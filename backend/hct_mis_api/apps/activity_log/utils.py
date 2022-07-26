@@ -47,6 +47,8 @@ def create_diff(old_object, new_object, mapping):
 def copy_model_object(model_object):
     model_dict = {}
     model_dict.update(model_object.__dict__)
-    del model_dict["_state"]
-    del model_dict["_django_version"]
+    if "_state" in model_dict:
+        del model_dict["_state"]
+    if "_django_version" in model_dict:
+        del model_dict["_django_version"]
     return model_object.__class__(**model_dict)
