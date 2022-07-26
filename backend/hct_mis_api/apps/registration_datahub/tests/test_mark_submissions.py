@@ -41,13 +41,16 @@ class TestMarkSubmissions(TestCase):
 
         self.assertEqual(KoboImportedSubmission.objects.filter(amended=True).count(), 1)
 
-    def _create_submission_with_in_review_rdi(self):
-        self._create_submission("IN_REVIEW")
+    @classmethod
+    def _create_submission_with_in_review_rdi(cls):
+        cls._create_submission("IN_REVIEW")
 
-    def _create_submission_with_merged_rdi(self):
-        self._create_submission("MERGED")
+    @classmethod
+    def _create_submission_with_merged_rdi(cls):
+        cls._create_submission("MERGED")
 
-    def _create_submission(self, status):
+    @classmethod
+    def _create_submission(cls, status):
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions.json"
         ).read_bytes()
@@ -63,7 +66,7 @@ class TestMarkSubmissions(TestCase):
         registration_data_import_data_hub = RegistrationDataImportDatahubFactory(
             id=datahub_id,
             import_data=import_data,
-            business_area_slug=self.business_area.slug,
+            business_area_slug=cls.business_area.slug,
             hct_id=registration_data_import.pk,
         )
 
