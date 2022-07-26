@@ -42,7 +42,6 @@ def delete_last_name(apps, schema_editor):
         Individual.objects.bulk_update(individuals, ["last_name"])
         individuals = []
         i += 1
-    print("Finished")
 
 
 class Migration(migrations.Migration):
