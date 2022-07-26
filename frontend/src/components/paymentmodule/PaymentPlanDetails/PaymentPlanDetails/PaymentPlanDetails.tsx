@@ -6,7 +6,6 @@ import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../../core/LabelizedField';
-import { Missing } from '../../../core/Missing';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
@@ -33,6 +32,7 @@ export const PaymentPlanDetails = ({
     dispersionStartDate,
     dispersionEndDate,
   } = paymentPlan;
+
   return (
     <Grid item xs={12}>
       <ContainerColumnWithBorder>
