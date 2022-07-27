@@ -15,7 +15,7 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { handleValidationErrors } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
-  useCreatePaymentPlanMutation,
+  useCreatePpMutation,
 } from '../../../__generated__/graphql';
 
 const today = new Date();
@@ -29,7 +29,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     endDate: '',
     currency: null,
   };
-  const [mutate] = useCreatePaymentPlanMutation();
+  const [mutate] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
