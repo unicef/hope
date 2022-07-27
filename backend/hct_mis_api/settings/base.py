@@ -158,11 +158,7 @@ DATABASES = {
     "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
     "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
 }
-DATABASES["default"].update(
-    {
-        "CONN_MAX_AGE": 60
-    }
-)
+DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
@@ -799,3 +795,9 @@ CONCURRENCY_ENABLED = False
 #     'error', r"DateTimeField .* received a naive datetime",
 #     RuntimeWarning, r'django\.db\.models\.fields',
 # )
+
+PROFILING = env("PROFILING", default="off") == "on"
+if PROFILING:
+    INSTALLED_APPS.append("silk")
+    MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
+    SILKY_PYTHON_PROFILER = True
