@@ -64,12 +64,12 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
           ),
         '',
       ),
-    dispersionStartDate: Yup.date().required(
-      t('Dispersion Start Date is required'),
-    ),
+    dispersionStartDate: Yup.date()
+      .required(t('Dispersion Start Date is required'))
+      .max(today, t('Dispersion End Date cannot be in the future')),
     dispersionEndDate: Yup.date()
       .required(t('Dispersion End Date is required'))
-      .min(today, t('Dispersion End Date cannot be in the past'))
+      .max(today, t('Dispersion End Date cannot be in the future'))
       .when(
         'dispersionStartDate',
         (dispersionStartDate, schema) =>
