@@ -71,19 +71,20 @@ export const PaymentPlanParameters = ({
               required
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+              maxDate={today}
             />
           </Grid>
           <Grid item xs={3}>
             <Field
               name='dispersionEndDate'
-              label={t('Dispersion Start Date')}
+              label={t('Dispersion End Date')}
               component={FormikDateField}
               required
               disabled={!values.dispersionStartDate}
               initialFocusedDate={values.dispersionStartDate}
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              minDate={today}
+              maxDate={today}
             />
           </Grid>
         </Grid>
