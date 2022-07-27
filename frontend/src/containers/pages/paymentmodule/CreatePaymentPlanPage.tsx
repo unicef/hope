@@ -12,11 +12,10 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import { handleValidationErrors } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
-  useCreateTpMutation,
+  useCreatePaymentPlanMutation,
 } from '../../../__generated__/graphql';
 
 const today = new Date();
@@ -25,12 +24,12 @@ today.setHours(0, 0, 0, 0);
 export const CreatePaymentPlanPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const initialValues = {
-    targetPopulation: '',
+    targetingId: '',
     startDate: '',
     endDate: '',
     currency: null,
   };
-  const [mutate] = useCreateTpMutation();
+  const [mutate] = useCreatePaymentPlanMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -48,7 +47,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
-    targetPopulation: Yup.string().required(t('Target Population is required')),
+    targetingId: Yup.string().required(t('Target Population is required')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
       .required(t('End Date is required'))
@@ -59,8 +58,26 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
           startDate &&
           schema.min(
             startDate,
-            `${t('End date have to be greater than')} ${moment(
-              startDate,
+            `${t('End date has to be greater than')} ${moment(startDate).format(
+              'YYYY-MM-DD',
+            )}`,
+          ),
+        '',
+      ),
+    dispersionStartDate: Yup.date().required(
+      t('Dispersion Start Date is required'),
+    ),
+    dispersionEndDate: Yup.date()
+      .required(t('Dispersion End Date is required'))
+      .min(today, t('Dispersion End Date cannot be in the past'))
+      .when(
+        'dispersionStartDate',
+        (dispersionStartDate, schema) =>
+          dispersionStartDate &&
+          schema.min(
+            dispersionStartDate,
+            `${t('Dispersion End Date has to be greater than')} ${moment(
+              dispersionStartDate,
             ).format('YYYY-MM-DD')}`,
           ),
         '',
@@ -72,28 +89,29 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       const res = await mutate({
         variables: {
           input: {
-            programId: values.program,
-            name: values.name,
-            excludedIds: values.excludedIds,
-            exclusionReason: values.exclusionReason,
             businessAreaSlug: businessArea,
-            ...getTargetingCriteriaVariables(values),
+            targetingId: values.targetingId,
+            startDate: values.startDate,
+            endDate: values.endDate,
+            dispersionStartDate: values.dispersionStartDate,
+            dispersionEndDate: values.dispersionEndDate,
+            currency: values.currency,
           },
         },
       });
-      showMessage(t('Target Population Created'), {
-        pathname: `/${businessArea}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
+      showMessage(t('Payment Plan Created'), {
+        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
         historyMethod: 'push',
       });
     } catch (e) {
       const { nonValidationErrors } = handleValidationErrors(
-        'createTargetPopulation',
+        'createPaymentPlan',
         e,
         setFieldError,
         showMessage,
       );
       if (nonValidationErrors.length > 0) {
-        showMessage(t('Unexpected problem while creating Target Population'));
+        showMessage(t('Unexpected problem while creating Payment Plan'));
       }
     }
   };

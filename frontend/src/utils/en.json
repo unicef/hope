@@ -665,5 +665,12 @@
   "Are you sure you want to mark this Payment Plan as reviewed?": "Are you sure you want to mark this Payment Plan as reviewed?",
   "Are you sure you want to authorize this Payment Plan?": "Are you sure you want to authorize this Payment Plan?",
   "Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Review stage.": "Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Review stage.",
-  "FSPs": "FSPs"
+  "FSPs": "FSPs",
+  "Payment Plan Created": "Payment Plan Created",
+  "Unexpected problem while creating Payment Plan": "Unexpected problem while creating Payment Plan",
+  "Dispersion Start Date is required": "Dispersion Start Date is required",
+  "End date has to be greater than": "End date has to be greater than",
+  "Dispersion End Date is required": "Dispersion End Date is required",
+  "Dispersion End Date cannot be in the past": "Dispersion End Date cannot be in the past",
+  "Dispersion End Date has to be greater than": "Dispersion End Date has to be greater than"
 }
