@@ -182,6 +182,7 @@ export const GrievancesTable = ({
         />
         <Box display='flex' ml='auto'>
           <Box>
+            {/* TODO: Enable Export Report button */}
             <Button
               startIcon={<GetAppOutlined />}
               variant='text'
@@ -194,6 +195,7 @@ export const GrievancesTable = ({
             </Button>
           </Box>
           <Box ml={5} mr={7}>
+            {/* TODO: Enable Upload Tickets button */}
             <Button
               startIcon={<PublishOutlined />}
               variant='text'
