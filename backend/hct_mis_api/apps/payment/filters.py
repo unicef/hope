@@ -235,6 +235,7 @@ class PaymentPlanFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
+            "id",
             "unicef_id",
             "status",
             "total_households_count",
@@ -248,4 +249,4 @@ class PaymentPlanFilter(FilterSet):
     )
 
     def search_filter(self, qs, name, value):
-        return qs.filter(Q(name__icontains=value) | Q(unicef_id__icontains=value))
+        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value))
