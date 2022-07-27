@@ -1,12 +1,13 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { Box, Checkbox } from '@material-ui/core';
+import { Checkbox } from '@material-ui/core';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
 import { StatusBox } from '../../core/StatusBox';
 import {
   grievanceTicketStatusToColor,
   grievanceTicketBadgeColors,
+  renderUserName,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../core/UniversalMoment';
 import {
@@ -95,16 +96,13 @@ export function GrievancesTableRow({
   return (
     <ClickableTableRow hover role='checkbox' key={ticket.id}>
       <TableCell align='left' padding='checkbox'>
-        <Box
-          display={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED && 'none'}
-        >
-          <Checkbox
-            color='primary'
-            onClick={(event) => checkboxClickHandler(event, ticket.unicefId)}
-            checked={isItemSelected}
-            inputProps={{ 'aria-labelledby': ticket.unicefId }}
-          />
-        </Box>
+        <Checkbox
+          color='primary'
+          onClick={(event) => checkboxClickHandler(event, ticket.unicefId)}
+          checked={isItemSelected}
+          disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
+          inputProps={{ 'aria-labelledby': ticket.unicefId }}
+        />
       </TableCell>
       <TableCell align='left'>
         {canViewDetails ? (
@@ -120,13 +118,18 @@ export function GrievancesTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <AssignedToDropdown
-          optionsData={optionsData}
-          onFilterChange={onFilterChange}
-          value={ticket.assignedTo}
-          ids={[ticket.unicefId]}
-          setInputValue={setInputValue}
-        />
+        {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED ? (
+          renderUserName(ticket.assignedTo)
+        ) : (
+          <AssignedToDropdown
+            optionsData={optionsData}
+            onFilterChange={onFilterChange}
+            value={ticket.assignedTo}
+            ids={[ticket.unicefId]}
+            setInputValue={setInputValue}
+            disableClearable
+          />
+        )}
       </TableCell>
       <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
       <TableCell align='left'>{issueType}</TableCell>
