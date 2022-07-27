@@ -1,6 +1,7 @@
 from django.utils import timezone
 import logging
 from contextlib import contextmanager
+from sentry_sdk import configure_scope
 
 from django.core.cache import cache
 from redis.exceptions import LockError
@@ -9,6 +10,7 @@ from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.utils.logs import log_start_and_end
+from hct_mis_api.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
 
@@ -32,17 +34,21 @@ def locked_cache(key):
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
+        from hct_mis_api.apps.core.models import BusinessArea
 
-        RdiXlsxCreateTask().execute(
-            registration_data_import_id=registration_data_import_id,
-            import_data_id=import_data_id,
-            business_area_id=business_area,
-        )
+        with configure_scope() as scope:
+            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
+            RdiXlsxCreateTask().execute(
+                registration_data_import_id=registration_data_import_id,
+                import_data_id=import_data_id,
+                business_area_id=business_area,
+            )
     except Exception as e:
         logger.exception(e)
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -62,17 +68,22 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def registration_kobo_import_task(registration_data_import_id, import_data_id, business_area):
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
+        from hct_mis_api.apps.core.models import BusinessArea
 
-        RdiKoboCreateTask().execute(
-            registration_data_import_id=registration_data_import_id,
-            import_data_id=import_data_id,
-            business_area_id=business_area,
-        )
+        with configure_scope() as scope:
+            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
+
+            RdiKoboCreateTask().execute(
+                registration_data_import_id=registration_data_import_id,
+                import_data_id=import_data_id,
+                business_area_id=business_area,
+            )
     except Exception as e:
         logger.exception(e)
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -100,6 +111,7 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def registration_kobo_import_hourly_task():
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -117,12 +129,14 @@ def registration_kobo_import_hourly_task():
         if not_started_rdi is None:
             return
         business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
+        with configure_scope() as scope:
+            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
 
-        RdiKoboCreateTask().execute(
-            registration_data_import_id=str(not_started_rdi.id),
-            import_data_id=str(not_started_rdi.import_data.id),
-            business_area_id=str(business_area.id),
-        )
+            RdiKoboCreateTask().execute(
+                registration_data_import_id=str(not_started_rdi.id),
+                import_data_id=str(not_started_rdi.import_data.id),
+                business_area_id=str(business_area.id),
+            )
     except Exception as e:
         logger.exception(e)
         raise
@@ -130,6 +144,7 @@ def registration_kobo_import_hourly_task():
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def registration_xlsx_import_hourly_task():
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -147,12 +162,14 @@ def registration_xlsx_import_hourly_task():
             return
 
         business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
+        with configure_scope() as scope:
+            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
 
-        RdiXlsxCreateTask().execute(
-            registration_data_import_id=str(not_started_rdi.id),
-            import_data_id=str(not_started_rdi.import_data.id),
-            business_area_id=str(business_area.id),
-        )
+            RdiXlsxCreateTask().execute(
+                registration_data_import_id=str(not_started_rdi.id),
+                import_data_id=str(not_started_rdi.import_data.id),
+                business_area_id=str(business_area.id),
+            )
     except Exception as e:
         logger.exception(e)
         raise
@@ -160,6 +177,7 @@ def registration_xlsx_import_hourly_task():
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def merge_registration_data_import_task(registration_data_import_id):
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
@@ -177,6 +195,7 @@ def merge_registration_data_import_task(registration_data_import_id):
 
 @app.task(queue="priority")
 @log_start_and_end
+@sentry_tags
 def rdi_deduplication_task(registration_data_import_id):
 
     try:
@@ -189,7 +208,10 @@ def rdi_deduplication_task(registration_data_import_id):
 
         rdi_obj = RegistrationDataImportDatahub.objects.get(id=registration_data_import_id)
 
-        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
+        with configure_scope() as scope:
+            scope.set_tag("business_area", rdi_obj.business_area_slug)
+
+            DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
     except Exception as e:
         logger.exception(e)
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -202,6 +224,7 @@ def rdi_deduplication_task(registration_data_import_id):
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def pull_kobo_submissions_task(import_data_id):
     from hct_mis_api.apps.registration_datahub.models import KoboImportData
 
@@ -224,6 +247,7 @@ def pull_kobo_submissions_task(import_data_id):
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def validate_xlsx_import_task(import_data_id):
     from hct_mis_api.apps.registration_datahub.models import ImportData
 
@@ -246,6 +270,7 @@ def validate_xlsx_import_task(import_data_id):
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def process_flex_records_task(rdi_id, records_ids):
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
@@ -256,6 +281,7 @@ def process_flex_records_task(rdi_id, records_ids):
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def extract_records_task(max_records=500):
     records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     extract(records_ids)
@@ -263,6 +289,7 @@ def extract_records_task(max_records=500):
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def fresh_extract_records_task(records_ids=None):
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
@@ -271,6 +298,7 @@ def fresh_extract_records_task(records_ids=None):
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def automate_rdi_creation_task(
     registration_id: int,
     page_size: int,
@@ -342,6 +370,7 @@ def check_and_set_taxid(queryset):
 
 
 @app.task
+@sentry_tags
 def automate_registration_diia_import_task(page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters):
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
@@ -362,6 +391,7 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
 
 
 @app.task
+@sentry_tags
 def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters):
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
