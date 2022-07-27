@@ -22,7 +22,7 @@ from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerificationSummary,
     PaymentPlan,
     Payment,
-    DeliveryMechanism,
+    GenericPayment,
 )
 from hct_mis_api.apps.program.fixtures import (
     ProgramFactory,
@@ -139,23 +139,20 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
 
     name = factory.Faker("company")
     vision_vendor_number = factory.Faker("ssn")
+    delivery_mechanisms = factory.List(
+        [
+            fuzzy.FuzzyChoice(
+                GenericPayment.DELIVERY_TYPE_CHOICE,
+                getter=lambda c: c[0],
+            )
+        ]
+    )
     distribution_limit = fuzzy.FuzzyDecimal(100.0, 1000.0)
     communication_channel = fuzzy.FuzzyChoice(
         FinancialServiceProvider.COMMUNICATION_CHANNEL_CHOICES, getter=lambda c: c[0]
     )
     data_transfer_configuration = factory.Faker("json")
     fsp_xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
-
-    @factory.post_generation
-    def delivery_mechanisms(self, create, extracted, **kwargs):
-        if not create:
-            return
-
-        if not extracted:
-            self.delivery_mechanisms.set(DeliveryMechanism.objects.all())
-            return
-
-        self.delivery_mechanisms.add(*extracted)
 
 
 class FinancialServiceProviderXlsxReportFactory(factory.DjangoModelFactory):
@@ -585,7 +582,7 @@ def generate_real_payment_plans():
         ServiceProviderFactory.create_batch(3)
     program = RealProgramFactory()
     payment_plans = PaymentPlanFactory.create_batch(
-        3, program=program, business_area=BusinessArea.objects.get(slug='afghanistan')
+        3, program=program, business_area=BusinessArea.objects.get(slug="afghanistan")
     )
     for payment_plan in payment_plans:
         PaymentFactory.create_batch(

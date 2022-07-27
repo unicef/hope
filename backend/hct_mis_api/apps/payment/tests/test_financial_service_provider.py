@@ -8,7 +8,6 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism
 
 
 class TestAllFinancialServiceProviders(APITestCase):
@@ -132,7 +131,6 @@ class TestAllFinancialServiceProviders(APITestCase):
 
     def test_create_financial_service_provider(self):
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
-        delivery_mechanisms = list(DeliveryMechanism.objects.all().values_list("id", flat=True))
 
         self.graphql_request(
             request_string=self.MUTATION_CREATE_FSP,
@@ -142,7 +140,7 @@ class TestAllFinancialServiceProviders(APITestCase):
                 "inputs": {
                     "name": "Web3 Bank",
                     "visionVendorNumber": "XYZB-123456789",
-                    "deliveryMechanisms": delivery_mechanisms,
+                    "deliveryMechanisms": {"Cash", "Mobile Money"},
                     "distributionLimit": "123456789",
                     "communicationChannel": "XLSX",
                     "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id, "FinancialServiceProviderXlsxTemplate"),
@@ -153,7 +151,6 @@ class TestAllFinancialServiceProviders(APITestCase):
     def test_update_financial_service_provider(self):
         fsp = FinancialServiceProviderFactory.create()
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
-        delivery_mechanism = DeliveryMechanism.objects.first()
 
         self.graphql_request(
             request_string=self.MUTATION_UPDATE_FSP,
@@ -164,7 +161,7 @@ class TestAllFinancialServiceProviders(APITestCase):
                 "inputs": {
                     "name": "New Gen Bank",
                     "visionVendorNumber": "XYZB-123456789",
-                    "deliveryMechanisms": [delivery_mechanism.id],
+                    "deliveryMechanisms": ["Transfer"],
                     "distributionLimit": "123456789",
                     "communicationChannel": "XLSX",
                     "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id, "FinancialServiceProviderXlsxTemplate"),

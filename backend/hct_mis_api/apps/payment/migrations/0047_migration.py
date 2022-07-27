@@ -2,36 +2,12 @@
 
 from decimal import Decimal
 from django.conf import settings
-import django.contrib.postgres.fields
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
 import django_fsm
 import model_utils.fields
 import uuid
-
-
-def populate_delivery_mechanisms(apps, schema_editor):
-    # TODO MB fill with proper data
-    DeliveryMechanism = apps.get_model("payment", "DeliveryMechanism")
-
-    delivery_mechanisms = [
-        DeliveryMechanism(name="bank_transfer", display_name="Bank Transfer", required_fields=["iban", "bank_name"]),
-        DeliveryMechanism(
-            name="ewallet",
-            display_name="eWallet",
-        ),
-        DeliveryMechanism(
-            name="mobile_money",
-            display_name="Mobile Money",
-        ),
-        DeliveryMechanism(
-            name="cash",
-            display_name="Cash",
-        ),
-    ]
-
-    DeliveryMechanism.objects.bulk_create(delivery_mechanisms)
 
 
 class Migration(migrations.Migration):
@@ -84,7 +60,26 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "delivery_mechanism",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.deliverymechanism"),
+                    models.CharField(
+                        choices=[
+                            ("Cardless cash withdrawal", "Cardless cash withdrawal"),
+                            ("Cash", "Cash"),
+                            ("Cash by FSP", "Cash by FSP"),
+                            ("Cheque", "Cheque"),
+                            ("Deposit to Card", "Deposit to Card"),
+                            ("In Kind", "In Kind"),
+                            ("Mobile Money", "Mobile Money"),
+                            ("Other", "Other"),
+                            ("Pre-paid card", "Pre-paid card"),
+                            ("Referral", "Referral"),
+                            ("Transfer", "Transfer"),
+                            ("Transfer to Account", "Transfer to Account"),
+                            ("Voucher", "Voucher"),
+                        ],
+                        db_index=True,
+                        max_length=255,
+                        null=True,
+                    ),
                 ),
                 (
                     "payment_plan",
@@ -127,5 +122,4 @@ class Migration(migrations.Migration):
                 fields=("payment_plan", "delivery_mechanism_order"), name="unique payment_plan_delivery_mechanism_order"
             ),
         ),
-        migrations.RunPython(populate_delivery_mechanisms, migrations.RunPython.noop),
     ]

@@ -9,7 +9,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     decode_id_string,
 )
-from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProcess
+from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProcess, Payment
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
@@ -22,6 +22,7 @@ class PaymentPlanService:
 
         self.action = None
         self.user = None
+        self.input_data = None
 
     @property
     def actions_map(self) -> dict:
@@ -60,6 +61,7 @@ class PaymentPlanService:
         return PaymentPlan object
         """
         self.action = input_data.get("action")
+        self.input_data = input_data
         self.user = user
         self.validate_action()
 
@@ -180,9 +182,25 @@ class PaymentPlanService:
 
             self.payment_plan.save()
 
-    def create(self, input_data: dict, user: User) -> PaymentPlan:
-        # TODO MB create payments for target population
+    def _create_payments(self, payment_plan: PaymentPlan):
+        payments_to_create = []
 
+        for household in payment_plan.target_population.households.all():
+            payments_to_create.append(
+                Payment(
+                    payment_plan=payment_plan,
+                    business_area=payment_plan.business_area,
+                    status=Payment.STATUS_NOT_DISTRIBUTED,  # TODO MB ?
+                    status_date=timezone.now(),
+                    household=household,
+                    head_of_household=household.head_of_household,  # TODO MB ?
+                    currency=payment_plan.currency,
+                )
+            )
+
+        Payment.objects.bulk_create(payments_to_create)
+
+    def create(self, input_data: dict, user: User) -> PaymentPlan:
         business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])
         if not business_area.is_payment_plan_applicable:
             raise GraphQLError(f"PaymentPlan can not be created in provided Business Area")
@@ -213,6 +231,7 @@ class PaymentPlanService:
             end_date=input_data["end_date"],
         )
 
+        self._create_payments(payment_plan)
         payment_plan.refresh_from_db()
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
@@ -222,9 +241,7 @@ class PaymentPlanService:
 
         return payment_plan
 
-    def update(self, input_data: dict, user: User) -> PaymentPlan:
-        # TODO MB update payments for target population
-
+    def update(self, input_data: dict) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             raise GraphQLError(f"Only Payment Plan in Open status can be edited")
 
@@ -272,6 +289,8 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         if recalculate:
+            self.payment_plan.payments.all().delete()
+            self._create_payments(self.payment_plan)
             self.payment_plan.refresh_from_db()
             self.payment_plan.update_population_count_fields()
             self.payment_plan.update_money_fields()

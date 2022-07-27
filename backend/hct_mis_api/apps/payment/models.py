@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import datetime
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField, ArrayField
+from django.contrib.postgres.fields import CICharField
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField, Q, Count, Sum
@@ -19,6 +19,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 
+from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
@@ -161,35 +162,24 @@ class GenericPayment(TimeStampedUUIDModel):
     status_date = models.DateTimeField()
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
     head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)  # collector
-    delivery_type = models.CharField(
-        choices=DELIVERY_TYPE_CHOICE,
-        max_length=24,
-    )
+    delivery_type = models.CharField(choices=DELIVERY_TYPE_CHOICE, max_length=24, null=True)
     currency = models.CharField(
         max_length=4,
     )
     entitlement_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
     )
     entitlement_quantity_usd = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
     )
     delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
     )
     delivered_quantity_usd = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
-    service_provider = models.ForeignKey(
-        "payment.ServiceProvider",
-        on_delete=models.CASCADE,
-    )  # financial_service_provider
 
     class Meta:
         abstract = True
@@ -307,14 +297,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         return self.dispersion_end_date
 
     @property
-    def all_payments(self):
-        filter_excluded = False if self.status == self.Status.OPEN else True
-        payments = self.payments.all().exclude(excluded=filter_excluded)
-
-        return payments
+    def all_active_payments(self):
+        return self.payments.all().exclude(excluded=True)
 
     def update_population_count_fields(self):
-        households_ids = self.all_payments.values_list("household_id", flat=True)
+        households_ids = self.all_active_payments.values_list("household_id", flat=True)
 
         delta18 = relativedelta(years=+18)
         date18ago = datetime.now() - delta18
@@ -347,10 +334,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         )
 
     def update_money_fields(self):
-        if not self.exchange_rate:
-            self.exchange_rate = self.get_exchange_rate()
+        self.exchange_rate = self.get_exchange_rate()
 
-        payments = self.all_payments.aggregate(
+        payments = self.all_active_payments.aggregate(
             total_entitled_quantity=Sum("entitlement_quantity"),
             entitlement_quantity_usd=Sum("entitlement_quantity_usd"),
             delivered_quantity=Sum("delivered_quantity"),
@@ -367,6 +353,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
         self.save(
             update_fields=[
+                "exchange_rate",
                 "total_entitled_quantity",
                 "total_entitled_quantity_usd",
                 "total_delivered_quantity",
@@ -439,11 +426,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=100, unique=True)
     vision_vendor_number = models.CharField(max_length=100, unique=True)
-    delivery_mechanisms = models.ManyToManyField(
-        "payment.DeliveryMechanism",
-        related_name="financial_service_providers",
-        blank=True,
-    )
+    delivery_mechanisms = ChoiceArrayField(models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=24))
     distribution_limit = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -492,16 +475,6 @@ class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
         return f"{self.template.name} ({self.status})"
 
 
-class DeliveryMechanism(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    display_name = models.CharField(max_length=255, unique=True)
-    required_fields = ArrayField(models.CharField(max_length=250), default=list, blank=True)
-
-    def validate_delivery_data(self, delivery_data: dict):
-        # TODO MB PaymentChannel instance delivery data can be validated here based on required fields
-        pass
-
-
 class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     class Status(models.TextChoices):
         NOT_SENT = "NOT_SENT"
@@ -529,7 +502,9 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         related_name="sent_delivery_mechanisms",
     )
     status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
-    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.CASCADE)
+    delivery_mechanism = models.CharField(
+        max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, db_index=True, null=True
+    )
     delivery_mechanism_order = models.PositiveIntegerField()
     entitlement_quantity = models.DecimalField(
         decimal_places=2,
@@ -564,7 +539,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
 
 class PaymentChannel(TimeStampedUUIDModel):
     individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
-    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.CASCADE)
+    delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, null=True)
     delivery_data = JSONField(default=dict, blank=True)
 
 
@@ -711,6 +686,10 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
     entitlement_card_issue_date = models.DateField(null=True)
     vision_id = models.CharField(max_length=255, null=True)
     registration_ca_id = models.CharField(max_length=255, null=True)
+    service_provider = models.ForeignKey(
+        "payment.ServiceProvider",
+        on_delete=models.CASCADE,
+    )
 
 
 class Payment(SoftDeletableModel, GenericPayment):
@@ -722,6 +701,9 @@ class Payment(SoftDeletableModel, GenericPayment):
     )
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
+    )
 
 
 class ServiceProvider(TimeStampedUUIDModel):

@@ -583,7 +583,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
 
-        payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=input, user=info.context.user)
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=input)
 
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

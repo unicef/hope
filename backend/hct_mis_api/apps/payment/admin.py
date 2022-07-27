@@ -22,7 +22,6 @@ from hct_mis_api.apps.payment.models import (
     CashPlan,
     PaymentPlan,
     Payment,
-    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     PaymentChannel,
 )
@@ -194,12 +193,12 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("payment_plan", AutoCompleteFilter),
-        ("service_provider", AutoCompleteFilter),
+        ("financial_service_provider", AutoCompleteFilter),
     )
     advanced_filter_fields = (
         "status",
         "delivery_date",
-        ("service_provider__name", "Service Provider"),
+        ("financial_service_provider__name", "Service Provider"),
         ("payment_plan__name", "PaymentPlan"),
     )
     date_hierarchy = "updated_at"
@@ -208,7 +207,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "payment_plan",
         "household",
         "head_of_household",
-        "service_provider",
+        "financial_service_provider",
     )
 
     def payment_plan_name(self, obj):
@@ -216,12 +215,6 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("household", "payment_plan", "business_area")
-
-
-@admin.register(DeliveryMechanism)
-class DeliveryMechanismAdmin(HOPEModelAdminBase):
-    list_display = ("display_name", "required_fields")
-    search_fields = ("name",)
 
 
 @admin.register(DeliveryMechanismPerPaymentPlan)
@@ -272,7 +265,8 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         "communication_channel",
     )
     search_fields = ("name",)
-    autocomplete_fields = ("created_by", "fsp_xlsx_template", "delivery_mechanisms")
+    list_filter = ("delivery_mechanisms",)
+    autocomplete_fields = ("created_by", "fsp_xlsx_template")
     list_select_related = ("created_by", "fsp_xlsx_template")
     fields = (
         ("name", "vision_vendor_number"),

@@ -47,7 +47,6 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProvider,
-    DeliveryMechanism,
     ApprovalProcess,
     Approval,
     PaymentPlan,
@@ -104,15 +103,6 @@ class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class DeliveryMechanismNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
-
-    class Meta:
-        model = DeliveryMechanism
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),
@@ -141,10 +131,6 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
 
 class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
-    delivery_mechanisms = graphene.List(DeliveryMechanismNode)
-
-    def resolve_delivery_mechanisms(self, info):
-        return self.delivery_mechanisms.all()
 
     class Meta:
         model = FinancialServiceProvider
@@ -223,7 +209,6 @@ class ApprovalNode(DjangoObjectType):
 
 
 class AcceptanceProcessNode(DjangoObjectType):
-
     class Meta:
         model = ApprovalProcess
         interfaces = (relay.Node,)

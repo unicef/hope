@@ -16,6 +16,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     PaymentPlan,
+    GenericPayment,
 )
 
 
@@ -136,6 +137,10 @@ class FinancialServiceProviderXlsxReportFilter(FilterSet):
 
 
 class FinancialServiceProviderFilter(FilterSet):
+    delivery_mechanisms = MultipleChoiceFilter(
+        field_name="delivery_mechanisms", choices=GenericPayment.DELIVERY_TYPE_CHOICE
+    )
+
     class Meta:
         fields = (
             "created_by",

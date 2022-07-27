@@ -11,6 +11,8 @@ import uuid
 
 import django_fsm
 
+import hct_mis_api.apps.account.models
+
 
 def populate_existing_payment_record_usd_amount(apps, schema_editor):
     PaymentRecord = apps.get_model("payment", "PaymentRecord")
@@ -68,20 +70,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="DeliveryMechanism",
-            fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("name", models.CharField(max_length=255, unique=True)),
-                ("display_name", models.CharField(max_length=255, unique=True)),
-                (
-                    "required_fields",
-                    django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(max_length=250), default=list, size=None, blank=True
-                    ),
-                ),
-            ],
-        ),
-        migrations.CreateModel(
             name="PaymentChannel",
             fields=[
                 (
@@ -93,7 +81,25 @@ class Migration(migrations.Migration):
                 ("delivery_data", models.JSONField(blank=True, default=dict)),
                 (
                     "delivery_mechanism",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.deliverymechanism"),
+                    models.CharField(
+                        choices=[
+                            ("Cardless cash withdrawal", "Cardless cash withdrawal"),
+                            ("Cash", "Cash"),
+                            ("Cash by FSP", "Cash by FSP"),
+                            ("Cheque", "Cheque"),
+                            ("Deposit to Card", "Deposit to Card"),
+                            ("In Kind", "In Kind"),
+                            ("Mobile Money", "Mobile Money"),
+                            ("Other", "Other"),
+                            ("Pre-paid card", "Pre-paid card"),
+                            ("Referral", "Referral"),
+                            ("Transfer", "Transfer"),
+                            ("Transfer to Account", "Transfer to Account"),
+                            ("Voucher", "Voucher"),
+                        ],
+                        max_length=255,
+                        null=True,
+                    ),
                 ),
                 (
                     "individual",
@@ -525,8 +531,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "service_provider",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.serviceprovider"),
+                    "financial_service_provider",
+                    models.ForeignKey(
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="payment.financialserviceprovider"
+                    ),
                 ),
             ],
             options={
@@ -598,8 +606,26 @@ class Migration(migrations.Migration):
                 ("vision_vendor_number", models.CharField(max_length=100, unique=True)),
                 (
                     "delivery_mechanisms",
-                    models.ManyToManyField(
-                        blank=True, related_name="financial_service_providers", to="payment.DeliveryMechanism"
+                    hct_mis_api.apps.account.models.ChoiceArrayField(
+                        base_field=models.CharField(
+                            choices=[
+                                ("Cardless cash withdrawal", "Cardless cash withdrawal"),
+                                ("Cash", "Cash"),
+                                ("Cash by FSP", "Cash by FSP"),
+                                ("Cheque", "Cheque"),
+                                ("Deposit to Card", "Deposit to Card"),
+                                ("In Kind", "In Kind"),
+                                ("Mobile Money", "Mobile Money"),
+                                ("Other", "Other"),
+                                ("Pre-paid card", "Pre-paid card"),
+                                ("Referral", "Referral"),
+                                ("Transfer", "Transfer"),
+                                ("Transfer to Account", "Transfer to Account"),
+                                ("Voucher", "Voucher"),
+                            ],
+                            max_length=24,
+                        ),
+                        size=None,
                     ),
                 ),
                 (
