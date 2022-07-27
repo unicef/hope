@@ -1,20 +1,23 @@
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, FilterSet, OrderingFilter, UUIDFilter
+from django_filters import CharFilter, FilterSet, OrderingFilter, UUIDFilter, MultipleChoiceFilter, DateFilter
 
-from hct_mis_api.apps.activity_log.schema import LogEntryFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid
+from hct_mis_api.apps.core.filters import DecimalRangeFilter
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
+from hct_mis_api.apps.activity_log.schema import LogEntryFilter
 from hct_mis_api.apps.payment.models import (
+    CashPlan,
     CashPlanPaymentVerification,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
     PaymentRecord,
     PaymentVerification,
+    PaymentPlan,
+    GenericPayment,
 )
-from hct_mis_api.apps.program.models import CashPlan
 
 
 class PaymentRecordFilter(FilterSet):
@@ -134,6 +137,10 @@ class FinancialServiceProviderXlsxReportFilter(FilterSet):
 
 
 class FinancialServiceProviderFilter(FilterSet):
+    delivery_mechanisms = MultipleChoiceFilter(
+        field_name="delivery_mechanisms", choices=GenericPayment.DELIVERY_TYPE_CHOICE
+    )
+
     class Meta:
         fields = (
             "created_by",
@@ -156,3 +163,89 @@ class FinancialServiceProviderFilter(FilterSet):
             "communication_channel",
         )
     )
+
+
+class CashPlanFilter(FilterSet):
+    search = CharFilter(method="search_filter")
+    delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE)
+    verification_status = MultipleChoiceFilter(
+        field_name="cash_plan_payment_verification_summary__status", choices=CashPlanPaymentVerification.STATUS_CHOICES
+    )
+    business_area = CharFilter(
+        field_name="business_area__slug",
+    )
+
+    class Meta:
+        fields = {
+            "program": ["exact"],
+            "assistance_through": ["exact", "startswith"],
+            "service_provider__full_name": ["exact", "startswith"],
+            "start_date": ["exact", "lte", "gte"],
+            "end_date": ["exact", "lte", "gte"],
+            "business_area": ["exact"],
+        }
+        model = CashPlan
+
+    order_by = OrderingFilter(
+        fields=(
+            "ca_id",
+            "status",
+            "total_number_of_hh",
+            "total_entitled_quantity",
+            ("cash_plan_payment_verification_summary__status", "verification_status"),
+            "total_persons_covered",
+            "total_delivered_quantity",
+            "total_undelivered_quantity",
+            "dispersion_date",
+            "assistance_measurement",
+            "assistance_through",
+            "delivery_type",
+            "start_date",
+            "end_date",
+            "program__name",
+            "id",
+            "updated_at",
+            "service_provider__full_name",
+        )
+    )
+
+    def filter_queryset(self, queryset):
+        queryset = queryset.annotate(total_number_of_hh=Count("payment_records"))
+        return super().filter_queryset(queryset)
+
+    def search_filter(self, qs, name, value):
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(ca_id__istartswith=value)
+        return qs.filter(q_obj)
+
+
+class PaymentPlanFilter(FilterSet):
+    business_area = CharFilter(field_name="business_area__slug", required=True)
+    search = CharFilter(method="search_filter")
+    status = MultipleChoiceFilter(field_name="status", choices=PaymentPlan.Status.choices)
+    total_entitled_quantity = DecimalRangeFilter(field_name="total_entitled_quantity")
+    dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
+    dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
+
+    class Meta:
+        fields = tuple()
+        model = PaymentPlan
+
+    order_by = OrderingFilter(
+        fields=(
+            "unicef_id",
+            "status",
+            "total_households_count",
+            "currency",
+            "total_entitled_quantity",
+            "total_delivered_quantity",
+            "total_undelivered_quantity",
+            "dispersion_start_date",
+            "dispersion_end_date",
+        )
+    )
+
+    def search_filter(self, qs, name, value):
+        return qs.filter(Q(name__icontains=value) | Q(unicef_id__icontains=value))

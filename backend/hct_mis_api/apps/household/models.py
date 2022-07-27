@@ -22,8 +22,6 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import AdminArea
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -511,22 +509,6 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     @property
     def sanction_list_confirmed_match(self):
         return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
-
-    @property
-    def total_cash_received_realtime(self):
-        return (
-            self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity", output_field=DecimalField()))
-            .get("delivered_quantity__sum")
-        )
-
-    @property
-    def total_cash_received_usd_realtime(self):
-        return (
-            self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
-            .get("delivered_quantity_usd__sum")
-        )
 
     @property
     def active_individuals(self):
