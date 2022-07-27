@@ -10,7 +10,10 @@ const StyledTextField = styled(TextField)`
     min-width: 150px;
   }
 `;
-export const SearchTextField = ({ ...props }): React.ReactElement => {
+export const SearchTextField = ({
+  icon = null,
+  ...props
+}): React.ReactElement => {
   return (
     <StyledTextField
       {...props}
@@ -19,7 +22,7 @@ export const SearchTextField = ({ ...props }): React.ReactElement => {
       InputProps={{
         startAdornment: (
           <InputAdornment position='start'>
-            <SearchIcon />
+            {(icon as JSX.Element) || <SearchIcon />}
           </InputAdornment>
         ),
       }}

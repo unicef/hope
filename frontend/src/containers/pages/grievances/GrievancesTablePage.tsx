@@ -1,12 +1,7 @@
-import { Box, Button, Tab, Tabs, Typography } from '@material-ui/core';
+import { Tab, Tabs } from '@material-ui/core';
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
-import {
-  hasPermissionInModule,
-  hasPermissions,
-  PERMISSIONS,
-} from '../../../config/permissions';
+import { useParams } from 'react-router-dom';
+import { hasPermissionInModule } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -16,10 +11,13 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
-import { GrievanceStatuses, GrievanceTypes, GRIEVANCE_TICKETS_TYPES } from '../../../utils/constants';
+import {
+  GrievanceStatuses,
+  GrievanceTypes,
+  GRIEVANCE_TICKETS_TYPES,
+} from '../../../utils/constants';
 
 export function GrievancesTablePage(): React.ReactElement {
-  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
@@ -91,26 +89,11 @@ export function GrievancesTablePage(): React.ReactElement {
         filter={filter}
         onFilterChange={setFilter}
       />
-      <Box display='flex' alignItems='center' px={5} pt={5}>
-        <Typography color='textSecondary' variant='subtitle1'>
-          {t('ASSIGN TICKETS')}
-        </Typography>
-        <Box display='flex' ml='auto'>
-          {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
-            hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-              <Button
-                alignItems='center'
-                variant='contained'
-                color='primary'
-                component={Link}
-                to={`/${businessArea}/grievance-and-feedback/new-ticket`}
-              >
-                {t('NEW TICKET')}
-              </Button>
-            )}
-        </Box>
-      </Box>
-      <GrievancesTable filter={debouncedFilter} businessArea={businessArea} />
+      <GrievancesTable
+        filter={debouncedFilter}
+        businessArea={businessArea}
+        selectedTab={selectedTab}
+      />
     </>
   );
 }

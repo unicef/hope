@@ -164,6 +164,10 @@ input BankTransferObjectType {
 
 scalar BigInt
 
+type BulkUpdateGrievanceTicketsAssigneesMutation {
+  grievanceTickets: [GrievanceTicketNode]
+}
+
 type BusinessAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -278,6 +282,7 @@ type CashPlanPaymentVerificationNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   version: BigInt!
+  unicefId: String
   status: CashPlanPaymentVerificationStatus!
   cashPlan: CashPlanNode!
   sampling: CashPlanPaymentVerificationSampling!
@@ -296,7 +301,6 @@ type CashPlanPaymentVerificationNode implements Node {
   sexFilter: String
   activationDate: DateTime
   completionDate: DateTime
-  unicefId: String!
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
@@ -759,6 +763,7 @@ type GrievanceTicketNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   version: BigInt!
+  unicefId: String
   userModified: DateTime
   lastNotificationSent: DateTime
   createdBy: UserNode
@@ -776,7 +781,6 @@ type GrievanceTicketNode implements Node {
   businessArea: UserBusinessAreaNode!
   linkedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   registrationDataImport: RegistrationDataImportNode
-  unicefId: String!
   extras: JSONString!
   ignored: Boolean!
   householdUnicefId: String
@@ -2132,6 +2136,7 @@ type Mutations {
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
+  bulkUpdateGrievanceAssignee(assignedTo: String, businessAreaSlug: String!, grievanceTicketUnicefIds: [ID]): BulkUpdateGrievanceTicketsAssigneesMutation
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
   approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
