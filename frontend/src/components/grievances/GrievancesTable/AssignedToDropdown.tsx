@@ -61,6 +61,7 @@ export const AssignedToDropdown = ({
         setOpen(true);
       }}
       onClose={(e, reason) => {
+        e.preventDefault();
         setOpen(false);
         if (reason === 'select-option') return;
         onInputTextChange('');

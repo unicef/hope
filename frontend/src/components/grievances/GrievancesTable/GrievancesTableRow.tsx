@@ -10,6 +10,7 @@ import {
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../core/UniversalMoment';
 import {
+  AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAssigneeMutation,
 } from '../../../__generated__/graphql';
@@ -36,6 +37,7 @@ interface GrievancesTableRowProps {
   selected: Array<string>;
   optionsData;
   setInputValue;
+  initialVariables;
 }
 
 export function GrievancesTableRow({
@@ -50,6 +52,7 @@ export function GrievancesTableRow({
   selected,
   optionsData,
   setInputValue,
+  initialVariables,
 }: GrievancesTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
@@ -76,6 +79,12 @@ export function GrievancesTableRow({
             businessAreaSlug: businessArea,
             grievanceTicketUnicefIds: ids,
           },
+          refetchQueries: () => [
+            {
+              query: AllGrievanceTicketDocument,
+              variables: { ...initialVariables },
+            },
+          ],
         });
       } catch (e) {
         e.graphQLErrors.map((x) => showMessage(x.message));
