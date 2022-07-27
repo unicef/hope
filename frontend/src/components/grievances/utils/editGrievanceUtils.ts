@@ -4,7 +4,7 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
-import { thingForSpecificGrievanceType } from '../../../utils/utils';
+import { thingForSpecificGrievanceType, camelizeArrayObjects } from '../../../utils/utils';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
@@ -84,6 +84,7 @@ function prepareInitialValueEditIndividual(
   delete individualData.payment_channels;
   delete individualData.payment_channels_to_remove;
   delete individualData.payment_channels_to_edit;
+  delete individualData.previous_payment_channels;
   delete individualData.previous_documents;
   delete individualData.previous_identities;
   delete individualData.flex_fields;
@@ -122,13 +123,13 @@ function prepareInitialValueEditIndividual(
     identitiesEdited || []
   ).map((item) => item.value);
   initialValues.individualDataUpdateFieldsPaymentChannels = (
-    paymentChannels || []
+    camelizeArrayObjects(paymentChannels) || []
   ).map((item) => item.value);
   initialValues.individualDataUpdatePaymentChannelsToRemove = (
-    paymentChannelsToRemove || []
+    camelizeArrayObjects(paymentChannelsToRemove) || []
   ).map((item) => item.value);
   initialValues.individualDataUpdatePaymentChannelsToEdit = (
-    paymentChannelsEdited || []
+    camelizeArrayObjects(paymentChannelsEdited) || []
   ).map((item) => item.value);
   return initialValues;
 }

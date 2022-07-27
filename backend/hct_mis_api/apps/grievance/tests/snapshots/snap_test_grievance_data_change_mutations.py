@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_for_individual_0_with_permission 1'] = {
@@ -53,7 +54,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                             'previous_identities': {
                             },
                             'previous_payment_channels': {
-                            },
+                            }
                         }
                     },
                     'issueType': 14,
@@ -140,7 +141,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                             'previous_identities': {
                             },
                             'previous_payment_channels': {
-                            },
+                            }
                         }
                     },
                     'issueType': 14,
@@ -404,6 +405,11 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'approve_status': False,
                                 'previous_value': '1943-07-30',
                                 'value': '1980-02-01'
+                            },
+                            'disability': {
+                                'approve_status': False,
+                                'previous_value': 'not disabled',
+                                'value': "disabled"
                             },
                             'documents': [
                                 {
