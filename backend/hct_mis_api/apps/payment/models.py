@@ -36,7 +36,6 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     status_date = models.DateTimeField()
-    name = models.CharField(max_length=255, db_index=True)
     start_date = models.DateTimeField(db_index=True)
     end_date = models.DateTimeField(db_index=True)
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE)
@@ -561,6 +560,7 @@ class CashPlan(GenericPaymentPlan):
             _("Transaction Completed with Errors"),
         ),
     )
+    name = models.CharField(max_length=255, db_index=True)
     ca_id = models.CharField(max_length=255, null=True, db_index=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICE, db_index=True)

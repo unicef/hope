@@ -84,7 +84,6 @@ class ActionPaymentPlanInput(graphene.InputObjectType):
 
 class CreatePaymentPlanInput(graphene.InputObjectType):
     business_area_slug = graphene.String(required=True)
-    name = graphene.String(required=True)
     targeting_id = graphene.ID(required=True)
     start_date = graphene.Date(required=True)
     end_date = graphene.Date(required=True)
@@ -95,7 +94,6 @@ class CreatePaymentPlanInput(graphene.InputObjectType):
 
 class UpdatePaymentPlanInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
-    name = graphene.String(required=False)
     targeting_id = graphene.ID(required=False)
     start_date = graphene.Date(required=False)
     end_date = graphene.Date(required=False)

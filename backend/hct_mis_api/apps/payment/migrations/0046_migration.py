@@ -306,7 +306,6 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
                 ("status_date", models.DateTimeField()),
-                ("name", models.CharField(db_index=True, max_length=255)),
                 ("start_date", models.DateTimeField(db_index=True)),
                 ("end_date", models.DateTimeField(db_index=True)),
                 ("exchange_rate", models.DecimalField(blank=True, decimal_places=8, max_digits=12, null=True)),
@@ -425,120 +424,6 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "Payment Plan",
                 "ordering": ["created_at"],
-            },
-        ),
-        migrations.CreateModel(
-            name="Payment",
-            fields=[
-                ("is_removed", models.BooleanField(default=False)),
-                (
-                    "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
-                ),
-                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
-                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                (
-                    "status",
-                    models.CharField(
-                        choices=[
-                            ("Distribution Successful", "Distribution Successful"),
-                            ("Not Distributed", "Not Distributed"),
-                            ("Transaction Successful", "Transaction Successful"),
-                            ("Transaction Erroneous", "Transaction Erroneous"),
-                        ],
-                        max_length=255,
-                    ),
-                ),
-                ("status_date", models.DateTimeField()),
-                (
-                    "delivery_type",
-                    models.CharField(
-                        choices=[
-                            ("Cardless cash withdrawal", "Cardless cash withdrawal"),
-                            ("Cash", "Cash"),
-                            ("Cash by FSP", "Cash by FSP"),
-                            ("Cheque", "Cheque"),
-                            ("Deposit to Card", "Deposit to Card"),
-                            ("In Kind", "In Kind"),
-                            ("Mobile Money", "Mobile Money"),
-                            ("Other", "Other"),
-                            ("Pre-paid card", "Pre-paid card"),
-                            ("Referral", "Referral"),
-                            ("Transfer", "Transfer"),
-                            ("Transfer to Account", "Transfer to Account"),
-                            ("Voucher", "Voucher"),
-                        ],
-                        max_length=24,
-                    ),
-                ),
-                ("currency", models.CharField(max_length=4)),
-                (
-                    "entitlement_quantity",
-                    models.DecimalField(
-                        decimal_places=2,
-                        max_digits=12,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
-                    ),
-                ),
-                (
-                    "entitlement_quantity_usd",
-                    models.DecimalField(
-                        decimal_places=2,
-                        max_digits=12,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
-                    ),
-                ),
-                (
-                    "delivered_quantity",
-                    models.DecimalField(
-                        decimal_places=2,
-                        max_digits=12,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
-                    ),
-                ),
-                (
-                    "delivered_quantity_usd",
-                    models.DecimalField(
-                        decimal_places=2,
-                        max_digits=12,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
-                    ),
-                ),
-                ("delivery_date", models.DateTimeField(blank=True, null=True)),
-                ("transaction_reference_id", models.CharField(max_length=255, null=True)),
-                ("excluded", models.BooleanField(default=False)),
-                ("entitlement_date", models.DateTimeField(blank=True, null=True)),
-                (
-                    "business_area",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
-                ),
-                (
-                    "head_of_household",
-                    models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="household.individual"
-                    ),
-                ),
-                ("household", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="household.household")),
-                (
-                    "payment_plan",
-                    models.ForeignKey(
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="payments",
-                        to="payment.paymentplan",
-                    ),
-                ),
-                (
-                    "financial_service_provider",
-                    models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="payment.financialserviceprovider"
-                    ),
-                ),
-            ],
-            options={
-                "abstract": False,
             },
         ),
         migrations.AddField(
@@ -663,6 +548,120 @@ class Migration(migrations.Migration):
                         related_name="created_financial_service_providers",
                         to=settings.AUTH_USER_MODEL,
                         verbose_name="Created by",
+                    ),
+                ),
+            ],
+            options={
+                "abstract": False,
+            },
+        ),
+        migrations.CreateModel(
+            name="Payment",
+            fields=[
+                ("is_removed", models.BooleanField(default=False)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Distribution Successful", "Distribution Successful"),
+                            ("Not Distributed", "Not Distributed"),
+                            ("Transaction Successful", "Transaction Successful"),
+                            ("Transaction Erroneous", "Transaction Erroneous"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                ("status_date", models.DateTimeField()),
+                (
+                    "delivery_type",
+                    models.CharField(
+                        choices=[
+                            ("Cardless cash withdrawal", "Cardless cash withdrawal"),
+                            ("Cash", "Cash"),
+                            ("Cash by FSP", "Cash by FSP"),
+                            ("Cheque", "Cheque"),
+                            ("Deposit to Card", "Deposit to Card"),
+                            ("In Kind", "In Kind"),
+                            ("Mobile Money", "Mobile Money"),
+                            ("Other", "Other"),
+                            ("Pre-paid card", "Pre-paid card"),
+                            ("Referral", "Referral"),
+                            ("Transfer", "Transfer"),
+                            ("Transfer to Account", "Transfer to Account"),
+                            ("Voucher", "Voucher"),
+                        ],
+                        max_length=24,
+                    ),
+                ),
+                ("currency", models.CharField(max_length=4)),
+                (
+                    "entitlement_quantity",
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=12,
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
+                    ),
+                ),
+                (
+                    "entitlement_quantity_usd",
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=12,
+                        null=True,
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
+                    ),
+                ),
+                (
+                    "delivered_quantity",
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=12,
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
+                    ),
+                ),
+                (
+                    "delivered_quantity_usd",
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=12,
+                        null=True,
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
+                    ),
+                ),
+                ("delivery_date", models.DateTimeField(blank=True, null=True)),
+                ("transaction_reference_id", models.CharField(max_length=255, null=True)),
+                ("excluded", models.BooleanField(default=False)),
+                ("entitlement_date", models.DateTimeField(blank=True, null=True)),
+                (
+                    "business_area",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
+                ),
+                (
+                    "head_of_household",
+                    models.ForeignKey(
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="household.individual"
+                    ),
+                ),
+                ("household", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="household.household")),
+                (
+                    "payment_plan",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="payments",
+                        to="payment.paymentplan",
+                    ),
+                ),
+                (
+                    "financial_service_provider",
+                    models.ForeignKey(
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="payment.financialserviceprovider"
                     ),
                 ),
             ],

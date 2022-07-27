@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -85,7 +87,8 @@ class TestActionPaymentPlanMutation(APITestCase):
             ),
         ]
     )
-    def test_update_status_payment_plan(self, name, permissions, status, actions):
+    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_update_status_payment_plan(self, name, permissions, status, actions, get_exchange_rate_mock):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         if status:
             self.payment_plan.status = status
