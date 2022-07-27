@@ -279,6 +279,7 @@ type BusinessAreaNode implements Node {
   approvalNumberRequired: Int!
   authorizationNumberRequired: Int!
   financeReviewNumberRequired: Int!
+  isPaymentPlanApplicable: Boolean!
   children(
     offset: Int
     before: String
@@ -288,6 +289,20 @@ type BusinessAreaNode implements Node {
     id: UUID
   ): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
+  householdSet(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): HouseholdNodeConnection!
+  individualSet(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): IndividualNodeConnection!
   paymentplanSet(
     offset: Int
     before: String
@@ -651,7 +666,7 @@ input CreateDashboardReportInput {
 input CreateFinancialServiceProviderInput {
   name: String!
   visionVendorNumber: String!
-  deliveryMechanisms: [ID]!
+  deliveryMechanisms: [String]!
   distributionLimit: Decimal
   communicationChannel: String!
   fspXlsxTemplateId: ID!
@@ -816,20 +831,6 @@ type DeliveredQuantityNode {
   currency: String
 }
 
-type DeliveryMechanismNode implements Node {
-  id: ID!
-  name: String!
-  displayName: String!
-  requiredFields: [String!]!
-  financialServiceProviders(
-    offset: Int
-    before: String
-    after: String
-    first: Int
-    last: Int
-  ): FinancialServiceProviderNodeConnection!
-}
-
 type DiscardCashPlanVerificationMutation {
   cashPlan: CashPlanNode
 }
@@ -979,7 +980,7 @@ type FinancialServiceProviderNode implements Node {
   createdBy: UserNode
   name: String!
   visionVendorNumber: String!
-  deliveryMechanisms: [DeliveryMechanismNode]
+  deliveryMechanisms: [String!]!
   distributionLimit: Float
   communicationChannel: FinancialServiceProviderCommunicationChannel!
   dataTransferConfiguration: JSONString
@@ -1302,6 +1303,14 @@ type HouseholdNode implements Node {
   rowId: Int
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
+  individualsAndRoles: [IndividualRoleInHouseholdNode!]!
+  individuals(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): IndividualNodeConnection!
   paymentrecordSet(
     offset: Int
     before: String
@@ -2387,6 +2396,30 @@ type IndividualNode implements Node {
   koboAssetId: String!
   rowId: Int
   disabilityCertificatePicture: String
+  representedHouseholds(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): HouseholdNodeConnection!
+  headingHousehold: HouseholdNode
+  documents(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): DocumentNodeConnection!
+  identities(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): IndividualIdentityNodeConnection!
+  householdsAndRoles: [IndividualRoleInHouseholdNode!]!
+  bankAccountInfo: BankAccountInfoNode
   paymentrecordSet(
     offset: Int
     before: String
@@ -2792,6 +2825,9 @@ type Mutations {
   actionPaymentPlanMutation(
     input: ActionPaymentPlanInput!
   ): ActionPaymentPlanMutation
+  createPaymentPlan(input: CreatePaymentPlanInput!): CreatePaymentPlanMutation
+  updatePaymentPlan(input: UpdatePaymentPlanInput!): UpdatePaymentPlanMutation
+  deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
   createTargetPopulation(
     input: CreateTargetPopulationInput!
   ): CreateTargetPopulationMutation
@@ -2991,15 +3027,14 @@ type PaymentRecordNode implements Node {
   statusDate: DateTime!
   household: HouseholdNode!
   headOfHousehold: IndividualNode
-  deliveryType: PaymentRecordDeliveryType!
+  deliveryType: PaymentRecordDeliveryType
   currency: String!
-  entitlementQuantity: Float!
+  entitlementQuantity: Float
   entitlementQuantityUsd: Float
-  deliveredQuantity: Float!
+  deliveredQuantity: Float
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
-  serviceProvider: ServiceProviderNode!
   caId: String
   caHashId: UUID
   cashPlan: CashPlanNode
@@ -3169,6 +3204,13 @@ type ProgramNode implements Node {
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
   individualDataNeeded: Boolean
+  households(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): HouseholdNodeConnection!
   paymentplanSet(
     offset: Int
     before: String
@@ -3183,13 +3225,6 @@ type ProgramNode implements Node {
     first: Int
     last: Int
   ): CashPlanNodeConnection!
-  households(
-    offset: Int
-    before: String
-    after: String
-    first: Int
-    last: Int
-  ): HouseholdNodeConnection!
   targetpopulationSet(
     offset: Int
     before: String
@@ -3214,6 +3249,7 @@ type ProgramNode implements Node {
     finalListTotalIndividualsMax: Int
     businessArea: String
     program: [ID]
+    paymentPlanApplicable: Boolean
     orderBy: String
   ): TargetPopulationNodeConnection!
   reports(
@@ -3434,7 +3470,7 @@ type Query {
     createdBy: ID
     name: String
     visionVendorNumber: String
-    deliveryMechanisms: [ID]
+    deliveryMechanisms: [String]
     distributionLimit: Float
     communicationChannel: String
     fspXlsxTemplate: ID
@@ -3653,6 +3689,7 @@ type Query {
     finalListTotalIndividualsMax: Int
     businessArea: String
     program: [ID]
+    paymentPlanApplicable: Boolean
     orderBy: String
   ): TargetPopulationNodeConnection
   goldenRecordByTargetingCriteria(
@@ -5138,6 +5175,7 @@ type UserBusinessAreaNode implements Node {
   approvalNumberRequired: Int!
   authorizationNumberRequired: Int!
   financeReviewNumberRequired: Int!
+  isPaymentPlanApplicable: Boolean!
   children(
     offset: Int
     before: String
@@ -5147,6 +5185,20 @@ type UserBusinessAreaNode implements Node {
     id: UUID
   ): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
+  householdSet(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): HouseholdNodeConnection!
+  individualSet(
+    offset: Int
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): IndividualNodeConnection!
   paymentplanSet(
     offset: Int
     before: String
