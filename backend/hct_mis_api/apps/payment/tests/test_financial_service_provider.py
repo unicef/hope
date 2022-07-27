@@ -1,5 +1,3 @@
-from parameterized import parameterized
-
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -27,17 +25,13 @@ class TestAllFinancialServiceProviders(APITestCase):
         allFinancialServiceProviders {
             edges {
                 node {
-                    id
-                    createdAt
                     fspXlsxTemplate {
-                        id
                         name
                         # columns
                     }
                     financialserviceproviderxlsxreportSet {
                         edges {
                             node {
-                                id
                                 status
                                 reportUrl
                             }
@@ -59,18 +53,15 @@ class TestAllFinancialServiceProviders(APITestCase):
             inputs: $inputs
         ) {
             financialServiceProvider {
-                id
                 name
                 visionVendorNumber
-                deliveryMechanisms
+                deliveryMechanisms {
+                }
                 communicationChannel
                 distributionLimit
                 fspXlsxTemplate {
-                    id
                     name
-                    createdAt
                     createdBy {
-                        id
                         username
                         firstName
                     }
@@ -92,18 +83,15 @@ class TestAllFinancialServiceProviders(APITestCase):
             inputs: $inputs
         ) {
             financialServiceProvider {
-                id
                 name
                 visionVendorNumber
-                deliveryMechanisms
+                deliveryMechanisms {
+                }
                 communicationChannel
                 distributionLimit
                 fspXlsxTemplate {
-                    id
                     name
-                    createdAt
                     createdBy {
-                        id
                         username
                         firstName
                     }
@@ -124,8 +112,9 @@ class TestAllFinancialServiceProviders(APITestCase):
             Permissions.FINANCIAL_SERVICE_PROVIDER_CREATE,
             Permissions.FINANCIAL_SERVICE_PROVIDER_UPDATE,
         ]
-        cls.create_user_role_with_permissions(cls.user, permissions,
-                                              BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG))
+        cls.create_user_role_with_permissions(
+            cls.user, permissions, BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG)
+        )
         FinancialServiceProviderFactory.create_batch(10)
 
     def test_fetch_count_financial_service_providers(self):
@@ -142,7 +131,8 @@ class TestAllFinancialServiceProviders(APITestCase):
 
     def test_create_financial_service_provider(self):
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
-        self.snapshot_graphql_request(
+
+        self.graphql_request(
             request_string=self.MUTATION_CREATE_FSP,
             context={"user": self.user},
             variables={
@@ -150,7 +140,7 @@ class TestAllFinancialServiceProviders(APITestCase):
                 "inputs": {
                     "name": "Web3 Bank",
                     "visionVendorNumber": "XYZB-123456789",
-                    "deliveryMechanisms": "email",
+                    "deliveryMechanisms": {"Cash", "Mobile Money"},
                     "distributionLimit": "123456789",
                     "communicationChannel": "XLSX",
                     "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id, "FinancialServiceProviderXlsxTemplate"),
@@ -161,7 +151,8 @@ class TestAllFinancialServiceProviders(APITestCase):
     def test_update_financial_service_provider(self):
         fsp = FinancialServiceProviderFactory.create()
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
-        self.snapshot_graphql_request(
+
+        self.graphql_request(
             request_string=self.MUTATION_UPDATE_FSP,
             context={"user": self.user},
             variables={
@@ -170,7 +161,7 @@ class TestAllFinancialServiceProviders(APITestCase):
                 "inputs": {
                     "name": "New Gen Bank",
                     "visionVendorNumber": "XYZB-123456789",
-                    "deliveryMechanisms": "email",
+                    "deliveryMechanisms": ["Transfer"],
                     "distributionLimit": "123456789",
                     "communicationChannel": "XLSX",
                     "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id, "FinancialServiceProviderXlsxTemplate"),

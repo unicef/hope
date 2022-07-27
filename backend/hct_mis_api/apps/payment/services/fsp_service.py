@@ -1,7 +1,10 @@
 from django.shortcuts import get_object_or_404
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import FinancialServiceProvider, FinancialServiceProviderXlsxTemplate
+from hct_mis_api.apps.payment.models import (
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+)
 
 
 class FSPService:
@@ -13,11 +16,11 @@ class FSPService:
         fsp = FinancialServiceProvider(
             name=inputs["name"],
             vision_vendor_number=inputs["vision_vendor_number"],
-            delivery_mechanisms=inputs["delivery_mechanisms"],
             distribution_limit=inputs["distribution_limit"],
             communication_channel=inputs["communication_channel"],
             fsp_xlsx_template=fsp_xlsx_template,
             created_by=user,
+            delivery_mechanisms=inputs["delivery_mechanisms"],
         )
         fsp.save()
 
@@ -32,10 +35,10 @@ class FSPService:
 
         fsp.name = inputs["name"]
         fsp.vision_vendor_number = inputs["vision_vendor_number"]
-        fsp.delivery_mechanisms = inputs["delivery_mechanisms"]
         fsp.distribution_limit = inputs["distribution_limit"]
         fsp.communication_channel = inputs["communication_channel"]
         fsp.fsp_xlsx_template = fsp_xlsx_template
+        fsp.delivery_mechanisms = inputs["delivery_mechanisms"]
         fsp.save()
 
         return fsp
