@@ -219,7 +219,6 @@ class PaymentPlanService:
 
         payment_plan = PaymentPlan.objects.create(
             business_area=business_area,
-            name=input_data["name"],
             created_by=user,
             target_population=target_population,
             program=target_population.program,
@@ -247,14 +246,11 @@ class PaymentPlanService:
 
         recalculate = False
 
-        basic_fields = ["name", "start_date", "end_date", "dispersion_start_date"]
+        basic_fields = ["start_date", "end_date", "dispersion_start_date"]
 
         for basic_field in basic_fields:
             if basic_field in input_data and input_data[basic_field] != getattr(self.payment_plan, basic_field):
                 setattr(self.payment_plan, basic_field, input_data[basic_field])
-
-        if input_data["name"] and input_data["name"] != self.payment_plan.name:
-            self.payment_plan.name = input_data["name"]
 
         targeting_id = decode_id_string(input_data.get("targeting_id"))
         if targeting_id and targeting_id != str(self.payment_plan.target_population.id):
