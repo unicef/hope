@@ -2694,7 +2694,7 @@ export type IndividualUpdateDataObjectType = {
   phoneNo?: Maybe<Scalars['String']>,
   phoneNoAlternative?: Maybe<Scalars['String']>,
   relationship?: Maybe<Scalars['String']>,
-  disability?: Maybe<Scalars['Boolean']>,
+  disability?: Maybe<Scalars['String']>,
   workStatus?: Maybe<Scalars['String']>,
   enrolledInNutritionProgramme?: Maybe<Scalars['Boolean']>,
   administrationOfRutf?: Maybe<Scalars['Boolean']>,
