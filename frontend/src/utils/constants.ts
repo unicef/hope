@@ -5,6 +5,7 @@ export const TARGETING_STATES = {
   [TargetPopulationStatus.Draft]: 'Open',
   [TargetPopulationStatus.Locked]: 'Locked',
   [TargetPopulationStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
+  [TargetPopulationStatus.Ready]: 'Ready',
   [TargetPopulationStatus.Processing]: 'Processing',
   [TargetPopulationStatus.SteficonWait]: 'Steficon Wait',
   [TargetPopulationStatus.SteficonRun]: 'Steficon Run',
