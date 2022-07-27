@@ -616,5 +616,8 @@
   "Priority": "Priority",
   "Urgency": "Urgency",
   "Active Tickets": "Active Tickets",
-  "All Tickets": "All Tickets"
+  "All Tickets": "All Tickets",
+  "Tickets ID": "Tickets ID",
+  "Export Report": "Export Report",
+  "Upload Tickets": "Upload Tickets"
 }

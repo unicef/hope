@@ -236,6 +236,25 @@ export function grievanceTicketStatusToColor(
   }
 }
 
+export function grievanceTicketBadgeColors(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Not urgent':
+    case 'Low':
+      return theme.hctPalette.green;
+    case 'Very urgent':
+    case 'High':
+      return theme.palette.error.main;
+    case 'Urgent':
+    case 'Medium':
+      return theme.hctPalette.oragne;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
 export function reportStatusToColor(
   theme: typeof themeObj,
   status: string,
