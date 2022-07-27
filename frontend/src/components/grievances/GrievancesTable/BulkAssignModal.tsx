@@ -45,6 +45,7 @@ interface BulkAssignModalProps {
   optionsData;
   initialVariables;
   setInputValue;
+  setSelected;
 }
 
 export const BulkAssignModal = ({
@@ -53,6 +54,7 @@ export const BulkAssignModal = ({
   optionsData,
   initialVariables,
   setInputValue,
+  setSelected,
 }: BulkAssignModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [assignee, setAssignee] = useState(null);
@@ -92,6 +94,8 @@ export const BulkAssignModal = ({
         });
       } catch (e) {
         e.graphQLErrors.map((x) => showMessage(x.message));
+      } finally {
+        setSelected([])
       }
     }
   };

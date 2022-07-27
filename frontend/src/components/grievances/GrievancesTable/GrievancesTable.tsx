@@ -157,7 +157,7 @@ export const GrievancesTable = ({
   };
 
   const handleSelectAllCheckboxesClick = (event, rows): void => {
-    event.preventDefault()
+    event.preventDefault();
     if (!selected.length) {
       const newSelecteds = rows
         .filter((row) => row.status !== GRIEVANCE_TICKET_STATES.CLOSED)
@@ -178,6 +178,7 @@ export const GrievancesTable = ({
           businessArea={businessArea}
           initialVariables={initialVariables}
           setInputValue={setInputValue}
+          setSelected={setSelected}
         />
         <Box display='flex' ml='auto'>
           <Box>
@@ -247,6 +248,7 @@ export const GrievancesTable = ({
               selected={selected}
               optionsData={optionsData}
               setInputValue={setInputValue}
+              initialVariables={initialVariables}
             />
           )}
         />
