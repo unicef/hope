@@ -67,12 +67,11 @@ export const EditIndividualDataChange = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { data, loading } = useAllAddIndividualFieldsQuery();
   if (!individual) {
     return <div>{t('You have to select an individual earlier')}</div>;
   }
   if (
-    loading ||
+    addIndividualFieldsLoading ||
     fullIndividualLoading ||
     addIndividualFieldsLoading ||
     !fullIndividual
@@ -102,7 +101,9 @@ export const EditIndividualDataChange = ({
                       itemValue={item}
                       index={index}
                       individual={fullIndividual.individual}
-                      fields={data.allAddIndividualsFieldsAttributes}
+                      fields={
+                        addIndividualFieldsData.allAddIndividualsFieldsAttributes
+                      }
                       notAvailableFields={notAvailableItems}
                       onDelete={() => arrayHelpers.remove(index)}
                       values={values}

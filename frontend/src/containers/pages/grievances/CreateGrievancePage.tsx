@@ -102,16 +102,20 @@ export function CreateGrievancePage(): React.ReactElement {
     variables: { businessArea, first: 1000 },
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useGrievancesChoiceDataQuery();
 
   const [mutate, { loading }] = useCreateGrievanceMutation();
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
+  const {
+    data: householdFieldsData,
+    loading: householdFieldsLoading,
+  } = useAllEditHouseholdFieldsQuery();
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
