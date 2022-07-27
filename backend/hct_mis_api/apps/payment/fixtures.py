@@ -488,12 +488,6 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    name = factory.Faker(
-        "sentence",
-        nb_words=6,
-        variable_nb_words=True,
-        ext_word_list=None,
-    )
     start_date = factory.Faker(
         "date_time_this_decade",
         before_now=True,
