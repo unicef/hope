@@ -1,18 +1,23 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { Checkbox } from '@material-ui/core';
+import { Box, Checkbox } from '@material-ui/core';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
 import { StatusBox } from '../../core/StatusBox';
 import {
   grievanceTicketStatusToColor,
-  grievanceTicketUrgencyToColor,
-  renderUserName,
+  grievanceTicketBadgeColors,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../core/UniversalMoment';
-import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
+import {
+  AllGrievanceTicketQuery,
+  useBulkUpdateGrievanceAssigneeMutation,
+} from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import { AssignedToDropdown } from './AssignedToDropdown';
 
 interface GrievancesTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
@@ -29,6 +34,8 @@ interface GrievancesTableRowProps {
     number,
   ) => void;
   selected: Array<string>;
+  optionsData;
+  setInputValue;
 }
 
 export function GrievancesTableRow({
@@ -41,8 +48,11 @@ export function GrievancesTableRow({
   urgencyChoicesData,
   checkboxClickHandler,
   selected,
+  optionsData,
+  setInputValue,
 }: GrievancesTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
+  const { showMessage } = useSnackbar();
   const detailsPath = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
 
   const isSelected = (name: string): boolean => selected.includes(name);
@@ -54,20 +64,38 @@ export function GrievancesTableRow({
           (el) => el.value === ticket.issueType.toString(),
         )[0].name
     : '-';
+
+  const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
+
+  const onFilterChange = async (assignee, ids): Promise<void> => {
+    if (assignee) {
+      try {
+        await mutate({
+          variables: {
+            assignedTo: assignee.node.id,
+            businessAreaSlug: businessArea,
+            grievanceTicketUnicefIds: ids,
+          },
+        });
+      } catch (e) {
+        e.graphQLErrors.map((x) => showMessage(x.message));
+      }
+    }
+  };
+
   return (
-    <ClickableTableRow
-      hover
-      onClick={(event) => checkboxClickHandler(event, ticket.unicefId)}
-      role='checkbox'
-      key={ticket.id}
-    >
-      <TableCell align='left'>
-        <Checkbox
-          color='primary'
-          onClick={(event) => checkboxClickHandler(event, ticket.unicefId)}
-          checked={isItemSelected}
-          inputProps={{ 'aria-labelledby': ticket.unicefId }}
-        />
+    <ClickableTableRow hover role='checkbox' key={ticket.id}>
+      <TableCell align='left' padding='checkbox'>
+        <Box
+          display={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED && 'none'}
+        >
+          <Checkbox
+            color='primary'
+            onClick={(event) => checkboxClickHandler(event, ticket.unicefId)}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': ticket.unicefId }}
+          />
+        </Box>
       </TableCell>
       <TableCell align='left'>
         {canViewDetails ? (
@@ -82,17 +110,28 @@ export function GrievancesTableRow({
           statusToColor={grievanceTicketStatusToColor}
         />
       </TableCell>
-      <TableCell align='left'>{renderUserName(ticket.assignedTo)}</TableCell>
+      <TableCell align='left'>
+        <AssignedToDropdown
+          optionsData={optionsData}
+          onFilterChange={onFilterChange}
+          value={ticket.assignedTo}
+          ids={[ticket.unicefId]}
+          setInputValue={setInputValue}
+        />
+      </TableCell>
       <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
       <TableCell align='left'>{issueType}</TableCell>
       <TableCell align='left'>{ticket.household?.unicefId || '-'}</TableCell>
       <TableCell align='left'>
-        {priorityChoicesData[ticket.priority - 1]?.name || '-'}
+        <StatusBox
+          status={priorityChoicesData[ticket.priority - 1]?.name || '-'}
+          statusToColor={grievanceTicketBadgeColors}
+        />
       </TableCell>
       <TableCell align='left'>
         <StatusBox
           status={urgencyChoicesData[ticket.urgency - 1]?.name || '-'}
-          statusToColor={grievanceTicketUrgencyToColor}
+          statusToColor={grievanceTicketBadgeColors}
         />
       </TableCell>
       <TableCell align='left'>
