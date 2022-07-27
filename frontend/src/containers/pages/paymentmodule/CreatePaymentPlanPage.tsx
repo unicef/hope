@@ -38,7 +38,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     data: allTargetPopulationsData,
     loading: loadingTargetPopulations,
   } = useAllTargetPopulationsQuery({
-    variables: { businessArea },
+    variables: { businessArea, paymentPlanApplicable: true },
   });
 
   if (loadingTargetPopulations) return <LoadingComponent />;
