@@ -1,17 +1,27 @@
-import React from 'react';
+import { Box, Button } from '@material-ui/core';
+import { PublishOutlined, GetAppOutlined } from '@material-ui/icons';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import get from 'lodash/get';
 import {
   hasCreatorOrOwnerPermissions,
+  hasPermissions,
   PERMISSIONS,
 } from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_TICKETS_TYPES,
+  GRIEVANCE_TICKET_STATES,
+} from '../../../utils/constants';
 import { decodeIdString, reduceChoices } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
   useAllGrievanceTicketQuery,
+  useAllUsersForFiltersLazyQuery,
   useGrievancesChoiceDataQuery,
   useMeQuery,
 } from '../../../__generated__/graphql';
@@ -19,15 +29,18 @@ import { LoadingComponent } from '../../core/LoadingComponent';
 import { TableWrapper } from '../../core/TableWrapper';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
+import { BulkAssignModal } from './BulkAssignModal';
 
 interface GrievancesTableProps {
   businessArea: string;
   filter;
+  selectedTab;
 }
 
 export const GrievancesTable = ({
   businessArea,
   filter,
+  selectedTab,
 }: GrievancesTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
@@ -49,6 +62,25 @@ export const GrievancesTable = ({
     priority: filter.priority,
     urgency: filter.urgency,
   };
+
+  const [inputValue, setInputValue] = useState('');
+
+  const [loadData, { data }] = useAllUsersForFiltersLazyQuery({
+    variables: {
+      businessArea,
+      first: 20,
+      orderBy: 'first_name,last_name,email',
+      search: inputValue,
+    },
+  });
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const optionsData = get(data, 'allUsers.edges', []);
+
+  const [selected, setSelected] = useState<string[]>([]);
 
   const {
     data: choicesData,
@@ -104,33 +136,125 @@ export const GrievancesTable = ({
     );
   };
 
+  const handleCheckboxClick = (event, name): void => {
+    const selectedIndex = selected.indexOf(name);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, name);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1),
+      );
+    }
+
+    setSelected(newSelected);
+  };
+
+  const handleSelectAllCheckboxesClick = (event, rows): void => {
+    event.preventDefault();
+    if (!selected.length) {
+      const newSelecteds = rows
+        .filter((row) => row.status !== GRIEVANCE_TICKET_STATES.CLOSED)
+        .map((row) => row.unicefId);
+      setSelected(newSelecteds);
+
+      return;
+    }
+    setSelected([]);
+  };
+
   return (
-    <TableWrapper>
-      <UniversalTable<
-        AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-        AllGrievanceTicketQueryVariables
-      >
-        headCells={headCells}
-        title={t('Grievance and Feedback List')}
-        rowsPerPageOptions={[10, 15, 20]}
-        query={useAllGrievanceTicketQuery}
-        queriedObjectName='allGrievanceTicket'
-        initialVariables={initialVariables}
-        defaultOrderBy='created_at'
-        defaultOrderDirection='desc'
-        renderRow={(row) => (
-          <GrievancesTableRow
-            key={row.id}
-            ticket={row}
-            statusChoices={statusChoices}
-            categoryChoices={categoryChoices}
-            issueTypeChoicesData={issueTypeChoicesData}
-            priorityChoicesData={priorityChoicesData}
-            urgencyChoicesData={urgencyChoicesData}
-            canViewDetails={getCanViewDetailsOfTicket(row)}
-          />
-        )}
-      />
-    </TableWrapper>
+    <>
+      <Box display='flex' alignItems='center' px={5} pt={5}>
+        <BulkAssignModal
+          optionsData={optionsData}
+          selected={selected}
+          businessArea={businessArea}
+          initialVariables={initialVariables}
+          setInputValue={setInputValue}
+          setSelected={setSelected}
+        />
+        <Box display='flex' ml='auto'>
+          <Box>
+            {/* TODO: Enable Export Report button */}
+            <Button
+              startIcon={<GetAppOutlined />}
+              variant='text'
+              color='primary'
+              onClick={() => {
+                '';
+              }}
+            >
+              {t('Export Report')}
+            </Button>
+          </Box>
+          <Box ml={5} mr={7}>
+            {/* TODO: Enable Upload Tickets button */}
+            <Button
+              startIcon={<PublishOutlined />}
+              variant='text'
+              color='primary'
+              onClick={() => {
+                '';
+              }}
+            >
+              {t('Upload Tickets')}
+            </Button>
+          </Box>
+          {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
+            hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
+              <Button
+                alignItems='center'
+                variant='contained'
+                color='primary'
+                component={Link}
+                to={`/${businessArea}/grievance-and-feedback/new-ticket`}
+              >
+                {t('NEW TICKET')}
+              </Button>
+            )}
+        </Box>
+      </Box>
+      <TableWrapper>
+        <UniversalTable<
+          AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+          AllGrievanceTicketQueryVariables
+        >
+          headCells={headCells}
+          title={t('Grievance and Feedback List')}
+          rowsPerPageOptions={[10, 15, 20]}
+          query={useAllGrievanceTicketQuery}
+          onSelectAllClick={handleSelectAllCheckboxesClick}
+          numSelected={selected.length}
+          queriedObjectName='allGrievanceTicket'
+          initialVariables={initialVariables}
+          defaultOrderBy='created_at'
+          defaultOrderDirection='desc'
+          renderRow={(row) => (
+            <GrievancesTableRow
+              key={row.id}
+              ticket={row}
+              statusChoices={statusChoices}
+              categoryChoices={categoryChoices}
+              issueTypeChoicesData={issueTypeChoicesData}
+              priorityChoicesData={priorityChoicesData}
+              urgencyChoicesData={urgencyChoicesData}
+              canViewDetails={getCanViewDetailsOfTicket(row)}
+              checkboxClickHandler={handleCheckboxClick}
+              selected={selected}
+              optionsData={optionsData}
+              setInputValue={setInputValue}
+              initialVariables={initialVariables}
+            />
+          )}
+        />
+      </TableWrapper>
+    </>
   );
 };
