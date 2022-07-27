@@ -1,22 +1,17 @@
 import { Box, Grid, Typography } from '@material-ui/core';
+import styled from 'styled-components';
 import { Field } from 'formik';
 import get from 'lodash/get';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { AllTargetPopulationsQuery } from '../../../../__generated__/graphql';
+import { GreyText } from '../../../core/GreyText';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { OverviewContainer } from '../../../core/OverviewContainer';
+import { Title } from '../../../core/Title';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(3)}px;
-`;
-const GreyText = styled.p`
-  color: #9e9e9e;
-  font-size: 16px;
-`;
 const StyledBox = styled(Box)`
   width: 100%;
 `;
@@ -52,7 +47,7 @@ export const PaymentPlanTargeting = ({
           <Grid container>
             <Grid item xs={6}>
               <Field
-                name='targetPopulation'
+                name='targetingId'
                 label={t('Target Population')}
                 fullWidth
                 variant='outlined'
