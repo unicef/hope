@@ -25,6 +25,7 @@ export const AssignedToDropdown = ({
   setInputValue,
   ids,
   label,
+  disableClearable,
 }: {
   fullWidth?: boolean;
   onFilterChange?;
@@ -33,6 +34,7 @@ export const AssignedToDropdown = ({
   setInputValue;
   ids?;
   label?;
+  disableClearable?: boolean;
 }): React.ReactElement => {
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
@@ -55,6 +57,7 @@ export const AssignedToDropdown = ({
     <StyledAutocomplete
       fullWidth={fullWidth}
       open={open}
+      disableClearable={disableClearable}
       filterOptions={(options1) => options1}
       onChange={onChangeMiddleware}
       onOpen={() => {
