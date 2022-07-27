@@ -26,7 +26,7 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Individual
+from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
     PaymentRecordFilter,
     PaymentVerificationFilter,
@@ -35,6 +35,7 @@ from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderXlsxTemplateFilter,
     FinancialServiceProviderXlsxReportFilter,
     FinancialServiceProviderFilter,
+    PaymentPlanFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -46,11 +47,14 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProvider,
+    ApprovalProcess,
+    Approval,
+    PaymentPlan,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -100,7 +104,9 @@ class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),)
+    permission_classes = (
+        hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),
+    )
 
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
@@ -189,6 +195,49 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         model = LogEntry
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+
+class ApprovalNode(DjangoObjectType):
+    info = graphene.String()
+
+    class Meta:
+        model = Approval
+        fields = ("type", "created_at", "comment", "info")
+
+    def resolve_info(self, info):
+        return self.info
+
+
+class AcceptanceProcessNode(DjangoObjectType):
+    class Meta:
+        model = ApprovalProcess
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    approval_number_required = graphene.Int()
+    authorization_number_required = graphene.Int()
+    finance_review_number_required = graphene.Int()
+
+    class Meta:
+        model = PaymentPlan
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    def resolve_status(self, info):
+        # in test it fails without str()
+        return str(self.status)
+
+    def resolve_approval_number_required(self, info):
+        return self.business_area.approval_number_required
+
+    def resolve_authorization_number_required(self, info):
+        return self.business_area.authorization_number_required
+
+    def resolve_finance_review_number_required(self, info):
+        return self.business_area.finance_review_number_required
 
 
 class Query(graphene.ObjectType):
@@ -288,6 +337,13 @@ class Query(graphene.ObjectType):
         PaymentVerificationLogEntryNode,
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
+    )
+
+    payment_plan = relay.Node.Field(PaymentPlanNode)
+    all_payment_plans = DjangoPermissionFilterConnectionField(
+        PaymentPlanNode,
+        filterset_class=PaymentPlanFilter,
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
 
     def resolve_all_payment_verifications(self, info, **kwargs):

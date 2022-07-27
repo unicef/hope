@@ -19,8 +19,8 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, CashPlanFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestAlreadyExistingFilterTickets(APITestCase):

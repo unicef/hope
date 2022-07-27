@@ -1,9 +1,11 @@
 from decimal import Decimal
 from math import ceil
 
+import datetime
 from django.db.models import Q
 
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
+from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 
 
@@ -12,7 +14,7 @@ def get_number_of_samples(payment_records_sample_count, confidence_interval, mar
 
     variable = 0.5
     z_score = NormalDist().inv_cdf(confidence_interval + (1 - confidence_interval) / 2)
-    theoretical_sample = (z_score ** 2) * variable * (1 - variable) / margin_of_error ** 2
+    theoretical_sample = (z_score**2) * variable * (1 - variable) / margin_of_error**2
     actual_sample = ceil(
         (payment_records_sample_count * theoretical_sample / (theoretical_sample + payment_records_sample_count)) * 1.5
     )
@@ -82,3 +84,25 @@ def get_payment_records_for_dashboard(year, business_area_slug, filters, only_wi
         },
         year_filter_path="delivery_date",
     )
+
+
+def get_quantity_in_usd(
+    amount: Decimal,
+    currency: str,
+    exchange_rate: Decimal,
+    currency_exchange_date: datetime.datetime,
+    exchange_rates_client=None,
+):
+    if amount is None:
+        return None
+
+    if not exchange_rate:
+        if exchange_rates_client is None:
+            exchange_rates_client = ExchangeRates()
+
+            exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency, currency_exchange_date)
+
+    if exchange_rate is None:
+        return None
+
+    return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))

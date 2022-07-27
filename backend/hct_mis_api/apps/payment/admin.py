@@ -2,6 +2,7 @@ from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.template.response import TemplateResponse
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
@@ -18,6 +19,11 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
+    CashPlan,
+    PaymentPlan,
+    Payment,
+    DeliveryMechanismPerPaymentPlan,
+    PaymentChannel,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -143,6 +149,87 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     list_filter = (("business_area", AutoCompleteFilter),)
 
 
+@admin.register(CashPlan)
+class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+    list_display = ("name", "program", "delivery_type", "status", "verification_status", "ca_id")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
+        ("delivery_type", ChoicesFieldComboFilter),
+        ("cash_plan_payment_verification_summary__status", ChoicesFieldComboFilter),
+        ("program__id", ValueFilter),
+        ("vision_id", ValueFilter),
+    )
+    raw_id_fields = ("business_area", "program", "service_provider")
+    search_fields = ("name",)
+
+    def verification_status(self, obj):
+        return obj.cash_plan_payment_verification_summary.status
+
+    @button()
+    def payments(self, request, pk):
+        context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
+
+        return TemplateResponse(request, "admin/cashplan/payments.html", context)
+
+
+@admin.register(PaymentPlan)
+class PaymentPlanAdmin(HOPEModelAdminBase):
+    list_display = ("name", "program", "status", "target_population")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
+        ("program__id", ValueFilter),
+        ("target_population", AutoCompleteFilter),
+    )
+    raw_id_fields = ("business_area", "program", "target_population")
+    search_fields = ("name",)
+
+
+@admin.register(Payment)
+class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+    list_display = ("household", "status", "payment_plan_name")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
+        ("payment_plan", AutoCompleteFilter),
+        ("financial_service_provider", AutoCompleteFilter),
+    )
+    advanced_filter_fields = (
+        "status",
+        "delivery_date",
+        ("financial_service_provider__name", "Service Provider"),
+        ("payment_plan__name", "PaymentPlan"),
+    )
+    date_hierarchy = "updated_at"
+    raw_id_fields = (
+        "business_area",
+        "payment_plan",
+        "household",
+        "head_of_household",
+        "financial_service_provider",
+    )
+
+    def payment_plan_name(self, obj):
+        return obj.payment_plan.name
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("household", "payment_plan", "business_area")
+
+
+@admin.register(DeliveryMechanismPerPaymentPlan)
+class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
+    list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
+
+
+@admin.register(PaymentChannel)
+class PaymentChannelAdmin(HOPEModelAdminBase):
+    list_display = ("individual", "delivery_mechanism_display_name")
+
+    def delivery_mechanism_display_name(self, obj):
+        return obj.delivery_mechanism.display_name
+
+
 @admin.register(FinancialServiceProviderXlsxTemplate)
 class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     list_display = (
@@ -197,15 +284,13 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
 @admin.register(FinancialServiceProviderXlsxReport)
 class FinancialServiceProviderXlsxReportAdmin(HOPEModelAdminBase):
     list_display = ("id", "status", "file")
-    list_filter = (
-        "status",
-    )
+    list_filter = ("status",)
     list_select_related = ("financial_service_provider",)
     # search_fields = ("id",)
     readonly_fields = ("file", "status", "financial_service_provider")
 
     def has_add_permission(self, request) -> bool:
         return False
-    
+
     def has_change_permission(self, request, obj=None) -> bool:
         return False

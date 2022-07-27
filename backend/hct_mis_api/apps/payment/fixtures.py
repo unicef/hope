@@ -6,6 +6,7 @@ import factory
 from factory import fuzzy
 from pytz import utc
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
@@ -18,13 +19,96 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
+    CashPlanPaymentVerificationSummary,
+    PaymentPlan,
+    Payment,
+    GenericPayment,
 )
 from hct_mis_api.apps.program.fixtures import (
-    CashPlanFactory,
-    CashPlanPaymentVerificationSummaryFactory,
+    ProgramFactory,
 )
-from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+
+
+class CashPlanPaymentVerificationSummaryFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CashPlanPaymentVerificationSummary
+
+
+class CashPlanFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CashPlan
+
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    program = factory.SubFactory(ProgramFactory)
+    status_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=False,
+        after_now=True,
+        tzinfo=utc,
+    )
+    status = fuzzy.FuzzyChoice(
+        CashPlan.STATUS_CHOICE,
+        getter=lambda c: c[0],
+    )
+    name = factory.Faker(
+        "sentence",
+        nb_words=6,
+        variable_nb_words=True,
+        ext_word_list=None,
+    )
+    distribution_level = "Registration Group"
+    start_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=False,
+        after_now=True,
+        tzinfo=utc,
+    )
+    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+    dispersion_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+    coverage_duration = factory.fuzzy.FuzzyInteger(1, 4)
+    coverage_unit = factory.Faker(
+        "random_element",
+        elements=["Day(s)", "Week(s)", "Month(s)", "Year(s)"],
+    )
+    comments = factory.Faker(
+        "sentence",
+        nb_words=6,
+        variable_nb_words=True,
+        ext_word_list=None,
+    )
+    delivery_type = fuzzy.FuzzyChoice(
+        PaymentRecord.DELIVERY_TYPE_CHOICE,
+        getter=lambda c: c[0],
+    )
+    assistance_measurement = factory.Faker("currency_name")
+    assistance_through = factory.Faker("random_element", elements=["ING", "Bank of America", "mBank"])
+    vision_id = factory.Faker("uuid4")
+    funds_commitment = factory.fuzzy.FuzzyInteger(1000, 99999999)
+    exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)
+    down_payment = factory.fuzzy.FuzzyInteger(1000, 99999999)
+    validation_alerts_count = factory.fuzzy.FuzzyInteger(1, 3)
+    total_persons_covered = factory.fuzzy.FuzzyInteger(1, 4)
+    total_persons_covered_revised = factory.fuzzy.FuzzyInteger(1, 4)
+
+    total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_entitled_quantity_revised = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+
+    total_entitled_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_entitled_quantity_revised_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_delivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_undelivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+
+    @factory.post_generation
+    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        CashPlanPaymentVerificationSummaryFactory(cash_plan=self)
 
 
 class ServiceProviderFactory(factory.DjangoModelFactory):
@@ -55,8 +139,13 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
 
     name = factory.Faker("company")
     vision_vendor_number = factory.Faker("ssn")
-    delivery_mechanisms = factory.Faker(
-        "random_element", elements=["email", "phone", "mail"]
+    delivery_mechanisms = factory.List(
+        [
+            fuzzy.FuzzyChoice(
+                GenericPayment.DELIVERY_TYPE_CHOICE,
+                getter=lambda c: c[0],
+            )
+        ]
     )
     distribution_limit = fuzzy.FuzzyDecimal(100.0, 1000.0)
     communication_channel = fuzzy.FuzzyChoice(
@@ -385,4 +474,121 @@ def generate_real_cash_plans_for_households(households):
         PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
         .filter(cash_plan__in=cash_plans)
         .values_list("household__id", flat=True)
+    )
+
+
+class PaymentPlanFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = PaymentPlan
+
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    status_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=True,
+        after_now=False,
+        tzinfo=utc,
+    )
+    name = factory.Faker(
+        "sentence",
+        nb_words=6,
+        variable_nb_words=True,
+        ext_word_list=None,
+    )
+    start_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=True,
+        after_now=False,
+        tzinfo=utc,
+    )
+    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+    program = factory.LazyAttribute(lambda o: o.target_population.program)
+    exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)
+
+    total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_entitled_quantity_revised = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+
+    total_entitled_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_entitled_quantity_revised_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_delivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_undelivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+
+    created_by = factory.SubFactory(UserFactory)
+    unicef_id = factory.Faker("uuid4")
+    target_population = factory.SubFactory(TargetPopulationFactory)
+    currency = factory.Faker("currency_code")
+
+    dispersion_start_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=False,
+        after_now=True,
+        tzinfo=utc,
+    )
+    dispersion_end_date = factory.LazyAttribute(lambda o: o.dispersion_start_date + timedelta(days=randint(60, 1000)))
+    female_children_count = factory.fuzzy.FuzzyInteger(2, 4)
+    male_children_count = factory.fuzzy.FuzzyInteger(2, 4)
+    female_adults_count = factory.fuzzy.FuzzyInteger(2, 4)
+    male_adults_count = factory.fuzzy.FuzzyInteger(2, 4)
+    total_households_count = factory.fuzzy.FuzzyInteger(2, 4)
+    total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
+
+
+class PaymentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Payment
+
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    status = fuzzy.FuzzyChoice(
+        PaymentRecord.STATUS_CHOICE,
+        getter=lambda c: c[0],
+    )
+    status_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=True,
+        after_now=False,
+        tzinfo=utc,
+    )
+    household = factory.LazyAttribute(lambda o: Household.objects.order_by("?").first())
+    head_of_household = factory.LazyAttribute(lambda o: o.household.head_of_household)
+    delivery_type = fuzzy.FuzzyChoice(
+        PaymentRecord.DELIVERY_TYPE_CHOICE,
+        getter=lambda c: c[0],
+    )
+    currency = factory.Faker("currency_code")
+    entitlement_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
+    entitlement_quantity_usd = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
+    delivered_quantity = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
+    delivered_quantity_usd = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
+
+    delivery_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=True,
+        after_now=False,
+        tzinfo=utc,
+    )
+    entitlement_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=False,
+        after_now=True,
+        tzinfo=utc,
+    )
+    service_provider = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first())
+    excluded = fuzzy.FuzzyChoice((True, False))
+
+
+def generate_real_payment_plans():
+    if ServiceProvider.objects.count() < 3:
+        ServiceProviderFactory.create_batch(3)
+    program = RealProgramFactory()
+    payment_plans = PaymentPlanFactory.create_batch(
+        3, program=program, business_area=BusinessArea.objects.get(slug="afghanistan")
+    )
+    for payment_plan in payment_plans:
+        PaymentFactory.create_batch(
+            5,
+            payment_plan=payment_plan,
+        )
+    program.households.set(
+        Payment.objects.filter(payment_plan__in=payment_plans).values_list("household__id", flat=True)
     )

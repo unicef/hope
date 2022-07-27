@@ -42,7 +42,6 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
-    Document,
     Household,
     Individual,
 )
@@ -144,6 +143,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_STEFICON_COMPLETED = "STEFICON_COMPLETED"
     STATUS_STEFICON_ERROR = "STEFICON_ERROR"
     STATUS_READY_FOR_CASH_ASSIST = "READY_FOR_CASH_ASSIST"
+    STATUS_READY = "READY"
+    STATUS_ASSIGNED = "ASSIGNED"
 
     STATUS_CHOICES = (
         (STATUS_DRAFT, _("Open")),
@@ -154,6 +155,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         (STATUS_STEFICON_ERROR, _("Rule Engine Errored")),
         (STATUS_PROCESSING, _("Processing")),
         (STATUS_READY_FOR_CASH_ASSIST, _("Ready for cash assist")),
+        (STATUS_READY, _("Ready")),
+        (STATUS_ASSIGNED, _("Assigned")),
     )
 
     objects = TargetPopulationManager()

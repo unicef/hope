@@ -7,8 +7,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, CashPlanFactory
 
 
 class TestAllPaymentRecords(APITestCase):
