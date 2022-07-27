@@ -12,6 +12,7 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
 import {
+  GrievanceSearchTypes,
   GrievanceStatuses,
   GrievanceTypes,
   GRIEVANCE_TICKETS_TYPES,
@@ -39,6 +40,7 @@ export function GrievancesTablePage(): React.ReactElement {
     grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',
+    searchType: GrievanceSearchTypes.TicketID,
   });
   const [selectedTab, setSelectedTab] = useState(
     GRIEVANCE_TICKETS_TYPES.userGenerated,
