@@ -413,6 +413,8 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     def save(self, *args, **kwargs):
         self.full_clean()
+        if self.ticket_details and self.ticket_details.household:
+            self.household_unicef_id = self.ticket_details.household.unicef_id
         return super().save(*args, **kwargs)
 
     def __str__(self):
