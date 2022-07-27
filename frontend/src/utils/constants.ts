@@ -66,3 +66,9 @@ export const GrievanceStatuses = {
   All: 'all',
   Active: 'active',
 };
+
+export const GrievanceSearchTypes = {
+  TicketID: 'ticket_id',
+  HouseholdID: 'ticket_hhid',
+  LastName: 'last_name',
+};

@@ -6,6 +6,7 @@ import { AccountBalance } from '@material-ui/icons';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
 import {
+  GrievanceSearchTypes,
   GrievanceStatuses,
   GrievanceTypes,
   GRIEVANCE_CATEGORIES,
@@ -66,6 +67,20 @@ export function GrievancesFilters({
             onChange={(e) => handleFilterChange(e, 'search')}
             data-cy='filters-search'
           />
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'searchType')}
+            label={undefined}
+            value={filter.searchType || ''}
+          >
+            {Object.keys(GrievanceSearchTypes).map((key) => (
+              <MenuItem
+                key={GrievanceSearchTypes[key]}
+                value={GrievanceSearchTypes[key]}
+              >
+                {key.replace(/\B([A-Z])\B/g, ' $1')}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <SelectFilter
@@ -251,10 +266,10 @@ export function GrievancesFilters({
             value={filter.grievanceStatus || ''}
           >
             <MenuItem value={GrievanceStatuses.Active}>
-              <em>{t('Active Tickets')}</em>
+              {t('Active Tickets')}
             </MenuItem>
             <MenuItem value={GrievanceStatuses.All}>
-              <em>{t('All Tickets')}</em>
+              {t('All Tickets')}
             </MenuItem>
           </SelectFilter>
         </Grid>
