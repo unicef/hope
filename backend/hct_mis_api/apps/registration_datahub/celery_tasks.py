@@ -1,15 +1,14 @@
-import datetime
+from django.utils import timezone
 import logging
 from contextlib import contextmanager
 
-from constance import config
 from django.core.cache import cache
-
 from redis.exceptions import LockError
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
+from hct_mis_api.apps.utils.logs import log_start_and_end
 
 logger = logging.getLogger(__name__)
 
@@ -17,15 +16,23 @@ logger = logging.getLogger(__name__)
 @contextmanager
 def locked_cache(key):
     try:
-        with cache.lock(key, blocking_timeout=2, timeout=85400):
+        # ``blocking_timeout`` indicates the maximum amount of time in seconds to
+        # spend trying to acquire the lock.
+        # ``timeout`` indicates a maximum life for the lock.
+        # some procedures here can take a few seconds
+        # 30s to try acquiring the lock should be enough
+        with cache.lock(key, blocking_timeout=30, timeout=60 * 60 * 24) as lock:
             yield
-    finally:
-        pass
+    except LockError as e:
+        logger.exception(f"Couldn't lock cache for key '{key}'. Failed with: {e}")
+    else:
+        if lock.locked():
+            lock.release()
 
 
 @app.task
+@log_start_and_end
 def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
-    logger.info("registration_xlsx_import_task start")
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
@@ -52,13 +59,10 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
         ).update(status=RegistrationDataImport.IMPORT_ERROR)
         raise
 
-    logger.info("registration_xlsx_import_task end")
-
 
 @app.task
+@log_start_and_end
 def registration_kobo_import_task(registration_data_import_id, import_data_id, business_area):
-    logger.info("registration_kobo_import_task start")
-
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
@@ -80,7 +84,7 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
             from sentry_sdk import capture_exception
 
             err = capture_exception(e)
-        except:
+        except Exception:
             err = "N/A"
 
         RegistrationDataImportDatahub.objects.filter(
@@ -93,13 +97,10 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
 
         raise
 
-    logger.info("registration_kobo_import_task end")
-
 
 @app.task
+@log_start_and_end
 def registration_kobo_import_hourly_task():
-    logger.info("registration_kobo_import_hourly_task start")
-
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.models import (
@@ -126,13 +127,10 @@ def registration_kobo_import_hourly_task():
         logger.exception(e)
         raise
 
-    logger.info("registration_kobo_import_hourly_task end")
-
 
 @app.task
+@log_start_and_end
 def registration_xlsx_import_hourly_task():
-    logger.info("registration_xlsx_import_hourly_task start")
-
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.models import (
@@ -159,15 +157,13 @@ def registration_xlsx_import_hourly_task():
         logger.exception(e)
         raise
 
-    logger.info("registration_xlsx_import_hourly_task end")
-
 
 @app.task
+@log_start_and_end
 def merge_registration_data_import_task(registration_data_import_id):
     logger.info(
         f"merge_registration_data_import_task started for registration_data_import_id: {registration_data_import_id}"
     )
-
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
@@ -185,10 +181,9 @@ def merge_registration_data_import_task(registration_data_import_id):
         f"merge_registration_data_import_task finished for registration_data_import_id: {registration_data_import_id}"
     )
 
-
 @app.task(queue="priority")
+@log_start_and_end
 def rdi_deduplication_task(registration_data_import_id):
-    logger.info("rdi_deduplication_task start")
 
     try:
         from hct_mis_api.apps.registration_datahub.models import (
@@ -210,12 +205,10 @@ def rdi_deduplication_task(registration_data_import_id):
         ).update(status=RegistrationDataImport.IMPORT_ERROR)
         raise
 
-    logger.info("rdi_deduplication_task end")
-
 
 @app.task
+@log_start_and_end
 def pull_kobo_submissions_task(import_data_id):
-    logger.info("pull_kobo_submissions_task start")
     from hct_mis_api.apps.registration_datahub.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
@@ -233,13 +226,11 @@ def pull_kobo_submissions_task(import_data_id):
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(e))
         raise
-    finally:
-        logger.info("pull_kobo_submissions_task end")
 
 
 @app.task
+@log_start_and_end
 def validate_xlsx_import_task(import_data_id):
-    logger.info("validate_xlsx_import_task start")
     from hct_mis_api.apps.registration_datahub.models import ImportData
 
     import_data = ImportData.objects.get(id=import_data_id)
@@ -257,66 +248,68 @@ def validate_xlsx_import_task(import_data_id):
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
         raise
-    finally:
-        logger.info("validate_xlsx_import_task end")
 
 
 @app.task
+@log_start_and_end
 def process_flex_records_task(rdi_id, records_ids):
-    logger.info("process_flex_records start")
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
 
     FlexRegistrationService().process_records(rdi_id, records_ids)
-    logger.info("process_flex_records end")
 
 
 @app.task
+@log_start_and_end
 def extract_records_task(max_records=500):
-    logger.info("extract_records_task start")
-
     records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     extract(records_ids)
-    logger.info("extract_records_task end")
 
 
 @app.task
+@log_start_and_end
 def fresh_extract_records_task(records_ids=None):
-    logger.info("fresh_extract_records_task start")
-
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     extract(records_ids)
 
-    logger.info("fresh_extract_records_task end")
 
-
-def process_all_records(registration_id: int, page_size: int, template: str, **filters):
+@app.task
+@log_start_and_end
+def automate_rdi_creation_task(
+    registration_id: int,
+    page_size: int,
+    template: str = "ukraine rdi {date}",
+    auto_merge=False,
+    fix_tax_id=False,
+    **filters,
+):
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
-
     try:
         with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
             try:
                 service = FlexRegistrationService()
 
-                all_records_ids = (
-                    Record.objects.filter(registration=registration_id, **filters)
-                    .exclude(status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR])
-                    .values_list("id", flat=True)
+                qs = Record.objects.filter(registration=registration_id, **filters).exclude(
+                    status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
                 )
+                if fix_tax_id:
+                    check_and_set_taxid(qs)
+                all_records_ids = qs.values_list("id", flat=True)
                 if len(all_records_ids) == 0:
-                    return None
+                    return ["No Records found", 0]
 
                 splitted_record_ids = [
-                    all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
+                    all_records_ids[i: i + page_size] for i in range(0, len(all_records_ids), page_size)
                 ]
                 output = []
-                for records_ids in splitted_record_ids:
+                for page, records_ids in enumerate(splitted_record_ids, 1):
                     rdi_name = template.format(
-                        date=datetime.datetime.now(),
+                        page=page,
+                        date=timezone.now(),
                         registration_id=registration_id,
                         page_size=page_size,
                         records=len(records_ids),
@@ -324,6 +317,9 @@ def process_all_records(registration_id: int, page_size: int, template: str, **f
                     rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
                     service.process_records(rdi_id=rdi.id, records_ids=records_ids)
                     output.append([rdi_name, len(records_ids)])
+                    if auto_merge:
+                        merge_registration_data_import_task.delay(rdi.id)
+
                 return output
             except Exception as e:
                 logger.exception(e)
@@ -333,65 +329,59 @@ def process_all_records(registration_id: int, page_size: int, template: str, **f
     return None
 
 
-@app.task
-def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}", **filters):
-    result = process_all_records(registration_id=registration_id, page_size=page_size, template=template, **filters)
-    if config.AUTO_MERGE_AFTER_AUTO_RDI_IMPORT:
-        merge_registration_data_import_task.delay(registration_id)
-    return result
+def check_and_set_taxid(queryset):
+    qs = queryset.filter(unique_field__isnull=True)
+    results = {"updated": [], "processed": []}
+    for record in qs.all():
+        try:
+            for individual in record.fields["individuals"]:
+                if individual["role_i_c"] == "y":
+                    record.unique_field = individual["tax_id_no_i_c"]
+                    record.save()
+                    results["updated"].append(record.pk)
+                    break
+            results["processed"].append(record.pk)
+
+        except Exception as e:
+            results[record.pk] = f"{e.__class__.__name__}: {str(e)}"
+    return results
 
 
 @app.task
 def automate_registration_diia_import_task(page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters):
-    logger.info("automate_registration_diia_import_task start")
-
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
 
-    try:
-        with locked_cache(key="automate_rdi_diia_creation_task"):
-            try:
-                service = RdiDiiaCreateTask()
-                rdi_name = template.format(
-                    date=datetime.datetime.now(),
-                    page_size=page_size,
-                )
-                rdi = service.create_rdi(None, rdi_name)
-                service.execute(rdi.id, diia_hh_count=page_size)
-                return [rdi_name, page_size]
-            except Exception as e:
-                logger.exception(e)
-    except LockError as e:
-        logger.exception(e)
-        return []
-
-    logger.info("automate_registration_diia_import_task end")
+    with locked_cache(key="automate_rdi_diia_creation_task"):
+        try:
+            service = RdiDiiaCreateTask()
+            rdi_name = template.format(
+                date=timezone.now(),
+                page_size=page_size,
+            )
+            rdi = service.create_rdi(None, rdi_name)
+            service.execute(rdi.id, diia_hh_count=page_size)
+            return [rdi_name, page_size]
+        except Exception:
+            raise
 
 
 @app.task
 def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters):
-    logger.info("registration_diia_import_task start")
-
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
 
-    try:
-        with locked_cache(key="registration_diia_import_task"):
-            try:
-                service = RdiDiiaCreateTask()
-                rdi_name = template.format(
-                    date=datetime.datetime.now(),
-                    page_size=len(diia_hh_ids),
-                )
-                rdi = service.create_rdi(None, rdi_name)
-                service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
-                return [rdi_name, len(diia_hh_ids)]
-            except Exception as e:
-                logger.exception(e)
-    except LockError as e:
-        logger.exception(e)
-        return []
-
-    logger.info("registration_diia_import_task end")
+    with locked_cache(key="registration_diia_import_task"):
+        try:
+            service = RdiDiiaCreateTask()
+            rdi_name = template.format(
+                date=timezone.now(),
+                page_size=len(diia_hh_ids),
+            )
+            rdi = service.create_rdi(None, rdi_name)
+            service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
+            return [rdi_name, len(diia_hh_ids)]
+        except Exception:
+            raise

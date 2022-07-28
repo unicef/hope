@@ -1,14 +1,14 @@
 import logging
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.utils.logs import log_start_and_end
 
 logger = logging.getLogger(__name__)
 
 
 @app.task
+@log_start_and_end
 def report_export_task(report_id):
-    logger.info("report_export_task start")
-
     try:
         from hct_mis_api.apps.reporting.services.generate_report_service import (
             GenerateReportService,
@@ -22,13 +22,10 @@ def report_export_task(report_id):
         logger.exception(e)
         raise
 
-    logger.info("report_export_task end")
-
 
 @app.task
+@log_start_and_end
 def dashboard_report_export_task(dashboard_report_id):
-    logger.info("dashboard_report_export_task start")
-
     try:
         from hct_mis_api.apps.reporting.services.generate_dashboard_report_service import (
             GenerateDashboardReportService,
@@ -41,5 +38,3 @@ def dashboard_report_export_task(dashboard_report_id):
     except Exception as e:
         logger.exception(e)
         raise
-
-    logger.info("dashboard_report_export_task end")

@@ -1,3 +1,4 @@
+from typing import Sequence
 from django.db import transaction
 
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
@@ -18,7 +19,7 @@ from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge 
 
 class DeduplicateAndCheckAgainstSanctionsListTask:
     @transaction.atomic(using="default")
-    def execute(self, should_populate_index, registration_data_import_id, individuals_ids):
+    def execute(self, should_populate_index: bool, registration_data_import_id: str, individuals_ids: Sequence[str]):
         registration_data_import = (
             RegistrationDataImport.objects.get(id=registration_data_import_id) if registration_data_import_id else None
         )

@@ -34,6 +34,7 @@ from hct_mis_api.apps.household.models import (
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
+    ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     UNIQUE,
@@ -265,6 +266,11 @@ class ImportedIndividual(TimeStampedUUIDModel):
     def phone_no_alternative_valid(self):
         return is_right_phone_number_format(str(self.phone_no_alternative))
 
+    @property
+    def role(self):
+        role = self.households_and_roles.first()
+        return role.role if role is not None else ROLE_NO_ROLE
+
 
 class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
     individual = models.ForeignKey(
@@ -307,6 +313,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         null=True,
     )
     import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
+    # TODO: Add business_area FK field instead
     business_area_slug = models.CharField(max_length=250, blank=True)
 
     class Meta:

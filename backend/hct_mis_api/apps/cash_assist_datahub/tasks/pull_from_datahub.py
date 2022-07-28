@@ -185,7 +185,6 @@ class PullFromDatahubTask:
                 dh_payment_record,
                 PullFromDatahubTask.MAPPING_PAYMENT_RECORD_DICT,
             )
-
             payment_record_args["business_area"] = self.get_business_area_for_cash_assist_code(
                 dh_payment_record.business_area
             )
@@ -207,9 +206,6 @@ class PullFromDatahubTask:
             household_ids.append(payment_record.household_id)
             if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
                 payment_record.household.programs.add(payment_record.cash_plan.program)
-        self.save_total_cash_received_in_household(household_ids)
-
-    def save_total_cash_received_in_household(self, household_ids):
         handle_total_cash_in_specific_households(household_ids)
 
     def copy_service_providers(self, session):
@@ -219,7 +215,7 @@ class PullFromDatahubTask:
                 dh_service_provider,
                 PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
             )
-            service_provider_args["business_area"] =self.get_business_area_for_cash_assist_code(
+            service_provider_args["business_area"] = self.get_business_area_for_cash_assist_code(
                 dh_service_provider.business_area
             )
             service_provider_args["country"] = CountryCodeMap.objects.get_iso3_code(dh_service_provider.country)

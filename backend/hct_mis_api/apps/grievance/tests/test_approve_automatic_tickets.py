@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from django.utils import timezone
+
 from django_countries.fields import Country
 from parameterized import parameterized
 
@@ -154,7 +156,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             "name_original_script": "",
             "un_list_type": "Al-Qaida",
             "reference_number": "QDi.135",
-            "listed_on": datetime(2003, 11, 3, 0, 0),
+            "listed_on": timezone.make_aware(datetime(2003, 11, 3, 0, 0)),
             "comments": "Father’s name is Sheikh Ibrahim Ali Kaskar, mother’s name is Amina Bi, wife’s "
             "name is Mehjabeen Shaikh. International arrest warrant issued by the Government of India. "
             "Review pursuant to Security Council resolution 1822 (2008) was concluded on 20 May"
@@ -272,8 +274,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+                "with_permission",
+                [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
             ),
             ("without_permission", []),
         ]
