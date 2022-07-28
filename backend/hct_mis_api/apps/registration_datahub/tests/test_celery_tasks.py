@@ -1,22 +1,29 @@
 import base64
-import datetime
+from django.utils import timezone
 import json
 from contextlib import contextmanager
-from django.test import TestCase
 from pathlib import Path
-from unittest.mock import MagicMock, patch
-from constance import config
+from unittest.mock import MagicMock, Mock, patch
 
 from django.conf import settings
+from django.test import TestCase
+
+from constance import config
 from django_countries.fields import Country
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import ImportedDocumentType, Record, ImportedIndividual
-from hct_mis_api.apps.registration_datahub.celery_tasks import automate_rdi_creation_task
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    automate_rdi_creation_task,
+)
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedDocumentType,
+    ImportedIndividual,
+    Record,
+)
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
 )
-from hct_mis_api.apps.core.models import BusinessArea
 
 
 def create_record(registration, status):
@@ -74,7 +81,7 @@ def create_record(registration, status):
     return Record.objects.create(
         registration=registration,
         status=status,
-        timestamp=datetime.datetime.now(),
+        timestamp=timezone.now(),
         data=None,
         source_id=1,
         fields=fields,
@@ -102,10 +109,7 @@ def create_ukraine_business_area():
 def run_automate_rdi_creation_task(*args, **kwargs):
     @contextmanager
     def do_nothing_cache(*_args, **_kwargs):
-        try:
-            yield
-        finally:
-            pass
+        yield Mock()
 
     with patch(
         "hct_mis_api.apps.registration_datahub.celery_tasks.locked_cache",
@@ -125,7 +129,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
     def test_successful_run_without_records_to_import(self):
         result = run_automate_rdi_creation_task(registration_id=123, page_size=1)
-        assert result is None
+        assert result[0] == "No Records found"
 
     def test_not_running_with_record_status_not_to_import(self):
         create_ukraine_business_area()
@@ -138,7 +142,7 @@ class TestAutomatingRDICreationTask(TestCase):
         result = run_automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
-        assert result is None
+        assert result[0] == "No Records found"
 
     def test_successful_run_with_records_to_import(self):
         create_ukraine_business_area()
@@ -182,12 +186,42 @@ class TestAutomatingRDICreationTask(TestCase):
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
 
-        with patch("hct_mis_api.apps.registration_datahub.celery_tasks.config",) as mocked_config, patch(
+        with patch(
             "hct_mis_api.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
         ) as merge_task_mock:
-            mocked_config.AUTO_MERGE_AFTER_AUTO_RDI_IMPORT = True
             result = run_automate_rdi_creation_task(
-                registration_id=registration, page_size=page_size, template="some template {date} {records}"
+                registration_id=registration,
+                page_size=page_size,
+                template="some template {date} {records}",
+                auto_merge=True,
             )
             assert len(result) == 4
             assert merge_task_mock.called
+
+    def test_successful_run_and_fix_task_id(self):
+        create_ukraine_business_area()
+        create_imported_document_types(country_code="UA")
+
+        registration = 345
+        amount_of_records = 10
+        page_size = 3
+
+        for _ in range(amount_of_records):
+            create_record(registration=registration, status=Record.STATUS_TO_IMPORT)
+
+        assert Record.objects.count() == amount_of_records
+        assert RegistrationDataImport.objects.count() == 0
+        assert ImportedIndividual.objects.count() == 0
+
+        with patch(
+            "hct_mis_api.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
+        ) as merge_task_mock:
+            result = run_automate_rdi_creation_task(
+                registration_id=registration,
+                page_size=page_size,
+                template="some template {date} {records}",
+                fix_tax_id=True,
+            )
+        assert len(result) == 4
+        assert not merge_task_mock.called  # auto_merge was not set ; defaults to false
+        assert set(Record.objects.values_list("unique_field", flat=True)) == {"123123123"}

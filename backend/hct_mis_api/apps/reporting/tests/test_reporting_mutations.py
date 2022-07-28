@@ -1,4 +1,5 @@
-import datetime
+from datetime import timedelta
+from django.utils import timezone
 
 from parameterized import parameterized
 
@@ -85,7 +86,7 @@ class TestReportingMutation(APITestCase):
                 },
                 [{"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]}],
             )
-        report_updated_at = datetime.datetime.now() - datetime.timedelta(minutes=31)
+        report_updated_at = timezone.now() - timedelta(minutes=31)
         cls.report = ReportFactory(business_area=cls.business_area, status=Report.IN_PROGRESS, report_type=Report.INDIVIDUALS)
         cls.report.update_at = report_updated_at
         cls.report.save()
@@ -199,7 +200,7 @@ class TestReportingMutation(APITestCase):
             },
         )
 
-        self.report.updated_at = datetime.datetime.now() - datetime.timedelta(minutes=29)
+        self.report.updated_at = timezone.now() - timedelta(minutes=29)
         self.report.save()
         self.snapshot_graphql_request(
             request_string=self.RESTART_CREATE_REPORT,

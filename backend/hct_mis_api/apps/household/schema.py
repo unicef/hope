@@ -423,6 +423,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
     class Meta:
         model = Individual
+        exclude = ("vector_column", )
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

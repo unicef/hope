@@ -1,5 +1,5 @@
 import base64
-import datetime
+from django.utils import timezone
 import logging
 
 from django import forms
@@ -381,7 +381,7 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         service = FlexRegistrationService()
         try:
             records_ids = queryset.values_list("id", flat=True)
-            rdi = service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
+            rdi = service.create_rdi(request.user, f"ukraine rdi {timezone.now()}")
 
             process_flex_records_task.delay(rdi.id, list(records_ids))
             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
