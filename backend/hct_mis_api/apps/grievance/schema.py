@@ -15,11 +15,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.core_fields_attributes import (
-    TYPE_IMAGE,
-    FieldFactory,
-    Scope,
-)
+from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
@@ -81,6 +77,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
     priority = graphene.Int()
     urgency = graphene.Int()
+    postpone_deduplication = graphene.Boolean()
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
