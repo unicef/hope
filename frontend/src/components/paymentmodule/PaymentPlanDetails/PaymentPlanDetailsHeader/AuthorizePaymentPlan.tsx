@@ -129,7 +129,7 @@ export const AuthorizePaymentPlan = ({
                     CANCEL
                   </Button>
                   <LoadingButton
-                    loading={true}
+                    loading
                     type='submit'
                     color='primary'
                     variant='contained'

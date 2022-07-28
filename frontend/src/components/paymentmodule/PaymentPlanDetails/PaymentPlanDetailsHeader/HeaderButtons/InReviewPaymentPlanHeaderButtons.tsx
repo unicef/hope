@@ -1,3 +1,4 @@
+import { Box } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
@@ -20,9 +21,9 @@ export function InReviewPaymentPlanHeaderButtons({
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canReject && <RejectPaymentPlan paymentPlanId='33333' />}
       {canMarkAsReviewed && <MarkAsReviewedPaymentPlan paymentPlanId='33333' />}
-    </div>
+    </Box>
   );
 }
