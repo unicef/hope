@@ -16,6 +16,7 @@ import { handleValidationErrors } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
   useCreatePpMutation,
+  useCurrencyChoicesQuery,
 } from '../../../__generated__/graphql';
 
 const today = new Date();
@@ -41,7 +42,14 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     variables: { businessArea, paymentPlanApplicable: true },
   });
 
-  if (loadingTargetPopulations) return <LoadingComponent />;
+  const {
+    data: currencyChoicesData,
+    loading: loadingCurrencyChoices,
+  } = useCurrencyChoicesQuery();
+
+  if (loadingTargetPopulations || loadingCurrencyChoices)
+    return <LoadingComponent />;
+  if (!allTargetPopulationsData || !currencyChoicesData) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
@@ -133,7 +141,10 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
           />
-          <PaymentPlanParameters values={values} />
+          <PaymentPlanParameters
+            currencyChoicesData={currencyChoicesData.currencyChoices}
+            values={values}
+          />
         </Form>
       )}
     </Formik>
