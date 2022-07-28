@@ -61,6 +61,7 @@ from hct_mis_api.apps.utils.schema import (
     SectionTotalNode,
     TableTotalCashTransferred,
 )
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 
 
 class RapidProFlowResult(graphene.ObjectType):
@@ -346,6 +347,8 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
 
+    currency_choices = graphene.List(ChoiceObject)
+
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (
             PaymentVerification.objects.filter(
@@ -579,3 +582,6 @@ class Query(graphene.ObjectType):
         ]
 
         return {"labels": labels, "datasets": datasets}
+
+    def resolve_currency_choices(self, *args, **kwargs):
+        return to_choice_object([c for c in CURRENCY_CHOICES if c[0] != ""])
