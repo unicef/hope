@@ -385,7 +385,22 @@ class Migration(migrations.Migration):
                         validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
                     ),
                 ),
-                ("status", django_fsm.FSMField(db_index=True, default="OPEN", max_length=50)),
+                (
+                    "status",
+                    django_fsm.FSMField(
+                        choices=[
+                            ("OPEN", "Open"),
+                            ("LOCKED", "Locked"),
+                            ("IN_APPROVAL", "In Approval"),
+                            ("IN_AUTHORIZATION", "In Authorization"),
+                            ("IN_REVIEW", "In Review"),
+                            ("ACCEPTED", "Accepted"),
+                        ],
+                        db_index=True,
+                        default="OPEN",
+                        max_length=50,
+                    ),
+                ),
                 (
                     "unicef_id",
                     django.contrib.postgres.fields.citext.CICharField(blank=True, db_index=True, max_length=250),
