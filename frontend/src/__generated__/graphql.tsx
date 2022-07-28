@@ -75,9 +75,19 @@ export type AcceptanceProcessNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum Action {
+  Lock = 'LOCK',
+  Unlock = 'UNLOCK',
+  SendForApproval = 'SEND_FOR_APPROVAL',
+  Approve = 'APPROVE',
+  Authorize = 'AUTHORIZE',
+  Review = 'REVIEW',
+  Reject = 'REJECT'
+}
+
 export type ActionPaymentPlanInput = {
   paymentPlanId: Scalars['ID'],
-  action: PaymentPlanActionType,
+  action: Action,
   comment?: Maybe<Scalars['String']>,
 };
 
@@ -3447,16 +3457,6 @@ export type PaymentDetailsApproveMutation = {
   grievanceTicket?: Maybe<GrievanceTicketNode>,
 };
 
-export enum PaymentPlanActionType {
-  Lock = 'LOCK',
-  Unlock = 'UNLOCK',
-  SendForApproval = 'SEND_FOR_APPROVAL',
-  Approve = 'APPROVE',
-  Authorize = 'AUTHORIZE',
-  Review = 'REVIEW',
-  Reject = 'REJECT'
-}
-
 export enum PaymentPlanCurrency {
   A = 'A_',
   Aed = 'AED',
@@ -3643,7 +3643,7 @@ export type PaymentPlanNode = Node & {
   totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
   totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
   createdBy: UserNode,
-  status: Scalars['String'],
+  status: PaymentPlanStatus,
   unicefId: Scalars['String'],
   targetPopulation: TargetPopulationNode,
   currency: PaymentPlanCurrency,
@@ -3683,6 +3683,15 @@ export type PaymentPlanNodeEdge = {
   node?: Maybe<PaymentPlanNode>,
   cursor: Scalars['String'],
 };
+
+export enum PaymentPlanStatus {
+  Open = 'OPEN',
+  Locked = 'LOCKED',
+  InApproval = 'IN_APPROVAL',
+  InAuthorization = 'IN_AUTHORIZATION',
+  InReview = 'IN_REVIEW',
+  Accepted = 'ACCEPTED'
+}
 
 export enum PaymentRecordDeliveryType {
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
@@ -4091,6 +4100,7 @@ export type Query = {
   allPaymentVerificationLogEntries?: Maybe<PaymentVerificationLogEntryNodeConnection>,
   paymentPlan?: Maybe<PaymentPlanNode>,
   allPaymentPlans?: Maybe<PaymentPlanNodeConnection>,
+  paymentPlanStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   currencyChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   businessArea?: Maybe<BusinessAreaNode>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
@@ -20146,6 +20156,7 @@ export type ResolversTypes = {
   ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
   ReportNode: ResolverTypeWrapper<ReportNode>,
+  PaymentPlanStatus: PaymentPlanStatus,
   PaymentPlanCurrency: PaymentPlanCurrency,
   AcceptanceProcessNodeConnection: ResolverTypeWrapper<AcceptanceProcessNodeConnection>,
   AcceptanceProcessNodeEdge: ResolverTypeWrapper<AcceptanceProcessNodeEdge>,
@@ -20394,7 +20405,7 @@ export type ResolversTypes = {
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
   UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   ActionPaymentPlanInput: ActionPaymentPlanInput,
-  PaymentPlanActionType: PaymentPlanActionType,
+  Action: Action,
   ActionPaymentPlanMutation: ResolverTypeWrapper<ActionPaymentPlanMutation>,
   CreatePaymentPlanInput: CreatePaymentPlanInput,
   CreatePaymentPlanMutation: ResolverTypeWrapper<CreatePaymentPlanMutation>,
@@ -20546,6 +20557,7 @@ export type ResolversParentTypes = {
   ReportNodeConnection: ReportNodeConnection,
   ReportNodeEdge: ReportNodeEdge,
   ReportNode: ReportNode,
+  PaymentPlanStatus: PaymentPlanStatus,
   PaymentPlanCurrency: PaymentPlanCurrency,
   AcceptanceProcessNodeConnection: AcceptanceProcessNodeConnection,
   AcceptanceProcessNodeEdge: AcceptanceProcessNodeEdge,
@@ -20794,7 +20806,7 @@ export type ResolversParentTypes = {
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
   UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount,
   ActionPaymentPlanInput: ActionPaymentPlanInput,
-  PaymentPlanActionType: PaymentPlanActionType,
+  Action: Action,
   ActionPaymentPlanMutation: ActionPaymentPlanMutation,
   CreatePaymentPlanInput: CreatePaymentPlanInput,
   CreatePaymentPlanMutation: CreatePaymentPlanMutation,
@@ -22211,7 +22223,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['PaymentPlanStatus'], ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
   currency?: Resolver<ResolversTypes['PaymentPlanCurrency'], ParentType, ContextType>,
@@ -22450,6 +22462,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allPaymentVerificationLogEntries?: Resolver<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentVerificationLogEntriesArgs, 'businessArea'>>,
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType, RequireFields<QueryPaymentPlanArgs, 'id'>>,
   allPaymentPlans?: Resolver<Maybe<ResolversTypes['PaymentPlanNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentPlansArgs, 'businessArea'>>,
+  paymentPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   currencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
