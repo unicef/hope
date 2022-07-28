@@ -3457,6 +3457,171 @@ export enum PaymentPlanActionType {
   Reject = 'REJECT'
 }
 
+export enum PaymentPlanCurrency {
+  A = 'A_',
+  Aed = 'AED',
+  Afn = 'AFN',
+  All = 'ALL',
+  Amd = 'AMD',
+  Ang = 'ANG',
+  Aoa = 'AOA',
+  Ars = 'ARS',
+  Aud = 'AUD',
+  Awg = 'AWG',
+  Azn = 'AZN',
+  Bam = 'BAM',
+  Bbd = 'BBD',
+  Bdt = 'BDT',
+  Bgn = 'BGN',
+  Bhd = 'BHD',
+  Bif = 'BIF',
+  Bmd = 'BMD',
+  Bnd = 'BND',
+  Bob = 'BOB',
+  Bov = 'BOV',
+  Brl = 'BRL',
+  Bsd = 'BSD',
+  Btn = 'BTN',
+  Bwp = 'BWP',
+  Byn = 'BYN',
+  Bzd = 'BZD',
+  Cad = 'CAD',
+  Cdf = 'CDF',
+  Chf = 'CHF',
+  Clp = 'CLP',
+  Cny = 'CNY',
+  Cop = 'COP',
+  Crc = 'CRC',
+  Cuc = 'CUC',
+  Cup = 'CUP',
+  Cve = 'CVE',
+  Czk = 'CZK',
+  Djf = 'DJF',
+  Dkk = 'DKK',
+  Dop = 'DOP',
+  Dzd = 'DZD',
+  Egp = 'EGP',
+  Ern = 'ERN',
+  Etb = 'ETB',
+  Eur = 'EUR',
+  Fjd = 'FJD',
+  Fkp = 'FKP',
+  Gbp = 'GBP',
+  Gel = 'GEL',
+  Ghs = 'GHS',
+  Gip = 'GIP',
+  Gmd = 'GMD',
+  Gnf = 'GNF',
+  Gtq = 'GTQ',
+  Gyd = 'GYD',
+  Hkd = 'HKD',
+  Hnl = 'HNL',
+  Hrk = 'HRK',
+  Htg = 'HTG',
+  Huf = 'HUF',
+  Idr = 'IDR',
+  Ils = 'ILS',
+  Inr = 'INR',
+  Iqd = 'IQD',
+  Irr = 'IRR',
+  Isk = 'ISK',
+  Jmd = 'JMD',
+  Jod = 'JOD',
+  Jpy = 'JPY',
+  Kes = 'KES',
+  Kgs = 'KGS',
+  Khr = 'KHR',
+  Kmf = 'KMF',
+  Kpw = 'KPW',
+  Krw = 'KRW',
+  Kwd = 'KWD',
+  Kyd = 'KYD',
+  Kzt = 'KZT',
+  Lak = 'LAK',
+  Lbp = 'LBP',
+  Lkr = 'LKR',
+  Lrd = 'LRD',
+  Lsl = 'LSL',
+  Lyd = 'LYD',
+  Mad = 'MAD',
+  Mdl = 'MDL',
+  Mga = 'MGA',
+  Mkd = 'MKD',
+  Mmk = 'MMK',
+  Mnt = 'MNT',
+  Mop = 'MOP',
+  Mru = 'MRU',
+  Mur = 'MUR',
+  Mvr = 'MVR',
+  Mwk = 'MWK',
+  Mxn = 'MXN',
+  Myr = 'MYR',
+  Mzn = 'MZN',
+  Nad = 'NAD',
+  Ngn = 'NGN',
+  Nio = 'NIO',
+  Nok = 'NOK',
+  Npr = 'NPR',
+  Nzd = 'NZD',
+  Omr = 'OMR',
+  Pab = 'PAB',
+  Pen = 'PEN',
+  Pgk = 'PGK',
+  Php = 'PHP',
+  Pkr = 'PKR',
+  Pln = 'PLN',
+  Pyg = 'PYG',
+  Qar = 'QAR',
+  Ron = 'RON',
+  Rsd = 'RSD',
+  Rub = 'RUB',
+  Rwf = 'RWF',
+  Sar = 'SAR',
+  Sbd = 'SBD',
+  Scr = 'SCR',
+  Sdg = 'SDG',
+  Sek = 'SEK',
+  Sgd = 'SGD',
+  Shp = 'SHP',
+  Sll = 'SLL',
+  Sos = 'SOS',
+  Srd = 'SRD',
+  Ssp = 'SSP',
+  Stn = 'STN',
+  Svc = 'SVC',
+  Syp = 'SYP',
+  Szl = 'SZL',
+  Thb = 'THB',
+  Tjs = 'TJS',
+  Tmt = 'TMT',
+  Tnd = 'TND',
+  Top = 'TOP',
+  Try = 'TRY',
+  Ttd = 'TTD',
+  Twd = 'TWD',
+  Tzs = 'TZS',
+  Uah = 'UAH',
+  Ugx = 'UGX',
+  Usd = 'USD',
+  Uyu = 'UYU',
+  Uyw = 'UYW',
+  Uzs = 'UZS',
+  Ves = 'VES',
+  Vnd = 'VND',
+  Vuv = 'VUV',
+  Wst = 'WST',
+  Xaf = 'XAF',
+  Xag = 'XAG',
+  Xau = 'XAU',
+  Xcd = 'XCD',
+  Xof = 'XOF',
+  Xpf = 'XPF',
+  Yer = 'YER',
+  Zar = 'ZAR',
+  Zmw = 'ZMW',
+  Zwl = 'ZWL'
+}
+
 export type PaymentPlanNode = Node & {
    __typename?: 'PaymentPlanNode',
   isRemoved: Scalars['Boolean'],
@@ -3481,7 +3646,7 @@ export type PaymentPlanNode = Node & {
   status: Scalars['String'],
   unicefId: Scalars['String'],
   targetPopulation: TargetPopulationNode,
-  currency: Scalars['String'],
+  currency: PaymentPlanCurrency,
   dispersionStartDate: Scalars['DateTime'],
   dispersionEndDate: Scalars['DateTime'],
   femaleChildrenCount: Scalars['Int'],
@@ -3926,6 +4091,7 @@ export type Query = {
   allPaymentVerificationLogEntries?: Maybe<PaymentVerificationLogEntryNodeConnection>,
   paymentPlan?: Maybe<PaymentPlanNode>,
   allPaymentPlans?: Maybe<PaymentPlanNodeConnection>,
+  currencyChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   businessArea?: Maybe<BusinessAreaNode>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
@@ -8128,6 +8294,17 @@ export type CashAssistUrlPrefixQueryVariables = {};
 export type CashAssistUrlPrefixQuery = (
   { __typename?: 'Query' }
   & Pick<Query, 'cashAssistUrlPrefix'>
+);
+
+export type CurrencyChoicesQueryVariables = {};
+
+
+export type CurrencyChoicesQuery = (
+  { __typename?: 'Query' }
+  & { currencyChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
 );
 
 export type LoggedCheckerQueryVariables = {};
@@ -14171,6 +14348,56 @@ export function useCashAssistUrlPrefixLazyQuery(baseOptions?: ApolloReactHooks.L
 export type CashAssistUrlPrefixQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixQuery>;
 export type CashAssistUrlPrefixLazyQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixLazyQuery>;
 export type CashAssistUrlPrefixQueryResult = ApolloReactCommon.QueryResult<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>;
+export const CurrencyChoicesDocument = gql`
+    query currencyChoices {
+  currencyChoices {
+    name
+    value
+  }
+}
+    `;
+export type CurrencyChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>, 'query'>;
+
+    export const CurrencyChoicesComponent = (props: CurrencyChoicesComponentProps) => (
+      <ApolloReactComponents.Query<CurrencyChoicesQuery, CurrencyChoicesQueryVariables> query={CurrencyChoicesDocument} {...props} />
+    );
+    
+export type CurrencyChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<CurrencyChoicesQuery, CurrencyChoicesQueryVariables> & TChildProps;
+export function withCurrencyChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CurrencyChoicesQuery,
+  CurrencyChoicesQueryVariables,
+  CurrencyChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CurrencyChoicesQuery, CurrencyChoicesQueryVariables, CurrencyChoicesProps<TChildProps>>(CurrencyChoicesDocument, {
+      alias: 'currencyChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCurrencyChoicesQuery__
+ *
+ * To run a query within a React component, call `useCurrencyChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCurrencyChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCurrencyChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCurrencyChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>(CurrencyChoicesDocument, baseOptions);
+      }
+export function useCurrencyChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>(CurrencyChoicesDocument, baseOptions);
+        }
+export type CurrencyChoicesQueryHookResult = ReturnType<typeof useCurrencyChoicesQuery>;
+export type CurrencyChoicesLazyQueryHookResult = ReturnType<typeof useCurrencyChoicesLazyQuery>;
+export type CurrencyChoicesQueryResult = ApolloReactCommon.QueryResult<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>;
 export const LoggedCheckerDocument = gql`
     query LoggedChecker {
   me {
@@ -19919,6 +20146,7 @@ export type ResolversTypes = {
   ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
   ReportNode: ResolverTypeWrapper<ReportNode>,
+  PaymentPlanCurrency: PaymentPlanCurrency,
   AcceptanceProcessNodeConnection: ResolverTypeWrapper<AcceptanceProcessNodeConnection>,
   AcceptanceProcessNodeEdge: ResolverTypeWrapper<AcceptanceProcessNodeEdge>,
   AcceptanceProcessNode: ResolverTypeWrapper<AcceptanceProcessNode>,
@@ -20318,6 +20546,7 @@ export type ResolversParentTypes = {
   ReportNodeConnection: ReportNodeConnection,
   ReportNodeEdge: ReportNodeEdge,
   ReportNode: ReportNode,
+  PaymentPlanCurrency: PaymentPlanCurrency,
   AcceptanceProcessNodeConnection: AcceptanceProcessNodeConnection,
   AcceptanceProcessNodeEdge: AcceptanceProcessNodeEdge,
   AcceptanceProcessNode: AcceptanceProcessNode,
@@ -21985,7 +22214,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   status?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
-  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  currency?: Resolver<ResolversTypes['PaymentPlanCurrency'], ParentType, ContextType>,
   dispersionStartDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   dispersionEndDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   femaleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -22221,6 +22450,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allPaymentVerificationLogEntries?: Resolver<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentVerificationLogEntriesArgs, 'businessArea'>>,
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType, RequireFields<QueryPaymentPlanArgs, 'id'>>,
   allPaymentPlans?: Resolver<Maybe<ResolversTypes['PaymentPlanNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentPlansArgs, 'businessArea'>>,
+  currencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
