@@ -126,16 +126,17 @@ class GrievanceTicketFilter(FilterSet):
     )
 
     def search_filter(self, qs, name, value):
-        values = value.split(" ")
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$") | Q(registration_data_import__name__icontains=value)
-            for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
-                for field, lookups in ticket_fields.items():
-                    for lookup in lookups:
-                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__istartswith": value})
-
-        return qs.filter(q_obj)
+        label, value = tuple(value.split(" "))
+        if label == "ticket_id":
+            q = Q(id=value)
+        elif label == "ticket_hhid":
+            q = Q(household_unicef_id=value)
+        else:
+            ids = Individual.objects.filter(
+                Q(last_name=value) & Q(relationship="HEAD")
+            ).values_list("household__unicef_ud", flat=True)
+            q = Q(household_unicef_id__in=ids)
+        return qs.filter(q)
 
     def fsp_filter(self, qs, name, value):
         if value:

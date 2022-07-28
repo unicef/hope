@@ -15,7 +15,6 @@ def set_last_name(apps, schema_editor):
     individuals = []
     i, count = 0, Individual.objects.all().count() // start + 1
     while i <= count:
-        print(f"{i}/{count}")
         batch = Individual.objects.all().order_by("created_at")[start * i: start * (i + 1)]
         for ind in batch:
             names = ind.full_name.split(" ")
@@ -25,7 +24,6 @@ def set_last_name(apps, schema_editor):
         Individual.objects.bulk_update(individuals, ["last_name"])
         individuals = []
         i += 1
-    print("Finished")
 
 
 def delete_last_name(apps, schema_editor):
@@ -34,7 +32,6 @@ def delete_last_name(apps, schema_editor):
     individuals = []
     i, count = 0, Individual.objects.all().count() // start + 1
     while i <= count:
-        print(f"{i}/{count}")
         batch = Individual.objects.all().order_by("created_at")[start * i: start * (i + 1)]
         for ind in batch:
             ind.last_name = None
@@ -42,13 +39,12 @@ def delete_last_name(apps, schema_editor):
         Individual.objects.bulk_update(individuals, ["last_name"])
         individuals = []
         i += 1
-    print("Finished")
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('household', '0112_migration'),
+        ('household', '0110_migration'),
     ]
 
     operations = [

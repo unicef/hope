@@ -860,7 +860,6 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     class Meta:
         verbose_name = "Individual"
-        indexes = (GinIndex(fields=["vector_column"]), )
 
     def set_sys_field(self, key, value):
         if "sys" not in self.user_fields:
