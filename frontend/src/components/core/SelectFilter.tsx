@@ -1,4 +1,4 @@
-import { InputAdornment } from '@material-ui/core';
+import { Box, InputAdornment } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';
@@ -14,32 +14,39 @@ export const SelectFilter = ({
   children,
   onChange,
   icon = null,
+  borderRadius = '4px',
   ...otherProps
 }): React.ReactElement => {
   return (
-    <StyledFormControl variant='outlined' margin='dense'>
-      <InputLabel>{label}</InputLabel>
-      <Select
-        /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-        // @ts-ignore
-        onChange={onChange}
-        variant='outlined'
-        label={label}
-        InputProps={
-          icon
-            ? {
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    {icon}
-                  </StartInputAdornment>
-                ),
-              }
-            : null
-        }
-        {...otherProps}
-      >
-        {children}
-      </Select>
+    <StyledFormControl
+      borderRadius={borderRadius}
+      variant='outlined'
+      margin='dense'
+    >
+      <Box display='grid'>
+        <InputLabel>{label}</InputLabel>
+        <Select
+          /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+          // @ts-ignore
+          onChange={onChange}
+          variant='outlined'
+          label={label}
+          InputProps={
+            icon
+              ? {
+                  startAdornment: (
+                    <StartInputAdornment position='start'>
+                      {icon}
+                    </StartInputAdornment>
+                  ),
+                }
+              : null
+          }
+          {...otherProps}
+        >
+          {children}
+        </Select>
+      </Box>
     </StyledFormControl>
   );
 };
