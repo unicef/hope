@@ -17,13 +17,12 @@ export const TARGETING_STATES = {
 };
 
 export const PAYMENT_PLAN_STATES = {
-  [PaymentPlanStatus.Lock]: 'Lock',
-  [PaymentPlanStatus.Unlock]: 'Unlock',
-  [PaymentPlanStatus.SendForApproval]: 'Send For Approval',
-  [PaymentPlanStatus.Approve]: 'Approve',
-  [PaymentPlanStatus.Authorize]: 'Authorize',
-  [PaymentPlanStatus.Review]: 'Review',
-  [PaymentPlanStatus.Reject]: 'Reject',
+  [PaymentPlanStatus.Open]: 'Open',
+  [PaymentPlanStatus.Locked]: 'Locked',
+  [PaymentPlanStatus.InApproval]: 'In Approval',
+  [PaymentPlanStatus.InAuthorization]: 'In Authorization',
+  [PaymentPlanStatus.InReview]: 'In Review',
+  [PaymentPlanStatus.Accepted]: 'Accepted',
 };
 
 export const GRIEVANCE_TICKET_STATES = {
