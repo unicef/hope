@@ -1,22 +1,19 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { MarkAsReviewedPaymentPlan } from '../MarkAsReviewedPaymentPlan';
 import { RejectPaymentPlan } from '../RejectPaymentPlan';
 
 export interface InReviewPaymentPlanHeaderButtonsProps {
-  setEditState: Function;
-  canDuplicate: boolean;
-  canRemove: boolean;
-  canEdit: boolean;
-  canLock: boolean;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  canReject: boolean;
+  canMarkAsReviewed: boolean;
 }
 
 export function InReviewPaymentPlanHeaderButtons({
-  setEditState,
-  canDuplicate,
-  canEdit,
-  canLock,
-  canRemove,
+  paymentPlan,
+  canReject,
+  canMarkAsReviewed,
 }: InReviewPaymentPlanHeaderButtonsProps): React.ReactElement {
   const { t } = useTranslation();
   const [openApprove, setOpenApprove] = useState(false);
@@ -24,8 +21,8 @@ export function InReviewPaymentPlanHeaderButtons({
   const [openDelete, setOpenDelete] = useState(false);
   return (
     <div>
-      {canLock && <RejectPaymentPlan paymentPlanId='33333' />}
-      {canLock && <MarkAsReviewedPaymentPlan paymentPlanId='33333' />}
+      {canReject && <RejectPaymentPlan paymentPlanId='33333' />}
+      {canMarkAsReviewed && <MarkAsReviewedPaymentPlan paymentPlanId='33333' />}
     </div>
   );
 }

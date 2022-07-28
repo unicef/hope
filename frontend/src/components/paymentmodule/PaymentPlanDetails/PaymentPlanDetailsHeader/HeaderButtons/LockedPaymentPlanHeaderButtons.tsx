@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
+import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 
 const IconContainer = styled.span`
   button {
@@ -20,20 +21,18 @@ const ButtonContainer = styled.span`
 `;
 
 export interface LockedPaymentPlanHeaderButtonsProps {
-  setEditState: Function;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
   canDuplicate: boolean;
-  canRemove: boolean;
-  canEdit: boolean;
   canLock: boolean;
+  canSendForApproval: boolean;
 }
 
-export function LockedPaymentPlanHeaderButtons({
-  setEditState,
+export const LockedPaymentPlanHeaderButtons = ({
+  paymentPlan,
   canDuplicate,
-  canEdit,
   canLock,
-  canRemove,
-}: LockedPaymentPlanHeaderButtonsProps): React.ReactElement {
+  canSendForApproval,
+}: LockedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
@@ -58,7 +57,7 @@ export function LockedPaymentPlanHeaderButtons({
           </Button>
         </ButtonContainer>
       )}
-      {canLock && (
+      {canSendForApproval && (
         <ButtonContainer>
           <Button
             variant='contained'
@@ -71,4 +70,4 @@ export function LockedPaymentPlanHeaderButtons({
       )}
     </div>
   );
-}
+};
