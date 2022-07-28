@@ -6,6 +6,7 @@ import { AccountBalance } from '@material-ui/icons';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
 import {
+  GrievanceSearchTypes,
   GrievanceStatuses,
   GrievanceTypes,
   GRIEVANCE_CATEGORIES,
@@ -59,15 +60,36 @@ export function GrievancesFilters({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
-          <SearchTextField
-            value={filter.search || ''}
-            label='Search'
-            onChange={(e) => handleFilterChange(e, 'search')}
-            data-cy='filters-search'
-          />
+        <Grid container item xs={5} spacing={0}>
+          <Grid xs={8}>
+            <SearchTextField
+              value={filter.search || ''}
+              label='Search'
+              onChange={(e) => handleFilterChange(e, 'search')}
+              data-cy='filters-search'
+              fullWidth
+              borderRadius='4px 0px 0px 4px'
+            />
+          </Grid>
+          <Grid container xs={4}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange(e, 'searchType')}
+              label={undefined}
+              value={filter.searchType || ''}
+              borderRadius='0px 4px 4px 0px'
+            >
+              {Object.keys(GrievanceSearchTypes).map((key) => (
+                <MenuItem
+                  key={GrievanceSearchTypes[key]}
+                  value={GrievanceSearchTypes[key]}
+                >
+                  {key.replace(/\B([A-Z])\B/g, ' $1')}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </Grid>
         </Grid>
-        <Grid item>
+        <Grid container item xs={2}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
             label={t('Status')}
@@ -76,57 +98,63 @@ export function GrievancesFilters({
             <MenuItem value=''>
               <em>None</em>
             </MenuItem>
-            {choicesData.grievanceTicketStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.grievanceTicketStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid container item xs={2}>
           <SearchTextField
             value={filter.fsp || ''}
             label='FSP'
             icon={<AccountBalance style={{ color: '#5f6368' }} />}
             onChange={(e) => handleFilterChange(e, 'fsp')}
+            fullWidth
           />
         </Grid>
-        <Grid item>
-          <DatePickerFilter
-            topLabel={t('Creation Date')}
-            label='From'
-            onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                createdAtRange: {
-                  ...filter.createdAtRange,
-                  min: moment(date)
-                    .set({ hour: 0, minute: 0 })
-                    .toISOString(),
-                },
-              })
-            }
-            value={filter.createdAtRange.min}
-          />
+        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+          <Grid item xs={6}>
+            <Box display='flex' flexDirection='column'>
+              <FieldLabel>{t('Creation Date')}</FieldLabel>
+              <DatePickerFilter
+                label='From'
+                onChange={(date) =>
+                  onFilterChange({
+                    ...filter,
+                    createdAtRange: {
+                      ...filter.createdAtRange,
+                      min: moment(date)
+                        .set({ hour: 0, minute: 0 })
+                        .toISOString(),
+                    },
+                  })
+                }
+                value={filter.createdAtRange.min}
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={6}>
+            <DatePickerFilter
+              label='To'
+              onChange={(date) =>
+                onFilterChange({
+                  ...filter,
+                  createdAtRange: {
+                    ...filter.createdAtRange,
+                    max: moment(date)
+                      .set({ hour: 23, minute: 59 })
+                      .toISOString(),
+                  },
+                })
+              }
+              value={filter.createdAtRange.max}
+            />
+          </Grid>
         </Grid>
         <Grid item>
-          <DatePickerFilter
-            label='To'
-            onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                createdAtRange: {
-                  ...filter.createdAtRange,
-                  max: moment(date)
-                    .set({ hour: 23, minute: 59 })
-                    .toISOString(),
-                },
-              })
-            }
-            value={filter.createdAtRange.max}
-          />
+          <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
         </Grid>
         <Grid item>
           <SelectFilter
@@ -147,60 +175,58 @@ export function GrievancesFilters({
           </SelectFilter>
         </Grid>
         {filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-        filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
-          <Grid item>
-            <SelectFilter
-              onChange={(e) => handleFilterChange(e, 'issueType')}
-              label='Issue Type'
-              value={filter.issueType || ''}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {issueTypeDict[filter.category].subCategories.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </SelectFilter>
-          </Grid>
-        ) : null}
-
-        <Grid item>
-          <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
-        </Grid>
+          (filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE && (
+            <Grid item>
+              <SelectFilter
+                onChange={(e) => handleFilterChange(e, 'issueType')}
+                label='Issue Type'
+                value={filter.issueType || ''}
+              >
+                <MenuItem value=''>
+                  <em>None</em>
+                </MenuItem>
+                {issueTypeDict[filter.category].subCategories.map((item) => {
+                  return (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  );
+                })}
+              </SelectFilter>
+            </Grid>
+          ))}
         <Grid item>
           <AssigneeAutocomplete
             onFilterChange={onFilterChange}
             name='assignedTo'
           />
         </Grid>
-        <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Similarity Score')}</FieldLabel>
-            <TextField
-              value={filter.scoreMin || null}
-              variant='outlined'
-              margin='dense'
-              placeholder='From'
-              onChange={(e) => handleFilterChange(e, 'scoreMin')}
-              type='number'
-            />
-          </Box>
-        </Grid>
-        <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <TextField
-              value={filter.scoreMax || null}
-              variant='outlined'
-              margin='dense'
-              placeholder='To'
-              onChange={(e) => handleFilterChange(e, 'scoreMax')}
-              type='number'
-            />
-          </Box>
+        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+          <Grid item xs={6}>
+            <Box display='flex' flexDirection='column'>
+              <FieldLabel>{t('Similarity Score')}</FieldLabel>
+              <TextField
+                value={filter.scoreMin || null}
+                variant='outlined'
+                margin='dense'
+                placeholder='From'
+                onChange={(e) => handleFilterChange(e, 'scoreMin')}
+                type='number'
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={6}>
+            <Box display='flex' flexDirection='column'>
+              <TextField
+                value={filter.scoreMax || null}
+                variant='outlined'
+                margin='dense'
+                placeholder='To'
+                onChange={(e) => handleFilterChange(e, 'scoreMax')}
+                type='number'
+              />
+            </Box>
+          </Grid>
         </Grid>
         <Grid item>
           <RdiAutocomplete
@@ -208,7 +234,7 @@ export function GrievancesFilters({
             name='registrationDataImport'
           />
         </Grid>
-        <Grid item>
+        <Grid item container xs={2}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'priority')}
             label={t('Priority')}
@@ -226,7 +252,7 @@ export function GrievancesFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item container xs={2}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'urgency')}
             label={t('Urgency')}
@@ -244,17 +270,17 @@ export function GrievancesFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item container xs={2}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'grievanceStatus')}
             label={undefined}
             value={filter.grievanceStatus || ''}
           >
             <MenuItem value={GrievanceStatuses.Active}>
-              <em>{t('Active Tickets')}</em>
+              {t('Active Tickets')}
             </MenuItem>
             <MenuItem value={GrievanceStatuses.All}>
-              <em>{t('All Tickets')}</em>
+              {t('All Tickets')}
             </MenuItem>
           </SelectFilter>
         </Grid>
