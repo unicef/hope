@@ -1,11 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from hct_mis_api.apps.registration_datahub.models import ImportedDocument, ImportedHousehold
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, Document, Household
 from hct_mis_api.apps.household.serializers import serialize_by_household, serialize_by_individual
 from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
 from hct_mis_api.apps.core.models import BusinessArea
-from rest_framework.response import Response
+from hct_mis_api.apps.utils.profiling import profiling
 
 
 def get_individual(tax_id, business_area_code):
@@ -85,6 +87,7 @@ def get_household_or_individual(tax_id, registration_id, business_area_code):
 class HouseholdStatusView(APIView):
     permission_classes = (IsAuthenticated,)
 
+    @profiling(name="Household status")
     def get(self, request):
         query_params = request.query_params
 

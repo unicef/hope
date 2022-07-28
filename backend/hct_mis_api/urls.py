@@ -49,6 +49,7 @@ api_patterns = [
     path(
         "download-cash-plan-payment-verification/<str:verification_id>",
         hct_mis_api.apps.payment.views.download_cash_plan_payment_verification,
+        name="download-cash-plan-payment-verification"
     ),
     path(
         "download-sanction-template",
@@ -77,6 +78,9 @@ api_patterns = [
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
     path("hh-status", hct_mis_api.apps.household.views.HouseholdStatusView.as_view()),
 ]
+
+if settings.PROFILING:
+    api_patterns.append(path("silk/", include("silk.urls", namespace="silk")))
 
 urlpatterns = (
     [path("", homepage), path("_health", homepage), path("api/", include(api_patterns))]
