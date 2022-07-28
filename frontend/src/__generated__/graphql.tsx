@@ -8076,7 +8076,7 @@ export type GrievanceTicketQuery = (
   { __typename?: 'Query' }
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
-    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency'>
+    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'postponeDeduplication' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency'>
     & { createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -14700,6 +14700,7 @@ export const GrievanceTicketDocument = gql`
     category
     subCategory
     consent
+    postponeDeduplication
     createdBy {
       id
       firstName
