@@ -248,13 +248,13 @@ export const GrievanceDetailsToolbar = ({
       variant='contained'
       onClick={() =>
         confirm({
-          title: 'Close ticket',
+          title: t('Close ticket'),
           extraContent:
             ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
               ? closingConfirmationText
               : getClosingConfirmationExtraText(),
           content: getClosingConfirmationText(),
-          continueText: 'close ticket',
+          continueText: t('close ticket'),
         }).then(() => {
           changeState(GRIEVANCE_TICKET_STATES.CLOSED);
         })

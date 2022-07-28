@@ -782,6 +782,7 @@ export type CreateGrievanceTicketInput = {
   extras?: Maybe<CreateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
+  postponeDeduplication?: Maybe<Scalars['Boolean']>,
 };
 
 export type CreateGrievanceTicketMutation = {
@@ -1130,6 +1131,7 @@ export type GrievanceTicketNode = Node & {
   householdUnicefId?: Maybe<Scalars['String']>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
+  postponeDeduplication?: Maybe<Scalars['Boolean']>,
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -5734,6 +5736,7 @@ export type UpdateGrievanceTicketInput = {
   extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
+  postponeDeduplication?: Maybe<Scalars['Boolean']>,
 };
 
 export type UpdateGrievanceTicketMutation = {
@@ -20790,6 +20793,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   householdUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   priority?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   urgency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  postponeDeduplication?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
