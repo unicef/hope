@@ -346,6 +346,7 @@ class Query(graphene.ObjectType):
         filterset_class=PaymentPlanFilter,
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
+    payment_plan_status_choices = graphene.List(ChoiceObject)
 
     currency_choices = graphene.List(ChoiceObject)
 
@@ -585,3 +586,6 @@ class Query(graphene.ObjectType):
 
     def resolve_currency_choices(self, *args, **kwargs):
         return to_choice_object([c for c in CURRENCY_CHOICES if c[0] != ""])
+
+    def resolve_payment_plan_status_choices(self, info, **kwargs):
+        return to_choice_object(PaymentPlan.Status.choices)
