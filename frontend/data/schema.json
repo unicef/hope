@@ -3048,6 +3048,22 @@
             "deprecationReason": null
           },
           {
+            "name": "paymentPlanStatusChoices",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ChoiceObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "currencyChoices",
             "description": null,
             "args": [],
@@ -17829,8 +17845,8 @@
               "kind": "NON_NULL",
               "name": null,
               "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
+                "kind": "ENUM",
+                "name": "PaymentPlanStatus",
                 "ofType": null
               }
             },
@@ -26876,6 +26892,53 @@
           }
         ],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "PaymentPlanStatus",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "OPEN",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "LOCKED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "IN_APPROVAL",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "IN_AUTHORIZATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "IN_REVIEW",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ACCEPTED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
         "possibleTypes": null
       },
       {
@@ -53003,7 +53066,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "PaymentPlanActionType",
+                "name": "Action",
                 "ofType": null
               }
             },
@@ -53026,7 +53089,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "PaymentPlanActionType",
+        "name": "Action",
         "description": null,
         "fields": null,
         "inputFields": null,

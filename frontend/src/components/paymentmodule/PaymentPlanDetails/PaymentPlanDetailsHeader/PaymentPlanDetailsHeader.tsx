@@ -6,10 +6,8 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import {
-  decodeIdString,
   paymentPlanStatusMapping,
-  targetPopulationStatusMapping,
-  targetPopulationStatusToColor,
+  paymentPlanStatusToColor,
 } from '../../../../utils/utils';
 import { StatusBox } from '../../../core/StatusBox';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
@@ -127,7 +125,7 @@ export const PaymentPlanDetailsHeader = ({
           <StatusWrapper>
             <StatusBox
               status={paymentPlan.status}
-              statusToColor={targetPopulationStatusToColor}
+              statusToColor={paymentPlanStatusToColor}
               statusNameMapping={paymentPlanStatusMapping}
             />
           </StatusWrapper>
