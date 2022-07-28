@@ -1,3 +1,5 @@
+from django.db import transaction
+from django.db.models import Count
 from django.utils import timezone
 import logging
 from contextlib import contextmanager
@@ -6,9 +8,13 @@ from django.core.cache import cache
 from redis.exceptions import LockError
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.household.models import Document
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.utils.logs import log_start_and_end
+
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 logger = logging.getLogger(__name__)
 
@@ -181,6 +187,7 @@ def merge_registration_data_import_task(registration_data_import_id):
         f"merge_registration_data_import_task finished for registration_data_import_id: {registration_data_import_id}"
     )
 
+
 @app.task(queue="priority")
 @log_start_and_end
 def rdi_deduplication_task(registration_data_import_id):
@@ -288,6 +295,7 @@ def automate_rdi_creation_task(
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
+
     try:
         with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
             try:
@@ -303,7 +311,7 @@ def automate_rdi_creation_task(
                     return ["No Records found", 0]
 
                 splitted_record_ids = [
-                    all_records_ids[i: i + page_size] for i in range(0, len(all_records_ids), page_size)
+                    all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
                 ]
                 output = []
                 for page, records_ids in enumerate(splitted_record_ids, 1):
@@ -384,4 +392,29 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
             service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
             return [rdi_name, len(diia_hh_ids)]
         except Exception:
+            raise
+
+
+@app.task
+def deduplicate_documents():
+    with locked_cache(key="deduplicate_documents"):
+        with transaction.atomic():
+            grouped_rdi = (
+                Document.objects.filter(status=Document.STATUS_PENDING)
+                .values("individual__registration_data_import")
+                .annotate(count=Count("individual__registration_data_import"))
+                .order_by("-individual__registration_data_import__created_at")
+            )
+            rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
+            for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids):
+                print(rdi)
+                DeduplicateTask.hard_deduplicate_documents(
+                    Document.objects.filter(status=Document.STATUS_PENDING, individual__registration_data_import=rdi),
+                    registration_data_import=rdi,
+                )
+            DeduplicateTask.hard_deduplicate_documents(
+                Document.objects.filter(status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True),
+                registration_data_import=rdi,
+            )
+            import ipdb;ipdb.set_trace()
             raise
