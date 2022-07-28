@@ -9,7 +9,7 @@ from hct_mis_api.apps.household.models import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
 )
-from hct_mis_api.apps.utils.models import AbstractSession
+from hct_mis_api.apps.utils.models import AbstractSession, UnicefIdentifiedModel
 
 
 class Session(AbstractSession):
@@ -24,10 +24,9 @@ class SessionModel(models.Model):
         abstract = True
 
 
-class Household(SessionModel):
+class Household(SessionModel, UnicefIdentifiedModel):
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
-    unicef_id = models.CharField(max_length=255, null=True)
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
     household_size = models.PositiveIntegerField()
     # registration household id
@@ -44,7 +43,7 @@ class Household(SessionModel):
         unique_together = ("session", "mis_id")
 
 
-class Individual(SessionModel):
+class Individual(SessionModel, UnicefIdentifiedModel):
     INACTIVE = "INACTIVE"
     ACTIVE = "ACTIVE"
     STATUS_CHOICE = ((INACTIVE, "Inactive"), (ACTIVE, "Active"))
@@ -57,7 +56,6 @@ class Individual(SessionModel):
 
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
-    unicef_id = models.CharField(max_length=255, null=True)
     household_mis_id = models.UUIDField(null=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICE, null=True)
     full_name = models.CharField(max_length=255)
@@ -141,7 +139,7 @@ class TargetPopulationEntry(SessionModel):
             "household_mis_id",
             "target_population_mis_id",
         )
-        verbose_name_plural = 'Target Population Entries'
+        verbose_name_plural = "Target Population Entries"
 
 
 class Program(SessionModel):

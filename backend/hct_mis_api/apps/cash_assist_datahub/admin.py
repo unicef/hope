@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 import logging
 
 from django.conf import settings
@@ -30,7 +30,6 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
     TargetPopulation,
 )
 from hct_mis_api.apps.household import models as people
-from hct_mis_api.apps.payment import models as payment
 from hct_mis_api.apps.program import models as program
 from hct_mis_api.apps.targeting import models as targeting
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -60,7 +59,7 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     def run_time(self, obj):
         if obj.status in (obj.STATUS_PROCESSING, obj.STATUS_LOADING):
-            elapsed = datetime.datetime.now() - obj.timestamp
+            elapsed = timezone.now() - obj.timestamp
             if elapsed.total_seconds() >= HOUR:
                 return elapsed
 
@@ -80,7 +79,6 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             msg = f"{e.__class__.__name__}: {str(e)}"
             self.message_user(request, msg, messages.ERROR)
 
-    # @button(label="test import", permission="account.can_debug")
     @button()
     def simulate_import(self, request, pk):
         context = self.get_common_context(request, pk, title="Test Import")
@@ -154,7 +152,7 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         elif obj.status == obj.STATUS_FAILED:
             warnings.append([messages.ERROR, f"Session is failed"])
         elif obj.status == obj.STATUS_PROCESSING:
-            elapsed = datetime.datetime.now() - obj.timestamp
+            elapsed = timezone.now() - obj.timestamp
             if elapsed.total_seconds() >= DAY:
                 warnings.append([messages.ERROR, f"Session is running more than {elapsed}"])
             elif elapsed.total_seconds() >= HOUR:

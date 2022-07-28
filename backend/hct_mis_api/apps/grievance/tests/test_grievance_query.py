@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils import timezone
 
 from parameterized import parameterized
 
@@ -195,9 +196,9 @@ class TestGrievanceQuery(APITestCase):
         cls.individual_2 = individuals[1]
 
         created_at_dates_to_set = {
-            GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
-            GrievanceTicket.STATUS_ON_HOLD: datetime(year=2020, month=7, day=12),
-            GrievanceTicket.STATUS_IN_PROGRESS: datetime(year=2020, month=8, day=22),
+            GrievanceTicket.STATUS_NEW: timezone.make_aware(datetime(year=2020, month=3, day=12)),
+            GrievanceTicket.STATUS_ON_HOLD: timezone.make_aware(datetime(year=2020, month=7, day=12)),
+            GrievanceTicket.STATUS_IN_PROGRESS: timezone.make_aware(datetime(year=2020, month=8, day=22)),
         }
 
         grievances_to_create = (

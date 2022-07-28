@@ -1,4 +1,5 @@
 import datetime
+from django.utils import timezone
 import json
 
 from django.test import TestCase
@@ -106,7 +107,7 @@ class TestUkrainianRegistrationService(TestCase):
         }
         defaults = {
             "registration": 1,
-            "timestamp": datetime.datetime(2022, 4, 1),
+            "timestamp": timezone.make_aware(datetime.datetime(2022, 4, 1)),
         }
 
         files = {
@@ -164,9 +165,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
         self.assertEqual(
-            ImportedDocument.objects.filter(
-                document_number="TESTID", type__type=IDENTIFICATION_TYPE_TAX_ID
-            ).count(),
+            ImportedDocument.objects.filter(document_number="TESTID", type__type=IDENTIFICATION_TYPE_TAX_ID).count(),
             1,
         )
 

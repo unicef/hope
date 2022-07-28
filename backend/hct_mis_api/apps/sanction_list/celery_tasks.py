@@ -1,14 +1,14 @@
 import logging
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.utils.logs import log_start_and_end
 
 logger = logging.getLogger(__name__)
 
 
 @app.task
+@log_start_and_end
 def sync_sanction_list_task():
-    logger.info("sync_sanction_list_task start")
-
     try:
         from hct_mis_api.apps.sanction_list.tasks.load_xml import (
             LoadSanctionListXMLTask,
@@ -19,13 +19,9 @@ def sync_sanction_list_task():
         logger.exception(e)
         raise
 
-    logger.info("sync_sanction_list_task end")
-
 
 @app.task
 def check_against_sanction_list_task(uploaded_file_id, original_file_name):
-    logger.info("check_against_sanction_list_task start")
-
     try:
         from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
             CheckAgainstSanctionListTask,
@@ -38,5 +34,3 @@ def check_against_sanction_list_task(uploaded_file_id, original_file_name):
     except Exception as e:
         logger.exception(e)
         raise
-
-    logger.info("check_against_sanction_list_task end")

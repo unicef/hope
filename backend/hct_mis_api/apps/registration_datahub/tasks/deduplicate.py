@@ -28,10 +28,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedIndividual,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 
 log = logging.getLogger(__name__)
@@ -585,9 +582,9 @@ class DeduplicateTask:
     def deduplicate_individuals(cls, registration_data_import, individuals=None):
         cls._wait_until_health_green()
         if registration_data_import:
-            cls.set_thresholds(registration_data_import)
+            cls.set_thresholds(registration_data_import.business_area)
         else:
-            cls.set_thresholds(individuals[0].registration_data_import)
+            cls.set_thresholds(individuals[0].business_area)
 
         (
             all_duplicates,
@@ -605,9 +602,9 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_individuals_from_other_source(cls, individuals):
+    def deduplicate_individuals_from_other_source(cls, individuals: list[Individual]):
         cls._wait_until_health_green()
-        cls.set_thresholds(individuals[0].registration_data_import)
+        cls.set_thresholds(individuals[0].business_area)
         # cls.business_area = individuals[0].business_area
 
         to_bulk_update_results = []
@@ -665,20 +662,14 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def set_thresholds(cls, registration_data):
-        # registration_data
-        if isinstance(registration_data, RegistrationDataImportDatahub):
-            cls.business_area = BusinessArea.objects.get(slug=registration_data.business_area_slug)
-        elif isinstance(registration_data, RegistrationDataImport):
-            cls.business_area = registration_data.business_area
-        else:
-            raise ValueError(f"Invalid type ({type(registration_data)}) for 'registration_data'")
-
+    def set_thresholds(cls, business_area: BusinessArea):
+        cls.business_area = business_area
         cls.thresholds = Thresholds.from_business_area(cls.business_area)
 
     @classmethod
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
-        cls.set_thresholds(registration_data_import_datahub)
+        business_area = BusinessArea.objects.get(slug=registration_data_import_datahub.business_area_slug)
+        cls.set_thresholds(business_area)
 
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub

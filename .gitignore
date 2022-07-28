@@ -109,6 +109,6 @@ venv.bak/
 
 *.tgz
 
-/.DS_Store
+*.DS_Store
 /.vscode/settings.json
 /HCT-MIS.code-workspace
