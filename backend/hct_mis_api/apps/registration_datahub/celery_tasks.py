@@ -161,6 +161,9 @@ def registration_xlsx_import_hourly_task():
 @app.task
 @log_start_and_end
 def merge_registration_data_import_task(registration_data_import_id):
+    logger.info(
+        f"merge_registration_data_import_task started for registration_data_import_id: {registration_data_import_id}"
+    )
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
@@ -174,6 +177,9 @@ def merge_registration_data_import_task(registration_data_import_id):
         ).update(status=RegistrationDataImport.MERGE_ERROR)
         raise
 
+    logger.info(
+        f"merge_registration_data_import_task finished for registration_data_import_id: {registration_data_import_id}"
+    )
 
 @app.task(queue="priority")
 @log_start_and_end
