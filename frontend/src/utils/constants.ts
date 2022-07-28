@@ -1,4 +1,7 @@
-import { TargetPopulationStatus } from '../__generated__/graphql';
+import {
+  PaymentPlanStatus,
+  TargetPopulationStatus,
+} from '../__generated__/graphql';
 
 export const TARGETING_STATES = {
   NONE: 'None',
@@ -11,6 +14,16 @@ export const TARGETING_STATES = {
   [TargetPopulationStatus.SteficonRun]: 'Steficon Run',
   [TargetPopulationStatus.SteficonCompleted]: 'Steficon Completed',
   [TargetPopulationStatus.SteficonError]: 'Steficon Error',
+};
+
+export const PAYMENT_PLAN_STATES = {
+  [PaymentPlanStatus.Lock]: 'Lock',
+  [PaymentPlanStatus.Unlock]: 'Unlock',
+  [PaymentPlanStatus.SendForApproval]: 'Send For Approval',
+  [PaymentPlanStatus.Approve]: 'Approve',
+  [PaymentPlanStatus.Authorize]: 'Authorize',
+  [PaymentPlanStatus.Review]: 'Review',
+  [PaymentPlanStatus.Reject]: 'Reject',
 };
 
 export const GRIEVANCE_TICKET_STATES = {

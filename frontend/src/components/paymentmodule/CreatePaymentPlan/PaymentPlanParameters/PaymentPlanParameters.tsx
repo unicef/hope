@@ -8,15 +8,20 @@ import { OverviewContainer } from '../../../core/OverviewContainer';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { Title } from '../../../core/Title';
+import { CurrencyChoicesQuery } from '../../../../__generated__/graphql';
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
+interface PaymentPlanParametersProps {
+  values;
+  currencyChoicesData: CurrencyChoicesQuery['currencyChoices'];
+}
+
 export const PaymentPlanParameters = ({
   values,
-}: {
-  values;
-}): React.ReactElement => {
+  currencyChoicesData,
+}: PaymentPlanParametersProps): React.ReactElement => {
   const { t } = useTranslation();
   return (
     <PaperContainer>
@@ -56,10 +61,7 @@ export const PaymentPlanParameters = ({
               variant='outlined'
               label={t('Currency')}
               component={FormikSelectField}
-              choices={[
-                { name: 'USD', value: 'USD' },
-                { name: 'PLN', value: 'PLN' },
-              ]}
+              choices={currencyChoicesData}
               required
             />
           </Grid>

@@ -1,5 +1,4 @@
-import { Box, Button } from '@material-ui/core';
-import { Link, useParams } from 'react-router-dom';
+import { Box } from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,14 +7,12 @@ import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import {
   decodeIdString,
+  paymentPlanStatusMapping,
   targetPopulationStatusMapping,
   targetPopulationStatusToColor,
 } from '../../../../utils/utils';
 import { StatusBox } from '../../../core/StatusBox';
-import {
-  PaymentPlanQuery,
-  TargetPopulationStatus,
-} from '../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
@@ -38,7 +35,6 @@ export const PaymentPlanDetailsHeader = ({
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { id } = useParams();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -47,9 +43,8 @@ export const PaymentPlanDetailsHeader = ({
     },
   ];
 
-  //TODO: Use statuses from node - not in backend yet
   let buttons;
-  switch (paymentPlan?.status) {
+  switch (paymentPlan.status) {
     case 'OPEN':
       buttons = (
         <>
@@ -128,12 +123,12 @@ export const PaymentPlanDetailsHeader = ({
     <PageHeader
       title={
         <Box display='flex' alignItems='center'>
-          {t('Payment Plan')} ID ${decodeIdString(id)}
+          {t('Payment Plan')} ID ${paymentPlan.unicefId}
           <StatusWrapper>
             <StatusBox
-              status={paymentPlan?.status}
+              status={paymentPlan.status}
               statusToColor={targetPopulationStatusToColor}
-              statusNameMapping={targetPopulationStatusMapping}
+              statusNameMapping={paymentPlanStatusMapping}
             />
           </StatusWrapper>
         </Box>
