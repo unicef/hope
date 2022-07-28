@@ -9,14 +9,21 @@ const StyledTextField = styled(TextField)`
   && {
     min-width: 150px;
   }
+  .MuiOutlinedInput-root {
+    border-radius: ${(props) => props.borderRadius};
+  }
 `;
 export const SearchTextField = ({
   icon = null,
+  fullWidth = false,
+  borderRadius = '4px',
   ...props
 }): React.ReactElement => {
   return (
     <StyledTextField
       {...props}
+      fullWidth={fullWidth}
+      borderRadius={borderRadius}
       variant='outlined'
       margin='dense'
       InputProps={{
