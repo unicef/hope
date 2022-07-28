@@ -8,6 +8,7 @@ from django.db.models.functions import Concat
 from constance import config
 from django_countries.fields import Country
 from elasticsearch_dsl import connections
+from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
@@ -819,10 +820,9 @@ class DeduplicateTask:
                 RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
             )
 
-
     @classmethod
     def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
-        documents_to_dedup = [x for x in new_documents if  x.status != Document.STATUS_VALID]
+        documents_to_dedup = [x for x in new_documents if x.status != Document.STATUS_VALID]
         documents_numbers = [x.document_number for x in documents_to_dedup]
         new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in documents_to_dedup]
         new_document_signatures_duplicated_in_batch = [
@@ -863,7 +863,18 @@ class DeduplicateTask:
                     "original": new_document,
                     "possible_duplicates": [],
                 }
-        Document.objects.bulk_update(documents_to_dedup, ("status", "updated_at"))
+
+        try:
+            Document.objects.bulk_update(documents_to_dedup, ("status", "updated_at"))
+        except IntegrityError:
+            log.error(
+                f"Hard Deduplication Documents bulk update error."
+                f"All matching documents in DB: {all_matching_number_documents_signatures}"
+                f"New documents to dedup: {new_document_signatures}"
+                f"new_document_signatures_duplicated_in_batch: {new_document_signatures_duplicated_in_batch}"
+            )
+            raise
+
         for ticket_data in ticket_data_dict.values():
             create_grievance_ticket_with_details(
                 main_individual=ticket_data["original"].individual,
