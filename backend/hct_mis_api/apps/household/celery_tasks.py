@@ -55,7 +55,7 @@ def recalculate_population_fields_task(household_ids: list[UUID] = None):
 
 
 @app.task()
-@sentry_tags()
+@sentry_tags
 def calculate_children_fields_for_not_collected_individual_data():
     from hct_mis_api.apps.household.models import Household
     from django.db.models import F

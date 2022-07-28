@@ -136,7 +136,7 @@ def registration_kobo_import_hourly_task():
             return
         business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
         with configure_scope() as scope:
-            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
+            scope.set_tag("business_area", business_area)
 
             RdiKoboCreateTask().execute(
                 registration_data_import_id=str(not_started_rdi.id),
@@ -169,7 +169,7 @@ def registration_xlsx_import_hourly_task():
 
         business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
         with configure_scope() as scope:
-            scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
+            scope.set_tag("business_area", business_area)
 
             RdiXlsxCreateTask().execute(
                 registration_data_import_id=str(not_started_rdi.id),
