@@ -713,7 +713,6 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     photo = models.ImageField(blank=True)
     full_name = CICharField(max_length=255, validators=[MinLengthValidator(2)], db_index=True)
     given_name = CICharField(max_length=85, blank=True, db_index=True)
-    last_name = CICharField(max_length=85, blank=True, null=True, db_index=True)
     middle_name = CICharField(max_length=85, blank=True, db_index=True)
     family_name = CICharField(max_length=85, blank=True, db_index=True)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True)
@@ -793,12 +792,6 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     disability_certificate_picture = models.ImageField(blank=True, null=True)
 
     vector_column = SearchVectorField(null=True)
-
-    def save(self, *args, **kwargs):
-        names = self.full_name.split(" ")
-        if len(names) > 1:
-            self.last_name = names[-1]
-        super().save(*args, **kwargs)
 
     @property
     def phone_no_valid(self):
