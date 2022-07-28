@@ -50,53 +50,67 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_category_1_witho
 }
 
 snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_location_0_with_permission 1'] = {
-    'data': {
-        'ticketsByLocationAndCategory': [
-            {
-                'categories': [
-                    {
-                        'categoryName': 'Positive Feedback',
-                        'count': 3
-                    },
-                    {
-                        'categoryName': 'Needs Adjudication',
-                        'count': 2
-                    },
-                    {
-                        'categoryName': 'Negative Feedback',
-                        'count': 1
-                    }
-                ],
-                'count': 6,
-                'location': 'City Test'
-            }
-        ]
-    }
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 4
+                }
+            ],
+            'message': 'Cannot query field "location" on type "ChartDetailedDatasetsNode".'
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 5
+                }
+            ],
+            'message': 'Cannot query field "count" on type "ChartDetailedDatasetsNode".'
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 6
+                }
+            ],
+            'message': 'Cannot query field "categories" on type "ChartDetailedDatasetsNode".'
+        }
+    ]
 }
 
 snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_location_1_without_permission 1'] = {
-    'data': {
-        'ticketsByLocationAndCategory': [
-            {
-                'categories': [
-                    {
-                        'categoryName': 'Positive Feedback',
-                        'count': 3
-                    },
-                    {
-                        'categoryName': 'Needs Adjudication',
-                        'count': 2
-                    },
-                    {
-                        'categoryName': 'Negative Feedback',
-                        'count': 1
-                    }
-                ],
-                'count': 6,
-                'location': 'City Test'
-            }
-        ]
-    }
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 4
+                }
+            ],
+            'message': 'Cannot query field "location" on type "ChartDetailedDatasetsNode".'
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 5
+                }
+            ],
+            'message': 'Cannot query field "count" on type "ChartDetailedDatasetsNode".'
+        },
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 6
+                }
+            ],
+            'message': 'Cannot query field "categories" on type "ChartDetailedDatasetsNode".'
+        }
+    ]
 }
 
 snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_status_0_with_permission 1'] = {
@@ -152,7 +166,7 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_type_0_with_perm
             'closedUserGeneratedCount': 1,
             'systemGeneratedAvgResolution': 0.0,
             'systemGeneratedCount': 2,
-            'userGeneratedAvgResolution': -1.0,
+            'userGeneratedAvgResolution': 9.5,
             'userGeneratedCount': 4
         }
     }
@@ -165,7 +179,7 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_type_1_without_p
             'closedUserGeneratedCount': 1,
             'systemGeneratedAvgResolution': 0.0,
             'systemGeneratedCount': 2,
-            'userGeneratedAvgResolution': -1.0,
+            'userGeneratedAvgResolution': 9.5,
             'userGeneratedCount': 4
         }
     }
