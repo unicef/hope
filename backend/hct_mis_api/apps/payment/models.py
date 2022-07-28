@@ -208,6 +208,15 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         IN_REVIEW = "IN_REVIEW"
         ACCEPTED = "ACCEPTED"
 
+    class Action(models.TextChoices):
+        LOCK = "LOCK"
+        UNLOCK = "UNLOCK"
+        SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL"
+        APPROVE = "APPROVE"
+        AUTHORIZE = "AUTHORIZE"
+        REVIEW = "REVIEW"
+        REJECT = "REJECT"
+
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -220,10 +229,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         on_delete=models.CASCADE,
         related_name="payment_plans",
     )
-    currency = models.CharField(
-        max_length=4,
-        choices=CURRENCY_CHOICES
-    )
+    currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
     dispersion_start_date = models.DateTimeField()
     dispersion_end_date = models.DateTimeField()
     female_children_count = models.PositiveSmallIntegerField(default=0)
