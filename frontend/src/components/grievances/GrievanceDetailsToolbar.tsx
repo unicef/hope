@@ -194,9 +194,15 @@ export const GrievanceDetailsToolbar = ({
     }
   };
 
-  const closingConfirmationText = t(
+  let closingConfirmationText = t(
     'Are you sure you want to close the ticket?',
   );
+
+  if (ticket?.postponeDeduplication === true) {
+    closingConfirmationText = `${closingConfirmationText} ${t(
+     'This ticket will be closed without running the deduplication process.'
+    )}`;
+  }
 
   const changeState = async (status): Promise<void> => {
     try {
