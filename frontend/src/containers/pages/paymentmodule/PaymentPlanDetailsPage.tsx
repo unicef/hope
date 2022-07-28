@@ -24,13 +24,14 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   });
 
   if (permissions === null) return null;
+  if (!data) return null;
   if (loading) return <LoadingComponent />;
   if (!hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
   return (
     <>
       <PaymentPlanDetailsHeader
-        paymentPlan={null}
+        paymentPlan={data.paymentPlan}
         businessArea={businessArea}
         permissions={permissions}
       />

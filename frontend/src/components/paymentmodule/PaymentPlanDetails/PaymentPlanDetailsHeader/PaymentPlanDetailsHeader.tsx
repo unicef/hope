@@ -12,7 +12,10 @@ import {
   targetPopulationStatusToColor,
 } from '../../../../utils/utils';
 import { StatusBox } from '../../../core/StatusBox';
-import { TargetPopulationStatus } from '../../../../__generated__/graphql';
+import {
+  PaymentPlanQuery,
+  TargetPopulationStatus,
+} from '../../../../__generated__/graphql';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
@@ -26,14 +29,14 @@ const StatusWrapper = styled.div`
 interface PaymentPlanDetailsHeaderProps {
   businessArea: string;
   permissions: string[];
-  paymentPlan;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function PaymentPlanDetailsHeader({
+export const PaymentPlanDetailsHeader = ({
   businessArea,
   permissions,
   paymentPlan,
-}: PaymentPlanDetailsHeaderProps): React.ReactElement {
+}: PaymentPlanDetailsHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
 
@@ -51,9 +54,8 @@ export function PaymentPlanDetailsHeader({
       buttons = (
         <>
           {/* <OpenPaymentPlanHeaderButtons
-          targetPopulation={targetPopulation}
+          paymentPlan={paymentPlan}
           setEditState={setEditState}
-          canDuplicate={canDuplicate}
           canRemove={canRemove}
           canEdit={canEdit}
           canLock={canLock}
@@ -65,12 +67,10 @@ export function PaymentPlanDetailsHeader({
       buttons = (
         <>
           {/* <LockedPaymentPlanHeaderButtons
-            targetPopulation={targetPopulation}
-            setEditState={setEditState}
+            paymentPlan={paymentPlan}
             canDuplicate={canDuplicate}
-            canRemove={canRemove}
-            canEdit={canEdit}
             canLock={canLock}
+            canSendForApproval={canSendForApproval}
           /> */}
         </>
       );
@@ -79,12 +79,9 @@ export function PaymentPlanDetailsHeader({
       buttons = (
         <>
           {/* <InApprovalPaymentPlanHeaderButtons
-              targetPopulation={targetPopulation}
-              setEditState={setEditState}
-              canDuplicate={canDuplicate}
-              canRemove={canRemove}
-              canEdit={canEdit}
-              canLock={canLock}
+              paymentPlan={paymentPlan}
+              canReject={canReject}
+              canApprove={canApprove}
             /> */}
         </>
       );
@@ -93,12 +90,9 @@ export function PaymentPlanDetailsHeader({
       buttons = (
         <>
           {/* <InAuthorizationPaymentPlanHeaderButtons
-                targetPopulation={targetPopulation}
-                setEditState={setEditState}
-                canDuplicate={canDuplicate}
-                canRemove={canRemove}
-                canEdit={canEdit}
-                canLock={canLock}
+                paymentPlan={paymentPlan}
+                canReject={canReject}
+                canAuthorize={canAuthorize}
               /> */}
         </>
       );
@@ -106,13 +100,10 @@ export function PaymentPlanDetailsHeader({
     case 'IN_REVIEW':
       buttons = (
         <>
-          {/* <InAuthorizationPaymentPlanHeaderButtons
-                  targetPopulation={targetPopulation}
-                  setEditState={setEditState}
-                  canDuplicate={canDuplicate}
-                  canRemove={canRemove}
-                  canEdit={canEdit}
-                  canLock={canLock}
+          {/* <InReviewPaymentPlanHeaderButtons
+                  paymentPlan={paymentPlan}
+                  canReject={canReject}
+                  canMarkAsReviewed={canMarkAsReviewed}
                 /> */}
         </>
       );
@@ -121,12 +112,9 @@ export function PaymentPlanDetailsHeader({
       buttons = (
         <>
           {/* <AcceptedPaymentPlanHeaderButtons
-                    targetPopulation={targetPopulation}
-                    setEditState={setEditState}
-                    canDuplicate={canDuplicate}
-                    canRemove={canRemove}
-                    canEdit={canEdit}
-                    canLock={canLock}
+                    paymentPlan={paymentPlan}
+                    canDownloadXlsx={canDownloadXlsx}
+                    canSendToFsp={canSendToFsp}
                   /> */}
         </>
       );
@@ -159,4 +147,4 @@ export function PaymentPlanDetailsHeader({
       {buttons}
     </PageHeader>
   );
-}
+};
