@@ -21,13 +21,13 @@ export function InApprovalPaymentPlanHeaderButtons({
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canReject && (
         <Box m={2}>
           <RejectPaymentPlan paymentPlanId='33333' />
         </Box>
       )}
       {canApprove && <ApprovePaymentPlan paymentPlanId='33333' />}
-    </div>
+    </Box>
   );
 }
