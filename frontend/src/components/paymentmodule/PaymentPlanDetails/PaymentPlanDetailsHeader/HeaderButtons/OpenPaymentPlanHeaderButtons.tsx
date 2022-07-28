@@ -4,6 +4,7 @@ import { Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
 import { LockPaymentPlan } from '../LockPaymentPlan';
+import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 
 const IconContainer = styled.span`
   button {
@@ -21,33 +22,24 @@ const ButtonContainer = styled.span`
 `;
 
 export interface OpenPaymentPlanHeaderButtonsProps {
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
   setEditState: Function;
-  canDuplicate: boolean;
   canRemove: boolean;
   canEdit: boolean;
   canLock: boolean;
 }
 
-export function OpenPaymentPlanHeaderButtons({
+export const OpenPaymentPlanHeaderButtons = ({
   setEditState,
-  canDuplicate,
   canEdit,
   canLock,
   canRemove,
-}: OpenPaymentPlanHeaderButtonsProps): React.ReactElement {
+}: OpenPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const [openLock, setOpenLock] = useState(false);
-  const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   return (
     <div>
-      {canDuplicate && (
-        <IconContainer>
-          <Button onClick={() => setOpenDuplicate(true)}>
-            <FileCopy />
-          </Button>
-        </IconContainer>
-      )}
       {canRemove && (
         <IconContainer>
           <Button onClick={() => setOpenDelete(true)}>
@@ -74,4 +66,4 @@ export function OpenPaymentPlanHeaderButtons({
       )}
     </div>
   );
-}
+};
