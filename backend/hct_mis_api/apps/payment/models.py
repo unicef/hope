@@ -21,6 +21,7 @@ from multiselectfield import MultiSelectField
 
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.household.models import Individual, MALE, FEMALE
@@ -221,6 +222,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     )
     currency = models.CharField(
         max_length=4,
+        choices=CURRENCY_CHOICES
     )
     dispersion_start_date = models.DateTimeField()
     dispersion_end_date = models.DateTimeField()
