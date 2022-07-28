@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -24,7 +24,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canDownloadXlsx && (
         <ButtonContainer>
           <Button
@@ -47,6 +47,6 @@ export const AcceptedPaymentPlanHeaderButtons = ({
           </Button>
         </ButtonContainer>
       )}
-    </div>
+    </Box>
   );
 };

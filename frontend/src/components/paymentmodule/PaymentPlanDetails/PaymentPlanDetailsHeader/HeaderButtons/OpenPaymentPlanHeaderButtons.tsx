@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
 import { LockPaymentPlan } from '../LockPaymentPlan';
@@ -39,7 +39,7 @@ export const OpenPaymentPlanHeaderButtons = ({
   const [openLock, setOpenLock] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canRemove && (
         <IconContainer>
           <Button onClick={() => setOpenDelete(true)}>
@@ -64,6 +64,6 @@ export const OpenPaymentPlanHeaderButtons = ({
           <LockPaymentPlan paymentPlanId='929292929' />
         </ButtonContainer>
       )}
-    </div>
+    </Box>
   );
 };

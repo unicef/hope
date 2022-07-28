@@ -48,14 +48,18 @@ export const PaymentPlanDetails = ({
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Programme')}>
-                <BlackLink to={`/${businessArea}/programs/${program.id}`} />
+                <BlackLink to={`/${businessArea}/programs/${program.id}`}>
+                  {program.name}
+                </BlackLink>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Target Population')}>
                 <BlackLink
                   to={`/${businessArea}/target-populations/${targetPopulation.id}`}
-                />
+                >
+                  {targetPopulation.name}
+                </BlackLink>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>

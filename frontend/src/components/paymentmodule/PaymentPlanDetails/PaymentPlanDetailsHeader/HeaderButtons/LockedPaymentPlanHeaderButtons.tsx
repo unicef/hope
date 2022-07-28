@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
@@ -38,7 +38,7 @@ export const LockedPaymentPlanHeaderButtons = ({
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canDuplicate && (
         <IconContainer>
           <Button onClick={() => setOpenDuplicate(true)}>
@@ -68,6 +68,6 @@ export const LockedPaymentPlanHeaderButtons = ({
           </Button>
         </ButtonContainer>
       )}
-    </div>
+    </Box>
   );
 };
