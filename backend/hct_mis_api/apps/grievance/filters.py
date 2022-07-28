@@ -125,17 +125,30 @@ class GrievanceTicketFilter(FilterSet):
         )
     )
 
-    def search_filter(self, qs, name, value):
-        values = value.split(" ")
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$") | Q(registration_data_import__name__icontains=value)
-            for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
-                for field, lookups in ticket_fields.items():
-                    for lookup in lookups:
-                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__istartswith": value})
+    # def search_filter(self, qs, name, value):
+    #     values = value.split(" ")
+    #     q_obj = Q()
+    #     for value in values:
+    #         q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$") | Q(registration_data_import__name__icontains=value)
+    #         for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
+    #             for field, lookups in ticket_fields.items():
+    #                 for lookup in lookups:
+    #                     q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__istartswith": value})
+    #
+    #     return qs.filter(q_obj)
 
-        return qs.filter(q_obj)
+    def search_filter(self, qs, name, value):
+        label, value = tuple(value.split(" ", 1))
+        if label == "ticket_id":
+            q = Q(id=value)
+        elif label == "ticket_hhid":
+            q = Q(household_unicef_id=value)
+        else:
+            ids = Individual.objects.filter(Q(last_name="Vidal") & Q(relationship="HEAD")).values_list(
+                "household__unicef_id", flat=True
+            )
+            q = Q(household_unicef_id__in=ids)
+        return qs.filter(q)
 
     def fsp_filter(self, qs, name, value):
         if value:
@@ -206,15 +219,15 @@ class GrievanceTicketFilter(FilterSet):
         for value in choices:
             if value in GrievanceTicket.MANUAL_CATEGORIES:
                 user_generated.append(value)
-        if val == 'user':
-            return qs.filter( category__in=user_generated )
-        elif val == 'system':
-            return qs.filter( ~Q(category__in=user_generated) )
+        if val == "user":
+            return qs.filter(category__in=user_generated)
+        elif val == "system":
+            return qs.filter(~Q(category__in=user_generated))
         return qs
 
     def filter_grievance_status(self, qs, name, val):
-        if val == 'active':
-            return qs.filter(~Q(status= GrievanceTicket.STATUS_CLOSED))
+        if val == "active":
+            return qs.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
         return qs
 
 
