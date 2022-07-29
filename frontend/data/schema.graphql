@@ -2542,8 +2542,8 @@ type PaymentPlanNode implements Node {
   updatedAt: DateTime!
   businessArea: UserBusinessAreaNode!
   statusDate: DateTime!
-  startDate: DateTime!
-  endDate: DateTime!
+  startDate: Date
+  endDate: Date
   program: ProgramNode!
   exchangeRate: Float
   totalEntitledQuantity: Float
@@ -2559,8 +2559,8 @@ type PaymentPlanNode implements Node {
   unicefId: String!
   targetPopulation: TargetPopulationNode!
   currency: PaymentPlanCurrency!
-  dispersionStartDate: DateTime!
-  dispersionEndDate: DateTime!
+  dispersionStartDate: Date
+  dispersionEndDate: Date
   femaleChildrenCount: Int!
   maleChildrenCount: Int!
   femaleAdultsCount: Int!

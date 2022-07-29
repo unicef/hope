@@ -2,7 +2,15 @@ import { Box, Button, IconButton } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
+import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
+import { useSnackbar } from '../../../../../hooks/useSnackBar';
+import {
+  Action,
+  PaymentPlanDocument,
+  PaymentPlanQuery,
+  useActionPpMutation,
+} from '../../../../../__generated__/graphql';
+import { LoadingButton } from '../../../../core/LoadingButton';
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -18,9 +26,28 @@ export const LockedPaymentPlanHeaderButtons = ({
   canSendForApproval,
 }: LockedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [openApprove, setOpenApprove] = useState(false);
+  const { id } = paymentPlan;
+  const { showMessage } = useSnackbar();
   const [openDuplicate, setOpenDuplicate] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
+  const {
+    mutatePaymentPlanAction: unlock,
+    loading: loadingUnlock,
+  } = usePaymentPlanAction(
+    Action.Unlock,
+    id,
+    () => showMessage(t('Payment Plan has been unlocked.')),
+    () => showMessage(t('Error during unlocking Payment Plan.')),
+  );
+  const {
+    mutatePaymentPlanAction: sendForApproval,
+    loading: loadingSendForApproval,
+  } = usePaymentPlanAction(
+    Action.SendForApproval,
+    id,
+    () => showMessage(t('Payment Plan has been sent for approval.')),
+    () => showMessage(t('Error during sending Payment Plan for approval.')),
+  );
+
   return (
     <Box display='flex' alignItems='center'>
       {canDuplicate && (
@@ -30,24 +57,26 @@ export const LockedPaymentPlanHeaderButtons = ({
       )}
       {canLock && (
         <Box m={2}>
-          <Button
+          <LoadingButton
+            loading={loadingUnlock}
             variant='outlined'
             color='primary'
-            onClick={() => setOpenApprove(true)}
+            onClick={() => unlock()}
           >
             {t('Unlock')}
-          </Button>
+          </LoadingButton>
         </Box>
       )}
       {canSendForApproval && (
         <Box m={2}>
-          <Button
+          <LoadingButton
+            loading={loadingSendForApproval}
             variant='contained'
             color='primary'
-            onClick={() => setOpenApprove(true)}
+            onClick={() => sendForApproval()}
           >
             {t('Send For Approval')}
-          </Button>
+          </LoadingButton>
         </Box>
       )}
     </Box>

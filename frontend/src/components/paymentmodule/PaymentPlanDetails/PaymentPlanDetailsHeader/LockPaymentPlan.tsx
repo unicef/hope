@@ -11,7 +11,9 @@ import { useTranslation } from 'react-i18next';
 import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { Action } from '../../../../__generated__/graphql';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { Missing } from '../../../core/Missing';
@@ -24,35 +26,18 @@ export const LockPaymentPlan = ({
   paymentPlanId,
 }: LockPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [lockDialogOpen, setLockDialogOpen] = useState(false);
-
   const { showMessage } = useSnackbar();
-  // const [mutate] = useActivateCashPlanPaymentVerificationMutation();
-  // const activate = async (): Promise<void> => {
-  //   try {
-  //     await mutate({
-  //       variables: { cashPlanVerificationId },
-  //       refetchQueries,
-  //     });
-  //   } catch (error) {
-  //     /* eslint-disable-next-line no-console */
-  //     console.log('error', error?.graphQLErrors);
-  //     if (
-  //       error?.graphQLErrors?.[0]?.validationErrors
-  //         ?.activateCashPlanPaymentVerification?.phone_numbers
-  //     ) {
-  //       showMessage(
-  //         error?.graphQLErrors?.[0]?.validationErrors?.activateCashPlanPaymentVerification?.phone_numbers.join(
-  //           '\n',
-  //         ),
-  //       );
-  //     } else {
-  //       showMessage(t('Error during activating.'));
-  //     }
-  //   }
+  const [lockDialogOpen, setLockDialogOpen] = useState(false);
+  const {
+    mutatePaymentPlanAction: lock,
+    loading: loadingLock,
+  } = usePaymentPlanAction(
+    Action.Lock,
+    paymentPlanId,
+    () => showMessage(t('Payment Plan has been locked.')),
+    () => showMessage(t('Error during locking Payment Plan.')),
+  );
 
-  //   showMessage(t('Verification plan has been activated.'));
-  // };
   return (
     <>
       <Box p={2}>
@@ -98,11 +83,11 @@ export const LockPaymentPlan = ({
           <DialogActions>
             <Button onClick={() => setLockDialogOpen(false)}>CANCEL</Button>
             <LoadingButton
-              loading
+              loading={loadingLock}
               type='submit'
               color='primary'
               variant='contained'
-              onClick={() => console.log(paymentPlanId)}
+              onClick={() => lock()}
               data-cy='button-submit'
             >
               {t('Lock')}

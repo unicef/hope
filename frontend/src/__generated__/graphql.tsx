@@ -3630,8 +3630,8 @@ export type PaymentPlanNode = Node & {
   updatedAt: Scalars['DateTime'],
   businessArea: UserBusinessAreaNode,
   statusDate: Scalars['DateTime'],
-  startDate: Scalars['DateTime'],
-  endDate: Scalars['DateTime'],
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
   program: ProgramNode,
   exchangeRate?: Maybe<Scalars['Float']>,
   totalEntitledQuantity?: Maybe<Scalars['Float']>,
@@ -3647,8 +3647,8 @@ export type PaymentPlanNode = Node & {
   unicefId: Scalars['String'],
   targetPopulation: TargetPopulationNode,
   currency: PaymentPlanCurrency,
-  dispersionStartDate: Scalars['DateTime'],
-  dispersionEndDate: Scalars['DateTime'],
+  dispersionStartDate?: Maybe<Scalars['Date']>,
+  dispersionEndDate?: Maybe<Scalars['Date']>,
   femaleChildrenCount: Scalars['Int'],
   maleChildrenCount: Scalars['Int'],
   femaleAdultsCount: Scalars['Int'],
@@ -7503,6 +7503,22 @@ export type UpdateGrievanceMutation = (
     & { grievanceTicket: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id'>
+    )> }
+  )> }
+);
+
+export type ActionPpMutationVariables = {
+  input: ActionPaymentPlanInput
+};
+
+
+export type ActionPpMutation = (
+  { __typename?: 'Mutations' }
+  & { actionPaymentPlanMutation: Maybe<(
+    { __typename?: 'ActionPaymentPlanMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'status'>
     )> }
   )> }
 );
@@ -12113,6 +12129,58 @@ export function useUpdateGrievanceMutation(baseOptions?: ApolloReactHooks.Mutati
 export type UpdateGrievanceMutationHookResult = ReturnType<typeof useUpdateGrievanceMutation>;
 export type UpdateGrievanceMutationResult = ApolloReactCommon.MutationResult<UpdateGrievanceMutation>;
 export type UpdateGrievanceMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>;
+export const ActionPpDocument = gql`
+    mutation ActionPP($input: ActionPaymentPlanInput!) {
+  actionPaymentPlanMutation(input: $input) {
+    paymentPlan {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ActionPpMutationFn = ApolloReactCommon.MutationFunction<ActionPpMutation, ActionPpMutationVariables>;
+export type ActionPpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ActionPpMutation, ActionPpMutationVariables>, 'mutation'>;
+
+    export const ActionPpComponent = (props: ActionPpComponentProps) => (
+      <ApolloReactComponents.Mutation<ActionPpMutation, ActionPpMutationVariables> mutation={ActionPpDocument} {...props} />
+    );
+    
+export type ActionPpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ActionPpMutation, ActionPpMutationVariables> & TChildProps;
+export function withActionPp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ActionPpMutation,
+  ActionPpMutationVariables,
+  ActionPpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ActionPpMutation, ActionPpMutationVariables, ActionPpProps<TChildProps>>(ActionPpDocument, {
+      alias: 'actionPp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useActionPpMutation__
+ *
+ * To run a mutation, you first call `useActionPpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useActionPpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [actionPpMutation, { data, loading, error }] = useActionPpMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useActionPpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ActionPpMutation, ActionPpMutationVariables>) {
+        return ApolloReactHooks.useMutation<ActionPpMutation, ActionPpMutationVariables>(ActionPpDocument, baseOptions);
+      }
+export type ActionPpMutationHookResult = ReturnType<typeof useActionPpMutation>;
+export type ActionPpMutationResult = ApolloReactCommon.MutationResult<ActionPpMutation>;
+export type ActionPpMutationOptions = ApolloReactCommon.BaseMutationOptions<ActionPpMutation, ActionPpMutationVariables>;
 export const CreatePpDocument = gql`
     mutation CreatePP($input: CreatePaymentPlanInput!) {
   createPaymentPlan(input: $input) {
@@ -22277,8 +22345,8 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  startDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
   exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
@@ -22294,8 +22362,8 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
   currency?: Resolver<ResolversTypes['PaymentPlanCurrency'], ParentType, ContextType>,
-  dispersionStartDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  dispersionEndDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  dispersionStartDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  dispersionEndDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   femaleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   maleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
