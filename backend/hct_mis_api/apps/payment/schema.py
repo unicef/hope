@@ -1,5 +1,4 @@
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
-
 from django.shortcuts import get_object_or_404
 
 import graphene
@@ -28,33 +27,35 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
+    CashPlanPaymentVerificationFilter,
+    FinancialServiceProviderFilter,
+    FinancialServiceProviderXlsxReportFilter,
+    FinancialServiceProviderXlsxTemplateFilter,
+    PaymentFilter,
+    PaymentPlanFilter,
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter,
-    FinancialServiceProviderXlsxTemplateFilter,
-    FinancialServiceProviderXlsxReportFilter,
-    FinancialServiceProviderFilter,
-    PaymentPlanFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
+    Approval,
+    ApprovalProcess,
+    CashPlan,
     CashPlanPaymentVerification,
     CashPlanPaymentVerificationSummary,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
+    Payment,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FinancialServiceProviderXlsxReport,
-    FinancialServiceProvider,
-    ApprovalProcess,
-    Approval,
-    PaymentPlan,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
-from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -240,6 +241,18 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.business_area.finance_review_number_required
 
 
+class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+
+    class Meta:
+        model = Payment
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    def resolve_status(self, info):
+        return str(self.status)
+
+
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
@@ -343,6 +356,13 @@ class Query(graphene.ObjectType):
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
+    )
+
+    payment = relay.Node.Field(PaymentNode)
+    all_payments = DjangoPermissionFilterConnectionField(
+        PaymentNode,
+        filterset_class=PaymentFilter,
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
 
