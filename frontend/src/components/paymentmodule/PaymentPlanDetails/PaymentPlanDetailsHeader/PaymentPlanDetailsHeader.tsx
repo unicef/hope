@@ -35,7 +35,6 @@ export const PaymentPlanDetailsHeader = ({
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [editState, setEditState] = useState(false);
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
@@ -62,7 +61,6 @@ export const PaymentPlanDetailsHeader = ({
         <>
           <OpenPaymentPlanHeaderButtons
             paymentPlan={paymentPlan}
-            setEditState={setEditState}
             canRemove={canRemove}
             canEdit={canEdit}
             canLock={canLock}

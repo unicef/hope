@@ -14,6 +14,7 @@ export const TARGETING_STATES = {
   [TargetPopulationStatus.SteficonRun]: 'Steficon Run',
   [TargetPopulationStatus.SteficonCompleted]: 'Steficon Completed',
   [TargetPopulationStatus.SteficonError]: 'Steficon Error',
+  [TargetPopulationStatus.Assigned]: 'Assigned',
 };
 
 export const PAYMENT_PLAN_STATES = {

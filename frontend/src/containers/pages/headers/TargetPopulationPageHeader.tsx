@@ -86,7 +86,7 @@ export const TargetPopulationPageHeader = ({
       );
       break;
     default:
-      //Ready for Cash Assist, Processing, Ready
+      //Ready for Cash Assist, Processing, Ready, Accepted
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
