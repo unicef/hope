@@ -50,7 +50,7 @@ class TestFixingGrievanceTickets(APITestCase):
     @parameterized.expand(
         [
             (True, DISABLED),
-            # (False, NOT_DISABLED),
+            (False, NOT_DISABLED),
         ]
     )
     def test_wrong_value_in_disability_field(self, previous_value, new_value):
