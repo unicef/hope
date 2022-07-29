@@ -764,7 +764,7 @@ sqlparse = "*"
 
 [[package]]
 name = "django-smart-admin"
-version = "2.0.1"
+version = "2.0.2"
 description = ""
 category = "main"
 optional = false
@@ -976,11 +976,11 @@ test = ["requests", "objgraph", "cffi (>=1.12.2)", "dnspython (>=1.16.0,<2.0)", 
 
 [[package]]
 name = "gprof2dot"
-version = "2021.2.21"
+version = "2022.7.29"
 description = "Generate a dot graph from the output of several profilers."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7"
 
 [[package]]
 name = "graphene"
@@ -2444,9 +2444,7 @@ faker = []
 fastdiff = []
 freezegun = []
 gevent = []
-gprof2dot = [
-    {file = "gprof2dot-2021.2.21.tar.gz", hash = "sha256:1223189383b53dcc8ecfd45787ac48c0ed7b4dbc16ee8b88695d053eea1acabf"},
-]
+gprof2dot = []
 graphene = []
 graphene-django = []
 graphene-file-upload = []
