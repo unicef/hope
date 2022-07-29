@@ -213,8 +213,8 @@ class PaymentPlanService:
             raise GraphQLError(f"TargetPopulation should have related Program defined")
 
         dispersion_end_date = input_data["dispersion_end_date"]
-        if not dispersion_end_date or dispersion_end_date >= timezone.now().date():
-            raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] should be a past date")
+        if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
+            raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
         payment_plan = PaymentPlan.objects.create(
             business_area=business_area,
@@ -272,8 +272,8 @@ class PaymentPlanService:
             input_data["dispersion_end_date"]
             and input_data["dispersion_end_date"] != self.payment_plan.dispersion_end_date
         ):
-            if input_data["dispersion_end_date"] >= timezone.now().date():
-                raise GraphQLError(f"Dispersion End Date [{input_data['dispersion_end_date']}] should be a past date")
+            if input_data["dispersion_end_date"] <= timezone.now().date():
+                raise GraphQLError(f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date")
             self.payment_plan.dispersion_end_date = input_data["dispersion_end_date"]
             recalculate = True
 

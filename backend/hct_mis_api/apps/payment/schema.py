@@ -221,7 +221,10 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     approval_number_required = graphene.Int()
     authorization_number_required = graphene.Int()
     finance_review_number_required = graphene.Int()
-
+    dispersion_start_date = graphene.Date()
+    dispersion_end_date = graphene.Date()
+    start_date = graphene.Date()
+    end_date = graphene.Date()
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)

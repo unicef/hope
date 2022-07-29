@@ -44,6 +44,7 @@ import { CreateSetUpFspPage } from './pages/paymentmodule/CreateSetUpFspPage';
 import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
 import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
 import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
+import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
 
 const Root = styled.div`
   display: flex;
@@ -131,6 +132,9 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp'>
             <SetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/edit'>
+            <EditPaymentPlanPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id'>
             <PaymentPlanDetailsPage />

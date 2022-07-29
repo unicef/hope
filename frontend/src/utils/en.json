@@ -672,5 +672,8 @@
   "End date has to be greater than": "End date has to be greater than",
   "Dispersion End Date is required": "Dispersion End Date is required",
   "Dispersion End Date cannot be in the past": "Dispersion End Date cannot be in the past",
-  "Dispersion End Date has to be greater than": "Dispersion End Date has to be greater than"
+  "Dispersion End Date has to be greater than": "Dispersion End Date has to be greater than",
+  "Payment Plan Edited": "Payment Plan Edited",
+  "Edit Payment Plan": "Edit Payment Plan",
+  "Unexpected problem while editing Payment Plan": "Unexpected problem while editing Payment Plan"
 }
