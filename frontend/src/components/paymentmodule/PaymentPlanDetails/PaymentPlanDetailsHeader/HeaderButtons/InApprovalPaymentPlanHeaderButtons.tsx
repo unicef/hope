@@ -1,6 +1,5 @@
 import { Box } from '@material-ui/core';
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { ApprovePaymentPlan } from '../ApprovePaymentPlan';
 import { RejectPaymentPlan } from '../RejectPaymentPlan';
@@ -11,23 +10,19 @@ export interface InApprovalPaymentPlanHeaderButtonsProps {
   canApprove: boolean;
 }
 
-export function InApprovalPaymentPlanHeaderButtons({
+export const InApprovalPaymentPlanHeaderButtons = ({
   paymentPlan,
   canReject,
   canApprove,
-}: InApprovalPaymentPlanHeaderButtonsProps): React.ReactElement {
-  const { t } = useTranslation();
-  const [openApprove, setOpenApprove] = useState(false);
-  const [openDuplicate, setOpenDuplicate] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
+}: InApprovalPaymentPlanHeaderButtonsProps): React.ReactElement => {
   return (
     <Box display='flex' alignItems='center'>
       {canReject && (
         <Box m={2}>
-          <RejectPaymentPlan paymentPlanId='33333' />
+          <RejectPaymentPlan paymentPlanId={paymentPlan.id} />
         </Box>
       )}
-      {canApprove && <ApprovePaymentPlan paymentPlanId='33333' />}
+      {canApprove && <ApprovePaymentPlan paymentPlanId={paymentPlan.id} />}
     </Box>
   );
-}
+};

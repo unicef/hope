@@ -675,5 +675,16 @@
   "Dispersion End Date has to be greater than": "Dispersion End Date has to be greater than",
   "Payment Plan Edited": "Payment Plan Edited",
   "Edit Payment Plan": "Edit Payment Plan",
-  "Unexpected problem while editing Payment Plan": "Unexpected problem while editing Payment Plan"
+  "Unexpected problem while editing Payment Plan": "Unexpected problem while editing Payment Plan",
+  "Error during locking Payment Plan.": "Error during locking Payment Plan.",
+  "Payment Plan has been locked.": "Payment Plan has been locked.",
+  "Payment Plan has been rejected.": "Payment Plan has been rejected.",
+  "Error during rejecting Payment Plan.": "Error during rejecting Payment Plan.",
+  "Payment Plan has been approved.": "Payment Plan has been approved.",
+  "Error during approving Payment Plan.": "Error during approving Payment Plan.",
+  "Payment Plan has been authorized.": "Payment Plan has been authorized.",
+  "Error during authorizing Payment Plan.": "Error during authorizing Payment Plan.",
+  "Payment Plan has been marked as reviewed.": "Payment Plan has been marked as reviewed.",
+  "Error during marking Payment Plan as reviewed.": "Error during marking Payment Plan as reviewed.",
+  "Reject Payment Plan": "Reject Payment Plan"
 }
