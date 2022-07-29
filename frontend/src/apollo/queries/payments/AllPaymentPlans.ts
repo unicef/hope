@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost';
 
-export const PAYMENT_PLAN_QUERY = gql`
+export const PAYMENT_PLAN_LIST_QUERY = gql`
   query AllPaymentPlans (
     $businessArea: String!
     $search: String
