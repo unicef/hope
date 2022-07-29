@@ -1,24 +1,8 @@
+import { Box, Button, IconButton } from '@material-ui/core';
+import { FileCopy } from '@material-ui/icons';
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { Box, Button } from '@material-ui/core';
-import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
-
-const IconContainer = styled.span`
-  button {
-    color: #949494;
-    min-width: 40px;
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-`;
-
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -40,14 +24,12 @@ export const LockedPaymentPlanHeaderButtons = ({
   return (
     <Box display='flex' alignItems='center'>
       {canDuplicate && (
-        <IconContainer>
-          <Button onClick={() => setOpenDuplicate(true)}>
-            <FileCopy />
-          </Button>
-        </IconContainer>
+        <IconButton onClick={() => setOpenDuplicate(true)}>
+          <FileCopy />
+        </IconButton>
       )}
       {canLock && (
-        <ButtonContainer>
+        <Box m={2}>
           <Button
             variant='outlined'
             color='primary'
@@ -55,10 +37,10 @@ export const LockedPaymentPlanHeaderButtons = ({
           >
             {t('Unlock')}
           </Button>
-        </ButtonContainer>
+        </Box>
       )}
       {canSendForApproval && (
-        <ButtonContainer>
+        <Box m={2}>
           <Button
             variant='contained'
             color='primary'
@@ -66,7 +48,7 @@ export const LockedPaymentPlanHeaderButtons = ({
           >
             {t('Send For Approval')}
           </Button>
-        </ButtonContainer>
+        </Box>
       )}
     </Box>
   );

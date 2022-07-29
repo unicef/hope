@@ -1,12 +1,7 @@
 import { Box, Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
-
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -26,7 +21,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
   return (
     <Box display='flex' alignItems='center'>
       {canDownloadXlsx && (
-        <ButtonContainer>
+        <Box m={2}>
           <Button
             variant='contained'
             color='primary'
@@ -34,10 +29,10 @@ export const AcceptedPaymentPlanHeaderButtons = ({
           >
             {t('Download XLSX')}
           </Button>
-        </ButtonContainer>
+        </Box>
       )}
       {canSendToFsp && (
-        <ButtonContainer>
+        <Box m={2}>
           <Button
             variant='contained'
             color='primary'
@@ -45,7 +40,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
           >
             {t('Send to Fsp')}
           </Button>
-        </ButtonContainer>
+        </Box>
       )}
     </Box>
   );

@@ -50,7 +50,6 @@ export const PaymentPlanParameters = ({
               initialFocusedDate={values.startDate}
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              minDate={today}
             />
           </Grid>
 
@@ -73,7 +72,6 @@ export const PaymentPlanParameters = ({
               required
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              maxDate={today}
             />
           </Grid>
           <Grid item xs={3}>
@@ -86,7 +84,7 @@ export const PaymentPlanParameters = ({
               initialFocusedDate={values.dispersionStartDate}
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              maxDate={today}
+              minDate={today}
             />
           </Grid>
         </Grid>

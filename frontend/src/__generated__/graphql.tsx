@@ -7523,6 +7523,22 @@ export type CreatePpMutation = (
   )> }
 );
 
+export type UpdatePpMutationVariables = {
+  input: UpdatePaymentPlanInput
+};
+
+
+export type UpdatePpMutation = (
+  { __typename?: 'Mutations' }
+  & { updatePaymentPlan: Maybe<(
+    { __typename?: 'UpdatePaymentPlanMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id'>
+    )> }
+  )> }
+);
+
 export type ActivateCashPlanPaymentVerificationMutationVariables = {
   cashPlanVerificationId: Scalars['ID']
 };
@@ -12148,6 +12164,57 @@ export function useCreatePpMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type CreatePpMutationHookResult = ReturnType<typeof useCreatePpMutation>;
 export type CreatePpMutationResult = ApolloReactCommon.MutationResult<CreatePpMutation>;
 export type CreatePpMutationOptions = ApolloReactCommon.BaseMutationOptions<CreatePpMutation, CreatePpMutationVariables>;
+export const UpdatePpDocument = gql`
+    mutation UpdatePP($input: UpdatePaymentPlanInput!) {
+  updatePaymentPlan(input: $input) {
+    paymentPlan {
+      id
+    }
+  }
+}
+    `;
+export type UpdatePpMutationFn = ApolloReactCommon.MutationFunction<UpdatePpMutation, UpdatePpMutationVariables>;
+export type UpdatePpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdatePpMutation, UpdatePpMutationVariables>, 'mutation'>;
+
+    export const UpdatePpComponent = (props: UpdatePpComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdatePpMutation, UpdatePpMutationVariables> mutation={UpdatePpDocument} {...props} />
+    );
+    
+export type UpdatePpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdatePpMutation, UpdatePpMutationVariables> & TChildProps;
+export function withUpdatePp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdatePpMutation,
+  UpdatePpMutationVariables,
+  UpdatePpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdatePpMutation, UpdatePpMutationVariables, UpdatePpProps<TChildProps>>(UpdatePpDocument, {
+      alias: 'updatePp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdatePpMutation__
+ *
+ * To run a mutation, you first call `useUpdatePpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePpMutation, { data, loading, error }] = useUpdatePpMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdatePpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdatePpMutation, UpdatePpMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdatePpMutation, UpdatePpMutationVariables>(UpdatePpDocument, baseOptions);
+      }
+export type UpdatePpMutationHookResult = ReturnType<typeof useUpdatePpMutation>;
+export type UpdatePpMutationResult = ApolloReactCommon.MutationResult<UpdatePpMutation>;
+export type UpdatePpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePpMutation, UpdatePpMutationVariables>;
 export const ActivateCashPlanPaymentVerificationDocument = gql`
     mutation ActivateCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
   activateCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
