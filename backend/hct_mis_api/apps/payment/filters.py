@@ -261,7 +261,7 @@ class PaymentPlanFilter(FilterSet):
 
 
 class PaymentFilter(FilterSet):
-    payment_plan = CharFilter(field_name="payment_plan__id", required=True)
+    payment_plan_id = CharFilter(required=True)
 
     class Meta:
         fields = tuple()
