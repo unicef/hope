@@ -1,4 +1,6 @@
+import itertools
 import logging
+from collections import defaultdict
 from dataclasses import dataclass, fields
 from time import sleep
 
@@ -13,7 +15,11 @@ from psycopg2._psycopg import IntegrityError
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_dict
-from hct_mis_api.apps.grievance.common import create_grievance_ticket_with_details
+from hct_mis_api.apps.grievance.common import (
+    create_grievance_ticket_with_details,
+    prepare_grievance_ticket_documents_deduplication,
+)
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import (
@@ -837,6 +843,7 @@ class DeduplicateTask:
         all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
         already_processed_signatures = []
         ticket_data_dict = {}
+        individuals_id_set = set()
         for new_document in documents_to_dedup:
             new_document_signature = f"{new_document.type_id}--{new_document.document_number}"
             if new_document_signature in all_matching_number_documents_signatures:
@@ -847,6 +854,7 @@ class DeduplicateTask:
                 )
                 ticket_data["possible_duplicates"].append(new_document)
                 ticket_data_dict[new_document_signature] = ticket_data
+                individuals_id_set.add(str(new_document.individual_id))
                 continue
             if (
                 new_document_signature in new_document_signatures_duplicated_in_batch
@@ -854,6 +862,7 @@ class DeduplicateTask:
             ):
                 new_document.status = Document.STATUS_NEED_INVESTIGATION
                 ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
+                individuals_id_set.add(str(new_document.individual_id))
                 continue
             new_document.status = Document.STATUS_VALID
             already_processed_signatures.append(new_document_signature)
@@ -874,13 +883,34 @@ class DeduplicateTask:
                 f"new_document_signatures_duplicated_in_batch: {new_document_signatures_duplicated_in_batch}"
             )
             raise
-
+        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
+        possible_duplicates_through_existing_list = (
+            PossibleDuplicateThrough.objects.filter(individual__in=individuals_id_set)
+            .order_by("ticketneedsadjudicationdetails")
+            .values_list(
+                "ticketneedsadjudicationdetails_id",
+                "individual_id",
+                "ticketneedsadjudicationdetails__golden_records_individual",
+            )
+        )
+        possible_duplicates_through_dict = defaultdict(set)
+        for (ticked_details_id, individual_id, main_individual_id) in possible_duplicates_through_existing_list:
+            possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
+            possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
+        ticket_data_collected = []
         for ticket_data in ticket_data_dict.values():
-            create_grievance_ticket_with_details(
+            prepared_ticket = prepare_grievance_ticket_documents_deduplication(
                 main_individual=ticket_data["original"].individual,
                 business_area=ticket_data["original"].individual.business_area,
-                possible_duplicate=ticket_data["possible_duplicates"][0].individual,
                 registration_data_import=registration_data_import,
-                is_multiple_duplicates_version=True,
                 possible_duplicates=[d.individual for d in ticket_data["possible_duplicates"]],
+                possible_duplicates_through_dict=possible_duplicates_through_dict,
             )
+            if prepared_ticket is None:
+                continue
+            ticket_data_collected.append(prepared_ticket)
+        GrievanceTicket.objects.bulk_create([x[0] for x in ticket_data_collected])
+        TicketNeedsAdjudicationDetails.objects.bulk_create([x[1] for x in ticket_data_collected])
+        # makes flat list from list of lists models
+        duplicates_models_to_create_flat = list(itertools.chain(*[x[2] for x in ticket_data_collected]))
+        PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
