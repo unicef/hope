@@ -1,22 +1,22 @@
 import { Box } from '@material-ui/core';
-import styled from 'styled-components';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
 import {
   paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
-import { StatusBox } from '../../../core/StatusBox';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
-import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
-import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
+import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
+import { PageHeader } from '../../../core/PageHeader';
+import { StatusBox } from '../../../core/StatusBox';
 import { AcceptedPaymentPlanHeaderButtons } from './HeaderButtons/AcceptedPaymentPlanHeaderButtons';
+import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
 import { InAuthorizationPaymentPlanHeaderButtons } from './HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
 import { InReviewPaymentPlanHeaderButtons } from './HeaderButtons/InReviewPaymentPlanHeaderButtons';
+import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
+import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 
 const StatusWrapper = styled.div`
   width: 140px;

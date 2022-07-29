@@ -25,6 +25,15 @@ export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatus.InReview]: 'In Review',
   [PaymentPlanStatus.Accepted]: 'Accepted',
 };
+export const PAYMENT_PLAN_ACTIONS = {
+  LOCK: 'LOCK',
+  UNLOCK: 'UNLOCK',
+  SEND_FOR_APPROVAL: 'SEND_FOR_APPROVAL',
+  APPROVE: 'APPROVE',
+  AUTHORIZE: 'AUTHORIZE',
+  REVIEW: 'REVIEW',
+  REJECT: 'REJECT',
+};
 
 export const GRIEVANCE_TICKET_STATES = {
   NEW: 1,
