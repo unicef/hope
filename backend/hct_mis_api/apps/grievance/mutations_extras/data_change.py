@@ -702,7 +702,6 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
 
     if grievance_ticket.postpone_deduplication:
-        transaction.on_commit()
         return
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
@@ -837,7 +836,6 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
 
     if grievance_ticket.postpone_deduplication:
-        transaction.on_commit()
         return
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
