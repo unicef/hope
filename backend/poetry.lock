@@ -943,6 +943,19 @@ wasmer = ">=1.0.0"
 wasmer-compiler-cranelift = ">=1.0.0"
 
 [[package]]
+name = "flake8"
+version = "4.0.1"
+description = "the modular source code checker: pep8 pyflakes and co"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+mccabe = ">=0.6.0,<0.7.0"
+pycodestyle = ">=2.8.0,<2.9.0"
+pyflakes = ">=2.4.0,<2.5.0"
+
+[[package]]
 name = "freezegun"
 version = "0.3.14"
 description = "Let your Python tests travel through time"
@@ -1262,6 +1275,14 @@ python-versions = ">=3.5"
 traitlets = "*"
 
 [[package]]
+name = "mccabe"
+version = "0.6.1"
+description = "McCabe checker, plugin for flake8"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "msrest"
 version = "0.7.1"
 description = "AutoRest swagger generator Python client runtime."
@@ -1521,6 +1542,14 @@ name = "pycparser"
 version = "2.21"
 description = "C parser in Python"
 category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
+name = "pyflakes"
+version = "2.4.0"
+description = "passive checker of Python programs"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -2161,7 +2190,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "9d432c7c9afdb199cd898472b3610a85fbcd1c4815de30cfa07b4f14cd90145e"
+content-hash = "18516c5aafa036f36b2e2e6b63435381a00cb503c092bf2242807eb91c9924e4"
 
 [metadata.files]
 amqp = []
@@ -2237,6 +2266,7 @@ executing = []
 factory-boy = []
 faker = []
 fastdiff = []
+flake8 = []
 freezegun = []
 gevent = []
 gprof2dot = []
@@ -2258,6 +2288,7 @@ lxml = []
 markuppy = []
 markupsafe = []
 matplotlib-inline = []
+mccabe = []
 msrest = []
 mypy-extensions = []
 newrelic = []
@@ -2283,6 +2314,7 @@ pure-eval = []
 pycodestyle = []
 pycountry = []
 pycparser = []
+pyflakes = []
 pygments = []
 pyjwt = []
 pyparsing = []

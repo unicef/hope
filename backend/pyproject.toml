@@ -136,6 +136,7 @@ watchdog = "^2.1.8"
 wasmer = "1.1.0"
 parso = "0.8.3"
 argh = "^0.26.2"
+flake8 = "^4.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
