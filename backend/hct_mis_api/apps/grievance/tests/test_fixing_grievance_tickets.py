@@ -1,0 +1,137 @@
+from django.core.management import call_command
+from django_countries.fields import Country
+from parameterized import parameterized
+
+from hct_mis_api.apps.grievance.fixtures import TicketIndividualDataUpdateDetailsFactory
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.household.models import HEAD, MALE, DISABLED, NOT_DISABLED
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    RegistrationDataImportDatahubFactory,
+)
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportData,
+)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+
+
+class TestFixingGrievanceTickets(APITestCase):
+    databases = "__all__"
+
+    CREATE_DATA_CHANGE_GRIEVANCE_MUTATION = """
+    mutation createGrievanceTicket($input:CreateGrievanceTicketInput!){
+      createGrievanceTicket(input:$input){
+        grievanceTickets{
+          description
+          category
+          issueType
+          individualDataUpdateTicketDetails{
+            individual{
+              fullName
+            }
+            individualData
+          }
+          sensitiveTicketDetails{
+            id
+          }
+          householdDataUpdateTicketDetails{
+            household{
+              id
+            }
+            householdData
+          }
+          addIndividualTicketDetails{
+            household{
+              id
+            }
+            individualData
+          }
+        }
+      }
+    }
+    """
+
+    @parameterized.expand(
+        [
+            (True, DISABLED),
+            (False, NOT_DISABLED),
+        ]
+    )
+    def test_wrong_value_in_disability_field(self, previous_value, new_value):
+        self.user = UserFactory.create()
+        self.business_area = BusinessAreaFactory(
+            code="0060",
+            name="Afghanistan",
+            long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+            region_code="64",
+            region_name="SAR",
+            slug="afghanistan",
+            has_data_sharing_agreement=True,
+        )
+        import_data = ImportData.objects.create(
+            file="test_file/x.xlsx",
+            number_of_households=10,
+            number_of_individuals=100,
+        )
+        self.registration_data_import_datahub = RegistrationDataImportDatahubFactory(
+            import_data=import_data,
+            business_area_slug=self.business_area.slug,
+        )
+        self.registration_data_import = RegistrationDataImportFactory(business_area=self.business_area)
+
+        (household, individuals) = create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.registration_data_import,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {
+                    "registration_data_import": self.registration_data_import,
+                    "given_name": "Test",
+                    "full_name": "Test Testowski",
+                    "middle_name": "",
+                    "family_name": "Testowski",
+                    "phone_no": "123-123-123",
+                    "phone_no_alternative": "",
+                    "relationship": HEAD,
+                    "sex": MALE,
+                    "birth_date": "1955-09-07",
+                },
+            ],
+        )
+        self.household = household
+        self.individual = individuals[0]
+
+        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area)
+
+        self.assertEqual(GrievanceTicket.objects.count(), 0)
+        ticket = GrievanceTicketFactory(
+            business_area=self.business_area,
+        )
+        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        TicketIndividualDataUpdateDetailsFactory(
+            ticket=ticket,
+            individual=self.individual,
+            individual_data={
+                "disability": {
+                    "value": previous_value,
+                }
+            },
+        )
+        self.assertEqual(
+            ticket.individual_data_update_ticket_details.individual_data["disability"]["value"],
+            previous_value,
+        )
+
+        call_command("fix_grievance_tickets")
+
+        ticket.refresh_from_db()
+        self.assertEqual(
+            ticket.individual_data_update_ticket_details.individual_data["disability"]["value"],
+            new_value,
+        )
