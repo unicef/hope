@@ -54,13 +54,17 @@
             <th></th><th>Name</th><th>Unicef ID</th>
         <tr>
             <td>Primary</td>
+            {% if primary.individual.pk %}
             <td><a href="{% url "admin:household_individual_change"  primary.individual.pk %}">{{ primary.individual.full_name }}</a></td>
             <td>{{ primary.individual.unicef_id }}</td>
+            {% endif %}
         </tr>
         <tr>
             <td>Alternate</td>
+            {% if alternate.individual.pk %}
             <td><a href="{% url "admin:household_individual_change" alternate.individual.pk %}">{{ alternate.individual.full_name }}</a></td>
             <td>{{ alternate.individual.unicef_id }}</td>
+            {% endif %}
         </tr>
         {#    </table>#}
         {#    <h3>Members</h3>#}

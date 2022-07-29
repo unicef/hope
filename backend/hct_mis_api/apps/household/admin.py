@@ -4,17 +4,19 @@ from itertools import chain
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.contrib.messages import DEFAULT_TAGS
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import JSONField, Q
 from django.db.transaction import atomic
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.shortcuts import redirect
 
-from admin_extra_buttons.decorators import button
+from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     MaxMinFilter,
@@ -29,16 +31,13 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
-from hct_mis_api.apps.household.celery_tasks import update_individuals_iban_from_xlsx_task
+from hct_mis_api.apps.household.celery_tasks import (
+    update_individuals_iban_from_xlsx_task,
+)
 from hct_mis_api.apps.household.forms import (
     UpdateByXlsxStage1Form,
     UpdateByXlsxStage2Form,
     UpdateIndividualsIBANFromXlsxForm,
-)
-from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
-from hct_mis_api.apps.household.services.individual_xlsx_update import (
-    IndividualXlsxUpdate,
-    InvalidColumnsError,
 )
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -54,6 +53,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
     XlsxUpdateFile,
+)
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.household.services.individual_xlsx_update import (
+    IndividualXlsxUpdate,
+    InvalidColumnsError,
 )
 from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
 from hct_mis_api.apps.utils.admin import (
@@ -82,6 +86,7 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_display = ("document_number", "type", "status", "individual")
     raw_id_fields = ("individual",)
     list_filter = (
+        QueryStringFilter,
         ("type", RelatedFieldComboFilter),
         ("individual", AutoCompleteFilter),
     )
@@ -129,6 +134,8 @@ class HouseholdAdmin(
         "registration_data_import",
     )
     list_filter = (
+        DepotManager,
+        QueryStringFilter,
         ("unicef_id", MultiValueFilter),
         ("unhcr_id", MultiValueFilter),
         ("id", MultiValueFilter),
@@ -138,7 +145,6 @@ class HouseholdAdmin(
         ("size", MaxMinFilter),
         "org_enumerator",
         "last_registration_date",
-        QueryStringFilter,
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
@@ -180,8 +186,9 @@ class HouseholdAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
+    actions = ["reset_sync_date"]
 
-    def get_ignored_linked_objects(self):
+    def get_ignored_linked_objects(self, request):
         return []
 
     @button(permission="household.can_withdrawn")
@@ -234,11 +241,15 @@ class HouseholdAdmin(
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
-    @button()
-    def members(self, request, pk):
-        obj = Household.objects.get(pk=pk)
+    @link(change_list=False)
+    def members(self, button):
+        # obj = Household.objects.get(pk=pk)
+        # url = reverse("admin:household_individual_changelist")
+        # return HttpResponseRedirect(f"{url}?household__iexact={obj.pk}")
+        obj = button.context["original"]
         url = reverse("admin:household_individual_changelist")
-        return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.unicef_id}")
+        button.href = f"{url}?household__exact={obj.pk}"
+        button.label = url
 
     @button()
     def sanity_check(self, request, pk):
@@ -256,7 +267,7 @@ class HouseholdAdmin(
         alternate = IndividualRoleInHousehold.objects.filter(household=hh, role=ROLE_ALTERNATE).first()
         try:
             head = hh.individuals.get(relationship=HEAD)
-        except IndividualRoleInHousehold.DoesNotExist:
+        except ObjectDoesNotExist:
             warnings.append([messages.ERROR, "Head of househould not found"])
 
         total_in_ranges = 0
@@ -361,6 +372,7 @@ class IndividualAdmin(
         QueryStringFilter,
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
+        ("household", AutoCompleteFilter),
         ("business_area", AutoCompleteFilter),
         "updated_at",
         "last_sync_at",
@@ -409,6 +421,7 @@ class IndividualAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
+    actions = ["reset_sync_date"]
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if isinstance(db_field, JSONField):
@@ -423,7 +436,7 @@ class IndividualAdmin(
     def household_members(self, request, pk):
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.household.unicef_id}")
+        return HttpResponseRedirect(f"{url}?household__exact={obj.household.pk}")
 
     @button(html_attrs={"class": "aeb-green"})
     def sanity_check(self, request, pk):

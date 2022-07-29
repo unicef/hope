@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.db.models import JSONField
 
@@ -38,18 +38,29 @@ class JSONWidgetMixin:
 
 
 class LastSyncDateResetMixin(ExtraButtonsMixin):
-    @button()
-    def reset_sync_date(self, request):
+    def reset_sync_date(self, request, queryset):
+        from hct_mis_api.apps.household.celery_tasks import reset_sync_date
+
+        if queryset:
+            pks = list(queryset.values_list("pk", flat=True))
+        else:
+            pks = None
+
+        reset_sync_date.delay(self.model._meta.label_lower, pks)
+        self.message_user(request, f"Last sync date reset successfully scheduled", messages.SUCCESS)
+
+    @button(label="reset sync date")
+    def reset_sync_date_all(self, request):
         if request.method == "POST":
-            self.get_queryset(request).update(last_sync_at=None)
+            self.reset_sync_date(request, None)
         else:
             return confirm_action(
                 self,
                 request,
                 self.reset_sync_date,
-                "Continuing will reset all records last_sync_date field.",
+                f"Continuing will reset all records last_sync_date field.",
                 "Successfully executed",
-                title="aaaaa",
+                title="Reset LastSyncDate",
             )
 
     @button(label="reset sync date")
