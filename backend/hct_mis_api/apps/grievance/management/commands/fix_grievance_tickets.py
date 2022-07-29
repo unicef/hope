@@ -11,7 +11,15 @@ from hct_mis_api.apps.core.models import BusinessArea
 def fix_disability_fields(business_area=None, **kwargs):
     def _logic(ba):
         print(f"Fixing disability fields for {ba}")
-        tickets = GrievanceTicket.objects.filter(business_area=ba, **kwargs)
+        tickets = GrievanceTicket.objects.filter(
+            business_area=ba,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type__in=[
+                GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+                GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+            ],
+            **kwargs,
+        )
         for ticket in tickets:
             details = ticket.individual_data_update_ticket_details
             if not details:

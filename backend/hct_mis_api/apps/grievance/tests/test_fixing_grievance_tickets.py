@@ -91,6 +91,8 @@ class TestFixingGrievanceTickets(APITestCase):
         self.assertEqual(GrievanceTicket.objects.count(), 0)
         ticket = GrievanceTicketFactory(
             business_area=self.business_area,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
         )
         self.assertEqual(GrievanceTicket.objects.count(), 1)
         TicketIndividualDataUpdateDetailsFactory(
