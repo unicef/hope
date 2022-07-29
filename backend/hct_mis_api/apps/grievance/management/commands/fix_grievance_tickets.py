@@ -37,6 +37,10 @@ def fix_disability_fields(business_area=None, **kwargs):
                         "value"
                     ] = new_disability_value
                     ticket.save()
+                    print(
+                        "SAVED WITH",
+                        ticket.individual_data_update_ticket_details.individual_data["disability"]["value"],
+                    )
 
     if business_area:
         return _logic(business_area)
