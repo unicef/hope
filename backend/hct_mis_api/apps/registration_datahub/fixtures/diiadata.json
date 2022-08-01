@@ -131,7 +131,7 @@
   "pk": "3",
   "fields": {
     "rec_id": "222222",
-    "individual_id": "123412341234",
+    "individual_id": "123412341234 999 222",
     "last_name": "Duarte",
     "first_name": "Erik",
     "second_name": "Mid",
