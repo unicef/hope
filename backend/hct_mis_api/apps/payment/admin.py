@@ -188,7 +188,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase):
 
 @admin.register(Payment)
 class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
-    list_display = ("household", "status", "payment_plan_name")
+    list_display = ("household", "status", "payment_plan")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
@@ -199,7 +199,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "status",
         "delivery_date",
         ("financial_service_provider__name", "Service Provider"),
-        ("payment_plan__name", "PaymentPlan"),
+        ("payment_plan", "PaymentPlan"),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = (
@@ -209,9 +209,6 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "head_of_household",
         "financial_service_provider",
     )
-
-    def payment_plan_name(self, obj):
-        return obj.payment_plan.name
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("household", "payment_plan", "business_area")
