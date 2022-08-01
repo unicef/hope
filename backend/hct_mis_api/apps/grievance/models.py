@@ -666,6 +666,12 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     def individual(self):
         return self.golden_records_individual
 
+    def save(self, *args, **kwargs):
+        if self.ticket:
+            self.ticket.household_unicef_id = self.household.unicef_id
+            self.ticket.save(update_fields=["household_unicef_id"])
+        super().save(*args, **kwargs)
+
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
