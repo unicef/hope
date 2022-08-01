@@ -9,7 +9,6 @@ def set_household_unicef_id(apps, schema_editor):
     grievance_tickets = []
     i, count = 0, GrievanceTicket.objects.all().count() // start + 1
     while i <= count:
-        print(f"{i}/{count}")
         batch = GrievanceTicket.objects.all().order_by("created_at")[start * i: start * (i + 1)]
         for grv in batch:
             ticket_details = getattr(grv, "ticket_details", None)
