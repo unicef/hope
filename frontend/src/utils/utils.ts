@@ -5,10 +5,15 @@ import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
+  PaymentPlanStatus,
   ProgramStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  PAYMENT_PLAN_STATES,
+  TARGETING_STATES,
+} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -173,10 +178,30 @@ export function targetPopulationStatusToColor(
     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
     [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
+    [TargetPopulationStatus.Ready]: theme.hctPalette.green,
+    [TargetPopulationStatus.Assigned]: theme.hctPalette.green,
     [TargetPopulationStatus.SteficonWait]: theme.hctPalette.oragne,
     [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
     [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
     [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function paymentPlanStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
+    [PaymentPlanStatus.Locked]: theme.hctPalette.oragne,
+    [PaymentPlanStatus.InApproval]: theme.hctPalette.blue,
+    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.blue,
+    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
+    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -373,6 +398,10 @@ export function formatThousands(value: string): string {
 
 export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
+}
+
+export function paymentPlanStatusMapping(status): string {
+  return PAYMENT_PLAN_STATES[status];
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

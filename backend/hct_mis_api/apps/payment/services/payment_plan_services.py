@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.inputs import PaymentPlanActionType
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     decode_id_string,
@@ -27,14 +26,14 @@ class PaymentPlanService:
     @property
     def actions_map(self) -> dict:
         return {
-            PaymentPlanActionType.LOCK.value: self.lock,
-            PaymentPlanActionType.UNLOCK.value: self.unlock,
-            PaymentPlanActionType.SEND_FOR_APPROVAL.value: self.send_for_approval,
+            PaymentPlan.Action.LOCK.value: self.lock,
+            PaymentPlan.Action.UNLOCK.value: self.unlock,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.value: self.send_for_approval,
             # use the same method for Approve, Authorize, Finance Review and Reject
-            PaymentPlanActionType.APPROVE.value: self.acceptance_process,
-            PaymentPlanActionType.AUTHORIZE.value: self.acceptance_process,
-            PaymentPlanActionType.REVIEW.value: self.acceptance_process,
-            PaymentPlanActionType.REJECT.value: self.acceptance_process,
+            PaymentPlan.Action.APPROVE.value: self.acceptance_process,
+            PaymentPlan.Action.AUTHORIZE.value: self.acceptance_process,
+            PaymentPlan.Action.REVIEW.value: self.acceptance_process,
+            PaymentPlan.Action.REJECT.value: self.acceptance_process,
         }
 
     def get_business_area_required_number_by_approval_type(self):
@@ -49,10 +48,10 @@ class PaymentPlanService:
 
     def get_approval_type_by_action(self):
         actions_to_approval_type_map = {
-            PaymentPlanActionType.APPROVE.value: Approval.APPROVAL,
-            PaymentPlanActionType.AUTHORIZE.value: Approval.AUTHORIZATION,
-            PaymentPlanActionType.REVIEW.value: Approval.FINANCE_REVIEW,
-            PaymentPlanActionType.REJECT.value: Approval.REJECT,
+            PaymentPlan.Action.APPROVE.value: Approval.APPROVAL,
+            PaymentPlan.Action.AUTHORIZE.value: Approval.AUTHORIZATION,
+            PaymentPlan.Action.REVIEW.value: Approval.FINANCE_REVIEW,
+            PaymentPlan.Action.REJECT.value: Approval.REJECT,
         }
         return actions_to_approval_type_map.get(self.action)
 
@@ -135,10 +134,10 @@ class PaymentPlanService:
 
     def validate_payment_plan_status_to_acceptance_process_approval_type(self):
         action_to_statuses_map = {
-            PaymentPlanActionType.APPROVE.value: [PaymentPlan.Status.IN_APPROVAL],
-            PaymentPlanActionType.AUTHORIZE.value: [PaymentPlan.Status.IN_AUTHORIZATION],
-            PaymentPlanActionType.REVIEW.value: [PaymentPlan.Status.IN_REVIEW],
-            PaymentPlanActionType.REJECT.value: [
+            PaymentPlan.Action.APPROVE.value: [PaymentPlan.Status.IN_APPROVAL],
+            PaymentPlan.Action.AUTHORIZE.value: [PaymentPlan.Status.IN_AUTHORIZATION],
+            PaymentPlan.Action.REVIEW.value: [PaymentPlan.Status.IN_REVIEW],
+            PaymentPlan.Action.REJECT.value: [
                 PaymentPlan.Status.IN_APPROVAL,
                 PaymentPlan.Status.IN_AUTHORIZATION,
                 PaymentPlan.Status.IN_REVIEW,
@@ -214,8 +213,8 @@ class PaymentPlanService:
             raise GraphQLError(f"TargetPopulation should have related Program defined")
 
         dispersion_end_date = input_data["dispersion_end_date"]
-        if not dispersion_end_date or dispersion_end_date >= timezone.now().date():
-            raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] should be a past date")
+        if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
+            raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
         payment_plan = PaymentPlan.objects.create(
             business_area=business_area,
@@ -273,8 +272,8 @@ class PaymentPlanService:
             input_data["dispersion_end_date"]
             and input_data["dispersion_end_date"] != self.payment_plan.dispersion_end_date
         ):
-            if input_data["dispersion_end_date"] >= timezone.now().date():
-                raise GraphQLError(f"Dispersion End Date [{input_data['dispersion_end_date']}] should be a past date")
+            if input_data["dispersion_end_date"] <= timezone.now().date():
+                raise GraphQLError(f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date")
             self.payment_plan.dispersion_end_date = input_data["dispersion_end_date"]
             recalculate = True
 

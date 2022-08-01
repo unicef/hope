@@ -5,30 +5,34 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 
-interface CreatePaymentPlanHeaderProps {
+interface EditPaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
   businessArea: string;
   permissions: string[];
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const CreatePaymentPlanHeader = ({
+export const EditPaymentPlanHeader = ({
   handleSubmit,
   businessArea,
   permissions,
-}: CreatePaymentPlanHeaderProps): React.ReactElement => {
+  paymentPlan,
+}: EditPaymentPlanHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { id } = paymentPlan;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${businessArea}/payment-module/`,
+      to: `/${businessArea}/payment-module/payment-plans/${id}`,
     },
   ];
 
   return (
     <PageHeader
-      title={t('New Payment Plan')}
+      title={`${t('Edit Payment Plan')} ID: ${id}`}
       breadCrumbs={
         hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_LIST, permissions)
           ? breadCrumbsItems
@@ -37,7 +41,10 @@ export const CreatePaymentPlanHeader = ({
     >
       <Box display='flex' mt={2} mb={2}>
         <Box mr={3}>
-          <Button component={Link} to={`/${businessArea}/payment-module`}>
+          <Button
+            component={Link}
+            to={`/${businessArea}/payment-module/payment-plans/${id}`}
+          >
             {t('Cancel')}
           </Button>
         </Box>

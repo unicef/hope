@@ -1,74 +1,84 @@
+import { Box, Button, IconButton } from '@material-ui/core';
+import { FileCopy } from '@material-ui/icons';
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { Button } from '@material-ui/core';
-import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
-
-const IconContainer = styled.span`
-  button {
-    color: #949494;
-    min-width: 40px;
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-`;
-
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
+import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
+import { useSnackbar } from '../../../../../hooks/useSnackBar';
+import {
+  Action,
+  PaymentPlanDocument,
+  PaymentPlanQuery,
+  useActionPpMutation,
+} from '../../../../../__generated__/graphql';
+import { LoadingButton } from '../../../../core/LoadingButton';
 
 export interface LockedPaymentPlanHeaderButtonsProps {
-  setEditState: Function;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
   canDuplicate: boolean;
-  canRemove: boolean;
-  canEdit: boolean;
   canLock: boolean;
+  canSendForApproval: boolean;
 }
 
-export function LockedPaymentPlanHeaderButtons({
-  setEditState,
+export const LockedPaymentPlanHeaderButtons = ({
+  paymentPlan,
   canDuplicate,
-  canEdit,
   canLock,
-  canRemove,
-}: LockedPaymentPlanHeaderButtonsProps): React.ReactElement {
+  canSendForApproval,
+}: LockedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [openApprove, setOpenApprove] = useState(false);
+  const { id } = paymentPlan;
+  const { showMessage } = useSnackbar();
   const [openDuplicate, setOpenDuplicate] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
+  const {
+    mutatePaymentPlanAction: unlock,
+    loading: loadingUnlock,
+  } = usePaymentPlanAction(
+    Action.Unlock,
+    id,
+    () => showMessage(t('Payment Plan has been unlocked.')),
+    () => showMessage(t('Error during unlocking Payment Plan.')),
+  );
+  const {
+    mutatePaymentPlanAction: sendForApproval,
+    loading: loadingSendForApproval,
+  } = usePaymentPlanAction(
+    Action.SendForApproval,
+    id,
+    () => showMessage(t('Payment Plan has been sent for approval.')),
+    () => showMessage(t('Error during sending Payment Plan for approval.')),
+  );
+
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canDuplicate && (
-        <IconContainer>
-          <Button onClick={() => setOpenDuplicate(true)}>
-            <FileCopy />
-          </Button>
-        </IconContainer>
+        <IconButton onClick={() => setOpenDuplicate(true)}>
+          <FileCopy />
+        </IconButton>
       )}
       {canLock && (
-        <ButtonContainer>
-          <Button
+        <Box m={2}>
+          <LoadingButton
+            loading={loadingUnlock}
             variant='outlined'
             color='primary'
-            onClick={() => setOpenApprove(true)}
+            onClick={() => unlock()}
           >
             {t('Unlock')}
-          </Button>
-        </ButtonContainer>
+          </LoadingButton>
+        </Box>
       )}
-      {canLock && (
-        <ButtonContainer>
-          <Button
+      {canSendForApproval && (
+        <Box m={2}>
+          <LoadingButton
+            loading={loadingSendForApproval}
             variant='contained'
             color='primary'
-            onClick={() => setOpenApprove(true)}
+            onClick={() => sendForApproval()}
           >
             {t('Send For Approval')}
-          </Button>
-        </ButtonContainer>
+          </LoadingButton>
+        </Box>
       )}
-    </div>
+    </Box>
   );
-}
+};

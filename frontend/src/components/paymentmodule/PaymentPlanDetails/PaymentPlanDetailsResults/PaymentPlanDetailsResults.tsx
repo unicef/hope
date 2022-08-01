@@ -4,7 +4,7 @@ import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../../theme';
-import { TargetPopulationQuery } from '../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 
@@ -57,22 +57,22 @@ const Label = styled.p`
 `;
 
 interface PaymentPlanDetailsResultsProps {
-  resultsData?:
-    | TargetPopulationQuery['targetPopulation']['candidateStats']
-    | TargetPopulationQuery['targetPopulation']['finalStats'];
-  totalNumOfHouseholds?;
-  totalNumOfIndividuals?;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function PaymentPlanDetailsResults({
-  resultsData,
-  totalNumOfHouseholds,
-  totalNumOfIndividuals,
-}: PaymentPlanDetailsResultsProps): React.ReactElement {
+export const PaymentPlanDetailsResults = ({
+  paymentPlan,
+}: PaymentPlanDetailsResultsProps): React.ReactElement => {
   const { t } = useTranslation();
-  if (!resultsData) {
-    return null;
-  }
+  const {
+    femaleChildrenCount,
+    maleChildrenCount,
+    femaleAdultsCount,
+    maleAdultsCount,
+    totalHouseholdsCount,
+    totalIndividualsCount,
+  } = paymentPlan;
+
   return (
     <>
       <PaperContainer>
@@ -85,7 +85,7 @@ export function PaymentPlanDetailsResults({
               <FieldBorder color={colors.femaleChildren}>
                 <LabelizedField
                   label={t('Female Children')}
-                  value={resultsData.childFemale}
+                  value={femaleChildrenCount}
                 />
               </FieldBorder>
             </Grid>
@@ -93,7 +93,7 @@ export function PaymentPlanDetailsResults({
               <FieldBorder color={colors.femaleAdult}>
                 <LabelizedField
                   label={t('Female Adults')}
-                  value={resultsData.adultFemale}
+                  value={femaleAdultsCount}
                 />
               </FieldBorder>
             </Grid>
@@ -101,7 +101,7 @@ export function PaymentPlanDetailsResults({
               <FieldBorder color={colors.maleChildren}>
                 <LabelizedField
                   label={t('Male Children')}
-                  value={resultsData.childMale}
+                  value={maleChildrenCount}
                 />
               </FieldBorder>
             </Grid>
@@ -109,7 +109,7 @@ export function PaymentPlanDetailsResults({
               <FieldBorder color={colors.maleAdult}>
                 <LabelizedField
                   label={t('Male Adults')}
-                  value={resultsData.adultMale}
+                  value={maleAdultsCount}
                 />
               </FieldBorder>
             </Grid>
@@ -135,10 +135,10 @@ export function PaymentPlanDetailsResults({
                     datasets: [
                       {
                         data: [
-                          resultsData.childFemale,
-                          resultsData.adultFemale,
-                          resultsData.childMale,
-                          resultsData.adultMale,
+                          femaleChildrenCount,
+                          femaleAdultsCount,
+                          maleChildrenCount,
+                          maleAdultsCount,
                         ],
                         backgroundColor: [
                           colors.femaleChildren,
@@ -156,12 +156,12 @@ export function PaymentPlanDetailsResults({
           <Grid container spacing={0} justify='flex-end'>
             <SummaryBorder>
               <LabelizedField label={t('Total Number of Households')}>
-                <SummaryValue>{totalNumOfHouseholds || '0'}</SummaryValue>
+                <SummaryValue>{totalHouseholdsCount || '0'}</SummaryValue>
               </LabelizedField>
             </SummaryBorder>
             <SummaryBorder>
               <LabelizedField label={t('Targeted Individuals')}>
-                <SummaryValue>{totalNumOfIndividuals || '0'}</SummaryValue>
+                <SummaryValue>{totalIndividualsCount || '0'}</SummaryValue>
               </LabelizedField>
             </SummaryBorder>
           </Grid>
@@ -169,4 +169,4 @@ export function PaymentPlanDetailsResults({
       </PaperContainer>
     </>
   );
-}
+};
