@@ -17,6 +17,8 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField/FormikTextField';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { GreyText } from '../../../core/GreyText';
+import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
+import { Action } from '../../../../__generated__/graphql';
 
 export interface AuthorizePaymentPlanProps {
   paymentPlanId: string;
@@ -27,34 +29,16 @@ export const AuthorizePaymentPlan = ({
 }: AuthorizePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [authorizeDialogOpen, setAuthorizeDialogOpen] = useState(false);
-
   const { showMessage } = useSnackbar();
-  // const [mutate] = useActivateCashPlanPaymentVerificationMutation();
-  // const activate = async (): Promise<void> => {
-  //   try {
-  //     await mutate({
-  //       variables: { cashPlanVerificationId },
-  //       refetchQueries,
-  //     });
-  //   } catch (error) {
-  //     /* eslint-disable-next-line no-console */
-  //     console.log('error', error?.graphQLErrors);
-  //     if (
-  //       error?.graphQLErrors?.[0]?.validationErrors
-  //         ?.activateCashPlanPaymentVerification?.phone_numbers
-  //     ) {
-  //       showMessage(
-  //         error?.graphQLErrors?.[0]?.validationErrors?.activateCashPlanPaymentVerification?.phone_numbers.join(
-  //           '\n',
-  //         ),
-  //       );
-  //     } else {
-  //       showMessage(t('Error during activating.'));
-  //     }
-  //   }
-
-  //   showMessage(t('Verification plan has been activated.'));
-  // };
+  const {
+    mutatePaymentPlanAction: authorize,
+    loading: loadingAuthorize,
+  } = usePaymentPlanAction(
+    Action.Authorize,
+    paymentPlanId,
+    () => showMessage(t('Payment Plan has been authorized.')),
+    () => showMessage(t('Error during authorizing Payment Plan.')),
+  );
   const initialValues = {
     comment: '',
   };
@@ -70,7 +54,7 @@ export const AuthorizePaymentPlan = ({
       <Formik
         initialValues={initialValues}
         onSubmit={(values, { resetForm }) => {
-          console.log('authorize');
+          authorize(values.comment);
           resetForm({});
         }}
         validationSchema={validationSchema}
@@ -129,11 +113,11 @@ export const AuthorizePaymentPlan = ({
                     CANCEL
                   </Button>
                   <LoadingButton
-                    loading={true}
+                    loading={loadingAuthorize}
                     type='submit'
                     color='primary'
                     variant='contained'
-                    onClick={() => console.log(paymentPlanId)}
+                    onClick={submitForm}
                     data-cy='button-submit'
                   >
                     {t('Authorize')}

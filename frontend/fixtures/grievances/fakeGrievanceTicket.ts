@@ -535,7 +535,7 @@ export const fakeGrievanceTicket = {
       },
       __typename: 'RegistrationDataImportNode',
     },
-    paymentRecords: {
+    paymentrecordSet: {
       edges: [
         {
           node: {
