@@ -942,6 +942,19 @@ wasmer = ">=1.0.0"
 wasmer-compiler-cranelift = ">=1.0.0"
 
 [[package]]
+name = "flake8"
+version = "4.0.1"
+description = "the modular source code checker: pep8 pyflakes and co"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+mccabe = ">=0.6.0,<0.7.0"
+pycodestyle = ">=2.8.0,<2.9.0"
+pyflakes = ">=2.4.0,<2.5.0"
+
+[[package]]
 name = "freezegun"
 version = "0.3.14"
 description = "Let your Python tests travel through time"
@@ -976,11 +989,11 @@ test = ["requests", "objgraph", "cffi (>=1.12.2)", "dnspython (>=1.16.0,<2.0)", 
 
 [[package]]
 name = "gprof2dot"
-version = "2021.2.21"
+version = "2022.7.29"
 description = "Generate a dot graph from the output of several profilers."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7"
 
 [[package]]
 name = "graphene"
@@ -1261,6 +1274,14 @@ python-versions = ">=3.5"
 traitlets = "*"
 
 [[package]]
+name = "mccabe"
+version = "0.6.1"
+description = "McCabe checker, plugin for flake8"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "msrest"
 version = "0.7.1"
 description = "AutoRest swagger generator Python client runtime."
@@ -1520,6 +1541,14 @@ name = "pycparser"
 version = "2.21"
 description = "C parser in Python"
 category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
+name = "pyflakes"
+version = "2.4.0"
+description = "passive checker of Python programs"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -2160,7 +2189,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "62ba214ac0be099900255c3bd7e266ace5318634fd59133482917f7afcac89d6"
+content-hash = "02199f611812dccbae257e4347a03a26656634c689783a2879aa24c5c7dc9d97"
 
 [metadata.files]
 amqp = []
@@ -2236,6 +2265,7 @@ executing = []
 factory-boy = []
 faker = []
 fastdiff = []
+flake8 = []
 freezegun = []
 gevent = []
 gprof2dot = []
@@ -2257,6 +2287,7 @@ lxml = []
 markuppy = []
 markupsafe = []
 matplotlib-inline = []
+mccabe = []
 msrest = []
 mypy-extensions = []
 newrelic = []
@@ -2282,6 +2313,7 @@ pure-eval = []
 pycodestyle = []
 pycountry = []
 pycparser = []
+pyflakes = []
 pygments = []
 pyjwt = []
 pyparsing = []
