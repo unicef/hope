@@ -30,3 +30,35 @@ When("I click the import button", () => {
 Then("I should see the file import modal", () => {
     cy.get("h2").contains("Select File to Import").click();
 })
+
+
+function hexStringToByte(str) {
+    if (!str) {
+      return new Uint8Array(0);
+    }
+    
+    var a = [];
+    for (var i = 0, len = str.length; i < len; i+=2) {
+      a.push(parseInt(str.substr(i,2),16));
+    }
+    
+    return new Uint8Array(a);
+  }
+
+When("I select the xlsx file", () => {
+    cy.get('[data-cy="import-type-select"]').click();
+    cy.get('[data-cy="excel-menu-item"]').click();
+    const fileName = 'RDI-VALID.xlsx'
+    const filePath = "cypress/fixtures/" + fileName
+    
+
+})
+
+
+Then("I see it was chosen", () => {
+
+})
+
+When("I press import", () => {
+    // cy.get('button > span').contains('IMPORT').click({ force: true });
+})
