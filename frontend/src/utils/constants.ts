@@ -1,15 +1,38 @@
-import { TargetPopulationStatus } from '../__generated__/graphql';
+import {
+  PaymentPlanStatus,
+  TargetPopulationStatus,
+} from '../__generated__/graphql';
 
 export const TARGETING_STATES = {
   NONE: 'None',
   [TargetPopulationStatus.Draft]: 'Open',
   [TargetPopulationStatus.Locked]: 'Locked',
   [TargetPopulationStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
+  [TargetPopulationStatus.Ready]: 'Ready',
   [TargetPopulationStatus.Processing]: 'Processing',
   [TargetPopulationStatus.SteficonWait]: 'Steficon Wait',
   [TargetPopulationStatus.SteficonRun]: 'Steficon Run',
   [TargetPopulationStatus.SteficonCompleted]: 'Steficon Completed',
   [TargetPopulationStatus.SteficonError]: 'Steficon Error',
+  [TargetPopulationStatus.Assigned]: 'Assigned',
+};
+
+export const PAYMENT_PLAN_STATES = {
+  [PaymentPlanStatus.Open]: 'Open',
+  [PaymentPlanStatus.Locked]: 'Locked',
+  [PaymentPlanStatus.InApproval]: 'In Approval',
+  [PaymentPlanStatus.InAuthorization]: 'In Authorization',
+  [PaymentPlanStatus.InReview]: 'In Review',
+  [PaymentPlanStatus.Accepted]: 'Accepted',
+};
+export const PAYMENT_PLAN_ACTIONS = {
+  LOCK: 'LOCK',
+  UNLOCK: 'UNLOCK',
+  SEND_FOR_APPROVAL: 'SEND_FOR_APPROVAL',
+  APPROVE: 'APPROVE',
+  AUTHORIZE: 'AUTHORIZE',
+  REVIEW: 'REVIEW',
+  REJECT: 'REJECT',
 };
 
 export const GRIEVANCE_TICKET_STATES = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { AcceptanceProcess } from '../../../components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { Entitlement } from '../../../components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
@@ -11,26 +11,34 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
+import { usePaymentPlanQuery } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 
-export function PaymentPlanDetailsPage(): React.ReactElement {
-  const { t } = useTranslation();
+export const PaymentPlanDetailsPage = (): React.ReactElement => {
+  const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
+  const { data, loading } = usePaymentPlanQuery({
+    variables: { id },
+    fetchPolicy: 'cache-and-network',
+  });
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_LIST, permissions))
+  if (!data) return null;
+  if (loading) return <LoadingComponent />;
+  if (!hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
-
   return (
     <>
       <PaymentPlanDetailsHeader
-        paymentPlan={null}
+        paymentPlan={data.paymentPlan}
         businessArea={businessArea}
         permissions={permissions}
       />
       <PaymentPlanDetails
         businessArea={businessArea}
         permissions={permissions}
+        paymentPlan={data.paymentPlan}
       />
       <AcceptanceProcess
         businessArea={businessArea}
@@ -38,8 +46,8 @@ export function PaymentPlanDetailsPage(): React.ReactElement {
       />
       <Entitlement businessArea={businessArea} permissions={permissions} />
       <FspSection businessArea={businessArea} permissions={permissions} />
-      <PaymentPlanDetailsResults />
+      <PaymentPlanDetailsResults paymentPlan={data.paymentPlan} />
       <PaymentsTable businessArea={businessArea} filter={{}} />
     </>
   );
-}
+};

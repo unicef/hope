@@ -1,48 +1,27 @@
+import { Box, Button } from '@material-ui/core';
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { Button } from '@material-ui/core';
-import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
-import { ErrorButton } from '../../../../core/ErrorButton';
-
-const IconContainer = styled.span`
-  button {
-    color: #949494;
-    min-width: 40px;
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-`;
-
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
+import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
-  setEditState: Function;
-  canDuplicate: boolean;
-  canRemove: boolean;
-  canEdit: boolean;
-  canLock: boolean;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  canDownloadXlsx: boolean;
+  canSendToFsp: boolean;
 }
 
-export function AcceptedPaymentPlanHeaderButtons({
-  setEditState,
-  canDuplicate,
-  canEdit,
-  canLock,
-  canRemove,
-}: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement {
+export const AcceptedPaymentPlanHeaderButtons = ({
+  paymentPlan,
+  canDownloadXlsx,
+  canSendToFsp,
+}: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   return (
-    <div>
-      {canLock && (
-        <ButtonContainer>
+    <Box display='flex' alignItems='center'>
+      {canDownloadXlsx && (
+        <Box m={2}>
           <Button
             variant='contained'
             color='primary'
@@ -50,10 +29,10 @@ export function AcceptedPaymentPlanHeaderButtons({
           >
             {t('Download XLSX')}
           </Button>
-        </ButtonContainer>
+        </Box>
       )}
-      {canLock && (
-        <ButtonContainer>
+      {canSendToFsp && (
+        <Box m={2}>
           <Button
             variant='contained'
             color='primary'
@@ -61,8 +40,8 @@ export function AcceptedPaymentPlanHeaderButtons({
           >
             {t('Send to Fsp')}
           </Button>
-        </ButtonContainer>
+        </Box>
       )}
-    </div>
+    </Box>
   );
-}
+};
