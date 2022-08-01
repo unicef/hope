@@ -1,5 +1,7 @@
 import graphene
 
+from hct_mis_api.apps.payment.models import PaymentPlan
+
 
 class FullListArguments(graphene.InputObjectType):
     excluded_admin_areas = graphene.List(graphene.String)
@@ -66,19 +68,9 @@ class CreateFinancialServiceProviderInput(graphene.InputObjectType):
     fsp_xlsx_template_id = graphene.ID(required=True)
 
 
-class PaymentPlanActionType(graphene.Enum):
-    LOCK = "LOCK"
-    UNLOCK = "UNLOCK"
-    SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL"
-    APPROVE = "APPROVE"
-    AUTHORIZE = "AUTHORIZE"
-    REVIEW = "REVIEW"
-    REJECT = "REJECT"
-
-
 class ActionPaymentPlanInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
-    action = graphene.InputField(PaymentPlanActionType, required=True)
+    action = graphene.Enum.from_enum(PaymentPlan.Action)(required=True)
     comment = graphene.String()
 
 

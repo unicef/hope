@@ -1,22 +1,22 @@
-import { Box, Button } from '@material-ui/core';
-import { Link, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { Box } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import {
+  paymentPlanStatusMapping,
+  paymentPlanStatusToColor,
+} from '../../../../utils/utils';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
-import {
-  decodeIdString,
-  targetPopulationStatusMapping,
-  targetPopulationStatusToColor,
-} from '../../../../utils/utils';
 import { StatusBox } from '../../../core/StatusBox';
-import { TargetPopulationStatus } from '../../../../__generated__/graphql';
-import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
-import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
-import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
 import { AcceptedPaymentPlanHeaderButtons } from './HeaderButtons/AcceptedPaymentPlanHeaderButtons';
+import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
+import { InAuthorizationPaymentPlanHeaderButtons } from './HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
+import { InReviewPaymentPlanHeaderButtons } from './HeaderButtons/InReviewPaymentPlanHeaderButtons';
+import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
+import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 
 const StatusWrapper = styled.div`
   width: 140px;
@@ -26,17 +26,15 @@ const StatusWrapper = styled.div`
 interface PaymentPlanDetailsHeaderProps {
   businessArea: string;
   permissions: string[];
-  paymentPlan;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function PaymentPlanDetailsHeader({
+export const PaymentPlanDetailsHeader = ({
   businessArea,
   permissions,
   paymentPlan,
-}: PaymentPlanDetailsHeaderProps): React.ReactElement {
+}: PaymentPlanDetailsHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { id } = useParams();
-
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
@@ -44,95 +42,90 @@ export function PaymentPlanDetailsHeader({
     },
   ];
 
-  //TODO: Use statuses from node - not in backend yet
+  const canRemove = true;
+  const canEdit = true;
+  const canLock = true;
+  const canSendForApproval = true;
+  const canDuplicate = true;
+  const canReject = true;
+  const canApprove = true;
+  const canAuthorize = true;
+  const canMarkAsReviewed = true;
+  const canDownloadXlsx = true;
+  const canSendToFsp = true;
+
   let buttons;
-  switch (paymentPlan?.status) {
+  switch (paymentPlan.status) {
     case 'OPEN':
       buttons = (
         <>
-          {/* <OpenPaymentPlanHeaderButtons
-          targetPopulation={targetPopulation}
-          setEditState={setEditState}
-          canDuplicate={canDuplicate}
-          canRemove={canRemove}
-          canEdit={canEdit}
-          canLock={canLock}
-        /> */}
+          <OpenPaymentPlanHeaderButtons
+            paymentPlan={paymentPlan}
+            canRemove={canRemove}
+            canEdit={canEdit}
+            canLock={canLock}
+          />
         </>
       );
       break;
     case 'LOCKED':
       buttons = (
         <>
-          {/* <LockedPaymentPlanHeaderButtons
-            targetPopulation={targetPopulation}
-            setEditState={setEditState}
+          <LockedPaymentPlanHeaderButtons
+            paymentPlan={paymentPlan}
             canDuplicate={canDuplicate}
-            canRemove={canRemove}
-            canEdit={canEdit}
             canLock={canLock}
-          /> */}
+            canSendForApproval={canSendForApproval}
+          />
         </>
       );
       break;
     case 'IN_APPROVAL':
       buttons = (
         <>
-          {/* <InApprovalPaymentPlanHeaderButtons
-              targetPopulation={targetPopulation}
-              setEditState={setEditState}
-              canDuplicate={canDuplicate}
-              canRemove={canRemove}
-              canEdit={canEdit}
-              canLock={canLock}
-            /> */}
+          <InApprovalPaymentPlanHeaderButtons
+            paymentPlan={paymentPlan}
+            canReject={canReject}
+            canApprove={canApprove}
+          />
         </>
       );
       break;
     case 'IN_AUTHORIZATION':
       buttons = (
         <>
-          {/* <InAuthorizationPaymentPlanHeaderButtons
-                targetPopulation={targetPopulation}
-                setEditState={setEditState}
-                canDuplicate={canDuplicate}
-                canRemove={canRemove}
-                canEdit={canEdit}
-                canLock={canLock}
-              /> */}
+          <InAuthorizationPaymentPlanHeaderButtons
+            paymentPlan={paymentPlan}
+            canReject={canReject}
+            canAuthorize={canAuthorize}
+          />
         </>
       );
       break;
     case 'IN_REVIEW':
       buttons = (
         <>
-          {/* <InAuthorizationPaymentPlanHeaderButtons
-                  targetPopulation={targetPopulation}
-                  setEditState={setEditState}
-                  canDuplicate={canDuplicate}
-                  canRemove={canRemove}
-                  canEdit={canEdit}
-                  canLock={canLock}
-                /> */}
+          <InReviewPaymentPlanHeaderButtons
+            paymentPlan={paymentPlan}
+            canReject={canReject}
+            canMarkAsReviewed={canMarkAsReviewed}
+          />
         </>
       );
       break;
     case 'ACCEPTED':
       buttons = (
         <>
-          {/* <AcceptedPaymentPlanHeaderButtons
-                    targetPopulation={targetPopulation}
-                    setEditState={setEditState}
-                    canDuplicate={canDuplicate}
-                    canRemove={canRemove}
-                    canEdit={canEdit}
-                    canLock={canLock}
-                  /> */}
+          <AcceptedPaymentPlanHeaderButtons
+            paymentPlan={paymentPlan}
+            canDownloadXlsx={canDownloadXlsx}
+            canSendToFsp={canSendToFsp}
+          />
         </>
       );
       break;
     default:
-      buttons = <div>buttons</div>;
+      buttons = <></>;
       break;
   }
 
@@ -140,12 +133,12 @@ export function PaymentPlanDetailsHeader({
     <PageHeader
       title={
         <Box display='flex' alignItems='center'>
-          {t('Payment Plan')} ID ${decodeIdString(id)}
+          {t('Payment Plan')} ID ${paymentPlan.unicefId}
           <StatusWrapper>
             <StatusBox
-              status={paymentPlan?.status}
-              statusToColor={targetPopulationStatusToColor}
-              statusNameMapping={targetPopulationStatusMapping}
+              status={paymentPlan.status}
+              statusToColor={paymentPlanStatusToColor}
+              statusNameMapping={paymentPlanStatusMapping}
             />
           </StatusWrapper>
         </Box>
@@ -159,4 +152,4 @@ export function PaymentPlanDetailsHeader({
       {buttons}
     </PageHeader>
   );
-}
+};

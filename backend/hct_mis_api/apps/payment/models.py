@@ -21,6 +21,7 @@ from multiselectfield import MultiSelectField
 
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
@@ -200,28 +201,35 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     )
 
     class Status(models.TextChoices):
-        OPEN = "OPEN"
-        LOCKED = "LOCKED"
-        IN_APPROVAL = "IN_APPROVAL"
-        IN_AUTHORIZATION = "IN_AUTHORIZATION"
-        IN_REVIEW = "IN_REVIEW"
-        ACCEPTED = "ACCEPTED"
+        OPEN = "OPEN", "Open"
+        LOCKED = "LOCKED", "Locked"
+        IN_APPROVAL = "IN_APPROVAL", "In Approval"
+        IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
+        IN_REVIEW = "IN_REVIEW", "In Review"
+        ACCEPTED = "ACCEPTED", "Accepted"
+
+    class Action(models.TextChoices):
+        LOCK = "LOCK", "Lock"
+        UNLOCK = "UNLOCK", "Unlock"
+        SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL", "Send For Approval"
+        APPROVE = "APPROVE", "Approve"
+        AUTHORIZE = "AUTHORIZE", "Authorize"
+        REVIEW = "REVIEW", "Review"
+        REJECT = "REJECT", "Reject"
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="created_payment_plans",
     )
-    status = FSMField(default=Status.OPEN, protected=False, db_index=True)
+    status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
     unicef_id = CICharField(max_length=250, blank=True, db_index=True)  # TODO MB remove?
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
         related_name="payment_plans",
     )
-    currency = models.CharField(
-        max_length=4,
-    )
+    currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
     dispersion_start_date = models.DateTimeField()
     dispersion_end_date = models.DateTimeField()
     female_children_count = models.PositiveSmallIntegerField(default=0)
