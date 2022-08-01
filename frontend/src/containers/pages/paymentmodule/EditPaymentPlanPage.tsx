@@ -1,11 +1,11 @@
 import { Form, Formik } from 'formik';
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import * as Yup from 'yup';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { CreatePaymentPlanHeader } from '../../../components/paymentmodule/CreatePaymentPlan/CreatePaymentPlanHeader/CreatePaymentPlanHeader';
 import { PaymentPlanParameters } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
 import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -17,22 +17,26 @@ import {
   useAllTargetPopulationsQuery,
   useCreatePpMutation,
   useCurrencyChoicesQuery,
+  usePaymentPlanQuery,
+  useUpdatePpMutation,
 } from '../../../__generated__/graphql';
+import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
-export const CreatePaymentPlanPage = (): React.ReactElement => {
+export const EditPaymentPlanPage = (): React.ReactElement => {
+  const { id } = useParams();
   const { t } = useTranslation();
-  const initialValues = {
-    targetingId: '',
-    startDate: '',
-    endDate: '',
-    currency: null,
-    dispersionStartDate: '',
-    dispersionEndDate: '',
-  };
-  const [mutate] = useCreatePpMutation();
+  const {
+    data: paymentPlanData,
+    loading: loadingPaymentPlan,
+  } = usePaymentPlanQuery({
+    variables: { id },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const [mutate] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -49,12 +53,22 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     loading: loadingCurrencyChoices,
   } = useCurrencyChoicesQuery();
 
-  if (loadingTargetPopulations || loadingCurrencyChoices)
+  if (loadingTargetPopulations || loadingCurrencyChoices || loadingPaymentPlan)
     return <LoadingComponent />;
-  if (!allTargetPopulationsData || !currencyChoicesData) return null;
+  if (!allTargetPopulationsData || !currencyChoicesData || !paymentPlanData)
+    return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
+
+  const initialValues = {
+    targetingId: paymentPlanData.paymentPlan.targetPopulation.id,
+    startDate: paymentPlanData.paymentPlan.startDate,
+    endDate: paymentPlanData.paymentPlan.endDate,
+    currency: paymentPlanData.paymentPlan.currency,
+    dispersionStartDate: paymentPlanData.paymentPlan.dispersionStartDate,
+    dispersionEndDate: paymentPlanData.paymentPlan.dispersionEndDate,
+  };
 
   const validationSchema = Yup.object().shape({
     targetingId: Yup.string().required(t('Target Population is required')),
@@ -98,7 +112,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       const res = await mutate({
         variables: {
           input: {
-            businessAreaSlug: businessArea,
+            paymentPlanId: id,
             targetingId: values.targetingId,
             startDate: values.startDate,
             endDate: values.endDate,
@@ -108,19 +122,19 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
           },
         },
       });
-      showMessage(t('Payment Plan Created'), {
-        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
+      showMessage(t('Payment Plan Edited'), {
+        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
         historyMethod: 'push',
       });
     } catch (e) {
       const { nonValidationErrors } = handleValidationErrors(
-        'createPaymentPlan',
+        'updatePaymentPlan',
         e,
         setFieldError,
         showMessage,
       );
       if (nonValidationErrors.length > 0) {
-        showMessage(t('Unexpected problem while creating Payment Plan'));
+        showMessage(t('Unexpected problem while editing Payment Plan'));
       }
     }
   };
@@ -133,7 +147,8 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     >
       {({ submitForm, values }) => (
         <Form>
-          <CreatePaymentPlanHeader
+          <EditPaymentPlanHeader
+            paymentPlan={paymentPlanData.paymentPlan}
             handleSubmit={submitForm}
             businessArea={businessArea}
             permissions={permissions}

@@ -6,18 +6,19 @@ import {
   DialogContent,
   DialogTitle,
 } from '@material-ui/core';
-import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import * as Yup from 'yup';
 import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField/FormikTextField';
-import { LoadingButton } from '../../../core/LoadingButton';
+import { Action } from '../../../../__generated__/graphql';
 import { GreyText } from '../../../core/GreyText';
-import { ErrorButton } from '../../../core/ErrorButton';
+import { LoadingButton } from '../../../core/LoadingButton';
 
 export interface MarkAsReviewedPaymentPlanProps {
   paymentPlanId: string;
@@ -30,34 +31,16 @@ export const MarkAsReviewedPaymentPlan = ({
   const [markAsReviewedDialogOpen, setMarkAsReviewedDialogOpen] = useState(
     false,
   );
-
   const { showMessage } = useSnackbar();
-  // const [mutate] = useActivateCashPlanPaymentVerificationMutation();
-  // const activate = async (): Promise<void> => {
-  //   try {
-  //     await mutate({
-  //       variables: { cashPlanVerificationId },
-  //       refetchQueries,
-  //     });
-  //   } catch (error) {
-  //     /* eslint-disable-next-line no-console */
-  //     console.log('error', error?.graphQLErrors);
-  //     if (
-  //       error?.graphQLErrors?.[0]?.validationErrors
-  //         ?.activateCashPlanPaymentVerification?.phone_numbers
-  //     ) {
-  //       showMessage(
-  //         error?.graphQLErrors?.[0]?.validationErrors?.activateCashPlanPaymentVerification?.phone_numbers.join(
-  //           '\n',
-  //         ),
-  //       );
-  //     } else {
-  //       showMessage(t('Error during activating.'));
-  //     }
-  //   }
-
-  //   showMessage(t('Verification plan has been activated.'));
-  // };
+  const {
+    mutatePaymentPlanAction: review,
+    loading: loadingReview,
+  } = usePaymentPlanAction(
+    Action.Review,
+    paymentPlanId,
+    () => showMessage(t('Payment Plan has been marked as reviewed.')),
+    () => showMessage(t('Error during marking Payment Plan as reviewed.')),
+  );
   const initialValues = {
     comment: '',
   };
@@ -73,7 +56,7 @@ export const MarkAsReviewedPaymentPlan = ({
       <Formik
         initialValues={initialValues}
         onSubmit={(values, { resetForm }) => {
-          console.log('MarkAsReviewed');
+          review(values.comment);
           resetForm({});
         }}
         validationSchema={validationSchema}
@@ -99,7 +82,7 @@ export const MarkAsReviewedPaymentPlan = ({
             >
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title'>
-                  {t('MarkAsReviewed')}
+                  {t('Mark as Reviewed')}
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
@@ -134,11 +117,11 @@ export const MarkAsReviewedPaymentPlan = ({
                     CANCEL
                   </Button>
                   <LoadingButton
-                    loading={true}
+                    loading={loadingReview}
                     type='submit'
                     color='primary'
                     variant='contained'
-                    onClick={() => console.log(paymentPlanId)}
+                    onClick={submitForm}
                     data-cy='button-submit'
                   >
                     {t('Mark as reviewed')}
