@@ -62,6 +62,7 @@ from hct_mis_api.apps.utils.schema import (
     SectionTotalNode,
     TableTotalCashTransferred,
 )
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 
 
 class RapidProFlowResult(graphene.ObjectType):
@@ -221,7 +222,10 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     approval_number_required = graphene.Int()
     authorization_number_required = graphene.Int()
     finance_review_number_required = graphene.Int()
-
+    dispersion_start_date = graphene.Date()
+    dispersion_end_date = graphene.Date()
+    start_date = graphene.Date()
+    end_date = graphene.Date()
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)
@@ -355,6 +359,9 @@ class Query(graphene.ObjectType):
         filterset_class=PaymentPlanFilter,
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
+    payment_plan_status_choices = graphene.List(ChoiceObject)
+
+    currency_choices = graphene.List(ChoiceObject)
 
     payment = relay.Node.Field(PaymentNode)
     all_payments = DjangoPermissionFilterConnectionField(
@@ -596,3 +603,9 @@ class Query(graphene.ObjectType):
         ]
 
         return {"labels": labels, "datasets": datasets}
+
+    def resolve_currency_choices(self, *args, **kwargs):
+        return to_choice_object([c for c in CURRENCY_CHOICES if c[0] != ""])
+
+    def resolve_payment_plan_status_choices(self, info, **kwargs):
+        return to_choice_object(PaymentPlan.Status.choices)
