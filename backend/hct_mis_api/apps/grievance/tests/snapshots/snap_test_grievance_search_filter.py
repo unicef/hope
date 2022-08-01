@@ -11,8 +11,14 @@ snapshots['TestGrievanceQuerySearchFilter::test_grievance_list_filtered_by_house
     'data': {
         'allGrievanceTicket': {
             'edges': [
+                {
+                    'cursor': 'YXJyYXljb25uZWN0aW9uOjA=',
+                    'node': {
+                        'description': 'ticket_3'
+                    }
+                }
             ],
-            'totalCount': 0
+            'totalCount': 1
         }
     }
 }
@@ -24,17 +30,11 @@ snapshots['TestGrievanceQuerySearchFilter::test_grievance_list_filtered_by_ticke
                 {
                     'cursor': 'YXJyYXljb25uZWN0aW9uOjA=',
                     'node': {
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTphM2RjNWVhNC1lMmExLTQxYWItYTRiOC1hODM1YTAyMDc1Zjg='
-                    }
-                },
-                {
-                    'cursor': 'YXJyYXljb25uZWN0aW9uOjE=',
-                    'node': {
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTo2YTRmOTgzYy1kMzJlLTRkM2UtYWNjMS03MjkwNzRmODFmNDQ='
+                        'description': 'ticket_2'
                     }
                 }
             ],
-            'totalCount': 2
+            'totalCount': 1
         }
     }
 }
@@ -43,8 +43,14 @@ snapshots['TestGrievanceQuerySearchFilter::test_grievance_list_filtered_by_ticke
     'data': {
         'allGrievanceTicket': {
             'edges': [
+                {
+                    'cursor': 'YXJyYXljb25uZWN0aW9uOjA=',
+                    'node': {
+                        'description': 'ticket_1'
+                    }
+                }
             ],
-            'totalCount': 0
+            'totalCount': 1
         }
     }
 }
