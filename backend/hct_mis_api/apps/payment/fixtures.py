@@ -567,7 +567,7 @@ class PaymentFactory(factory.DjangoModelFactory):
         after_now=True,
         tzinfo=utc,
     )
-    service_provider = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first())
+    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = fuzzy.FuzzyChoice((True, False))
 
 
