@@ -4,7 +4,7 @@
     "pk": 991,
     "fields": {
       "rec_id": "1234567890123",
-      "individual_id": "1234567890",
+      "individual_id": "1234567890888",
       "last_name": "Дія1",
       "first_name": "Надія1",
       "second_name": "Володимірівна1",
@@ -29,7 +29,7 @@
     "pk": 992,
     "fields": {
       "rec_id": "1234567890123",
-      "individual_id": "1234567890",
+      "individual_id": "1234567890999",
       "last_name": "Надія1",
       "first_name": "Тарас1",
       "second_name": "Олександровіч1",
@@ -104,7 +104,7 @@
     "pk": 995,
     "fields": {
       "rec_id": "1234567890124",
-      "individual_id": "1234567891",
+      "individual_id": "1234567891333",
       "last_name": "Надія2",
       "first_name": "Тарас2",
       "second_name": "Олександровіч2",
@@ -154,7 +154,7 @@
     "pk": 997,
     "fields": {
       "rec_id": "1234567890125",
-      "individual_id": "1234567892",
+      "individual_id": "1234567892222",
       "last_name": "Дія3",
       "first_name": "Надія3",
       "second_name": "Володимірівна3",
@@ -179,7 +179,7 @@
     "pk": 998,
     "fields": {
       "rec_id": "1234567890125",
-      "individual_id": "1234567892",
+      "individual_id": "1234567892111",
       "last_name": "Надія3",
       "first_name": "Тарас3",
       "second_name": "Олександровіч3",
@@ -270,6 +270,47 @@
       "registration_data_import": null,
       "imported_household": null,
       "status": null
+    }
+  },
+  {
+    "model": "registration_datahub.diiahousehold",
+    "pk": 994,
+    "fields": {
+      "rec_id": "1234567890999",
+      "vpo_doc": "",
+      "vpo_doc_id": null,
+      "vpo_doc_date": null,
+      "address": "ОДЕСЬКА ОБЛАСТЬ, ОДЕСЬКИЙ РАЙОН, М., ОДЕСА, ВУЛ., КАТЕРИНИНСЬКА, 71, , 10",
+      "consent": true,
+      "source_data": "\"{\"REC_ID\":\"1234567890125\",\"APPLICANT\":{\"RNOKPP\":\"1234567892\",\"LAST_NAME\":\"Дія3\",\"FIRST_NAME\":\"Надія3\",\"SECOND_NAME\":\"Володимірівна3\",\"SEX\":\"F\",\"BIRTH_DATE\":\"01.01.1989\",\"DOC\":{\"TYPE\":\"passport\",\"SERIE\":\"ЕМ\",\"NUMBER\":\"682173\",\"ISSUE_DATE\":\"16.06.2002\"}},\"ADDRESS\":{\"registration_inf\":\"true\",\"postbox\":\"\",\"address_grom_katottg\":\"UA51100270000073551\",\"address_koatuu\":\"\",\"address_katottg\":\"UA51100270010076757\",\"region\":\"ОДЕСЬКА ОБЛАСТЬ\",\"district\":\"ОДЕСЬКИЙ РАЙОН\",\"settlement_name\":\"ОДЕСА\",\"settlement_type\":\"М.\",\"city_district\":\"ПРИМОРСЬКИЙ РАЙОН\",\"settlement_district_katottg\":\"UA51100270010320268\",\"street_name\":\"КАТЕРИНИНСЬКА\",\"street_type\":\"ВУЛ.\",\"building_number\":\"71\",\"building_part\":\"\",\"apartment\":\"10\",\"registration_date\":\"\",\"cancelregistration_date\":\"02.11.2020\"},\"PARTNER\":{\"RNOKPP\":\"1234567892\",\"LAST_NAME\":\"Надія3\",\"FIRST_NAME\":\"Тарас3\",\"SECOND_NAME\":\"Олександровіч3\",\"SEX\":\"M\",\"BIRTH_DATE\":\"11.04.1986\"},\"CHILDREN\":[{\"LAST_NAME\":\"Надія3\",\"FIRST_NAME\":\"Богдана3\",\"SECOND_NAME\":\"Тарасівна3\",\"BIRTH_DATE\":\"07.07.2009\",\"BIRTH_DOC\":\"КА-1467\",\"DISABILITY\":false,\"SEX\":\"F\"}],\"IBAN\":\"UA701052990262016400931280454\",\"BANK_NAME\":\"UkrBank3\"}\"",
+      "registration_data_import": null,
+      "imported_household": null,
+      "status": null
+    }
+  },
+  {
+    "model": "registration_datahub.diiaindividual",
+    "pk": 1011,
+    "fields": {
+      "rec_id": "1234567890999",
+      "individual_id": "1234567892222",
+      "last_name": "Дія99",
+      "first_name": "Надія99",
+      "second_name": "Володимірівна999",
+      "relationship": "HEAD",
+      "sex": "F",
+      "birth_date": "03.03.1999",
+      "birth_doc": null,
+      "marital_status": null,
+      "disability": null,
+      "iban": "UA12345529902620164009999994",
+      "bank_name": "UkrBank3",
+      "doc_type": "passport",
+      "doc_serie": "ЕF",
+      "doc_number": "99997",
+      "doc_issue_date": "11.03.2010",
+      "registration_data_import": null,
+      "imported_individual": null
     }
   }
 ]

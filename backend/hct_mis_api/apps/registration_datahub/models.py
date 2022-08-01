@@ -533,11 +533,13 @@ class DiiaHousehold(models.Model):
     STATUS_IMPORTED = "IMPORTED"
     STATUS_ERROR = "ERROR"
     STATUS_IGNORED = "IGNORED"
+    STATUS_TAX_ID_ERROR = "TAX_ID_ERROR"
 
     STATUSES_CHOICES = (
         (STATUS_TO_IMPORT, "To import"),
         (STATUS_IMPORTED, "Imported"),
         (STATUS_ERROR, "Error"),
+        (STATUS_TAX_ID_ERROR, "Tax ID Error"),
     )
 
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
@@ -597,7 +599,7 @@ DIIA_RELATIONSHIP_CHOICE = (
 
 class DiiaIndividual(models.Model):
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
-    individual_id = models.CharField(max_length=128, blank=True, null=True)  # RNOKPP
+    individual_id = models.CharField(max_length=128, blank=True, null=True)  # RNOKPP - ukrainian tax_id
     last_name = models.CharField(max_length=85, blank=True, null=True)
     first_name = models.CharField(max_length=85, blank=True, null=True)
     second_name = models.CharField(max_length=85, blank=True, null=True)
