@@ -13,6 +13,8 @@ export const PAYMENT_QUERY = gql`
       }
       status
       currency
+      entitlementDate
+      entitlementQuantityUsd
     }
   }
 `;
