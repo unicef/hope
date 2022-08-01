@@ -1,8 +1,8 @@
 import { gql } from 'apollo-boost';
 
 export const PAYMENT_LIST_QUERY = gql`
-  query AllPayments ($paymentPlanId: String!) {
-    allPayments (paymentPlanId: $paymentPlanId) {
+  query AllPayments ($paymentPlanId: String!, $businessArea: String!) {
+    allPayments (paymentPlanId: $paymentPlanId, businessArea: $businessArea) {
       edges {
         node {
           id
@@ -15,6 +15,8 @@ export const PAYMENT_LIST_QUERY = gql`
           }
           status
           currency
+          entitlementDate
+          entitlementQuantityUsd
         }
       }
     }

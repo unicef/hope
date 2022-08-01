@@ -249,9 +249,6 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_status(self, info):
-        return str(self.status)
-
 
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
