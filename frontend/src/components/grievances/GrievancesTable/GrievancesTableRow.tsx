@@ -8,6 +8,7 @@ import {
   grievanceTicketStatusToColor,
   grievanceTicketBadgeColors,
   renderUserName,
+  getTimeDifferenceInDays,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../core/UniversalMoment';
 import {
@@ -161,6 +162,15 @@ export function GrievancesTableRow({
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{ticket.userModified}</UniversalMoment>
+      </TableCell>
+      <TableCell align='left'>
+        {getTimeDifferenceInDays(
+          ticket.createdAt,
+          ticket.status === GRIEVANCE_TICKET_STATES.CLOSED &&
+            ticket.updatedAt
+            ? ticket.updatedAt
+            : null,
+        )}
       </TableCell>
     </ClickableTableRow>
   );
