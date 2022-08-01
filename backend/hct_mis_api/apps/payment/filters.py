@@ -261,7 +261,11 @@ class PaymentPlanFilter(FilterSet):
 
 
 class PaymentFilter(FilterSet):
-    payment_plan_id = CharFilter(required=True)
+    business_area = CharFilter(field_name="payment_plan__business_area__slug", required=True)
+    payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
+
+    def payment_plan_id_filter(self, qs, name, value):
+        return qs
 
     class Meta:
         fields = tuple()
