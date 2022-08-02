@@ -54,7 +54,7 @@ try:
         def test_steficon(self, request, pk):
             context = self.get_common_context(request, pk)
             if request.method == "GET":
-                context["title"] = f"Test Steficon rule"
+                context["title"] = "Test Steficon rule"
                 context["form"] = RuleTestForm(
                     initial={"number_of_records": 100, "dry_run": True, "rule": self.object.steficon_rule}
                 )
@@ -89,7 +89,6 @@ try:
                         context["rule_error"] = get_error_info(e)
                         context["form"] = form
             return TemplateResponse(request, "admin/targeting/targetpopulation/steficon_test.html", context)
-
 
 except ImportError:
 
