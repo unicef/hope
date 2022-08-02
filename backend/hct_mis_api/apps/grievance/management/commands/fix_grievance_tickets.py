@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED
@@ -8,6 +9,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 # for copying & pasting into the terminal purposes
 # there's this business_area filter
 # additional kwargs go to GrievanceTicket filter
+@transaction.atomic
 def fix_disability_fields(business_area=None, **kwargs):
     def _logic(ba):
         print(f"Fixing disability fields for {ba}")
