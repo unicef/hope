@@ -276,7 +276,7 @@
     "model": "registration_datahub.diiahousehold",
     "pk": 994,
     "fields": {
-      "rec_id": "1234567890999",
+      "rec_id": "1234567890999123",
       "vpo_doc": "",
       "vpo_doc_id": null,
       "vpo_doc_date": null,
@@ -290,9 +290,9 @@
   },
   {
     "model": "registration_datahub.diiaindividual",
-    "pk": 1011,
+    "pk": 1000,
     "fields": {
-      "rec_id": "1234567890999",
+      "rec_id": "1234567890999123",
       "individual_id": "1234567892222",
       "last_name": "Дія99",
       "first_name": "Надія99",
@@ -304,7 +304,7 @@
       "marital_status": null,
       "disability": null,
       "iban": "UA12345529902620164009999994",
-      "bank_name": "UkrBank3",
+      "bank_name": "UkrBank42",
       "doc_type": "passport",
       "doc_serie": "ЕF",
       "doc_number": "99997",

@@ -16,6 +16,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     DiiaHousehold,
     ImportedDocument,
+    RegistrationDataImportDatahub,
 )
 
 
@@ -53,7 +54,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         )
         self.assertEqual(
             individual.documents.filter(document_number="123412341234999222").first().type.type,
-            IDENTIFICATION_TYPE_TAX_ID
+            IDENTIFICATION_TYPE_TAX_ID,
         )
 
         individual_2 = individuals.get(full_name="Sam Bautista")
@@ -85,11 +86,22 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(0, ImportedIndividual.objects.all().count())
 
         rdi = self.RdiDiiaCreateTask().create_rdi(None, "Test import Diia")
-        self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[991, 992, 993, 1011])
+        self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[991, 992, 993, 994])
 
         self.assertEqual(DiiaHousehold.objects.filter(status=DiiaHousehold.STATUS_IMPORTED).count(), 3)
-        self.assertTrue(ImportedDocument.objects.filter(document_number="1234567892222").exists())
         self.assertEqual(DiiaHousehold.objects.filter(status=DiiaHousehold.STATUS_TAX_ID_ERROR).count(), 1)
+        self.assertEqual(ImportedDocument.objects.filter(document_number="1234567892222").count(), 1)
+        self.assertEqual(ImportedHousehold.objects.all().count(), 3)
+        self.assertEqual(ImportedIndividual.objects.all().count(), 9)
+        self.assertEqual(
+            RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id).import_data.number_of_households, 3
+        )
+        self.assertEqual(
+            RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id).import_data.number_of_individuals, 9
+        )
+        rdi.refresh_from_db()
+        self.assertEqual(rdi.number_of_households, 3)
+        self.assertEqual(rdi.number_of_individuals, 9)
 
     def test_create_duplicated_imported_households(self):
         self.assertEqual(0, ImportedHousehold.objects.all().count())
