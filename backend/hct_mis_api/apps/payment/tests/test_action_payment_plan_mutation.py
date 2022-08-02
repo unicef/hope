@@ -25,6 +25,7 @@ class TestActionPaymentPlanMutation(APITestCase):
                       type
                       comment
                     }
+                    rejectedOn
                     sentForApprovalBy {
                       firstName
                       lastName

@@ -219,12 +219,14 @@ class ApprovalProcessNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_rejected_on(self, info):
-        if self.sent_for_finance_review_date:
-            return "IN_REVIEW"
-        if self.sent_for_authorization_date:
-            return "IN_AUTHORIZATION"
-        if self.sent_for_approval_date:
-            return "IN_APPROVAL"
+        if self.approvals.filter(type=Approval.REJECT).exists():
+            if self.sent_for_finance_review_date:
+                return "IN_REVIEW"
+            if self.sent_for_authorization_date:
+                return "IN_AUTHORIZATION"
+            if self.sent_for_approval_date:
+                return "IN_APPROVAL"
+        return None
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
