@@ -210,11 +210,21 @@ class ApprovalNode(DjangoObjectType):
         return self.info
 
 
-class AcceptanceProcessNode(DjangoObjectType):
+class ApprovalProcessNode(DjangoObjectType):
+    rejected_on = graphene.String()
+
     class Meta:
         model = ApprovalProcess
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_rejected_on(self, info):
+        if self.sent_for_finance_review_date:
+            return "IN_REVIEW"
+        if self.sent_for_authorization_date:
+            return "IN_AUTHORIZATION"
+        if self.sent_for_approval_date:
+            return "IN_APPROVAL"
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
