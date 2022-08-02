@@ -2,6 +2,7 @@ import { Box } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { UniversalMoment } from '../../../core/UniversalMoment';
 import { MessageDialog } from './MessageDialog';
 
 const GreyText = styled.div`
@@ -18,32 +19,48 @@ const GreyBox = styled(Box)`
   background-color: #f4f5f6;
 `;
 interface GreyInfoCardProps {
-  businessArea?: string;
-  permissions?: string[];
+  topMessage: string;
+  topDate: string;
+  bottomMessage: string;
+  bottomDate: string;
+  comment?: string;
+  commentAuthor?: string;
+  commentDate?: string;
 }
 
-export function GreyInfoCard({
-  businessArea,
-  permissions,
-}: GreyInfoCardProps): React.ReactElement {
+export const GreyInfoCard = ({
+  topMessage,
+  topDate,
+  bottomMessage,
+  bottomDate,
+  comment,
+  commentAuthor,
+  commentDate,
+}: GreyInfoCardProps): React.ReactElement => {
   const { t } = useTranslation();
 
   return (
     <Box display='flex' flexDirection='column'>
       <Box p={3}>
-        <GreyTitle>Sent for approval by martin scott on 01/01/2022</GreyTitle>
+        <GreyTitle>
+          {topMessage} on <UniversalMoment>{topDate}</UniversalMoment>
+        </GreyTitle>
       </Box>
       <GreyBox display='flex' alignItems='center' ml={3} mr={3} p={3}>
-        Approved by someone
+        {bottomMessage}
         <Box ml={1}>
-          <GreyText>on 01/01/2022</GreyText>
+          <GreyText>
+            on <UniversalMoment>{bottomDate}</UniversalMoment>
+          </GreyText>
         </Box>
-        <MessageDialog
-          message='I rejected it because I felt it was wrong.'
-          author='Bob Ugar'
-          date='12/02/2022'
-        />
+        {comment && (
+          <MessageDialog
+            comment={comment}
+            author={commentAuthor}
+            date={commentDate}
+          />
+        )}
       </GreyBox>
     </Box>
   );
-}
+};

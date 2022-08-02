@@ -7530,27 +7530,7 @@
           },
           {
             "kind": "OBJECT",
-            "name": "PaymentNode",
-            "ofType": null
-          },
-          {
-            "kind": "OBJECT",
-            "name": "FinancialServiceProviderNode",
-            "ofType": null
-          },
-          {
-            "kind": "OBJECT",
-            "name": "FinancialServiceProviderXlsxTemplateNode",
-            "ofType": null
-          },
-          {
-            "kind": "OBJECT",
-            "name": "FinancialServiceProviderXlsxReportNode",
-            "ofType": null
-          },
-          {
-            "kind": "OBJECT",
-            "name": "AcceptanceProcessNode",
+            "name": "ApprovalProcessNode",
             "ofType": null
           },
           {
@@ -18474,7 +18454,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "AcceptanceProcessNodeConnection",
+                "name": "ApprovalProcessNodeConnection",
                 "ofType": null
               }
             },
@@ -28323,7 +28303,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PaymentNodeConnection",
+        "name": "ApprovalProcessNodeConnection",
         "description": null,
         "fields": [
           {
@@ -28354,7 +28334,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
-                  "name": "PaymentNodeEdge",
+                  "name": "ApprovalProcessNodeEdge",
                   "ofType": null
                 }
               }
@@ -28394,7 +28374,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PaymentNodeEdge",
+        "name": "ApprovalProcessNodeEdge",
         "description": null,
         "fields": [
           {
@@ -28403,7 +28383,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "PaymentNode",
+              "name": "ApprovalProcessNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -28433,7 +28413,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "PaymentNode",
+        "name": "ApprovalProcessNode",
         "description": null,
         "fields": [
           {
@@ -28616,6 +28596,21 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
+          {
+            "name": "rejectedOn",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
           {
             "name": "entitlementQuantityUsd",
             "description": null,
@@ -56659,11 +56654,7 @@
       {
         "name": "include",
         "description": "Directs the executor to include this field or fragment only when the `if` argument is true.",
-        "locations": [
-          "FIELD",
-          "FRAGMENT_SPREAD",
-          "INLINE_FRAGMENT"
-        ],
+        "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
         "args": [
           {
             "name": "if",
@@ -56684,11 +56675,7 @@
       {
         "name": "skip",
         "description": "Directs the executor to skip this field or fragment when the `if` argument is true.",
-        "locations": [
-          "FIELD",
-          "FRAGMENT_SPREAD",
-          "INLINE_FRAGMENT"
-        ],
+        "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
         "args": [
           {
             "name": "if",
@@ -56709,10 +56696,7 @@
       {
         "name": "deprecated",
         "description": "Marks an element of a GraphQL schema as no longer supported.",
-        "locations": [
-          "FIELD_DEFINITION",
-          "ENUM_VALUE"
-        ],
+        "locations": ["FIELD_DEFINITION", "ENUM_VALUE"],
         "args": [
           {
             "name": "reason",
@@ -56729,11 +56713,7 @@
       {
         "name": "client",
         "description": "Direct the client to resolve this field locally, either from the cache or local resolvers.",
-        "locations": [
-          "FIELD",
-          "FRAGMENT_DEFINITION",
-          "INLINE_FRAGMENT"
-        ],
+        "locations": ["FIELD", "FRAGMENT_DEFINITION", "INLINE_FRAGMENT"],
         "args": [
           {
             "name": "always",
@@ -56750,9 +56730,7 @@
       {
         "name": "export",
         "description": "Export this locally resolved field as a variable to be used in the remainder of this query. See\nhttps://www.apollographql.com/docs/react/essentials/local-state/#using-client-fields-as-variables",
-        "locations": [
-          "FIELD"
-        ],
+        "locations": ["FIELD"],
         "args": [
           {
             "name": "as",
@@ -56773,9 +56751,7 @@
       {
         "name": "connection",
         "description": "Specify a custom store key for this result. See\nhttps://www.apollographql.com/docs/react/advanced/caching/#the-connection-directive",
-        "locations": [
-          "FIELD"
-        ],
+        "locations": ["FIELD"],
         "args": [
           {
             "name": "key",
