@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.core.management import BaseCommand
 
-from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED
+from hct_mis_api.apps.household.models import Individual, DISABLED, NOT_DISABLED
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.core.models import BusinessArea
 
@@ -54,6 +54,9 @@ def fix_disability_fields(business_area=None, **kwargs):
 
     for _business_area in BusinessArea.objects.all():
         _logic(_business_area)
+
+    Individual.objects.filter(disability="False").update(disability=NOT_DISABLED)
+    Individual.objects.filter(disability="True").update(disability=DISABLED)
 
 
 class Command(BaseCommand):
