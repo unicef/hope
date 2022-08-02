@@ -1,3 +1,4 @@
+import logging
 from django.db import transaction
 from django.core.management import BaseCommand
 
@@ -12,7 +13,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 @transaction.atomic
 def fix_disability_fields(business_area=None, **kwargs):
     def _logic(ba):
-        print(f"Fixing disability fields for {ba}")
+        logging.info(f"Fixing disability fields for {ba}")
         tickets = GrievanceTicket.objects.filter(
             business_area=ba,
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -41,7 +42,7 @@ def fix_disability_fields(business_area=None, **kwargs):
                 elif disability_value is False:
                     new_disability_value = NOT_DISABLED
                 if new_disability_value is not None:
-                    print(
+                    logging.info(
                         f"Found ticket (id={ticket.id}) with disability: '{disability_value}'. Changing to '{new_disability_value}'"
                     )
                     ticket.individual_data_update_ticket_details.individual_data["disability"][
