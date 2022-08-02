@@ -158,7 +158,7 @@ class DjAdminManager:
         pass
 
     def __init__(self, kf_host=settings.KOBO_KF_URL, kc_host=settings.KOBO_KC_URL):
-        self.admin_path = f"/admin/"
+        self.admin_path = "/admin/"
         self.admin_url = f"{kf_host}{self.admin_path}"
         self.login_url = f"{self.admin_url}login/"
 
