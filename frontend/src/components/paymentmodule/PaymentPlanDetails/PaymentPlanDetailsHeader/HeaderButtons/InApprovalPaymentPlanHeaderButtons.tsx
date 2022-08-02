@@ -17,11 +17,7 @@ export const InApprovalPaymentPlanHeaderButtons = ({
 }: InApprovalPaymentPlanHeaderButtonsProps): React.ReactElement => {
   return (
     <Box display='flex' alignItems='center'>
-      {canReject && (
-        <Box m={2}>
-          <RejectPaymentPlan paymentPlanId={paymentPlan.id} />
-        </Box>
-      )}
+      {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
       {canApprove && <ApprovePaymentPlan paymentPlanId={paymentPlan.id} />}
     </Box>
   );

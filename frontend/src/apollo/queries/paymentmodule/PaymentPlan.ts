@@ -35,6 +35,45 @@ export const PaymentPlan = gql`
       totalEntitledQuantity
       totalDeliveredQuantity
       totalUndeliveredQuantity
+      approvalProcess {
+        totalCount
+        edgeCount
+        edges {
+          node {
+            id
+            sentForApprovalBy {
+              id
+              firstName
+              lastName
+              email
+            }
+            sentForApprovalDate
+            sentForAuthorizationBy {
+              id
+              firstName
+              lastName
+              email
+            }
+            sentForAuthorizationDate
+            sentForFinanceReviewBy {
+              id
+              firstName
+              lastName
+              email
+            }
+            sentForFinanceReviewDate
+            approvals {
+              createdAt
+              type
+              comment
+              info
+            }
+          }
+        }
+      }
+      approvalNumberRequired
+      authorizationNumberRequired
+      financeReviewNumberRequired
     }
   }
 `;
