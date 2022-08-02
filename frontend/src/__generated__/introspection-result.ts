@@ -84,6 +84,18 @@
             "name": "ReportNode"
           },
           {
+            "name": "PaymentNode"
+          },
+          {
+            "name": "FinancialServiceProviderNode"
+          },
+          {
+            "name": "FinancialServiceProviderXlsxTemplateNode"
+          },
+          {
+            "name": "FinancialServiceProviderXlsxReportNode"
+          },
+          {
             "name": "AcceptanceProcessNode"
           },
           {
@@ -142,15 +154,6 @@
           },
           {
             "name": "PaymentVerificationLogEntryNode"
-          },
-          {
-            "name": "FinancialServiceProviderXlsxTemplateNode"
-          },
-          {
-            "name": "FinancialServiceProviderNode"
-          },
-          {
-            "name": "FinancialServiceProviderXlsxReportNode"
           },
           {
             "name": "DocumentNode"

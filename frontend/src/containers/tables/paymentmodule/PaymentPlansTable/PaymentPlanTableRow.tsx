@@ -3,14 +3,14 @@ import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  AllCashPlansQuery,
+  AllPaymentPlansQuery,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import {
   choicesToDict,
-  formatCurrencyWithSymbol,
+  formatCurrency,
   paymentVerificationStatusToColor,
 } from '../../../../utils/utils';
 import { StatusBox } from '../../../../components/core/StatusBox';
@@ -22,7 +22,7 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 interface PaymentVerificationTableRowProps {
-  plan: AllCashPlansQuery['allCashPlans']['edges'][number]['node'];
+  plan: AllPaymentPlansQuery['allPaymentPlans']['edges'][number]['node'];
   canViewDetails: boolean;
 }
 
@@ -54,35 +54,39 @@ export const PaymentPlanTableRow = ({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={paymentPlanPath}>{plan.caId}</BlackLink>
+          <BlackLink to={paymentPlanPath}>{plan.id.slice(0, 10)}</BlackLink>
         ) : (
-          plan.caId
+          plan.id.slice(0, 10)
         )}
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
-            status={plan.cashPlanPaymentVerificationSummary.status}
+            status={plan.status}
             statusToColor={paymentVerificationStatusToColor}
           />
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>
-        {plan.serviceProvider?.fullName || '-'}
+        {plan.totalHouseholdsCount || '-'}
       </TableCell>
       <TableCell align='left'>
-        {deliveryTypeChoicesDict[plan.deliveryType]}
+        {plan.currency}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}
+        {formatCurrency(plan.totalEntitledQuantity, true)}
+      </TableCell>
+      <TableCell align='right'>
+        {formatCurrency(plan.totalDeliveredQuantity, true)}
+      </TableCell>
+      <TableCell align='right'>
+        {formatCurrency(plan.totalUndeliveredQuantity, true)}
       </TableCell>
       <TableCell align='left'>
-        <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
-        <UniversalMoment>{plan.endDate}</UniversalMoment>
+        <UniversalMoment>{plan.dispersionStartDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{plan.program.name}</TableCell>
       <TableCell align='left'>
-        <UniversalMoment>{plan.updatedAt}</UniversalMoment>
+        <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );
