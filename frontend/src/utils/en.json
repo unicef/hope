@@ -686,5 +686,9 @@
   "Error during authorizing Payment Plan.": "Error during authorizing Payment Plan.",
   "Payment Plan has been marked as reviewed.": "Payment Plan has been marked as reviewed.",
   "Error during marking Payment Plan as reviewed.": "Error during marking Payment Plan as reviewed.",
-  "Reject Payment Plan": "Reject Payment Plan"
+  "Reject Payment Plan": "Reject Payment Plan",
+  "Approval": "Approval",
+  "Authorization": "Authorization",
+  "Finance Review": "Finance Review",
+  "SHOW PREVIOUS": "SHOW PREVIOUS"
 }
