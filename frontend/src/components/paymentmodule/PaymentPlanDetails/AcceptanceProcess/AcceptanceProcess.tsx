@@ -1,22 +1,21 @@
 import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { Title } from '../../../core/Title';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
 import { GreyInfoCard } from './GreyInfoCard';
 
 interface AcceptanceProcessProps {
-  businessArea: string;
-  permissions: string[];
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function AcceptanceProcess({
-  businessArea,
-  permissions,
-}: AcceptanceProcessProps): React.ReactElement {
+export const AcceptanceProcess = ({
+  paymentPlan,
+}: AcceptanceProcessProps): React.ReactElement => {
   const { t } = useTranslation();
-
+  console.log(paymentPlan.approvalProcess, 'paymentPlan.approvalProcess');
   return (
     <Box m={5}>
       <ContainerColumnWithBorder>
@@ -40,4 +39,4 @@ export function AcceptanceProcess({
       </ContainerColumnWithBorder>
     </Box>
   );
-}
+};
