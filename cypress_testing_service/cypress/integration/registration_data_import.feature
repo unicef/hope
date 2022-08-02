@@ -14,4 +14,5 @@ Feature: Registration Data Import
         When I select the xlsx file
         Then I see it was chosen
         When I press import
-        Then I should see a new import with status importing
+        Then I should see a new import with status in review
+        When I merge the import
