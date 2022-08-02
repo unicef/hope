@@ -72,6 +72,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                             'node': {
                                 'approvals': [
                                 ],
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -104,6 +105,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                                         'type': 'APPROVAL'
                                     }
                                 ],
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -161,6 +163,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                                         'type': 'REJECT'
                                     }
                                 ],
+                                'rejectedOn': 'IN_APPROVAL',
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -188,6 +191,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                             'node': {
                                 'approvals': [
                                 ],
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -220,6 +224,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                         'type': 'APPROVAL'
                                     }
                                 ],
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -257,6 +262,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                         'type': 'APPROVAL'
                                     }
                                 ],
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -302,6 +308,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                         'type': 'AUTHORIZATION'
                                     }
                                 ],
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -352,6 +359,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                         'type': 'AUTHORIZATION'
                                     }
                                 ],
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -410,6 +418,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                         'type': 'FINANCE_REVIEW'
                                     }
                                 ],
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -473,6 +482,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                         'type': 'FINANCE_REVIEW'
                                     }
                                 ],
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -541,6 +551,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                                         'type': 'FINANCE_REVIEW'
                                     }
                                 ],
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
