@@ -1,7 +1,6 @@
 import datetime
 from django.utils import timezone
 
-from django.core.management import call_command
 from django.test import TestCase
 
 from freezegun import freeze_time
@@ -19,7 +18,6 @@ from hct_mis_api.apps.household.models import (
     MALE,
     NON_BENEFICIARY,
     Household,
-    Individual,
 )
 from hct_mis_api.apps.household.services.household_recalculate_data import recalculate_data
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory

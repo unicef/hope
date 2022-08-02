@@ -1,13 +1,11 @@
 from django.contrib import admin
 from django.template.response import TemplateResponse
-from django.utils.translation import ugettext_lazy as _
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
-    RelatedFieldComboFilter,
     ValueFilter,
 )
 
@@ -34,7 +32,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdm
 
 @admin.register(CashPlan)
 class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-    list_display = ("name", "program", "delivery_type", "status", "verification_status","ca_id")
+    list_display = ("name", "program", "delivery_type", "status", "verification_status", "ca_id")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),

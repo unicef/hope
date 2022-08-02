@@ -1,5 +1,4 @@
 from adminfilters.filters import AutoCompleteFilter, ValueFilter
-from adminfilters.mixin import AdminFiltersMixin
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.logs.admin import LogEntryAdmin as SmartLogEntryAdmin
 

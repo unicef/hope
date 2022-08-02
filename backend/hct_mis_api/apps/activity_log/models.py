@@ -5,8 +5,6 @@ from django.db import models
 from django.db.models import JSONField
 from django.utils.translation import gettext_lazy as _
 
-from model_utils.fields import UUIDField
-
 from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.utils import nested_getattr
 

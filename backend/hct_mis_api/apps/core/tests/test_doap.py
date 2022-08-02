@@ -3,7 +3,6 @@ from io import StringIO
 
 from django.contrib import admin
 from django.core import mail
-from django.core.management import call_command
 from django.urls import reverse
 
 from django_webtest import WebTest

@@ -2,7 +2,6 @@ import logging
 
 from django import forms
 from django.contrib import messages
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.transaction import atomic
 from django.template.response import TemplateResponse
@@ -83,13 +82,10 @@ try:
                             self.message_user(request, "No records found", messages.WARNING)
                     except Exception as e:
                         logger.exception(e)
-                        from hct_mis_api.apps.steficon.debug import process_exception
-
                         context["exception"] = e
                         context["rule_error"] = get_error_info(e)
                         context["form"] = form
             return TemplateResponse(request, "admin/targeting/targetpopulation/steficon_test.html", context)
-
 
 except ImportError:
 
