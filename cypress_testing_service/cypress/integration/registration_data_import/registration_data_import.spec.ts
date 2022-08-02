@@ -36,9 +36,12 @@ When("I select the xlsx file", () => {
     cy.get('[data-cy="import-type-select"]').click();
     cy.get('[data-cy="excel-menu-item"]').click();
     
-    cy.get('[data-cy="input-name"]').type("Test Import");
+    cy.get('[data-cy="input-name"]').type("Test import ".concat((new Date()).toISOString()));
 
-    const fileName = 'valid_rdi.xlsx'
+    const fileName = 'rdi_1_hh_4_ind.xlsx'
+    // check if file under that name is present
+    // and generate file (instead of storing binary xlsx in repo)
+
     cy.fixture(fileName, 'base64').then(fileContent => {
         cy.get('[data-cy="rdi-file-input"]').upload({ fileContent, fileName, mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', encoding: 'base64' })
     })
@@ -46,10 +49,21 @@ When("I select the xlsx file", () => {
 
 
 Then("I see it was chosen", () => {
-    cy.get('div').contains('18 households available to import', { timeout: 10000 });
-    cy.get('div').contains('72 individuals available to import');
+    cy.get('div').contains('1 Household available to import', { timeout: 10000 });
+    cy.get('div').contains('4 Individuals available to import');
+    cy.get('div').contains('Errors').should('not.exist');
 })
 
 When("I press import", () => {
-    // cy.get('button > span').contains('IMPORT').click({ force: true });
+    cy.get('[data-cy="button-import-rdi"').click();
+})
+
+Then("I should see a new import with status importing", () => {
+    cy.get('div').contains('Status')
+    cy.get('div').contains('IMPORTING')
+
+    cy.wait(1000)
+    cy.reload()
+    cy.wait(500)
+    cy.get('div').contains('IMPORT ERROR').should('not.exist');
 })

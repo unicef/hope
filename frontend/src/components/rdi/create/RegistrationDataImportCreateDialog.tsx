@@ -141,7 +141,7 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
               color='primary'
               variant='contained'
               disabled={submitDisabled}
-              data-cy='button-import'
+              data-cy='button-import-rdi'
               onClick={submitForm}
             >
               {t('IMPORT')}

@@ -4,7 +4,7 @@ Feature: Registration Data Import
     Background:
         Given I am authenticated
 
-    Scenario: Visit RDI page
+    Scenario: Visit RDI page and import RDI data
         When I visit the main dashboard
         Then I should see the side panel with RDI option
         When I click on RDI option
@@ -14,3 +14,4 @@ Feature: Registration Data Import
         When I select the xlsx file
         Then I see it was chosen
         When I press import
+        Then I should see a new import with status importing
