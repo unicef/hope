@@ -84,8 +84,8 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Total days',
-    id: 'tota_days',
-    numeric: false,
+    id: 'total_days',
+    numeric: true,
     dataCy: 'totalDays',
   },
 ];
