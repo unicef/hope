@@ -1,6 +1,14 @@
-import { Box, Button, FormHelperText, Grid } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Grid,
+  Step,
+  StepLabel,
+  Stepper,
+} from '@material-ui/core';
 import { Field, Formik } from 'formik';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -50,8 +58,25 @@ import { validate } from '../../../components/grievances/utils/validateGrievance
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 
+const steps = [
+  'Category Selection',
+  'Household/Individual Look up',
+  'Identity Verification',
+  'Description',
+];
+
 const BoxPadding = styled.div`
   padding: 15px 0;
+`;
+const NoRootPadding = styled.div`
+  .MuiStepper-root {
+    padding: 0 !important;
+  }
+`;
+const InnerBoxPadding = styled.div`
+  .MuiPaper-root {
+    padding: 32px 20px;
+  }
 `;
 const NewTicket = styled.div`
   padding: 20px;
@@ -80,6 +105,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+
+  const [activeStep, setActiveStep] = useState(0);
 
   const linkedTicketId = history.location.state?.linkedTicketId;
 
@@ -216,6 +243,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
     return null;
   };
 
+  const handleNext = (): void => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = (): void => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
   return (
     <Formik
       initialValues={initialValues}
@@ -267,191 +302,242 @@ export const CreateGrievancePage = (): React.ReactElement => {
                   ? breadCrumbsItems
                   : null
               }
-            >
-              <Box display='flex' alignContent='center'>
-                <Box mr={3}>
-                  <Button
-                    component={Link}
-                    to={`/${businessArea}/grievance-and-feedback`}
-                  >
-                    {t('Cancel')}
-                  </Button>
-                </Box>
-                <LoadingButton
-                  loading={loading}
-                  color='primary'
-                  variant='contained'
-                  onClick={submitForm}
-                >
-                  {t('Save')}
-                </LoadingButton>
-              </Box>
-            </PageHeader>
+            />
             <Grid container spacing={3}>
-              <Grid item xs={9}>
+              <Grid item xs={12}>
                 <NewTicket>
-                  <ContainerColumnWithBorder>
-                    <Grid container spacing={3}>
-                      <Grid item xs={6}>
-                        <Field
-                          name='category'
-                          label='Category*'
-                          onChange={(e) => {
-                            setFieldValue('category', e.target.value);
-                            setFieldValue('issueType', null);
-                            setFieldValue('subCategory', null);
-                          }}
-                          variant='outlined'
-                          choices={
-                            choicesData.grievanceTicketManualCategoryChoices
-                          }
-                          component={FormikSelectField}
-                        />
-                      </Grid>
-                      {values.category ===
-                        GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-                      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
-                        <Grid item xs={6}>
-                          <Field
-                            name='issueType'
-                            label='Issue Type*'
-                            variant='outlined'
-                            choices={
-                              issueTypeDict[values.category].subCategories
-                            }
-                            component={FormikSelectField}
-                          />
-                        </Grid>
-                      ) : null}
-                      {values.category ===
-                        GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT && (
-                        <Grid item xs={6}>
-                          <Field
-                            name='subCategory'
-                            label={t('Sub Category')}
-                            onChange={(e) => {
-                              setFieldValue('subCategory', e.target.value);
-                            }}
-                            variant='outlined'
-                            choices={
-                              choicesData.grievanceTicketSubCategoryChoices
-                            }
-                            component={FormikSelectField}
-                          />
+                  <InnerBoxPadding>
+                    <ContainerColumnWithBorder>
+                      <NoRootPadding>
+                        <Stepper activeStep={activeStep}>
+                          {steps.map((label) => {
+                            const stepProps: { completed?: boolean } = {};
+                            const labelProps: {
+                              optional?: React.ReactNode;
+                            } = {};
+                            return (
+                              <Step key={label} {...stepProps}>
+                                <StepLabel {...labelProps}>{label}</StepLabel>
+                              </Step>
+                            );
+                          })}
+                        </Stepper>
+                      </NoRootPadding>
+                      {activeStep === 0 && (
+                        <Grid container spacing={3}>
+                          <Grid item xs={6}>
+                            <Field
+                              name='category'
+                              label='Category*'
+                              onChange={(e) => {
+                                setFieldValue('category', e.target.value);
+                                setFieldValue('issueType', null);
+                                setFieldValue('subCategory', null);
+                              }}
+                              variant='outlined'
+                              choices={
+                                choicesData.grievanceTicketManualCategoryChoices
+                              }
+                              component={FormikSelectField}
+                            />
+                          </Grid>
+                          {values.category ===
+                            GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+                          values.category ===
+                            GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
+                            <Grid item xs={6}>
+                              <Field
+                                name='issueType'
+                                label='Issue Type*'
+                                variant='outlined'
+                                choices={
+                                  issueTypeDict[values.category].subCategories
+                                }
+                                component={FormikSelectField}
+                              />
+                            </Grid>
+                          ) : null}
+                          {values.category ===
+                            GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT && (
+                            <Grid item xs={6}>
+                              <Field
+                                name='subCategory'
+                                label={t('Sub Category')}
+                                onChange={(e) => {
+                                  setFieldValue('subCategory', e.target.value);
+                                }}
+                                variant='outlined'
+                                choices={
+                                  choicesData.grievanceTicketSubCategoryChoices
+                                }
+                                component={FormikSelectField}
+                              />
+                            </Grid>
+                          )}
                         </Grid>
                       )}
-                    </Grid>
-                    <BoxWithBorders>
-                      <Box display='flex' flexDirection='column'>
-                        <Consent />
-                        <Field
-                          name='consent'
-                          label={t('Received Consent*')}
-                          color='primary'
-                          component={FormikCheckboxField}
-                        />
-                        <LookUpSection
-                          values={values}
-                          onValueChange={setFieldValue}
-                          errors={errors}
-                          touched={touched}
-                        />
-                      </Box>
-                    </BoxWithBorders>
-                    <BoxWithBorderBottom>
-                      <Grid container spacing={3}>
-                        <Grid item xs={6}>
-                          <Field
-                            name='assignedTo'
-                            label={t('Assigned to*')}
-                            variant='outlined'
-                            choices={mappedIndividuals}
-                            component={FormikSelectField}
-                          />
-                        </Grid>
-                      </Grid>
-                    </BoxWithBorderBottom>
-                    <BoxPadding>
-                      <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                          <Field
-                            name='description'
-                            multiline
-                            fullWidth
-                            variant='outlined'
-                            label='Description*'
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='admin'
-                            label={t('Administrative Level 2')}
-                            variant='outlined'
-                            component={FormikAdminAreaAutocomplete}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='area'
-                            fullWidth
-                            variant='outlined'
-                            label={t('Area / Village / Pay point')}
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='language'
-                            multiline
-                            fullWidth
-                            variant='outlined'
-                            label={t('Languages Spoken')}
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='priority'
-                            multiline
-                            fullWidth
-                            variant='outlined'
-                            label={t('Priority')}
-                            choices={mappedPriorities}
-                            component={FormikSelectField}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='urgency'
-                            multiline
-                            fullWidth
-                            variant='outlined'
-                            label={t('Urgency')}
-                            choices={mappedUrgencies}
-                            component={FormikSelectField}
-                          />
-                        </Grid>
-                      </Grid>
-                    </BoxPadding>
-                    <BoxPadding>
+                      {activeStep === 1 && (
+                        <BoxWithBorders>
+                          <Box display='flex' flexDirection='column'>
+                            <Consent />
+                            <Field
+                              name='consent'
+                              label={t('Received Consent*')}
+                              color='primary'
+                              component={FormikCheckboxField}
+                            />
+                            <LookUpSection
+                              values={values}
+                              onValueChange={setFieldValue}
+                              errors={errors}
+                              touched={touched}
+                            />
+                          </Box>
+                        </BoxWithBorders>
+                      )}
+                      {activeStep === 2 && (
+                        <BoxWithBorderBottom>
+                          <Grid container spacing={3}>
+                            <Grid item xs={6}>
+                              <Field
+                                name='assignedTo'
+                                label={t('Assigned to*')}
+                                variant='outlined'
+                                choices={mappedIndividuals}
+                                component={FormikSelectField}
+                              />
+                            </Grid>
+                          </Grid>
+                        </BoxWithBorderBottom>
+                      )}
+                      {activeStep === steps.length - 1 && (
+                        <BoxPadding>
+                          <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                              <Field
+                                name='description'
+                                multiline
+                                fullWidth
+                                variant='outlined'
+                                label='Description*'
+                                component={FormikTextField}
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Field
+                                name='admin'
+                                label={t('Administrative Level 2')}
+                                variant='outlined'
+                                component={FormikAdminAreaAutocomplete}
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Field
+                                name='area'
+                                fullWidth
+                                variant='outlined'
+                                label={t('Area / Village / Pay point')}
+                                component={FormikTextField}
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Field
+                                name='language'
+                                multiline
+                                fullWidth
+                                variant='outlined'
+                                label={t('Languages Spoken')}
+                                component={FormikTextField}
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Field
+                                name='priority'
+                                multiline
+                                fullWidth
+                                variant='outlined'
+                                label={t('Priority')}
+                                choices={mappedPriorities}
+                                component={FormikSelectField}
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Field
+                                name='urgency'
+                                multiline
+                                fullWidth
+                                variant='outlined'
+                                label={t('Urgency')}
+                                choices={mappedUrgencies}
+                                component={FormikSelectField}
+                              />
+                            </Grid>
+                          </Grid>
+                        </BoxPadding>
+                      )}
+                      {/* <BoxPadding> */}
                       <DatachangeComponent
                         values={values}
                         setFieldValue={setFieldValue}
                       />
                       {dataChangeErrors(errors, touched)}
-                    </BoxPadding>
-                  </ContainerColumnWithBorder>
+                      {/* <BoxWithBorderBottom /> */}
+                      <Box pt={3} display='flex' flexDirection='row'>
+                        <Box mr={3}>
+                          <Button
+                            component={Link}
+                            to={`/${businessArea}/grievance-and-feedback/tickets`}
+                          >
+                            {t('Cancel')}
+                          </Button>
+                        </Box>
+                        <Box display='flex' ml='auto'>
+                          <Button
+                            disabled={activeStep === 0}
+                            onClick={handleBack}
+                          >
+                            {t('Back')}
+                          </Button>
+                          {activeStep === steps.length - 1 ? (
+                            <LoadingButton
+                              loading={loading}
+                              color='primary'
+                              variant='contained'
+                              onClick={submitForm}
+                            >
+                              {t('Save')}
+                            </LoadingButton>
+                          ) : (
+                            <Button
+                              onClick={handleNext}
+                              color='primary'
+                              variant='contained'
+                            >
+                              {t('Next')}
+                            </Button>
+                          )}
+                        </Box>
+                      </Box>
+                    </ContainerColumnWithBorder>
+                  </InnerBoxPadding>
                 </NewTicket>
               </Grid>
-              <Grid item xs={3}>
-                <NewTicket>{renderAlreadyExistsBox(values)}</NewTicket>
-                <NewTicket>
-                  {values.category && values.selectedHousehold?.id ? (
-                    <OtherRelatedTicketsCreate values={values} />
-                  ) : null}
-                </NewTicket>
-              </Grid>
+              {activeStep === steps.length - 1 && (
+                <Grid item xs={12}>
+                  <NewTicket>
+                    <Grid container spacing={3}>
+                      <Grid item xs={6}>
+                        {renderAlreadyExistsBox(values)}
+                      </Grid>
+                      <Grid item xs={6}>
+                        {values.category && values.selectedHousehold?.id && (
+                          <OtherRelatedTicketsCreate values={values} />
+                        )}
+                      </Grid>
+                    </Grid>
+                  </NewTicket>
+                </Grid>
+              )}
             </Grid>
           </>
         );
