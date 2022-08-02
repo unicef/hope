@@ -3,31 +3,61 @@ import { gql } from 'apollo-boost';
 export const PaymentPlan = gql`
   query PaymentPlan($id: ID!) {
     paymentPlan(id: $id) {
-      id
+      isRemoved
       unicefId
-      status
-      createdBy {
+      id
+      createdAt
+      businessArea {
         id
-        firstName
-        lastName
-        email
-      }
-      program {
-        id
+        slug
+        code
         name
+        longName
       }
-      targetPopulation {
-        id
-        name
-      }
-      currency
+      statusDate
       startDate
       endDate
+      program {
+        isRemoved
+        id
+        createdAt
+        updatedAt
+        version
+        name
+        status
+        startDate
+        endDate
+        description
+        caId
+        caHashId
+        budget
+      }
+      exchangeRate
+      totalEntitledQuantity
+      totalEntitledQuantityUsd
+      totalEntitledQuantityRevised
+      totalEntitledQuantityRevisedUsd
+      totalDeliveredQuantity
+      totalDeliveredQuantityUsd
+      totalUndeliveredQuantity
+      totalUndeliveredQuantityUsd
+      createdBy {
+        id
+        username
+        firstName
+        lastName
+      }
+      status
+      targetPopulation {
+        name
+        id
+      }
+      currency
       dispersionStartDate
       dispersionEndDate
       femaleChildrenCount
-      femaleAdultsCount
       maleChildrenCount
+      femaleAdultsCount
       maleAdultsCount
       totalHouseholdsCount
       totalIndividualsCount

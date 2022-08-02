@@ -1,9 +1,12 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllCashPlansQuery,
-  AllCashPlansQueryVariables,
-  useAllCashPlansQuery,
+  // AllCashPlansQuery,
+  // AllCashPlansQueryVariables,
+  // useAllCashPlansQuery,
+  AllPaymentPlansQuery,
+  AllPaymentPlansQueryVariables,
+  useAllPaymentPlansQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentPlansHeadCells';
@@ -20,25 +23,23 @@ export function PaymentPlansTable({
   businessArea,
 }: PaymentPlansTableProps): ReactElement {
   const { t } = useTranslation();
-  const initialVariables: AllCashPlansQueryVariables = {
+  const initialVariables: AllPaymentPlansQueryVariables = {
     businessArea,
-    program: filter.program,
     search: filter.search,
-    serviceProvider: filter.serviceProvider,
-    deliveryType: filter.deliveryType,
-    verificationStatus: filter.verificationStatus,
-    startDateGte: filter.startDate,
-    endDateLte: filter.endDate,
+    status: filter.status,
+    totalEntitledQuantity: filter.totalEntitledQuantity,
+    dispersionStartDate: filter.dispersionStartDate,
+    dispersionEndDate: filter.dispersionEndDate,
   };
   return (
     <UniversalTable<
-      AllCashPlansQuery['allCashPlans']['edges'][number]['node'],
-      AllCashPlansQueryVariables
+      AllPaymentPlansQuery['allPaymentPlans']['edges'][number]['node'],
+      AllPaymentPlansQueryVariables
     >
       title={t('Payment Plans')}
       headCells={headCells}
-      query={useAllCashPlansQuery}
-      queriedObjectName='allCashPlans'
+      query={useAllPaymentPlansQuery}
+      queriedObjectName='allPaymentPlans'
       initialVariables={initialVariables}
       renderRow={(row) => (
         <PaymentPlanTableRow
