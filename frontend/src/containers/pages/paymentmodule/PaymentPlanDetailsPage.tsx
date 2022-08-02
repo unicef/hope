@@ -38,13 +38,9 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       />
       <PaymentPlanDetails
         businessArea={businessArea}
-        permissions={permissions}
         paymentPlan={data.paymentPlan}
       />
-      <AcceptanceProcess
-        businessArea={businessArea}
-        permissions={permissions}
-      />
+      <AcceptanceProcess paymentPlan={data.paymentPlan} />
       <Entitlement businessArea={businessArea} permissions={permissions} />
       <FspSection businessArea={businessArea} permissions={permissions} />
       <PaymentPlanDetailsResults paymentPlan={data.paymentPlan} />
