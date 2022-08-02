@@ -68,6 +68,7 @@ export const PaymentPlan = gql`
               comment
               info
             }
+            rejectedOn
           }
         }
       }

@@ -113,15 +113,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
         historyMethod: 'push',
       });
     } catch (e) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'createPaymentPlan',
-        e,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(t('Unexpected problem while creating Payment Plan'));
-      }
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
