@@ -96,9 +96,9 @@ class BusinessArea(TimeStampedUUIDModel):
     )
     screen_beneficiary = models.BooleanField(default=False)
     deduplication_ignore_withdraw = models.BooleanField(default=False)
-    approval_number_required = models.PositiveIntegerField(default=0)
-    authorization_number_required = models.PositiveIntegerField(default=0)
-    finance_review_number_required = models.PositiveIntegerField(default=0)
+    approval_number_required = models.PositiveIntegerField(default=1)
+    authorization_number_required = models.PositiveIntegerField(default=1)
+    finance_review_number_required = models.PositiveIntegerField(default=1)
 
     is_payment_plan_applicable = models.BooleanField(default=False)
 
