@@ -14,5 +14,3 @@ Feature: Registration Data Import
         When I select the xlsx file
         Then I see it was chosen
         When I press import
-#
-# TODO: prepare xlsx file, upload it and expect stuff to appear in table

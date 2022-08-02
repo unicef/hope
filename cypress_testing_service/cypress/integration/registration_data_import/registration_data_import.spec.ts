@@ -32,31 +32,22 @@ Then("I should see the file import modal", () => {
 })
 
 
-function hexStringToByte(str) {
-    if (!str) {
-      return new Uint8Array(0);
-    }
-    
-    var a = [];
-    for (var i = 0, len = str.length; i < len; i+=2) {
-      a.push(parseInt(str.substr(i,2),16));
-    }
-    
-    return new Uint8Array(a);
-  }
-
 When("I select the xlsx file", () => {
     cy.get('[data-cy="import-type-select"]').click();
     cy.get('[data-cy="excel-menu-item"]').click();
-    const fileName = 'RDI-VALID.xlsx'
-    const filePath = "cypress/fixtures/" + fileName
     
+    cy.get('[data-cy="input-name"]').type("Test Import");
 
+    const fileName = 'valid_rdi.xlsx'
+    cy.fixture(fileName, 'base64').then(fileContent => {
+        cy.get('[data-cy="rdi-file-input"]').upload({ fileContent, fileName, mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', encoding: 'base64' })
+    })
 })
 
 
 Then("I see it was chosen", () => {
-
+    cy.get('div').contains('18 households available to import', { timeout: 10000 });
+    cy.get('div').contains('72 individuals available to import');
 })
 
 When("I press import", () => {
