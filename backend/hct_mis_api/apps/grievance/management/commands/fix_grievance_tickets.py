@@ -21,8 +21,9 @@ def fix_disability_fields(business_area=None, **kwargs):
             **kwargs,
         )
         for ticket in tickets:
-            details = ticket.individual_data_update_ticket_details
-            if not details:
+            try:
+                details = ticket.individual_data_update_ticket_details
+            except GrievanceTicket.individual_data_update_ticket_details.RelatedObjectDoesNotExist:
                 continue
             data = details.individual_data
             if not data:
