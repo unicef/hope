@@ -2628,6 +2628,7 @@ type PaymentPlanNode implements Node {
   approvalNumberRequired: Int
   authorizationNumberRequired: Int
   financeReviewNumberRequired: Int
+  currencyName: String
 }
 
 type PaymentPlanNodeConnection {

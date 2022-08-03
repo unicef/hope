@@ -13,6 +13,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.schema import LogEntryNode
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
@@ -62,7 +63,6 @@ from hct_mis_api.apps.utils.schema import (
     SectionTotalNode,
     TableTotalCashTransferred,
 )
-from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 
 
 class RapidProFlowResult(graphene.ObjectType):
@@ -226,6 +226,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     dispersion_end_date = graphene.Date()
     start_date = graphene.Date()
     end_date = graphene.Date()
+    currency_name = graphene.String()
+
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)
@@ -243,6 +245,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_finance_review_number_required(self, info):
         return self.business_area.finance_review_number_required
+
+    def resolve_currency_name(self, info):
+        return self.get_currency_display()
 
 
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
