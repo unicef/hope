@@ -32,7 +32,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     dispersionStartDate: '',
     dispersionEndDate: '',
   };
-  const [mutate] = useCreatePpMutation();
+  const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -129,6 +129,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
             handleSubmit={submitForm}
             businessArea={businessArea}
             permissions={permissions}
+            loadingCreate={loadingCreate}
           />
           <PaymentPlanTargeting
             allTargetPopulations={allTargetPopulationsData}
