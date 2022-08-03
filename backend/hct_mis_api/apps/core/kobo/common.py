@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from dateutil.parser import parse
 
 from hct_mis_api.apps.core.models import BusinessArea

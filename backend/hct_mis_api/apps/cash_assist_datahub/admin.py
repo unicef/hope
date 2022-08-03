@@ -19,7 +19,6 @@ from adminfilters.mixin import AdminFiltersMixin
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
 
-logger = logging.getLogger(__name__)
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
     CashPlan,
@@ -33,6 +32,8 @@ from hct_mis_api.apps.household import models as people
 from hct_mis_api.apps.program import models as program
 from hct_mis_api.apps.targeting import models as targeting
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+
+logger = logging.getLogger(__name__)
 
 MINUTE = 60
 HOUR = MINUTE * 60
