@@ -31,10 +31,7 @@ export const AcceptanceProcess = ({
     return showAll ? data : [data[data.length - 1]];
   };
 
-  // show newest first
-  const reversedEdges = edges.reverse();
-
-  if (!edges.length || !reversedEdges.length) {
+  if (!edges.length) {
     return null;
   }
 
@@ -46,7 +43,7 @@ export const AcceptanceProcess = ({
             <Typography variant='h6'>{t('Acceptance Process')}</Typography>
           </Title>
         </Box>
-        {matchDataSize(reversedEdges).map((edge) => (
+        {matchDataSize(edges).map((edge) => (
           <AcceptanceProcessRow
             key={edge.node.id}
             row={edge}
