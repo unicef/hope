@@ -448,4 +448,3 @@ def deduplicate_documents():
                 ),
                 registration_data_import=rdi,
             )
-            raise
