@@ -170,6 +170,7 @@ export function GrievancesTableRow({
             ticket.updatedAt
             ? ticket.updatedAt
             : null,
+          false
         )}
       </TableCell>
     </ClickableTableRow>
