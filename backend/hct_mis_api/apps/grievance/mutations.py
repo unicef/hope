@@ -716,8 +716,9 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                     traverse_sibling_tickets(grievance_ticket, individual)
 
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
-            close_function(grievance_ticket, info)
-            grievance_ticket.refresh_from_db()
+            with transaction.atomic(using="default"):
+                close_function(grievance_ticket, info)
+                grievance_ticket.refresh_from_db()
         if status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
             cls.has_permission(info, Permissions.GRIEVANCE_ASSIGN, grievance_ticket.business_area)
             grievance_ticket.assigned_to = info.context.user
