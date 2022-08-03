@@ -41,7 +41,7 @@ from adminfilters.mixin import AdminFiltersMixin
 from constance import config
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
-from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
+from import_export.widgets import ManyToManyWidget
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 from smart_admin.decorators import smart_register
