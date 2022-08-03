@@ -989,11 +989,11 @@ test = ["requests", "objgraph", "cffi (>=1.12.2)", "dnspython (>=1.16.0,<2.0)", 
 
 [[package]]
 name = "gprof2dot"
-version = "2021.2.21"
+version = "2022.7.29"
 description = "Generate a dot graph from the output of several profilers."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7"
 
 [[package]]
 name = "graphene"
@@ -2189,7 +2189,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "9124654f16556cab9ddcf9ff705759154e78cfc17b1ae515ab9eb648eee835c3"
+content-hash = "02199f611812dccbae257e4347a03a26656634c689783a2879aa24c5c7dc9d97"
 
 [metadata.files]
 amqp = []
