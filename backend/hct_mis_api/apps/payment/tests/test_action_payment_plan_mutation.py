@@ -20,10 +20,23 @@ class TestActionPaymentPlanMutation(APITestCase):
                 totalCount
                 edges {
                   node {
-                    approvals {
-                      info
-                      type
-                      comment
+                    actions {
+                      approval{
+                        info
+                        comment
+                      }
+                      authorization{
+                        info
+                        comment
+                      }
+                      financeReview{
+                        info
+                        comment
+                      }
+                      reject{
+                        info
+                        comment
+                      }
                     }
                     rejectedOn
                     sentForApprovalBy {
