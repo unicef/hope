@@ -9317,7 +9317,7 @@ export type AllPaymentsQuery = (
       { __typename?: 'PaymentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'PaymentNode' }
-        & Pick<PaymentNode, 'id' | 'status' | 'currency' | 'entitlementDate' | 'entitlementQuantityUsd'>
+        & Pick<PaymentNode, 'id' | 'status' | 'currency' | 'entitlementDate' | 'entitlementQuantityUsd' | 'createdAt'>
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'size'>
@@ -9474,7 +9474,7 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'status' | 'currency' | 'entitlementDate' | 'entitlementQuantityUsd'>
+    & Pick<PaymentNode, 'id' | 'status' | 'currency' | 'entitlementDate' | 'entitlementQuantityUsd' | 'createdAt'>
     & { household: (
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'size'>
@@ -16651,6 +16651,7 @@ export const AllPaymentsDocument = gql`
         currency
         entitlementDate
         entitlementQuantityUsd
+        createdAt
       }
     }
   }
@@ -17042,6 +17043,7 @@ export const PaymentDocument = gql`
     currency
     entitlementDate
     entitlementQuantityUsd
+    createdAt
   }
 }
     `;

@@ -12,7 +12,7 @@ import { Missing } from '../../../../components/core/Missing';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
+import { AllPaymentsQuery } from '../../../../__generated__/graphql';
 import { SuggestNewAmount } from './SuggestNewAmount';
 import { WarningTooltipTable } from './WarningTooltipTable';
 
@@ -31,6 +31,7 @@ const ErrorOutline = styled(ErrorOutlineIcon)`
   color: #e90202;
   margin-right: 5px;
 `;
+
 export const StyledLink = styled.div`
   color: #000;
   text-decoration: underline;
@@ -40,16 +41,12 @@ export const StyledLink = styled.div`
 `;
 
 interface PaymentsTableRowProps {
-  ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
-  statusChoices: { [id: number]: string };
-  categoryChoices: { [id: number]: string };
+  payment: AllPaymentsQuery['allPayments']['edges'][number]['node'];
   canViewDetails: boolean;
 }
 
 export function PaymentsTableRow({
-  ticket,
-  statusChoices,
-  categoryChoices,
+  payment,
   canViewDetails,
 }: PaymentsTableRowProps): React.ReactElement {
   const { t } = useTranslation();
@@ -57,18 +54,18 @@ export function PaymentsTableRow({
   const businessArea = useBusinessArea();
   const [dialogAmountOpen, setDialogAmountOpen] = useState(false);
   const [dialogWarningOpen, setDialogWarningOpen] = useState(false);
-  const detailsPath = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
+  const detailsPath = `/${businessArea}/payment/${payment.id}`;
 
   const handleClick = (): void => {
     history.push(detailsPath);
   };
 
-  const handleDialogAmountOpen = (e): void => {
+  const handleDialogAmountOpen = (e: React.SyntheticEvent<HTMLButtonElement>): void => {
     e.stopPropagation();
     setDialogAmountOpen(true);
   };
 
-  const handleDialogWarningOpen = (e): void => {
+  const handleDialogWarningOpen = (e: React.SyntheticEvent<HTMLButtonElement>): void => {
     e.stopPropagation();
     setDialogWarningOpen(true);
   };
@@ -79,7 +76,7 @@ export function PaymentsTableRow({
         hover
         onClick={canViewDetails ? handleClick : undefined}
         role='checkbox'
-        key={ticket.id}
+        key={payment.id}
       >
         <TableCell align='left'>
           <WarningTooltip
@@ -91,9 +88,9 @@ export function PaymentsTableRow({
         </TableCell>
         <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink to={detailsPath}>{ticket.unicefId}</BlackLink>
+            <BlackLink to={detailsPath}>{payment.id}</BlackLink>
           ) : (
-            ticket.unicefId
+            payment.id
           )}
         </TableCell>
         <TableCell align='left'>

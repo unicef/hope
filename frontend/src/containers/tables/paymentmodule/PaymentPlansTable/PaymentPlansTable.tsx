@@ -1,9 +1,6 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  // AllCashPlansQuery,
-  // AllCashPlansQueryVariables,
-  // useAllCashPlansQuery,
   AllPaymentPlansQuery,
   AllPaymentPlansQueryVariables,
   useAllPaymentPlansQuery,
@@ -17,6 +14,7 @@ interface PaymentPlansTableProps {
   businessArea: string;
   canViewDetails: boolean;
 }
+
 export function PaymentPlansTable({
   filter,
   canViewDetails,
@@ -31,6 +29,7 @@ export function PaymentPlansTable({
     dispersionStartDate: filter.dispersionStartDate,
     dispersionEndDate: filter.dispersionEndDate,
   };
+
   return (
     <UniversalTable<
       AllPaymentPlansQuery['allPaymentPlans']['edges'][number]['node'],
