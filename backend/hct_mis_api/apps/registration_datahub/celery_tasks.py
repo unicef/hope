@@ -443,8 +443,9 @@ def deduplicate_documents():
                     registration_data_import=rdi,
                 )
             DeduplicateTask.hard_deduplicate_documents(
-                Document.objects.filter(status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True),
+                Document.objects.filter(
+                    status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True
+                ),
                 registration_data_import=rdi,
             )
-            import ipdb;ipdb.set_trace()
             raise
