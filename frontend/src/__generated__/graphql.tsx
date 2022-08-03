@@ -9313,8 +9313,13 @@ export type AllPaymentsQuery = (
   { __typename?: 'Query' }
   & { allPayments: Maybe<(
     { __typename?: 'PaymentNodeConnection' }
-    & { edges: Array<Maybe<(
+    & Pick<PaymentNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
       { __typename?: 'PaymentNodeEdge' }
+      & Pick<PaymentNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentNode' }
         & Pick<PaymentNode, 'id' | 'status' | 'currency' | 'entitlementDate' | 'entitlementQuantityUsd' | 'createdAt'>
@@ -9323,7 +9328,7 @@ export type AllPaymentsQuery = (
           & Pick<HouseholdNode, 'id' | 'size'>
           & { admin2: Maybe<(
             { __typename?: 'AreaNode' }
-            & Pick<AreaNode, 'name'>
+            & Pick<AreaNode, 'id' | 'name'>
           )> }
         ) }
       )> }
@@ -9480,7 +9485,7 @@ export type PaymentQuery = (
       & Pick<HouseholdNode, 'id' | 'size'>
       & { admin2: Maybe<(
         { __typename?: 'AreaNode' }
-        & Pick<AreaNode, 'name'>
+        & Pick<AreaNode, 'id' | 'name'>
       )> }
     ) }
   )> }
@@ -16637,13 +16642,22 @@ export type AllPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<AllPaym
 export const AllPaymentsDocument = gql`
     query AllPayments($paymentPlanId: String!, $businessArea: String!) {
   allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
     edges {
+      cursor
       node {
         id
         household {
           id
           size
           admin2 {
+            id
             name
           }
         }
@@ -17036,6 +17050,7 @@ export const PaymentDocument = gql`
       id
       size
       admin2 {
+        id
         name
       }
     }

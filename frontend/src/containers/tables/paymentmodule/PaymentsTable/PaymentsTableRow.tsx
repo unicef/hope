@@ -1,6 +1,4 @@
-import { IconButton } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
-import { Edit } from '@material-ui/icons';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import React, { useState } from 'react';
@@ -8,12 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { BlackLink } from '../../../../components/core/BlackLink';
-import { Missing } from '../../../../components/core/Missing';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { decodeIdString } from '../../../../utils/utils';
 import { AllPaymentsQuery } from '../../../../__generated__/graphql';
-import { SuggestNewAmount } from './SuggestNewAmount';
 import { WarningTooltipTable } from './WarningTooltipTable';
 
 const ErrorText = styled.div`
@@ -40,6 +37,10 @@ export const StyledLink = styled.div`
   align-content: center;
 `;
 
+const firstTwoOfId = (id: string) => {
+  return decodeIdString(id).split('-').slice(0, 2).join('-');
+};
+
 interface PaymentsTableRowProps {
   payment: AllPaymentsQuery['allPayments']['edges'][number]['node'];
   canViewDetails: boolean;
@@ -52,17 +53,12 @@ export function PaymentsTableRow({
   const { t } = useTranslation();
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const [dialogAmountOpen, setDialogAmountOpen] = useState(false);
   const [dialogWarningOpen, setDialogWarningOpen] = useState(false);
   const detailsPath = `/${businessArea}/payment/${payment.id}`;
+  const householdDetailsPath = `/${businessArea}/population/household/${payment.household.id}`;
 
   const handleClick = (): void => {
     history.push(detailsPath);
-  };
-
-  const handleDialogAmountOpen = (e: React.SyntheticEvent<HTMLButtonElement>): void => {
-    e.stopPropagation();
-    setDialogAmountOpen(true);
   };
 
   const handleDialogWarningOpen = (e: React.SyntheticEvent<HTMLButtonElement>): void => {
@@ -87,20 +83,23 @@ export function PaymentsTableRow({
           />
         </TableCell>
         <TableCell align='left'>
+            {firstTwoOfId(payment.id)}
+        </TableCell>
+        <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink to={detailsPath}>{payment.id}</BlackLink>
+            <BlackLink to={householdDetailsPath}>{firstTwoOfId(payment.household.id)}</BlackLink>
           ) : (
-            payment.id
+            firstTwoOfId(payment.household.id)
           )}
         </TableCell>
         <TableCell align='left'>
-          <Missing />
+          {payment.household.size}
         </TableCell>
         <TableCell align='left'>
-          <Missing />
+          {payment.household.admin2.name}
         </TableCell>
         <TableCell align='left'>
-          <Missing />
+          {payment.household.admin2.name}
         </TableCell>
         <TableCell align='left'>
           {false ? (
@@ -113,20 +112,9 @@ export function PaymentsTableRow({
           )}
         </TableCell>
         <TableCell align='left'>
-          <Missing />
-        </TableCell>
-        <TableCell align='left'>
-          <Missing />
-          <IconButton onClick={(e) => handleDialogAmountOpen(e)}>
-            <Edit />
-          </IconButton>
+          {payment.entitlementQuantityUsd}
         </TableCell>
       </ClickableTableRow>
-      <SuggestNewAmount
-        businessArea={businessArea}
-        setDialogOpen={setDialogAmountOpen}
-        dialogOpen={dialogAmountOpen}
-      />
       <WarningTooltipTable
         businessArea={businessArea}
         setDialogOpen={setDialogWarningOpen}
