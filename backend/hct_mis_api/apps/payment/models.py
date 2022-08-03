@@ -8,7 +8,7 @@ from django.contrib.postgres.fields import CICharField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Count, JSONField, Q, Sum
+from django.db.models import JSONField, Q, Count, Sum, UniqueConstraint
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -27,6 +27,7 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hct_mis_api.apps.payment.managers import PaymentManager
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
@@ -163,7 +164,7 @@ class GenericPayment(TimeStampedUUIDModel):
     )
     status_date = models.DateTimeField()
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
-    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)  # collector
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
     delivery_type = models.CharField(choices=DELIVERY_TYPE_CHOICE, max_length=24, null=True)
     currency = models.CharField(
         max_length=4,
@@ -226,6 +227,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
     unicef_id = CICharField(max_length=250, blank=True, db_index=True)  # TODO MB remove?
+    collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
@@ -307,7 +309,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @property
     def all_active_payments(self):
-        return self.payments.all().exclude(excluded=True)
+        return self.payments.exclude(excluded=True)
+
+    @property
+    def can_be_locked(self) -> bool:
+        return self.payment_plan.payments.filter(payment_plan_hard_conflicted=False).exists()
 
     def update_population_count_fields(self):
         households_ids = self.all_active_payments.values_list("household_id", flat=True)
@@ -707,13 +713,22 @@ class Payment(SoftDeletableModel, GenericPayment):
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
         related_name="payments",
-        null=True,
     )
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
     )
+
+    objects = PaymentManager()
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["payment_plan", "household"],
+                name="payment_plan_and_household",
+            )
+        ]
 
 
 class ServiceProvider(TimeStampedUUIDModel):

@@ -21,11 +21,11 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
-    GenericPayment,
-    Payment,
-    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
+    PaymentPlan,
+    GenericPayment,
+    Payment,
 )
 
 
@@ -267,7 +267,7 @@ class PaymentFilter(FilterSet):
     payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
 
     def payment_plan_id_filter(self, qs, name, value):
-        return qs
+        return qs.filter(payment_plan_id=value)
 
     class Meta:
         fields = tuple()

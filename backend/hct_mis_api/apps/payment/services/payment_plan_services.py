@@ -3,6 +3,7 @@ import logging
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from graphql import GraphQLError
+from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
@@ -10,6 +11,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProcess, Payment
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
 
 
 User = get_user_model()
@@ -87,7 +89,10 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock(self):
-        # TODO MB set/unset excluded payments
+        if not self.payment_plan.can_be_locked:
+            raise GraphQLError(f"At least one valid Payment should exist in order to Lock the Payment Plan")
+
+        self.payment_plan.payments.all().filter(payment_plan_hard_conflicted=True).update(excluded=True)
         self.payment_plan.status_lock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
@@ -97,7 +102,7 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock(self):
-        # TODO MB set/unset excluded payments
+        self.payment_plan.payments.all().update(excluded=False)
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
@@ -192,12 +197,15 @@ class PaymentPlanService:
                     status=Payment.STATUS_NOT_DISTRIBUTED,  # TODO MB ?
                     status_date=timezone.now(),
                     household=household,
-                    head_of_household=household.head_of_household,  # TODO MB ?
+                    head_of_household=household.head_of_household,
+                    collector=household.individuals_and_roles.filter(role=ROLE_PRIMARY).first().individual,
                     currency=payment_plan.currency,
                 )
             )
-
-        Payment.objects.bulk_create(payments_to_create)
+        try:
+            Payment.objects.bulk_create(payments_to_create)
+        except IntegrityError:
+            raise GraphQLError(f"Duplicated Households in provided Targeting")
 
     def create(self, input_data: dict, user: User) -> PaymentPlan:
         business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])

@@ -579,11 +579,12 @@ def generate_real_payment_plans():
     payment_plans = PaymentPlanFactory.create_batch(
         3, program=program, business_area=BusinessArea.objects.get(slug="afghanistan")
     )
-    for payment_plan in payment_plans:
-        PaymentFactory.create_batch(
-            5,
-            payment_plan=payment_plan,
-        )
     program.households.set(
-        Payment.objects.filter(payment_plan__in=payment_plans).values_list("household__id", flat=True)
+        Household.objects.all().values_list("id", flat=True)
     )
+    for payment_plan in payment_plans:
+        for household in program.households.all():
+            PaymentFactory(
+                payment_plan=payment_plan,
+                household=household
+            )
