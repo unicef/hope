@@ -155,47 +155,40 @@ export enum AgencyType {
 export type ApprovalNode = {
   __typename?: 'ApprovalNode';
   createdAt: Scalars['DateTime'];
-  type: ApprovalType;
   comment?: Maybe<Scalars['String']>;
+  createdBy?: Maybe<UserNode>;
   info?: Maybe<Scalars['String']>;
 };
 
 export type ApprovalProcessNode = Node & {
-   __typename?: 'ApprovalProcessNode',
-  id: Scalars['ID'],
-  createdAt: Scalars['DateTime'],
-  updatedAt: Scalars['DateTime'],
-  sentForApprovalBy?: Maybe<UserNode>,
-  sentForApprovalDate?: Maybe<Scalars['DateTime']>,
-  sentForAuthorizationBy?: Maybe<UserNode>,
-  sentForAuthorizationDate?: Maybe<Scalars['DateTime']>,
-  sentForFinanceReviewBy?: Maybe<UserNode>,
-  sentForFinanceReviewDate?: Maybe<Scalars['DateTime']>,
-  paymentPlan: PaymentPlanNode,
-  approvals: Array<ApprovalNode>,
-  rejectedOn?: Maybe<Scalars['String']>,
+  __typename?: 'ApprovalProcessNode';
+  id: Scalars['ID'];
+  createdAt: Scalars['DateTime'];
+  updatedAt: Scalars['DateTime'];
+  sentForApprovalBy?: Maybe<UserNode>;
+  sentForApprovalDate?: Maybe<Scalars['DateTime']>;
+  sentForAuthorizationBy?: Maybe<UserNode>;
+  sentForAuthorizationDate?: Maybe<Scalars['DateTime']>;
+  sentForFinanceReviewBy?: Maybe<UserNode>;
+  sentForFinanceReviewDate?: Maybe<Scalars['DateTime']>;
+  paymentPlan: PaymentPlanNode;
+  rejectedOn?: Maybe<Scalars['String']>;
+  actions?: Maybe<FilteredActionsListNode>;
 };
 
 export type ApprovalProcessNodeConnection = {
-   __typename?: 'ApprovalProcessNodeConnection',
-  pageInfo: PageInfo,
-  edges: Array<Maybe<ApprovalProcessNodeEdge>>,
-  totalCount?: Maybe<Scalars['Int']>,
-  edgeCount?: Maybe<Scalars['Int']>,
+  __typename?: 'ApprovalProcessNodeConnection';
+  pageInfo: PageInfo;
+  edges: Array<Maybe<ApprovalProcessNodeEdge>>;
+  totalCount?: Maybe<Scalars['Int']>;
+  edgeCount?: Maybe<Scalars['Int']>;
 };
 
 export type ApprovalProcessNodeEdge = {
-   __typename?: 'ApprovalProcessNodeEdge',
-  node?: Maybe<ApprovalProcessNode>,
-  cursor: Scalars['String'],
+  __typename?: 'ApprovalProcessNodeEdge';
+  node?: Maybe<ApprovalProcessNode>;
+  cursor: Scalars['String'];
 };
-
-export enum ApprovalType {
-  Approval = 'APPROVAL',
-  Authorization = 'AUTHORIZATION',
-  FinanceReview = 'FINANCE_REVIEW',
-  Reject = 'REJECT',
-}
 
 export type ApproveTargetPopulationMutation = {
   __typename?: 'ApproveTargetPopulationMutation';
@@ -1136,6 +1129,14 @@ export type FieldAttributeNode = {
   choices?: Maybe<Array<Maybe<CoreFieldChoiceObject>>>;
   associatedWith?: Maybe<Scalars['String']>;
   isFlexField?: Maybe<Scalars['Boolean']>;
+};
+
+export type FilteredActionsListNode = {
+  __typename?: 'FilteredActionsListNode';
+  approval?: Maybe<Array<Maybe<ApprovalNode>>>;
+  authorization?: Maybe<Array<Maybe<ApprovalNode>>>;
+  financeReview?: Maybe<Array<Maybe<ApprovalNode>>>;
+  reject?: Maybe<Array<Maybe<ApprovalNode>>>;
 };
 
 export type FinalizeTargetPopulationMutation = {
@@ -3632,42 +3633,42 @@ export enum PaymentPlanCurrency {
 }
 
 export type PaymentPlanNode = Node & {
-   __typename?: 'PaymentPlanNode',
-  isRemoved: Scalars['Boolean'],
-  id: Scalars['ID'],
-  createdAt: Scalars['DateTime'],
-  updatedAt: Scalars['DateTime'],
-  businessArea: UserBusinessAreaNode,
-  statusDate: Scalars['DateTime'],
-  startDate?: Maybe<Scalars['Date']>,
-  endDate?: Maybe<Scalars['Date']>,
-  program: ProgramNode,
-  exchangeRate?: Maybe<Scalars['Float']>,
-  totalEntitledQuantity?: Maybe<Scalars['Float']>,
-  totalEntitledQuantityUsd?: Maybe<Scalars['Float']>,
-  totalEntitledQuantityRevised?: Maybe<Scalars['Float']>,
-  totalEntitledQuantityRevisedUsd?: Maybe<Scalars['Float']>,
-  totalDeliveredQuantity?: Maybe<Scalars['Float']>,
-  totalDeliveredQuantityUsd?: Maybe<Scalars['Float']>,
-  totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
-  totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
-  createdBy: UserNode,
-  status: PaymentPlanStatus,
-  unicefId: Scalars['String'],
-  targetPopulation: TargetPopulationNode,
-  currency: PaymentPlanCurrency,
-  dispersionStartDate?: Maybe<Scalars['Date']>,
-  dispersionEndDate?: Maybe<Scalars['Date']>,
-  femaleChildrenCount: Scalars['Int'],
-  maleChildrenCount: Scalars['Int'],
-  femaleAdultsCount: Scalars['Int'],
-  maleAdultsCount: Scalars['Int'],
-  totalHouseholdsCount: Scalars['Int'],
-  totalIndividualsCount: Scalars['Int'],
-  approvalProcess: ApprovalProcessNodeConnection,
-  approvalNumberRequired?: Maybe<Scalars['Int']>,
-  authorizationNumberRequired?: Maybe<Scalars['Int']>,
-  financeReviewNumberRequired?: Maybe<Scalars['Int']>,
+  __typename?: 'PaymentPlanNode';
+  isRemoved: Scalars['Boolean'];
+  id: Scalars['ID'];
+  createdAt: Scalars['DateTime'];
+  updatedAt: Scalars['DateTime'];
+  businessArea: UserBusinessAreaNode;
+  statusDate: Scalars['DateTime'];
+  startDate?: Maybe<Scalars['Date']>;
+  endDate?: Maybe<Scalars['Date']>;
+  program: ProgramNode;
+  exchangeRate?: Maybe<Scalars['Float']>;
+  totalEntitledQuantity?: Maybe<Scalars['Float']>;
+  totalEntitledQuantityUsd?: Maybe<Scalars['Float']>;
+  totalEntitledQuantityRevised?: Maybe<Scalars['Float']>;
+  totalEntitledQuantityRevisedUsd?: Maybe<Scalars['Float']>;
+  totalDeliveredQuantity?: Maybe<Scalars['Float']>;
+  totalDeliveredQuantityUsd?: Maybe<Scalars['Float']>;
+  totalUndeliveredQuantity?: Maybe<Scalars['Float']>;
+  totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>;
+  createdBy: UserNode;
+  status: PaymentPlanStatus;
+  unicefId: Scalars['String'];
+  targetPopulation: TargetPopulationNode;
+  currency: PaymentPlanCurrency;
+  dispersionStartDate?: Maybe<Scalars['Date']>;
+  dispersionEndDate?: Maybe<Scalars['Date']>;
+  femaleChildrenCount: Scalars['Int'];
+  maleChildrenCount: Scalars['Int'];
+  femaleAdultsCount: Scalars['Int'];
+  maleAdultsCount: Scalars['Int'];
+  totalHouseholdsCount: Scalars['Int'];
+  totalIndividualsCount: Scalars['Int'];
+  approvalProcess: ApprovalProcessNodeConnection;
+  approvalNumberRequired?: Maybe<Scalars['Int']>;
+  authorizationNumberRequired?: Maybe<Scalars['Int']>;
+  financeReviewNumberRequired?: Maybe<Scalars['Int']>;
 };
 
 export type PaymentPlanNodeApprovalProcessArgs = {
@@ -10373,50 +10374,169 @@ export type AllPaymentPlansForTableQuery = { __typename?: 'Query' } & {
 };
 
 export type PaymentPlanQueryVariables = {
-  id: Scalars['ID']
+  id: Scalars['ID'];
 };
 
-
-export type PaymentPlanQuery = (
-  { __typename?: 'Query' }
-  & { paymentPlan: Maybe<(
-    { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'currency' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired'>
-    & { createdBy: (
-      { __typename?: 'UserNode' }
-      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
-    ), program: (
-      { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name'>
-    ), targetPopulation: (
-      { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name'>
-    ), approvalProcess: (
-      { __typename?: 'ApprovalProcessNodeConnection' }
-      & Pick<ApprovalProcessNodeConnection, 'totalCount' | 'edgeCount'>
-      & { edges: Array<Maybe<(
-        { __typename?: 'ApprovalProcessNodeEdge' }
-        & { node: Maybe<(
-          { __typename?: 'ApprovalProcessNode' }
-          & Pick<ApprovalProcessNode, 'id' | 'sentForApprovalDate' | 'sentForAuthorizationDate' | 'sentForFinanceReviewDate' | 'rejectedOn'>
-          & { sentForApprovalBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
-          )>, sentForAuthorizationBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
-          )>, sentForFinanceReviewBy: Maybe<(
-            { __typename?: 'UserNode' }
-            & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
-          )>, approvals: Array<(
-            { __typename?: 'ApprovalNode' }
-            & Pick<ApprovalNode, 'createdAt' | 'type' | 'comment' | 'info'>
-          )> }
-        )> }
-      )>> }
-    ) }
-  )> }
-);
+export type PaymentPlanQuery = { __typename?: 'Query' } & {
+  paymentPlan: Maybe<
+    { __typename?: 'PaymentPlanNode' } & Pick<
+      PaymentPlanNode,
+      | 'id'
+      | 'unicefId'
+      | 'status'
+      | 'currency'
+      | 'startDate'
+      | 'endDate'
+      | 'dispersionStartDate'
+      | 'dispersionEndDate'
+      | 'femaleChildrenCount'
+      | 'femaleAdultsCount'
+      | 'maleChildrenCount'
+      | 'maleAdultsCount'
+      | 'totalHouseholdsCount'
+      | 'totalIndividualsCount'
+      | 'approvalNumberRequired'
+      | 'authorizationNumberRequired'
+      | 'financeReviewNumberRequired'
+    > & {
+        createdBy: { __typename?: 'UserNode' } & Pick<
+          UserNode,
+          'id' | 'firstName' | 'lastName' | 'email'
+        >;
+        program: { __typename?: 'ProgramNode' } & Pick<
+          ProgramNode,
+          'id' | 'name'
+        >;
+        targetPopulation: { __typename?: 'TargetPopulationNode' } & Pick<
+          TargetPopulationNode,
+          'id' | 'name'
+        >;
+        approvalProcess: {
+          __typename?: 'ApprovalProcessNodeConnection';
+        } & Pick<ApprovalProcessNodeConnection, 'totalCount' | 'edgeCount'> & {
+            edges: Array<
+              Maybe<
+                { __typename?: 'ApprovalProcessNodeEdge' } & {
+                  node: Maybe<
+                    { __typename?: 'ApprovalProcessNode' } & Pick<
+                      ApprovalProcessNode,
+                      | 'id'
+                      | 'sentForApprovalDate'
+                      | 'sentForAuthorizationDate'
+                      | 'sentForFinanceReviewDate'
+                      | 'rejectedOn'
+                    > & {
+                        sentForApprovalBy: Maybe<
+                          { __typename?: 'UserNode' } & Pick<
+                            UserNode,
+                            'id' | 'firstName' | 'lastName' | 'email'
+                          >
+                        >;
+                        sentForAuthorizationBy: Maybe<
+                          { __typename?: 'UserNode' } & Pick<
+                            UserNode,
+                            'id' | 'firstName' | 'lastName' | 'email'
+                          >
+                        >;
+                        sentForFinanceReviewBy: Maybe<
+                          { __typename?: 'UserNode' } & Pick<
+                            UserNode,
+                            'id' | 'firstName' | 'lastName' | 'email'
+                          >
+                        >;
+                        actions: Maybe<
+                          { __typename?: 'FilteredActionsListNode' } & {
+                            approval: Maybe<
+                              Array<
+                                Maybe<
+                                  { __typename?: 'ApprovalNode' } & Pick<
+                                    ApprovalNode,
+                                    'createdAt' | 'comment' | 'info'
+                                  > & {
+                                      createdBy: Maybe<
+                                        { __typename?: 'UserNode' } & Pick<
+                                          UserNode,
+                                          | 'id'
+                                          | 'firstName'
+                                          | 'lastName'
+                                          | 'email'
+                                        >
+                                      >;
+                                    }
+                                >
+                              >
+                            >;
+                            authorization: Maybe<
+                              Array<
+                                Maybe<
+                                  { __typename?: 'ApprovalNode' } & Pick<
+                                    ApprovalNode,
+                                    'createdAt' | 'comment' | 'info'
+                                  > & {
+                                      createdBy: Maybe<
+                                        { __typename?: 'UserNode' } & Pick<
+                                          UserNode,
+                                          | 'id'
+                                          | 'firstName'
+                                          | 'lastName'
+                                          | 'email'
+                                        >
+                                      >;
+                                    }
+                                >
+                              >
+                            >;
+                            financeReview: Maybe<
+                              Array<
+                                Maybe<
+                                  { __typename?: 'ApprovalNode' } & Pick<
+                                    ApprovalNode,
+                                    'createdAt' | 'comment' | 'info'
+                                  > & {
+                                      createdBy: Maybe<
+                                        { __typename?: 'UserNode' } & Pick<
+                                          UserNode,
+                                          | 'id'
+                                          | 'firstName'
+                                          | 'lastName'
+                                          | 'email'
+                                        >
+                                      >;
+                                    }
+                                >
+                              >
+                            >;
+                            reject: Maybe<
+                              Array<
+                                Maybe<
+                                  { __typename?: 'ApprovalNode' } & Pick<
+                                    ApprovalNode,
+                                    'createdAt' | 'comment' | 'info'
+                                  > & {
+                                      createdBy: Maybe<
+                                        { __typename?: 'UserNode' } & Pick<
+                                          UserNode,
+                                          | 'id'
+                                          | 'firstName'
+                                          | 'lastName'
+                                          | 'email'
+                                        >
+                                      >;
+                                    }
+                                >
+                              >
+                            >;
+                          }
+                        >;
+                      }
+                  >;
+                }
+              >
+            >;
+          };
+      }
+  >;
+};
 
 export type AllCashPlansQueryVariables = {
   program?: Maybe<Scalars['ID']>;
@@ -21994,32 +22114,55 @@ export const PaymentPlanDocument = gql`
         edges {
           node {
             id
-            sentForApprovalBy {
-              id
-              firstName
-              lastName
-              email
-            }
-            sentForApprovalDate
-            sentForAuthorizationBy {
-              id
-              firstName
-              lastName
-              email
-            }
-            sentForAuthorizationDate
-            sentForFinanceReviewBy {
-              id
-              firstName
-              lastName
-              email
-            }
-            sentForFinanceReviewDate
-            approvals {
+            firstName
+            lastName
+            email
+          }
+          sentForFinanceReviewDate
+          actions {
+            approval {
               createdAt
-              type
               comment
               info
+              createdBy {
+                id
+                firstName
+                lastName
+                email
+              }
+            }
+            authorization {
+              createdAt
+              comment
+              info
+              createdBy {
+                id
+                firstName
+                lastName
+                email
+              }
+            }
+            financeReview {
+              createdAt
+              comment
+              info
+              createdBy {
+                id
+                firstName
+                lastName
+                email
+              }
+            }
+            reject {
+              createdAt
+              comment
+              info
+              createdBy {
+                id
+                firstName
+                lastName
+                email
+              }
             }
           }
         }
@@ -30018,1231 +30161,2279 @@ export type DirectiveResolverFn<
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
-  Query: ResolverTypeWrapper<{}>,
-  ID: ResolverTypeWrapper<Scalars['ID']>,
-  AreaNode: ResolverTypeWrapper<AreaNode>,
-  Node: ResolverTypeWrapper<Node>,
-  DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
-  UUID: ResolverTypeWrapper<Scalars['UUID']>,
-  String: ResolverTypeWrapper<Scalars['String']>,
-  AreaTypeNode: ResolverTypeWrapper<AreaTypeNode>,
-  Int: ResolverTypeWrapper<Scalars['Int']>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
-  AreaTypeNodeConnection: ResolverTypeWrapper<AreaTypeNodeConnection>,
-  PageInfo: ResolverTypeWrapper<PageInfo>,
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
-  AreaTypeNodeEdge: ResolverTypeWrapper<AreaTypeNodeEdge>,
-  AreaNodeConnection: ResolverTypeWrapper<AreaNodeConnection>,
-  AreaNodeEdge: ResolverTypeWrapper<AreaNodeEdge>,
-  HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
-  HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
-  HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
-  BigInt: ResolverTypeWrapper<Scalars['BigInt']>,
-  HouseholdResidenceStatus: HouseholdResidenceStatus,
-  IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
-  IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
-  IndividualNode: ResolverTypeWrapper<IndividualNode>,
-  IndividualSex: IndividualSex,
-  Date: ResolverTypeWrapper<Scalars['Date']>,
-  IndividualMaritalStatus: IndividualMaritalStatus,
-  IndividualRelationship: IndividualRelationship,
-  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
-  RegistrationDataImportStatus: RegistrationDataImportStatus,
-  UserNode: ResolverTypeWrapper<UserNode>,
-  UserStatus: UserStatus,
-  PartnerType: ResolverTypeWrapper<PartnerType>,
-  UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
-  UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
-  UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
-  UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>,
-  Float: ResolverTypeWrapper<Scalars['Float']>,
-  UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
-  UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
-  PaymentPlanNodeConnection: ResolverTypeWrapper<PaymentPlanNodeConnection>,
-  PaymentPlanNodeEdge: ResolverTypeWrapper<PaymentPlanNodeEdge>,
-  PaymentPlanNode: ResolverTypeWrapper<PaymentPlanNode>,
-  ProgramNode: ResolverTypeWrapper<ProgramNode>,
-  ProgramStatus: ProgramStatus,
-  Decimal: ResolverTypeWrapper<Scalars['Decimal']>,
-  ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
-  ProgramSector: ProgramSector,
-  ProgramScope: ProgramScope,
-  CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
-  CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
-  CashPlanNode: ResolverTypeWrapper<CashPlanNode>,
-  CashPlanStatus: CashPlanStatus,
-  ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
-  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
-  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
-  PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>,
-  PaymentRecordStatus: PaymentRecordStatus,
-  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
-  TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>,
-  TargetPopulationStatus: TargetPopulationStatus,
-  TargetingCriteriaNode: ResolverTypeWrapper<TargetingCriteriaNode>,
-  TargetingCriteriaRuleNode: ResolverTypeWrapper<TargetingCriteriaRuleNode>,
-  TargetingIndividualRuleFilterBlockNode: ResolverTypeWrapper<TargetingIndividualRuleFilterBlockNode>,
-  TargetingIndividualBlockRuleFilterNode: ResolverTypeWrapper<TargetingIndividualBlockRuleFilterNode>,
-  TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
-  Arg: ResolverTypeWrapper<Scalars['Arg']>,
-  FieldAttributeNode: ResolverTypeWrapper<FieldAttributeNode>,
-  LabelNode: ResolverTypeWrapper<LabelNode>,
-  CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
-  TargetingCriteriaRuleFilterNode: ResolverTypeWrapper<TargetingCriteriaRuleFilterNode>,
-  TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
-  RuleCommitNode: ResolverTypeWrapper<RuleCommitNode>,
-  SteficonRuleNode: ResolverTypeWrapper<SteficonRuleNode>,
-  RuleLanguage: RuleLanguage,
-  RuleSecurity: RuleSecurity,
-  RuleCommitNodeConnection: ResolverTypeWrapper<RuleCommitNodeConnection>,
-  RuleCommitNodeEdge: ResolverTypeWrapper<RuleCommitNodeEdge>,
-  RuleCommitLanguage: RuleCommitLanguage,
-  TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>,
-  TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>,
-  HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
-  StatsObjectType: ResolverTypeWrapper<StatsObjectType>,
-  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
-  PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>,
-  CashPlanPaymentVerificationNode: ResolverTypeWrapper<CashPlanPaymentVerificationNode>,
-  CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
-  CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
-  CashPlanPaymentVerificationVerificationChannel: CashPlanPaymentVerificationVerificationChannel,
-  AgeFilterObject: ResolverTypeWrapper<AgeFilterObject>,
-  PaymentVerificationNodeConnection: ResolverTypeWrapper<PaymentVerificationNodeConnection>,
-  PaymentVerificationNodeEdge: ResolverTypeWrapper<PaymentVerificationNodeEdge>,
-  PaymentVerificationStatus: PaymentVerificationStatus,
-  TicketPaymentVerificationDetailsNodeConnection: ResolverTypeWrapper<TicketPaymentVerificationDetailsNodeConnection>,
-  TicketPaymentVerificationDetailsNodeEdge: ResolverTypeWrapper<TicketPaymentVerificationDetailsNodeEdge>,
-  TicketPaymentVerificationDetailsNode: ResolverTypeWrapper<TicketPaymentVerificationDetailsNode>,
-  TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
-  TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus,
-  TicketComplaintDetailsNodeConnection: ResolverTypeWrapper<TicketComplaintDetailsNodeConnection>,
-  TicketComplaintDetailsNodeEdge: ResolverTypeWrapper<TicketComplaintDetailsNodeEdge>,
-  TicketComplaintDetailsNode: ResolverTypeWrapper<TicketComplaintDetailsNode>,
-  TicketSensitiveDetailsNodeConnection: ResolverTypeWrapper<TicketSensitiveDetailsNodeConnection>,
-  TicketSensitiveDetailsNodeEdge: ResolverTypeWrapper<TicketSensitiveDetailsNodeEdge>,
-  TicketSensitiveDetailsNode: ResolverTypeWrapper<TicketSensitiveDetailsNode>,
-  CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
-  CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationNodeEdge>,
-  CashPlanPaymentVerificationSummaryNode: ResolverTypeWrapper<CashPlanPaymentVerificationSummaryNode>,
-  CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus,
-  ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
-  ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
-  ReportNode: ResolverTypeWrapper<ReportNode>,
-  PaymentPlanStatus: PaymentPlanStatus,
-  PaymentPlanCurrency: PaymentPlanCurrency,
-  ApprovalProcessNodeConnection: ResolverTypeWrapper<ApprovalProcessNodeConnection>,
-  ApprovalProcessNodeEdge: ResolverTypeWrapper<ApprovalProcessNodeEdge>,
-  ApprovalProcessNode: ResolverTypeWrapper<ApprovalProcessNode>,
-  ApprovalNode: ResolverTypeWrapper<ApprovalNode>,
-  ApprovalType: ApprovalType,
-  ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
-  ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
-  GrievanceTicketNodeConnection: ResolverTypeWrapper<GrievanceTicketNodeConnection>,
-  GrievanceTicketNodeEdge: ResolverTypeWrapper<GrievanceTicketNodeEdge>,
-  GrievanceTicketNode: ResolverTypeWrapper<GrievanceTicketNode>,
-  TicketNoteNodeConnection: ResolverTypeWrapper<TicketNoteNodeConnection>,
-  TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
-  TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
-  TicketHouseholdDataUpdateDetailsNode: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNode>,
-  TicketIndividualDataUpdateDetailsNode: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNode>,
-  TicketAddIndividualDetailsNode: ResolverTypeWrapper<TicketAddIndividualDetailsNode>,
-  TicketDeleteIndividualDetailsNode: ResolverTypeWrapper<TicketDeleteIndividualDetailsNode>,
-  TicketDeleteHouseholdDetailsNode: ResolverTypeWrapper<TicketDeleteHouseholdDetailsNode>,
-  TicketSystemFlaggingDetailsNode: ResolverTypeWrapper<TicketSystemFlaggingDetailsNode>,
-  SanctionListIndividualNode: ResolverTypeWrapper<SanctionListIndividualNode>,
-  SanctionListIndividualDocumentNodeConnection: ResolverTypeWrapper<SanctionListIndividualDocumentNodeConnection>,
-  SanctionListIndividualDocumentNodeEdge: ResolverTypeWrapper<SanctionListIndividualDocumentNodeEdge>,
-  SanctionListIndividualDocumentNode: ResolverTypeWrapper<SanctionListIndividualDocumentNode>,
-  SanctionListIndividualNationalitiesNodeConnection: ResolverTypeWrapper<SanctionListIndividualNationalitiesNodeConnection>,
-  SanctionListIndividualNationalitiesNodeEdge: ResolverTypeWrapper<SanctionListIndividualNationalitiesNodeEdge>,
-  SanctionListIndividualNationalitiesNode: ResolverTypeWrapper<SanctionListIndividualNationalitiesNode>,
-  SanctionListIndividualCountriesNodeConnection: ResolverTypeWrapper<SanctionListIndividualCountriesNodeConnection>,
-  SanctionListIndividualCountriesNodeEdge: ResolverTypeWrapper<SanctionListIndividualCountriesNodeEdge>,
-  SanctionListIndividualCountriesNode: ResolverTypeWrapper<SanctionListIndividualCountriesNode>,
-  SanctionListIndividualAliasNameNodeConnection: ResolverTypeWrapper<SanctionListIndividualAliasNameNodeConnection>,
-  SanctionListIndividualAliasNameNodeEdge: ResolverTypeWrapper<SanctionListIndividualAliasNameNodeEdge>,
-  SanctionListIndividualAliasNameNode: ResolverTypeWrapper<SanctionListIndividualAliasNameNode>,
-  SanctionListIndividualDateOfBirthNodeConnection: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNodeConnection>,
-  SanctionListIndividualDateOfBirthNodeEdge: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNodeEdge>,
-  SanctionListIndividualDateOfBirthNode: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNode>,
-  TicketNeedsAdjudicationDetailsNode: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNode>,
-  TicketNeedsAdjudicationDetailsExtraDataNode: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsExtraDataNode>,
-  DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
-  TicketPositiveFeedbackDetailsNode: ResolverTypeWrapper<TicketPositiveFeedbackDetailsNode>,
-  TicketNegativeFeedbackDetailsNode: ResolverTypeWrapper<TicketNegativeFeedbackDetailsNode>,
-  TicketReferralDetailsNode: ResolverTypeWrapper<TicketReferralDetailsNode>,
-  ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
-  ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
-  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
-  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
-  PaymentVerificationLogEntryNodeConnection: ResolverTypeWrapper<PaymentVerificationLogEntryNodeConnection>,
-  PaymentVerificationLogEntryNodeEdge: ResolverTypeWrapper<PaymentVerificationLogEntryNodeEdge>,
-  PaymentVerificationLogEntryNode: ResolverTypeWrapper<PaymentVerificationLogEntryNode>,
-  ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>,
-  LogEntryAction: LogEntryAction,
-  RoleNode: ResolverTypeWrapper<RoleNode>,
-  RoleSubsystem: RoleSubsystem,
-  FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>,
-  FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeEdge>,
-  FinancialServiceProviderXlsxTemplateNode: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNode>,
-  FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns,
-  FinancialServiceProviderNodeConnection: ResolverTypeWrapper<FinancialServiceProviderNodeConnection>,
-  FinancialServiceProviderNodeEdge: ResolverTypeWrapper<FinancialServiceProviderNodeEdge>,
-  FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>,
-  FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
-  FinancialServiceProviderXlsxReportNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeConnection>,
-  FinancialServiceProviderXlsxReportNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeEdge>,
-  FinancialServiceProviderXlsxReportNode: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNode>,
-  FinancialServiceProviderXlsxReportStatus: FinancialServiceProviderXlsxReportStatus,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
-  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
-  IndividualDisability: IndividualDisability,
-  FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
-  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
-  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
-  DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
-  DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
-  DocumentNode: ResolverTypeWrapper<DocumentNode>,
-  DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
-  DocumentTypeType: DocumentTypeType,
-  DocumentStatus: DocumentStatus,
-  IndividualIdentityNodeConnection: ResolverTypeWrapper<IndividualIdentityNodeConnection>,
-  IndividualIdentityNodeEdge: ResolverTypeWrapper<IndividualIdentityNodeEdge>,
-  IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>,
-  AgencyNode: ResolverTypeWrapper<AgencyNode>,
-  AgencyType: AgencyType,
-  IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
-  IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
-  BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>,
-  TicketIndividualDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeConnection>,
-  TicketIndividualDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeEdge>,
-  TicketDeleteIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeConnection>,
-  TicketDeleteIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeEdge>,
-  TicketSystemFlaggingDetailsNodeConnection: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeConnection>,
-  TicketSystemFlaggingDetailsNodeEdge: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeEdge>,
-  TicketNeedsAdjudicationDetailsNodeConnection: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNodeConnection>,
-  TicketNeedsAdjudicationDetailsNodeEdge: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNodeEdge>,
-  TicketPositiveFeedbackDetailsNodeConnection: ResolverTypeWrapper<TicketPositiveFeedbackDetailsNodeConnection>,
-  TicketPositiveFeedbackDetailsNodeEdge: ResolverTypeWrapper<TicketPositiveFeedbackDetailsNodeEdge>,
-  TicketNegativeFeedbackDetailsNodeConnection: ResolverTypeWrapper<TicketNegativeFeedbackDetailsNodeConnection>,
-  TicketNegativeFeedbackDetailsNodeEdge: ResolverTypeWrapper<TicketNegativeFeedbackDetailsNodeEdge>,
-  TicketReferralDetailsNodeConnection: ResolverTypeWrapper<TicketReferralDetailsNodeConnection>,
-  TicketReferralDetailsNodeEdge: ResolverTypeWrapper<TicketReferralDetailsNodeEdge>,
-  GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
-  HouseholdOrgEnumerator: HouseholdOrgEnumerator,
-  HouseholdRegistrationMethod: HouseholdRegistrationMethod,
-  HouseholdCollectIndividualData: HouseholdCollectIndividualData,
-  TicketHouseholdDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNodeConnection>,
-  TicketHouseholdDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNodeEdge>,
-  TicketAddIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketAddIndividualDetailsNodeConnection>,
-  TicketAddIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketAddIndividualDetailsNodeEdge>,
-  TicketDeleteHouseholdDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteHouseholdDetailsNodeConnection>,
-  TicketDeleteHouseholdDetailsNodeEdge: ResolverTypeWrapper<TicketDeleteHouseholdDetailsNodeEdge>,
-  ProgramsWithDeliveredQuantityNode: ResolverTypeWrapper<ProgramsWithDeliveredQuantityNode>,
-  DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>,
-  LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
-  LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
-  LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
-  ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
-  SanctionListIndividualNodeConnection: ResolverTypeWrapper<SanctionListIndividualNodeConnection>,
-  SanctionListIndividualNodeEdge: ResolverTypeWrapper<SanctionListIndividualNodeEdge>,
-  ChartGrievanceTicketsNode: ResolverTypeWrapper<ChartGrievanceTicketsNode>,
-  _DatasetsNode: ResolverTypeWrapper<_DatasetsNode>,
-  IssueTypesObject: ResolverTypeWrapper<IssueTypesObject>,
-  SteficonRuleNodeConnection: ResolverTypeWrapper<SteficonRuleNodeConnection>,
-  SteficonRuleNodeEdge: ResolverTypeWrapper<SteficonRuleNodeEdge>,
-  ChartPaymentVerification: ResolverTypeWrapper<ChartPaymentVerification>,
-  _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>,
-  ChartDatasetNode: ResolverTypeWrapper<ChartDatasetNode>,
-  SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>,
-  TableTotalCashTransferred: ResolverTypeWrapper<TableTotalCashTransferred>,
-  _TableTotalCashTransferredDataNode: ResolverTypeWrapper<_TableTotalCashTransferredDataNode>,
-  ChartDetailedDatasetsNode: ResolverTypeWrapper<ChartDetailedDatasetsNode>,
-  RapidProFlow: ResolverTypeWrapper<RapidProFlow>,
-  RapidProFlowRun: ResolverTypeWrapper<RapidProFlowRun>,
-  RapidProFlowResult: ResolverTypeWrapper<RapidProFlowResult>,
-  GetCashplanVerificationSampleSizeInput: GetCashplanVerificationSampleSizeInput,
-  FullListArguments: FullListArguments,
-  RandomSamplingArguments: RandomSamplingArguments,
-  AgeInput: AgeInput,
-  RapidProArguments: RapidProArguments,
-  GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
-  BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
-  BusinessAreaNodeConnection: ResolverTypeWrapper<BusinessAreaNodeConnection>,
-  BusinessAreaNodeEdge: ResolverTypeWrapper<BusinessAreaNodeEdge>,
-  GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
-  KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
-  KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
-  KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
-  TargetingCriteriaObjectType: TargetingCriteriaObjectType,
-  TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
-  TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
-  TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
-  ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
-  ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
-  ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
-  ImportedIndividualNode: ResolverTypeWrapper<ImportedIndividualNode>,
-  ImportedIndividualSex: ImportedIndividualSex,
-  ImportedIndividualMaritalStatus: ImportedIndividualMaritalStatus,
-  RegistrationDataImportDatahubNode: ResolverTypeWrapper<RegistrationDataImportDatahubNode>,
-  ImportDataNode: ResolverTypeWrapper<ImportDataNode>,
-  ImportDataStatus: ImportDataStatus,
-  ImportDataDataType: ImportDataDataType,
-  KoboImportDataNode: ResolverTypeWrapper<KoboImportDataNode>,
-  KoboErrorNode: ResolverTypeWrapper<KoboErrorNode>,
-  XlsxRowErrorNode: ResolverTypeWrapper<XlsxRowErrorNode>,
-  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
-  ImportedHouseholdNodeConnection: ResolverTypeWrapper<ImportedHouseholdNodeConnection>,
-  ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
-  ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
-  ImportedIndividualNodeEdge: ResolverTypeWrapper<ImportedIndividualNodeEdge>,
-  ImportedIndividualDisability: ImportedIndividualDisability,
-  ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
-  ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
-  ImportedDocumentNodeConnection: ResolverTypeWrapper<ImportedDocumentNodeConnection>,
-  ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>,
-  ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
-  ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>,
-  ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
-  ImportedDocumentTypeType: ImportedDocumentTypeType,
-  ImportedIndividualIdentityNodeConnection: ResolverTypeWrapper<ImportedIndividualIdentityNodeConnection>,
-  ImportedIndividualIdentityNodeEdge: ResolverTypeWrapper<ImportedIndividualIdentityNodeEdge>,
-  ImportedIndividualIdentityNode: ResolverTypeWrapper<ImportedIndividualIdentityNode>,
-  ImportedHouseholdOrgEnumerator: ImportedHouseholdOrgEnumerator,
-  ImportedHouseholdRegistrationMethod: ImportedHouseholdRegistrationMethod,
-  ImportedHouseholdCollectIndividualData: ImportedHouseholdCollectIndividualData,
-  ImportedHouseholdCurrency: ImportedHouseholdCurrency,
-  RegistrationDataImportDatahubNodeConnection: ResolverTypeWrapper<RegistrationDataImportDatahubNodeConnection>,
-  RegistrationDataImportDatahubNodeEdge: ResolverTypeWrapper<RegistrationDataImportDatahubNodeEdge>,
-  DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
-  DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
-  Mutations: ResolverTypeWrapper<{}>,
-  CreateReportInput: CreateReportInput,
-  CreateReport: ResolverTypeWrapper<CreateReport>,
-  CreateDashboardReportInput: CreateDashboardReportInput,
-  CreateDashboardReport: ResolverTypeWrapper<CreateDashboardReport>,
-  CreateGrievanceTicketInput: CreateGrievanceTicketInput,
-  CreateGrievanceTicketExtrasInput: CreateGrievanceTicketExtrasInput,
-  CategoryExtrasInput: CategoryExtrasInput,
-  SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras,
-  GrievanceComplaintTicketExtras: GrievanceComplaintTicketExtras,
-  PositiveFeedbackTicketExtras: PositiveFeedbackTicketExtras,
-  NegativeFeedbackTicketExtras: NegativeFeedbackTicketExtras,
-  ReferralTicketExtras: ReferralTicketExtras,
-  IssueTypeExtrasInput: IssueTypeExtrasInput,
-  HouseholdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras,
-  HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType,
-  IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
-  IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
-  IndividualDocumentObjectType: IndividualDocumentObjectType,
-  EditIndividualDocumentObjectType: EditIndividualDocumentObjectType,
-  IndividualIdentityObjectType: IndividualIdentityObjectType,
-  EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
-  IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
-  HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras,
-  AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
-  AddIndividualDataObjectType: AddIndividualDataObjectType,
-  CreateGrievanceTicketMutation: ResolverTypeWrapper<CreateGrievanceTicketMutation>,
-  UpdateGrievanceTicketInput: UpdateGrievanceTicketInput,
-  UpdateGrievanceTicketExtrasInput: UpdateGrievanceTicketExtrasInput,
-  UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras,
-  UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras,
-  UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras,
-  TicketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras,
-  UpdateGrievanceTicketMutation: ResolverTypeWrapper<UpdateGrievanceTicketMutation>,
-  GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
-  CreateTicketNoteInput: CreateTicketNoteInput,
-  CreateTicketNoteMutation: ResolverTypeWrapper<CreateTicketNoteMutation>,
-  IndividualDataChangeApproveMutation: ResolverTypeWrapper<IndividualDataChangeApproveMutation>,
-  HouseholdDataChangeApproveMutation: ResolverTypeWrapper<HouseholdDataChangeApproveMutation>,
-  SimpleApproveMutation: ResolverTypeWrapper<SimpleApproveMutation>,
-  NeedsAdjudicationApproveMutation: ResolverTypeWrapper<NeedsAdjudicationApproveMutation>,
-  PaymentDetailsApproveMutation: ResolverTypeWrapper<PaymentDetailsApproveMutation>,
-  ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>,
-  CreatePaymentVerificationInput: CreatePaymentVerificationInput,
-  CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
-  CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput,
-  CreateFinancialServiceProviderMutation: ResolverTypeWrapper<CreateFinancialServiceProviderMutation>,
-  EditFinancialServiceProviderMutation: ResolverTypeWrapper<EditFinancialServiceProviderMutation>,
-  EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput,
-  EditPaymentVerificationMutation: ResolverTypeWrapper<EditPaymentVerificationMutation>,
-  Upload: ResolverTypeWrapper<Scalars['Upload']>,
-  ImportXlsxCashPlanVerification: ResolverTypeWrapper<ImportXlsxCashPlanVerification>,
-  XlsxErrorNode: ResolverTypeWrapper<XlsxErrorNode>,
-  ActivateCashPlanVerificationMutation: ResolverTypeWrapper<ActivateCashPlanVerificationMutation>,
-  FinishCashPlanVerificationMutation: ResolverTypeWrapper<FinishCashPlanVerificationMutation>,
-  DiscardCashPlanVerificationMutation: ResolverTypeWrapper<DiscardCashPlanVerificationMutation>,
-  DeleteCashPlanVerificationMutation: ResolverTypeWrapper<DeleteCashPlanVerificationMutation>,
-  PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
-  UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
-  UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>,
-  ActionPaymentPlanInput: ActionPaymentPlanInput,
-  Action: Action,
-  ActionPaymentPlanMutation: ResolverTypeWrapper<ActionPaymentPlanMutation>,
-  CreatePaymentPlanInput: CreatePaymentPlanInput,
-  CreatePaymentPlanMutation: ResolverTypeWrapper<CreatePaymentPlanMutation>,
-  UpdatePaymentPlanInput: UpdatePaymentPlanInput,
-  UpdatePaymentPlanMutation: ResolverTypeWrapper<UpdatePaymentPlanMutation>,
-  DeletePaymentPlanMutation: ResolverTypeWrapper<DeletePaymentPlanMutation>,
-  CreateTargetPopulationInput: CreateTargetPopulationInput,
-  CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
-  UpdateTargetPopulationInput: UpdateTargetPopulationInput,
-  UpdateTargetPopulationMutation: ResolverTypeWrapper<UpdateTargetPopulationMutation>,
-  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput,
-  CopyTargetPopulationInput: CopyTargetPopulationInput,
-  CopyTargetPopulationMutationPayload: ResolverTypeWrapper<CopyTargetPopulationMutationPayload>,
-  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput,
-  DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>,
-  ApproveTargetPopulationMutation: ResolverTypeWrapper<ApproveTargetPopulationMutation>,
-  UnapproveTargetPopulationMutation: ResolverTypeWrapper<UnapproveTargetPopulationMutation>,
-  FinalizeTargetPopulationMutation: ResolverTypeWrapper<FinalizeTargetPopulationMutation>,
-  SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput,
-  SetSteficonRuleOnTargetPopulationMutationPayload: ResolverTypeWrapper<SetSteficonRuleOnTargetPopulationMutationPayload>,
-  CreateProgramInput: CreateProgramInput,
-  CreateProgram: ResolverTypeWrapper<CreateProgram>,
-  UpdateProgramInput: UpdateProgramInput,
-  UpdateProgram: ResolverTypeWrapper<UpdateProgram>,
-  DeleteProgram: ResolverTypeWrapper<DeleteProgram>,
-  UploadImportDataXLSXFileAsync: ResolverTypeWrapper<UploadImportDataXlsxFileAsync>,
-  DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
-  RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
-  RegistrationXlsxImportMutation: ResolverTypeWrapper<RegistrationXlsxImportMutation>,
-  RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput,
-  RegistrationKoboImportMutation: ResolverTypeWrapper<RegistrationKoboImportMutation>,
-  SaveKoboProjectImportDataAsync: ResolverTypeWrapper<SaveKoboProjectImportDataAsync>,
-  MergeRegistrationDataImportMutation: ResolverTypeWrapper<MergeRegistrationDataImportMutation>,
-  RefuseRegistrationDataImportMutation: ResolverTypeWrapper<RefuseRegistrationDataImportMutation>,
-  RegistrationDeduplicationMutation: ResolverTypeWrapper<RegistrationDeduplicationMutation>,
-  CheckAgainstSanctionListMutation: ResolverTypeWrapper<CheckAgainstSanctionListMutation>,
+  Query: ResolverTypeWrapper<{}>;
+  ID: ResolverTypeWrapper<Scalars['ID']>;
+  AreaNode: ResolverTypeWrapper<AreaNode>;
+  Node: ResolverTypeWrapper<Node>;
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
+  UUID: ResolverTypeWrapper<Scalars['UUID']>;
+  String: ResolverTypeWrapper<Scalars['String']>;
+  AreaTypeNode: ResolverTypeWrapper<AreaTypeNode>;
+  Int: ResolverTypeWrapper<Scalars['Int']>;
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>;
+  AreaTypeNodeConnection: ResolverTypeWrapper<AreaTypeNodeConnection>;
+  PageInfo: ResolverTypeWrapper<PageInfo>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  AreaTypeNodeEdge: ResolverTypeWrapper<AreaTypeNodeEdge>;
+  AreaNodeConnection: ResolverTypeWrapper<AreaNodeConnection>;
+  AreaNodeEdge: ResolverTypeWrapper<AreaNodeEdge>;
+  HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>;
+  HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>;
+  HouseholdNode: ResolverTypeWrapper<HouseholdNode>;
+  BigInt: ResolverTypeWrapper<Scalars['BigInt']>;
+  HouseholdResidenceStatus: HouseholdResidenceStatus;
+  IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>;
+  IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>;
+  IndividualNode: ResolverTypeWrapper<IndividualNode>;
+  IndividualSex: IndividualSex;
+  Date: ResolverTypeWrapper<Scalars['Date']>;
+  IndividualMaritalStatus: IndividualMaritalStatus;
+  IndividualRelationship: IndividualRelationship;
+  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>;
+  RegistrationDataImportStatus: RegistrationDataImportStatus;
+  UserNode: ResolverTypeWrapper<UserNode>;
+  UserStatus: UserStatus;
+  PartnerType: ResolverTypeWrapper<PartnerType>;
+  UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>;
+  UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>;
+  UserRoleNode: ResolverTypeWrapper<UserRoleNode>;
+  UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>;
+  Float: ResolverTypeWrapper<Scalars['Float']>;
+  UserBusinessAreaNodeConnection: ResolverTypeWrapper<
+    UserBusinessAreaNodeConnection
+  >;
+  UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>;
+  PaymentPlanNodeConnection: ResolverTypeWrapper<PaymentPlanNodeConnection>;
+  PaymentPlanNodeEdge: ResolverTypeWrapper<PaymentPlanNodeEdge>;
+  PaymentPlanNode: ResolverTypeWrapper<PaymentPlanNode>;
+  ProgramNode: ResolverTypeWrapper<ProgramNode>;
+  ProgramStatus: ProgramStatus;
+  Decimal: ResolverTypeWrapper<Scalars['Decimal']>;
+  ProgramFrequencyOfPayments: ProgramFrequencyOfPayments;
+  ProgramSector: ProgramSector;
+  ProgramScope: ProgramScope;
+  CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>;
+  CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>;
+  CashPlanNode: ResolverTypeWrapper<CashPlanNode>;
+  CashPlanStatus: CashPlanStatus;
+  ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>;
+  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>;
+  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>;
+  PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>;
+  PaymentRecordStatus: PaymentRecordStatus;
+  PaymentRecordDeliveryType: PaymentRecordDeliveryType;
+  TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>;
+  TargetPopulationStatus: TargetPopulationStatus;
+  TargetingCriteriaNode: ResolverTypeWrapper<TargetingCriteriaNode>;
+  TargetingCriteriaRuleNode: ResolverTypeWrapper<TargetingCriteriaRuleNode>;
+  TargetingIndividualRuleFilterBlockNode: ResolverTypeWrapper<
+    TargetingIndividualRuleFilterBlockNode
+  >;
+  TargetingIndividualBlockRuleFilterNode: ResolverTypeWrapper<
+    TargetingIndividualBlockRuleFilterNode
+  >;
+  TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod;
+  Arg: ResolverTypeWrapper<Scalars['Arg']>;
+  FieldAttributeNode: ResolverTypeWrapper<FieldAttributeNode>;
+  LabelNode: ResolverTypeWrapper<LabelNode>;
+  CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>;
+  TargetingCriteriaRuleFilterNode: ResolverTypeWrapper<
+    TargetingCriteriaRuleFilterNode
+  >;
+  TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod;
+  RuleCommitNode: ResolverTypeWrapper<RuleCommitNode>;
+  SteficonRuleNode: ResolverTypeWrapper<SteficonRuleNode>;
+  RuleLanguage: RuleLanguage;
+  RuleSecurity: RuleSecurity;
+  RuleCommitNodeConnection: ResolverTypeWrapper<RuleCommitNodeConnection>;
+  RuleCommitNodeEdge: ResolverTypeWrapper<RuleCommitNodeEdge>;
+  RuleCommitLanguage: RuleCommitLanguage;
+  TargetPopulationNodeConnection: ResolverTypeWrapper<
+    TargetPopulationNodeConnection
+  >;
+  TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>;
+  HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>;
+  StatsObjectType: ResolverTypeWrapper<StatsObjectType>;
+  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus;
+  PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>;
+  CashPlanPaymentVerificationNode: ResolverTypeWrapper<
+    CashPlanPaymentVerificationNode
+  >;
+  CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus;
+  CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling;
+  CashPlanPaymentVerificationVerificationChannel: CashPlanPaymentVerificationVerificationChannel;
+  AgeFilterObject: ResolverTypeWrapper<AgeFilterObject>;
+  PaymentVerificationNodeConnection: ResolverTypeWrapper<
+    PaymentVerificationNodeConnection
+  >;
+  PaymentVerificationNodeEdge: ResolverTypeWrapper<PaymentVerificationNodeEdge>;
+  PaymentVerificationStatus: PaymentVerificationStatus;
+  TicketPaymentVerificationDetailsNodeConnection: ResolverTypeWrapper<
+    TicketPaymentVerificationDetailsNodeConnection
+  >;
+  TicketPaymentVerificationDetailsNodeEdge: ResolverTypeWrapper<
+    TicketPaymentVerificationDetailsNodeEdge
+  >;
+  TicketPaymentVerificationDetailsNode: ResolverTypeWrapper<
+    TicketPaymentVerificationDetailsNode
+  >;
+  TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus;
+  TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus;
+  TicketComplaintDetailsNodeConnection: ResolverTypeWrapper<
+    TicketComplaintDetailsNodeConnection
+  >;
+  TicketComplaintDetailsNodeEdge: ResolverTypeWrapper<
+    TicketComplaintDetailsNodeEdge
+  >;
+  TicketComplaintDetailsNode: ResolverTypeWrapper<TicketComplaintDetailsNode>;
+  TicketSensitiveDetailsNodeConnection: ResolverTypeWrapper<
+    TicketSensitiveDetailsNodeConnection
+  >;
+  TicketSensitiveDetailsNodeEdge: ResolverTypeWrapper<
+    TicketSensitiveDetailsNodeEdge
+  >;
+  TicketSensitiveDetailsNode: ResolverTypeWrapper<TicketSensitiveDetailsNode>;
+  CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<
+    CashPlanPaymentVerificationNodeConnection
+  >;
+  CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<
+    CashPlanPaymentVerificationNodeEdge
+  >;
+  CashPlanPaymentVerificationSummaryNode: ResolverTypeWrapper<
+    CashPlanPaymentVerificationSummaryNode
+  >;
+  CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus;
+  ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>;
+  ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>;
+  ReportNode: ResolverTypeWrapper<ReportNode>;
+  PaymentPlanStatus: PaymentPlanStatus;
+  PaymentPlanCurrency: PaymentPlanCurrency;
+  ApprovalProcessNodeConnection: ResolverTypeWrapper<
+    ApprovalProcessNodeConnection
+  >;
+  ApprovalProcessNodeEdge: ResolverTypeWrapper<ApprovalProcessNodeEdge>;
+  ApprovalProcessNode: ResolverTypeWrapper<ApprovalProcessNode>;
+  FilteredActionsListNode: ResolverTypeWrapper<FilteredActionsListNode>;
+  ApprovalNode: ResolverTypeWrapper<ApprovalNode>;
+  ServiceProviderNodeConnection: ResolverTypeWrapper<
+    ServiceProviderNodeConnection
+  >;
+  ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>;
+  GrievanceTicketNodeConnection: ResolverTypeWrapper<
+    GrievanceTicketNodeConnection
+  >;
+  GrievanceTicketNodeEdge: ResolverTypeWrapper<GrievanceTicketNodeEdge>;
+  GrievanceTicketNode: ResolverTypeWrapper<GrievanceTicketNode>;
+  TicketNoteNodeConnection: ResolverTypeWrapper<TicketNoteNodeConnection>;
+  TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>;
+  TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>;
+  TicketHouseholdDataUpdateDetailsNode: ResolverTypeWrapper<
+    TicketHouseholdDataUpdateDetailsNode
+  >;
+  TicketIndividualDataUpdateDetailsNode: ResolverTypeWrapper<
+    TicketIndividualDataUpdateDetailsNode
+  >;
+  TicketAddIndividualDetailsNode: ResolverTypeWrapper<
+    TicketAddIndividualDetailsNode
+  >;
+  TicketDeleteIndividualDetailsNode: ResolverTypeWrapper<
+    TicketDeleteIndividualDetailsNode
+  >;
+  TicketDeleteHouseholdDetailsNode: ResolverTypeWrapper<
+    TicketDeleteHouseholdDetailsNode
+  >;
+  TicketSystemFlaggingDetailsNode: ResolverTypeWrapper<
+    TicketSystemFlaggingDetailsNode
+  >;
+  SanctionListIndividualNode: ResolverTypeWrapper<SanctionListIndividualNode>;
+  SanctionListIndividualDocumentNodeConnection: ResolverTypeWrapper<
+    SanctionListIndividualDocumentNodeConnection
+  >;
+  SanctionListIndividualDocumentNodeEdge: ResolverTypeWrapper<
+    SanctionListIndividualDocumentNodeEdge
+  >;
+  SanctionListIndividualDocumentNode: ResolverTypeWrapper<
+    SanctionListIndividualDocumentNode
+  >;
+  SanctionListIndividualNationalitiesNodeConnection: ResolverTypeWrapper<
+    SanctionListIndividualNationalitiesNodeConnection
+  >;
+  SanctionListIndividualNationalitiesNodeEdge: ResolverTypeWrapper<
+    SanctionListIndividualNationalitiesNodeEdge
+  >;
+  SanctionListIndividualNationalitiesNode: ResolverTypeWrapper<
+    SanctionListIndividualNationalitiesNode
+  >;
+  SanctionListIndividualCountriesNodeConnection: ResolverTypeWrapper<
+    SanctionListIndividualCountriesNodeConnection
+  >;
+  SanctionListIndividualCountriesNodeEdge: ResolverTypeWrapper<
+    SanctionListIndividualCountriesNodeEdge
+  >;
+  SanctionListIndividualCountriesNode: ResolverTypeWrapper<
+    SanctionListIndividualCountriesNode
+  >;
+  SanctionListIndividualAliasNameNodeConnection: ResolverTypeWrapper<
+    SanctionListIndividualAliasNameNodeConnection
+  >;
+  SanctionListIndividualAliasNameNodeEdge: ResolverTypeWrapper<
+    SanctionListIndividualAliasNameNodeEdge
+  >;
+  SanctionListIndividualAliasNameNode: ResolverTypeWrapper<
+    SanctionListIndividualAliasNameNode
+  >;
+  SanctionListIndividualDateOfBirthNodeConnection: ResolverTypeWrapper<
+    SanctionListIndividualDateOfBirthNodeConnection
+  >;
+  SanctionListIndividualDateOfBirthNodeEdge: ResolverTypeWrapper<
+    SanctionListIndividualDateOfBirthNodeEdge
+  >;
+  SanctionListIndividualDateOfBirthNode: ResolverTypeWrapper<
+    SanctionListIndividualDateOfBirthNode
+  >;
+  TicketNeedsAdjudicationDetailsNode: ResolverTypeWrapper<
+    TicketNeedsAdjudicationDetailsNode
+  >;
+  TicketNeedsAdjudicationDetailsExtraDataNode: ResolverTypeWrapper<
+    TicketNeedsAdjudicationDetailsExtraDataNode
+  >;
+  DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>;
+  TicketPositiveFeedbackDetailsNode: ResolverTypeWrapper<
+    TicketPositiveFeedbackDetailsNode
+  >;
+  TicketNegativeFeedbackDetailsNode: ResolverTypeWrapper<
+    TicketNegativeFeedbackDetailsNode
+  >;
+  TicketReferralDetailsNode: ResolverTypeWrapper<TicketReferralDetailsNode>;
+  ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>;
+  ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>;
+  RegistrationDataImportNodeConnection: ResolverTypeWrapper<
+    RegistrationDataImportNodeConnection
+  >;
+  RegistrationDataImportNodeEdge: ResolverTypeWrapper<
+    RegistrationDataImportNodeEdge
+  >;
+  PaymentVerificationLogEntryNodeConnection: ResolverTypeWrapper<
+    PaymentVerificationLogEntryNodeConnection
+  >;
+  PaymentVerificationLogEntryNodeEdge: ResolverTypeWrapper<
+    PaymentVerificationLogEntryNodeEdge
+  >;
+  PaymentVerificationLogEntryNode: ResolverTypeWrapper<
+    PaymentVerificationLogEntryNode
+  >;
+  ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>;
+  LogEntryAction: LogEntryAction;
+  RoleNode: ResolverTypeWrapper<RoleNode>;
+  RoleSubsystem: RoleSubsystem;
+  FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<
+    FinancialServiceProviderXlsxTemplateNodeConnection
+  >;
+  FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<
+    FinancialServiceProviderXlsxTemplateNodeEdge
+  >;
+  FinancialServiceProviderXlsxTemplateNode: ResolverTypeWrapper<
+    FinancialServiceProviderXlsxTemplateNode
+  >;
+  FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns;
+  FinancialServiceProviderNodeConnection: ResolverTypeWrapper<
+    FinancialServiceProviderNodeConnection
+  >;
+  FinancialServiceProviderNodeEdge: ResolverTypeWrapper<
+    FinancialServiceProviderNodeEdge
+  >;
+  FinancialServiceProviderNode: ResolverTypeWrapper<
+    FinancialServiceProviderNode
+  >;
+  FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel;
+  FinancialServiceProviderXlsxReportNodeConnection: ResolverTypeWrapper<
+    FinancialServiceProviderXlsxReportNodeConnection
+  >;
+  FinancialServiceProviderXlsxReportNodeEdge: ResolverTypeWrapper<
+    FinancialServiceProviderXlsxReportNodeEdge
+  >;
+  FinancialServiceProviderXlsxReportNode: ResolverTypeWrapper<
+    FinancialServiceProviderXlsxReportNode
+  >;
+  FinancialServiceProviderXlsxReportStatus: FinancialServiceProviderXlsxReportStatus;
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource;
+  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>;
+  IndividualDisability: IndividualDisability;
+  FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>;
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus;
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus;
+  DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>;
+  DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>;
+  DocumentNode: ResolverTypeWrapper<DocumentNode>;
+  DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>;
+  DocumentTypeType: DocumentTypeType;
+  DocumentStatus: DocumentStatus;
+  IndividualIdentityNodeConnection: ResolverTypeWrapper<
+    IndividualIdentityNodeConnection
+  >;
+  IndividualIdentityNodeEdge: ResolverTypeWrapper<IndividualIdentityNodeEdge>;
+  IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>;
+  AgencyNode: ResolverTypeWrapper<AgencyNode>;
+  AgencyType: AgencyType;
+  IndividualRoleInHouseholdNode: ResolverTypeWrapper<
+    IndividualRoleInHouseholdNode
+  >;
+  IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole;
+  BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>;
+  TicketIndividualDataUpdateDetailsNodeConnection: ResolverTypeWrapper<
+    TicketIndividualDataUpdateDetailsNodeConnection
+  >;
+  TicketIndividualDataUpdateDetailsNodeEdge: ResolverTypeWrapper<
+    TicketIndividualDataUpdateDetailsNodeEdge
+  >;
+  TicketDeleteIndividualDetailsNodeConnection: ResolverTypeWrapper<
+    TicketDeleteIndividualDetailsNodeConnection
+  >;
+  TicketDeleteIndividualDetailsNodeEdge: ResolverTypeWrapper<
+    TicketDeleteIndividualDetailsNodeEdge
+  >;
+  TicketSystemFlaggingDetailsNodeConnection: ResolverTypeWrapper<
+    TicketSystemFlaggingDetailsNodeConnection
+  >;
+  TicketSystemFlaggingDetailsNodeEdge: ResolverTypeWrapper<
+    TicketSystemFlaggingDetailsNodeEdge
+  >;
+  TicketNeedsAdjudicationDetailsNodeConnection: ResolverTypeWrapper<
+    TicketNeedsAdjudicationDetailsNodeConnection
+  >;
+  TicketNeedsAdjudicationDetailsNodeEdge: ResolverTypeWrapper<
+    TicketNeedsAdjudicationDetailsNodeEdge
+  >;
+  TicketPositiveFeedbackDetailsNodeConnection: ResolverTypeWrapper<
+    TicketPositiveFeedbackDetailsNodeConnection
+  >;
+  TicketPositiveFeedbackDetailsNodeEdge: ResolverTypeWrapper<
+    TicketPositiveFeedbackDetailsNodeEdge
+  >;
+  TicketNegativeFeedbackDetailsNodeConnection: ResolverTypeWrapper<
+    TicketNegativeFeedbackDetailsNodeConnection
+  >;
+  TicketNegativeFeedbackDetailsNodeEdge: ResolverTypeWrapper<
+    TicketNegativeFeedbackDetailsNodeEdge
+  >;
+  TicketReferralDetailsNodeConnection: ResolverTypeWrapper<
+    TicketReferralDetailsNodeConnection
+  >;
+  TicketReferralDetailsNodeEdge: ResolverTypeWrapper<
+    TicketReferralDetailsNodeEdge
+  >;
+  GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>;
+  HouseholdOrgEnumerator: HouseholdOrgEnumerator;
+  HouseholdRegistrationMethod: HouseholdRegistrationMethod;
+  HouseholdCollectIndividualData: HouseholdCollectIndividualData;
+  TicketHouseholdDataUpdateDetailsNodeConnection: ResolverTypeWrapper<
+    TicketHouseholdDataUpdateDetailsNodeConnection
+  >;
+  TicketHouseholdDataUpdateDetailsNodeEdge: ResolverTypeWrapper<
+    TicketHouseholdDataUpdateDetailsNodeEdge
+  >;
+  TicketAddIndividualDetailsNodeConnection: ResolverTypeWrapper<
+    TicketAddIndividualDetailsNodeConnection
+  >;
+  TicketAddIndividualDetailsNodeEdge: ResolverTypeWrapper<
+    TicketAddIndividualDetailsNodeEdge
+  >;
+  TicketDeleteHouseholdDetailsNodeConnection: ResolverTypeWrapper<
+    TicketDeleteHouseholdDetailsNodeConnection
+  >;
+  TicketDeleteHouseholdDetailsNodeEdge: ResolverTypeWrapper<
+    TicketDeleteHouseholdDetailsNodeEdge
+  >;
+  ProgramsWithDeliveredQuantityNode: ResolverTypeWrapper<
+    ProgramsWithDeliveredQuantityNode
+  >;
+  DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>;
+  LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>;
+  LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>;
+  LogEntryNode: ResolverTypeWrapper<LogEntryNode>;
+  ChoiceObject: ResolverTypeWrapper<ChoiceObject>;
+  SanctionListIndividualNodeConnection: ResolverTypeWrapper<
+    SanctionListIndividualNodeConnection
+  >;
+  SanctionListIndividualNodeEdge: ResolverTypeWrapper<
+    SanctionListIndividualNodeEdge
+  >;
+  ChartGrievanceTicketsNode: ResolverTypeWrapper<ChartGrievanceTicketsNode>;
+  _DatasetsNode: ResolverTypeWrapper<_DatasetsNode>;
+  IssueTypesObject: ResolverTypeWrapper<IssueTypesObject>;
+  SteficonRuleNodeConnection: ResolverTypeWrapper<SteficonRuleNodeConnection>;
+  SteficonRuleNodeEdge: ResolverTypeWrapper<SteficonRuleNodeEdge>;
+  ChartPaymentVerification: ResolverTypeWrapper<ChartPaymentVerification>;
+  _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>;
+  ChartDatasetNode: ResolverTypeWrapper<ChartDatasetNode>;
+  SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>;
+  TableTotalCashTransferred: ResolverTypeWrapper<TableTotalCashTransferred>;
+  _TableTotalCashTransferredDataNode: ResolverTypeWrapper<
+    _TableTotalCashTransferredDataNode
+  >;
+  ChartDetailedDatasetsNode: ResolverTypeWrapper<ChartDetailedDatasetsNode>;
+  RapidProFlow: ResolverTypeWrapper<RapidProFlow>;
+  RapidProFlowRun: ResolverTypeWrapper<RapidProFlowRun>;
+  RapidProFlowResult: ResolverTypeWrapper<RapidProFlowResult>;
+  GetCashplanVerificationSampleSizeInput: GetCashplanVerificationSampleSizeInput;
+  FullListArguments: FullListArguments;
+  RandomSamplingArguments: RandomSamplingArguments;
+  AgeInput: AgeInput;
+  RapidProArguments: RapidProArguments;
+  GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<
+    GetCashplanVerificationSampleSizeObject
+  >;
+  BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>;
+  BusinessAreaNodeConnection: ResolverTypeWrapper<BusinessAreaNodeConnection>;
+  BusinessAreaNodeEdge: ResolverTypeWrapper<BusinessAreaNodeEdge>;
+  GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>;
+  KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>;
+  KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>;
+  KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>;
+  TargetingCriteriaObjectType: TargetingCriteriaObjectType;
+  TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType;
+  TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType;
+  TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType;
+  ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>;
+  ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing;
+  ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus;
+  ImportedIndividualNode: ResolverTypeWrapper<ImportedIndividualNode>;
+  ImportedIndividualSex: ImportedIndividualSex;
+  ImportedIndividualMaritalStatus: ImportedIndividualMaritalStatus;
+  RegistrationDataImportDatahubNode: ResolverTypeWrapper<
+    RegistrationDataImportDatahubNode
+  >;
+  ImportDataNode: ResolverTypeWrapper<ImportDataNode>;
+  ImportDataStatus: ImportDataStatus;
+  ImportDataDataType: ImportDataDataType;
+  KoboImportDataNode: ResolverTypeWrapper<KoboImportDataNode>;
+  KoboErrorNode: ResolverTypeWrapper<KoboErrorNode>;
+  XlsxRowErrorNode: ResolverTypeWrapper<XlsxRowErrorNode>;
+  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone;
+  ImportedHouseholdNodeConnection: ResolverTypeWrapper<
+    ImportedHouseholdNodeConnection
+  >;
+  ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>;
+  ImportedIndividualNodeConnection: ResolverTypeWrapper<
+    ImportedIndividualNodeConnection
+  >;
+  ImportedIndividualNodeEdge: ResolverTypeWrapper<ImportedIndividualNodeEdge>;
+  ImportedIndividualDisability: ImportedIndividualDisability;
+  ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus;
+  ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus;
+  ImportedDocumentNodeConnection: ResolverTypeWrapper<
+    ImportedDocumentNodeConnection
+  >;
+  ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>;
+  ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>;
+  ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>;
+  ImportedDocumentTypeCountry: ImportedDocumentTypeCountry;
+  ImportedDocumentTypeType: ImportedDocumentTypeType;
+  ImportedIndividualIdentityNodeConnection: ResolverTypeWrapper<
+    ImportedIndividualIdentityNodeConnection
+  >;
+  ImportedIndividualIdentityNodeEdge: ResolverTypeWrapper<
+    ImportedIndividualIdentityNodeEdge
+  >;
+  ImportedIndividualIdentityNode: ResolverTypeWrapper<
+    ImportedIndividualIdentityNode
+  >;
+  ImportedHouseholdOrgEnumerator: ImportedHouseholdOrgEnumerator;
+  ImportedHouseholdRegistrationMethod: ImportedHouseholdRegistrationMethod;
+  ImportedHouseholdCollectIndividualData: ImportedHouseholdCollectIndividualData;
+  ImportedHouseholdCurrency: ImportedHouseholdCurrency;
+  RegistrationDataImportDatahubNodeConnection: ResolverTypeWrapper<
+    RegistrationDataImportDatahubNodeConnection
+  >;
+  RegistrationDataImportDatahubNodeEdge: ResolverTypeWrapper<
+    RegistrationDataImportDatahubNodeEdge
+  >;
+  DjangoDebug: ResolverTypeWrapper<DjangoDebug>;
+  DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>;
+  Mutations: ResolverTypeWrapper<{}>;
+  CreateReportInput: CreateReportInput;
+  CreateReport: ResolverTypeWrapper<CreateReport>;
+  CreateDashboardReportInput: CreateDashboardReportInput;
+  CreateDashboardReport: ResolverTypeWrapper<CreateDashboardReport>;
+  CreateGrievanceTicketInput: CreateGrievanceTicketInput;
+  CreateGrievanceTicketExtrasInput: CreateGrievanceTicketExtrasInput;
+  CategoryExtrasInput: CategoryExtrasInput;
+  SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras;
+  GrievanceComplaintTicketExtras: GrievanceComplaintTicketExtras;
+  PositiveFeedbackTicketExtras: PositiveFeedbackTicketExtras;
+  NegativeFeedbackTicketExtras: NegativeFeedbackTicketExtras;
+  ReferralTicketExtras: ReferralTicketExtras;
+  IssueTypeExtrasInput: IssueTypeExtrasInput;
+  HouseholdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras;
+  HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType;
+  IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras;
+  IndividualUpdateDataObjectType: IndividualUpdateDataObjectType;
+  IndividualDocumentObjectType: IndividualDocumentObjectType;
+  EditIndividualDocumentObjectType: EditIndividualDocumentObjectType;
+  IndividualIdentityObjectType: IndividualIdentityObjectType;
+  EditIndividualIdentityObjectType: EditIndividualIdentityObjectType;
+  IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras;
+  HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras;
+  AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras;
+  AddIndividualDataObjectType: AddIndividualDataObjectType;
+  CreateGrievanceTicketMutation: ResolverTypeWrapper<
+    CreateGrievanceTicketMutation
+  >;
+  UpdateGrievanceTicketInput: UpdateGrievanceTicketInput;
+  UpdateGrievanceTicketExtrasInput: UpdateGrievanceTicketExtrasInput;
+  UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras;
+  UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras;
+  UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras;
+  TicketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras;
+  UpdateGrievanceTicketMutation: ResolverTypeWrapper<
+    UpdateGrievanceTicketMutation
+  >;
+  GrievanceStatusChangeMutation: ResolverTypeWrapper<
+    GrievanceStatusChangeMutation
+  >;
+  CreateTicketNoteInput: CreateTicketNoteInput;
+  CreateTicketNoteMutation: ResolverTypeWrapper<CreateTicketNoteMutation>;
+  IndividualDataChangeApproveMutation: ResolverTypeWrapper<
+    IndividualDataChangeApproveMutation
+  >;
+  HouseholdDataChangeApproveMutation: ResolverTypeWrapper<
+    HouseholdDataChangeApproveMutation
+  >;
+  SimpleApproveMutation: ResolverTypeWrapper<SimpleApproveMutation>;
+  NeedsAdjudicationApproveMutation: ResolverTypeWrapper<
+    NeedsAdjudicationApproveMutation
+  >;
+  PaymentDetailsApproveMutation: ResolverTypeWrapper<
+    PaymentDetailsApproveMutation
+  >;
+  ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>;
+  CreatePaymentVerificationInput: CreatePaymentVerificationInput;
+  CreatePaymentVerificationMutation: ResolverTypeWrapper<
+    CreatePaymentVerificationMutation
+  >;
+  CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput;
+  CreateFinancialServiceProviderMutation: ResolverTypeWrapper<
+    CreateFinancialServiceProviderMutation
+  >;
+  EditFinancialServiceProviderMutation: ResolverTypeWrapper<
+    EditFinancialServiceProviderMutation
+  >;
+  EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput;
+  EditPaymentVerificationMutation: ResolverTypeWrapper<
+    EditPaymentVerificationMutation
+  >;
+  Upload: ResolverTypeWrapper<Scalars['Upload']>;
+  ImportXlsxCashPlanVerification: ResolverTypeWrapper<
+    ImportXlsxCashPlanVerification
+  >;
+  XlsxErrorNode: ResolverTypeWrapper<XlsxErrorNode>;
+  ActivateCashPlanVerificationMutation: ResolverTypeWrapper<
+    ActivateCashPlanVerificationMutation
+  >;
+  FinishCashPlanVerificationMutation: ResolverTypeWrapper<
+    FinishCashPlanVerificationMutation
+  >;
+  DiscardCashPlanVerificationMutation: ResolverTypeWrapper<
+    DiscardCashPlanVerificationMutation
+  >;
+  DeleteCashPlanVerificationMutation: ResolverTypeWrapper<
+    DeleteCashPlanVerificationMutation
+  >;
+  PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate;
+  UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<
+    UpdatePaymentVerificationStatusAndReceivedAmount
+  >;
+  UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<
+    UpdatePaymentVerificationReceivedAndReceivedAmount
+  >;
+  ActionPaymentPlanInput: ActionPaymentPlanInput;
+  Action: Action;
+  ActionPaymentPlanMutation: ResolverTypeWrapper<ActionPaymentPlanMutation>;
+  CreatePaymentPlanInput: CreatePaymentPlanInput;
+  CreatePaymentPlanMutation: ResolverTypeWrapper<CreatePaymentPlanMutation>;
+  UpdatePaymentPlanInput: UpdatePaymentPlanInput;
+  UpdatePaymentPlanMutation: ResolverTypeWrapper<UpdatePaymentPlanMutation>;
+  DeletePaymentPlanMutation: ResolverTypeWrapper<DeletePaymentPlanMutation>;
+  CreateTargetPopulationInput: CreateTargetPopulationInput;
+  CreateTargetPopulationMutation: ResolverTypeWrapper<
+    CreateTargetPopulationMutation
+  >;
+  UpdateTargetPopulationInput: UpdateTargetPopulationInput;
+  UpdateTargetPopulationMutation: ResolverTypeWrapper<
+    UpdateTargetPopulationMutation
+  >;
+  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput;
+  CopyTargetPopulationInput: CopyTargetPopulationInput;
+  CopyTargetPopulationMutationPayload: ResolverTypeWrapper<
+    CopyTargetPopulationMutationPayload
+  >;
+  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
+  DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<
+    DeleteTargetPopulationMutationPayload
+  >;
+  ApproveTargetPopulationMutation: ResolverTypeWrapper<
+    ApproveTargetPopulationMutation
+  >;
+  UnapproveTargetPopulationMutation: ResolverTypeWrapper<
+    UnapproveTargetPopulationMutation
+  >;
+  FinalizeTargetPopulationMutation: ResolverTypeWrapper<
+    FinalizeTargetPopulationMutation
+  >;
+  SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput;
+  SetSteficonRuleOnTargetPopulationMutationPayload: ResolverTypeWrapper<
+    SetSteficonRuleOnTargetPopulationMutationPayload
+  >;
+  CreateProgramInput: CreateProgramInput;
+  CreateProgram: ResolverTypeWrapper<CreateProgram>;
+  UpdateProgramInput: UpdateProgramInput;
+  UpdateProgram: ResolverTypeWrapper<UpdateProgram>;
+  DeleteProgram: ResolverTypeWrapper<DeleteProgram>;
+  UploadImportDataXLSXFileAsync: ResolverTypeWrapper<
+    UploadImportDataXlsxFileAsync
+  >;
+  DeleteRegistrationDataImport: ResolverTypeWrapper<
+    DeleteRegistrationDataImport
+  >;
+  RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput;
+  RegistrationXlsxImportMutation: ResolverTypeWrapper<
+    RegistrationXlsxImportMutation
+  >;
+  RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput;
+  RegistrationKoboImportMutation: ResolverTypeWrapper<
+    RegistrationKoboImportMutation
+  >;
+  SaveKoboProjectImportDataAsync: ResolverTypeWrapper<
+    SaveKoboProjectImportDataAsync
+  >;
+  MergeRegistrationDataImportMutation: ResolverTypeWrapper<
+    MergeRegistrationDataImportMutation
+  >;
+  RefuseRegistrationDataImportMutation: ResolverTypeWrapper<
+    RefuseRegistrationDataImportMutation
+  >;
+  RegistrationDeduplicationMutation: ResolverTypeWrapper<
+    RegistrationDeduplicationMutation
+  >;
+  CheckAgainstSanctionListMutation: ResolverTypeWrapper<
+    CheckAgainstSanctionListMutation
+  >;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  Query: {},
-  ID: Scalars['ID'],
-  AreaNode: AreaNode,
-  Node: Node,
-  DateTime: Scalars['DateTime'],
-  UUID: Scalars['UUID'],
-  String: Scalars['String'],
-  AreaTypeNode: AreaTypeNode,
-  Int: Scalars['Int'],
-  JSONString: Scalars['JSONString'],
-  AreaTypeNodeConnection: AreaTypeNodeConnection,
-  PageInfo: PageInfo,
-  Boolean: Scalars['Boolean'],
-  AreaTypeNodeEdge: AreaTypeNodeEdge,
-  AreaNodeConnection: AreaNodeConnection,
-  AreaNodeEdge: AreaNodeEdge,
-  HouseholdNodeConnection: HouseholdNodeConnection,
-  HouseholdNodeEdge: HouseholdNodeEdge,
-  HouseholdNode: HouseholdNode,
-  BigInt: Scalars['BigInt'],
-  HouseholdResidenceStatus: HouseholdResidenceStatus,
-  IndividualNodeConnection: IndividualNodeConnection,
-  IndividualNodeEdge: IndividualNodeEdge,
-  IndividualNode: IndividualNode,
-  IndividualSex: IndividualSex,
-  Date: Scalars['Date'],
-  IndividualMaritalStatus: IndividualMaritalStatus,
-  IndividualRelationship: IndividualRelationship,
-  RegistrationDataImportNode: RegistrationDataImportNode,
-  RegistrationDataImportStatus: RegistrationDataImportStatus,
-  UserNode: UserNode,
-  UserStatus: UserStatus,
-  PartnerType: PartnerType,
-  UserNodeConnection: UserNodeConnection,
-  UserNodeEdge: UserNodeEdge,
-  UserRoleNode: UserRoleNode,
-  UserBusinessAreaNode: UserBusinessAreaNode,
-  Float: Scalars['Float'],
-  UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
-  UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
-  PaymentPlanNodeConnection: PaymentPlanNodeConnection,
-  PaymentPlanNodeEdge: PaymentPlanNodeEdge,
-  PaymentPlanNode: PaymentPlanNode,
-  ProgramNode: ProgramNode,
-  ProgramStatus: ProgramStatus,
-  Decimal: Scalars['Decimal'],
-  ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
-  ProgramSector: ProgramSector,
-  ProgramScope: ProgramScope,
-  CashPlanNodeConnection: CashPlanNodeConnection,
-  CashPlanNodeEdge: CashPlanNodeEdge,
-  CashPlanNode: CashPlanNode,
-  CashPlanStatus: CashPlanStatus,
-  ServiceProviderNode: ServiceProviderNode,
-  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
-  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
-  PaymentRecordNode: PaymentRecordNode,
-  PaymentRecordStatus: PaymentRecordStatus,
-  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
-  TargetPopulationNode: TargetPopulationNode,
-  TargetPopulationStatus: TargetPopulationStatus,
-  TargetingCriteriaNode: TargetingCriteriaNode,
-  TargetingCriteriaRuleNode: TargetingCriteriaRuleNode,
-  TargetingIndividualRuleFilterBlockNode: TargetingIndividualRuleFilterBlockNode,
-  TargetingIndividualBlockRuleFilterNode: TargetingIndividualBlockRuleFilterNode,
-  TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
-  Arg: Scalars['Arg'],
-  FieldAttributeNode: FieldAttributeNode,
-  LabelNode: LabelNode,
-  CoreFieldChoiceObject: CoreFieldChoiceObject,
-  TargetingCriteriaRuleFilterNode: TargetingCriteriaRuleFilterNode,
-  TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
-  RuleCommitNode: RuleCommitNode,
-  SteficonRuleNode: SteficonRuleNode,
-  RuleLanguage: RuleLanguage,
-  RuleSecurity: RuleSecurity,
-  RuleCommitNodeConnection: RuleCommitNodeConnection,
-  RuleCommitNodeEdge: RuleCommitNodeEdge,
-  RuleCommitLanguage: RuleCommitLanguage,
-  TargetPopulationNodeConnection: TargetPopulationNodeConnection,
-  TargetPopulationNodeEdge: TargetPopulationNodeEdge,
-  HouseholdSelection: HouseholdSelection,
-  StatsObjectType: StatsObjectType,
-  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
-  PaymentVerificationNode: PaymentVerificationNode,
-  CashPlanPaymentVerificationNode: CashPlanPaymentVerificationNode,
-  CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
-  CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
-  CashPlanPaymentVerificationVerificationChannel: CashPlanPaymentVerificationVerificationChannel,
-  AgeFilterObject: AgeFilterObject,
-  PaymentVerificationNodeConnection: PaymentVerificationNodeConnection,
-  PaymentVerificationNodeEdge: PaymentVerificationNodeEdge,
-  PaymentVerificationStatus: PaymentVerificationStatus,
-  TicketPaymentVerificationDetailsNodeConnection: TicketPaymentVerificationDetailsNodeConnection,
-  TicketPaymentVerificationDetailsNodeEdge: TicketPaymentVerificationDetailsNodeEdge,
-  TicketPaymentVerificationDetailsNode: TicketPaymentVerificationDetailsNode,
-  TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
-  TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus,
-  TicketComplaintDetailsNodeConnection: TicketComplaintDetailsNodeConnection,
-  TicketComplaintDetailsNodeEdge: TicketComplaintDetailsNodeEdge,
-  TicketComplaintDetailsNode: TicketComplaintDetailsNode,
-  TicketSensitiveDetailsNodeConnection: TicketSensitiveDetailsNodeConnection,
-  TicketSensitiveDetailsNodeEdge: TicketSensitiveDetailsNodeEdge,
-  TicketSensitiveDetailsNode: TicketSensitiveDetailsNode,
-  CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
-  CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge,
-  CashPlanPaymentVerificationSummaryNode: CashPlanPaymentVerificationSummaryNode,
-  CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus,
-  ReportNodeConnection: ReportNodeConnection,
-  ReportNodeEdge: ReportNodeEdge,
-  ReportNode: ReportNode,
-  PaymentPlanStatus: PaymentPlanStatus,
-  PaymentPlanCurrency: PaymentPlanCurrency,
-  ApprovalProcessNodeConnection: ApprovalProcessNodeConnection,
-  ApprovalProcessNodeEdge: ApprovalProcessNodeEdge,
-  ApprovalProcessNode: ApprovalProcessNode,
-  ApprovalNode: ApprovalNode,
-  ApprovalType: ApprovalType,
-  ServiceProviderNodeConnection: ServiceProviderNodeConnection,
-  ServiceProviderNodeEdge: ServiceProviderNodeEdge,
-  GrievanceTicketNodeConnection: GrievanceTicketNodeConnection,
-  GrievanceTicketNodeEdge: GrievanceTicketNodeEdge,
-  GrievanceTicketNode: GrievanceTicketNode,
-  TicketNoteNodeConnection: TicketNoteNodeConnection,
-  TicketNoteNodeEdge: TicketNoteNodeEdge,
-  TicketNoteNode: TicketNoteNode,
-  TicketHouseholdDataUpdateDetailsNode: TicketHouseholdDataUpdateDetailsNode,
-  TicketIndividualDataUpdateDetailsNode: TicketIndividualDataUpdateDetailsNode,
-  TicketAddIndividualDetailsNode: TicketAddIndividualDetailsNode,
-  TicketDeleteIndividualDetailsNode: TicketDeleteIndividualDetailsNode,
-  TicketDeleteHouseholdDetailsNode: TicketDeleteHouseholdDetailsNode,
-  TicketSystemFlaggingDetailsNode: TicketSystemFlaggingDetailsNode,
-  SanctionListIndividualNode: SanctionListIndividualNode,
-  SanctionListIndividualDocumentNodeConnection: SanctionListIndividualDocumentNodeConnection,
-  SanctionListIndividualDocumentNodeEdge: SanctionListIndividualDocumentNodeEdge,
-  SanctionListIndividualDocumentNode: SanctionListIndividualDocumentNode,
-  SanctionListIndividualNationalitiesNodeConnection: SanctionListIndividualNationalitiesNodeConnection,
-  SanctionListIndividualNationalitiesNodeEdge: SanctionListIndividualNationalitiesNodeEdge,
-  SanctionListIndividualNationalitiesNode: SanctionListIndividualNationalitiesNode,
-  SanctionListIndividualCountriesNodeConnection: SanctionListIndividualCountriesNodeConnection,
-  SanctionListIndividualCountriesNodeEdge: SanctionListIndividualCountriesNodeEdge,
-  SanctionListIndividualCountriesNode: SanctionListIndividualCountriesNode,
-  SanctionListIndividualAliasNameNodeConnection: SanctionListIndividualAliasNameNodeConnection,
-  SanctionListIndividualAliasNameNodeEdge: SanctionListIndividualAliasNameNodeEdge,
-  SanctionListIndividualAliasNameNode: SanctionListIndividualAliasNameNode,
-  SanctionListIndividualDateOfBirthNodeConnection: SanctionListIndividualDateOfBirthNodeConnection,
-  SanctionListIndividualDateOfBirthNodeEdge: SanctionListIndividualDateOfBirthNodeEdge,
-  SanctionListIndividualDateOfBirthNode: SanctionListIndividualDateOfBirthNode,
-  TicketNeedsAdjudicationDetailsNode: TicketNeedsAdjudicationDetailsNode,
-  TicketNeedsAdjudicationDetailsExtraDataNode: TicketNeedsAdjudicationDetailsExtraDataNode,
-  DeduplicationResultNode: DeduplicationResultNode,
-  TicketPositiveFeedbackDetailsNode: TicketPositiveFeedbackDetailsNode,
-  TicketNegativeFeedbackDetailsNode: TicketNegativeFeedbackDetailsNode,
-  TicketReferralDetailsNode: TicketReferralDetailsNode,
-  ProgramNodeConnection: ProgramNodeConnection,
-  ProgramNodeEdge: ProgramNodeEdge,
-  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
-  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
-  PaymentVerificationLogEntryNodeConnection: PaymentVerificationLogEntryNodeConnection,
-  PaymentVerificationLogEntryNodeEdge: PaymentVerificationLogEntryNodeEdge,
-  PaymentVerificationLogEntryNode: PaymentVerificationLogEntryNode,
-  ContentTypeObjectType: ContentTypeObjectType,
-  LogEntryAction: LogEntryAction,
-  RoleNode: RoleNode,
-  RoleSubsystem: RoleSubsystem,
-  FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection,
-  FinancialServiceProviderXlsxTemplateNodeEdge: FinancialServiceProviderXlsxTemplateNodeEdge,
-  FinancialServiceProviderXlsxTemplateNode: FinancialServiceProviderXlsxTemplateNode,
-  FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns,
-  FinancialServiceProviderNodeConnection: FinancialServiceProviderNodeConnection,
-  FinancialServiceProviderNodeEdge: FinancialServiceProviderNodeEdge,
-  FinancialServiceProviderNode: FinancialServiceProviderNode,
-  FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
-  FinancialServiceProviderXlsxReportNodeConnection: FinancialServiceProviderXlsxReportNodeConnection,
-  FinancialServiceProviderXlsxReportNodeEdge: FinancialServiceProviderXlsxReportNodeEdge,
-  FinancialServiceProviderXlsxReportNode: FinancialServiceProviderXlsxReportNode,
-  FinancialServiceProviderXlsxReportStatus: FinancialServiceProviderXlsxReportStatus,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
-  CountAndPercentageNode: CountAndPercentageNode,
-  IndividualDisability: IndividualDisability,
-  FlexFieldsScalar: Scalars['FlexFieldsScalar'],
-  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
-  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
-  DocumentNodeConnection: DocumentNodeConnection,
-  DocumentNodeEdge: DocumentNodeEdge,
-  DocumentNode: DocumentNode,
-  DocumentTypeNode: DocumentTypeNode,
-  DocumentTypeType: DocumentTypeType,
-  DocumentStatus: DocumentStatus,
-  IndividualIdentityNodeConnection: IndividualIdentityNodeConnection,
-  IndividualIdentityNodeEdge: IndividualIdentityNodeEdge,
-  IndividualIdentityNode: IndividualIdentityNode,
-  AgencyNode: AgencyNode,
-  AgencyType: AgencyType,
-  IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
-  IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
-  BankAccountInfoNode: BankAccountInfoNode,
-  TicketIndividualDataUpdateDetailsNodeConnection: TicketIndividualDataUpdateDetailsNodeConnection,
-  TicketIndividualDataUpdateDetailsNodeEdge: TicketIndividualDataUpdateDetailsNodeEdge,
-  TicketDeleteIndividualDetailsNodeConnection: TicketDeleteIndividualDetailsNodeConnection,
-  TicketDeleteIndividualDetailsNodeEdge: TicketDeleteIndividualDetailsNodeEdge,
-  TicketSystemFlaggingDetailsNodeConnection: TicketSystemFlaggingDetailsNodeConnection,
-  TicketSystemFlaggingDetailsNodeEdge: TicketSystemFlaggingDetailsNodeEdge,
-  TicketNeedsAdjudicationDetailsNodeConnection: TicketNeedsAdjudicationDetailsNodeConnection,
-  TicketNeedsAdjudicationDetailsNodeEdge: TicketNeedsAdjudicationDetailsNodeEdge,
-  TicketPositiveFeedbackDetailsNodeConnection: TicketPositiveFeedbackDetailsNodeConnection,
-  TicketPositiveFeedbackDetailsNodeEdge: TicketPositiveFeedbackDetailsNodeEdge,
-  TicketNegativeFeedbackDetailsNodeConnection: TicketNegativeFeedbackDetailsNodeConnection,
-  TicketNegativeFeedbackDetailsNodeEdge: TicketNegativeFeedbackDetailsNodeEdge,
-  TicketReferralDetailsNodeConnection: TicketReferralDetailsNodeConnection,
-  TicketReferralDetailsNodeEdge: TicketReferralDetailsNodeEdge,
-  GeoJSON: Scalars['GeoJSON'],
-  HouseholdOrgEnumerator: HouseholdOrgEnumerator,
-  HouseholdRegistrationMethod: HouseholdRegistrationMethod,
-  HouseholdCollectIndividualData: HouseholdCollectIndividualData,
-  TicketHouseholdDataUpdateDetailsNodeConnection: TicketHouseholdDataUpdateDetailsNodeConnection,
-  TicketHouseholdDataUpdateDetailsNodeEdge: TicketHouseholdDataUpdateDetailsNodeEdge,
-  TicketAddIndividualDetailsNodeConnection: TicketAddIndividualDetailsNodeConnection,
-  TicketAddIndividualDetailsNodeEdge: TicketAddIndividualDetailsNodeEdge,
-  TicketDeleteHouseholdDetailsNodeConnection: TicketDeleteHouseholdDetailsNodeConnection,
-  TicketDeleteHouseholdDetailsNodeEdge: TicketDeleteHouseholdDetailsNodeEdge,
-  ProgramsWithDeliveredQuantityNode: ProgramsWithDeliveredQuantityNode,
-  DeliveredQuantityNode: DeliveredQuantityNode,
-  LogEntryNodeConnection: LogEntryNodeConnection,
-  LogEntryNodeEdge: LogEntryNodeEdge,
-  LogEntryNode: LogEntryNode,
-  ChoiceObject: ChoiceObject,
-  SanctionListIndividualNodeConnection: SanctionListIndividualNodeConnection,
-  SanctionListIndividualNodeEdge: SanctionListIndividualNodeEdge,
-  ChartGrievanceTicketsNode: ChartGrievanceTicketsNode,
-  _DatasetsNode: _DatasetsNode,
-  IssueTypesObject: IssueTypesObject,
-  SteficonRuleNodeConnection: SteficonRuleNodeConnection,
-  SteficonRuleNodeEdge: SteficonRuleNodeEdge,
-  ChartPaymentVerification: ChartPaymentVerification,
-  _DetailedDatasetsNode: _DetailedDatasetsNode,
-  ChartDatasetNode: ChartDatasetNode,
-  SectionTotalNode: SectionTotalNode,
-  TableTotalCashTransferred: TableTotalCashTransferred,
-  _TableTotalCashTransferredDataNode: _TableTotalCashTransferredDataNode,
-  ChartDetailedDatasetsNode: ChartDetailedDatasetsNode,
-  RapidProFlow: RapidProFlow,
-  RapidProFlowRun: RapidProFlowRun,
-  RapidProFlowResult: RapidProFlowResult,
-  GetCashplanVerificationSampleSizeInput: GetCashplanVerificationSampleSizeInput,
-  FullListArguments: FullListArguments,
-  RandomSamplingArguments: RandomSamplingArguments,
-  AgeInput: AgeInput,
-  RapidProArguments: RapidProArguments,
-  GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
-  BusinessAreaNode: BusinessAreaNode,
-  BusinessAreaNodeConnection: BusinessAreaNodeConnection,
-  BusinessAreaNodeEdge: BusinessAreaNodeEdge,
-  GroupAttributeNode: GroupAttributeNode,
-  KoboAssetObject: KoboAssetObject,
-  KoboAssetObjectConnection: KoboAssetObjectConnection,
-  KoboAssetObjectEdge: KoboAssetObjectEdge,
-  TargetingCriteriaObjectType: TargetingCriteriaObjectType,
-  TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
-  TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
-  TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
-  ImportedHouseholdNode: ImportedHouseholdNode,
-  ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
-  ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
-  ImportedIndividualNode: ImportedIndividualNode,
-  ImportedIndividualSex: ImportedIndividualSex,
-  ImportedIndividualMaritalStatus: ImportedIndividualMaritalStatus,
-  RegistrationDataImportDatahubNode: RegistrationDataImportDatahubNode,
-  ImportDataNode: ImportDataNode,
-  ImportDataStatus: ImportDataStatus,
-  ImportDataDataType: ImportDataDataType,
-  KoboImportDataNode: KoboImportDataNode,
-  KoboErrorNode: KoboErrorNode,
-  XlsxRowErrorNode: XlsxRowErrorNode,
-  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
-  ImportedHouseholdNodeConnection: ImportedHouseholdNodeConnection,
-  ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
-  ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
-  ImportedIndividualNodeEdge: ImportedIndividualNodeEdge,
-  ImportedIndividualDisability: ImportedIndividualDisability,
-  ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
-  ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
-  ImportedDocumentNodeConnection: ImportedDocumentNodeConnection,
-  ImportedDocumentNodeEdge: ImportedDocumentNodeEdge,
-  ImportedDocumentNode: ImportedDocumentNode,
-  ImportedDocumentTypeNode: ImportedDocumentTypeNode,
-  ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
-  ImportedDocumentTypeType: ImportedDocumentTypeType,
-  ImportedIndividualIdentityNodeConnection: ImportedIndividualIdentityNodeConnection,
-  ImportedIndividualIdentityNodeEdge: ImportedIndividualIdentityNodeEdge,
-  ImportedIndividualIdentityNode: ImportedIndividualIdentityNode,
-  ImportedHouseholdOrgEnumerator: ImportedHouseholdOrgEnumerator,
-  ImportedHouseholdRegistrationMethod: ImportedHouseholdRegistrationMethod,
-  ImportedHouseholdCollectIndividualData: ImportedHouseholdCollectIndividualData,
-  ImportedHouseholdCurrency: ImportedHouseholdCurrency,
-  RegistrationDataImportDatahubNodeConnection: RegistrationDataImportDatahubNodeConnection,
-  RegistrationDataImportDatahubNodeEdge: RegistrationDataImportDatahubNodeEdge,
-  DjangoDebug: DjangoDebug,
-  DjangoDebugSQL: DjangoDebugSql,
-  Mutations: {},
-  CreateReportInput: CreateReportInput,
-  CreateReport: CreateReport,
-  CreateDashboardReportInput: CreateDashboardReportInput,
-  CreateDashboardReport: CreateDashboardReport,
-  CreateGrievanceTicketInput: CreateGrievanceTicketInput,
-  CreateGrievanceTicketExtrasInput: CreateGrievanceTicketExtrasInput,
-  CategoryExtrasInput: CategoryExtrasInput,
-  SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras,
-  GrievanceComplaintTicketExtras: GrievanceComplaintTicketExtras,
-  PositiveFeedbackTicketExtras: PositiveFeedbackTicketExtras,
-  NegativeFeedbackTicketExtras: NegativeFeedbackTicketExtras,
-  ReferralTicketExtras: ReferralTicketExtras,
-  IssueTypeExtrasInput: IssueTypeExtrasInput,
-  HouseholdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras,
-  HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType,
-  IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
-  IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
-  IndividualDocumentObjectType: IndividualDocumentObjectType,
-  EditIndividualDocumentObjectType: EditIndividualDocumentObjectType,
-  IndividualIdentityObjectType: IndividualIdentityObjectType,
-  EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
-  IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
-  HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras,
-  AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
-  AddIndividualDataObjectType: AddIndividualDataObjectType,
-  CreateGrievanceTicketMutation: CreateGrievanceTicketMutation,
-  UpdateGrievanceTicketInput: UpdateGrievanceTicketInput,
-  UpdateGrievanceTicketExtrasInput: UpdateGrievanceTicketExtrasInput,
-  UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras,
-  UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras,
-  UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras,
-  TicketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras,
-  UpdateGrievanceTicketMutation: UpdateGrievanceTicketMutation,
-  GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
-  CreateTicketNoteInput: CreateTicketNoteInput,
-  CreateTicketNoteMutation: CreateTicketNoteMutation,
-  IndividualDataChangeApproveMutation: IndividualDataChangeApproveMutation,
-  HouseholdDataChangeApproveMutation: HouseholdDataChangeApproveMutation,
-  SimpleApproveMutation: SimpleApproveMutation,
-  NeedsAdjudicationApproveMutation: NeedsAdjudicationApproveMutation,
-  PaymentDetailsApproveMutation: PaymentDetailsApproveMutation,
-  ReassignRoleMutation: ReassignRoleMutation,
-  CreatePaymentVerificationInput: CreatePaymentVerificationInput,
-  CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
-  CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput,
-  CreateFinancialServiceProviderMutation: CreateFinancialServiceProviderMutation,
-  EditFinancialServiceProviderMutation: EditFinancialServiceProviderMutation,
-  EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput,
-  EditPaymentVerificationMutation: EditPaymentVerificationMutation,
-  Upload: Scalars['Upload'],
-  ImportXlsxCashPlanVerification: ImportXlsxCashPlanVerification,
-  XlsxErrorNode: XlsxErrorNode,
-  ActivateCashPlanVerificationMutation: ActivateCashPlanVerificationMutation,
-  FinishCashPlanVerificationMutation: FinishCashPlanVerificationMutation,
-  DiscardCashPlanVerificationMutation: DiscardCashPlanVerificationMutation,
-  DeleteCashPlanVerificationMutation: DeleteCashPlanVerificationMutation,
-  PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
-  UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
-  UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount,
-  ActionPaymentPlanInput: ActionPaymentPlanInput,
-  Action: Action,
-  ActionPaymentPlanMutation: ActionPaymentPlanMutation,
-  CreatePaymentPlanInput: CreatePaymentPlanInput,
-  CreatePaymentPlanMutation: CreatePaymentPlanMutation,
-  UpdatePaymentPlanInput: UpdatePaymentPlanInput,
-  UpdatePaymentPlanMutation: UpdatePaymentPlanMutation,
-  DeletePaymentPlanMutation: DeletePaymentPlanMutation,
-  CreateTargetPopulationInput: CreateTargetPopulationInput,
-  CreateTargetPopulationMutation: CreateTargetPopulationMutation,
-  UpdateTargetPopulationInput: UpdateTargetPopulationInput,
-  UpdateTargetPopulationMutation: UpdateTargetPopulationMutation,
-  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput,
-  CopyTargetPopulationInput: CopyTargetPopulationInput,
-  CopyTargetPopulationMutationPayload: CopyTargetPopulationMutationPayload,
-  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput,
-  DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload,
-  ApproveTargetPopulationMutation: ApproveTargetPopulationMutation,
-  UnapproveTargetPopulationMutation: UnapproveTargetPopulationMutation,
-  FinalizeTargetPopulationMutation: FinalizeTargetPopulationMutation,
-  SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput,
-  SetSteficonRuleOnTargetPopulationMutationPayload: SetSteficonRuleOnTargetPopulationMutationPayload,
-  CreateProgramInput: CreateProgramInput,
-  CreateProgram: CreateProgram,
-  UpdateProgramInput: UpdateProgramInput,
-  UpdateProgram: UpdateProgram,
-  DeleteProgram: DeleteProgram,
-  UploadImportDataXLSXFileAsync: UploadImportDataXlsxFileAsync,
-  DeleteRegistrationDataImport: DeleteRegistrationDataImport,
-  RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
-  RegistrationXlsxImportMutation: RegistrationXlsxImportMutation,
-  RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput,
-  RegistrationKoboImportMutation: RegistrationKoboImportMutation,
-  SaveKoboProjectImportDataAsync: SaveKoboProjectImportDataAsync,
-  MergeRegistrationDataImportMutation: MergeRegistrationDataImportMutation,
-  RefuseRegistrationDataImportMutation: RefuseRegistrationDataImportMutation,
-  RegistrationDeduplicationMutation: RegistrationDeduplicationMutation,
-  CheckAgainstSanctionListMutation: CheckAgainstSanctionListMutation,
+  Query: {};
+  ID: Scalars['ID'];
+  AreaNode: AreaNode;
+  Node: Node;
+  DateTime: Scalars['DateTime'];
+  UUID: Scalars['UUID'];
+  String: Scalars['String'];
+  AreaTypeNode: AreaTypeNode;
+  Int: Scalars['Int'];
+  JSONString: Scalars['JSONString'];
+  AreaTypeNodeConnection: AreaTypeNodeConnection;
+  PageInfo: PageInfo;
+  Boolean: Scalars['Boolean'];
+  AreaTypeNodeEdge: AreaTypeNodeEdge;
+  AreaNodeConnection: AreaNodeConnection;
+  AreaNodeEdge: AreaNodeEdge;
+  HouseholdNodeConnection: HouseholdNodeConnection;
+  HouseholdNodeEdge: HouseholdNodeEdge;
+  HouseholdNode: HouseholdNode;
+  BigInt: Scalars['BigInt'];
+  HouseholdResidenceStatus: HouseholdResidenceStatus;
+  IndividualNodeConnection: IndividualNodeConnection;
+  IndividualNodeEdge: IndividualNodeEdge;
+  IndividualNode: IndividualNode;
+  IndividualSex: IndividualSex;
+  Date: Scalars['Date'];
+  IndividualMaritalStatus: IndividualMaritalStatus;
+  IndividualRelationship: IndividualRelationship;
+  RegistrationDataImportNode: RegistrationDataImportNode;
+  RegistrationDataImportStatus: RegistrationDataImportStatus;
+  UserNode: UserNode;
+  UserStatus: UserStatus;
+  PartnerType: PartnerType;
+  UserNodeConnection: UserNodeConnection;
+  UserNodeEdge: UserNodeEdge;
+  UserRoleNode: UserRoleNode;
+  UserBusinessAreaNode: UserBusinessAreaNode;
+  Float: Scalars['Float'];
+  UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection;
+  UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge;
+  PaymentPlanNodeConnection: PaymentPlanNodeConnection;
+  PaymentPlanNodeEdge: PaymentPlanNodeEdge;
+  PaymentPlanNode: PaymentPlanNode;
+  ProgramNode: ProgramNode;
+  ProgramStatus: ProgramStatus;
+  Decimal: Scalars['Decimal'];
+  ProgramFrequencyOfPayments: ProgramFrequencyOfPayments;
+  ProgramSector: ProgramSector;
+  ProgramScope: ProgramScope;
+  CashPlanNodeConnection: CashPlanNodeConnection;
+  CashPlanNodeEdge: CashPlanNodeEdge;
+  CashPlanNode: CashPlanNode;
+  CashPlanStatus: CashPlanStatus;
+  ServiceProviderNode: ServiceProviderNode;
+  PaymentRecordNodeConnection: PaymentRecordNodeConnection;
+  PaymentRecordNodeEdge: PaymentRecordNodeEdge;
+  PaymentRecordNode: PaymentRecordNode;
+  PaymentRecordStatus: PaymentRecordStatus;
+  PaymentRecordDeliveryType: PaymentRecordDeliveryType;
+  TargetPopulationNode: TargetPopulationNode;
+  TargetPopulationStatus: TargetPopulationStatus;
+  TargetingCriteriaNode: TargetingCriteriaNode;
+  TargetingCriteriaRuleNode: TargetingCriteriaRuleNode;
+  TargetingIndividualRuleFilterBlockNode: TargetingIndividualRuleFilterBlockNode;
+  TargetingIndividualBlockRuleFilterNode: TargetingIndividualBlockRuleFilterNode;
+  TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod;
+  Arg: Scalars['Arg'];
+  FieldAttributeNode: FieldAttributeNode;
+  LabelNode: LabelNode;
+  CoreFieldChoiceObject: CoreFieldChoiceObject;
+  TargetingCriteriaRuleFilterNode: TargetingCriteriaRuleFilterNode;
+  TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod;
+  RuleCommitNode: RuleCommitNode;
+  SteficonRuleNode: SteficonRuleNode;
+  RuleLanguage: RuleLanguage;
+  RuleSecurity: RuleSecurity;
+  RuleCommitNodeConnection: RuleCommitNodeConnection;
+  RuleCommitNodeEdge: RuleCommitNodeEdge;
+  RuleCommitLanguage: RuleCommitLanguage;
+  TargetPopulationNodeConnection: TargetPopulationNodeConnection;
+  TargetPopulationNodeEdge: TargetPopulationNodeEdge;
+  HouseholdSelection: HouseholdSelection;
+  StatsObjectType: StatsObjectType;
+  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus;
+  PaymentVerificationNode: PaymentVerificationNode;
+  CashPlanPaymentVerificationNode: CashPlanPaymentVerificationNode;
+  CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus;
+  CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling;
+  CashPlanPaymentVerificationVerificationChannel: CashPlanPaymentVerificationVerificationChannel;
+  AgeFilterObject: AgeFilterObject;
+  PaymentVerificationNodeConnection: PaymentVerificationNodeConnection;
+  PaymentVerificationNodeEdge: PaymentVerificationNodeEdge;
+  PaymentVerificationStatus: PaymentVerificationStatus;
+  TicketPaymentVerificationDetailsNodeConnection: TicketPaymentVerificationDetailsNodeConnection;
+  TicketPaymentVerificationDetailsNodeEdge: TicketPaymentVerificationDetailsNodeEdge;
+  TicketPaymentVerificationDetailsNode: TicketPaymentVerificationDetailsNode;
+  TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus;
+  TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus;
+  TicketComplaintDetailsNodeConnection: TicketComplaintDetailsNodeConnection;
+  TicketComplaintDetailsNodeEdge: TicketComplaintDetailsNodeEdge;
+  TicketComplaintDetailsNode: TicketComplaintDetailsNode;
+  TicketSensitiveDetailsNodeConnection: TicketSensitiveDetailsNodeConnection;
+  TicketSensitiveDetailsNodeEdge: TicketSensitiveDetailsNodeEdge;
+  TicketSensitiveDetailsNode: TicketSensitiveDetailsNode;
+  CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection;
+  CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge;
+  CashPlanPaymentVerificationSummaryNode: CashPlanPaymentVerificationSummaryNode;
+  CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus;
+  ReportNodeConnection: ReportNodeConnection;
+  ReportNodeEdge: ReportNodeEdge;
+  ReportNode: ReportNode;
+  PaymentPlanStatus: PaymentPlanStatus;
+  PaymentPlanCurrency: PaymentPlanCurrency;
+  ApprovalProcessNodeConnection: ApprovalProcessNodeConnection;
+  ApprovalProcessNodeEdge: ApprovalProcessNodeEdge;
+  ApprovalProcessNode: ApprovalProcessNode;
+  FilteredActionsListNode: FilteredActionsListNode;
+  ApprovalNode: ApprovalNode;
+  ServiceProviderNodeConnection: ServiceProviderNodeConnection;
+  ServiceProviderNodeEdge: ServiceProviderNodeEdge;
+  GrievanceTicketNodeConnection: GrievanceTicketNodeConnection;
+  GrievanceTicketNodeEdge: GrievanceTicketNodeEdge;
+  GrievanceTicketNode: GrievanceTicketNode;
+  TicketNoteNodeConnection: TicketNoteNodeConnection;
+  TicketNoteNodeEdge: TicketNoteNodeEdge;
+  TicketNoteNode: TicketNoteNode;
+  TicketHouseholdDataUpdateDetailsNode: TicketHouseholdDataUpdateDetailsNode;
+  TicketIndividualDataUpdateDetailsNode: TicketIndividualDataUpdateDetailsNode;
+  TicketAddIndividualDetailsNode: TicketAddIndividualDetailsNode;
+  TicketDeleteIndividualDetailsNode: TicketDeleteIndividualDetailsNode;
+  TicketDeleteHouseholdDetailsNode: TicketDeleteHouseholdDetailsNode;
+  TicketSystemFlaggingDetailsNode: TicketSystemFlaggingDetailsNode;
+  SanctionListIndividualNode: SanctionListIndividualNode;
+  SanctionListIndividualDocumentNodeConnection: SanctionListIndividualDocumentNodeConnection;
+  SanctionListIndividualDocumentNodeEdge: SanctionListIndividualDocumentNodeEdge;
+  SanctionListIndividualDocumentNode: SanctionListIndividualDocumentNode;
+  SanctionListIndividualNationalitiesNodeConnection: SanctionListIndividualNationalitiesNodeConnection;
+  SanctionListIndividualNationalitiesNodeEdge: SanctionListIndividualNationalitiesNodeEdge;
+  SanctionListIndividualNationalitiesNode: SanctionListIndividualNationalitiesNode;
+  SanctionListIndividualCountriesNodeConnection: SanctionListIndividualCountriesNodeConnection;
+  SanctionListIndividualCountriesNodeEdge: SanctionListIndividualCountriesNodeEdge;
+  SanctionListIndividualCountriesNode: SanctionListIndividualCountriesNode;
+  SanctionListIndividualAliasNameNodeConnection: SanctionListIndividualAliasNameNodeConnection;
+  SanctionListIndividualAliasNameNodeEdge: SanctionListIndividualAliasNameNodeEdge;
+  SanctionListIndividualAliasNameNode: SanctionListIndividualAliasNameNode;
+  SanctionListIndividualDateOfBirthNodeConnection: SanctionListIndividualDateOfBirthNodeConnection;
+  SanctionListIndividualDateOfBirthNodeEdge: SanctionListIndividualDateOfBirthNodeEdge;
+  SanctionListIndividualDateOfBirthNode: SanctionListIndividualDateOfBirthNode;
+  TicketNeedsAdjudicationDetailsNode: TicketNeedsAdjudicationDetailsNode;
+  TicketNeedsAdjudicationDetailsExtraDataNode: TicketNeedsAdjudicationDetailsExtraDataNode;
+  DeduplicationResultNode: DeduplicationResultNode;
+  TicketPositiveFeedbackDetailsNode: TicketPositiveFeedbackDetailsNode;
+  TicketNegativeFeedbackDetailsNode: TicketNegativeFeedbackDetailsNode;
+  TicketReferralDetailsNode: TicketReferralDetailsNode;
+  ProgramNodeConnection: ProgramNodeConnection;
+  ProgramNodeEdge: ProgramNodeEdge;
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection;
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge;
+  PaymentVerificationLogEntryNodeConnection: PaymentVerificationLogEntryNodeConnection;
+  PaymentVerificationLogEntryNodeEdge: PaymentVerificationLogEntryNodeEdge;
+  PaymentVerificationLogEntryNode: PaymentVerificationLogEntryNode;
+  ContentTypeObjectType: ContentTypeObjectType;
+  LogEntryAction: LogEntryAction;
+  RoleNode: RoleNode;
+  RoleSubsystem: RoleSubsystem;
+  FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection;
+  FinancialServiceProviderXlsxTemplateNodeEdge: FinancialServiceProviderXlsxTemplateNodeEdge;
+  FinancialServiceProviderXlsxTemplateNode: FinancialServiceProviderXlsxTemplateNode;
+  FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns;
+  FinancialServiceProviderNodeConnection: FinancialServiceProviderNodeConnection;
+  FinancialServiceProviderNodeEdge: FinancialServiceProviderNodeEdge;
+  FinancialServiceProviderNode: FinancialServiceProviderNode;
+  FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel;
+  FinancialServiceProviderXlsxReportNodeConnection: FinancialServiceProviderXlsxReportNodeConnection;
+  FinancialServiceProviderXlsxReportNodeEdge: FinancialServiceProviderXlsxReportNodeEdge;
+  FinancialServiceProviderXlsxReportNode: FinancialServiceProviderXlsxReportNode;
+  FinancialServiceProviderXlsxReportStatus: FinancialServiceProviderXlsxReportStatus;
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource;
+  CountAndPercentageNode: CountAndPercentageNode;
+  IndividualDisability: IndividualDisability;
+  FlexFieldsScalar: Scalars['FlexFieldsScalar'];
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus;
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus;
+  DocumentNodeConnection: DocumentNodeConnection;
+  DocumentNodeEdge: DocumentNodeEdge;
+  DocumentNode: DocumentNode;
+  DocumentTypeNode: DocumentTypeNode;
+  DocumentTypeType: DocumentTypeType;
+  DocumentStatus: DocumentStatus;
+  IndividualIdentityNodeConnection: IndividualIdentityNodeConnection;
+  IndividualIdentityNodeEdge: IndividualIdentityNodeEdge;
+  IndividualIdentityNode: IndividualIdentityNode;
+  AgencyNode: AgencyNode;
+  AgencyType: AgencyType;
+  IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode;
+  IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole;
+  BankAccountInfoNode: BankAccountInfoNode;
+  TicketIndividualDataUpdateDetailsNodeConnection: TicketIndividualDataUpdateDetailsNodeConnection;
+  TicketIndividualDataUpdateDetailsNodeEdge: TicketIndividualDataUpdateDetailsNodeEdge;
+  TicketDeleteIndividualDetailsNodeConnection: TicketDeleteIndividualDetailsNodeConnection;
+  TicketDeleteIndividualDetailsNodeEdge: TicketDeleteIndividualDetailsNodeEdge;
+  TicketSystemFlaggingDetailsNodeConnection: TicketSystemFlaggingDetailsNodeConnection;
+  TicketSystemFlaggingDetailsNodeEdge: TicketSystemFlaggingDetailsNodeEdge;
+  TicketNeedsAdjudicationDetailsNodeConnection: TicketNeedsAdjudicationDetailsNodeConnection;
+  TicketNeedsAdjudicationDetailsNodeEdge: TicketNeedsAdjudicationDetailsNodeEdge;
+  TicketPositiveFeedbackDetailsNodeConnection: TicketPositiveFeedbackDetailsNodeConnection;
+  TicketPositiveFeedbackDetailsNodeEdge: TicketPositiveFeedbackDetailsNodeEdge;
+  TicketNegativeFeedbackDetailsNodeConnection: TicketNegativeFeedbackDetailsNodeConnection;
+  TicketNegativeFeedbackDetailsNodeEdge: TicketNegativeFeedbackDetailsNodeEdge;
+  TicketReferralDetailsNodeConnection: TicketReferralDetailsNodeConnection;
+  TicketReferralDetailsNodeEdge: TicketReferralDetailsNodeEdge;
+  GeoJSON: Scalars['GeoJSON'];
+  HouseholdOrgEnumerator: HouseholdOrgEnumerator;
+  HouseholdRegistrationMethod: HouseholdRegistrationMethod;
+  HouseholdCollectIndividualData: HouseholdCollectIndividualData;
+  TicketHouseholdDataUpdateDetailsNodeConnection: TicketHouseholdDataUpdateDetailsNodeConnection;
+  TicketHouseholdDataUpdateDetailsNodeEdge: TicketHouseholdDataUpdateDetailsNodeEdge;
+  TicketAddIndividualDetailsNodeConnection: TicketAddIndividualDetailsNodeConnection;
+  TicketAddIndividualDetailsNodeEdge: TicketAddIndividualDetailsNodeEdge;
+  TicketDeleteHouseholdDetailsNodeConnection: TicketDeleteHouseholdDetailsNodeConnection;
+  TicketDeleteHouseholdDetailsNodeEdge: TicketDeleteHouseholdDetailsNodeEdge;
+  ProgramsWithDeliveredQuantityNode: ProgramsWithDeliveredQuantityNode;
+  DeliveredQuantityNode: DeliveredQuantityNode;
+  LogEntryNodeConnection: LogEntryNodeConnection;
+  LogEntryNodeEdge: LogEntryNodeEdge;
+  LogEntryNode: LogEntryNode;
+  ChoiceObject: ChoiceObject;
+  SanctionListIndividualNodeConnection: SanctionListIndividualNodeConnection;
+  SanctionListIndividualNodeEdge: SanctionListIndividualNodeEdge;
+  ChartGrievanceTicketsNode: ChartGrievanceTicketsNode;
+  _DatasetsNode: _DatasetsNode;
+  IssueTypesObject: IssueTypesObject;
+  SteficonRuleNodeConnection: SteficonRuleNodeConnection;
+  SteficonRuleNodeEdge: SteficonRuleNodeEdge;
+  ChartPaymentVerification: ChartPaymentVerification;
+  _DetailedDatasetsNode: _DetailedDatasetsNode;
+  ChartDatasetNode: ChartDatasetNode;
+  SectionTotalNode: SectionTotalNode;
+  TableTotalCashTransferred: TableTotalCashTransferred;
+  _TableTotalCashTransferredDataNode: _TableTotalCashTransferredDataNode;
+  ChartDetailedDatasetsNode: ChartDetailedDatasetsNode;
+  RapidProFlow: RapidProFlow;
+  RapidProFlowRun: RapidProFlowRun;
+  RapidProFlowResult: RapidProFlowResult;
+  GetCashplanVerificationSampleSizeInput: GetCashplanVerificationSampleSizeInput;
+  FullListArguments: FullListArguments;
+  RandomSamplingArguments: RandomSamplingArguments;
+  AgeInput: AgeInput;
+  RapidProArguments: RapidProArguments;
+  GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject;
+  BusinessAreaNode: BusinessAreaNode;
+  BusinessAreaNodeConnection: BusinessAreaNodeConnection;
+  BusinessAreaNodeEdge: BusinessAreaNodeEdge;
+  GroupAttributeNode: GroupAttributeNode;
+  KoboAssetObject: KoboAssetObject;
+  KoboAssetObjectConnection: KoboAssetObjectConnection;
+  KoboAssetObjectEdge: KoboAssetObjectEdge;
+  TargetingCriteriaObjectType: TargetingCriteriaObjectType;
+  TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType;
+  TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType;
+  TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType;
+  ImportedHouseholdNode: ImportedHouseholdNode;
+  ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing;
+  ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus;
+  ImportedIndividualNode: ImportedIndividualNode;
+  ImportedIndividualSex: ImportedIndividualSex;
+  ImportedIndividualMaritalStatus: ImportedIndividualMaritalStatus;
+  RegistrationDataImportDatahubNode: RegistrationDataImportDatahubNode;
+  ImportDataNode: ImportDataNode;
+  ImportDataStatus: ImportDataStatus;
+  ImportDataDataType: ImportDataDataType;
+  KoboImportDataNode: KoboImportDataNode;
+  KoboErrorNode: KoboErrorNode;
+  XlsxRowErrorNode: XlsxRowErrorNode;
+  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone;
+  ImportedHouseholdNodeConnection: ImportedHouseholdNodeConnection;
+  ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge;
+  ImportedIndividualNodeConnection: ImportedIndividualNodeConnection;
+  ImportedIndividualNodeEdge: ImportedIndividualNodeEdge;
+  ImportedIndividualDisability: ImportedIndividualDisability;
+  ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus;
+  ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus;
+  ImportedDocumentNodeConnection: ImportedDocumentNodeConnection;
+  ImportedDocumentNodeEdge: ImportedDocumentNodeEdge;
+  ImportedDocumentNode: ImportedDocumentNode;
+  ImportedDocumentTypeNode: ImportedDocumentTypeNode;
+  ImportedDocumentTypeCountry: ImportedDocumentTypeCountry;
+  ImportedDocumentTypeType: ImportedDocumentTypeType;
+  ImportedIndividualIdentityNodeConnection: ImportedIndividualIdentityNodeConnection;
+  ImportedIndividualIdentityNodeEdge: ImportedIndividualIdentityNodeEdge;
+  ImportedIndividualIdentityNode: ImportedIndividualIdentityNode;
+  ImportedHouseholdOrgEnumerator: ImportedHouseholdOrgEnumerator;
+  ImportedHouseholdRegistrationMethod: ImportedHouseholdRegistrationMethod;
+  ImportedHouseholdCollectIndividualData: ImportedHouseholdCollectIndividualData;
+  ImportedHouseholdCurrency: ImportedHouseholdCurrency;
+  RegistrationDataImportDatahubNodeConnection: RegistrationDataImportDatahubNodeConnection;
+  RegistrationDataImportDatahubNodeEdge: RegistrationDataImportDatahubNodeEdge;
+  DjangoDebug: DjangoDebug;
+  DjangoDebugSQL: DjangoDebugSql;
+  Mutations: {};
+  CreateReportInput: CreateReportInput;
+  CreateReport: CreateReport;
+  CreateDashboardReportInput: CreateDashboardReportInput;
+  CreateDashboardReport: CreateDashboardReport;
+  CreateGrievanceTicketInput: CreateGrievanceTicketInput;
+  CreateGrievanceTicketExtrasInput: CreateGrievanceTicketExtrasInput;
+  CategoryExtrasInput: CategoryExtrasInput;
+  SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras;
+  GrievanceComplaintTicketExtras: GrievanceComplaintTicketExtras;
+  PositiveFeedbackTicketExtras: PositiveFeedbackTicketExtras;
+  NegativeFeedbackTicketExtras: NegativeFeedbackTicketExtras;
+  ReferralTicketExtras: ReferralTicketExtras;
+  IssueTypeExtrasInput: IssueTypeExtrasInput;
+  HouseholdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras;
+  HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType;
+  IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras;
+  IndividualUpdateDataObjectType: IndividualUpdateDataObjectType;
+  IndividualDocumentObjectType: IndividualDocumentObjectType;
+  EditIndividualDocumentObjectType: EditIndividualDocumentObjectType;
+  IndividualIdentityObjectType: IndividualIdentityObjectType;
+  EditIndividualIdentityObjectType: EditIndividualIdentityObjectType;
+  IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras;
+  HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras;
+  AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras;
+  AddIndividualDataObjectType: AddIndividualDataObjectType;
+  CreateGrievanceTicketMutation: CreateGrievanceTicketMutation;
+  UpdateGrievanceTicketInput: UpdateGrievanceTicketInput;
+  UpdateGrievanceTicketExtrasInput: UpdateGrievanceTicketExtrasInput;
+  UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras;
+  UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras;
+  UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras;
+  TicketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras;
+  UpdateGrievanceTicketMutation: UpdateGrievanceTicketMutation;
+  GrievanceStatusChangeMutation: GrievanceStatusChangeMutation;
+  CreateTicketNoteInput: CreateTicketNoteInput;
+  CreateTicketNoteMutation: CreateTicketNoteMutation;
+  IndividualDataChangeApproveMutation: IndividualDataChangeApproveMutation;
+  HouseholdDataChangeApproveMutation: HouseholdDataChangeApproveMutation;
+  SimpleApproveMutation: SimpleApproveMutation;
+  NeedsAdjudicationApproveMutation: NeedsAdjudicationApproveMutation;
+  PaymentDetailsApproveMutation: PaymentDetailsApproveMutation;
+  ReassignRoleMutation: ReassignRoleMutation;
+  CreatePaymentVerificationInput: CreatePaymentVerificationInput;
+  CreatePaymentVerificationMutation: CreatePaymentVerificationMutation;
+  CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput;
+  CreateFinancialServiceProviderMutation: CreateFinancialServiceProviderMutation;
+  EditFinancialServiceProviderMutation: EditFinancialServiceProviderMutation;
+  EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput;
+  EditPaymentVerificationMutation: EditPaymentVerificationMutation;
+  Upload: Scalars['Upload'];
+  ImportXlsxCashPlanVerification: ImportXlsxCashPlanVerification;
+  XlsxErrorNode: XlsxErrorNode;
+  ActivateCashPlanVerificationMutation: ActivateCashPlanVerificationMutation;
+  FinishCashPlanVerificationMutation: FinishCashPlanVerificationMutation;
+  DiscardCashPlanVerificationMutation: DiscardCashPlanVerificationMutation;
+  DeleteCashPlanVerificationMutation: DeleteCashPlanVerificationMutation;
+  PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate;
+  UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount;
+  UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount;
+  ActionPaymentPlanInput: ActionPaymentPlanInput;
+  Action: Action;
+  ActionPaymentPlanMutation: ActionPaymentPlanMutation;
+  CreatePaymentPlanInput: CreatePaymentPlanInput;
+  CreatePaymentPlanMutation: CreatePaymentPlanMutation;
+  UpdatePaymentPlanInput: UpdatePaymentPlanInput;
+  UpdatePaymentPlanMutation: UpdatePaymentPlanMutation;
+  DeletePaymentPlanMutation: DeletePaymentPlanMutation;
+  CreateTargetPopulationInput: CreateTargetPopulationInput;
+  CreateTargetPopulationMutation: CreateTargetPopulationMutation;
+  UpdateTargetPopulationInput: UpdateTargetPopulationInput;
+  UpdateTargetPopulationMutation: UpdateTargetPopulationMutation;
+  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput;
+  CopyTargetPopulationInput: CopyTargetPopulationInput;
+  CopyTargetPopulationMutationPayload: CopyTargetPopulationMutationPayload;
+  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
+  DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload;
+  ApproveTargetPopulationMutation: ApproveTargetPopulationMutation;
+  UnapproveTargetPopulationMutation: UnapproveTargetPopulationMutation;
+  FinalizeTargetPopulationMutation: FinalizeTargetPopulationMutation;
+  SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput;
+  SetSteficonRuleOnTargetPopulationMutationPayload: SetSteficonRuleOnTargetPopulationMutationPayload;
+  CreateProgramInput: CreateProgramInput;
+  CreateProgram: CreateProgram;
+  UpdateProgramInput: UpdateProgramInput;
+  UpdateProgram: UpdateProgram;
+  DeleteProgram: DeleteProgram;
+  UploadImportDataXLSXFileAsync: UploadImportDataXlsxFileAsync;
+  DeleteRegistrationDataImport: DeleteRegistrationDataImport;
+  RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput;
+  RegistrationXlsxImportMutation: RegistrationXlsxImportMutation;
+  RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput;
+  RegistrationKoboImportMutation: RegistrationKoboImportMutation;
+  SaveKoboProjectImportDataAsync: SaveKoboProjectImportDataAsync;
+  MergeRegistrationDataImportMutation: MergeRegistrationDataImportMutation;
+  RefuseRegistrationDataImportMutation: RefuseRegistrationDataImportMutation;
+  RegistrationDeduplicationMutation: RegistrationDeduplicationMutation;
+  CheckAgainstSanctionListMutation: CheckAgainstSanctionListMutation;
 };
 
-export type _DatasetsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_DatasetsNode'] = ResolversParentTypes['_DatasetsNode']> = {
-  data?: Resolver<Maybe<Array<Maybe<ResolversTypes['Float']>>>, ParentType, ContextType>,
+export type _DatasetsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['_DatasetsNode'] = ResolversParentTypes['_DatasetsNode']
+> = {
+  data?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['Float']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type _DetailedDatasetsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_DetailedDatasetsNode'] = ResolversParentTypes['_DetailedDatasetsNode']> = {
-  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  data?: Resolver<Maybe<Array<Maybe<ResolversTypes['Float']>>>, ParentType, ContextType>,
+export type _DetailedDatasetsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['_DetailedDatasetsNode'] = ResolversParentTypes['_DetailedDatasetsNode']
+> = {
+  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  data?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['Float']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_TableTotalCashTransferredDataNode'] = ResolversParentTypes['_TableTotalCashTransferredDataNode']> = {
-  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  totalCashTransferred?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type _TableTotalCashTransferredDataNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['_TableTotalCashTransferredDataNode'] = ResolversParentTypes['_TableTotalCashTransferredDataNode']
+> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  totalCashTransferred?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalHouseholds?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type ActionPaymentPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActionPaymentPlanMutation'] = ResolversParentTypes['ActionPaymentPlanMutation']> = {
-  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+export type ActionPaymentPlanMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ActionPaymentPlanMutation'] = ResolversParentTypes['ActionPaymentPlanMutation']
+> = {
+  paymentPlan?: Resolver<
+    Maybe<ResolversTypes['PaymentPlanNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+export type ActivateCashPlanVerificationMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']
+> = {
+  validationErrors?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+  cashPlan?: Resolver<
+    Maybe<ResolversTypes['CashPlanNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type AgeFilterObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgeFilterObject'] = ResolversParentTypes['AgeFilterObject']> = {
-  min?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  max?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type AgeFilterObjectResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['AgeFilterObject'] = ResolversParentTypes['AgeFilterObject']
+> = {
+  min?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  max?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgencyNode'] = ResolversParentTypes['AgencyNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['AgencyType'], ParentType, ContextType>,
-  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, AgencyNodeIndividualIdentitiesArgs>,
-  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type AgencyNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['AgencyNode'] = ResolversParentTypes['AgencyNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['AgencyType'], ParentType, ContextType>;
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  individualIdentities?: Resolver<
+    ResolversTypes['IndividualIdentityNodeConnection'],
+    ParentType,
+    ContextType,
+    AgencyNodeIndividualIdentitiesArgs
+  >;
+  countryIso3?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type ApprovalNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApprovalNode'] = ResolversParentTypes['ApprovalNode']> = {
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['ApprovalType'], ParentType, ContextType>,
-  comment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  info?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type ApprovalNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ApprovalNode'] = ResolversParentTypes['ApprovalNode']
+> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  comment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  info?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type ApprovalProcessNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApprovalProcessNode'] = ResolversParentTypes['ApprovalProcessNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  sentForApprovalBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  sentForApprovalDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  sentForAuthorizationBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  sentForAuthorizationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  sentForFinanceReviewBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  sentForFinanceReviewDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  paymentPlan?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>,
-  approvals?: Resolver<Array<ResolversTypes['ApprovalNode']>, ParentType, ContextType>,
-  rejectedOn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type ApprovalProcessNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ApprovalProcessNode'] = ResolversParentTypes['ApprovalProcessNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  sentForApprovalBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  sentForApprovalDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  sentForAuthorizationBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  sentForAuthorizationDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  sentForFinanceReviewBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  sentForFinanceReviewDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  paymentPlan?: Resolver<
+    ResolversTypes['PaymentPlanNode'],
+    ParentType,
+    ContextType
+  >;
+  rejectedOn?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  actions?: Resolver<
+    Maybe<ResolversTypes['FilteredActionsListNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type ApprovalProcessNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApprovalProcessNodeConnection'] = ResolversParentTypes['ApprovalProcessNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['ApprovalProcessNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type ApprovalProcessNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ApprovalProcessNodeConnection'] = ResolversParentTypes['ApprovalProcessNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['ApprovalProcessNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type ApprovalProcessNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApprovalProcessNodeEdge'] = ResolversParentTypes['ApprovalProcessNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['ApprovalProcessNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type ApprovalProcessNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ApprovalProcessNodeEdge'] = ResolversParentTypes['ApprovalProcessNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['ApprovalProcessNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+export type ApproveTargetPopulationMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']
+> = {
+  targetPopulation?: Resolver<
+    Maybe<ResolversTypes['TargetPopulationNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type AreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaNode'] = ResolversParentTypes['AreaNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  originalId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  parent?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  pCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  areaType?: Resolver<ResolversTypes['AreaTypeNode'], ParentType, ContextType>,
-  validFrom?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  validUntil?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  areaSet?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, AreaNodeAreaSetArgs>,
-  householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, AreaNodeHouseholdSetArgs>,
-  grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, AreaNodeGrievanceticketSetArgs>,
-  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, AreaNodeProgramsArgs>,
-  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, AreaNodeReportsArgs>,
+export type AreaNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['AreaNode'] = ResolversParentTypes['AreaNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  originalId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  parent?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>;
+  pCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  areaType?: Resolver<ResolversTypes['AreaTypeNode'], ParentType, ContextType>;
+  validFrom?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  validUntil?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  areaSet?: Resolver<
+    ResolversTypes['AreaNodeConnection'],
+    ParentType,
+    ContextType,
+    AreaNodeAreaSetArgs
+  >;
+  householdSet?: Resolver<
+    ResolversTypes['HouseholdNodeConnection'],
+    ParentType,
+    ContextType,
+    AreaNodeHouseholdSetArgs
+  >;
+  grievanceticketSet?: Resolver<
+    ResolversTypes['GrievanceTicketNodeConnection'],
+    ParentType,
+    ContextType,
+    AreaNodeGrievanceticketSetArgs
+  >;
+  programs?: Resolver<
+    ResolversTypes['ProgramNodeConnection'],
+    ParentType,
+    ContextType,
+    AreaNodeProgramsArgs
+  >;
+  reports?: Resolver<
+    ResolversTypes['ReportNodeConnection'],
+    ParentType,
+    ContextType,
+    AreaNodeReportsArgs
+  >;
 };
 
-export type AreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaNodeConnection'] = ResolversParentTypes['AreaNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['AreaNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type AreaNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['AreaNodeConnection'] = ResolversParentTypes['AreaNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['AreaNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type AreaNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaNodeEdge'] = ResolversParentTypes['AreaNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type AreaNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['AreaNodeEdge'] = ResolversParentTypes['AreaNodeEdge']
+> = {
+  node?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type AreaTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaTypeNode'] = ResolversParentTypes['AreaTypeNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  originalId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  areaLevel?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  parent?: Resolver<Maybe<ResolversTypes['AreaTypeNode']>, ParentType, ContextType>,
-  validFrom?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  validUntil?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  areatypeSet?: Resolver<ResolversTypes['AreaTypeNodeConnection'], ParentType, ContextType, AreaTypeNodeAreatypeSetArgs>,
-  areaSet?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, AreaTypeNodeAreaSetArgs>,
+export type AreaTypeNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['AreaTypeNode'] = ResolversParentTypes['AreaTypeNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  originalId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  areaLevel?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  parent?: Resolver<
+    Maybe<ResolversTypes['AreaTypeNode']>,
+    ParentType,
+    ContextType
+  >;
+  validFrom?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  validUntil?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  areatypeSet?: Resolver<
+    ResolversTypes['AreaTypeNodeConnection'],
+    ParentType,
+    ContextType,
+    AreaTypeNodeAreatypeSetArgs
+  >;
+  areaSet?: Resolver<
+    ResolversTypes['AreaNodeConnection'],
+    ParentType,
+    ContextType,
+    AreaTypeNodeAreaSetArgs
+  >;
 };
 
-export type AreaTypeNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaTypeNodeConnection'] = ResolversParentTypes['AreaTypeNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['AreaTypeNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type AreaTypeNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['AreaTypeNodeConnection'] = ResolversParentTypes['AreaTypeNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['AreaTypeNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type AreaTypeNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaTypeNodeEdge'] = ResolversParentTypes['AreaTypeNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['AreaTypeNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type AreaTypeNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['AreaTypeNodeEdge'] = ResolversParentTypes['AreaTypeNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['AreaTypeNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Arg'], any> {
-  name: 'Arg'
+export interface ArgScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes['Arg'], any> {
+  name: 'Arg';
 }
 
-export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BankAccountInfoNode'] = ResolversParentTypes['BankAccountInfoNode']> = {
-  bankName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  bankAccountNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type BankAccountInfoNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['BankAccountInfoNode'] = ResolversParentTypes['BankAccountInfoNode']
+> = {
+  bankName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  bankAccountNumber?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
 };
 
-export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['BigInt'], any> {
-  name: 'BigInt'
+export interface BigIntScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes['BigInt'], any> {
+  name: 'BigInt';
 }
 
-export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNode'] = ResolversParentTypes['BusinessAreaNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  code?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  longName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  koboUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
-  isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  postponeDeduplication?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  deduplicationDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  deduplicationBatchDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationBatchDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  approvalNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  authorizationNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  financeReviewNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
-  userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
-  householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, BusinessAreaNodeHouseholdSetArgs>,
-  individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, BusinessAreaNodeIndividualSetArgs>,
-  paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentplanSetArgs>,
-  cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, BusinessAreaNodeCashplanSetArgs>,
-  paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
-  serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, BusinessAreaNodeServiceproviderSetArgs>,
-  tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, BusinessAreaNodeTicketsArgs>,
-  programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
-  registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, BusinessAreaNodeRegistrationdataimportSetArgs>,
-  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
-  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, BusinessAreaNodeReportsArgs>,
-  logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
+export type BusinessAreaNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['BusinessAreaNode'] = ResolversParentTypes['BusinessAreaNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  code?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  longName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  koboUsername?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  rapidProHost?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  rapidProApiKey?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  customFields?: Resolver<
+    ResolversTypes['JSONString'],
+    ParentType,
+    ContextType
+  >;
+  hasDataSharingAgreement?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  parent?: Resolver<
+    Maybe<ResolversTypes['UserBusinessAreaNode']>,
+    ParentType,
+    ContextType
+  >;
+  isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  postponeDeduplication?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  deduplicationDuplicateScore?: Resolver<
+    ResolversTypes['Float'],
+    ParentType,
+    ContextType
+  >;
+  deduplicationPossibleDuplicateScore?: Resolver<
+    ResolversTypes['Float'],
+    ParentType,
+    ContextType
+  >;
+  deduplicationBatchDuplicatesPercentage?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  deduplicationBatchDuplicatesAllowed?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  deduplicationGoldenRecordDuplicatesPercentage?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  deduplicationGoldenRecordDuplicatesAllowed?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  screenBeneficiary?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  deduplicationIgnoreWithdraw?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  approvalNumberRequired?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  authorizationNumberRequired?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  financeReviewNumberRequired?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  isPaymentPlanApplicable?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  children?: Resolver<
+    ResolversTypes['UserBusinessAreaNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeChildrenArgs
+  >;
+  userRoles?: Resolver<
+    Array<ResolversTypes['UserRoleNode']>,
+    ParentType,
+    ContextType
+  >;
+  householdSet?: Resolver<
+    ResolversTypes['HouseholdNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeHouseholdSetArgs
+  >;
+  individualSet?: Resolver<
+    ResolversTypes['IndividualNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeIndividualSetArgs
+  >;
+  paymentplanSet?: Resolver<
+    ResolversTypes['PaymentPlanNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodePaymentplanSetArgs
+  >;
+  cashplanSet?: Resolver<
+    ResolversTypes['CashPlanNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeCashplanSetArgs
+  >;
+  paymentrecordSet?: Resolver<
+    ResolversTypes['PaymentRecordNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodePaymentrecordSetArgs
+  >;
+  serviceproviderSet?: Resolver<
+    ResolversTypes['ServiceProviderNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeServiceproviderSetArgs
+  >;
+  tickets?: Resolver<
+    ResolversTypes['GrievanceTicketNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeTicketsArgs
+  >;
+  programSet?: Resolver<
+    ResolversTypes['ProgramNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeProgramSetArgs
+  >;
+  registrationdataimportSet?: Resolver<
+    ResolversTypes['RegistrationDataImportNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeRegistrationdataimportSetArgs
+  >;
+  targetpopulationSet?: Resolver<
+    ResolversTypes['TargetPopulationNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeTargetpopulationSetArgs
+  >;
+  reports?: Resolver<
+    ResolversTypes['ReportNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeReportsArgs
+  >;
+  logentrySet?: Resolver<
+    ResolversTypes['PaymentVerificationLogEntryNodeConnection'],
+    ParentType,
+    ContextType,
+    BusinessAreaNodeLogentrySetArgs
+  >;
 };
 
-export type BusinessAreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeConnection'] = ResolversParentTypes['BusinessAreaNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['BusinessAreaNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type BusinessAreaNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['BusinessAreaNodeConnection'] = ResolversParentTypes['BusinessAreaNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['BusinessAreaNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type BusinessAreaNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeEdge'] = ResolversParentTypes['BusinessAreaNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type BusinessAreaNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['BusinessAreaNodeEdge'] = ResolversParentTypes['BusinessAreaNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['BusinessAreaNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type CashPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNode'] = ResolversParentTypes['CashPlanNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
-  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
-  exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalEntitledQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalEntitledQuantityRevised?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalEntitledQuantityRevisedUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['CashPlanStatus'], ParentType, ContextType>,
-  distributionLevel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  dispersionDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  coverageDuration?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  coverageUnit?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  deliveryType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  assistanceMeasurement?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  assistanceThrough?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  serviceProvider?: Resolver<Maybe<ResolversTypes['ServiceProviderNode']>, ParentType, ContextType>,
-  visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  fundsCommitment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  downPayment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  validationAlertsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  totalPersonsCoveredRevised?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
-  verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
-  cashPlanPaymentVerificationSummary?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationSummaryNode']>, ParentType, ContextType>,
-  bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type CashPlanNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CashPlanNode'] = ResolversParentTypes['CashPlanNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  businessArea?: Resolver<
+    ResolversTypes['UserBusinessAreaNode'],
+    ParentType,
+    ContextType
+  >;
+  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
+  exchangeRate?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalEntitledQuantity?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalEntitledQuantityUsd?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalEntitledQuantityRevised?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalEntitledQuantityRevisedUsd?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalDeliveredQuantity?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalDeliveredQuantityUsd?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalUndeliveredQuantity?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalUndeliveredQuantityUsd?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['CashPlanStatus'], ParentType, ContextType>;
+  distributionLevel?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  dispersionDate?: Resolver<
+    ResolversTypes['DateTime'],
+    ParentType,
+    ContextType
+  >;
+  coverageDuration?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  coverageUnit?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  deliveryType?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  assistanceMeasurement?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  assistanceThrough?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  serviceProvider?: Resolver<
+    Maybe<ResolversTypes['ServiceProviderNode']>,
+    ParentType,
+    ContextType
+  >;
+  visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  fundsCommitment?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  downPayment?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  validationAlertsCount?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  totalPersonsCovered?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  totalPersonsCoveredRevised?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  paymentRecords?: Resolver<
+    ResolversTypes['PaymentRecordNodeConnection'],
+    ParentType,
+    ContextType,
+    CashPlanNodePaymentRecordsArgs
+  >;
+  verifications?: Resolver<
+    ResolversTypes['CashPlanPaymentVerificationNodeConnection'],
+    ParentType,
+    ContextType,
+    CashPlanNodeVerificationsArgs
+  >;
+  cashPlanPaymentVerificationSummary?: Resolver<
+    Maybe<ResolversTypes['CashPlanPaymentVerificationSummaryNode']>,
+    ParentType,
+    ContextType
+  >;
+  bankReconciliationSuccess?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  bankReconciliationError?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  totalNumberOfHouseholds?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  canCreatePaymentVerificationPlan?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  availablePaymentRecordsCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['CashPlanNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type CashPlanNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['CashPlanNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type CashPlanNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeEdge'] = ResolversParentTypes['CashPlanNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type CashPlanNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CashPlanNodeEdge'] = ResolversParentTypes['CashPlanNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['CashPlanNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNode'] = ResolversParentTypes['CashPlanPaymentVerificationNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['CashPlanPaymentVerificationStatus'], ParentType, ContextType>,
-  cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
-  sampling?: Resolver<ResolversTypes['CashPlanPaymentVerificationSampling'], ParentType, ContextType>,
-  verificationChannel?: Resolver<ResolversTypes['CashPlanPaymentVerificationVerificationChannel'], ParentType, ContextType>,
-  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  respondedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  receivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  notReceivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  receivedWithProblemsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  confidenceInterval?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  marginOfError?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  rapidProFlowStartUuid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  ageFilter?: Resolver<Maybe<ResolversTypes['AgeFilterObject']>, ParentType, ContextType>,
-  excludedAdminAreasFilter?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
+export type CashPlanPaymentVerificationNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNode'] = ResolversParentTypes['CashPlanPaymentVerificationNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  status?: Resolver<
+    ResolversTypes['CashPlanPaymentVerificationStatus'],
+    ParentType,
+    ContextType
+  >;
+  cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>;
+  sampling?: Resolver<
+    ResolversTypes['CashPlanPaymentVerificationSampling'],
+    ParentType,
+    ContextType
+  >;
+  verificationChannel?: Resolver<
+    ResolversTypes['CashPlanPaymentVerificationVerificationChannel'],
+    ParentType,
+    ContextType
+  >;
+  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  respondedCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  receivedCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  notReceivedCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  receivedWithProblemsCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  confidenceInterval?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  marginOfError?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  rapidProFlowStartUuid?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  ageFilter?: Resolver<
+    Maybe<ResolversTypes['AgeFilterObject']>,
+    ParentType,
+    ContextType
+  >;
+  excludedAdminAreasFilter?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+  sexFilter?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  activationDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  completionDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  paymentRecordVerifications?: Resolver<
+    ResolversTypes['PaymentVerificationNodeConnection'],
+    ParentType,
+    ContextType,
+    CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs
+  >;
 };
 
-export type CashPlanPaymentVerificationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeConnection'] = ResolversParentTypes['CashPlanPaymentVerificationNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['CashPlanPaymentVerificationNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type CashPlanPaymentVerificationNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeConnection'] = ResolversParentTypes['CashPlanPaymentVerificationNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['CashPlanPaymentVerificationNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type CashPlanPaymentVerificationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeEdge'] = ResolversParentTypes['CashPlanPaymentVerificationNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type CashPlanPaymentVerificationNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeEdge'] = ResolversParentTypes['CashPlanPaymentVerificationNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type CashPlanPaymentVerificationSummaryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationSummaryNode'] = ResolversParentTypes['CashPlanPaymentVerificationSummaryNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['CashPlanPaymentVerificationSummaryStatus'], ParentType, ContextType>,
-  activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
+export type CashPlanPaymentVerificationSummaryNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CashPlanPaymentVerificationSummaryNode'] = ResolversParentTypes['CashPlanPaymentVerificationSummaryNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  status?: Resolver<
+    ResolversTypes['CashPlanPaymentVerificationSummaryStatus'],
+    ParentType,
+    ContextType
+  >;
+  activationDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  completionDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>;
 };
 
-export type ChartDatasetNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartDatasetNode'] = ResolversParentTypes['ChartDatasetNode']> = {
-  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>, ParentType, ContextType>,
+export type ChartDatasetNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ChartDatasetNode'] = ResolversParentTypes['ChartDatasetNode']
+> = {
+  labels?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+  datasets?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type ChartDetailedDatasetsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartDetailedDatasetsNode'] = ResolversParentTypes['ChartDetailedDatasetsNode']> = {
-  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DetailedDatasetsNode']>>>, ParentType, ContextType>,
+export type ChartDetailedDatasetsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ChartDetailedDatasetsNode'] = ResolversParentTypes['ChartDetailedDatasetsNode']
+> = {
+  labels?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+  datasets?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['_DetailedDatasetsNode']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type ChartGrievanceTicketsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartGrievanceTicketsNode'] = ResolversParentTypes['ChartGrievanceTicketsNode']> = {
-  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>, ParentType, ContextType>,
-  totalNumberOfGrievances?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalNumberOfFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalNumberOfOpenSensitive?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type ChartGrievanceTicketsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ChartGrievanceTicketsNode'] = ResolversParentTypes['ChartGrievanceTicketsNode']
+> = {
+  labels?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+  datasets?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  totalNumberOfGrievances?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  totalNumberOfFeedback?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  totalNumberOfOpenSensitive?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type ChartPaymentVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartPaymentVerification'] = ResolversParentTypes['ChartPaymentVerification']> = {
-  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DetailedDatasetsNode']>>>, ParentType, ContextType>,
-  households?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  averageSampleSize?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+export type ChartPaymentVerificationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ChartPaymentVerification'] = ResolversParentTypes['ChartPaymentVerification']
+> = {
+  labels?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+  datasets?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['_DetailedDatasetsNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  households?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  averageSampleSize?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CheckAgainstSanctionListMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CheckAgainstSanctionListMutation'] = ResolversParentTypes['CheckAgainstSanctionListMutation']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxRowErrorNode']>>>, ParentType, ContextType>,
+export type CheckAgainstSanctionListMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CheckAgainstSanctionListMutation'] = ResolversParentTypes['CheckAgainstSanctionListMutation']
+> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  errors?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['XlsxRowErrorNode']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type ChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChoiceObject'] = ResolversParentTypes['ChoiceObject']> = {
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type ChoiceObjectResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ChoiceObject'] = ResolversParentTypes['ChoiceObject']
+> = {
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ContentTypeObjectType'] = ResolversParentTypes['ContentTypeObjectType']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  appLabel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  model?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  logEntries?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeLogEntriesArgs>,
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type ContentTypeObjectTypeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ContentTypeObjectType'] = ResolversParentTypes['ContentTypeObjectType']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  appLabel?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  model?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  logEntries?: Resolver<
+    ResolversTypes['PaymentVerificationLogEntryNodeConnection'],
+    ParentType,
+    ContextType,
+    ContentTypeObjectTypeLogEntriesArgs
+  >;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type CopyTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']> = {
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type CopyTargetPopulationMutationPayloadResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']
+> = {
+  targetPopulation?: Resolver<
+    Maybe<ResolversTypes['TargetPopulationNode']>,
+    ParentType,
+    ContextType
+  >;
+  validationErrors?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+  clientMutationId?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CoreFieldChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['CoreFieldChoiceObject'] = ResolversParentTypes['CoreFieldChoiceObject']> = {
-  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['LabelNode']>>>, ParentType, ContextType>,
-  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  listName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type CoreFieldChoiceObjectResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CoreFieldChoiceObject'] = ResolversParentTypes['CoreFieldChoiceObject']
+> = {
+  labels?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['LabelNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  listName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type CountAndPercentageNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CountAndPercentageNode'] = ResolversParentTypes['CountAndPercentageNode']> = {
-  count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  percentage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+export type CountAndPercentageNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CountAndPercentageNode'] = ResolversParentTypes['CountAndPercentageNode']
+> = {
+  count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  percentage?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CreateDashboardReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateDashboardReport'] = ResolversParentTypes['CreateDashboardReport']> = {
-  success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+export type CreateDashboardReportResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CreateDashboardReport'] = ResolversParentTypes['CreateDashboardReport']
+> = {
+  success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
 };
 
-export type CreateFinancialServiceProviderMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateFinancialServiceProviderMutation'] = ResolversParentTypes['CreateFinancialServiceProviderMutation']> = {
-  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
+export type CreateFinancialServiceProviderMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CreateFinancialServiceProviderMutation'] = ResolversParentTypes['CreateFinancialServiceProviderMutation']
+> = {
+  financialServiceProvider?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CreateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateGrievanceTicketMutation'] = ResolversParentTypes['CreateGrievanceTicketMutation']> = {
-  grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
+export type CreateGrievanceTicketMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CreateGrievanceTicketMutation'] = ResolversParentTypes['CreateGrievanceTicketMutation']
+> = {
+  grievanceTickets?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CreatePaymentPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreatePaymentPlanMutation'] = ResolversParentTypes['CreatePaymentPlanMutation']> = {
-  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+export type CreatePaymentPlanMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CreatePaymentPlanMutation'] = ResolversParentTypes['CreatePaymentPlanMutation']
+> = {
+  paymentPlan?: Resolver<
+    Maybe<ResolversTypes['PaymentPlanNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CreatePaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreatePaymentVerificationMutation'] = ResolversParentTypes['CreatePaymentVerificationMutation']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+export type CreatePaymentVerificationMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CreatePaymentVerificationMutation'] = ResolversParentTypes['CreatePaymentVerificationMutation']
+> = {
+  cashPlan?: Resolver<
+    Maybe<ResolversTypes['CashPlanNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+export type CreateProgramResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']
+> = {
+  validationErrors?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+  program?: Resolver<
+    Maybe<ResolversTypes['ProgramNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateReport'] = ResolversParentTypes['CreateReport']> = {
-  report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
+export type CreateReportResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CreateReport'] = ResolversParentTypes['CreateReport']
+> = {
+  report?: Resolver<
+    Maybe<ResolversTypes['ReportNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CreateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']> = {
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+export type CreateTargetPopulationMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']
+> = {
+  validationErrors?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+  targetPopulation?: Resolver<
+    Maybe<ResolversTypes['TargetPopulationNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type CreateTicketNoteMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTicketNoteMutation'] = ResolversParentTypes['CreateTicketNoteMutation']> = {
-  grievanceTicketNote?: Resolver<Maybe<ResolversTypes['TicketNoteNode']>, ParentType, ContextType>,
+export type CreateTicketNoteMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['CreateTicketNoteMutation'] = ResolversParentTypes['CreateTicketNoteMutation']
+> = {
+  grievanceTicketNote?: Resolver<
+    Maybe<ResolversTypes['TicketNoteNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
-  name: 'Date'
+export interface DateScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
+  name: 'Date';
 }
 
 export type BankAccountInfoNodeResolvers<
@@ -32108,2061 +33299,6265 @@ export interface DateScalarConfig
   name: 'Date';
 }
 
-export type DeduplicationResultNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationResultNode'] = ResolversParentTypes['DeduplicationResultNode']> = {
-  hitId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
-  fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  score?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  proximityToScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type DeduplicationResultNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DeduplicationResultNode'] = ResolversParentTypes['DeduplicationResultNode']
+> = {
+  hitId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  score?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  proximityToScore?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type DeleteCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteCashPlanVerificationMutation'] = ResolversParentTypes['DeleteCashPlanVerificationMutation']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+export type DeleteCashPlanVerificationMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DeleteCashPlanVerificationMutation'] = ResolversParentTypes['DeleteCashPlanVerificationMutation']
+> = {
+  cashPlan?: Resolver<
+    Maybe<ResolversTypes['CashPlanNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type DeletePaymentPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeletePaymentPlanMutation'] = ResolversParentTypes['DeletePaymentPlanMutation']> = {
-  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+export type DeletePaymentPlanMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DeletePaymentPlanMutation'] = ResolversParentTypes['DeletePaymentPlanMutation']
+> = {
+  paymentPlan?: Resolver<
+    Maybe<ResolversTypes['PaymentPlanNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+export type DeleteProgramResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']
+> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
 };
 
-export type DeleteRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteRegistrationDataImport'] = ResolversParentTypes['DeleteRegistrationDataImport']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+export type DeleteRegistrationDataImportResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DeleteRegistrationDataImport'] = ResolversParentTypes['DeleteRegistrationDataImport']
+> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
 };
 
-export type DeleteTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteTargetPopulationMutationPayload'] = ResolversParentTypes['DeleteTargetPopulationMutationPayload']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type DeleteTargetPopulationMutationPayloadResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DeleteTargetPopulationMutationPayload'] = ResolversParentTypes['DeleteTargetPopulationMutationPayload']
+> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  clientMutationId?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type DeliveredQuantityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveredQuantityNode'] = ResolversParentTypes['DeliveredQuantityNode']> = {
-  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type DeliveredQuantityNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DeliveredQuantityNode'] = ResolversParentTypes['DeliveredQuantityNode']
+> = {
+  totalDeliveredQuantity?: Resolver<
+    Maybe<ResolversTypes['Decimal']>,
+    ParentType,
+    ContextType
+  >;
+  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type DiscardCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscardCashPlanVerificationMutation'] = ResolversParentTypes['DiscardCashPlanVerificationMutation']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+export type DiscardCashPlanVerificationMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DiscardCashPlanVerificationMutation'] = ResolversParentTypes['DiscardCashPlanVerificationMutation']
+> = {
+  cashPlan?: Resolver<
+    Maybe<ResolversTypes['CashPlanNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type DjangoDebugResolvers<ContextType = any, ParentType extends ResolversParentTypes['DjangoDebug'] = ResolversParentTypes['DjangoDebug']> = {
-  sql?: Resolver<Maybe<Array<Maybe<ResolversTypes['DjangoDebugSQL']>>>, ParentType, ContextType>,
+export type DjangoDebugResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DjangoDebug'] = ResolversParentTypes['DjangoDebug']
+> = {
+  sql?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['DjangoDebugSQL']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type DjangoDebugSqlResolvers<ContextType = any, ParentType extends ResolversParentTypes['DjangoDebugSQL'] = ResolversParentTypes['DjangoDebugSQL']> = {
-  vendor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  alias?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  sql?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  duration?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  rawSql?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  params?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  startTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  stopTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  isSlow?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  isSelect?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  transId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  transStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  isoLevel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  encoding?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type DjangoDebugSqlResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DjangoDebugSQL'] = ResolversParentTypes['DjangoDebugSQL']
+> = {
+  vendor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  alias?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  sql?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  duration?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  rawSql?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  params?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  startTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  stopTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  isSlow?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isSelect?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  transId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  transStatus?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  isoLevel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  encoding?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type DocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNode'] = ResolversParentTypes['DocumentNode']> = {
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type DocumentNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DocumentNode'] = ResolversParentTypes['DocumentNode']
+> = {
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  individual?: Resolver<
+    ResolversTypes['IndividualNode'],
+    ParentType,
+    ContextType
+  >;
+  type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type DocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNodeConnection'] = ResolversParentTypes['DocumentNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['DocumentNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type DocumentNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DocumentNodeConnection'] = ResolversParentTypes['DocumentNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['DocumentNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type DocumentNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNodeEdge'] = ResolversParentTypes['DocumentNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['DocumentNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type DocumentNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DocumentNodeEdge'] = ResolversParentTypes['DocumentNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['DocumentNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentTypeNode'] = ResolversParentTypes['DocumentTypeNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
-  documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
-  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type DocumentTypeNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['DocumentTypeNode'] = ResolversParentTypes['DocumentTypeNode']
+> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>;
+  documents?: Resolver<
+    ResolversTypes['DocumentNodeConnection'],
+    ParentType,
+    ContextType,
+    DocumentTypeNodeDocumentsArgs
+  >;
+  countryIso3?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type EditFinancialServiceProviderMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditFinancialServiceProviderMutation'] = ResolversParentTypes['EditFinancialServiceProviderMutation']> = {
-  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
+export type EditFinancialServiceProviderMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['EditFinancialServiceProviderMutation'] = ResolversParentTypes['EditFinancialServiceProviderMutation']
+> = {
+  financialServiceProvider?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+export type EditPaymentVerificationMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']
+> = {
+  cashPlan?: Resolver<
+    Maybe<ResolversTypes['CashPlanNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FieldAttributeNode'] = ResolversParentTypes['FieldAttributeNode']> = {
-  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['LabelNode']>>>, ParentType, ContextType>,
-  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  hint?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  required?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['CoreFieldChoiceObject']>>>, ParentType, ContextType>,
-  associatedWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  isFlexField?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+export type FieldAttributeNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FieldAttributeNode'] = ResolversParentTypes['FieldAttributeNode']
+> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  labels?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['LabelNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  hint?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  required?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  choices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['CoreFieldChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  associatedWith?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  isFlexField?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type FinalizeTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinalizeTargetPopulationMutation'] = ResolversParentTypes['FinalizeTargetPopulationMutation']> = {
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+export type FilteredActionsListNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FilteredActionsListNode'] = ResolversParentTypes['FilteredActionsListNode']
+> = {
+  approval?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ApprovalNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  authorization?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ApprovalNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  financeReview?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ApprovalNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  reject?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ApprovalNode']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNode'] = ResolversParentTypes['FinancialServiceProviderNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  visionVendorNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  deliveryMechanisms?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
-  distributionLimit?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  communicationChannel?: Resolver<ResolversTypes['FinancialServiceProviderCommunicationChannel'], ParentType, ContextType>,
-  dataTransferConfiguration?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
-  fspXlsxTemplate?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>, ParentType, ContextType>,
-  financialserviceproviderxlsxreportSet?: Resolver<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs>,
+export type FinalizeTargetPopulationMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinalizeTargetPopulationMutation'] = ResolversParentTypes['FinalizeTargetPopulationMutation']
+> = {
+  targetPopulation?: Resolver<
+    Maybe<ResolversTypes['TargetPopulationNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type FinancialServiceProviderNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNodeConnection'] = ResolversParentTypes['FinancialServiceProviderNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['FinancialServiceProviderNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type FinancialServiceProviderNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinancialServiceProviderNode'] = ResolversParentTypes['FinancialServiceProviderNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  visionVendorNumber?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  deliveryMechanisms?: Resolver<
+    Array<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  distributionLimit?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  communicationChannel?: Resolver<
+    ResolversTypes['FinancialServiceProviderCommunicationChannel'],
+    ParentType,
+    ContextType
+  >;
+  dataTransferConfiguration?: Resolver<
+    Maybe<ResolversTypes['JSONString']>,
+    ParentType,
+    ContextType
+  >;
+  fspXlsxTemplate?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>,
+    ParentType,
+    ContextType
+  >;
+  financialserviceproviderxlsxreportSet?: Resolver<
+    ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection'],
+    ParentType,
+    ContextType,
+    FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs
+  >;
 };
 
-export type FinancialServiceProviderNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNodeEdge'] = ResolversParentTypes['FinancialServiceProviderNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type FinancialServiceProviderNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinancialServiceProviderNodeConnection'] = ResolversParentTypes['FinancialServiceProviderNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['FinancialServiceProviderNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type FinancialServiceProviderXlsxReportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNode'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  financialServiceProvider?: Resolver<ResolversTypes['FinancialServiceProviderNode'], ParentType, ContextType>,
-  status?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportStatus']>, ParentType, ContextType>,
-  reportUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type FinancialServiceProviderNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinancialServiceProviderNodeEdge'] = ResolversParentTypes['FinancialServiceProviderNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type FinancialServiceProviderXlsxReportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNodeConnection'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type FinancialServiceProviderXlsxReportNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNode'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  financialServiceProvider?: Resolver<
+    ResolversTypes['FinancialServiceProviderNode'],
+    ParentType,
+    ContextType
+  >;
+  status?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderXlsxReportStatus']>,
+    ParentType,
+    ContextType
+  >;
+  reportUrl?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type FinancialServiceProviderXlsxReportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNodeEdge'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type FinancialServiceProviderXlsxReportNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNodeConnection'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxTemplateNode'] = ResolversParentTypes['FinancialServiceProviderXlsxTemplateNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  columns?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateColumns'], ParentType, ContextType>,
-  financialserviceproviderSet?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, FinancialServiceProviderXlsxTemplateNodeFinancialserviceproviderSetArgs>,
+export type FinancialServiceProviderXlsxReportNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNodeEdge'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type FinancialServiceProviderXlsxTemplateNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeConnection'] = ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type FinancialServiceProviderXlsxTemplateNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxTemplateNode'] = ResolversParentTypes['FinancialServiceProviderXlsxTemplateNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  columns?: Resolver<
+    ResolversTypes['FinancialServiceProviderXlsxTemplateColumns'],
+    ParentType,
+    ContextType
+  >;
+  financialserviceproviderSet?: Resolver<
+    ResolversTypes['FinancialServiceProviderNodeConnection'],
+    ParentType,
+    ContextType,
+    FinancialServiceProviderXlsxTemplateNodeFinancialserviceproviderSetArgs
+  >;
 };
 
-export type FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeEdge'] = ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type FinancialServiceProviderXlsxTemplateNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeConnection'] = ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<
+      Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeEdge']>
+    >,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type FinishCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinishCashPlanVerificationMutation'] = ResolversParentTypes['FinishCashPlanVerificationMutation']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+export type FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeEdge'] = ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export interface FlexFieldsScalarScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['FlexFieldsScalar'], any> {
-  name: 'FlexFieldsScalar'
+export type FinishCashPlanVerificationMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['FinishCashPlanVerificationMutation'] = ResolversParentTypes['FinishCashPlanVerificationMutation']
+> = {
+  cashPlan?: Resolver<
+    Maybe<ResolversTypes['CashPlanNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export interface FlexFieldsScalarScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes['FlexFieldsScalar'], any> {
+  name: 'FlexFieldsScalar';
 }
 
-export interface GeoJsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['GeoJSON'], any> {
-  name: 'GeoJSON'
+export interface GeoJsonScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes['GeoJSON'], any> {
+  name: 'GeoJSON';
 }
 
-export type GetCashplanVerificationSampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['GetCashplanVerificationSampleSizeObject'] = ResolversParentTypes['GetCashplanVerificationSampleSizeObject']> = {
-  paymentRecordCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type GetCashplanVerificationSampleSizeObjectResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GetCashplanVerificationSampleSizeObject'] = ResolversParentTypes['GetCashplanVerificationSampleSizeObject']
+> = {
+  paymentRecordCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type GrievanceStatusChangeMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceStatusChangeMutation'] = ResolversParentTypes['GrievanceStatusChangeMutation']> = {
-  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+export type GrievanceStatusChangeMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GrievanceStatusChangeMutation'] = ResolversParentTypes['GrievanceStatusChangeMutation']
+> = {
+  grievanceTicket?: Resolver<
+    Maybe<ResolversTypes['GrievanceTicketNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNode'] = ResolversParentTypes['GrievanceTicketNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  userModified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  lastNotificationSent?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  assignedTo?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  category?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  issueType?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  admin2New?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  area?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  language?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
-  linkedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsArgs>,
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  ignored?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  householdUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
-  ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
-  complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
-  sensitiveTicketDetails?: Resolver<Maybe<ResolversTypes['TicketSensitiveDetailsNode']>, ParentType, ContextType>,
-  householdDataUpdateTicketDetails?: Resolver<Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNode']>, ParentType, ContextType>,
-  individualDataUpdateTicketDetails?: Resolver<Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNode']>, ParentType, ContextType>,
-  addIndividualTicketDetails?: Resolver<Maybe<ResolversTypes['TicketAddIndividualDetailsNode']>, ParentType, ContextType>,
-  deleteIndividualTicketDetails?: Resolver<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNode']>, ParentType, ContextType>,
-  deleteHouseholdTicketDetails?: Resolver<Maybe<ResolversTypes['TicketDeleteHouseholdDetailsNode']>, ParentType, ContextType>,
-  systemFlaggingTicketDetails?: Resolver<Maybe<ResolversTypes['TicketSystemFlaggingDetailsNode']>, ParentType, ContextType>,
-  needsAdjudicationTicketDetails?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsNode']>, ParentType, ContextType>,
-  paymentVerificationTicketDetails?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNode']>, ParentType, ContextType>,
-  positiveFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketPositiveFeedbackDetailsNode']>, ParentType, ContextType>,
-  negativeFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNode']>, ParentType, ContextType>,
-  referralTicketDetails?: Resolver<Maybe<ResolversTypes['TicketReferralDetailsNode']>, ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
-  relatedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
-  admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  existingTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
+export type GrievanceTicketNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GrievanceTicketNode'] = ResolversParentTypes['GrievanceTicketNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  userModified?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  lastNotificationSent?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  createdBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  assignedTo?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  category?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  issueType?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>;
+  admin2New?: Resolver<
+    Maybe<ResolversTypes['AreaNode']>,
+    ParentType,
+    ContextType
+  >;
+  area?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  language?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  businessArea?: Resolver<
+    ResolversTypes['UserBusinessAreaNode'],
+    ParentType,
+    ContextType
+  >;
+  linkedTickets?: Resolver<
+    ResolversTypes['GrievanceTicketNodeConnection'],
+    ParentType,
+    ContextType,
+    GrievanceTicketNodeLinkedTicketsArgs
+  >;
+  registrationDataImport?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportNode']>,
+    ParentType,
+    ContextType
+  >;
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  ignored?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  householdUnicefId?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  linkedTicketsRelated?: Resolver<
+    ResolversTypes['GrievanceTicketNodeConnection'],
+    ParentType,
+    ContextType,
+    GrievanceTicketNodeLinkedTicketsRelatedArgs
+  >;
+  ticketNotes?: Resolver<
+    ResolversTypes['TicketNoteNodeConnection'],
+    ParentType,
+    ContextType,
+    GrievanceTicketNodeTicketNotesArgs
+  >;
+  complaintTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketComplaintDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  sensitiveTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketSensitiveDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  householdDataUpdateTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  individualDataUpdateTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  addIndividualTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketAddIndividualDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  deleteIndividualTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketDeleteIndividualDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  deleteHouseholdTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketDeleteHouseholdDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  systemFlaggingTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketSystemFlaggingDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  needsAdjudicationTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  paymentVerificationTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketPaymentVerificationDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  positiveFeedbackTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketPositiveFeedbackDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  negativeFeedbackTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  referralTicketDetails?: Resolver<
+    Maybe<ResolversTypes['TicketReferralDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  individual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+  paymentRecord?: Resolver<
+    Maybe<ResolversTypes['PaymentRecordNode']>,
+    ParentType,
+    ContextType
+  >;
+  relatedTickets?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  existingTickets?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type GrievanceTicketNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['GrievanceTicketNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type GrievanceTicketNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['GrievanceTicketNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type GrievanceTicketNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeEdge'] = ResolversParentTypes['GrievanceTicketNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type GrievanceTicketNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GrievanceTicketNodeEdge'] = ResolversParentTypes['GrievanceTicketNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['GrievanceTicketNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type GroupAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GroupAttributeNode'] = ResolversParentTypes['GroupAttributeNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  flexAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, GroupAttributeNodeFlexAttributesArgs>,
-  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type GroupAttributeNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GroupAttributeNode'] = ResolversParentTypes['GroupAttributeNode']
+> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  flexAttributes?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>,
+    ParentType,
+    ContextType,
+    GroupAttributeNodeFlexAttributesArgs
+  >;
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type HouseholdDataChangeApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdDataChangeApproveMutation'] = ResolversParentTypes['HouseholdDataChangeApproveMutation']> = {
-  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+export type HouseholdDataChangeApproveMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['HouseholdDataChangeApproveMutation'] = ResolversParentTypes['HouseholdDataChangeApproveMutation']
+> = {
+  grievanceTicket?: Resolver<
+    Maybe<ResolversTypes['GrievanceTicketNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  withdrawn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  withdrawnDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  consentSharing?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
-  countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  adminAreaNew?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
-  geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
-  femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  pregnantCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  childrenCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleChildrenCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleChildrenCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  childrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleChildrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleChildrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
-  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
-  returnee?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
-  firstRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  lastRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
-  fchildHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  childHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
-  start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  nameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  orgEnumerator?: Resolver<ResolversTypes['HouseholdOrgEnumerator'], ParentType, ContextType>,
-  orgNameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  village?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  registrationMethod?: Resolver<ResolversTypes['HouseholdRegistrationMethod'], ParentType, ContextType>,
-  collectIndividualData?: Resolver<ResolversTypes['HouseholdCollectIndividualData'], ParentType, ContextType>,
-  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  userFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalCashReceivedUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
-  individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
-  paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentrecordSetArgs>,
-  complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeComplaintTicketDetailsArgs>,
-  sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeSensitiveTicketDetailsArgs>,
-  householdDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeHouseholdDataUpdateTicketDetailsArgs>,
-  addIndividualTicketDetails?: Resolver<ResolversTypes['TicketAddIndividualDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeAddIndividualTicketDetailsArgs>,
-  deleteHouseholdTicketDetails?: Resolver<ResolversTypes['TicketDeleteHouseholdDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeDeleteHouseholdTicketDetailsArgs>,
-  positiveFeedbackTicketDetails?: Resolver<ResolversTypes['TicketPositiveFeedbackDetailsNodeConnection'], ParentType, ContextType, HouseholdNodePositiveFeedbackTicketDetailsArgs>,
-  negativeFeedbackTicketDetails?: Resolver<ResolversTypes['TicketNegativeFeedbackDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeNegativeFeedbackTicketDetailsArgs>,
-  referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeReferralTicketDetailsArgs>,
-  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
-  selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
-  adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
-  sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  sanctionListConfirmedMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  admin1?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
-  status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  programsWithDeliveredQuantity?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProgramsWithDeliveredQuantityNode']>>>, ParentType, ContextType>,
-  activeIndividualsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type HouseholdNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  removedDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  lastSyncAt?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  withdrawn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  withdrawnDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  consentSharing?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+  residenceStatus?: Resolver<
+    ResolversTypes['HouseholdResidenceStatus'],
+    ParentType,
+    ContextType
+  >;
+  countryOrigin?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  adminArea?: Resolver<
+    Maybe<ResolversTypes['AreaNode']>,
+    ParentType,
+    ContextType
+  >;
+  adminAreaNew?: Resolver<
+    Maybe<ResolversTypes['AreaNode']>,
+    ParentType,
+    ContextType
+  >;
+  representatives?: Resolver<
+    ResolversTypes['IndividualNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeRepresentativesArgs
+  >;
+  geopoint?: Resolver<
+    Maybe<ResolversTypes['GeoJSON']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup05Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup611Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup1217Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup1859Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup60Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  pregnantCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup05Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup611Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup1217Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup1859Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup60Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup05DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup611DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup1217DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup1859DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup60DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup05DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup611DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup1217DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup1859DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup60DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  childrenCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleChildrenCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleChildrenCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  childrenDisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleChildrenDisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleChildrenDisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  registrationDataImport?: Resolver<
+    ResolversTypes['RegistrationDataImportNode'],
+    ParentType,
+    ContextType
+  >;
+  programs?: Resolver<
+    ResolversTypes['ProgramNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeProgramsArgs
+  >;
+  returnee?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  flexFields?: Resolver<
+    Maybe<ResolversTypes['FlexFieldsScalar']>,
+    ParentType,
+    ContextType
+  >;
+  firstRegistrationDate?: Resolver<
+    ResolversTypes['DateTime'],
+    ParentType,
+    ContextType
+  >;
+  lastRegistrationDate?: Resolver<
+    ResolversTypes['DateTime'],
+    ParentType,
+    ContextType
+  >;
+  headOfHousehold?: Resolver<
+    ResolversTypes['IndividualNode'],
+    ParentType,
+    ContextType
+  >;
+  fchildHoh?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  childHoh?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  businessArea?: Resolver<
+    ResolversTypes['UserBusinessAreaNode'],
+    ParentType,
+    ContextType
+  >;
+  start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  nameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  orgEnumerator?: Resolver<
+    ResolversTypes['HouseholdOrgEnumerator'],
+    ParentType,
+    ContextType
+  >;
+  orgNameEnumerator?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  village?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  registrationMethod?: Resolver<
+    ResolversTypes['HouseholdRegistrationMethod'],
+    ParentType,
+    ContextType
+  >;
+  collectIndividualData?: Resolver<
+    ResolversTypes['HouseholdCollectIndividualData'],
+    ParentType,
+    ContextType
+  >;
+  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  userFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  totalCashReceivedUsd?: Resolver<
+    Maybe<ResolversTypes['Decimal']>,
+    ParentType,
+    ContextType
+  >;
+  totalCashReceived?: Resolver<
+    Maybe<ResolversTypes['Decimal']>,
+    ParentType,
+    ContextType
+  >;
+  individualsAndRoles?: Resolver<
+    Array<ResolversTypes['IndividualRoleInHouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  individuals?: Resolver<
+    ResolversTypes['IndividualNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeIndividualsArgs
+  >;
+  paymentrecordSet?: Resolver<
+    ResolversTypes['PaymentRecordNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodePaymentrecordSetArgs
+  >;
+  complaintTicketDetails?: Resolver<
+    ResolversTypes['TicketComplaintDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeComplaintTicketDetailsArgs
+  >;
+  sensitiveTicketDetails?: Resolver<
+    ResolversTypes['TicketSensitiveDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeSensitiveTicketDetailsArgs
+  >;
+  householdDataUpdateTicketDetails?: Resolver<
+    ResolversTypes['TicketHouseholdDataUpdateDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeHouseholdDataUpdateTicketDetailsArgs
+  >;
+  addIndividualTicketDetails?: Resolver<
+    ResolversTypes['TicketAddIndividualDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeAddIndividualTicketDetailsArgs
+  >;
+  deleteHouseholdTicketDetails?: Resolver<
+    ResolversTypes['TicketDeleteHouseholdDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeDeleteHouseholdTicketDetailsArgs
+  >;
+  positiveFeedbackTicketDetails?: Resolver<
+    ResolversTypes['TicketPositiveFeedbackDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodePositiveFeedbackTicketDetailsArgs
+  >;
+  negativeFeedbackTicketDetails?: Resolver<
+    ResolversTypes['TicketNegativeFeedbackDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeNegativeFeedbackTicketDetailsArgs
+  >;
+  referralTicketDetails?: Resolver<
+    ResolversTypes['TicketReferralDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeReferralTicketDetailsArgs
+  >;
+  targetPopulations?: Resolver<
+    ResolversTypes['TargetPopulationNodeConnection'],
+    ParentType,
+    ContextType,
+    HouseholdNodeTargetPopulationsArgs
+  >;
+  selections?: Resolver<
+    Array<ResolversTypes['HouseholdSelection']>,
+    ParentType,
+    ContextType
+  >;
+  adminAreaTitle?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  selection?: Resolver<
+    Maybe<ResolversTypes['HouseholdSelection']>,
+    ParentType,
+    ContextType
+  >;
+  sanctionListPossibleMatch?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  sanctionListConfirmedMatch?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  hasDuplicates?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  admin1?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>;
+  admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>;
+  status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  programsWithDeliveredQuantity?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ProgramsWithDeliveredQuantityNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  activeIndividualsCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['HouseholdNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  individualsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type HouseholdNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['HouseholdNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  individualsCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type HouseholdNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeEdge'] = ResolversParentTypes['HouseholdNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type HouseholdNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['HouseholdNodeEdge'] = ResolversParentTypes['HouseholdNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type HouseholdSelectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdSelection'] = ResolversParentTypes['HouseholdSelection']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
-  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
-  vulnerabilityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  final?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+export type HouseholdSelectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['HouseholdSelection'] = ResolversParentTypes['HouseholdSelection']
+> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  household?: Resolver<
+    ResolversTypes['HouseholdNode'],
+    ParentType,
+    ContextType
+  >;
+  targetPopulation?: Resolver<
+    ResolversTypes['TargetPopulationNode'],
+    ParentType,
+    ContextType
+  >;
+  vulnerabilityScore?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  final?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
 };
 
-export type ImportDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportDataNode'] = ResolversParentTypes['ImportDataNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['ImportDataStatus'], ParentType, ContextType>,
-  businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>,
-  numberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  numberOfIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  error?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  validationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  createdById?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType>,
-  koboimportdata?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType>,
-  xlsxValidationErrors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxRowErrorNode']>>>, ParentType, ContextType>,
+export type ImportDataNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportDataNode'] = ResolversParentTypes['ImportDataNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  status?: Resolver<
+    ResolversTypes['ImportDataStatus'],
+    ParentType,
+    ContextType
+  >;
+  businessAreaSlug?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  dataType?: Resolver<
+    ResolversTypes['ImportDataDataType'],
+    ParentType,
+    ContextType
+  >;
+  numberOfHouseholds?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  numberOfIndividuals?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  error?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  validationErrors?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  createdById?: Resolver<
+    Maybe<ResolversTypes['UUID']>,
+    ParentType,
+    ContextType
+  >;
+  registrationDataImport?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>,
+    ParentType,
+    ContextType
+  >;
+  koboimportdata?: Resolver<
+    Maybe<ResolversTypes['KoboImportDataNode']>,
+    ParentType,
+    ContextType
+  >;
+  xlsxValidationErrors?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['XlsxRowErrorNode']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNode'] = ResolversParentTypes['ImportedDocumentNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['ImportedDocumentTypeNode'], ParentType, ContextType>,
-  docDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type ImportedDocumentNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedDocumentNode'] = ResolversParentTypes['ImportedDocumentNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  individual?: Resolver<
+    ResolversTypes['ImportedIndividualNode'],
+    ParentType,
+    ContextType
+  >;
+  type?: Resolver<
+    ResolversTypes['ImportedDocumentTypeNode'],
+    ParentType,
+    ContextType
+  >;
+  docDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type ImportedDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNodeConnection'] = ResolversParentTypes['ImportedDocumentNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['ImportedDocumentNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type ImportedDocumentNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedDocumentNodeConnection'] = ResolversParentTypes['ImportedDocumentNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['ImportedDocumentNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type ImportedDocumentNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNodeEdge'] = ResolversParentTypes['ImportedDocumentNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['ImportedDocumentNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type ImportedDocumentNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedDocumentNodeEdge'] = ResolversParentTypes['ImportedDocumentNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['ImportedDocumentNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type ImportedDocumentTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentTypeNode'] = ResolversParentTypes['ImportedDocumentTypeNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  country?: Resolver<ResolversTypes['ImportedDocumentTypeCountry'], ParentType, ContextType>,
-  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['ImportedDocumentTypeType'], ParentType, ContextType>,
-  documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedDocumentTypeNodeDocumentsArgs>,
+export type ImportedDocumentTypeNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedDocumentTypeNode'] = ResolversParentTypes['ImportedDocumentTypeNode']
+> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  country?: Resolver<
+    ResolversTypes['ImportedDocumentTypeCountry'],
+    ParentType,
+    ContextType
+  >;
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  type?: Resolver<
+    ResolversTypes['ImportedDocumentTypeType'],
+    ParentType,
+    ContextType
+  >;
+  documents?: Resolver<
+    ResolversTypes['ImportedDocumentNodeConnection'],
+    ParentType,
+    ContextType,
+    ImportedDocumentTypeNodeDocumentsArgs
+  >;
 };
 
-export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedHouseholdNode'] = ResolversParentTypes['ImportedHouseholdNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  consentSharing?: Resolver<ResolversTypes['ImportedHouseholdConsentSharing'], ParentType, ContextType>,
-  residenceStatus?: Resolver<ResolversTypes['ImportedHouseholdResidenceStatus'], ParentType, ContextType>,
-  countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  admin1Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  admin2Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
-  femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  pregnantCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  headOfHousehold?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType>,
-  fchildHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  childHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
-  firstRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  lastRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  returnee?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  flexFields?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  nameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  orgEnumerator?: Resolver<Maybe<ResolversTypes['ImportedHouseholdOrgEnumerator']>, ParentType, ContextType>,
-  orgNameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  village?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  registrationMethod?: Resolver<ResolversTypes['ImportedHouseholdRegistrationMethod'], ParentType, ContextType>,
-  collectIndividualData?: Resolver<ResolversTypes['ImportedHouseholdCollectIndividualData'], ParentType, ContextType>,
-  currency?: Resolver<ResolversTypes['ImportedHouseholdCurrency'], ParentType, ContextType>,
-  unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  koboSubmissionUuid?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  diiaRecId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
-  hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type ImportedHouseholdNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedHouseholdNode'] = ResolversParentTypes['ImportedHouseholdNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  consentSharing?: Resolver<
+    ResolversTypes['ImportedHouseholdConsentSharing'],
+    ParentType,
+    ContextType
+  >;
+  residenceStatus?: Resolver<
+    ResolversTypes['ImportedHouseholdResidenceStatus'],
+    ParentType,
+    ContextType
+  >;
+  countryOrigin?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  admin1Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  admin2Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  geopoint?: Resolver<
+    Maybe<ResolversTypes['GeoJSON']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup05Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup611Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup1217Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup1859Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup60Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  pregnantCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup05Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup611Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup1217Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup1859Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup60Count?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup05DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup611DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup1217DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup1859DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  femaleAgeGroup60DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup05DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup611DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup1217DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup1859DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  maleAgeGroup60DisabledCount?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  headOfHousehold?: Resolver<
+    Maybe<ResolversTypes['ImportedIndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+  fchildHoh?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  childHoh?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  registrationDataImport?: Resolver<
+    ResolversTypes['RegistrationDataImportDatahubNode'],
+    ParentType,
+    ContextType
+  >;
+  firstRegistrationDate?: Resolver<
+    ResolversTypes['DateTime'],
+    ParentType,
+    ContextType
+  >;
+  lastRegistrationDate?: Resolver<
+    ResolversTypes['DateTime'],
+    ParentType,
+    ContextType
+  >;
+  returnee?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  flexFields?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
+  start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  nameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  orgEnumerator?: Resolver<
+    Maybe<ResolversTypes['ImportedHouseholdOrgEnumerator']>,
+    ParentType,
+    ContextType
+  >;
+  orgNameEnumerator?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  village?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  registrationMethod?: Resolver<
+    ResolversTypes['ImportedHouseholdRegistrationMethod'],
+    ParentType,
+    ContextType
+  >;
+  collectIndividualData?: Resolver<
+    ResolversTypes['ImportedHouseholdCollectIndividualData'],
+    ParentType,
+    ContextType
+  >;
+  currency?: Resolver<
+    ResolversTypes['ImportedHouseholdCurrency'],
+    ParentType,
+    ContextType
+  >;
+  unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  koboSubmissionUuid?: Resolver<
+    Maybe<ResolversTypes['UUID']>,
+    ParentType,
+    ContextType
+  >;
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  koboSubmissionTime?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  diiaRecId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  misUnicefId?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  individuals?: Resolver<
+    ResolversTypes['ImportedIndividualNodeConnection'],
+    ParentType,
+    ContextType,
+    ImportedHouseholdNodeIndividualsArgs
+  >;
+  hasDuplicates?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type ImportedHouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedHouseholdNodeConnection'] = ResolversParentTypes['ImportedHouseholdNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['ImportedHouseholdNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type ImportedHouseholdNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedHouseholdNodeConnection'] = ResolversParentTypes['ImportedHouseholdNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['ImportedHouseholdNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type ImportedHouseholdNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedHouseholdNodeEdge'] = ResolversParentTypes['ImportedHouseholdNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type ImportedHouseholdNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedHouseholdNodeEdge'] = ResolversParentTypes['ImportedHouseholdNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['ImportedHouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualIdentityNode'] = ResolversParentTypes['ImportedIndividualIdentityNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
-  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type ImportedIndividualIdentityNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedIndividualIdentityNode'] = ResolversParentTypes['ImportedIndividualIdentityNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  individual?: Resolver<
+    ResolversTypes['ImportedIndividualNode'],
+    ParentType,
+    ContextType
+  >;
+  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type ImportedIndividualIdentityNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualIdentityNodeConnection'] = ResolversParentTypes['ImportedIndividualIdentityNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['ImportedIndividualIdentityNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type ImportedIndividualIdentityNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedIndividualIdentityNodeConnection'] = ResolversParentTypes['ImportedIndividualIdentityNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['ImportedIndividualIdentityNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type ImportedIndividualIdentityNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualIdentityNodeEdge'] = ResolversParentTypes['ImportedIndividualIdentityNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['ImportedIndividualIdentityNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type ImportedIndividualIdentityNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedIndividualIdentityNodeEdge'] = ResolversParentTypes['ImportedIndividualIdentityNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['ImportedIndividualIdentityNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNode'] = ResolversParentTypes['ImportedIndividualNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  givenName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  relationship?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  sex?: Resolver<ResolversTypes['ImportedIndividualSex'], ParentType, ContextType>,
-  birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  maritalStatus?: Resolver<ResolversTypes['ImportedIndividualMaritalStatus'], ParentType, ContextType>,
-  phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
-  registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
-  disability?: Resolver<ResolversTypes['ImportedIndividualDisability'], ParentType, ContextType>,
-  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  deduplicationBatchStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationBatchStatus']>, ParentType, ContextType>,
-  deduplicationGoldenRecordStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationGoldenRecordStatus']>, ParentType, ContextType>,
-  deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
-  deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
-  flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
-  pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  seeingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  hearingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  physicalDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  memoryDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  selfcareDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
-  documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
-  identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
-  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type ImportedIndividualNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedIndividualNode'] = ResolversParentTypes['ImportedIndividualNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  givenName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  relationship?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  sex?: Resolver<
+    ResolversTypes['ImportedIndividualSex'],
+    ParentType,
+    ContextType
+  >;
+  birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  estimatedBirthDate?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  maritalStatus?: Resolver<
+    ResolversTypes['ImportedIndividualMaritalStatus'],
+    ParentType,
+    ContextType
+  >;
+  phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  phoneNoAlternative?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  household?: Resolver<
+    Maybe<ResolversTypes['ImportedHouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  registrationDataImport?: Resolver<
+    ResolversTypes['RegistrationDataImportDatahubNode'],
+    ParentType,
+    ContextType
+  >;
+  disability?: Resolver<
+    ResolversTypes['ImportedIndividualDisability'],
+    ParentType,
+    ContextType
+  >;
+  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  firstRegistrationDate?: Resolver<
+    ResolversTypes['Date'],
+    ParentType,
+    ContextType
+  >;
+  lastRegistrationDate?: Resolver<
+    ResolversTypes['Date'],
+    ParentType,
+    ContextType
+  >;
+  deduplicationBatchStatus?: Resolver<
+    Maybe<ResolversTypes['ImportedIndividualDeduplicationBatchStatus']>,
+    ParentType,
+    ContextType
+  >;
+  deduplicationGoldenRecordStatus?: Resolver<
+    Maybe<ResolversTypes['ImportedIndividualDeduplicationGoldenRecordStatus']>,
+    ParentType,
+    ContextType
+  >;
+  deduplicationBatchResults?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  deduplicationGoldenRecordResults?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  flexFields?: Resolver<
+    Maybe<ResolversTypes['FlexFieldsScalar']>,
+    ParentType,
+    ContextType
+  >;
+  pregnant?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  observedDisability?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+  seeingDisability?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  hearingDisability?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  physicalDisability?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  memoryDisability?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  selfcareDisability?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  whoAnswersAltPhone?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  disabilityCertificatePicture?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  misUnicefId?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  importedhousehold?: Resolver<
+    Maybe<ResolversTypes['ImportedHouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  documents?: Resolver<
+    ResolversTypes['ImportedDocumentNodeConnection'],
+    ParentType,
+    ContextType,
+    ImportedIndividualNodeDocumentsArgs
+  >;
+  identities?: Resolver<
+    ResolversTypes['ImportedIndividualIdentityNodeConnection'],
+    ParentType,
+    ContextType,
+    ImportedIndividualNodeIdentitiesArgs
+  >;
+  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type ImportedIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeConnection'] = ResolversParentTypes['ImportedIndividualNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['ImportedIndividualNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type ImportedIndividualNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedIndividualNodeConnection'] = ResolversParentTypes['ImportedIndividualNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['ImportedIndividualNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type ImportedIndividualNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeEdge'] = ResolversParentTypes['ImportedIndividualNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type ImportedIndividualNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportedIndividualNodeEdge'] = ResolversParentTypes['ImportedIndividualNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['ImportedIndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type ImportXlsxCashPlanVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXlsxCashPlanVerification'] = ResolversParentTypes['ImportXlsxCashPlanVerification']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
-  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
+export type ImportXlsxCashPlanVerificationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ImportXlsxCashPlanVerification'] = ResolversParentTypes['ImportXlsxCashPlanVerification']
+> = {
+  cashPlan?: Resolver<
+    Maybe<ResolversTypes['CashPlanNode']>,
+    ParentType,
+    ContextType
+  >;
+  errors?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type IndividualDataChangeApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualDataChangeApproveMutation'] = ResolversParentTypes['IndividualDataChangeApproveMutation']> = {
-  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+export type IndividualDataChangeApproveMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['IndividualDataChangeApproveMutation'] = ResolversParentTypes['IndividualDataChangeApproveMutation']
+> = {
+  grievanceTicket?: Resolver<
+    Maybe<ResolversTypes['GrievanceTicketNode']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNode'] = ResolversParentTypes['IndividualIdentityNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  agency?: Resolver<ResolversTypes['AgencyNode'], ParentType, ContextType>,
-  individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
-  number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+export type IndividualIdentityNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['IndividualIdentityNode'] = ResolversParentTypes['IndividualIdentityNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  agency?: Resolver<ResolversTypes['AgencyNode'], ParentType, ContextType>;
+  individual?: Resolver<
+    ResolversTypes['IndividualNode'],
+    ParentType,
+    ContextType
+  >;
+  number?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type IndividualIdentityNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNodeConnection'] = ResolversParentTypes['IndividualIdentityNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['IndividualIdentityNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type IndividualIdentityNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['IndividualIdentityNodeConnection'] = ResolversParentTypes['IndividualIdentityNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['IndividualIdentityNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type IndividualIdentityNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNodeEdge'] = ResolversParentTypes['IndividualIdentityNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type IndividualIdentityNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['IndividualIdentityNodeEdge'] = ResolversParentTypes['IndividualIdentityNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['IndividualIdentityNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type IndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNode'] = ResolversParentTypes['IndividualNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  duplicate?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  duplicateDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  withdrawn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  withdrawnDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  givenName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  sex?: Resolver<ResolversTypes['IndividualSex'], ParentType, ContextType>,
-  birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  maritalStatus?: Resolver<ResolversTypes['IndividualMaritalStatus'], ParentType, ContextType>,
-  phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-  disability?: Resolver<ResolversTypes['IndividualDisability'], ParentType, ContextType>,
-  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
-  userFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  enrolledInNutritionProgramme?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  administrationOfRutf?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  deduplicationGoldenRecordStatus?: Resolver<ResolversTypes['IndividualDeduplicationGoldenRecordStatus'], ParentType, ContextType>,
-  deduplicationBatchStatus?: Resolver<ResolversTypes['IndividualDeduplicationBatchStatus'], ParentType, ContextType>,
-  deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
-  deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
-  importedIndividualId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  sanctionListConfirmedMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  seeingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  hearingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  physicalDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  memoryDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  selfcareDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
-  fchildHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  childHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
-  headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
-  identities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, IndividualNodeIdentitiesArgs>,
-  householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
-  bankAccountInfo?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>,
-  paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentrecordSetArgs>,
-  complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, IndividualNodeComplaintTicketDetailsArgs>,
-  sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, IndividualNodeSensitiveTicketDetailsArgs>,
-  individualDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketIndividualDataUpdateDetailsNodeConnection'], ParentType, ContextType, IndividualNodeIndividualDataUpdateTicketDetailsArgs>,
-  deleteIndividualTicketDetails?: Resolver<ResolversTypes['TicketDeleteIndividualDetailsNodeConnection'], ParentType, ContextType, IndividualNodeDeleteIndividualTicketDetailsArgs>,
-  ticketsystemflaggingdetailsSet?: Resolver<ResolversTypes['TicketSystemFlaggingDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketsystemflaggingdetailsSetArgs>,
-  ticketDuplicates?: Resolver<ResolversTypes['TicketNeedsAdjudicationDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketDuplicatesArgs>,
-  ticketSelected?: Resolver<ResolversTypes['TicketNeedsAdjudicationDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketSelectedArgs>,
-  positiveFeedbackTicketDetails?: Resolver<ResolversTypes['TicketPositiveFeedbackDetailsNodeConnection'], ParentType, ContextType, IndividualNodePositiveFeedbackTicketDetailsArgs>,
-  negativeFeedbackTicketDetails?: Resolver<ResolversTypes['TicketNegativeFeedbackDetailsNodeConnection'], ParentType, ContextType, IndividualNodeNegativeFeedbackTicketDetailsArgs>,
-  referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, IndividualNodeReferralTicketDetailsArgs>,
-  status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+export type IndividualNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['IndividualNode'] = ResolversParentTypes['IndividualNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  removedDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  lastSyncAt?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  duplicate?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  duplicateDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  withdrawn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  withdrawnDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  givenName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  sex?: Resolver<ResolversTypes['IndividualSex'], ParentType, ContextType>;
+  birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  estimatedBirthDate?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  maritalStatus?: Resolver<
+    ResolversTypes['IndividualMaritalStatus'],
+    ParentType,
+    ContextType
+  >;
+  phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  phoneNoAlternative?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  relationship?: Resolver<
+    Maybe<ResolversTypes['IndividualRelationship']>,
+    ParentType,
+    ContextType
+  >;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  registrationDataImport?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportNode']>,
+    ParentType,
+    ContextType
+  >;
+  disability?: Resolver<
+    ResolversTypes['IndividualDisability'],
+    ParentType,
+    ContextType
+  >;
+  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  firstRegistrationDate?: Resolver<
+    ResolversTypes['Date'],
+    ParentType,
+    ContextType
+  >;
+  lastRegistrationDate?: Resolver<
+    ResolversTypes['Date'],
+    ParentType,
+    ContextType
+  >;
+  flexFields?: Resolver<
+    Maybe<ResolversTypes['FlexFieldsScalar']>,
+    ParentType,
+    ContextType
+  >;
+  userFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  enrolledInNutritionProgramme?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  administrationOfRutf?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  deduplicationGoldenRecordStatus?: Resolver<
+    ResolversTypes['IndividualDeduplicationGoldenRecordStatus'],
+    ParentType,
+    ContextType
+  >;
+  deduplicationBatchStatus?: Resolver<
+    ResolversTypes['IndividualDeduplicationBatchStatus'],
+    ParentType,
+    ContextType
+  >;
+  deduplicationGoldenRecordResults?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  deduplicationBatchResults?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  importedIndividualId?: Resolver<
+    Maybe<ResolversTypes['UUID']>,
+    ParentType,
+    ContextType
+  >;
+  sanctionListPossibleMatch?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  sanctionListConfirmedMatch?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  pregnant?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  observedDisability?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+  seeingDisability?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  hearingDisability?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  physicalDisability?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  memoryDisability?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  selfcareDisability?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  whoAnswersAltPhone?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  businessArea?: Resolver<
+    ResolversTypes['UserBusinessAreaNode'],
+    ParentType,
+    ContextType
+  >;
+  fchildHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  childHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  disabilityCertificatePicture?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  representedHouseholds?: Resolver<
+    ResolversTypes['HouseholdNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeRepresentedHouseholdsArgs
+  >;
+  headingHousehold?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  documents?: Resolver<
+    ResolversTypes['DocumentNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeDocumentsArgs
+  >;
+  identities?: Resolver<
+    ResolversTypes['IndividualIdentityNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeIdentitiesArgs
+  >;
+  householdsAndRoles?: Resolver<
+    Array<ResolversTypes['IndividualRoleInHouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  bankAccountInfo?: Resolver<
+    Maybe<ResolversTypes['BankAccountInfoNode']>,
+    ParentType,
+    ContextType
+  >;
+  paymentrecordSet?: Resolver<
+    ResolversTypes['PaymentRecordNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodePaymentrecordSetArgs
+  >;
+  complaintTicketDetails?: Resolver<
+    ResolversTypes['TicketComplaintDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeComplaintTicketDetailsArgs
+  >;
+  sensitiveTicketDetails?: Resolver<
+    ResolversTypes['TicketSensitiveDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeSensitiveTicketDetailsArgs
+  >;
+  individualDataUpdateTicketDetails?: Resolver<
+    ResolversTypes['TicketIndividualDataUpdateDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeIndividualDataUpdateTicketDetailsArgs
+  >;
+  deleteIndividualTicketDetails?: Resolver<
+    ResolversTypes['TicketDeleteIndividualDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeDeleteIndividualTicketDetailsArgs
+  >;
+  ticketsystemflaggingdetailsSet?: Resolver<
+    ResolversTypes['TicketSystemFlaggingDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeTicketsystemflaggingdetailsSetArgs
+  >;
+  ticketDuplicates?: Resolver<
+    ResolversTypes['TicketNeedsAdjudicationDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeTicketDuplicatesArgs
+  >;
+  ticketSelected?: Resolver<
+    ResolversTypes['TicketNeedsAdjudicationDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeTicketSelectedArgs
+  >;
+  positiveFeedbackTicketDetails?: Resolver<
+    ResolversTypes['TicketPositiveFeedbackDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodePositiveFeedbackTicketDetailsArgs
+  >;
+  negativeFeedbackTicketDetails?: Resolver<
+    ResolversTypes['TicketNegativeFeedbackDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeNegativeFeedbackTicketDetailsArgs
+  >;
+  referralTicketDetails?: Resolver<
+    ResolversTypes['TicketReferralDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    IndividualNodeReferralTicketDetailsArgs
+  >;
+  status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  sanctionListLastCheck?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type IndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeConnection'] = ResolversParentTypes['IndividualNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['IndividualNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+export type IndividualNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['IndividualNodeConnection'] = ResolversParentTypes['IndividualNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['IndividualNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
 };
 
-export type IndividualNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeEdge'] = ResolversParentTypes['IndividualNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type IndividualNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['IndividualNodeEdge'] = ResolversParentTypes['IndividualNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualRoleInHouseholdNode'] = ResolversParentTypes['IndividualRoleInHouseholdNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
-  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
-  role?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdRole']>, ParentType, ContextType>,
+export type IndividualRoleInHouseholdNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['IndividualRoleInHouseholdNode'] = ResolversParentTypes['IndividualRoleInHouseholdNode']
+> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  lastSyncAt?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  individual?: Resolver<
+    ResolversTypes['IndividualNode'],
+    ParentType,
+    ContextType
+  >;
+  household?: Resolver<
+    ResolversTypes['HouseholdNode'],
+    ParentType,
+    ContextType
+  >;
+  role?: Resolver<
+    Maybe<ResolversTypes['IndividualRoleInHouseholdRole']>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export type IssueTypesObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['IssueTypesObject'] = ResolversParentTypes['IssueTypesObject']> = {
-  category?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  subCategories?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+export type IssueTypesObjectResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['IssueTypesObject'] = ResolversParentTypes['IssueTypesObject']
+> = {
+  category?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  subCategories?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
 };
 
-export interface JsonStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONString'], any> {
-  name: 'JSONString'
+export interface JsonStringScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes['JSONString'], any> {
+  name: 'JSONString';
 }
 
-export type KoboAssetObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboAssetObject'] = ResolversParentTypes['KoboAssetObject']> = {
-  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  sector?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  assetType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  dateModified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  deploymentActive?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  hasDeployment?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  xlsLink?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-};
-
-export type KoboAssetObjectConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboAssetObjectConnection'] = ResolversParentTypes['KoboAssetObjectConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['KoboAssetObjectEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type KoboAssetObjectEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboAssetObjectEdge'] = ResolversParentTypes['KoboAssetObjectEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type KoboErrorNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboErrorNode'] = ResolversParentTypes['KoboErrorNode']> = {
-  header?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-};
-
-export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboImportDataNode'] = ResolversParentTypes['KoboImportDataNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['ImportDataStatus'], ParentType, ContextType>,
-  businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>,
-  numberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  numberOfIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  error?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  validationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  createdById?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  importdataPtr?: Resolver<ResolversTypes['ImportDataNode'], ParentType, ContextType>,
-  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  onlyActiveSubmissions?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  koboValidationErrors?: Resolver<Maybe<Array<Maybe<ResolversTypes['KoboErrorNode']>>>, ParentType, ContextType>,
-};
-
-export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']> = {
-  language?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-};
-
-export type LogEntryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNode'] = ResolversParentTypes['LogEntryNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  contentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
-  objectId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>,
-  objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
-  timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-};
-
-export type LogEntryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNodeConnection'] = ResolversParentTypes['LogEntryNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['LogEntryNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type LogEntryNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNodeEdge'] = ResolversParentTypes['LogEntryNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['LogEntryNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type MergeRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['MergeRegistrationDataImportMutation'] = ResolversParentTypes['MergeRegistrationDataImportMutation']> = {
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-};
-
-export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
-  createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
-  createDashboardReport?: Resolver<Maybe<ResolversTypes['CreateDashboardReport']>, ParentType, ContextType, RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>>,
-  createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
-  updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>,
-  grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, MutationsGrievanceStatusChangeArgs>,
-  createTicketNote?: Resolver<Maybe<ResolversTypes['CreateTicketNoteMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTicketNoteArgs, 'noteInput'>>,
-  approveIndividualDataChange?: Resolver<Maybe<ResolversTypes['IndividualDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveIndividualDataChangeArgs, 'grievanceTicketId'>>,
-  approveHouseholdDataChange?: Resolver<Maybe<ResolversTypes['HouseholdDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveHouseholdDataChangeArgs, 'grievanceTicketId'>>,
-  approveAddIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveAddIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
-  approveDeleteIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
-  approveDeleteHousehold?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteHouseholdArgs, 'approveStatus' | 'grievanceTicketId'>>,
-  approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>,
-  approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>,
-  approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approveStatus' | 'grievanceTicketId'>>,
-  reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
-  createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
-  createFinancialServiceProvider?: Resolver<Maybe<ResolversTypes['CreateFinancialServiceProviderMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFinancialServiceProviderArgs, 'businessAreaSlug' | 'inputs'>>,
-  editFinancialServiceProvider?: Resolver<Maybe<ResolversTypes['EditFinancialServiceProviderMutation']>, ParentType, ContextType, RequireFields<MutationsEditFinancialServiceProviderArgs, 'businessAreaSlug' | 'financialServiceProviderId' | 'inputs'>>,
-  editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
-  importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
-  activateCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['ActivateCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsActivateCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
-  finishCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['FinishCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsFinishCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
-  discardCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DiscardCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDiscardCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
-  deleteCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DeleteCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDeleteCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
-  updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
-  updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
-  actionPaymentPlanMutation?: Resolver<Maybe<ResolversTypes['ActionPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsActionPaymentPlanMutationArgs, 'input'>>,
-  createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>,
-  updatePaymentPlan?: Resolver<Maybe<ResolversTypes['UpdatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentPlanArgs, 'input'>>,
-  deletePaymentPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>>,
-  createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
-  updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
-  copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
-  deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>,
-  approveTargetPopulation?: Resolver<Maybe<ResolversTypes['ApproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsApproveTargetPopulationArgs, 'id'>>,
-  unapproveTargetPopulation?: Resolver<Maybe<ResolversTypes['UnapproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUnapproveTargetPopulationArgs, 'id'>>,
-  finalizeTargetPopulation?: Resolver<Maybe<ResolversTypes['FinalizeTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsFinalizeTargetPopulationArgs, 'id'>>,
-  setSteficonRuleOnTargetPopulation?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnTargetPopulationArgs, 'input'>>,
-  createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
-  updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
-  deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
-  uploadImportDataXlsxFileAsync?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFileAsync']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileAsyncArgs, 'businessAreaSlug' | 'file'>>,
-  deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
-  registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>,
-  registrationKoboImport?: Resolver<Maybe<ResolversTypes['RegistrationKoboImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationKoboImportArgs, 'registrationDataImportData'>>,
-  saveKoboImportDataAsync?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataAsync']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataAsyncArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'uid'>>,
-  mergeRegistrationDataImport?: Resolver<Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>>,
-  refuseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['RefuseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsRefuseRegistrationDataImportArgs, 'id'>>,
-  rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>,
-  checkAgainstSanctionList?: Resolver<Maybe<ResolversTypes['CheckAgainstSanctionListMutation']>, ParentType, ContextType, RequireFields<MutationsCheckAgainstSanctionListArgs, 'file'>>,
-};
-
-export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['NeedsAdjudicationApproveMutation'] = ResolversParentTypes['NeedsAdjudicationApproveMutation']> = {
-  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
-};
-
-export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentVerificationNode' | 'CashPlanPaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'ReportNode' | 'ApprovalProcessNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'PaymentVerificationLogEntryNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxReportNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-};
-
-export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {
-  hasNextPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  hasPreviousPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  startCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  endCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-};
-
-export type PartnerTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerTypeUserSetArgs>,
-};
-
-export type PaymentDetailsApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentDetailsApproveMutation'] = ResolversParentTypes['PaymentDetailsApproveMutation']> = {
-  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
-};
-
-export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNode'] = ResolversParentTypes['PaymentPlanNode']> = {
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
-  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  startDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
-  exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalEntitledQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalEntitledQuantityRevised?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalEntitledQuantityRevisedUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['PaymentPlanStatus'], ParentType, ContextType>,
-  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
-  currency?: Resolver<ResolversTypes['PaymentPlanCurrency'], ParentType, ContextType>,
-  dispersionStartDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  dispersionEndDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  femaleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  maleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  maleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  totalHouseholdsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  totalIndividualsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  approvalProcess?: Resolver<ResolversTypes['ApprovalProcessNodeConnection'], ParentType, ContextType, PaymentPlanNodeApprovalProcessArgs>,
-  approvalNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  authorizationNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  financeReviewNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentPlanNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type PaymentPlanNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeEdge'] = ResolversParentTypes['PaymentPlanNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNode'] = ResolversParentTypes['PaymentRecordNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['PaymentRecordStatus'], ParentType, ContextType>,
-  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
-  headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-  deliveryType?: Resolver<Maybe<ResolversTypes['PaymentRecordDeliveryType']>, ParentType, ContextType>,
-  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  entitlementQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  entitlementQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  deliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
-  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  distributionModality?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
-  targetPopulationCashAssistId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  entitlementCardNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  entitlementCardStatus?: Resolver<Maybe<ResolversTypes['PaymentRecordEntitlementCardStatus']>, ParentType, ContextType>,
-  entitlementCardIssueDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  registrationCaId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  serviceProvider?: Resolver<ResolversTypes['ServiceProviderNode'], ParentType, ContextType>,
-  verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
-  complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeComplaintTicketDetailsArgs>,
-  sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeSensitiveTicketDetailsArgs>,
-};
-
-export type PaymentRecordNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNodeConnection'] = ResolversParentTypes['PaymentRecordNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentRecordNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type PaymentRecordNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNodeEdge'] = ResolversParentTypes['PaymentRecordNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type PaymentVerificationLogEntryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNode'] = ResolversParentTypes['PaymentVerificationLogEntryNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  contentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
-  objectId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>,
-  objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
-  timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  contentObject?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType>,
-};
-
-export type PaymentVerificationLogEntryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNodeConnection'] = ResolversParentTypes['PaymentVerificationLogEntryNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type PaymentVerificationLogEntryNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNodeEdge'] = ResolversParentTypes['PaymentVerificationLogEntryNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['PaymentVerificationLogEntryNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type PaymentVerificationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNode'] = ResolversParentTypes['PaymentVerificationNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  cashPlanPaymentVerification?: Resolver<ResolversTypes['CashPlanPaymentVerificationNode'], ParentType, ContextType>,
-  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['PaymentVerificationStatus'], ParentType, ContextType>,
-  statusDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  receivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  ticketDetails?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'], ParentType, ContextType, PaymentVerificationNodeTicketDetailsArgs>,
-  ticketDetail?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'], ParentType, ContextType, PaymentVerificationNodeTicketDetailArgs>,
-  isManuallyEditable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-};
-
-export type PaymentVerificationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNodeConnection'] = ResolversParentTypes['PaymentVerificationNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentVerificationNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type PaymentVerificationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNodeEdge'] = ResolversParentTypes['PaymentVerificationNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type ProgramNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNode'] = ResolversParentTypes['ProgramNode']> = {
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['ProgramStatus'], ParentType, ContextType>,
-  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  adminAreasNew?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, ProgramNodeAdminAreasNewArgs>,
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
-  budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  frequencyOfPayments?: Resolver<ResolversTypes['ProgramFrequencyOfPayments'], ParentType, ContextType>,
-  sector?: Resolver<ResolversTypes['ProgramSector'], ParentType, ContextType>,
-  scope?: Resolver<ResolversTypes['ProgramScope'], ParentType, ContextType>,
-  cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
-  paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, ProgramNodePaymentplanSetArgs>,
-  cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashplanSetArgs>,
-  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
-  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
-  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type ProgramNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNodeConnection'] = ResolversParentTypes['ProgramNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['ProgramNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNodeEdge'] = ResolversParentTypes['ProgramNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type ProgramsWithDeliveredQuantityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramsWithDeliveredQuantityNode'] = ResolversParentTypes['ProgramsWithDeliveredQuantityNode']> = {
-  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  quantity?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveredQuantityNode']>>>, ParentType, ContextType>,
-};
-
-export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
-  allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
-  allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
-  logEntryActionChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType, RequireFields<QueryReportArgs, 'id'>>,
-  allReports?: Resolver<Maybe<ResolversTypes['ReportNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllReportsArgs, 'businessArea'>>,
-  reportTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  reportStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  dashboardReportTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType, RequireFields<QueryDashboardReportTypesChoicesArgs, 'businessAreaSlug'>>,
-  dashboardYearsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType, RequireFields<QueryDashboardYearsChoicesArgs, 'businessAreaSlug'>>,
-  sanctionListIndividual?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNode']>, ParentType, ContextType, RequireFields<QuerySanctionListIndividualArgs, 'id'>>,
-  allSanctionListIndividuals?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNodeConnection']>, ParentType, ContextType, QueryAllSanctionListIndividualsArgs>,
-  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>,
-  allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>,
-  existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea'>>,
-  allTicketNotes?: Resolver<Maybe<ResolversTypes['TicketNoteNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllTicketNotesArgs, 'ticket'>>,
-  chartGrievances?: Resolver<Maybe<ResolversTypes['ChartGrievanceTicketsNode']>, ParentType, ContextType, RequireFields<QueryChartGrievancesArgs, 'businessAreaSlug' | 'year'>>,
-  allAddIndividualsFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
-  allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
-  grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  grievanceTicketCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  grievanceTicketManualCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
-  allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, QueryAllSteficonRulesArgs>,
-  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
-  financialServiceProviderXlsxTemplate?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderXlsxTemplateArgs, 'id'>>,
-  allFinancialServiceProviderXlsxTemplates?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection']>, ParentType, ContextType, QueryAllFinancialServiceProviderXlsxTemplatesArgs>,
-  financialServiceProviderXlsxReport?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderXlsxReportArgs, 'id'>>,
-  allFinancialServiceProviderXlsxReports?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection']>, ParentType, ContextType, QueryAllFinancialServiceProviderXlsxReportsArgs>,
-  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderArgs, 'id'>>,
-  allFinancialServiceProviders?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNodeConnection']>, ParentType, ContextType, QueryAllFinancialServiceProvidersArgs>,
-  paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>,
-  cashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryCashPlanPaymentVerificationArgs, 'id'>>,
-  allPaymentRecords?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, QueryAllPaymentRecordsArgs>,
-  allPaymentVerifications?: Resolver<Maybe<ResolversTypes['PaymentVerificationNodeConnection']>, ParentType, ContextType, QueryAllPaymentVerificationsArgs>,
-  allCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNodeConnection']>, ParentType, ContextType, QueryAllCashPlanPaymentVerificationArgs>,
-  chartPaymentVerification?: Resolver<Maybe<ResolversTypes['ChartPaymentVerification']>, ParentType, ContextType, RequireFields<QueryChartPaymentVerificationArgs, 'businessAreaSlug' | 'year'>>,
-  chartVolumeByDeliveryMechanism?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartVolumeByDeliveryMechanismArgs, 'businessAreaSlug' | 'year'>>,
-  chartPayment?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPaymentArgs, 'businessAreaSlug' | 'year'>>,
-  sectionTotalTransferred?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionTotalTransferredArgs, 'businessAreaSlug' | 'year'>>,
-  tableTotalCashTransferredByAdministrativeArea?: Resolver<Maybe<ResolversTypes['TableTotalCashTransferred']>, ParentType, ContextType, RequireFields<QueryTableTotalCashTransferredByAdministrativeAreaArgs, 'businessAreaSlug' | 'year'>>,
-  chartTotalTransferredCashByCountry?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredCashByCountryArgs, 'year'>>,
-  paymentRecordStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  paymentRecordEntitlementCardStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  paymentRecordDeliveryTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  cashPlanVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  cashPlanVerificationSamplingChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  cashPlanVerificationVerificationChannelChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  paymentVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
-  sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, QuerySampleSizeArgs>,
-  allPaymentVerificationLogEntries?: Resolver<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentVerificationLogEntriesArgs, 'businessArea'>>,
-  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType, RequireFields<QueryPaymentPlanArgs, 'id'>>,
-  allPaymentPlans?: Resolver<Maybe<ResolversTypes['PaymentPlanNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentPlansArgs, 'businessArea'>>,
-  paymentPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  currencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
-  allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
-  allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
-  allGroupsWithFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['GroupAttributeNode']>>>, ParentType, ContextType>,
-  koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'uid' | 'businessAreaSlug'>>,
-  allKoboProjects?: Resolver<Maybe<ResolversTypes['KoboAssetObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllKoboProjectsArgs, 'businessAreaSlug'>>,
-  cashAssistUrlPrefix?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
-  allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>,
-  chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>,
-  chartTotalTransferredByMonth?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredByMonthArgs, 'businessAreaSlug' | 'year'>>,
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
-  allCashPlans?: Resolver<Maybe<ResolversTypes['CashPlanNodeConnection']>, ParentType, ContextType, QueryAllCashPlansArgs>,
-  programStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  programFrequencyOfPaymentsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  programSectorChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  programScopeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
-  allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
-  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria' | 'program' | 'excludedIds'>>,
-  candidateHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryCandidateHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
-  finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation' | 'excludedIds'>>,
-  targetPopulationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>,
-  allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
-  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
-  allIndividuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, QueryAllIndividualsArgs>,
-  sectionHouseholdsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionHouseholdsReachedArgs, 'businessAreaSlug' | 'year'>>,
-  sectionIndividualsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>,
-  sectionChildReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionChildReachedArgs, 'businessAreaSlug' | 'year'>>,
-  chartIndividualsReachedByAgeAndGender?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartIndividualsReachedByAgeAndGenderArgs, 'businessAreaSlug' | 'year'>>,
-  chartIndividualsWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartIndividualsWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>,
-  residenceStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  sexChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  maritalStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  workStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  relationshipChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  documentTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  identityTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  observedDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  severityOfDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  flagChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  allHouseholdsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
-  allIndividualsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
-  me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>,
-  userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  userStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  userPartnerChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  hasAvailableUsersToExport?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<QueryHasAvailableUsersToExportArgs, 'businessAreaSlug'>>,
-  importedHousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType, RequireFields<QueryImportedHouseholdArgs, 'id'>>,
-  allImportedHouseholds?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNodeConnection']>, ParentType, ContextType, QueryAllImportedHouseholdsArgs>,
-  registrationDataImportDatahub?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportDatahubArgs, 'id'>>,
-  allRegistrationDataImportsDatahub?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNodeConnection']>, ParentType, ContextType, QueryAllRegistrationDataImportsDatahubArgs>,
-  importedIndividual?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType, RequireFields<QueryImportedIndividualArgs, 'id'>>,
-  allImportedIndividuals?: Resolver<Maybe<ResolversTypes['ImportedIndividualNodeConnection']>, ParentType, ContextType, QueryAllImportedIndividualsArgs>,
-  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType, RequireFields<QueryImportDataArgs, 'id'>>,
-  koboImportData?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType, RequireFields<QueryKoboImportDataArgs, 'id'>>,
-  deduplicationBatchStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  deduplicationGoldenRecordStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportArgs, 'id'>>,
-  allRegistrationDataImports?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNodeConnection']>, ParentType, ContextType, QueryAllRegistrationDataImportsArgs>,
-  registrationDataStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  _debug?: Resolver<Maybe<ResolversTypes['DjangoDebug']>, ParentType, ContextType>,
-};
-
-export type RapidProFlowResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlow'] = ResolversParentTypes['RapidProFlow']> = {
-  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  archived?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  expires?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  runs?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowRun']>>>, ParentType, ContextType>,
-  results?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowResult']>>>, ParentType, ContextType>,
-  createdOn?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  modifiedOn?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-};
-
-export type RapidProFlowResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowResult'] = ResolversParentTypes['RapidProFlowResult']> = {
-  key?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  categories?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  nodeUuids?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-};
-
-export type RapidProFlowRunResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowRun'] = ResolversParentTypes['RapidProFlowRun']> = {
-  active?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  completed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  interrupted?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  expired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type ReassignRoleMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReassignRoleMutation'] = ResolversParentTypes['ReassignRoleMutation']> = {
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-};
-
-export type RefuseRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RefuseRegistrationDataImportMutation'] = ResolversParentTypes['RefuseRegistrationDataImportMutation']> = {
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-};
-
-export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNode'] = ResolversParentTypes['RegistrationDataImportDatahubNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  hctId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
-  importDone?: Resolver<ResolversTypes['RegistrationDataImportDatahubImportDone'], ParentType, ContextType>,
-  businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  households?: Resolver<ResolversTypes['ImportedHouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeHouseholdsArgs>,
-  individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeIndividualsArgs>,
-};
-
-export type RegistrationDataImportDatahubNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNodeConnection'] = ResolversParentTypes['RegistrationDataImportDatahubNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['RegistrationDataImportDatahubNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type RegistrationDataImportDatahubNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNodeEdge'] = ResolversParentTypes['RegistrationDataImportDatahubNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNode'] = ResolversParentTypes['RegistrationDataImportNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['RegistrationDataImportStatus'], ParentType, ContextType>,
-  importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  importedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  dataSource?: Resolver<ResolversTypes['RegistrationDataImportDataSource'], ParentType, ContextType>,
-  numberOfIndividuals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  datahubId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  errorMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  sentryId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  pullPictures?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
-  screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
-  individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
-  grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
-  batchDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
-  goldenRecordDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
-  batchPossibleDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
-  goldenRecordPossibleDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
-  batchUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
-  goldenRecordUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
-};
-
-export type RegistrationDataImportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNodeConnection'] = ResolversParentTypes['RegistrationDataImportNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['RegistrationDataImportNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type RegistrationDataImportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNodeEdge'] = ResolversParentTypes['RegistrationDataImportNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type RegistrationDeduplicationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDeduplicationMutation'] = ResolversParentTypes['RegistrationDeduplicationMutation']> = {
-  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-};
-
-export type RegistrationKoboImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationKoboImportMutation'] = ResolversParentTypes['RegistrationKoboImportMutation']> = {
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-};
-
-export type RegistrationXlsxImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationXlsxImportMutation'] = ResolversParentTypes['RegistrationXlsxImportMutation']> = {
-  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-};
-
-export type ReportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNode'] = ResolversParentTypes['ReportNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
-  file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  reportType?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  dateFrom?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  dateTo?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  numberOfRecords?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
-  adminArea?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, ReportNodeAdminAreaArgs>,
-  adminAreaNew?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, ReportNodeAdminAreaNewArgs>,
-  fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-};
-
-export type ReportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeConnection'] = ResolversParentTypes['ReportNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['ReportNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type ReportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeEdge'] = ResolversParentTypes['ReportNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleNode'] = ResolversParentTypes['RoleNode']> = {
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  subsystem?: Resolver<ResolversTypes['RoleSubsystem'], ParentType, ContextType>,
-  permissions?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>,
-  userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
-};
-
-export type RuleCommitNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RuleCommitNode'] = ResolversParentTypes['RuleCommitNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  timestamp?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  rule?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>,
-  updatedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  definition?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  isRelease?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  language?: Resolver<ResolversTypes['RuleCommitLanguage'], ParentType, ContextType>,
-  affectedFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
-  before?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  after?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, RuleCommitNodeTargetPopulationsArgs>,
-};
-
-export type RuleCommitNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['RuleCommitNodeConnection'] = ResolversParentTypes['RuleCommitNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['RuleCommitNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type RuleCommitNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RuleCommitNodeEdge'] = ResolversParentTypes['RuleCommitNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['RuleCommitNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type SanctionListIndividualAliasNameNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualAliasNameNode'] = ResolversParentTypes['SanctionListIndividualAliasNameNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type SanctionListIndividualAliasNameNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualAliasNameNodeConnection'] = ResolversParentTypes['SanctionListIndividualAliasNameNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualAliasNameNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type SanctionListIndividualAliasNameNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualAliasNameNodeEdge'] = ResolversParentTypes['SanctionListIndividualAliasNameNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualAliasNameNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type SanctionListIndividualCountriesNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualCountriesNode'] = ResolversParentTypes['SanctionListIndividualCountriesNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-};
-
-export type SanctionListIndividualCountriesNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualCountriesNodeConnection'] = ResolversParentTypes['SanctionListIndividualCountriesNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualCountriesNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type SanctionListIndividualCountriesNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualCountriesNodeEdge'] = ResolversParentTypes['SanctionListIndividualCountriesNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualCountriesNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type SanctionListIndividualDateOfBirthNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNode'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-};
-
-export type SanctionListIndividualDateOfBirthNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNodeConnection'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualDateOfBirthNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type SanctionListIndividualDateOfBirthNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNodeEdge'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualDateOfBirthNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type SanctionListIndividualDocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNode'] = ResolversParentTypes['SanctionListIndividualDocumentNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  typeOfDocument?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  dateOfIssue?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  issuingCountry?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  note?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type SanctionListIndividualDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNodeConnection'] = ResolversParentTypes['SanctionListIndividualDocumentNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualDocumentNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type SanctionListIndividualDocumentNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNodeEdge'] = ResolversParentTypes['SanctionListIndividualDocumentNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualDocumentNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type SanctionListIndividualNationalitiesNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNationalitiesNode'] = ResolversParentTypes['SanctionListIndividualNationalitiesNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  nationality?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-};
-
-export type SanctionListIndividualNationalitiesNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNationalitiesNodeConnection'] = ResolversParentTypes['SanctionListIndividualNationalitiesNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualNationalitiesNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type SanctionListIndividualNationalitiesNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNationalitiesNodeEdge'] = ResolversParentTypes['SanctionListIndividualNationalitiesNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNationalitiesNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type SanctionListIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNode'] = ResolversParentTypes['SanctionListIndividualNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  dataId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  versionNum?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  secondName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  thirdName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  fourthName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  nameOriginalScript?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  unListType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  referenceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  listedOn?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  comments?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  designation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  listType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  street?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  city?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  stateProvince?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  addressNote?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  countryOfBirth?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  documents?: Resolver<ResolversTypes['SanctionListIndividualDocumentNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeDocumentsArgs>,
-  nationalities?: Resolver<ResolversTypes['SanctionListIndividualNationalitiesNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeNationalitiesArgs>,
-  countries?: Resolver<ResolversTypes['SanctionListIndividualCountriesNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeCountriesArgs>,
-  aliasNames?: Resolver<ResolversTypes['SanctionListIndividualAliasNameNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeAliasNamesArgs>,
-  datesOfBirth?: Resolver<ResolversTypes['SanctionListIndividualDateOfBirthNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeDatesOfBirthArgs>,
-};
-
-export type SanctionListIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNodeConnection'] = ResolversParentTypes['SanctionListIndividualNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type SanctionListIndividualNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNodeEdge'] = ResolversParentTypes['SanctionListIndividualNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type SaveKoboProjectImportDataAsyncResolvers<ContextType = any, ParentType extends ResolversParentTypes['SaveKoboProjectImportDataAsync'] = ResolversParentTypes['SaveKoboProjectImportDataAsync']> = {
-  importData?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType>,
-};
-
-export type SectionTotalNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SectionTotalNode'] = ResolversParentTypes['SectionTotalNode']> = {
-  total?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-};
-
-export type ServiceProviderNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServiceProviderNode'] = ResolversParentTypes['ServiceProviderNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
-  caId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  shortName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  country?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ServiceProviderNodeCashPlansArgs>,
-  paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, ServiceProviderNodePaymentrecordSetArgs>,
-};
-
-export type ServiceProviderNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServiceProviderNodeConnection'] = ResolversParentTypes['ServiceProviderNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['ServiceProviderNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type ServiceProviderNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServiceProviderNodeEdge'] = ResolversParentTypes['ServiceProviderNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['ServiceProviderNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type SetSteficonRuleOnTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutationPayload'] = ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutationPayload']> = {
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
-  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-};
-
-export type SimpleApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SimpleApproveMutation'] = ResolversParentTypes['SimpleApproveMutation']> = {
-  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
-};
-
-export type StatsObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['StatsObjectType'] = ResolversParentTypes['StatsObjectType']> = {
-  childMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  childFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  adultMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  adultFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  allHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  allIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type SteficonRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNode'] = ResolversParentTypes['SteficonRuleNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  definition?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  language?: Resolver<ResolversTypes['RuleLanguage'], ParentType, ContextType>,
-  security?: Resolver<ResolversTypes['RuleSecurity'], ParentType, ContextType>,
-  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  updatedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  flags?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  history?: Resolver<ResolversTypes['RuleCommitNodeConnection'], ParentType, ContextType, SteficonRuleNodeHistoryArgs>,
-};
-
-export type SteficonRuleNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNodeConnection'] = ResolversParentTypes['SteficonRuleNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['SteficonRuleNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type SteficonRuleNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNodeEdge'] = ResolversParentTypes['SteficonRuleNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TableTotalCashTransferredResolvers<ContextType = any, ParentType extends ResolversParentTypes['TableTotalCashTransferred'] = ResolversParentTypes['TableTotalCashTransferred']> = {
-  data?: Resolver<Maybe<Array<Maybe<ResolversTypes['_TableTotalCashTransferredDataNode']>>>, ParentType, ContextType>,
-};
-
-export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaNode'] = ResolversParentTypes['TargetingCriteriaNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  targetPopulationCandidate?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
-  targetPopulationFinal?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
-  rules?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>, ParentType, ContextType>,
-};
-
-export type TargetingCriteriaRuleFilterNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaRuleFilterNode'] = ResolversParentTypes['TargetingCriteriaRuleFilterNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  comparisionMethod?: Resolver<ResolversTypes['TargetingCriteriaRuleFilterComparisionMethod'], ParentType, ContextType>,
-  targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>,
-  isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  arguments?: Resolver<Maybe<Array<Maybe<ResolversTypes['Arg']>>>, ParentType, ContextType>,
-  fieldAttribute?: Resolver<Maybe<ResolversTypes['FieldAttributeNode']>, ParentType, ContextType>,
-};
-
-export type TargetingCriteriaRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaRuleNode'] = ResolversParentTypes['TargetingCriteriaRuleNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  targetingCriteria?: Resolver<ResolversTypes['TargetingCriteriaNode'], ParentType, ContextType>,
-  individualsFiltersBlocks?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualRuleFilterBlockNode']>>>, ParentType, ContextType>,
-  filters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleFilterNode']>>>, ParentType, ContextType>,
-};
-
-export type TargetingIndividualBlockRuleFilterNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingIndividualBlockRuleFilterNode'] = ResolversParentTypes['TargetingIndividualBlockRuleFilterNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  comparisionMethod?: Resolver<ResolversTypes['TargetingIndividualBlockRuleFilterComparisionMethod'], ParentType, ContextType>,
-  individualsFiltersBlock?: Resolver<ResolversTypes['TargetingIndividualRuleFilterBlockNode'], ParentType, ContextType>,
-  isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  arguments?: Resolver<Maybe<Array<Maybe<ResolversTypes['Arg']>>>, ParentType, ContextType>,
-  fieldAttribute?: Resolver<Maybe<ResolversTypes['FieldAttributeNode']>, ParentType, ContextType>,
-};
-
-export type TargetingIndividualRuleFilterBlockNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingIndividualRuleFilterBlockNode'] = ResolversParentTypes['TargetingIndividualRuleFilterBlockNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>,
-  targetOnlyHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  individualBlockFilters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualBlockRuleFilterNode']>>>, ParentType, ContextType>,
-};
-
-export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNode'] = ResolversParentTypes['TargetPopulationNode']> = {
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  changeDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  changedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  finalizedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  finalizedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>,
-  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, TargetPopulationNodeHouseholdsArgs>,
-  candidateListTotalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  candidateListTotalIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  finalListTotalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  finalListTotalIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  selectionComputationMetadata?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
-  candidateListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
-  finalListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
-  sentToDatahub?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  steficonRule?: Resolver<Maybe<ResolversTypes['RuleCommitNode']>, ParentType, ContextType>,
-  steficonAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  vulnerabilityScoreMin?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  paymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentPlansArgs>,
-  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
-  selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
-  totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  finalList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeFinalListArgs>,
-  candidateStats?: Resolver<Maybe<ResolversTypes['StatsObjectType']>, ParentType, ContextType>,
-  finalStats?: Resolver<Maybe<ResolversTypes['StatsObjectType']>, ParentType, ContextType>,
-};
-
-export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TargetPopulationNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TargetPopulationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeEdge'] = ResolversParentTypes['TargetPopulationNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketAddIndividualDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNode'] = ResolversParentTypes['TicketAddIndividualDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-};
-
-export type TicketAddIndividualDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNodeConnection'] = ResolversParentTypes['TicketAddIndividualDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketAddIndividualDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketAddIndividualDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNodeEdge'] = ResolversParentTypes['TicketAddIndividualDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketAddIndividualDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketComplaintDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketComplaintDetailsNode'] = ResolversParentTypes['TicketComplaintDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-};
-
-export type TicketComplaintDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketComplaintDetailsNodeConnection'] = ResolversParentTypes['TicketComplaintDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketComplaintDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketComplaintDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketComplaintDetailsNodeEdge'] = ResolversParentTypes['TicketComplaintDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketDeleteHouseholdDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteHouseholdDetailsNode'] = ResolversParentTypes['TicketDeleteHouseholdDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  householdData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-};
-
-export type TicketDeleteHouseholdDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteHouseholdDetailsNodeConnection'] = ResolversParentTypes['TicketDeleteHouseholdDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketDeleteHouseholdDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketDeleteHouseholdDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteHouseholdDetailsNodeEdge'] = ResolversParentTypes['TicketDeleteHouseholdDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketDeleteHouseholdDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketDeleteIndividualDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNode'] = ResolversParentTypes['TicketDeleteIndividualDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-};
-
-export type TicketDeleteIndividualDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNodeConnection'] = ResolversParentTypes['TicketDeleteIndividualDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketDeleteIndividualDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNodeEdge'] = ResolversParentTypes['TicketDeleteIndividualDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketHouseholdDataUpdateDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNode'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  householdData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-};
-
-export type TicketHouseholdDataUpdateDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeConnection'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketHouseholdDataUpdateDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeEdge'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketIndividualDataUpdateDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNode'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-  individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-};
-
-export type TicketIndividualDataUpdateDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeConnection'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketIndividualDataUpdateDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeEdge'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketNeedsAdjudicationDetailsExtraDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsExtraDataNode'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsExtraDataNode']> = {
-  goldenRecords?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
-  possibleDuplicate?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
-};
-
-export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNode'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
-  isMultipleDuplicatesVersion?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  possibleDuplicate?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
-  possibleDuplicates?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>,
-  selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-  selectedIndividuals?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>,
-  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
-  extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>,
-  scoreMin?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  scoreMax?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-};
-
-export type TicketNeedsAdjudicationDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNodeConnection'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketNeedsAdjudicationDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNodeEdge'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketNegativeFeedbackDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNegativeFeedbackDetailsNode'] = ResolversParentTypes['TicketNegativeFeedbackDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-};
-
-export type TicketNegativeFeedbackDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNegativeFeedbackDetailsNodeConnection'] = ResolversParentTypes['TicketNegativeFeedbackDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketNegativeFeedbackDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNegativeFeedbackDetailsNodeEdge'] = ResolversParentTypes['TicketNegativeFeedbackDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketNoteNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNoteNode'] = ResolversParentTypes['TicketNoteNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-};
-
-export type TicketNoteNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNoteNodeConnection'] = ResolversParentTypes['TicketNoteNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketNoteNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketNoteNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNoteNodeEdge'] = ResolversParentTypes['TicketNoteNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketNoteNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketPaymentVerificationDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNode'] = ResolversParentTypes['TicketPaymentVerificationDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  paymentVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, TicketPaymentVerificationDetailsNodePaymentVerificationsArgs>,
-  paymentVerificationStatus?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsPaymentVerificationStatus'], ParentType, ContextType>,
-  paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
-  newStatus?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNewStatus']>, ParentType, ContextType>,
-  newReceivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  hasMultiplePaymentVerifications?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-};
-
-export type TicketPaymentVerificationDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNodeConnection'] = ResolversParentTypes['TicketPaymentVerificationDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketPaymentVerificationDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNodeEdge'] = ResolversParentTypes['TicketPaymentVerificationDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketPositiveFeedbackDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPositiveFeedbackDetailsNode'] = ResolversParentTypes['TicketPositiveFeedbackDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-};
-
-export type TicketPositiveFeedbackDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPositiveFeedbackDetailsNodeConnection'] = ResolversParentTypes['TicketPositiveFeedbackDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketPositiveFeedbackDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketPositiveFeedbackDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPositiveFeedbackDetailsNodeEdge'] = ResolversParentTypes['TicketPositiveFeedbackDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketPositiveFeedbackDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketReferralDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketReferralDetailsNode'] = ResolversParentTypes['TicketReferralDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-};
-
-export type TicketReferralDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketReferralDetailsNodeConnection'] = ResolversParentTypes['TicketReferralDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketReferralDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketReferralDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketReferralDetailsNodeEdge'] = ResolversParentTypes['TicketReferralDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketReferralDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketSensitiveDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketSensitiveDetailsNode'] = ResolversParentTypes['TicketSensitiveDetailsNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
-  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
-  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-};
-
-export type TicketSensitiveDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketSensitiveDetailsNodeConnection'] = ResolversParentTypes['TicketSensitiveDetailsNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['TicketSensitiveDetailsNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketSensitiveDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketSensitiveDetailsNodeEdge'] = ResolversParentTypes['TicketSensitiveDetailsNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['TicketSensitiveDetailsNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+export type KoboAssetObjectResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['KoboAssetObject'] = ResolversParentTypes['KoboAssetObject']
+> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sector?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  assetType?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  dateModified?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  deploymentActive?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  hasDeployment?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  xlsLink?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+};
+
+export type KoboAssetObjectConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['KoboAssetObjectConnection'] = ResolversParentTypes['KoboAssetObjectConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['KoboAssetObjectEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type KoboAssetObjectEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['KoboAssetObjectEdge'] = ResolversParentTypes['KoboAssetObjectEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['KoboAssetObject']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type KoboErrorNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['KoboErrorNode'] = ResolversParentTypes['KoboErrorNode']
+> = {
+  header?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+};
+
+export type KoboImportDataNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['KoboImportDataNode'] = ResolversParentTypes['KoboImportDataNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  status?: Resolver<
+    ResolversTypes['ImportDataStatus'],
+    ParentType,
+    ContextType
+  >;
+  businessAreaSlug?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  dataType?: Resolver<
+    ResolversTypes['ImportDataDataType'],
+    ParentType,
+    ContextType
+  >;
+  numberOfHouseholds?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  numberOfIndividuals?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  error?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  validationErrors?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  createdById?: Resolver<
+    Maybe<ResolversTypes['UUID']>,
+    ParentType,
+    ContextType
+  >;
+  importdataPtr?: Resolver<
+    ResolversTypes['ImportDataNode'],
+    ParentType,
+    ContextType
+  >;
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  onlyActiveSubmissions?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  koboValidationErrors?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['KoboErrorNode']>>>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type LabelNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']
+> = {
+  language?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+};
+
+export type LogEntryNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['LogEntryNode'] = ResolversParentTypes['LogEntryNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  contentType?: Resolver<
+    Maybe<ResolversTypes['ContentTypeObjectType']>,
+    ParentType,
+    ContextType
+  >;
+  objectId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
+  action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>;
+  objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
+  user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
+  businessArea?: Resolver<
+    Maybe<ResolversTypes['UserBusinessAreaNode']>,
+    ParentType,
+    ContextType
+  >;
+  timestamp?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type LogEntryNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['LogEntryNodeConnection'] = ResolversParentTypes['LogEntryNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['LogEntryNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type LogEntryNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['LogEntryNodeEdge'] = ResolversParentTypes['LogEntryNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['LogEntryNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type MergeRegistrationDataImportMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['MergeRegistrationDataImportMutation'] = ResolversParentTypes['MergeRegistrationDataImportMutation']
+> = {
+  registrationDataImport?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type MutationsResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']
+> = {
+  createReport?: Resolver<
+    Maybe<ResolversTypes['CreateReport']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsCreateReportArgs, 'reportData'>
+  >;
+  createDashboardReport?: Resolver<
+    Maybe<ResolversTypes['CreateDashboardReport']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>
+  >;
+  createGrievanceTicket?: Resolver<
+    Maybe<ResolversTypes['CreateGrievanceTicketMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>
+  >;
+  updateGrievanceTicket?: Resolver<
+    Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>
+  >;
+  grievanceStatusChange?: Resolver<
+    Maybe<ResolversTypes['GrievanceStatusChangeMutation']>,
+    ParentType,
+    ContextType,
+    MutationsGrievanceStatusChangeArgs
+  >;
+  createTicketNote?: Resolver<
+    Maybe<ResolversTypes['CreateTicketNoteMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsCreateTicketNoteArgs, 'noteInput'>
+  >;
+  approveIndividualDataChange?: Resolver<
+    Maybe<ResolversTypes['IndividualDataChangeApproveMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsApproveIndividualDataChangeArgs, 'grievanceTicketId'>
+  >;
+  approveHouseholdDataChange?: Resolver<
+    Maybe<ResolversTypes['HouseholdDataChangeApproveMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsApproveHouseholdDataChangeArgs, 'grievanceTicketId'>
+  >;
+  approveAddIndividual?: Resolver<
+    Maybe<ResolversTypes['SimpleApproveMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsApproveAddIndividualArgs,
+      'approveStatus' | 'grievanceTicketId'
+    >
+  >;
+  approveDeleteIndividual?: Resolver<
+    Maybe<ResolversTypes['SimpleApproveMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsApproveDeleteIndividualArgs,
+      'approveStatus' | 'grievanceTicketId'
+    >
+  >;
+  approveDeleteHousehold?: Resolver<
+    Maybe<ResolversTypes['SimpleApproveMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsApproveDeleteHouseholdArgs,
+      'approveStatus' | 'grievanceTicketId'
+    >
+  >;
+  approveSystemFlagging?: Resolver<
+    Maybe<ResolversTypes['SimpleApproveMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsApproveSystemFlaggingArgs,
+      'approveStatus' | 'grievanceTicketId'
+    >
+  >;
+  approveNeedsAdjudication?: Resolver<
+    Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>
+  >;
+  approvePaymentDetails?: Resolver<
+    Maybe<ResolversTypes['PaymentDetailsApproveMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsApprovePaymentDetailsArgs,
+      'approveStatus' | 'grievanceTicketId'
+    >
+  >;
+  reassignRole?: Resolver<
+    Maybe<ResolversTypes['ReassignRoleMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsReassignRoleArgs,
+      'grievanceTicketId' | 'householdId' | 'individualId' | 'role'
+    >
+  >;
+  createCashPlanPaymentVerification?: Resolver<
+    Maybe<ResolversTypes['CreatePaymentVerificationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>
+  >;
+  createFinancialServiceProvider?: Resolver<
+    Maybe<ResolversTypes['CreateFinancialServiceProviderMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsCreateFinancialServiceProviderArgs,
+      'businessAreaSlug' | 'inputs'
+    >
+  >;
+  editFinancialServiceProvider?: Resolver<
+    Maybe<ResolversTypes['EditFinancialServiceProviderMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsEditFinancialServiceProviderArgs,
+      'businessAreaSlug' | 'financialServiceProviderId' | 'inputs'
+    >
+  >;
+  editCashPlanPaymentVerification?: Resolver<
+    Maybe<ResolversTypes['EditPaymentVerificationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>
+  >;
+  importXlsxCashPlanVerification?: Resolver<
+    Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsImportXlsxCashPlanVerificationArgs,
+      'cashPlanVerificationId' | 'file'
+    >
+  >;
+  activateCashPlanPaymentVerification?: Resolver<
+    Maybe<ResolversTypes['ActivateCashPlanVerificationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsActivateCashPlanPaymentVerificationArgs,
+      'cashPlanVerificationId'
+    >
+  >;
+  finishCashPlanPaymentVerification?: Resolver<
+    Maybe<ResolversTypes['FinishCashPlanVerificationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsFinishCashPlanPaymentVerificationArgs,
+      'cashPlanVerificationId'
+    >
+  >;
+  discardCashPlanPaymentVerification?: Resolver<
+    Maybe<ResolversTypes['DiscardCashPlanVerificationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsDiscardCashPlanPaymentVerificationArgs,
+      'cashPlanVerificationId'
+    >
+  >;
+  deleteCashPlanPaymentVerification?: Resolver<
+    Maybe<ResolversTypes['DeleteCashPlanVerificationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsDeleteCashPlanPaymentVerificationArgs,
+      'cashPlanVerificationId'
+    >
+  >;
+  updatePaymentVerificationStatusAndReceivedAmount?: Resolver<
+    Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs,
+      'paymentVerificationId' | 'receivedAmount'
+    >
+  >;
+  updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<
+    Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs,
+      'paymentVerificationId' | 'received' | 'receivedAmount'
+    >
+  >;
+  actionPaymentPlanMutation?: Resolver<
+    Maybe<ResolversTypes['ActionPaymentPlanMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsActionPaymentPlanMutationArgs, 'input'>
+  >;
+  createPaymentPlan?: Resolver<
+    Maybe<ResolversTypes['CreatePaymentPlanMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsCreatePaymentPlanArgs, 'input'>
+  >;
+  updatePaymentPlan?: Resolver<
+    Maybe<ResolversTypes['UpdatePaymentPlanMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsUpdatePaymentPlanArgs, 'input'>
+  >;
+  deletePaymentPlan?: Resolver<
+    Maybe<ResolversTypes['DeletePaymentPlanMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>
+  >;
+  createTargetPopulation?: Resolver<
+    Maybe<ResolversTypes['CreateTargetPopulationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsCreateTargetPopulationArgs, 'input'>
+  >;
+  updateTargetPopulation?: Resolver<
+    Maybe<ResolversTypes['UpdateTargetPopulationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>
+  >;
+  copyTargetPopulation?: Resolver<
+    Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsCopyTargetPopulationArgs, 'input'>
+  >;
+  deleteTargetPopulation?: Resolver<
+    Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>
+  >;
+  approveTargetPopulation?: Resolver<
+    Maybe<ResolversTypes['ApproveTargetPopulationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsApproveTargetPopulationArgs, 'id'>
+  >;
+  unapproveTargetPopulation?: Resolver<
+    Maybe<ResolversTypes['UnapproveTargetPopulationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsUnapproveTargetPopulationArgs, 'id'>
+  >;
+  finalizeTargetPopulation?: Resolver<
+    Maybe<ResolversTypes['FinalizeTargetPopulationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsFinalizeTargetPopulationArgs, 'id'>
+  >;
+  setSteficonRuleOnTargetPopulation?: Resolver<
+    Maybe<ResolversTypes['SetSteficonRuleOnTargetPopulationMutationPayload']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsSetSteficonRuleOnTargetPopulationArgs, 'input'>
+  >;
+  createProgram?: Resolver<
+    Maybe<ResolversTypes['CreateProgram']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsCreateProgramArgs, 'programData'>
+  >;
+  updateProgram?: Resolver<
+    Maybe<ResolversTypes['UpdateProgram']>,
+    ParentType,
+    ContextType,
+    MutationsUpdateProgramArgs
+  >;
+  deleteProgram?: Resolver<
+    Maybe<ResolversTypes['DeleteProgram']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsDeleteProgramArgs, 'programId'>
+  >;
+  uploadImportDataXlsxFileAsync?: Resolver<
+    Maybe<ResolversTypes['UploadImportDataXLSXFileAsync']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsUploadImportDataXlsxFileAsyncArgs,
+      'businessAreaSlug' | 'file'
+    >
+  >;
+  deleteRegistrationDataImport?: Resolver<
+    Maybe<ResolversTypes['DeleteRegistrationDataImport']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsDeleteRegistrationDataImportArgs,
+      'registrationDataImportId'
+    >
+  >;
+  registrationXlsxImport?: Resolver<
+    Maybe<ResolversTypes['RegistrationXlsxImportMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsRegistrationXlsxImportArgs,
+      'registrationDataImportData'
+    >
+  >;
+  registrationKoboImport?: Resolver<
+    Maybe<ResolversTypes['RegistrationKoboImportMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsRegistrationKoboImportArgs,
+      'registrationDataImportData'
+    >
+  >;
+  saveKoboImportDataAsync?: Resolver<
+    Maybe<ResolversTypes['SaveKoboProjectImportDataAsync']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationsSaveKoboImportDataAsyncArgs,
+      'businessAreaSlug' | 'onlyActiveSubmissions' | 'uid'
+    >
+  >;
+  mergeRegistrationDataImport?: Resolver<
+    Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>
+  >;
+  refuseRegistrationDataImport?: Resolver<
+    Maybe<ResolversTypes['RefuseRegistrationDataImportMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsRefuseRegistrationDataImportArgs, 'id'>
+  >;
+  rerunDedupe?: Resolver<
+    Maybe<ResolversTypes['RegistrationDeduplicationMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>
+  >;
+  checkAgainstSanctionList?: Resolver<
+    Maybe<ResolversTypes['CheckAgainstSanctionListMutation']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationsCheckAgainstSanctionListArgs, 'file'>
+  >;
+};
+
+export type NeedsAdjudicationApproveMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['NeedsAdjudicationApproveMutation'] = ResolversParentTypes['NeedsAdjudicationApproveMutation']
+> = {
+  grievanceTicket?: Resolver<
+    Maybe<ResolversTypes['GrievanceTicketNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type NodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']
+> = {
+  __resolveType: TypeResolveFn<
+    | 'AreaNode'
+    | 'AreaTypeNode'
+    | 'HouseholdNode'
+    | 'IndividualNode'
+    | 'RegistrationDataImportNode'
+    | 'UserNode'
+    | 'UserBusinessAreaNode'
+    | 'PaymentPlanNode'
+    | 'ProgramNode'
+    | 'CashPlanNode'
+    | 'ServiceProviderNode'
+    | 'PaymentRecordNode'
+    | 'TargetPopulationNode'
+    | 'RuleCommitNode'
+    | 'SteficonRuleNode'
+    | 'PaymentVerificationNode'
+    | 'CashPlanPaymentVerificationNode'
+    | 'TicketPaymentVerificationDetailsNode'
+    | 'TicketComplaintDetailsNode'
+    | 'TicketSensitiveDetailsNode'
+    | 'CashPlanPaymentVerificationSummaryNode'
+    | 'ReportNode'
+    | 'ApprovalProcessNode'
+    | 'GrievanceTicketNode'
+    | 'TicketNoteNode'
+    | 'TicketHouseholdDataUpdateDetailsNode'
+    | 'TicketIndividualDataUpdateDetailsNode'
+    | 'TicketAddIndividualDetailsNode'
+    | 'TicketDeleteIndividualDetailsNode'
+    | 'TicketDeleteHouseholdDetailsNode'
+    | 'TicketSystemFlaggingDetailsNode'
+    | 'SanctionListIndividualNode'
+    | 'SanctionListIndividualDocumentNode'
+    | 'SanctionListIndividualNationalitiesNode'
+    | 'SanctionListIndividualCountriesNode'
+    | 'SanctionListIndividualAliasNameNode'
+    | 'SanctionListIndividualDateOfBirthNode'
+    | 'TicketNeedsAdjudicationDetailsNode'
+    | 'TicketPositiveFeedbackDetailsNode'
+    | 'TicketNegativeFeedbackDetailsNode'
+    | 'TicketReferralDetailsNode'
+    | 'PaymentVerificationLogEntryNode'
+    | 'FinancialServiceProviderXlsxTemplateNode'
+    | 'FinancialServiceProviderNode'
+    | 'FinancialServiceProviderXlsxReportNode'
+    | 'DocumentNode'
+    | 'IndividualIdentityNode'
+    | 'LogEntryNode'
+    | 'BusinessAreaNode'
+    | 'ImportedHouseholdNode'
+    | 'ImportedIndividualNode'
+    | 'RegistrationDataImportDatahubNode'
+    | 'ImportDataNode'
+    | 'KoboImportDataNode'
+    | 'ImportedDocumentNode'
+    | 'ImportedIndividualIdentityNode',
+    ParentType,
+    ContextType
+  >;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
+export type PageInfoResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']
+> = {
+  hasNextPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  hasPreviousPage?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  startCursor?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  endCursor?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type PartnerTypeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  userSet?: Resolver<
+    ResolversTypes['UserNodeConnection'],
+    ParentType,
+    ContextType,
+    PartnerTypeUserSetArgs
+  >;
+};
+
+export type PaymentDetailsApproveMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentDetailsApproveMutation'] = ResolversParentTypes['PaymentDetailsApproveMutation']
+> = {
+  grievanceTicket?: Resolver<
+    Maybe<ResolversTypes['GrievanceTicketNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type PaymentPlanNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentPlanNode'] = ResolversParentTypes['PaymentPlanNode']
+> = {
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  businessArea?: Resolver<
+    ResolversTypes['UserBusinessAreaNode'],
+    ParentType,
+    ContextType
+  >;
+  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  startDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>;
+  exchangeRate?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalEntitledQuantity?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalEntitledQuantityUsd?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalEntitledQuantityRevised?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalEntitledQuantityRevisedUsd?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalDeliveredQuantity?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalDeliveredQuantityUsd?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalUndeliveredQuantity?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalUndeliveredQuantityUsd?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>;
+  status?: Resolver<
+    ResolversTypes['PaymentPlanStatus'],
+    ParentType,
+    ContextType
+  >;
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  targetPopulation?: Resolver<
+    ResolversTypes['TargetPopulationNode'],
+    ParentType,
+    ContextType
+  >;
+  currency?: Resolver<
+    ResolversTypes['PaymentPlanCurrency'],
+    ParentType,
+    ContextType
+  >;
+  dispersionStartDate?: Resolver<
+    Maybe<ResolversTypes['Date']>,
+    ParentType,
+    ContextType
+  >;
+  dispersionEndDate?: Resolver<
+    Maybe<ResolversTypes['Date']>,
+    ParentType,
+    ContextType
+  >;
+  femaleChildrenCount?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  maleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  maleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  totalHouseholdsCount?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  totalIndividualsCount?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  approvalProcess?: Resolver<
+    ResolversTypes['ApprovalProcessNodeConnection'],
+    ParentType,
+    ContextType,
+    PaymentPlanNodeApprovalProcessArgs
+  >;
+  approvalNumberRequired?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  authorizationNumberRequired?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  financeReviewNumberRequired?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type PaymentPlanNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['PaymentPlanNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type PaymentPlanNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentPlanNodeEdge'] = ResolversParentTypes['PaymentPlanNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['PaymentPlanNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type PaymentRecordNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentRecordNode'] = ResolversParentTypes['PaymentRecordNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  businessArea?: Resolver<
+    ResolversTypes['UserBusinessAreaNode'],
+    ParentType,
+    ContextType
+  >;
+  status?: Resolver<
+    ResolversTypes['PaymentRecordStatus'],
+    ParentType,
+    ContextType
+  >;
+  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  household?: Resolver<
+    ResolversTypes['HouseholdNode'],
+    ParentType,
+    ContextType
+  >;
+  headOfHousehold?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+  deliveryType?: Resolver<
+    Maybe<ResolversTypes['PaymentRecordDeliveryType']>,
+    ParentType,
+    ContextType
+  >;
+  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  entitlementQuantity?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  entitlementQuantityUsd?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  deliveredQuantity?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  deliveredQuantityUsd?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  deliveryDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  transactionReferenceId?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
+  cashPlan?: Resolver<
+    Maybe<ResolversTypes['CashPlanNode']>,
+    ParentType,
+    ContextType
+  >;
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  totalPersonsCovered?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  distributionModality?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  targetPopulation?: Resolver<
+    ResolversTypes['TargetPopulationNode'],
+    ParentType,
+    ContextType
+  >;
+  targetPopulationCashAssistId?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  entitlementCardNumber?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  entitlementCardStatus?: Resolver<
+    Maybe<ResolversTypes['PaymentRecordEntitlementCardStatus']>,
+    ParentType,
+    ContextType
+  >;
+  entitlementCardIssueDate?: Resolver<
+    Maybe<ResolversTypes['Date']>,
+    ParentType,
+    ContextType
+  >;
+  visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  registrationCaId?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  serviceProvider?: Resolver<
+    ResolversTypes['ServiceProviderNode'],
+    ParentType,
+    ContextType
+  >;
+  verification?: Resolver<
+    Maybe<ResolversTypes['PaymentVerificationNode']>,
+    ParentType,
+    ContextType
+  >;
+  complaintTicketDetails?: Resolver<
+    ResolversTypes['TicketComplaintDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    PaymentRecordNodeComplaintTicketDetailsArgs
+  >;
+  sensitiveTicketDetails?: Resolver<
+    ResolversTypes['TicketSensitiveDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    PaymentRecordNodeSensitiveTicketDetailsArgs
+  >;
+};
+
+export type PaymentRecordNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentRecordNodeConnection'] = ResolversParentTypes['PaymentRecordNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['PaymentRecordNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type PaymentRecordNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentRecordNodeEdge'] = ResolversParentTypes['PaymentRecordNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['PaymentRecordNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type PaymentVerificationLogEntryNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNode'] = ResolversParentTypes['PaymentVerificationLogEntryNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  contentType?: Resolver<
+    Maybe<ResolversTypes['ContentTypeObjectType']>,
+    ParentType,
+    ContextType
+  >;
+  objectId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
+  action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>;
+  objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
+  user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
+  businessArea?: Resolver<
+    Maybe<ResolversTypes['UserBusinessAreaNode']>,
+    ParentType,
+    ContextType
+  >;
+  timestamp?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  contentObject?: Resolver<
+    Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type PaymentVerificationLogEntryNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNodeConnection'] = ResolversParentTypes['PaymentVerificationLogEntryNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type PaymentVerificationLogEntryNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNodeEdge'] = ResolversParentTypes['PaymentVerificationLogEntryNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['PaymentVerificationLogEntryNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type PaymentVerificationNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentVerificationNode'] = ResolversParentTypes['PaymentVerificationNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  cashPlanPaymentVerification?: Resolver<
+    ResolversTypes['CashPlanPaymentVerificationNode'],
+    ParentType,
+    ContextType
+  >;
+  paymentRecord?: Resolver<
+    Maybe<ResolversTypes['PaymentRecordNode']>,
+    ParentType,
+    ContextType
+  >;
+  status?: Resolver<
+    ResolversTypes['PaymentVerificationStatus'],
+    ParentType,
+    ContextType
+  >;
+  statusDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  receivedAmount?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  ticketDetails?: Resolver<
+    ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    PaymentVerificationNodeTicketDetailsArgs
+  >;
+  ticketDetail?: Resolver<
+    ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'],
+    ParentType,
+    ContextType,
+    PaymentVerificationNodeTicketDetailArgs
+  >;
+  isManuallyEditable?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type PaymentVerificationNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentVerificationNodeConnection'] = ResolversParentTypes['PaymentVerificationNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['PaymentVerificationNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type PaymentVerificationNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PaymentVerificationNodeEdge'] = ResolversParentTypes['PaymentVerificationNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['PaymentVerificationNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type ProgramNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ProgramNode'] = ResolversParentTypes['ProgramNode']
+> = {
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  lastSyncAt?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['ProgramStatus'], ParentType, ContextType>;
+  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  adminAreasNew?: Resolver<
+    ResolversTypes['AreaNodeConnection'],
+    ParentType,
+    ContextType,
+    ProgramNodeAdminAreasNewArgs
+  >;
+  businessArea?: Resolver<
+    ResolversTypes['UserBusinessAreaNode'],
+    ParentType,
+    ContextType
+  >;
+  budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>;
+  frequencyOfPayments?: Resolver<
+    ResolversTypes['ProgramFrequencyOfPayments'],
+    ParentType,
+    ContextType
+  >;
+  sector?: Resolver<ResolversTypes['ProgramSector'], ParentType, ContextType>;
+  scope?: Resolver<ResolversTypes['ProgramScope'], ParentType, ContextType>;
+  cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  administrativeAreasOfImplementation?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  individualDataNeeded?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  households?: Resolver<
+    ResolversTypes['HouseholdNodeConnection'],
+    ParentType,
+    ContextType,
+    ProgramNodeHouseholdsArgs
+  >;
+  paymentplanSet?: Resolver<
+    ResolversTypes['PaymentPlanNodeConnection'],
+    ParentType,
+    ContextType,
+    ProgramNodePaymentplanSetArgs
+  >;
+  cashplanSet?: Resolver<
+    ResolversTypes['CashPlanNodeConnection'],
+    ParentType,
+    ContextType,
+    ProgramNodeCashplanSetArgs
+  >;
+  targetpopulationSet?: Resolver<
+    ResolversTypes['TargetPopulationNodeConnection'],
+    ParentType,
+    ContextType,
+    ProgramNodeTargetpopulationSetArgs
+  >;
+  reports?: Resolver<
+    ResolversTypes['ReportNodeConnection'],
+    ParentType,
+    ContextType,
+    ProgramNodeReportsArgs
+  >;
+  totalEntitledQuantity?: Resolver<
+    Maybe<ResolversTypes['Decimal']>,
+    ParentType,
+    ContextType
+  >;
+  totalDeliveredQuantity?: Resolver<
+    Maybe<ResolversTypes['Decimal']>,
+    ParentType,
+    ContextType
+  >;
+  totalUndeliveredQuantity?: Resolver<
+    Maybe<ResolversTypes['Decimal']>,
+    ParentType,
+    ContextType
+  >;
+  totalNumberOfHouseholds?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type ProgramNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ProgramNodeConnection'] = ResolversParentTypes['ProgramNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['ProgramNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type ProgramNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ProgramNodeEdge'] = ResolversParentTypes['ProgramNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['ProgramNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type ProgramsWithDeliveredQuantityNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ProgramsWithDeliveredQuantityNode'] = ResolversParentTypes['ProgramsWithDeliveredQuantityNode']
+> = {
+  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  quantity?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['DeliveredQuantityNode']>>>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type QueryResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']
+> = {
+  adminArea?: Resolver<
+    Maybe<ResolversTypes['AreaNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAdminAreaArgs, 'id'>
+  >;
+  allAdminAreas?: Resolver<
+    Maybe<ResolversTypes['AreaNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllAdminAreasArgs
+  >;
+  allLogEntries?: Resolver<
+    Maybe<ResolversTypes['LogEntryNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAllLogEntriesArgs, 'businessArea'>
+  >;
+  logEntryActionChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  report?: Resolver<
+    Maybe<ResolversTypes['ReportNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryReportArgs, 'id'>
+  >;
+  allReports?: Resolver<
+    Maybe<ResolversTypes['ReportNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAllReportsArgs, 'businessArea'>
+  >;
+  reportTypesChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  reportStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  dashboardReportTypesChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryDashboardReportTypesChoicesArgs, 'businessAreaSlug'>
+  >;
+  dashboardYearsChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryDashboardYearsChoicesArgs, 'businessAreaSlug'>
+  >;
+  sanctionListIndividual?: Resolver<
+    Maybe<ResolversTypes['SanctionListIndividualNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QuerySanctionListIndividualArgs, 'id'>
+  >;
+  allSanctionListIndividuals?: Resolver<
+    Maybe<ResolversTypes['SanctionListIndividualNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllSanctionListIndividualsArgs
+  >;
+  grievanceTicket?: Resolver<
+    Maybe<ResolversTypes['GrievanceTicketNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryGrievanceTicketArgs, 'id'>
+  >;
+  allGrievanceTicket?: Resolver<
+    Maybe<ResolversTypes['GrievanceTicketNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>
+  >;
+  existingGrievanceTickets?: Resolver<
+    Maybe<ResolversTypes['GrievanceTicketNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea'>
+  >;
+  allTicketNotes?: Resolver<
+    Maybe<ResolversTypes['TicketNoteNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAllTicketNotesArgs, 'ticket'>
+  >;
+  chartGrievances?: Resolver<
+    Maybe<ResolversTypes['ChartGrievanceTicketsNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryChartGrievancesArgs, 'businessAreaSlug' | 'year'>
+  >;
+  allAddIndividualsFieldsAttributes?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  allEditHouseholdFieldsAttributes?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  grievanceTicketStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  grievanceTicketCategoryChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  grievanceTicketManualCategoryChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  grievanceTicketIssueTypeChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  allSteficonRules?: Resolver<
+    Maybe<ResolversTypes['SteficonRuleNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllSteficonRulesArgs
+  >;
+  paymentRecord?: Resolver<
+    Maybe<ResolversTypes['PaymentRecordNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryPaymentRecordArgs, 'id'>
+  >;
+  financialServiceProviderXlsxTemplate?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryFinancialServiceProviderXlsxTemplateArgs, 'id'>
+  >;
+  allFinancialServiceProviderXlsxTemplates?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllFinancialServiceProviderXlsxTemplatesArgs
+  >;
+  financialServiceProviderXlsxReport?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryFinancialServiceProviderXlsxReportArgs, 'id'>
+  >;
+  allFinancialServiceProviderXlsxReports?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllFinancialServiceProviderXlsxReportsArgs
+  >;
+  financialServiceProvider?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryFinancialServiceProviderArgs, 'id'>
+  >;
+  allFinancialServiceProviders?: Resolver<
+    Maybe<ResolversTypes['FinancialServiceProviderNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllFinancialServiceProvidersArgs
+  >;
+  paymentRecordVerification?: Resolver<
+    Maybe<ResolversTypes['PaymentVerificationNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryPaymentRecordVerificationArgs, 'id'>
+  >;
+  cashPlanPaymentVerification?: Resolver<
+    Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryCashPlanPaymentVerificationArgs, 'id'>
+  >;
+  allPaymentRecords?: Resolver<
+    Maybe<ResolversTypes['PaymentRecordNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllPaymentRecordsArgs
+  >;
+  allPaymentVerifications?: Resolver<
+    Maybe<ResolversTypes['PaymentVerificationNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllPaymentVerificationsArgs
+  >;
+  allCashPlanPaymentVerification?: Resolver<
+    Maybe<ResolversTypes['CashPlanPaymentVerificationNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllCashPlanPaymentVerificationArgs
+  >;
+  chartPaymentVerification?: Resolver<
+    Maybe<ResolversTypes['ChartPaymentVerification']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QueryChartPaymentVerificationArgs,
+      'businessAreaSlug' | 'year'
+    >
+  >;
+  chartVolumeByDeliveryMechanism?: Resolver<
+    Maybe<ResolversTypes['ChartDatasetNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QueryChartVolumeByDeliveryMechanismArgs,
+      'businessAreaSlug' | 'year'
+    >
+  >;
+  chartPayment?: Resolver<
+    Maybe<ResolversTypes['ChartDatasetNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryChartPaymentArgs, 'businessAreaSlug' | 'year'>
+  >;
+  sectionTotalTransferred?: Resolver<
+    Maybe<ResolversTypes['SectionTotalNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QuerySectionTotalTransferredArgs, 'businessAreaSlug' | 'year'>
+  >;
+  tableTotalCashTransferredByAdministrativeArea?: Resolver<
+    Maybe<ResolversTypes['TableTotalCashTransferred']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QueryTableTotalCashTransferredByAdministrativeAreaArgs,
+      'businessAreaSlug' | 'year'
+    >
+  >;
+  chartTotalTransferredCashByCountry?: Resolver<
+    Maybe<ResolversTypes['ChartDetailedDatasetsNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryChartTotalTransferredCashByCountryArgs, 'year'>
+  >;
+  paymentRecordStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  paymentRecordEntitlementCardStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  paymentRecordDeliveryTypeChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  cashPlanVerificationStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  cashPlanVerificationSamplingChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  cashPlanVerificationVerificationChannelChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  paymentVerificationStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  allRapidProFlows?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>
+  >;
+  sampleSize?: Resolver<
+    Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>,
+    ParentType,
+    ContextType,
+    QuerySampleSizeArgs
+  >;
+  allPaymentVerificationLogEntries?: Resolver<
+    Maybe<ResolversTypes['PaymentVerificationLogEntryNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAllPaymentVerificationLogEntriesArgs, 'businessArea'>
+  >;
+  paymentPlan?: Resolver<
+    Maybe<ResolversTypes['PaymentPlanNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryPaymentPlanArgs, 'id'>
+  >;
+  allPaymentPlans?: Resolver<
+    Maybe<ResolversTypes['PaymentPlanNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAllPaymentPlansArgs, 'businessArea'>
+  >;
+  paymentPlanStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  currencyChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  businessArea?: Resolver<
+    Maybe<ResolversTypes['BusinessAreaNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>
+  >;
+  allBusinessAreas?: Resolver<
+    Maybe<ResolversTypes['BusinessAreaNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllBusinessAreasArgs
+  >;
+  allFieldsAttributes?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>,
+    ParentType,
+    ContextType,
+    QueryAllFieldsAttributesArgs
+  >;
+  allGroupsWithFields?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['GroupAttributeNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  koboProject?: Resolver<
+    Maybe<ResolversTypes['KoboAssetObject']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryKoboProjectArgs, 'uid' | 'businessAreaSlug'>
+  >;
+  allKoboProjects?: Resolver<
+    Maybe<ResolversTypes['KoboAssetObjectConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAllKoboProjectsArgs, 'businessAreaSlug'>
+  >;
+  cashAssistUrlPrefix?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  program?: Resolver<
+    Maybe<ResolversTypes['ProgramNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryProgramArgs, 'id'>
+  >;
+  allPrograms?: Resolver<
+    Maybe<ResolversTypes['ProgramNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAllProgramsArgs, 'businessArea'>
+  >;
+  chartProgrammesBySector?: Resolver<
+    Maybe<ResolversTypes['ChartDetailedDatasetsNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>
+  >;
+  chartTotalTransferredByMonth?: Resolver<
+    Maybe<ResolversTypes['ChartDetailedDatasetsNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QueryChartTotalTransferredByMonthArgs,
+      'businessAreaSlug' | 'year'
+    >
+  >;
+  cashPlan?: Resolver<
+    Maybe<ResolversTypes['CashPlanNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryCashPlanArgs, 'id'>
+  >;
+  allCashPlans?: Resolver<
+    Maybe<ResolversTypes['CashPlanNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllCashPlansArgs
+  >;
+  programStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  programFrequencyOfPaymentsChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  programSectorChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  programScopeChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  cashPlanStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  targetPopulation?: Resolver<
+    Maybe<ResolversTypes['TargetPopulationNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryTargetPopulationArgs, 'id'>
+  >;
+  allTargetPopulation?: Resolver<
+    Maybe<ResolversTypes['TargetPopulationNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllTargetPopulationArgs
+  >;
+  goldenRecordByTargetingCriteria?: Resolver<
+    Maybe<ResolversTypes['HouseholdNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QueryGoldenRecordByTargetingCriteriaArgs,
+      'targetingCriteria' | 'program' | 'excludedIds'
+    >
+  >;
+  candidateHouseholdsListByTargetingCriteria?: Resolver<
+    Maybe<ResolversTypes['HouseholdNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QueryCandidateHouseholdsListByTargetingCriteriaArgs,
+      'targetPopulation'
+    >
+  >;
+  finalHouseholdsListByTargetingCriteria?: Resolver<
+    Maybe<ResolversTypes['HouseholdNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QueryFinalHouseholdsListByTargetingCriteriaArgs,
+      'targetPopulation' | 'excludedIds'
+    >
+  >;
+  targetPopulationStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryHouseholdArgs, 'id'>
+  >;
+  allHouseholds?: Resolver<
+    Maybe<ResolversTypes['HouseholdNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllHouseholdsArgs
+  >;
+  individual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryIndividualArgs, 'id'>
+  >;
+  allIndividuals?: Resolver<
+    Maybe<ResolversTypes['IndividualNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllIndividualsArgs
+  >;
+  sectionHouseholdsReached?: Resolver<
+    Maybe<ResolversTypes['SectionTotalNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QuerySectionHouseholdsReachedArgs,
+      'businessAreaSlug' | 'year'
+    >
+  >;
+  sectionIndividualsReached?: Resolver<
+    Maybe<ResolversTypes['SectionTotalNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QuerySectionIndividualsReachedArgs,
+      'businessAreaSlug' | 'year'
+    >
+  >;
+  sectionChildReached?: Resolver<
+    Maybe<ResolversTypes['SectionTotalNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QuerySectionChildReachedArgs, 'businessAreaSlug' | 'year'>
+  >;
+  chartIndividualsReachedByAgeAndGender?: Resolver<
+    Maybe<ResolversTypes['ChartDatasetNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QueryChartIndividualsReachedByAgeAndGenderArgs,
+      'businessAreaSlug' | 'year'
+    >
+  >;
+  chartIndividualsWithDisabilityReachedByAge?: Resolver<
+    Maybe<ResolversTypes['ChartDetailedDatasetsNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      QueryChartIndividualsWithDisabilityReachedByAgeArgs,
+      'businessAreaSlug' | 'year'
+    >
+  >;
+  residenceStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  sexChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  maritalStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  workStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  relationshipChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  roleChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  documentTypeChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  identityTypeChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  countriesChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  observedDisabilityChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  severityOfDisabilityChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  flagChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  allHouseholdsFlexFieldsAttributes?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  allIndividualsFlexFieldsAttributes?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
+  allUsers?: Resolver<
+    Maybe<ResolversTypes['UserNodeConnection']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryAllUsersArgs, 'businessArea'>
+  >;
+  userRolesChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  userStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  userPartnerChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  hasAvailableUsersToExport?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryHasAvailableUsersToExportArgs, 'businessAreaSlug'>
+  >;
+  importedHousehold?: Resolver<
+    Maybe<ResolversTypes['ImportedHouseholdNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryImportedHouseholdArgs, 'id'>
+  >;
+  allImportedHouseholds?: Resolver<
+    Maybe<ResolversTypes['ImportedHouseholdNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllImportedHouseholdsArgs
+  >;
+  registrationDataImportDatahub?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryRegistrationDataImportDatahubArgs, 'id'>
+  >;
+  allRegistrationDataImportsDatahub?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportDatahubNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllRegistrationDataImportsDatahubArgs
+  >;
+  importedIndividual?: Resolver<
+    Maybe<ResolversTypes['ImportedIndividualNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryImportedIndividualArgs, 'id'>
+  >;
+  allImportedIndividuals?: Resolver<
+    Maybe<ResolversTypes['ImportedIndividualNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllImportedIndividualsArgs
+  >;
+  importData?: Resolver<
+    Maybe<ResolversTypes['ImportDataNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryImportDataArgs, 'id'>
+  >;
+  koboImportData?: Resolver<
+    Maybe<ResolversTypes['KoboImportDataNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryKoboImportDataArgs, 'id'>
+  >;
+  deduplicationBatchStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  deduplicationGoldenRecordStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  registrationDataImport?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportNode']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryRegistrationDataImportArgs, 'id'>
+  >;
+  allRegistrationDataImports?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportNodeConnection']>,
+    ParentType,
+    ContextType,
+    QueryAllRegistrationDataImportsArgs
+  >;
+  registrationDataStatusChoices?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>,
+    ParentType,
+    ContextType
+  >;
+  _debug?: Resolver<
+    Maybe<ResolversTypes['DjangoDebug']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type RapidProFlowResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RapidProFlow'] = ResolversParentTypes['RapidProFlow']
+> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  archived?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+  labels?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+  expires?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  runs?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['RapidProFlowRun']>>>,
+    ParentType,
+    ContextType
+  >;
+  results?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['RapidProFlowResult']>>>,
+    ParentType,
+    ContextType
+  >;
+  createdOn?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  modifiedOn?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type RapidProFlowResultResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RapidProFlowResult'] = ResolversParentTypes['RapidProFlowResult']
+> = {
+  key?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  categories?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+  nodeUuids?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['String']>>>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type RapidProFlowRunResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RapidProFlowRun'] = ResolversParentTypes['RapidProFlowRun']
+> = {
+  active?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  completed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  interrupted?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  expired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type ReassignRoleMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ReassignRoleMutation'] = ResolversParentTypes['ReassignRoleMutation']
+> = {
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  individual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type RefuseRegistrationDataImportMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RefuseRegistrationDataImportMutation'] = ResolversParentTypes['RefuseRegistrationDataImportMutation']
+> = {
+  registrationDataImport?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type RegistrationDataImportDatahubNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNode'] = ResolversParentTypes['RegistrationDataImportDatahubNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  hctId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
+  importData?: Resolver<
+    Maybe<ResolversTypes['ImportDataNode']>,
+    ParentType,
+    ContextType
+  >;
+  importDone?: Resolver<
+    ResolversTypes['RegistrationDataImportDatahubImportDone'],
+    ParentType,
+    ContextType
+  >;
+  businessAreaSlug?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  households?: Resolver<
+    ResolversTypes['ImportedHouseholdNodeConnection'],
+    ParentType,
+    ContextType,
+    RegistrationDataImportDatahubNodeHouseholdsArgs
+  >;
+  individuals?: Resolver<
+    ResolversTypes['ImportedIndividualNodeConnection'],
+    ParentType,
+    ContextType,
+    RegistrationDataImportDatahubNodeIndividualsArgs
+  >;
+};
+
+export type RegistrationDataImportDatahubNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNodeConnection'] = ResolversParentTypes['RegistrationDataImportDatahubNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['RegistrationDataImportDatahubNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type RegistrationDataImportDatahubNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNodeEdge'] = ResolversParentTypes['RegistrationDataImportDatahubNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type RegistrationDataImportNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RegistrationDataImportNode'] = ResolversParentTypes['RegistrationDataImportNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  status?: Resolver<
+    ResolversTypes['RegistrationDataImportStatus'],
+    ParentType,
+    ContextType
+  >;
+  importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  importedBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  dataSource?: Resolver<
+    ResolversTypes['RegistrationDataImportDataSource'],
+    ParentType,
+    ContextType
+  >;
+  numberOfIndividuals?: Resolver<
+    ResolversTypes['Int'],
+    ParentType,
+    ContextType
+  >;
+  numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  datahubId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>;
+  errorMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  sentryId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  pullPictures?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  businessArea?: Resolver<
+    Maybe<ResolversTypes['UserBusinessAreaNode']>,
+    ParentType,
+    ContextType
+  >;
+  screenBeneficiary?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  households?: Resolver<
+    ResolversTypes['HouseholdNodeConnection'],
+    ParentType,
+    ContextType,
+    RegistrationDataImportNodeHouseholdsArgs
+  >;
+  individuals?: Resolver<
+    ResolversTypes['IndividualNodeConnection'],
+    ParentType,
+    ContextType,
+    RegistrationDataImportNodeIndividualsArgs
+  >;
+  grievanceticketSet?: Resolver<
+    ResolversTypes['GrievanceTicketNodeConnection'],
+    ParentType,
+    ContextType,
+    RegistrationDataImportNodeGrievanceticketSetArgs
+  >;
+  batchDuplicatesCountAndPercentage?: Resolver<
+    Maybe<ResolversTypes['CountAndPercentageNode']>,
+    ParentType,
+    ContextType
+  >;
+  goldenRecordDuplicatesCountAndPercentage?: Resolver<
+    Maybe<ResolversTypes['CountAndPercentageNode']>,
+    ParentType,
+    ContextType
+  >;
+  batchPossibleDuplicatesCountAndPercentage?: Resolver<
+    Maybe<ResolversTypes['CountAndPercentageNode']>,
+    ParentType,
+    ContextType
+  >;
+  goldenRecordPossibleDuplicatesCountAndPercentage?: Resolver<
+    Maybe<ResolversTypes['CountAndPercentageNode']>,
+    ParentType,
+    ContextType
+  >;
+  batchUniqueCountAndPercentage?: Resolver<
+    Maybe<ResolversTypes['CountAndPercentageNode']>,
+    ParentType,
+    ContextType
+  >;
+  goldenRecordUniqueCountAndPercentage?: Resolver<
+    Maybe<ResolversTypes['CountAndPercentageNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type RegistrationDataImportNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RegistrationDataImportNodeConnection'] = ResolversParentTypes['RegistrationDataImportNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['RegistrationDataImportNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type RegistrationDataImportNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RegistrationDataImportNodeEdge'] = ResolversParentTypes['RegistrationDataImportNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type RegistrationDeduplicationMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RegistrationDeduplicationMutation'] = ResolversParentTypes['RegistrationDeduplicationMutation']
+> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+};
+
+export type RegistrationKoboImportMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RegistrationKoboImportMutation'] = ResolversParentTypes['RegistrationKoboImportMutation']
+> = {
+  validationErrors?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+  registrationDataImport?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type RegistrationXlsxImportMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RegistrationXlsxImportMutation'] = ResolversParentTypes['RegistrationXlsxImportMutation']
+> = {
+  validationErrors?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+  registrationDataImport?: Resolver<
+    Maybe<ResolversTypes['RegistrationDataImportNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type ReportNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ReportNode'] = ResolversParentTypes['ReportNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  businessArea?: Resolver<
+    ResolversTypes['UserBusinessAreaNode'],
+    ParentType,
+    ContextType
+  >;
+  file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  reportType?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  dateFrom?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  dateTo?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  numberOfRecords?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  program?: Resolver<
+    Maybe<ResolversTypes['ProgramNode']>,
+    ParentType,
+    ContextType
+  >;
+  adminArea?: Resolver<
+    Maybe<ResolversTypes['AreaNodeConnection']>,
+    ParentType,
+    ContextType,
+    ReportNodeAdminAreaArgs
+  >;
+  adminAreaNew?: Resolver<
+    ResolversTypes['AreaNodeConnection'],
+    ParentType,
+    ContextType,
+    ReportNodeAdminAreaNewArgs
+  >;
+  fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+};
+
+export type ReportNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ReportNodeConnection'] = ResolversParentTypes['ReportNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['ReportNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type ReportNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ReportNodeEdge'] = ResolversParentTypes['ReportNodeEdge']
+> = {
+  node?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type RoleNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RoleNode'] = ResolversParentTypes['RoleNode']
+> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  subsystem?: Resolver<
+    ResolversTypes['RoleSubsystem'],
+    ParentType,
+    ContextType
+  >;
+  permissions?: Resolver<
+    Maybe<Array<ResolversTypes['String']>>,
+    ParentType,
+    ContextType
+  >;
+  userRoles?: Resolver<
+    Array<ResolversTypes['UserRoleNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type RuleCommitNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RuleCommitNode'] = ResolversParentTypes['RuleCommitNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  timestamp?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  rule?: Resolver<
+    Maybe<ResolversTypes['SteficonRuleNode']>,
+    ParentType,
+    ContextType
+  >;
+  updatedBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  definition?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  isRelease?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  language?: Resolver<
+    ResolversTypes['RuleCommitLanguage'],
+    ParentType,
+    ContextType
+  >;
+  affectedFields?: Resolver<
+    Array<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  before?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  after?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  targetPopulations?: Resolver<
+    ResolversTypes['TargetPopulationNodeConnection'],
+    ParentType,
+    ContextType,
+    RuleCommitNodeTargetPopulationsArgs
+  >;
+};
+
+export type RuleCommitNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RuleCommitNodeConnection'] = ResolversParentTypes['RuleCommitNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['RuleCommitNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type RuleCommitNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RuleCommitNodeEdge'] = ResolversParentTypes['RuleCommitNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['RuleCommitNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SanctionListIndividualAliasNameNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualAliasNameNode'] = ResolversParentTypes['SanctionListIndividualAliasNameNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SanctionListIndividualAliasNameNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualAliasNameNodeConnection'] = ResolversParentTypes['SanctionListIndividualAliasNameNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['SanctionListIndividualAliasNameNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type SanctionListIndividualAliasNameNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualAliasNameNodeEdge'] = ResolversParentTypes['SanctionListIndividualAliasNameNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['SanctionListIndividualAliasNameNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SanctionListIndividualCountriesNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualCountriesNode'] = ResolversParentTypes['SanctionListIndividualCountriesNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+};
+
+export type SanctionListIndividualCountriesNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualCountriesNodeConnection'] = ResolversParentTypes['SanctionListIndividualCountriesNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['SanctionListIndividualCountriesNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type SanctionListIndividualCountriesNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualCountriesNodeEdge'] = ResolversParentTypes['SanctionListIndividualCountriesNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['SanctionListIndividualCountriesNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SanctionListIndividualDateOfBirthNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNode'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+};
+
+export type SanctionListIndividualDateOfBirthNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNodeConnection'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['SanctionListIndividualDateOfBirthNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type SanctionListIndividualDateOfBirthNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNodeEdge'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['SanctionListIndividualDateOfBirthNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SanctionListIndividualDocumentNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNode'] = ResolversParentTypes['SanctionListIndividualDocumentNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  typeOfDocument?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  dateOfIssue?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  issuingCountry?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  note?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SanctionListIndividualDocumentNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNodeConnection'] = ResolversParentTypes['SanctionListIndividualDocumentNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['SanctionListIndividualDocumentNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type SanctionListIndividualDocumentNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNodeEdge'] = ResolversParentTypes['SanctionListIndividualDocumentNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['SanctionListIndividualDocumentNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SanctionListIndividualNationalitiesNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualNationalitiesNode'] = ResolversParentTypes['SanctionListIndividualNationalitiesNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  nationality?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type SanctionListIndividualNationalitiesNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualNationalitiesNodeConnection'] = ResolversParentTypes['SanctionListIndividualNationalitiesNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['SanctionListIndividualNationalitiesNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type SanctionListIndividualNationalitiesNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualNationalitiesNodeEdge'] = ResolversParentTypes['SanctionListIndividualNationalitiesNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['SanctionListIndividualNationalitiesNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SanctionListIndividualNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualNode'] = ResolversParentTypes['SanctionListIndividualNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  dataId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  versionNum?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  secondName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  thirdName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  fourthName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  nameOriginalScript?: Resolver<
+    ResolversTypes['String'],
+    ParentType,
+    ContextType
+  >;
+  unListType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  referenceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  listedOn?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  comments?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  designation?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  listType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  street?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  city?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  stateProvince?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  addressNote?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  countryOfBirth?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  documents?: Resolver<
+    ResolversTypes['SanctionListIndividualDocumentNodeConnection'],
+    ParentType,
+    ContextType,
+    SanctionListIndividualNodeDocumentsArgs
+  >;
+  nationalities?: Resolver<
+    ResolversTypes['SanctionListIndividualNationalitiesNodeConnection'],
+    ParentType,
+    ContextType,
+    SanctionListIndividualNodeNationalitiesArgs
+  >;
+  countries?: Resolver<
+    ResolversTypes['SanctionListIndividualCountriesNodeConnection'],
+    ParentType,
+    ContextType,
+    SanctionListIndividualNodeCountriesArgs
+  >;
+  aliasNames?: Resolver<
+    ResolversTypes['SanctionListIndividualAliasNameNodeConnection'],
+    ParentType,
+    ContextType,
+    SanctionListIndividualNodeAliasNamesArgs
+  >;
+  datesOfBirth?: Resolver<
+    ResolversTypes['SanctionListIndividualDateOfBirthNodeConnection'],
+    ParentType,
+    ContextType,
+    SanctionListIndividualNodeDatesOfBirthArgs
+  >;
+};
+
+export type SanctionListIndividualNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualNodeConnection'] = ResolversParentTypes['SanctionListIndividualNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['SanctionListIndividualNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type SanctionListIndividualNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SanctionListIndividualNodeEdge'] = ResolversParentTypes['SanctionListIndividualNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['SanctionListIndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SaveKoboProjectImportDataAsyncResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SaveKoboProjectImportDataAsync'] = ResolversParentTypes['SaveKoboProjectImportDataAsync']
+> = {
+  importData?: Resolver<
+    Maybe<ResolversTypes['KoboImportDataNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type SectionTotalNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SectionTotalNode'] = ResolversParentTypes['SectionTotalNode']
+> = {
+  total?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+};
+
+export type ServiceProviderNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ServiceProviderNode'] = ResolversParentTypes['ServiceProviderNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  businessArea?: Resolver<
+    ResolversTypes['UserBusinessAreaNode'],
+    ParentType,
+    ContextType
+  >;
+  caId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  shortName?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  country?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  cashPlans?: Resolver<
+    ResolversTypes['CashPlanNodeConnection'],
+    ParentType,
+    ContextType,
+    ServiceProviderNodeCashPlansArgs
+  >;
+  paymentrecordSet?: Resolver<
+    ResolversTypes['PaymentRecordNodeConnection'],
+    ParentType,
+    ContextType,
+    ServiceProviderNodePaymentrecordSetArgs
+  >;
+};
+
+export type ServiceProviderNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ServiceProviderNodeConnection'] = ResolversParentTypes['ServiceProviderNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['ServiceProviderNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type ServiceProviderNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ServiceProviderNodeEdge'] = ResolversParentTypes['ServiceProviderNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['ServiceProviderNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SetSteficonRuleOnTargetPopulationMutationPayloadResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutationPayload'] = ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutationPayload']
+> = {
+  targetPopulation?: Resolver<
+    Maybe<ResolversTypes['TargetPopulationNode']>,
+    ParentType,
+    ContextType
+  >;
+  clientMutationId?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type SimpleApproveMutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SimpleApproveMutation'] = ResolversParentTypes['SimpleApproveMutation']
+> = {
+  grievanceTicket?: Resolver<
+    Maybe<ResolversTypes['GrievanceTicketNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type StatsObjectTypeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['StatsObjectType'] = ResolversParentTypes['StatsObjectType']
+> = {
+  childMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  childFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  adultMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  adultFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  allHouseholds?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  allIndividuals?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type SteficonRuleNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SteficonRuleNode'] = ResolversParentTypes['SteficonRuleNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  definition?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  language?: Resolver<ResolversTypes['RuleLanguage'], ParentType, ContextType>;
+  security?: Resolver<ResolversTypes['RuleSecurity'], ParentType, ContextType>;
+  createdBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  updatedBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  flags?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  history?: Resolver<
+    ResolversTypes['RuleCommitNodeConnection'],
+    ParentType,
+    ContextType,
+    SteficonRuleNodeHistoryArgs
+  >;
+};
+
+export type SteficonRuleNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SteficonRuleNodeConnection'] = ResolversParentTypes['SteficonRuleNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['SteficonRuleNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type SteficonRuleNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['SteficonRuleNodeEdge'] = ResolversParentTypes['SteficonRuleNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['SteficonRuleNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TableTotalCashTransferredResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TableTotalCashTransferred'] = ResolversParentTypes['TableTotalCashTransferred']
+> = {
+  data?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['_TableTotalCashTransferredDataNode']>>>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TargetingCriteriaNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TargetingCriteriaNode'] = ResolversParentTypes['TargetingCriteriaNode']
+> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  targetPopulationCandidate?: Resolver<
+    Maybe<ResolversTypes['TargetPopulationNode']>,
+    ParentType,
+    ContextType
+  >;
+  targetPopulationFinal?: Resolver<
+    Maybe<ResolversTypes['TargetPopulationNode']>,
+    ParentType,
+    ContextType
+  >;
+  rules?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TargetingCriteriaRuleFilterNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TargetingCriteriaRuleFilterNode'] = ResolversParentTypes['TargetingCriteriaRuleFilterNode']
+> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  comparisionMethod?: Resolver<
+    ResolversTypes['TargetingCriteriaRuleFilterComparisionMethod'],
+    ParentType,
+    ContextType
+  >;
+  targetingCriteriaRule?: Resolver<
+    ResolversTypes['TargetingCriteriaRuleNode'],
+    ParentType,
+    ContextType
+  >;
+  isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  arguments?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['Arg']>>>,
+    ParentType,
+    ContextType
+  >;
+  fieldAttribute?: Resolver<
+    Maybe<ResolversTypes['FieldAttributeNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TargetingCriteriaRuleNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TargetingCriteriaRuleNode'] = ResolversParentTypes['TargetingCriteriaRuleNode']
+> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  targetingCriteria?: Resolver<
+    ResolversTypes['TargetingCriteriaNode'],
+    ParentType,
+    ContextType
+  >;
+  individualsFiltersBlocks?: Resolver<
+    Maybe<
+      Array<Maybe<ResolversTypes['TargetingIndividualRuleFilterBlockNode']>>
+    >,
+    ParentType,
+    ContextType
+  >;
+  filters?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleFilterNode']>>>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TargetingIndividualBlockRuleFilterNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TargetingIndividualBlockRuleFilterNode'] = ResolversParentTypes['TargetingIndividualBlockRuleFilterNode']
+> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  comparisionMethod?: Resolver<
+    ResolversTypes['TargetingIndividualBlockRuleFilterComparisionMethod'],
+    ParentType,
+    ContextType
+  >;
+  individualsFiltersBlock?: Resolver<
+    ResolversTypes['TargetingIndividualRuleFilterBlockNode'],
+    ParentType,
+    ContextType
+  >;
+  isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  arguments?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['Arg']>>>,
+    ParentType,
+    ContextType
+  >;
+  fieldAttribute?: Resolver<
+    Maybe<ResolversTypes['FieldAttributeNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TargetingIndividualRuleFilterBlockNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TargetingIndividualRuleFilterBlockNode'] = ResolversParentTypes['TargetingIndividualRuleFilterBlockNode']
+> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  targetingCriteriaRule?: Resolver<
+    ResolversTypes['TargetingCriteriaRuleNode'],
+    ParentType,
+    ContextType
+  >;
+  targetOnlyHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  individualBlockFilters?: Resolver<
+    Maybe<
+      Array<Maybe<ResolversTypes['TargetingIndividualBlockRuleFilterNode']>>
+    >,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TargetPopulationNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TargetPopulationNode'] = ResolversParentTypes['TargetPopulationNode']
+> = {
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  changeDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  changedBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  finalizedAt?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  finalizedBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+  businessArea?: Resolver<
+    Maybe<ResolversTypes['UserBusinessAreaNode']>,
+    ParentType,
+    ContextType
+  >;
+  status?: Resolver<
+    ResolversTypes['TargetPopulationStatus'],
+    ParentType,
+    ContextType
+  >;
+  households?: Resolver<
+    ResolversTypes['HouseholdNodeConnection'],
+    ParentType,
+    ContextType,
+    TargetPopulationNodeHouseholdsArgs
+  >;
+  candidateListTotalHouseholds?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  candidateListTotalIndividuals?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  finalListTotalHouseholds?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  finalListTotalIndividuals?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  selectionComputationMetadata?: Resolver<
+    Maybe<ResolversTypes['String']>,
+    ParentType,
+    ContextType
+  >;
+  program?: Resolver<
+    Maybe<ResolversTypes['ProgramNode']>,
+    ParentType,
+    ContextType
+  >;
+  candidateListTargetingCriteria?: Resolver<
+    Maybe<ResolversTypes['TargetingCriteriaNode']>,
+    ParentType,
+    ContextType
+  >;
+  finalListTargetingCriteria?: Resolver<
+    Maybe<ResolversTypes['TargetingCriteriaNode']>,
+    ParentType,
+    ContextType
+  >;
+  sentToDatahub?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  steficonRule?: Resolver<
+    Maybe<ResolversTypes['RuleCommitNode']>,
+    ParentType,
+    ContextType
+  >;
+  steficonAppliedDate?: Resolver<
+    Maybe<ResolversTypes['DateTime']>,
+    ParentType,
+    ContextType
+  >;
+  vulnerabilityScoreMin?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  vulnerabilityScoreMax?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  paymentPlans?: Resolver<
+    ResolversTypes['PaymentPlanNodeConnection'],
+    ParentType,
+    ContextType,
+    TargetPopulationNodePaymentPlansArgs
+  >;
+  paymentRecords?: Resolver<
+    ResolversTypes['PaymentRecordNodeConnection'],
+    ParentType,
+    ContextType,
+    TargetPopulationNodePaymentRecordsArgs
+  >;
+  selections?: Resolver<
+    Array<ResolversTypes['HouseholdSelection']>,
+    ParentType,
+    ContextType
+  >;
+  totalHouseholds?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  totalFamilySize?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  finalList?: Resolver<
+    Maybe<ResolversTypes['HouseholdNodeConnection']>,
+    ParentType,
+    ContextType,
+    TargetPopulationNodeFinalListArgs
+  >;
+  candidateStats?: Resolver<
+    Maybe<ResolversTypes['StatsObjectType']>,
+    ParentType,
+    ContextType
+  >;
+  finalStats?: Resolver<
+    Maybe<ResolversTypes['StatsObjectType']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TargetPopulationNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TargetPopulationNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TargetPopulationNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TargetPopulationNodeEdge'] = ResolversParentTypes['TargetPopulationNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TargetPopulationNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketAddIndividualDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNode'] = ResolversParentTypes['TicketAddIndividualDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  individualData?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+};
+
+export type TicketAddIndividualDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNodeConnection'] = ResolversParentTypes['TicketAddIndividualDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketAddIndividualDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketAddIndividualDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNodeEdge'] = ResolversParentTypes['TicketAddIndividualDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketAddIndividualDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketComplaintDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketComplaintDetailsNode'] = ResolversParentTypes['TicketComplaintDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  paymentRecord?: Resolver<
+    Maybe<ResolversTypes['PaymentRecordNode']>,
+    ParentType,
+    ContextType
+  >;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  individual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketComplaintDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketComplaintDetailsNodeConnection'] = ResolversParentTypes['TicketComplaintDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketComplaintDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketComplaintDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketComplaintDetailsNodeEdge'] = ResolversParentTypes['TicketComplaintDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketComplaintDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketDeleteHouseholdDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketDeleteHouseholdDetailsNode'] = ResolversParentTypes['TicketDeleteHouseholdDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  roleReassignData?: Resolver<
+    ResolversTypes['JSONString'],
+    ParentType,
+    ContextType
+  >;
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  householdData?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketDeleteHouseholdDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketDeleteHouseholdDetailsNodeConnection'] = ResolversParentTypes['TicketDeleteHouseholdDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketDeleteHouseholdDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketDeleteHouseholdDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketDeleteHouseholdDetailsNodeEdge'] = ResolversParentTypes['TicketDeleteHouseholdDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketDeleteHouseholdDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketDeleteIndividualDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNode'] = ResolversParentTypes['TicketDeleteIndividualDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  individual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+  roleReassignData?: Resolver<
+    ResolversTypes['JSONString'],
+    ParentType,
+    ContextType
+  >;
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  individualData?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketDeleteIndividualDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNodeConnection'] = ResolversParentTypes['TicketDeleteIndividualDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketDeleteIndividualDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNodeEdge'] = ResolversParentTypes['TicketDeleteIndividualDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketDeleteIndividualDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNode'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  householdData?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeConnection'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeEdge'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketIndividualDataUpdateDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNode'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  individual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+  individualData?: Resolver<
+    Maybe<ResolversTypes['Arg']>,
+    ParentType,
+    ContextType
+  >;
+  roleReassignData?: Resolver<
+    ResolversTypes['JSONString'],
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketIndividualDataUpdateDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeConnection'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketIndividualDataUpdateDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeEdge'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketNeedsAdjudicationDetailsExtraDataNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsExtraDataNode'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsExtraDataNode']
+> = {
+  goldenRecords?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  possibleDuplicate?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketNeedsAdjudicationDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNode'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  goldenRecordsIndividual?: Resolver<
+    ResolversTypes['IndividualNode'],
+    ParentType,
+    ContextType
+  >;
+  isMultipleDuplicatesVersion?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType
+  >;
+  possibleDuplicate?: Resolver<
+    ResolversTypes['IndividualNode'],
+    ParentType,
+    ContextType
+  >;
+  possibleDuplicates?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  selectedIndividual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+  selectedIndividuals?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>,
+    ParentType,
+    ContextType
+  >;
+  roleReassignData?: Resolver<
+    ResolversTypes['JSONString'],
+    ParentType,
+    ContextType
+  >;
+  extraData?: Resolver<
+    Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>,
+    ParentType,
+    ContextType
+  >;
+  scoreMin?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  scoreMax?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  hasDuplicatedDocument?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketNeedsAdjudicationDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNodeConnection'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketNeedsAdjudicationDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNodeEdge'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketNegativeFeedbackDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketNegativeFeedbackDetailsNode'] = ResolversParentTypes['TicketNegativeFeedbackDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  individual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketNegativeFeedbackDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketNegativeFeedbackDetailsNodeConnection'] = ResolversParentTypes['TicketNegativeFeedbackDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketNegativeFeedbackDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketNegativeFeedbackDetailsNodeEdge'] = ResolversParentTypes['TicketNegativeFeedbackDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketNoteNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketNoteNode'] = ResolversParentTypes['TicketNoteNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdBy?: Resolver<
+    Maybe<ResolversTypes['UserNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketNoteNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketNoteNodeConnection'] = ResolversParentTypes['TicketNoteNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketNoteNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketNoteNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketNoteNodeEdge'] = ResolversParentTypes['TicketNoteNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketNoteNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketPaymentVerificationDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNode'] = ResolversParentTypes['TicketPaymentVerificationDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  paymentVerifications?: Resolver<
+    ResolversTypes['PaymentVerificationNodeConnection'],
+    ParentType,
+    ContextType,
+    TicketPaymentVerificationDetailsNodePaymentVerificationsArgs
+  >;
+  paymentVerificationStatus?: Resolver<
+    ResolversTypes['TicketPaymentVerificationDetailsPaymentVerificationStatus'],
+    ParentType,
+    ContextType
+  >;
+  paymentVerification?: Resolver<
+    Maybe<ResolversTypes['PaymentVerificationNode']>,
+    ParentType,
+    ContextType
+  >;
+  newStatus?: Resolver<
+    Maybe<ResolversTypes['TicketPaymentVerificationDetailsNewStatus']>,
+    ParentType,
+    ContextType
+  >;
+  newReceivedAmount?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  hasMultiplePaymentVerifications?: Resolver<
+    Maybe<ResolversTypes['Boolean']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketPaymentVerificationDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNodeConnection'] = ResolversParentTypes['TicketPaymentVerificationDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketPaymentVerificationDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNodeEdge'] = ResolversParentTypes['TicketPaymentVerificationDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketPaymentVerificationDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketPositiveFeedbackDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketPositiveFeedbackDetailsNode'] = ResolversParentTypes['TicketPositiveFeedbackDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  individual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketPositiveFeedbackDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketPositiveFeedbackDetailsNodeConnection'] = ResolversParentTypes['TicketPositiveFeedbackDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketPositiveFeedbackDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketPositiveFeedbackDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketPositiveFeedbackDetailsNodeEdge'] = ResolversParentTypes['TicketPositiveFeedbackDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketPositiveFeedbackDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketReferralDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketReferralDetailsNode'] = ResolversParentTypes['TicketReferralDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  individual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketReferralDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketReferralDetailsNodeConnection'] = ResolversParentTypes['TicketReferralDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketReferralDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketReferralDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketReferralDetailsNodeEdge'] = ResolversParentTypes['TicketReferralDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketReferralDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TicketSensitiveDetailsNodeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketSensitiveDetailsNode'] = ResolversParentTypes['TicketSensitiveDetailsNode']
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  paymentRecord?: Resolver<
+    Maybe<ResolversTypes['PaymentRecordNode']>,
+    ParentType,
+    ContextType
+  >;
+  household?: Resolver<
+    Maybe<ResolversTypes['HouseholdNode']>,
+    ParentType,
+    ContextType
+  >;
+  individual?: Resolver<
+    Maybe<ResolversTypes['IndividualNode']>,
+    ParentType,
+    ContextType
+  >;
+};
+
+export type TicketSensitiveDetailsNodeConnectionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketSensitiveDetailsNodeConnection'] = ResolversParentTypes['TicketSensitiveDetailsNodeConnection']
+> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  edges?: Resolver<
+    Array<Maybe<ResolversTypes['TicketSensitiveDetailsNodeEdge']>>,
+    ParentType,
+    ContextType
+  >;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+};
+
+export type TicketSensitiveDetailsNodeEdgeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['TicketSensitiveDetailsNodeEdge'] = ResolversParentTypes['TicketSensitiveDetailsNodeEdge']
+> = {
+  node?: Resolver<
+    Maybe<ResolversTypes['TicketSensitiveDetailsNode']>,
+    ParentType,
+    ContextType
+  >;
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export interface DecimalScalarConfig
@@ -41143,279 +46538,544 @@ export type XlsxRowErrorNodeResolvers<
 };
 
 export type Resolvers<ContextType = any> = {
-  _DatasetsNode?: _DatasetsNodeResolvers<ContextType>,
-  _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>,
-  _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>,
-  ActionPaymentPlanMutation?: ActionPaymentPlanMutationResolvers<ContextType>,
-  ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<ContextType>,
-  AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
-  AgencyNode?: AgencyNodeResolvers<ContextType>,
-  ApprovalNode?: ApprovalNodeResolvers<ContextType>,
-  ApprovalProcessNode?: ApprovalProcessNodeResolvers<ContextType>,
-  ApprovalProcessNodeConnection?: ApprovalProcessNodeConnectionResolvers<ContextType>,
-  ApprovalProcessNodeEdge?: ApprovalProcessNodeEdgeResolvers<ContextType>,
-  ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
-  AreaNode?: AreaNodeResolvers<ContextType>,
-  AreaNodeConnection?: AreaNodeConnectionResolvers<ContextType>,
-  AreaNodeEdge?: AreaNodeEdgeResolvers<ContextType>,
-  AreaTypeNode?: AreaTypeNodeResolvers<ContextType>,
-  AreaTypeNodeConnection?: AreaTypeNodeConnectionResolvers<ContextType>,
-  AreaTypeNodeEdge?: AreaTypeNodeEdgeResolvers<ContextType>,
-  Arg?: GraphQLScalarType,
-  BankAccountInfoNode?: BankAccountInfoNodeResolvers<ContextType>,
-  BigInt?: GraphQLScalarType,
-  BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,
-  BusinessAreaNodeConnection?: BusinessAreaNodeConnectionResolvers<ContextType>,
-  BusinessAreaNodeEdge?: BusinessAreaNodeEdgeResolvers<ContextType>,
-  CashPlanNode?: CashPlanNodeResolvers<ContextType>,
-  CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>,
-  CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>,
-  CashPlanPaymentVerificationNode?: CashPlanPaymentVerificationNodeResolvers<ContextType>,
-  CashPlanPaymentVerificationNodeConnection?: CashPlanPaymentVerificationNodeConnectionResolvers<ContextType>,
-  CashPlanPaymentVerificationNodeEdge?: CashPlanPaymentVerificationNodeEdgeResolvers<ContextType>,
-  CashPlanPaymentVerificationSummaryNode?: CashPlanPaymentVerificationSummaryNodeResolvers<ContextType>,
-  ChartDatasetNode?: ChartDatasetNodeResolvers<ContextType>,
-  ChartDetailedDatasetsNode?: ChartDetailedDatasetsNodeResolvers<ContextType>,
-  ChartGrievanceTicketsNode?: ChartGrievanceTicketsNodeResolvers<ContextType>,
-  ChartPaymentVerification?: ChartPaymentVerificationResolvers<ContextType>,
-  CheckAgainstSanctionListMutation?: CheckAgainstSanctionListMutationResolvers<ContextType>,
-  ChoiceObject?: ChoiceObjectResolvers<ContextType>,
-  ContentTypeObjectType?: ContentTypeObjectTypeResolvers<ContextType>,
-  CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
-  CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
-  CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
-  CreateDashboardReport?: CreateDashboardReportResolvers<ContextType>,
-  CreateFinancialServiceProviderMutation?: CreateFinancialServiceProviderMutationResolvers<ContextType>,
-  CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
-  CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>,
-  CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
-  CreateProgram?: CreateProgramResolvers<ContextType>,
-  CreateReport?: CreateReportResolvers<ContextType>,
-  CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
-  CreateTicketNoteMutation?: CreateTicketNoteMutationResolvers<ContextType>,
-  Date?: GraphQLScalarType,
-  DateTime?: GraphQLScalarType,
-  Decimal?: GraphQLScalarType,
-  DeduplicationResultNode?: DeduplicationResultNodeResolvers<ContextType>,
-  DeleteCashPlanVerificationMutation?: DeleteCashPlanVerificationMutationResolvers<ContextType>,
-  DeletePaymentPlanMutation?: DeletePaymentPlanMutationResolvers<ContextType>,
-  DeleteProgram?: DeleteProgramResolvers<ContextType>,
-  DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
-  DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,
-  DeliveredQuantityNode?: DeliveredQuantityNodeResolvers<ContextType>,
-  DiscardCashPlanVerificationMutation?: DiscardCashPlanVerificationMutationResolvers<ContextType>,
-  DjangoDebug?: DjangoDebugResolvers<ContextType>,
-  DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
-  DocumentNode?: DocumentNodeResolvers<ContextType>,
-  DocumentNodeConnection?: DocumentNodeConnectionResolvers<ContextType>,
-  DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>,
-  DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
-  EditFinancialServiceProviderMutation?: EditFinancialServiceProviderMutationResolvers<ContextType>,
-  EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
-  FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>,
-  FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
-  FinancialServiceProviderNode?: FinancialServiceProviderNodeResolvers<ContextType>,
-  FinancialServiceProviderNodeConnection?: FinancialServiceProviderNodeConnectionResolvers<ContextType>,
-  FinancialServiceProviderNodeEdge?: FinancialServiceProviderNodeEdgeResolvers<ContextType>,
-  FinancialServiceProviderXlsxReportNode?: FinancialServiceProviderXlsxReportNodeResolvers<ContextType>,
-  FinancialServiceProviderXlsxReportNodeConnection?: FinancialServiceProviderXlsxReportNodeConnectionResolvers<ContextType>,
-  FinancialServiceProviderXlsxReportNodeEdge?: FinancialServiceProviderXlsxReportNodeEdgeResolvers<ContextType>,
-  FinancialServiceProviderXlsxTemplateNode?: FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType>,
-  FinancialServiceProviderXlsxTemplateNodeConnection?: FinancialServiceProviderXlsxTemplateNodeConnectionResolvers<ContextType>,
-  FinancialServiceProviderXlsxTemplateNodeEdge?: FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<ContextType>,
-  FinishCashPlanVerificationMutation?: FinishCashPlanVerificationMutationResolvers<ContextType>,
-  FlexFieldsScalar?: GraphQLScalarType,
-  GeoJSON?: GraphQLScalarType,
-  GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<ContextType>,
-  GrievanceStatusChangeMutation?: GrievanceStatusChangeMutationResolvers<ContextType>,
-  GrievanceTicketNode?: GrievanceTicketNodeResolvers<ContextType>,
-  GrievanceTicketNodeConnection?: GrievanceTicketNodeConnectionResolvers<ContextType>,
-  GrievanceTicketNodeEdge?: GrievanceTicketNodeEdgeResolvers<ContextType>,
-  GroupAttributeNode?: GroupAttributeNodeResolvers<ContextType>,
-  HouseholdDataChangeApproveMutation?: HouseholdDataChangeApproveMutationResolvers<ContextType>,
-  HouseholdNode?: HouseholdNodeResolvers<ContextType>,
-  HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
-  HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
-  HouseholdSelection?: HouseholdSelectionResolvers<ContextType>,
-  ImportDataNode?: ImportDataNodeResolvers<ContextType>,
-  ImportedDocumentNode?: ImportedDocumentNodeResolvers<ContextType>,
-  ImportedDocumentNodeConnection?: ImportedDocumentNodeConnectionResolvers<ContextType>,
-  ImportedDocumentNodeEdge?: ImportedDocumentNodeEdgeResolvers<ContextType>,
-  ImportedDocumentTypeNode?: ImportedDocumentTypeNodeResolvers<ContextType>,
-  ImportedHouseholdNode?: ImportedHouseholdNodeResolvers<ContextType>,
-  ImportedHouseholdNodeConnection?: ImportedHouseholdNodeConnectionResolvers<ContextType>,
-  ImportedHouseholdNodeEdge?: ImportedHouseholdNodeEdgeResolvers<ContextType>,
-  ImportedIndividualIdentityNode?: ImportedIndividualIdentityNodeResolvers<ContextType>,
-  ImportedIndividualIdentityNodeConnection?: ImportedIndividualIdentityNodeConnectionResolvers<ContextType>,
-  ImportedIndividualIdentityNodeEdge?: ImportedIndividualIdentityNodeEdgeResolvers<ContextType>,
-  ImportedIndividualNode?: ImportedIndividualNodeResolvers<ContextType>,
-  ImportedIndividualNodeConnection?: ImportedIndividualNodeConnectionResolvers<ContextType>,
-  ImportedIndividualNodeEdge?: ImportedIndividualNodeEdgeResolvers<ContextType>,
-  ImportXlsxCashPlanVerification?: ImportXlsxCashPlanVerificationResolvers<ContextType>,
-  IndividualDataChangeApproveMutation?: IndividualDataChangeApproveMutationResolvers<ContextType>,
-  IndividualIdentityNode?: IndividualIdentityNodeResolvers<ContextType>,
-  IndividualIdentityNodeConnection?: IndividualIdentityNodeConnectionResolvers<ContextType>,
-  IndividualIdentityNodeEdge?: IndividualIdentityNodeEdgeResolvers<ContextType>,
-  IndividualNode?: IndividualNodeResolvers<ContextType>,
-  IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,
-  IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
-  IndividualRoleInHouseholdNode?: IndividualRoleInHouseholdNodeResolvers<ContextType>,
-  IssueTypesObject?: IssueTypesObjectResolvers<ContextType>,
-  JSONString?: GraphQLScalarType,
-  KoboAssetObject?: KoboAssetObjectResolvers<ContextType>,
-  KoboAssetObjectConnection?: KoboAssetObjectConnectionResolvers<ContextType>,
-  KoboAssetObjectEdge?: KoboAssetObjectEdgeResolvers<ContextType>,
-  KoboErrorNode?: KoboErrorNodeResolvers<ContextType>,
-  KoboImportDataNode?: KoboImportDataNodeResolvers<ContextType>,
-  LabelNode?: LabelNodeResolvers<ContextType>,
-  LogEntryNode?: LogEntryNodeResolvers<ContextType>,
-  LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>,
-  LogEntryNodeEdge?: LogEntryNodeEdgeResolvers<ContextType>,
-  MergeRegistrationDataImportMutation?: MergeRegistrationDataImportMutationResolvers<ContextType>,
-  Mutations?: MutationsResolvers<ContextType>,
-  NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<ContextType>,
-  Node?: NodeResolvers,
-  PageInfo?: PageInfoResolvers<ContextType>,
-  PartnerType?: PartnerTypeResolvers<ContextType>,
-  PaymentDetailsApproveMutation?: PaymentDetailsApproveMutationResolvers<ContextType>,
-  PaymentPlanNode?: PaymentPlanNodeResolvers<ContextType>,
-  PaymentPlanNodeConnection?: PaymentPlanNodeConnectionResolvers<ContextType>,
-  PaymentPlanNodeEdge?: PaymentPlanNodeEdgeResolvers<ContextType>,
-  PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
-  PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<ContextType>,
-  PaymentRecordNodeEdge?: PaymentRecordNodeEdgeResolvers<ContextType>,
-  PaymentVerificationLogEntryNode?: PaymentVerificationLogEntryNodeResolvers<ContextType>,
-  PaymentVerificationLogEntryNodeConnection?: PaymentVerificationLogEntryNodeConnectionResolvers<ContextType>,
-  PaymentVerificationLogEntryNodeEdge?: PaymentVerificationLogEntryNodeEdgeResolvers<ContextType>,
-  PaymentVerificationNode?: PaymentVerificationNodeResolvers<ContextType>,
-  PaymentVerificationNodeConnection?: PaymentVerificationNodeConnectionResolvers<ContextType>,
-  PaymentVerificationNodeEdge?: PaymentVerificationNodeEdgeResolvers<ContextType>,
-  ProgramNode?: ProgramNodeResolvers<ContextType>,
-  ProgramNodeConnection?: ProgramNodeConnectionResolvers<ContextType>,
-  ProgramNodeEdge?: ProgramNodeEdgeResolvers<ContextType>,
-  ProgramsWithDeliveredQuantityNode?: ProgramsWithDeliveredQuantityNodeResolvers<ContextType>,
-  Query?: QueryResolvers<ContextType>,
-  RapidProFlow?: RapidProFlowResolvers<ContextType>,
-  RapidProFlowResult?: RapidProFlowResultResolvers<ContextType>,
-  RapidProFlowRun?: RapidProFlowRunResolvers<ContextType>,
-  ReassignRoleMutation?: ReassignRoleMutationResolvers<ContextType>,
-  RefuseRegistrationDataImportMutation?: RefuseRegistrationDataImportMutationResolvers<ContextType>,
-  RegistrationDataImportDatahubNode?: RegistrationDataImportDatahubNodeResolvers<ContextType>,
-  RegistrationDataImportDatahubNodeConnection?: RegistrationDataImportDatahubNodeConnectionResolvers<ContextType>,
-  RegistrationDataImportDatahubNodeEdge?: RegistrationDataImportDatahubNodeEdgeResolvers<ContextType>,
-  RegistrationDataImportNode?: RegistrationDataImportNodeResolvers<ContextType>,
-  RegistrationDataImportNodeConnection?: RegistrationDataImportNodeConnectionResolvers<ContextType>,
-  RegistrationDataImportNodeEdge?: RegistrationDataImportNodeEdgeResolvers<ContextType>,
-  RegistrationDeduplicationMutation?: RegistrationDeduplicationMutationResolvers<ContextType>,
-  RegistrationKoboImportMutation?: RegistrationKoboImportMutationResolvers<ContextType>,
-  RegistrationXlsxImportMutation?: RegistrationXlsxImportMutationResolvers<ContextType>,
-  ReportNode?: ReportNodeResolvers<ContextType>,
-  ReportNodeConnection?: ReportNodeConnectionResolvers<ContextType>,
-  ReportNodeEdge?: ReportNodeEdgeResolvers<ContextType>,
-  RoleNode?: RoleNodeResolvers<ContextType>,
-  RuleCommitNode?: RuleCommitNodeResolvers<ContextType>,
-  RuleCommitNodeConnection?: RuleCommitNodeConnectionResolvers<ContextType>,
-  RuleCommitNodeEdge?: RuleCommitNodeEdgeResolvers<ContextType>,
-  SanctionListIndividualAliasNameNode?: SanctionListIndividualAliasNameNodeResolvers<ContextType>,
-  SanctionListIndividualAliasNameNodeConnection?: SanctionListIndividualAliasNameNodeConnectionResolvers<ContextType>,
-  SanctionListIndividualAliasNameNodeEdge?: SanctionListIndividualAliasNameNodeEdgeResolvers<ContextType>,
-  SanctionListIndividualCountriesNode?: SanctionListIndividualCountriesNodeResolvers<ContextType>,
-  SanctionListIndividualCountriesNodeConnection?: SanctionListIndividualCountriesNodeConnectionResolvers<ContextType>,
-  SanctionListIndividualCountriesNodeEdge?: SanctionListIndividualCountriesNodeEdgeResolvers<ContextType>,
-  SanctionListIndividualDateOfBirthNode?: SanctionListIndividualDateOfBirthNodeResolvers<ContextType>,
-  SanctionListIndividualDateOfBirthNodeConnection?: SanctionListIndividualDateOfBirthNodeConnectionResolvers<ContextType>,
-  SanctionListIndividualDateOfBirthNodeEdge?: SanctionListIndividualDateOfBirthNodeEdgeResolvers<ContextType>,
-  SanctionListIndividualDocumentNode?: SanctionListIndividualDocumentNodeResolvers<ContextType>,
-  SanctionListIndividualDocumentNodeConnection?: SanctionListIndividualDocumentNodeConnectionResolvers<ContextType>,
-  SanctionListIndividualDocumentNodeEdge?: SanctionListIndividualDocumentNodeEdgeResolvers<ContextType>,
-  SanctionListIndividualNationalitiesNode?: SanctionListIndividualNationalitiesNodeResolvers<ContextType>,
-  SanctionListIndividualNationalitiesNodeConnection?: SanctionListIndividualNationalitiesNodeConnectionResolvers<ContextType>,
-  SanctionListIndividualNationalitiesNodeEdge?: SanctionListIndividualNationalitiesNodeEdgeResolvers<ContextType>,
-  SanctionListIndividualNode?: SanctionListIndividualNodeResolvers<ContextType>,
-  SanctionListIndividualNodeConnection?: SanctionListIndividualNodeConnectionResolvers<ContextType>,
-  SanctionListIndividualNodeEdge?: SanctionListIndividualNodeEdgeResolvers<ContextType>,
-  SaveKoboProjectImportDataAsync?: SaveKoboProjectImportDataAsyncResolvers<ContextType>,
-  SectionTotalNode?: SectionTotalNodeResolvers<ContextType>,
-  ServiceProviderNode?: ServiceProviderNodeResolvers<ContextType>,
-  ServiceProviderNodeConnection?: ServiceProviderNodeConnectionResolvers<ContextType>,
-  ServiceProviderNodeEdge?: ServiceProviderNodeEdgeResolvers<ContextType>,
-  SetSteficonRuleOnTargetPopulationMutationPayload?: SetSteficonRuleOnTargetPopulationMutationPayloadResolvers<ContextType>,
-  SimpleApproveMutation?: SimpleApproveMutationResolvers<ContextType>,
-  StatsObjectType?: StatsObjectTypeResolvers<ContextType>,
-  SteficonRuleNode?: SteficonRuleNodeResolvers<ContextType>,
-  SteficonRuleNodeConnection?: SteficonRuleNodeConnectionResolvers<ContextType>,
-  SteficonRuleNodeEdge?: SteficonRuleNodeEdgeResolvers<ContextType>,
-  TableTotalCashTransferred?: TableTotalCashTransferredResolvers<ContextType>,
-  TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>,
-  TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<ContextType>,
-  TargetingCriteriaRuleNode?: TargetingCriteriaRuleNodeResolvers<ContextType>,
-  TargetingIndividualBlockRuleFilterNode?: TargetingIndividualBlockRuleFilterNodeResolvers<ContextType>,
-  TargetingIndividualRuleFilterBlockNode?: TargetingIndividualRuleFilterBlockNodeResolvers<ContextType>,
-  TargetPopulationNode?: TargetPopulationNodeResolvers<ContextType>,
-  TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>,
-  TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>,
-  TicketAddIndividualDetailsNode?: TicketAddIndividualDetailsNodeResolvers<ContextType>,
-  TicketAddIndividualDetailsNodeConnection?: TicketAddIndividualDetailsNodeConnectionResolvers<ContextType>,
-  TicketAddIndividualDetailsNodeEdge?: TicketAddIndividualDetailsNodeEdgeResolvers<ContextType>,
-  TicketComplaintDetailsNode?: TicketComplaintDetailsNodeResolvers<ContextType>,
-  TicketComplaintDetailsNodeConnection?: TicketComplaintDetailsNodeConnectionResolvers<ContextType>,
-  TicketComplaintDetailsNodeEdge?: TicketComplaintDetailsNodeEdgeResolvers<ContextType>,
-  TicketDeleteHouseholdDetailsNode?: TicketDeleteHouseholdDetailsNodeResolvers<ContextType>,
-  TicketDeleteHouseholdDetailsNodeConnection?: TicketDeleteHouseholdDetailsNodeConnectionResolvers<ContextType>,
-  TicketDeleteHouseholdDetailsNodeEdge?: TicketDeleteHouseholdDetailsNodeEdgeResolvers<ContextType>,
-  TicketDeleteIndividualDetailsNode?: TicketDeleteIndividualDetailsNodeResolvers<ContextType>,
-  TicketDeleteIndividualDetailsNodeConnection?: TicketDeleteIndividualDetailsNodeConnectionResolvers<ContextType>,
-  TicketDeleteIndividualDetailsNodeEdge?: TicketDeleteIndividualDetailsNodeEdgeResolvers<ContextType>,
-  TicketHouseholdDataUpdateDetailsNode?: TicketHouseholdDataUpdateDetailsNodeResolvers<ContextType>,
-  TicketHouseholdDataUpdateDetailsNodeConnection?: TicketHouseholdDataUpdateDetailsNodeConnectionResolvers<ContextType>,
-  TicketHouseholdDataUpdateDetailsNodeEdge?: TicketHouseholdDataUpdateDetailsNodeEdgeResolvers<ContextType>,
-  TicketIndividualDataUpdateDetailsNode?: TicketIndividualDataUpdateDetailsNodeResolvers<ContextType>,
-  TicketIndividualDataUpdateDetailsNodeConnection?: TicketIndividualDataUpdateDetailsNodeConnectionResolvers<ContextType>,
-  TicketIndividualDataUpdateDetailsNodeEdge?: TicketIndividualDataUpdateDetailsNodeEdgeResolvers<ContextType>,
-  TicketNeedsAdjudicationDetailsExtraDataNode?: TicketNeedsAdjudicationDetailsExtraDataNodeResolvers<ContextType>,
-  TicketNeedsAdjudicationDetailsNode?: TicketNeedsAdjudicationDetailsNodeResolvers<ContextType>,
-  TicketNeedsAdjudicationDetailsNodeConnection?: TicketNeedsAdjudicationDetailsNodeConnectionResolvers<ContextType>,
-  TicketNeedsAdjudicationDetailsNodeEdge?: TicketNeedsAdjudicationDetailsNodeEdgeResolvers<ContextType>,
-  TicketNegativeFeedbackDetailsNode?: TicketNegativeFeedbackDetailsNodeResolvers<ContextType>,
-  TicketNegativeFeedbackDetailsNodeConnection?: TicketNegativeFeedbackDetailsNodeConnectionResolvers<ContextType>,
-  TicketNegativeFeedbackDetailsNodeEdge?: TicketNegativeFeedbackDetailsNodeEdgeResolvers<ContextType>,
-  TicketNoteNode?: TicketNoteNodeResolvers<ContextType>,
-  TicketNoteNodeConnection?: TicketNoteNodeConnectionResolvers<ContextType>,
-  TicketNoteNodeEdge?: TicketNoteNodeEdgeResolvers<ContextType>,
-  TicketPaymentVerificationDetailsNode?: TicketPaymentVerificationDetailsNodeResolvers<ContextType>,
-  TicketPaymentVerificationDetailsNodeConnection?: TicketPaymentVerificationDetailsNodeConnectionResolvers<ContextType>,
-  TicketPaymentVerificationDetailsNodeEdge?: TicketPaymentVerificationDetailsNodeEdgeResolvers<ContextType>,
-  TicketPositiveFeedbackDetailsNode?: TicketPositiveFeedbackDetailsNodeResolvers<ContextType>,
-  TicketPositiveFeedbackDetailsNodeConnection?: TicketPositiveFeedbackDetailsNodeConnectionResolvers<ContextType>,
-  TicketPositiveFeedbackDetailsNodeEdge?: TicketPositiveFeedbackDetailsNodeEdgeResolvers<ContextType>,
-  TicketReferralDetailsNode?: TicketReferralDetailsNodeResolvers<ContextType>,
-  TicketReferralDetailsNodeConnection?: TicketReferralDetailsNodeConnectionResolvers<ContextType>,
-  TicketReferralDetailsNodeEdge?: TicketReferralDetailsNodeEdgeResolvers<ContextType>,
-  TicketSensitiveDetailsNode?: TicketSensitiveDetailsNodeResolvers<ContextType>,
-  TicketSensitiveDetailsNodeConnection?: TicketSensitiveDetailsNodeConnectionResolvers<ContextType>,
-  TicketSensitiveDetailsNodeEdge?: TicketSensitiveDetailsNodeEdgeResolvers<ContextType>,
-  TicketSystemFlaggingDetailsNode?: TicketSystemFlaggingDetailsNodeResolvers<ContextType>,
-  TicketSystemFlaggingDetailsNodeConnection?: TicketSystemFlaggingDetailsNodeConnectionResolvers<ContextType>,
-  TicketSystemFlaggingDetailsNodeEdge?: TicketSystemFlaggingDetailsNodeEdgeResolvers<ContextType>,
-  UnapproveTargetPopulationMutation?: UnapproveTargetPopulationMutationResolvers<ContextType>,
-  UpdateGrievanceTicketMutation?: UpdateGrievanceTicketMutationResolvers<ContextType>,
-  UpdatePaymentPlanMutation?: UpdatePaymentPlanMutationResolvers<ContextType>,
-  UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType>,
-  UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>,
-  UpdateProgram?: UpdateProgramResolvers<ContextType>,
-  UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>,
-  Upload?: GraphQLScalarType,
-  UploadImportDataXLSXFileAsync?: UploadImportDataXlsxFileAsyncResolvers<ContextType>,
-  UserBusinessAreaNode?: UserBusinessAreaNodeResolvers<ContextType>,
-  UserBusinessAreaNodeConnection?: UserBusinessAreaNodeConnectionResolvers<ContextType>,
-  UserBusinessAreaNodeEdge?: UserBusinessAreaNodeEdgeResolvers<ContextType>,
-  UserNode?: UserNodeResolvers<ContextType>,
-  UserNodeConnection?: UserNodeConnectionResolvers<ContextType>,
-  UserNodeEdge?: UserNodeEdgeResolvers<ContextType>,
-  UserRoleNode?: UserRoleNodeResolvers<ContextType>,
-  UUID?: GraphQLScalarType,
-  XlsxErrorNode?: XlsxErrorNodeResolvers<ContextType>,
-  XlsxRowErrorNode?: XlsxRowErrorNodeResolvers<ContextType>,
+  _DatasetsNode?: _DatasetsNodeResolvers<ContextType>;
+  _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>;
+  _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<
+    ContextType
+  >;
+  ActionPaymentPlanMutation?: ActionPaymentPlanMutationResolvers<ContextType>;
+  ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<
+    ContextType
+  >;
+  AgeFilterObject?: AgeFilterObjectResolvers<ContextType>;
+  AgencyNode?: AgencyNodeResolvers<ContextType>;
+  ApprovalNode?: ApprovalNodeResolvers<ContextType>;
+  ApprovalProcessNode?: ApprovalProcessNodeResolvers<ContextType>;
+  ApprovalProcessNodeConnection?: ApprovalProcessNodeConnectionResolvers<
+    ContextType
+  >;
+  ApprovalProcessNodeEdge?: ApprovalProcessNodeEdgeResolvers<ContextType>;
+  ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<
+    ContextType
+  >;
+  AreaNode?: AreaNodeResolvers<ContextType>;
+  AreaNodeConnection?: AreaNodeConnectionResolvers<ContextType>;
+  AreaNodeEdge?: AreaNodeEdgeResolvers<ContextType>;
+  AreaTypeNode?: AreaTypeNodeResolvers<ContextType>;
+  AreaTypeNodeConnection?: AreaTypeNodeConnectionResolvers<ContextType>;
+  AreaTypeNodeEdge?: AreaTypeNodeEdgeResolvers<ContextType>;
+  Arg?: GraphQLScalarType;
+  BankAccountInfoNode?: BankAccountInfoNodeResolvers<ContextType>;
+  BigInt?: GraphQLScalarType;
+  BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>;
+  BusinessAreaNodeConnection?: BusinessAreaNodeConnectionResolvers<ContextType>;
+  BusinessAreaNodeEdge?: BusinessAreaNodeEdgeResolvers<ContextType>;
+  CashPlanNode?: CashPlanNodeResolvers<ContextType>;
+  CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>;
+  CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>;
+  CashPlanPaymentVerificationNode?: CashPlanPaymentVerificationNodeResolvers<
+    ContextType
+  >;
+  CashPlanPaymentVerificationNodeConnection?: CashPlanPaymentVerificationNodeConnectionResolvers<
+    ContextType
+  >;
+  CashPlanPaymentVerificationNodeEdge?: CashPlanPaymentVerificationNodeEdgeResolvers<
+    ContextType
+  >;
+  CashPlanPaymentVerificationSummaryNode?: CashPlanPaymentVerificationSummaryNodeResolvers<
+    ContextType
+  >;
+  ChartDatasetNode?: ChartDatasetNodeResolvers<ContextType>;
+  ChartDetailedDatasetsNode?: ChartDetailedDatasetsNodeResolvers<ContextType>;
+  ChartGrievanceTicketsNode?: ChartGrievanceTicketsNodeResolvers<ContextType>;
+  ChartPaymentVerification?: ChartPaymentVerificationResolvers<ContextType>;
+  CheckAgainstSanctionListMutation?: CheckAgainstSanctionListMutationResolvers<
+    ContextType
+  >;
+  ChoiceObject?: ChoiceObjectResolvers<ContextType>;
+  ContentTypeObjectType?: ContentTypeObjectTypeResolvers<ContextType>;
+  CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<
+    ContextType
+  >;
+  CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>;
+  CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>;
+  CreateDashboardReport?: CreateDashboardReportResolvers<ContextType>;
+  CreateFinancialServiceProviderMutation?: CreateFinancialServiceProviderMutationResolvers<
+    ContextType
+  >;
+  CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<
+    ContextType
+  >;
+  CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>;
+  CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<
+    ContextType
+  >;
+  CreateProgram?: CreateProgramResolvers<ContextType>;
+  CreateReport?: CreateReportResolvers<ContextType>;
+  CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<
+    ContextType
+  >;
+  CreateTicketNoteMutation?: CreateTicketNoteMutationResolvers<ContextType>;
+  Date?: GraphQLScalarType;
+  DateTime?: GraphQLScalarType;
+  Decimal?: GraphQLScalarType;
+  DeduplicationResultNode?: DeduplicationResultNodeResolvers<ContextType>;
+  DeleteCashPlanVerificationMutation?: DeleteCashPlanVerificationMutationResolvers<
+    ContextType
+  >;
+  DeletePaymentPlanMutation?: DeletePaymentPlanMutationResolvers<ContextType>;
+  DeleteProgram?: DeleteProgramResolvers<ContextType>;
+  DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<
+    ContextType
+  >;
+  DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<
+    ContextType
+  >;
+  DeliveredQuantityNode?: DeliveredQuantityNodeResolvers<ContextType>;
+  DiscardCashPlanVerificationMutation?: DiscardCashPlanVerificationMutationResolvers<
+    ContextType
+  >;
+  DjangoDebug?: DjangoDebugResolvers<ContextType>;
+  DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>;
+  DocumentNode?: DocumentNodeResolvers<ContextType>;
+  DocumentNodeConnection?: DocumentNodeConnectionResolvers<ContextType>;
+  DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>;
+  DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>;
+  EditFinancialServiceProviderMutation?: EditFinancialServiceProviderMutationResolvers<
+    ContextType
+  >;
+  EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<
+    ContextType
+  >;
+  FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>;
+  FilteredActionsListNode?: FilteredActionsListNodeResolvers<ContextType>;
+  FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<
+    ContextType
+  >;
+  FinancialServiceProviderNode?: FinancialServiceProviderNodeResolvers<
+    ContextType
+  >;
+  FinancialServiceProviderNodeConnection?: FinancialServiceProviderNodeConnectionResolvers<
+    ContextType
+  >;
+  FinancialServiceProviderNodeEdge?: FinancialServiceProviderNodeEdgeResolvers<
+    ContextType
+  >;
+  FinancialServiceProviderXlsxReportNode?: FinancialServiceProviderXlsxReportNodeResolvers<
+    ContextType
+  >;
+  FinancialServiceProviderXlsxReportNodeConnection?: FinancialServiceProviderXlsxReportNodeConnectionResolvers<
+    ContextType
+  >;
+  FinancialServiceProviderXlsxReportNodeEdge?: FinancialServiceProviderXlsxReportNodeEdgeResolvers<
+    ContextType
+  >;
+  FinancialServiceProviderXlsxTemplateNode?: FinancialServiceProviderXlsxTemplateNodeResolvers<
+    ContextType
+  >;
+  FinancialServiceProviderXlsxTemplateNodeConnection?: FinancialServiceProviderXlsxTemplateNodeConnectionResolvers<
+    ContextType
+  >;
+  FinancialServiceProviderXlsxTemplateNodeEdge?: FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<
+    ContextType
+  >;
+  FinishCashPlanVerificationMutation?: FinishCashPlanVerificationMutationResolvers<
+    ContextType
+  >;
+  FlexFieldsScalar?: GraphQLScalarType;
+  GeoJSON?: GraphQLScalarType;
+  GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<
+    ContextType
+  >;
+  GrievanceStatusChangeMutation?: GrievanceStatusChangeMutationResolvers<
+    ContextType
+  >;
+  GrievanceTicketNode?: GrievanceTicketNodeResolvers<ContextType>;
+  GrievanceTicketNodeConnection?: GrievanceTicketNodeConnectionResolvers<
+    ContextType
+  >;
+  GrievanceTicketNodeEdge?: GrievanceTicketNodeEdgeResolvers<ContextType>;
+  GroupAttributeNode?: GroupAttributeNodeResolvers<ContextType>;
+  HouseholdDataChangeApproveMutation?: HouseholdDataChangeApproveMutationResolvers<
+    ContextType
+  >;
+  HouseholdNode?: HouseholdNodeResolvers<ContextType>;
+  HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>;
+  HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>;
+  HouseholdSelection?: HouseholdSelectionResolvers<ContextType>;
+  ImportDataNode?: ImportDataNodeResolvers<ContextType>;
+  ImportedDocumentNode?: ImportedDocumentNodeResolvers<ContextType>;
+  ImportedDocumentNodeConnection?: ImportedDocumentNodeConnectionResolvers<
+    ContextType
+  >;
+  ImportedDocumentNodeEdge?: ImportedDocumentNodeEdgeResolvers<ContextType>;
+  ImportedDocumentTypeNode?: ImportedDocumentTypeNodeResolvers<ContextType>;
+  ImportedHouseholdNode?: ImportedHouseholdNodeResolvers<ContextType>;
+  ImportedHouseholdNodeConnection?: ImportedHouseholdNodeConnectionResolvers<
+    ContextType
+  >;
+  ImportedHouseholdNodeEdge?: ImportedHouseholdNodeEdgeResolvers<ContextType>;
+  ImportedIndividualIdentityNode?: ImportedIndividualIdentityNodeResolvers<
+    ContextType
+  >;
+  ImportedIndividualIdentityNodeConnection?: ImportedIndividualIdentityNodeConnectionResolvers<
+    ContextType
+  >;
+  ImportedIndividualIdentityNodeEdge?: ImportedIndividualIdentityNodeEdgeResolvers<
+    ContextType
+  >;
+  ImportedIndividualNode?: ImportedIndividualNodeResolvers<ContextType>;
+  ImportedIndividualNodeConnection?: ImportedIndividualNodeConnectionResolvers<
+    ContextType
+  >;
+  ImportedIndividualNodeEdge?: ImportedIndividualNodeEdgeResolvers<ContextType>;
+  ImportXlsxCashPlanVerification?: ImportXlsxCashPlanVerificationResolvers<
+    ContextType
+  >;
+  IndividualDataChangeApproveMutation?: IndividualDataChangeApproveMutationResolvers<
+    ContextType
+  >;
+  IndividualIdentityNode?: IndividualIdentityNodeResolvers<ContextType>;
+  IndividualIdentityNodeConnection?: IndividualIdentityNodeConnectionResolvers<
+    ContextType
+  >;
+  IndividualIdentityNodeEdge?: IndividualIdentityNodeEdgeResolvers<ContextType>;
+  IndividualNode?: IndividualNodeResolvers<ContextType>;
+  IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>;
+  IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>;
+  IndividualRoleInHouseholdNode?: IndividualRoleInHouseholdNodeResolvers<
+    ContextType
+  >;
+  IssueTypesObject?: IssueTypesObjectResolvers<ContextType>;
+  JSONString?: GraphQLScalarType;
+  KoboAssetObject?: KoboAssetObjectResolvers<ContextType>;
+  KoboAssetObjectConnection?: KoboAssetObjectConnectionResolvers<ContextType>;
+  KoboAssetObjectEdge?: KoboAssetObjectEdgeResolvers<ContextType>;
+  KoboErrorNode?: KoboErrorNodeResolvers<ContextType>;
+  KoboImportDataNode?: KoboImportDataNodeResolvers<ContextType>;
+  LabelNode?: LabelNodeResolvers<ContextType>;
+  LogEntryNode?: LogEntryNodeResolvers<ContextType>;
+  LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>;
+  LogEntryNodeEdge?: LogEntryNodeEdgeResolvers<ContextType>;
+  MergeRegistrationDataImportMutation?: MergeRegistrationDataImportMutationResolvers<
+    ContextType
+  >;
+  Mutations?: MutationsResolvers<ContextType>;
+  NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<
+    ContextType
+  >;
+  Node?: NodeResolvers;
+  PageInfo?: PageInfoResolvers<ContextType>;
+  PartnerType?: PartnerTypeResolvers<ContextType>;
+  PaymentDetailsApproveMutation?: PaymentDetailsApproveMutationResolvers<
+    ContextType
+  >;
+  PaymentPlanNode?: PaymentPlanNodeResolvers<ContextType>;
+  PaymentPlanNodeConnection?: PaymentPlanNodeConnectionResolvers<ContextType>;
+  PaymentPlanNodeEdge?: PaymentPlanNodeEdgeResolvers<ContextType>;
+  PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>;
+  PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<
+    ContextType
+  >;
+  PaymentRecordNodeEdge?: PaymentRecordNodeEdgeResolvers<ContextType>;
+  PaymentVerificationLogEntryNode?: PaymentVerificationLogEntryNodeResolvers<
+    ContextType
+  >;
+  PaymentVerificationLogEntryNodeConnection?: PaymentVerificationLogEntryNodeConnectionResolvers<
+    ContextType
+  >;
+  PaymentVerificationLogEntryNodeEdge?: PaymentVerificationLogEntryNodeEdgeResolvers<
+    ContextType
+  >;
+  PaymentVerificationNode?: PaymentVerificationNodeResolvers<ContextType>;
+  PaymentVerificationNodeConnection?: PaymentVerificationNodeConnectionResolvers<
+    ContextType
+  >;
+  PaymentVerificationNodeEdge?: PaymentVerificationNodeEdgeResolvers<
+    ContextType
+  >;
+  ProgramNode?: ProgramNodeResolvers<ContextType>;
+  ProgramNodeConnection?: ProgramNodeConnectionResolvers<ContextType>;
+  ProgramNodeEdge?: ProgramNodeEdgeResolvers<ContextType>;
+  ProgramsWithDeliveredQuantityNode?: ProgramsWithDeliveredQuantityNodeResolvers<
+    ContextType
+  >;
+  Query?: QueryResolvers<ContextType>;
+  RapidProFlow?: RapidProFlowResolvers<ContextType>;
+  RapidProFlowResult?: RapidProFlowResultResolvers<ContextType>;
+  RapidProFlowRun?: RapidProFlowRunResolvers<ContextType>;
+  ReassignRoleMutation?: ReassignRoleMutationResolvers<ContextType>;
+  RefuseRegistrationDataImportMutation?: RefuseRegistrationDataImportMutationResolvers<
+    ContextType
+  >;
+  RegistrationDataImportDatahubNode?: RegistrationDataImportDatahubNodeResolvers<
+    ContextType
+  >;
+  RegistrationDataImportDatahubNodeConnection?: RegistrationDataImportDatahubNodeConnectionResolvers<
+    ContextType
+  >;
+  RegistrationDataImportDatahubNodeEdge?: RegistrationDataImportDatahubNodeEdgeResolvers<
+    ContextType
+  >;
+  RegistrationDataImportNode?: RegistrationDataImportNodeResolvers<ContextType>;
+  RegistrationDataImportNodeConnection?: RegistrationDataImportNodeConnectionResolvers<
+    ContextType
+  >;
+  RegistrationDataImportNodeEdge?: RegistrationDataImportNodeEdgeResolvers<
+    ContextType
+  >;
+  RegistrationDeduplicationMutation?: RegistrationDeduplicationMutationResolvers<
+    ContextType
+  >;
+  RegistrationKoboImportMutation?: RegistrationKoboImportMutationResolvers<
+    ContextType
+  >;
+  RegistrationXlsxImportMutation?: RegistrationXlsxImportMutationResolvers<
+    ContextType
+  >;
+  ReportNode?: ReportNodeResolvers<ContextType>;
+  ReportNodeConnection?: ReportNodeConnectionResolvers<ContextType>;
+  ReportNodeEdge?: ReportNodeEdgeResolvers<ContextType>;
+  RoleNode?: RoleNodeResolvers<ContextType>;
+  RuleCommitNode?: RuleCommitNodeResolvers<ContextType>;
+  RuleCommitNodeConnection?: RuleCommitNodeConnectionResolvers<ContextType>;
+  RuleCommitNodeEdge?: RuleCommitNodeEdgeResolvers<ContextType>;
+  SanctionListIndividualAliasNameNode?: SanctionListIndividualAliasNameNodeResolvers<
+    ContextType
+  >;
+  SanctionListIndividualAliasNameNodeConnection?: SanctionListIndividualAliasNameNodeConnectionResolvers<
+    ContextType
+  >;
+  SanctionListIndividualAliasNameNodeEdge?: SanctionListIndividualAliasNameNodeEdgeResolvers<
+    ContextType
+  >;
+  SanctionListIndividualCountriesNode?: SanctionListIndividualCountriesNodeResolvers<
+    ContextType
+  >;
+  SanctionListIndividualCountriesNodeConnection?: SanctionListIndividualCountriesNodeConnectionResolvers<
+    ContextType
+  >;
+  SanctionListIndividualCountriesNodeEdge?: SanctionListIndividualCountriesNodeEdgeResolvers<
+    ContextType
+  >;
+  SanctionListIndividualDateOfBirthNode?: SanctionListIndividualDateOfBirthNodeResolvers<
+    ContextType
+  >;
+  SanctionListIndividualDateOfBirthNodeConnection?: SanctionListIndividualDateOfBirthNodeConnectionResolvers<
+    ContextType
+  >;
+  SanctionListIndividualDateOfBirthNodeEdge?: SanctionListIndividualDateOfBirthNodeEdgeResolvers<
+    ContextType
+  >;
+  SanctionListIndividualDocumentNode?: SanctionListIndividualDocumentNodeResolvers<
+    ContextType
+  >;
+  SanctionListIndividualDocumentNodeConnection?: SanctionListIndividualDocumentNodeConnectionResolvers<
+    ContextType
+  >;
+  SanctionListIndividualDocumentNodeEdge?: SanctionListIndividualDocumentNodeEdgeResolvers<
+    ContextType
+  >;
+  SanctionListIndividualNationalitiesNode?: SanctionListIndividualNationalitiesNodeResolvers<
+    ContextType
+  >;
+  SanctionListIndividualNationalitiesNodeConnection?: SanctionListIndividualNationalitiesNodeConnectionResolvers<
+    ContextType
+  >;
+  SanctionListIndividualNationalitiesNodeEdge?: SanctionListIndividualNationalitiesNodeEdgeResolvers<
+    ContextType
+  >;
+  SanctionListIndividualNode?: SanctionListIndividualNodeResolvers<ContextType>;
+  SanctionListIndividualNodeConnection?: SanctionListIndividualNodeConnectionResolvers<
+    ContextType
+  >;
+  SanctionListIndividualNodeEdge?: SanctionListIndividualNodeEdgeResolvers<
+    ContextType
+  >;
+  SaveKoboProjectImportDataAsync?: SaveKoboProjectImportDataAsyncResolvers<
+    ContextType
+  >;
+  SectionTotalNode?: SectionTotalNodeResolvers<ContextType>;
+  ServiceProviderNode?: ServiceProviderNodeResolvers<ContextType>;
+  ServiceProviderNodeConnection?: ServiceProviderNodeConnectionResolvers<
+    ContextType
+  >;
+  ServiceProviderNodeEdge?: ServiceProviderNodeEdgeResolvers<ContextType>;
+  SetSteficonRuleOnTargetPopulationMutationPayload?: SetSteficonRuleOnTargetPopulationMutationPayloadResolvers<
+    ContextType
+  >;
+  SimpleApproveMutation?: SimpleApproveMutationResolvers<ContextType>;
+  StatsObjectType?: StatsObjectTypeResolvers<ContextType>;
+  SteficonRuleNode?: SteficonRuleNodeResolvers<ContextType>;
+  SteficonRuleNodeConnection?: SteficonRuleNodeConnectionResolvers<ContextType>;
+  SteficonRuleNodeEdge?: SteficonRuleNodeEdgeResolvers<ContextType>;
+  TableTotalCashTransferred?: TableTotalCashTransferredResolvers<ContextType>;
+  TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>;
+  TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<
+    ContextType
+  >;
+  TargetingCriteriaRuleNode?: TargetingCriteriaRuleNodeResolvers<ContextType>;
+  TargetingIndividualBlockRuleFilterNode?: TargetingIndividualBlockRuleFilterNodeResolvers<
+    ContextType
+  >;
+  TargetingIndividualRuleFilterBlockNode?: TargetingIndividualRuleFilterBlockNodeResolvers<
+    ContextType
+  >;
+  TargetPopulationNode?: TargetPopulationNodeResolvers<ContextType>;
+  TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<
+    ContextType
+  >;
+  TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>;
+  TicketAddIndividualDetailsNode?: TicketAddIndividualDetailsNodeResolvers<
+    ContextType
+  >;
+  TicketAddIndividualDetailsNodeConnection?: TicketAddIndividualDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketAddIndividualDetailsNodeEdge?: TicketAddIndividualDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketComplaintDetailsNode?: TicketComplaintDetailsNodeResolvers<ContextType>;
+  TicketComplaintDetailsNodeConnection?: TicketComplaintDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketComplaintDetailsNodeEdge?: TicketComplaintDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketDeleteHouseholdDetailsNode?: TicketDeleteHouseholdDetailsNodeResolvers<
+    ContextType
+  >;
+  TicketDeleteHouseholdDetailsNodeConnection?: TicketDeleteHouseholdDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketDeleteHouseholdDetailsNodeEdge?: TicketDeleteHouseholdDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketDeleteIndividualDetailsNode?: TicketDeleteIndividualDetailsNodeResolvers<
+    ContextType
+  >;
+  TicketDeleteIndividualDetailsNodeConnection?: TicketDeleteIndividualDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketDeleteIndividualDetailsNodeEdge?: TicketDeleteIndividualDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketHouseholdDataUpdateDetailsNode?: TicketHouseholdDataUpdateDetailsNodeResolvers<
+    ContextType
+  >;
+  TicketHouseholdDataUpdateDetailsNodeConnection?: TicketHouseholdDataUpdateDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketHouseholdDataUpdateDetailsNodeEdge?: TicketHouseholdDataUpdateDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketIndividualDataUpdateDetailsNode?: TicketIndividualDataUpdateDetailsNodeResolvers<
+    ContextType
+  >;
+  TicketIndividualDataUpdateDetailsNodeConnection?: TicketIndividualDataUpdateDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketIndividualDataUpdateDetailsNodeEdge?: TicketIndividualDataUpdateDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketNeedsAdjudicationDetailsExtraDataNode?: TicketNeedsAdjudicationDetailsExtraDataNodeResolvers<
+    ContextType
+  >;
+  TicketNeedsAdjudicationDetailsNode?: TicketNeedsAdjudicationDetailsNodeResolvers<
+    ContextType
+  >;
+  TicketNeedsAdjudicationDetailsNodeConnection?: TicketNeedsAdjudicationDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketNeedsAdjudicationDetailsNodeEdge?: TicketNeedsAdjudicationDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketNegativeFeedbackDetailsNode?: TicketNegativeFeedbackDetailsNodeResolvers<
+    ContextType
+  >;
+  TicketNegativeFeedbackDetailsNodeConnection?: TicketNegativeFeedbackDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketNegativeFeedbackDetailsNodeEdge?: TicketNegativeFeedbackDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketNoteNode?: TicketNoteNodeResolvers<ContextType>;
+  TicketNoteNodeConnection?: TicketNoteNodeConnectionResolvers<ContextType>;
+  TicketNoteNodeEdge?: TicketNoteNodeEdgeResolvers<ContextType>;
+  TicketPaymentVerificationDetailsNode?: TicketPaymentVerificationDetailsNodeResolvers<
+    ContextType
+  >;
+  TicketPaymentVerificationDetailsNodeConnection?: TicketPaymentVerificationDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketPaymentVerificationDetailsNodeEdge?: TicketPaymentVerificationDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketPositiveFeedbackDetailsNode?: TicketPositiveFeedbackDetailsNodeResolvers<
+    ContextType
+  >;
+  TicketPositiveFeedbackDetailsNodeConnection?: TicketPositiveFeedbackDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketPositiveFeedbackDetailsNodeEdge?: TicketPositiveFeedbackDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketReferralDetailsNode?: TicketReferralDetailsNodeResolvers<ContextType>;
+  TicketReferralDetailsNodeConnection?: TicketReferralDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketReferralDetailsNodeEdge?: TicketReferralDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketSensitiveDetailsNode?: TicketSensitiveDetailsNodeResolvers<ContextType>;
+  TicketSensitiveDetailsNodeConnection?: TicketSensitiveDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketSensitiveDetailsNodeEdge?: TicketSensitiveDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  TicketSystemFlaggingDetailsNode?: TicketSystemFlaggingDetailsNodeResolvers<
+    ContextType
+  >;
+  TicketSystemFlaggingDetailsNodeConnection?: TicketSystemFlaggingDetailsNodeConnectionResolvers<
+    ContextType
+  >;
+  TicketSystemFlaggingDetailsNodeEdge?: TicketSystemFlaggingDetailsNodeEdgeResolvers<
+    ContextType
+  >;
+  UnapproveTargetPopulationMutation?: UnapproveTargetPopulationMutationResolvers<
+    ContextType
+  >;
+  UpdateGrievanceTicketMutation?: UpdateGrievanceTicketMutationResolvers<
+    ContextType
+  >;
+  UpdatePaymentPlanMutation?: UpdatePaymentPlanMutationResolvers<ContextType>;
+  UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<
+    ContextType
+  >;
+  UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<
+    ContextType
+  >;
+  UpdateProgram?: UpdateProgramResolvers<ContextType>;
+  UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<
+    ContextType
+  >;
+  Upload?: GraphQLScalarType;
+  UploadImportDataXLSXFileAsync?: UploadImportDataXlsxFileAsyncResolvers<
+    ContextType
+  >;
+  UserBusinessAreaNode?: UserBusinessAreaNodeResolvers<ContextType>;
+  UserBusinessAreaNodeConnection?: UserBusinessAreaNodeConnectionResolvers<
+    ContextType
+  >;
+  UserBusinessAreaNodeEdge?: UserBusinessAreaNodeEdgeResolvers<ContextType>;
+  UserNode?: UserNodeResolvers<ContextType>;
+  UserNodeConnection?: UserNodeConnectionResolvers<ContextType>;
+  UserNodeEdge?: UserNodeEdgeResolvers<ContextType>;
+  UserRoleNode?: UserRoleNodeResolvers<ContextType>;
+  UUID?: GraphQLScalarType;
+  XlsxErrorNode?: XlsxErrorNodeResolvers<ContextType>;
+  XlsxRowErrorNode?: XlsxRowErrorNodeResolvers<ContextType>;
 };
 
 /**

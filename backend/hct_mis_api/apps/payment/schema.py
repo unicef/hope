@@ -204,7 +204,7 @@ class ApprovalNode(DjangoObjectType):
 
     class Meta:
         model = Approval
-        fields = ("created_at", "comment", "info")
+        fields = ("created_at", "comment", "info", "created_by")
 
     def resolve_info(self, info):
         return self.info

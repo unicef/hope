@@ -62,11 +62,51 @@ export const PaymentPlan = gql`
               email
             }
             sentForFinanceReviewDate
-            approvals {
-              createdAt
-              type
-              comment
-              info
+            actions {
+              approval {
+                createdAt
+                comment
+                info
+                createdBy {
+                  id
+                  firstName
+                  lastName
+                  email
+                }
+              }
+              authorization {
+                createdAt
+                comment
+                info
+                createdBy {
+                  id
+                  firstName
+                  lastName
+                  email
+                }
+              }
+              financeReview {
+                createdAt
+                comment
+                info
+                createdBy {
+                  id
+                  firstName
+                  lastName
+                  email
+                }
+              }
+              reject {
+                createdAt
+                comment
+                info
+                createdBy {
+                  id
+                  firstName
+                  lastName
+                  email
+                }
+              }
             }
             rejectedOn
           }
