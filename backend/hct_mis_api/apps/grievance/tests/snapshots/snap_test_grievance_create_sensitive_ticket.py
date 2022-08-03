@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_0_with_permission 1'] = {
@@ -24,9 +25,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'individual': {
                             'fullName': 'John Doe'
                         },
-                        'paymentRecord': {
-                            'fullName': 'John Doe'
-                        }
+                        'paymentRecord': None
                     }
                 }
             ]
@@ -35,73 +34,6 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
 }
 
 snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_1_without_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'createGrievanceTicket'
-            ]
-        }
-    ]
-}
-
-snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_with_two_payment_records_0_with_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
-                {
-                    'admin': 'City Test',
-                    'category': 3,
-                    'consent': True,
-                    'description': 'Test Feedback',
-                    'issueType': 12,
-                    'language': 'Polish, English',
-                    'sensitiveTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
-                        'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
-                        }
-                    }
-                },
-                {
-                    'admin': 'City Test',
-                    'category': 3,
-                    'consent': True,
-                    'description': 'Test Feedback',
-                    'issueType': 12,
-                    'language': 'Polish, English',
-                    'sensitiveTicketDetails': {
-                        'household': {
-                            'size': 1
-                        },
-                        'individual': {
-                            'fullName': 'John Doe'
-                        },
-                        'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
-                        }
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket_with_two_payment_records_1_without_permission 1'] = {
     'data': {
         'createGrievanceTicket': None
     },
@@ -179,9 +111,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                         'individual': {
                             'fullName': 'John Doe'
                         },
-                        'paymentRecord': {
-                            'fullName': 'John Doe'
-                        }
+                        'paymentRecord': None
                     }
                 }
             ]
@@ -225,9 +155,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                             'size': 1
                         },
                         'individual': None,
-                        'paymentRecord': {
-                            'fullName': 'John Doe'
-                        }
+                        'paymentRecord': None
                     }
                 }
             ]
