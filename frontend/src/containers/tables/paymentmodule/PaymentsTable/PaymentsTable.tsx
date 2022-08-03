@@ -45,7 +45,7 @@ export const PaymentsTable = ({
         query={useAllPaymentsQuery}
         queriedObjectName='allPayments'
         initialVariables={initialVariables}
-        defaultOrderBy='created_at'
+        defaultOrderBy='createdAt'
         defaultOrderDirection='desc'
         renderRow={(row) => (
           <PaymentsTableRow

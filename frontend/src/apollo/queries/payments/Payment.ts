@@ -8,6 +8,7 @@ export const Payment = gql`
         id
         size
         admin2 {
+          id
           name
         }
       }
