@@ -1,5 +1,6 @@
 import logging
 from datetime import timedelta
+from typing import Sequence
 from django.utils import timezone
 
 from django.db.models import Q
@@ -10,14 +11,16 @@ from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.utils.logs import log_start_and_end
+from hct_mis_api.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
 
 
 @app.task(queue="priority")
 @log_start_and_end
+@sentry_tags
 def deduplicate_and_check_against_sanctions_list_task(
-    should_populate_index, registration_data_import_id, individuals_ids
+    should_populate_index: bool, registration_data_import_id: str, individuals_ids: Sequence[str]
 ):
     try:
         from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
@@ -33,6 +36,7 @@ def deduplicate_and_check_against_sanctions_list_task(
 
 
 @app.task
+@sentry_tags
 def periodic_grievances_notifications():
     sensitive_tickets_one_day_date = timezone.now() - timedelta(days=1)
     sensitive_tickets_to_notify = (

@@ -34,6 +34,8 @@ class BusinessArea(TimeStampedUUIDModel):
     </BusinessArea>
     """
 
+    code_to_cash_assist_mapping = {"575RE00000": "SLVK"}
+    cash_assist_to_code_mapping = {v: k for k, v in code_to_cash_assist_mapping.items()}
     code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=255)
     long_name = models.CharField(max_length=255)
@@ -117,6 +119,14 @@ class BusinessArea(TimeStampedUUIDModel):
 
     def __str__(self):
         return self.name
+
+    @property
+    def cash_assist_code(self):
+        return self.code_to_cash_assist_mapping.get(self.code, self.code)
+
+    @cash_assist_code.setter
+    def cash_assist_code(self,value):
+        self.code = self.cash_assist_to_code_mapping.get(value,value)
 
     @property
     def can_import_ocha_response_plans(self):

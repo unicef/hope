@@ -169,7 +169,7 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     phone_no = graphene.String()
     phone_no_alternative = graphene.String()
     relationship = graphene.String()
-    disability = graphene.Boolean()
+    disability = graphene.String()
     work_status = graphene.String()
     enrolled_in_nutrition_programme = graphene.Boolean()
     administration_of_rutf = graphene.Boolean()

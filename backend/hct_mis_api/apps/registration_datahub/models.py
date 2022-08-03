@@ -313,6 +313,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         null=True,
     )
     import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
+    # TODO: Add business_area FK field instead
     business_area_slug = models.CharField(max_length=250, blank=True)
 
     class Meta:

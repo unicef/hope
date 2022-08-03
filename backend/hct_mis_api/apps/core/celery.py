@@ -12,7 +12,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hct_mis_api.settings")
 app = Celery("hct_mis")
 
 app.config_from_object("django.conf:settings", namespace="CELERY")
-
 app.conf["task_queues"] = (
     Queue(
         CELERY_QUEUE_DEFAULT,
@@ -25,6 +24,7 @@ app.conf["task_queues"] = (
         routing_key=CELERY_QUEUE_OTHER,
     ),
 )
+app.conf['worker_prefetch_multiplier'] = 1
 app.conf["task_default_queue"] = CELERY_QUEUE_DEFAULT
 
 # Load task modules from all registered Django app configs.

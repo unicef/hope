@@ -9,14 +9,32 @@ Example commands: https://example.cypress.io/
 
 ## Local development / testing
 
-In this directory run ```yarn``` (install yarn if you don't have it locally)
+Turn on the services by calling
 
-Create a ```cypress.env.json``` file (copy the ```cypress.env.json.example``` file and fill in the appropriate values).
+```
+docker-compose up -d --build
+```
 
-Make sure your local development environment is up and running on http://localhost:*/
+When BE etc. is up, call
 
-To start then run ```$(npm bin)/cypress open``` in this directory. You can now run the tests.
+```
+docker exec -it hct-mis_backend_1 ./manage.py initcypress
+```
 
-To run the tests on the commandline run ```$(npm bin)/cypress run --spec=**/*.feature```. This uses the Electron browser.
+And turn on the FE in `frontend` directory:
 
-To use Chrome instead  ```$(npm bin)/cypress run --spec=**/*.feature --browser=chrome```.
+```
+yarn && yarn start
+```
+
+When all is up (accessible via `localhost:8082`), you can run the tests by calling in `cypress_testing_service` dir (after calling `yarn`):
+
+```
+yarn cy:run
+```
+
+Or by opening the window to play with it in the browser:
+
+```
+yarn cy:open
+```
