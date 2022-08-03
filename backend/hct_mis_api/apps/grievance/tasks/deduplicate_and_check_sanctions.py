@@ -1,3 +1,5 @@
+import logging
+from sqlite3 import OperationalError
 from typing import Sequence
 from django.db import transaction
 
@@ -31,7 +33,11 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
         if should_populate_index is True:
             populate_index(individuals, IndividualDocument)
 
-        DeduplicateTask.deduplicate_individuals_from_other_source(individuals=individuals)
+        try:
+            DeduplicateTask.deduplicate_individuals_from_other_source(individuals=individuals)
+        except OperationalError as error:
+            logging.error(f"Failed to deduplicate individuals from other source: {error}")
+            raise error
 
         golden_record_duplicates = individuals.filter(deduplication_golden_record_status=DUPLICATE)
 
@@ -42,4 +48,8 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
         create_needs_adjudication_tickets(needs_adjudication, "possible_duplicates", business_area)
 
         CheckAgainstSanctionListPreMergeTask.execute()
-        DeduplicateTask.hard_deduplicate_documents(Document.objects.filter(individual_id__in=individuals_ids))
+        try:
+            DeduplicateTask.hard_deduplicate_documents(Document.objects.filter(individual_id__in=individuals_ids))
+        except OperationalError as error:
+            logging.error(f"Failed to hard deduplicate documents: {error}")
+            raise error

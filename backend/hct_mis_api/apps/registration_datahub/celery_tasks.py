@@ -437,7 +437,6 @@ def deduplicate_documents():
             )
             rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
             for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids):
-                print(rdi)
                 DeduplicateTask.hard_deduplicate_documents(
                     Document.objects.filter(status=Document.STATUS_PENDING, individual__registration_data_import=rdi),
                     registration_data_import=rdi,
