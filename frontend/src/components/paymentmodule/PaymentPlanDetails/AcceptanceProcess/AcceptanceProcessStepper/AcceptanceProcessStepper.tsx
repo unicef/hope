@@ -6,7 +6,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ApprovalProcessNodeEdge } from '../../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 
 const StyledBox = styled(Box)`
   width: 100%;
@@ -17,14 +17,14 @@ const StyledCancelIcon = styled(CancelIcon)`
 `;
 
 interface AcceptanceProcessStepperProps {
-  row: ApprovalProcessNodeEdge;
+  acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];
   approvalNumberRequired: number;
   authorizationNumberRequired: number;
   financeReviewNumberRequired: number;
 }
 
 export const AcceptanceProcessStepper = ({
-  row,
+  acceptanceProcess,
   approvalNumberRequired,
   authorizationNumberRequired,
   financeReviewNumberRequired,
@@ -34,7 +34,9 @@ export const AcceptanceProcessStepper = ({
     sentForAuthorizationDate,
     sentForFinanceReviewDate,
     rejectedOn,
-  } = row.node;
+    actions,
+  } = acceptanceProcess;
+
   const { t } = useTranslation();
   const getActiveStep = (): number => {
     if (sentForFinanceReviewDate) {
@@ -49,32 +51,44 @@ export const AcceptanceProcessStepper = ({
     }
     return 0;
   };
-  const [activeStep, setActiveStep] = useState(() => getActiveStep());
 
-  //TODO: Add numbers in steps
-  //TODO: handle step completed prop based on numbers required
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [activeStep, setActiveStep] = useState(() => getActiveStep());
 
   const steps = [
     {
-      name: `${t('Approval')} (0/${approvalNumberRequired})`,
+      name: `${t('Approval')} (${
+        actions.approval.length
+      }/${approvalNumberRequired})`,
       hasError: rejectedOn === 'IN_APPROVAL',
     },
     {
-      name: `${t('Authorization')} (0/${authorizationNumberRequired})`,
+      name: `${t('Authorization')} (${
+        actions.authorization.length
+      }/${authorizationNumberRequired})`,
       hasError: rejectedOn === 'IN_AUTHORIZATION',
     },
     {
-      name: `${t('Finance Review')} (0/${financeReviewNumberRequired})`,
+      name: `${t('Finance Review')} (${
+        actions.financeReview.length
+      }/${financeReviewNumberRequired})`,
       hasError: rejectedOn === 'IN_REVIEW',
     },
   ];
+
+  const getStepCompleted = (): boolean | null => {
+    if (financeReviewNumberRequired === actions.financeReview.length) {
+      return true;
+    }
+    return null;
+  };
 
   return (
     <StyledBox>
       <Stepper activeStep={activeStep}>
         {steps.map((step) => {
           return (
-            <Step key={step.name}>
+            <Step completed={getStepCompleted()} key={step.name}>
               <StepLabel
                 error={step.hasError}
                 StepIconComponent={step.hasError ? StyledCancelIcon : null}

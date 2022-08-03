@@ -28,7 +28,7 @@ export const ApprovePaymentPlan = ({
   paymentPlanId,
 }: ApprovePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [lockDialogOpen, setLockDialogOpen] = useState(false);
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const {
     mutatePaymentPlanAction: approve,
@@ -38,6 +38,7 @@ export const ApprovePaymentPlan = ({
     paymentPlanId,
     () => showMessage(t('Payment Plan has been approved.')),
     () => showMessage(t('Error during approving Payment Plan.')),
+    () => setApproveDialogOpen(false),
   );
   const initialValues = {
     comment: '',
@@ -65,15 +66,15 @@ export const ApprovePaymentPlan = ({
               <Button
                 color='primary'
                 variant='contained'
-                onClick={() => setLockDialogOpen(true)}
+                onClick={() => setApproveDialogOpen(true)}
                 data-cy='button-lock-plan'
               >
                 {t('Approve')}
               </Button>
             </Box>
             <Dialog
-              open={lockDialogOpen}
-              onClose={() => setLockDialogOpen(false)}
+              open={approveDialogOpen}
+              onClose={() => setApproveDialogOpen(false)}
               scroll='paper'
               aria-labelledby='form-dialog-title'
               maxWidth='md'
@@ -109,7 +110,7 @@ export const ApprovePaymentPlan = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={() => setLockDialogOpen(false)}>
+                  <Button onClick={() => setApproveDialogOpen(false)}>
                     CANCEL
                   </Button>
                   <LoadingButton

@@ -98,8 +98,8 @@ enum AgencyType {
 
 type ApprovalNode {
   createdAt: DateTime!
-  type: ApprovalType!
   comment: String
+  createdBy: UserNode
   info: String
 }
 
@@ -114,8 +114,8 @@ type ApprovalProcessNode implements Node {
   sentForFinanceReviewBy: UserNode
   sentForFinanceReviewDate: DateTime
   paymentPlan: PaymentPlanNode!
-  approvals: [ApprovalNode!]!
   rejectedOn: String
+  actions: FilteredActionsListNode
 }
 
 type ApprovalProcessNodeConnection {
@@ -128,13 +128,6 @@ type ApprovalProcessNodeConnection {
 type ApprovalProcessNodeEdge {
   node: ApprovalProcessNode
   cursor: String!
-}
-
-enum ApprovalType {
-  APPROVAL
-  AUTHORIZATION
-  FINANCE_REVIEW
-  REJECT
 }
 
 type ApproveTargetPopulationMutation {
@@ -978,6 +971,13 @@ type FieldAttributeNode {
   choices: [CoreFieldChoiceObject]
   associatedWith: String
   isFlexField: Boolean
+}
+
+type FilteredActionsListNode {
+  approval: [ApprovalNode]
+  authorization: [ApprovalNode]
+  financeReview: [ApprovalNode]
+  reject: [ApprovalNode]
 }
 
 type FinalizeTargetPopulationMutation {

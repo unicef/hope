@@ -3,10 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { renderUserName } from '../../../../utils/utils';
-import {
-  ApprovalProcessNodeEdge,
-  PaymentPlanQuery,
-} from '../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { DividerLine } from '../../../core/DividerLine';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
 import { GreyInfoCard } from './GreyInfoCard';
@@ -16,24 +13,25 @@ const StyledBox = styled(Box)`
 `;
 
 interface AcceptanceProcessRowProps {
-  row: ApprovalProcessNodeEdge;
+  acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const AcceptanceProcessRow = ({
-  row,
+  acceptanceProcess,
   paymentPlan,
 }: AcceptanceProcessRowProps): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    approvals,
+    actions,
     sentForApprovalDate,
     sentForApprovalBy,
     sentForAuthorizationDate,
     sentForAuthorizationBy,
     sentForFinanceReviewDate,
     sentForFinanceReviewBy,
-  } = row.node;
+    rejectedOn,
+  } = acceptanceProcess;
 
   const {
     approvalNumberRequired,
@@ -41,58 +39,91 @@ export const AcceptanceProcessRow = ({
     financeReviewNumberRequired,
   } = paymentPlan;
 
+  const getRejectedOnString = (stage: string): string => {
+    switch (stage) {
+      case 'IN_APPROVAL':
+        return t('Rejected in Approval stage');
+      case 'IN_AUTHORIZATION':
+        return t('Rejected in Authorization stage');
+      case 'IN_REVIEW':
+        return t('Rejected in Finance Review stage');
+
+      default:
+        return '';
+    }
+  };
+
   return (
     <StyledBox m={5}>
       <AcceptanceProcessStepper
-        row={row}
+        acceptanceProcess={acceptanceProcess}
         approvalNumberRequired={approvalNumberRequired}
         authorizationNumberRequired={authorizationNumberRequired}
         financeReviewNumberRequired={financeReviewNumberRequired}
       />
       <Grid container>
-        {approvals?.[0] && (
-          <Grid item xs={4}>
+        <Grid item xs={4}>
+          {actions.approval.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for approval by ${renderUserName(
                 sentForApprovalBy,
               )}`}
               topDate={sentForApprovalDate}
-              bottomMessage={approvals[0].info}
-              bottomDate={approvals[0].createdAt}
-              comment={approvals[0].comment}
-              commentAuthor={renderUserName(sentForApprovalBy)}
-              commentDate={approvals[0].createdAt}
+              actions={actions.approval}
             />
-          </Grid>
-        )}
-        {approvals?.[1] && (
-          <Grid item xs={4}>
+          )}
+        </Grid>
+        <Grid item xs={4}>
+          {actions.authorization.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for authorization by ${renderUserName(
                 sentForAuthorizationBy,
               )}`}
               topDate={sentForAuthorizationDate}
-              bottomMessage={approvals[1].info}
-              bottomDate={approvals[1].createdAt}
-              comment={approvals[1].comment}
-              commentAuthor={renderUserName(sentForAuthorizationBy)}
-              commentDate={approvals[1].createdAt}
+              actions={actions.authorization}
             />
-          </Grid>
-        )}
-        {approvals?.[2] && (
-          <Grid item xs={4}>
+          )}
+        </Grid>
+        <Grid item xs={4}>
+          {actions.financeReview.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for review by ${renderUserName(
                 sentForFinanceReviewBy,
               )}`}
               topDate={sentForFinanceReviewDate}
-              bottomMessage={approvals[2].info}
-              bottomDate={approvals[2].createdAt}
-              comment={approvals[2].comment}
-              commentAuthor={renderUserName(sentForFinanceReviewBy)}
-              commentDate={approvals[2].createdAt}
+              actions={actions.financeReview}
             />
+          )}
+        </Grid>
+        {actions.reject.length > 0 && (
+          <Grid container>
+            <Grid item xs={4}>
+              {rejectedOn === 'IN_APPROVAL' && (
+                <GreyInfoCard
+                  topMessage={getRejectedOnString(rejectedOn)}
+                  topDate={actions.reject[0]?.createdAt}
+                  actions={actions.reject}
+                />
+              )}
+            </Grid>
+            <Grid item xs={4}>
+              {rejectedOn === 'IN_AUTHORIZATION' && (
+                <GreyInfoCard
+                  topMessage={getRejectedOnString(rejectedOn)}
+                  topDate={actions.reject[0]?.createdAt}
+                  actions={actions.reject}
+                />
+              )}
+            </Grid>
+            <Grid item xs={4}>
+              {rejectedOn === 'IN_REVIEW' && (
+                <GreyInfoCard
+                  topMessage={getRejectedOnString(rejectedOn)}
+                  topDate={actions.reject[0]?.createdAt}
+                  actions={actions.reject}
+                />
+              )}
+            </Grid>
           </Grid>
         )}
       </Grid>

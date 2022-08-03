@@ -36,6 +36,7 @@ export const LockPaymentPlan = ({
     paymentPlanId,
     () => showMessage(t('Payment Plan has been locked.')),
     () => showMessage(t('Error during locking Payment Plan.')),
+    () => setLockDialogOpen(false),
   );
 
   return (

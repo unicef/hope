@@ -40,6 +40,7 @@ export const MarkAsReviewedPaymentPlan = ({
     paymentPlanId,
     () => showMessage(t('Payment Plan has been marked as reviewed.')),
     () => showMessage(t('Error during marking Payment Plan as reviewed.')),
+    () => setMarkAsReviewedDialogOpen(false),
   );
   const initialValues = {
     comment: '',
