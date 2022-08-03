@@ -11,7 +11,8 @@ import { ClickableTableRow } from '../../../../components/core/Table/ClickableTa
 import {
   choicesToDict,
   formatCurrency,
-  paymentVerificationStatusToColor,
+  paymentPlanStatusMapping,
+  paymentPlanStatusToColor,
 } from '../../../../utils/utils';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
@@ -54,16 +55,17 @@ export const PaymentPlanTableRow = ({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={paymentPlanPath}>{plan.id.slice(0, 10)}</BlackLink>
+          <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
         ) : (
-          plan.id.slice(0, 10)
+          plan.unicefId
         )}
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
             status={plan.status}
-            statusToColor={paymentVerificationStatusToColor}
+            statusToColor={paymentPlanStatusToColor}
+            statusNameMapping={paymentPlanStatusMapping}
           />
         </StatusContainer>
       </TableCell>
@@ -71,7 +73,7 @@ export const PaymentPlanTableRow = ({
         {plan.totalHouseholdsCount || '-'}
       </TableCell>
       <TableCell align='left'>
-        {plan.currency}
+        {plan.currencyName}
       </TableCell>
       <TableCell align='right'>
         {formatCurrency(plan.totalEntitledQuantity, true)}

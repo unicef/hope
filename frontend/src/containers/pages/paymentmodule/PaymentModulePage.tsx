@@ -10,13 +10,13 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
-import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
+import { PaymentPlansFilters, FilterProps } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 
 export function PaymentModulePage(): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const [planfilter, setPlanFilter] = useState({
+  const [planfilter, setPlanFilter] = useState<FilterProps>({
     search: '',
     dispersionDate: '',
     status: '',

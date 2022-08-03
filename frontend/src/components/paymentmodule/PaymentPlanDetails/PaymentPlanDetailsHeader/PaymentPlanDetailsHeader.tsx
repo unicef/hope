@@ -54,7 +54,7 @@ export const PaymentPlanDetailsHeader = ({
   const canDownloadXlsx = true;
   const canSendToFsp = true;
 
-  let buttons;
+  let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
       buttons = (

@@ -31,6 +31,29 @@ export const PaymentPlans = gql`
           unicefId
           id
           createdAt
+          statusDate
+          startDate
+          endDate
+          exchangeRate
+          totalEntitledQuantity
+          totalEntitledQuantityUsd
+          totalEntitledQuantityRevised
+          totalEntitledQuantityRevisedUsd
+          totalDeliveredQuantity
+          totalDeliveredQuantityUsd
+          totalUndeliveredQuantity
+          totalUndeliveredQuantityUsd
+          status
+          currency
+          currencyName
+          dispersionStartDate
+          dispersionEndDate
+          femaleChildrenCount
+          maleChildrenCount
+          femaleAdultsCount
+          maleAdultsCount
+          totalHouseholdsCount
+          totalIndividualsCount
           businessArea {
             id
             slug
@@ -38,9 +61,6 @@ export const PaymentPlans = gql`
             name
             longName
           }
-          statusDate
-          startDate
-          endDate
           program {
             isRemoved
             id
@@ -56,35 +76,16 @@ export const PaymentPlans = gql`
             caHashId
             budget
           }
-          exchangeRate
-          totalEntitledQuantity
-          totalEntitledQuantityUsd
-          totalEntitledQuantityRevised
-          totalEntitledQuantityRevisedUsd
-          totalDeliveredQuantity
-          totalDeliveredQuantityUsd
-          totalUndeliveredQuantity
-          totalUndeliveredQuantityUsd
           createdBy {
             id
             username
             firstName
             lastName
           }
-          status
           targetPopulation {
             name
             id
           }
-          currency
-          dispersionStartDate
-          dispersionEndDate
-          femaleChildrenCount
-          maleChildrenCount
-          femaleAdultsCount
-          maleAdultsCount
-          totalHouseholdsCount
-          totalIndividualsCount
         }
       }
     }
