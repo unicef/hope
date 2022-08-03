@@ -38,6 +38,7 @@ export const AuthorizePaymentPlan = ({
     paymentPlanId,
     () => showMessage(t('Payment Plan has been authorized.')),
     () => showMessage(t('Error during authorizing Payment Plan.')),
+    () => setAuthorizeDialogOpen(false),
   );
   const initialValues = {
     comment: '',

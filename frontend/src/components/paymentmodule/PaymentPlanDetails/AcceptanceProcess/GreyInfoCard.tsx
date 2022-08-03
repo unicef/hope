@@ -1,6 +1,5 @@
 import { Box } from '@material-ui/core';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { MessageDialog } from './MessageDialog';
@@ -15,29 +14,50 @@ const GreyTitle = styled.div`
   font-size: 12px;
 `;
 
+const IconPlaceholder = styled.div`
+  width: 16px;
+  height: 16px;
+`;
+
 const GreyBox = styled(Box)`
   background-color: #f4f5f6;
 `;
 interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
-  bottomMessage: string;
-  bottomDate: string;
-  comment?: string;
-  commentAuthor?: string;
-  commentDate?: string;
+  actions;
 }
-
 export const GreyInfoCard = ({
   topMessage,
   topDate,
-  bottomMessage,
-  bottomDate,
-  comment,
-  commentAuthor,
-  commentDate,
+  actions,
 }: GreyInfoCardProps): React.ReactElement => {
-  const { t } = useTranslation();
+  const mappedActions = actions.map((action) => {
+    const { info, createdAt, comment, createdBy } = action;
+    return (
+      info && (
+        <Box alignItems='center' display='flex'>
+          {info}
+          <Box ml={1}>
+            <GreyText>
+              on <UniversalMoment>{createdAt}</UniversalMoment>
+            </GreyText>
+          </Box>
+          <Box p={1} ml={1}>
+            {comment ? (
+              <MessageDialog
+                comment={comment}
+                author={createdBy}
+                date={createdAt}
+              />
+            ) : (
+              <IconPlaceholder />
+            )}
+          </Box>
+        </Box>
+      )
+    );
+  });
 
   return (
     <Box display='flex' flexDirection='column'>
@@ -46,20 +66,15 @@ export const GreyInfoCard = ({
           {topMessage} on <UniversalMoment>{topDate}</UniversalMoment>
         </GreyTitle>
       </Box>
-      <GreyBox display='flex' alignItems='center' ml={3} mr={3} p={3}>
-        {bottomMessage}
-        <Box ml={1}>
-          <GreyText>
-            on <UniversalMoment>{bottomDate}</UniversalMoment>
-          </GreyText>
-        </Box>
-        {comment && (
-          <MessageDialog
-            comment={comment}
-            author={commentAuthor}
-            date={commentDate}
-          />
-        )}
+      <GreyBox
+        display='flex'
+        flexDirection='column'
+        alignItems='center'
+        ml={3}
+        mr={3}
+        p={3}
+      >
+        {mappedActions}
       </GreyBox>
     </Box>
   );

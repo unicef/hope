@@ -4,10 +4,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ApprovalProcessNodeEdge,
-  PaymentPlanQuery,
-} from '../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { Title } from '../../../core/Title';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
@@ -27,8 +24,10 @@ export const AcceptanceProcess = ({
   const { edges } = paymentPlan.approvalProcess;
   const [showAll, setShowAll] = useState(false);
 
-  const matchDataSize = (data): ApprovalProcessNodeEdge[] => {
-    return showAll ? data : [data[data.length - 1]];
+  const matchDataSize = (
+    data,
+  ): PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'] => {
+    return showAll ? data : [data[0]];
   };
 
   if (!edges.length) {
@@ -46,7 +45,7 @@ export const AcceptanceProcess = ({
         {matchDataSize(edges).map((edge) => (
           <AcceptanceProcessRow
             key={edge.node.id}
-            row={edge}
+            acceptanceProcess={edge.node}
             paymentPlan={paymentPlan}
           />
         ))}

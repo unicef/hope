@@ -14,6 +14,7 @@ export const usePaymentPlanAction = (
   paymentPlanId: string,
   onSuccess: () => void,
   onError: () => void,
+  onClose?: () => void,
 ): PaymentPlanAction => {
   const [mutate, { loading }] = useActionPpMutation();
   const mutatePaymentPlanAction = async (comment?: string) => {
@@ -38,6 +39,9 @@ export const usePaymentPlanAction = (
       /* eslint-disable-next-line no-console */
       console.log('error', error?.graphQLErrors);
       onError();
+    }
+    if (onClose) {
+      onClose();
     }
   };
   return { loading, mutatePaymentPlanAction };

@@ -14,6 +14,8 @@ import { DialogActions } from '../../../../containers/dialogs/DialogActions';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
 import { DividerLine } from '../../../core/DividerLine';
+import { renderUserName } from '../../../../utils/utils';
+import { UserNode } from '../../../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -39,7 +41,7 @@ const MessageIconContainer = styled(Box)`
 
 export interface MessageDialogProps {
   comment: string;
-  author: string;
+  author: Pick<UserNode, 'id' | 'email' | 'firstName' | 'lastName'>;
   date: string;
 }
 export const MessageDialog = ({
@@ -51,13 +53,11 @@ export const MessageDialog = ({
   const [MessageDialogOpen, setMessageDialogOpen] = useState(false);
   return (
     <>
-      <Box p={2}>
-        <IconButton size='small' onClick={() => setMessageDialogOpen(true)}>
-          <MessageIconContainer>
-            <MessageIcon fontSize='inherit' />
-          </MessageIconContainer>
-        </IconButton>
-      </Box>
+      <IconButton size='small' onClick={() => setMessageDialogOpen(true)}>
+        <MessageIconContainer>
+          <MessageIcon fontSize='inherit' />
+        </MessageIconContainer>
+      </IconButton>
       <Dialog
         open={MessageDialogOpen}
         onClose={() => setMessageDialogOpen(false)}
@@ -72,7 +72,7 @@ export const MessageDialog = ({
           <DialogContainer>
             <Box display='flex' flexDirection='column'>
               <Box mt={2} display='flex'>
-                {author}{' '}
+                {renderUserName(author)}{' '}
                 <GreyText>
                   <Box ml={1}>
                     on <UniversalMoment>{date}</UniversalMoment>
