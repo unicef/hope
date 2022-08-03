@@ -3,16 +3,15 @@ from django.db.models.functions import Lower
 
 from django_filters import (
     CharFilter,
-    DateFilter,
     FilterSet,
-    MultipleChoiceFilter,
-    NumberFilter,
     OrderingFilter,
+    NumberFilter,
     UUIDFilter,
+    MultipleChoiceFilter,
+    DateFilter,
 )
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
-from hct_mis_api.apps.core.filters import DecimalRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.models import (
@@ -264,10 +263,7 @@ class PaymentPlanFilter(FilterSet):
 
 class PaymentFilter(FilterSet):
     business_area = CharFilter(field_name="payment_plan__business_area__slug", required=True)
-    payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
-
-    def payment_plan_id_filter(self, qs, name, value):
-        return qs.filter(payment_plan_id=value)
+    payment_plan_id = CharFilter(field_name="payment_plan", required=True)
 
     class Meta:
         fields = tuple()

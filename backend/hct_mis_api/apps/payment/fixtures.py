@@ -546,6 +546,7 @@ class PaymentFactory(factory.DjangoModelFactory):
     )
     household = factory.LazyAttribute(lambda o: Household.objects.order_by("?").first())
     head_of_household = factory.LazyAttribute(lambda o: o.household.head_of_household)
+    collector = factory.LazyAttribute(lambda o: o.household.head_of_household)
     delivery_type = fuzzy.FuzzyChoice(
         PaymentRecord.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],

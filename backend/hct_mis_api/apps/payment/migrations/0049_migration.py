@@ -604,10 +604,6 @@ class Migration(migrations.Migration):
                         to="targeting.targetpopulation",
                     ),
                 ),
-                (
-                    "collector",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="household.individual"),
-                ),
             ],
             options={
                 "verbose_name": "Payment Plan",
@@ -849,6 +845,14 @@ class Migration(migrations.Migration):
                     "financial_service_provider",
                     models.ForeignKey(
                         null=True, on_delete=django.db.models.deletion.CASCADE, to="payment.financialserviceprovider"
+                    ),
+                ),
+                (
+                    "collector",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="household.individual",
+                        related_name="collector_payments",
                     ),
                 ),
             ],
