@@ -263,10 +263,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_status(self, info):
-        # in test it fails without str()
-        return str(self.status)
-
     def resolve_approval_number_required(self, info):
         return self.business_area.approval_number_required
 
