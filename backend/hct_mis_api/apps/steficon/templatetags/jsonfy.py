@@ -8,7 +8,6 @@ from django.utils.safestring import mark_safe
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import JsonLexer, PythonLexer
-from pygments.styles import get_style_by_name
 
 register = template.Library()
 
