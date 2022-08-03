@@ -28,6 +28,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   if (loading) return <LoadingComponent />;
   if (!hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
+
   return (
     <>
       <PaymentPlanDetailsHeader
@@ -47,7 +48,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       <Entitlement businessArea={businessArea} permissions={permissions} />
       <FspSection businessArea={businessArea} permissions={permissions} />
       <PaymentPlanDetailsResults paymentPlan={data.paymentPlan} />
-      <PaymentsTable businessArea={businessArea} filter={{}} />
+      <PaymentsTable businessArea={businessArea} filter={{paymentPlanId: id}} />
     </>
   );
 };

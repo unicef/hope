@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost';
 
-export const PAYMENT_LIST_QUERY = gql`
+export const AllPayments = gql`
   query AllPayments ($paymentPlanId: String!, $businessArea: String!) {
     allPayments (paymentPlanId: $paymentPlanId, businessArea: $businessArea) {
       edges {
@@ -17,6 +17,7 @@ export const PAYMENT_LIST_QUERY = gql`
           currency
           entitlementDate
           entitlementQuantityUsd
+          createdAt
         }
       }
     }

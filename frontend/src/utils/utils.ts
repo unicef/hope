@@ -340,10 +340,6 @@ export function programCompare(
   return statusA > statusB ? 1 : -1;
 }
 
-// export function currencyNameFromCode(code: string, locales: string[] = ['en']): string {
-//   return new Intl.DisplayNames(locales, { type: 'currency' }).of(code);
-// }
-
 export function formatCurrency(
   amount: number,
   onlyNumberValue = false,
