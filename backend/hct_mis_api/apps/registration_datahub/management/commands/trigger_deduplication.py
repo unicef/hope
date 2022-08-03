@@ -320,4 +320,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         user = create_user_in_business_area_with_permissions(self)
         ticket_scenario_till_closed(self, user)
-        # # deduplication should be triggered now
+        # deduplication should be triggered now
