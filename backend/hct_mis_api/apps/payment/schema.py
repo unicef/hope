@@ -204,17 +204,26 @@ class ApprovalNode(DjangoObjectType):
 
     class Meta:
         model = Approval
-        fields = ("type", "created_at", "comment", "info")
+        fields = ("created_at", "comment", "info")
 
     def resolve_info(self, info):
         return self.info
 
 
+class FilteredActionsListNode(graphene.ObjectType):
+    approval = graphene.List(ApprovalNode)
+    authorization = graphene.List(ApprovalNode)
+    finance_review = graphene.List(ApprovalNode)
+    reject = graphene.List(ApprovalNode)
+
+
 class ApprovalProcessNode(DjangoObjectType):
     rejected_on = graphene.String()
+    actions = graphene.Field(FilteredActionsListNode)
 
     class Meta:
         model = ApprovalProcess
+        exclude = ("approvals",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -227,6 +236,15 @@ class ApprovalProcessNode(DjangoObjectType):
             if self.sent_for_approval_date:
                 return "IN_APPROVAL"
         return None
+
+    def resolve_actions(self, info):
+        resp = FilteredActionsListNode(
+            approval=self.approvals.filter(type=Approval.APPROVAL),
+            authorization=self.approvals.filter(type=Approval.AUTHORIZATION),
+            finance_review=self.approvals.filter(type=Approval.FINANCE_REVIEW),
+            reject=self.approvals.filter(type=Approval.REJECT)
+        )
+        return resp
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):

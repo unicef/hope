@@ -109,9 +109,9 @@ class PaymentPlanService:
     def acceptance_process(self):
         self.validate_payment_plan_status_to_acceptance_process_approval_type()
 
-        # every time we will create Approval for last created AcceptanceProcess
+        # every time we will create Approval for first created AcceptanceProcess
         # init creation AcceptanceProcess added in send_for_approval()
-        approval_process = self.payment_plan.approval_process.last()
+        approval_process = self.payment_plan.approval_process.first()
         if not approval_process:
             logging.exception(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
             raise GraphQLError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
