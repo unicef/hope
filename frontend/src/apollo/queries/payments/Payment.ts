@@ -6,17 +6,14 @@ export const Payment = gql`
       id
       household {
         id
+        unicefId
         size
         admin2 {
           id
           name
         }
       }
-      status
-      currency
-      entitlementDate
       entitlementQuantityUsd
-      createdAt
     }
   }
 `;

@@ -9144,7 +9144,12 @@ export type RelatedGrievanceTicketsQuery = (
   )> }
 );
 
-export type AllPaymentPlansQueryVariables = {
+export type AllPaymentPlansForTableQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -9154,7 +9159,7 @@ export type AllPaymentPlansQueryVariables = {
 };
 
 
-export type AllPaymentPlansQuery = (
+export type AllPaymentPlansForTableQuery = (
   { __typename?: 'Query' }
   & { allPaymentPlans: Maybe<(
     { __typename?: 'PaymentPlanNodeConnection' }
@@ -9167,19 +9172,16 @@ export type AllPaymentPlansQuery = (
       & Pick<PaymentPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentPlanNode' }
-        & Pick<PaymentPlanNode, 'isRemoved' | 'unicefId' | 'id' | 'createdAt' | 'statusDate' | 'startDate' | 'endDate' | 'exchangeRate' | 'totalEntitledQuantity' | 'totalEntitledQuantityUsd' | 'totalEntitledQuantityRevised' | 'totalEntitledQuantityRevisedUsd' | 'totalDeliveredQuantity' | 'totalDeliveredQuantityUsd' | 'totalUndeliveredQuantity' | 'totalUndeliveredQuantityUsd' | 'status' | 'currency' | 'currencyName' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'maleChildrenCount' | 'femaleAdultsCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount'>
-        & { businessArea: (
-          { __typename?: 'UserBusinessAreaNode' }
-          & Pick<UserBusinessAreaNode, 'id' | 'slug' | 'code' | 'name' | 'longName'>
+        & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+        & { createdBy: (
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
         ), program: (
           { __typename?: 'ProgramNode' }
-          & Pick<ProgramNode, 'isRemoved' | 'id' | 'createdAt' | 'updatedAt' | 'version' | 'name' | 'status' | 'startDate' | 'endDate' | 'description' | 'caId' | 'caHashId' | 'budget'>
-        ), createdBy: (
-          { __typename?: 'UserNode' }
-          & Pick<UserNode, 'id' | 'username' | 'firstName' | 'lastName'>
+          & Pick<ProgramNode, 'id' | 'name'>
         ), targetPopulation: (
           { __typename?: 'TargetPopulationNode' }
-          & Pick<TargetPopulationNode, 'name' | 'id'>
+          & Pick<TargetPopulationNode, 'id' | 'name'>
         ) }
       )> }
     )>> }
@@ -9195,19 +9197,16 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'isRemoved' | 'unicefId' | 'id' | 'createdAt' | 'statusDate' | 'startDate' | 'endDate' | 'exchangeRate' | 'totalEntitledQuantity' | 'totalEntitledQuantityUsd' | 'totalEntitledQuantityRevised' | 'totalEntitledQuantityRevisedUsd' | 'totalDeliveredQuantity' | 'totalDeliveredQuantityUsd' | 'totalUndeliveredQuantity' | 'totalUndeliveredQuantityUsd' | 'status' | 'currency' | 'currencyName' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'maleChildrenCount' | 'femaleAdultsCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount'>
-    & { businessArea: (
-      { __typename?: 'UserBusinessAreaNode' }
-      & Pick<UserBusinessAreaNode, 'id' | 'slug' | 'code' | 'name' | 'longName'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+    & { createdBy: (
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
     ), program: (
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'isRemoved' | 'id' | 'createdAt' | 'updatedAt' | 'version' | 'name' | 'status' | 'startDate' | 'endDate' | 'description' | 'caId' | 'caHashId' | 'budget'>
-    ), createdBy: (
-      { __typename?: 'UserNode' }
-      & Pick<UserNode, 'id' | 'username' | 'firstName' | 'lastName'>
+      & Pick<ProgramNode, 'id' | 'name'>
     ), targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'name' | 'id'>
+      & Pick<TargetPopulationNode, 'id' | 'name'>
     ) }
   )> }
 );
@@ -9303,13 +9302,18 @@ export type AllPaymentRecordsQuery = (
   )> }
 );
 
-export type AllPaymentsQueryVariables = {
-  paymentPlanId: Scalars['String'],
-  businessArea: Scalars['String']
+export type AllPaymentsForTableQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  businessArea: Scalars['String'],
+  paymentPlanId: Scalars['String']
 };
 
 
-export type AllPaymentsQuery = (
+export type AllPaymentsForTableQuery = (
   { __typename?: 'Query' }
   & { allPayments: Maybe<(
     { __typename?: 'PaymentNodeConnection' }
@@ -9322,10 +9326,10 @@ export type AllPaymentsQuery = (
       & Pick<PaymentNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentNode' }
-        & Pick<PaymentNode, 'id' | 'status' | 'currency' | 'entitlementDate' | 'entitlementQuantityUsd' | 'createdAt'>
+        & Pick<PaymentNode, 'id' | 'entitlementQuantityUsd'>
         & { household: (
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'size'>
+          & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
           & { admin2: Maybe<(
             { __typename?: 'AreaNode' }
             & Pick<AreaNode, 'id' | 'name'>
@@ -9479,10 +9483,10 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'status' | 'currency' | 'entitlementDate' | 'entitlementQuantityUsd' | 'createdAt'>
+    & Pick<PaymentNode, 'id' | 'entitlementQuantityUsd'>
     & { household: (
       { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'size'>
+      & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
       & { admin2: Maybe<(
         { __typename?: 'AreaNode' }
         & Pick<AreaNode, 'id' | 'name'>
@@ -16206,9 +16210,9 @@ export function useRelatedGrievanceTicketsLazyQuery(baseOptions?: ApolloReactHoo
 export type RelatedGrievanceTicketsQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsQuery>;
 export type RelatedGrievanceTicketsLazyQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsLazyQuery>;
 export type RelatedGrievanceTicketsQueryResult = ApolloReactCommon.QueryResult<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>;
-export const AllPaymentPlansDocument = gql`
-    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantity: String, $dispersionStartDate: Date, $dispersionEndDate: Date) {
-  allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantity: $totalEntitledQuantity, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate) {
+export const AllPaymentPlansForTableDocument = gql`
+    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantity: String, $dispersionStartDate: Date, $dispersionEndDate: Date) {
+  allPaymentPlans(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantity: $totalEntitledQuantity, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -16219,100 +16223,78 @@ export const AllPaymentPlansDocument = gql`
     edges {
       cursor
       node {
-        isRemoved
-        unicefId
         id
-        createdAt
-        statusDate
-        startDate
-        endDate
-        exchangeRate
-        totalEntitledQuantity
-        totalEntitledQuantityUsd
-        totalEntitledQuantityRevised
-        totalEntitledQuantityRevisedUsd
-        totalDeliveredQuantity
-        totalDeliveredQuantityUsd
-        totalUndeliveredQuantity
-        totalUndeliveredQuantityUsd
+        unicefId
         status
+        createdBy {
+          id
+          firstName
+          lastName
+          email
+        }
+        program {
+          id
+          name
+        }
+        targetPopulation {
+          id
+          name
+        }
         currency
         currencyName
+        startDate
+        endDate
         dispersionStartDate
         dispersionEndDate
         femaleChildrenCount
-        maleChildrenCount
         femaleAdultsCount
+        maleChildrenCount
         maleAdultsCount
         totalHouseholdsCount
         totalIndividualsCount
-        businessArea {
-          id
-          slug
-          code
-          name
-          longName
-        }
-        program {
-          isRemoved
-          id
-          createdAt
-          updatedAt
-          version
-          name
-          status
-          startDate
-          endDate
-          description
-          caId
-          caHashId
-          budget
-        }
-        createdBy {
-          id
-          username
-          firstName
-          lastName
-        }
-        targetPopulation {
-          name
-          id
-        }
+        totalEntitledQuantity
+        totalDeliveredQuantity
+        totalUndeliveredQuantity
       }
     }
   }
 }
     `;
-export type AllPaymentPlansComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentPlansQuery, AllPaymentPlansQueryVariables>, 'query'> & ({ variables: AllPaymentPlansQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type AllPaymentPlansForTableComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>, 'query'> & ({ variables: AllPaymentPlansForTableQueryVariables; skip?: boolean; } | { skip: boolean; });
 
-    export const AllPaymentPlansComponent = (props: AllPaymentPlansComponentProps) => (
-      <ApolloReactComponents.Query<AllPaymentPlansQuery, AllPaymentPlansQueryVariables> query={AllPaymentPlansDocument} {...props} />
+    export const AllPaymentPlansForTableComponent = (props: AllPaymentPlansForTableComponentProps) => (
+      <ApolloReactComponents.Query<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables> query={AllPaymentPlansForTableDocument} {...props} />
     );
     
-export type AllPaymentPlansProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllPaymentPlansQuery, AllPaymentPlansQueryVariables> & TChildProps;
-export function withAllPaymentPlans<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type AllPaymentPlansForTableProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables> & TChildProps;
+export function withAllPaymentPlansForTable<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  AllPaymentPlansQuery,
-  AllPaymentPlansQueryVariables,
-  AllPaymentPlansProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, AllPaymentPlansQuery, AllPaymentPlansQueryVariables, AllPaymentPlansProps<TChildProps>>(AllPaymentPlansDocument, {
-      alias: 'allPaymentPlans',
+  AllPaymentPlansForTableQuery,
+  AllPaymentPlansForTableQueryVariables,
+  AllPaymentPlansForTableProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables, AllPaymentPlansForTableProps<TChildProps>>(AllPaymentPlansForTableDocument, {
+      alias: 'allPaymentPlansForTable',
       ...operationOptions
     });
 };
 
 /**
- * __useAllPaymentPlansQuery__
+ * __useAllPaymentPlansForTableQuery__
  *
- * To run a query within a React component, call `useAllPaymentPlansQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllPaymentPlansQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `useAllPaymentPlansForTableQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllPaymentPlansForTableQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useAllPaymentPlansQuery({
+ * const { data, loading, error } = useAllPaymentPlansForTableQuery({
  *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
  *      businessArea: // value for 'businessArea'
  *      search: // value for 'search'
  *      status: // value for 'status'
@@ -16322,77 +16304,50 @@ export function withAllPaymentPlans<TProps, TChildProps = {}>(operationOptions?:
  *   },
  * });
  */
-export function useAllPaymentPlansQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllPaymentPlansQuery, AllPaymentPlansQueryVariables>) {
-        return ApolloReactHooks.useQuery<AllPaymentPlansQuery, AllPaymentPlansQueryVariables>(AllPaymentPlansDocument, baseOptions);
+export function useAllPaymentPlansForTableQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>(AllPaymentPlansForTableDocument, baseOptions);
       }
-export function useAllPaymentPlansLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllPaymentPlansQuery, AllPaymentPlansQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<AllPaymentPlansQuery, AllPaymentPlansQueryVariables>(AllPaymentPlansDocument, baseOptions);
+export function useAllPaymentPlansForTableLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>(AllPaymentPlansForTableDocument, baseOptions);
         }
-export type AllPaymentPlansQueryHookResult = ReturnType<typeof useAllPaymentPlansQuery>;
-export type AllPaymentPlansLazyQueryHookResult = ReturnType<typeof useAllPaymentPlansLazyQuery>;
-export type AllPaymentPlansQueryResult = ApolloReactCommon.QueryResult<AllPaymentPlansQuery, AllPaymentPlansQueryVariables>;
+export type AllPaymentPlansForTableQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableQuery>;
+export type AllPaymentPlansForTableLazyQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableLazyQuery>;
+export type AllPaymentPlansForTableQueryResult = ApolloReactCommon.QueryResult<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>;
 export const PaymentPlanDocument = gql`
     query PaymentPlan($id: ID!) {
   paymentPlan(id: $id) {
-    isRemoved
-    unicefId
     id
-    createdAt
-    statusDate
-    startDate
-    endDate
-    exchangeRate
-    totalEntitledQuantity
-    totalEntitledQuantityUsd
-    totalEntitledQuantityRevised
-    totalEntitledQuantityRevisedUsd
-    totalDeliveredQuantity
-    totalDeliveredQuantityUsd
-    totalUndeliveredQuantity
-    totalUndeliveredQuantityUsd
+    unicefId
     status
+    createdBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    program {
+      id
+      name
+    }
+    targetPopulation {
+      id
+      name
+    }
     currency
     currencyName
+    startDate
+    endDate
     dispersionStartDate
     dispersionEndDate
     femaleChildrenCount
-    maleChildrenCount
     femaleAdultsCount
+    maleChildrenCount
     maleAdultsCount
     totalHouseholdsCount
     totalIndividualsCount
-    businessArea {
-      id
-      slug
-      code
-      name
-      longName
-    }
-    program {
-      isRemoved
-      id
-      createdAt
-      updatedAt
-      version
-      name
-      status
-      startDate
-      endDate
-      description
-      caId
-      caHashId
-      budget
-    }
-    createdBy {
-      id
-      username
-      firstName
-      lastName
-    }
-    targetPopulation {
-      name
-      id
-    }
+    totalEntitledQuantity
+    totalDeliveredQuantity
+    totalUndeliveredQuantity
   }
 }
     `;
@@ -16639,9 +16594,9 @@ export function useAllPaymentRecordsLazyQuery(baseOptions?: ApolloReactHooks.Laz
 export type AllPaymentRecordsQueryHookResult = ReturnType<typeof useAllPaymentRecordsQuery>;
 export type AllPaymentRecordsLazyQueryHookResult = ReturnType<typeof useAllPaymentRecordsLazyQuery>;
 export type AllPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>;
-export const AllPaymentsDocument = gql`
-    query AllPayments($paymentPlanId: String!, $businessArea: String!) {
-  allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea) {
+export const AllPaymentsForTableDocument = gql`
+    query AllPaymentsForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $paymentPlanId: String!) {
+  allPayments(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, paymentPlanId: $paymentPlanId) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -16655,66 +16610,68 @@ export const AllPaymentsDocument = gql`
         id
         household {
           id
+          unicefId
           size
           admin2 {
             id
             name
           }
         }
-        status
-        currency
-        entitlementDate
         entitlementQuantityUsd
-        createdAt
       }
     }
   }
 }
     `;
-export type AllPaymentsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentsQuery, AllPaymentsQueryVariables>, 'query'> & ({ variables: AllPaymentsQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type AllPaymentsForTableComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>, 'query'> & ({ variables: AllPaymentsForTableQueryVariables; skip?: boolean; } | { skip: boolean; });
 
-    export const AllPaymentsComponent = (props: AllPaymentsComponentProps) => (
-      <ApolloReactComponents.Query<AllPaymentsQuery, AllPaymentsQueryVariables> query={AllPaymentsDocument} {...props} />
+    export const AllPaymentsForTableComponent = (props: AllPaymentsForTableComponentProps) => (
+      <ApolloReactComponents.Query<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables> query={AllPaymentsForTableDocument} {...props} />
     );
     
-export type AllPaymentsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllPaymentsQuery, AllPaymentsQueryVariables> & TChildProps;
-export function withAllPayments<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type AllPaymentsForTableProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables> & TChildProps;
+export function withAllPaymentsForTable<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  AllPaymentsQuery,
-  AllPaymentsQueryVariables,
-  AllPaymentsProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, AllPaymentsQuery, AllPaymentsQueryVariables, AllPaymentsProps<TChildProps>>(AllPaymentsDocument, {
-      alias: 'allPayments',
+  AllPaymentsForTableQuery,
+  AllPaymentsForTableQueryVariables,
+  AllPaymentsForTableProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables, AllPaymentsForTableProps<TChildProps>>(AllPaymentsForTableDocument, {
+      alias: 'allPaymentsForTable',
       ...operationOptions
     });
 };
 
 /**
- * __useAllPaymentsQuery__
+ * __useAllPaymentsForTableQuery__
  *
- * To run a query within a React component, call `useAllPaymentsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllPaymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `useAllPaymentsForTableQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllPaymentsForTableQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useAllPaymentsQuery({
+ * const { data, loading, error } = useAllPaymentsForTableQuery({
  *   variables: {
- *      paymentPlanId: // value for 'paymentPlanId'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
  *      businessArea: // value for 'businessArea'
+ *      paymentPlanId: // value for 'paymentPlanId'
  *   },
  * });
  */
-export function useAllPaymentsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllPaymentsQuery, AllPaymentsQueryVariables>) {
-        return ApolloReactHooks.useQuery<AllPaymentsQuery, AllPaymentsQueryVariables>(AllPaymentsDocument, baseOptions);
+export function useAllPaymentsForTableQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>(AllPaymentsForTableDocument, baseOptions);
       }
-export function useAllPaymentsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllPaymentsQuery, AllPaymentsQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<AllPaymentsQuery, AllPaymentsQueryVariables>(AllPaymentsDocument, baseOptions);
+export function useAllPaymentsForTableLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>(AllPaymentsForTableDocument, baseOptions);
         }
-export type AllPaymentsQueryHookResult = ReturnType<typeof useAllPaymentsQuery>;
-export type AllPaymentsLazyQueryHookResult = ReturnType<typeof useAllPaymentsLazyQuery>;
-export type AllPaymentsQueryResult = ApolloReactCommon.QueryResult<AllPaymentsQuery, AllPaymentsQueryVariables>;
+export type AllPaymentsForTableQueryHookResult = ReturnType<typeof useAllPaymentsForTableQuery>;
+export type AllPaymentsForTableLazyQueryHookResult = ReturnType<typeof useAllPaymentsForTableLazyQuery>;
+export type AllPaymentsForTableQueryResult = ApolloReactCommon.QueryResult<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>;
 export const CashPlanDocument = gql`
     query CashPlan($id: ID!) {
   cashPlan(id: $id) {
@@ -17048,17 +17005,14 @@ export const PaymentDocument = gql`
     id
     household {
       id
+      unicefId
       size
       admin2 {
         id
         name
       }
     }
-    status
-    currency
-    entitlementDate
     entitlementQuantityUsd
-    createdAt
   }
 }
     `;
