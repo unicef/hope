@@ -387,9 +387,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             TargetPopulation.objects.filter(
                 program=self.program,
                 steficon_rule__isnull=False,
-                status=TargetPopulation.STATUS_PROCESSING,
             )
+            .filter(status__in=(TargetPopulation.STATUS_PROCESSING, TargetPopulation.STATUS_READY_FOR_CASH_ASSIST))
             .order_by("-created_at")
+            .distinct()
             .first()
         )
         if tp is None:
