@@ -38,7 +38,7 @@ def to_dataset(result):
         if not fields:
             fields = [field.name for field in result.model._meta.get_fields()]
         data.headers = fields
-        try :
+        try:
             for obj in result.all():
                 data.append([obj[f] if isinstance(obj, dict) else str(getattr(obj, f)) for f in fields])
         except Exception as e:
@@ -47,7 +47,7 @@ def to_dataset(result):
         data = tablib.Dataset()
         fields = set().union(*(d.keys() for d in list(result)))
         data.headers = fields
-        try :
+        try:
             for obj in result:
                 data.append([obj[f] for f in fields])
         except Exception as e:

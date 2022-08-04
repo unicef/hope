@@ -443,18 +443,19 @@ def deduplicate_documents():
                 Document.objects.filter(status=Document.STATUS_PENDING)
                 .values("individual__registration_data_import")
                 .annotate(count=Count("individual__registration_data_import"))
-                .order_by("-individual__registration_data_import__created_at")
             )
             rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
-            for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids):
-                print(rdi)
+            for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
+                documents_query = Document.objects.filter(
+                    status=Document.STATUS_PENDING, individual__registration_data_import=rdi
+                )
                 DeduplicateTask.hard_deduplicate_documents(
-                    Document.objects.filter(status=Document.STATUS_PENDING, individual__registration_data_import=rdi),
+                    documents_query,
                     registration_data_import=rdi,
                 )
+            documents_query = Document.objects.filter(
+                status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True
+            )
             DeduplicateTask.hard_deduplicate_documents(
-                Document.objects.filter(
-                    status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True
-                ),
-                registration_data_import=rdi,
+                documents_query,
             )

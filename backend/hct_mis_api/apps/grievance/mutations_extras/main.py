@@ -22,7 +22,7 @@ from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import (
     SensitiveGrievanceTicketExtras,
 )
 from hct_mis_api.apps.grievance.mutations_extras.ticket_payment_verification_details import (
-    TicketPaymentVerificationDetailsExtras
+    TicketPaymentVerificationDetailsExtras,
 )
 
 

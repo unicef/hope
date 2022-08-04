@@ -95,7 +95,9 @@ def fix_document_photos():
             imported_documents_to_update.append(imported_document)
 
             document = Document.objects.filter(
-                individual__registration_data_import__id=imported_document.hct_id, document_number=document_number, photo=""
+                individual__registration_data_import__id=imported_document.hct_id,
+                document_number=document_number,
+                photo="",
             ).first()
 
             if document:
