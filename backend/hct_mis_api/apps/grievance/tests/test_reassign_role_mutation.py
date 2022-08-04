@@ -10,7 +10,8 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
-    TicketDeleteIndividualDetailsFactory, TicketNeedsAdjudicationDetailsFactory,
+    TicketDeleteIndividualDetailsFactory,
+    TicketNeedsAdjudicationDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -264,7 +265,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
             golden_records_individual=cls.individual_1,
             possible_duplicate=cls.individual_2,
             is_multiple_duplicates_version=True,
-            selected_individual=None
+            selected_individual=None,
         )
 
     def test_role_reassignment_new_ticket(self):
