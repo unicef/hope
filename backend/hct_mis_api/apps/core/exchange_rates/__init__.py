@@ -1,2 +1,2 @@
-from .api import ExchangeRateAPI
-from .models import ExchangeRates
+from .api import ExchangeRateAPI  # noqa: F401
+from .models import ExchangeRates  # noqa: F401

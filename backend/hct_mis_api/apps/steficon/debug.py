@@ -1,6 +1,5 @@
 import sys
 
-from django.template import Context
 from django.template.response import TemplateResponse
 from django.views.debug import ExceptionReporter
 

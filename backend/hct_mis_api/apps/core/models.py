@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.gis.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MinValueValidator
 from django.db.models import JSONField
 from django.utils.translation import gettext_lazy as _
 
