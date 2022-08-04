@@ -125,8 +125,8 @@ class BusinessArea(TimeStampedUUIDModel):
         return self.code_to_cash_assist_mapping.get(self.code, self.code)
 
     @cash_assist_code.setter
-    def cash_assist_code(self,value):
-        self.code = self.cash_assist_to_code_mapping.get(value,value)
+    def cash_assist_code(self, value):
+        self.code = self.cash_assist_to_code_mapping.get(value, value)
 
     @property
     def can_import_ocha_response_plans(self):

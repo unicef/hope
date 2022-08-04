@@ -3,10 +3,11 @@
 import django.contrib.postgres.indexes
 import django.contrib.postgres.search
 from django.db import migrations
+from django.contrib.postgres.operations import AddIndexConcurrently
 
 
 class Migration(migrations.Migration):
-
+    atomic = False
     dependencies = [
         ('household', '0109_migration'),
     ]
@@ -17,7 +18,7 @@ class Migration(migrations.Migration):
             name='vector_column',
             field=django.contrib.postgres.search.SearchVectorField(null=True),
         ),
-        migrations.AddIndex(
+        AddIndexConcurrently(
             model_name='individual',
             index=django.contrib.postgres.indexes.GinIndex(fields=['vector_column'], name='household_i_vector__4c5828_gin'),
         ),
