@@ -2,7 +2,6 @@ import io
 
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
-from django.core.management import call_command
 
 from parameterized import parameterized
 from PIL import Image

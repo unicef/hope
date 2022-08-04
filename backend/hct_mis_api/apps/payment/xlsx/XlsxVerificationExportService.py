@@ -103,7 +103,7 @@ class XlsxVerificationExportService:
             self._add_payment_record_verification_row(payment_record_verification)
 
     def _add_data_validation(self):
-        self.dv_received = DataValidation(type="list", formula1=f'"YES,NO"', allow_blank=False)
+        self.dv_received = DataValidation(type="list", formula1='"YES,NO"', allow_blank=False)
         self.dv_received.add(f"B2:B{len(self.ws_verifications['B'])}")
         self.ws_verifications.add_data_validation(self.dv_received)
         self.ws_verifications["B2":f"B{len(self.ws_verifications['B'])}"]
@@ -126,15 +126,11 @@ class XlsxVerificationExportService:
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
             xlsx_obj = XlsxCashPlanPaymentVerificationFile(
-                created_by=user,
-                cash_plan_payment_verification=self.cashplan_payment_verification
+                created_by=user, cash_plan_payment_verification=self.cashplan_payment_verification
             )
             self.wb.save(tmp.name)
             tmp.seek(0)
-            xlsx_obj.file.save(
-                filename,
-                File(tmp)
-            )
+            xlsx_obj.file.save(filename, File(tmp))
 
     def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col):
 
@@ -172,17 +168,13 @@ class XlsxVerificationExportService:
             "last_name": user.last_name,
             "email": user.email,
             "message": msg,
-            "link": link
+            "link": link,
         }
-        text_body = render_to_string(
-            "payment/verification_plan_xlsx_file_generated_email.txt", context=context
-        )
-        html_body = render_to_string(
-            "payment/verification_plan_xlsx_file_generated_email.html", context=context
-        )
+        text_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.txt", context=context)
+        html_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.html", context=context)
 
         email = EmailMultiAlternatives(
-            subject=f"Verification Plan XLSX file generated",
+            subject="Verification Plan XLSX file generated",
             from_email=settings.EMAIL_HOST_USER,
             to=[context["email"]],
             body=text_body,
@@ -191,4 +183,3 @@ class XlsxVerificationExportService:
         result = email.send()
         if not result:
             logger.error(f"Email couldn't be send to {context['email']}")
-
