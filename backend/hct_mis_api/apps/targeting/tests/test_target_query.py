@@ -1,7 +1,3 @@
-import unittest
-
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -138,7 +134,6 @@ class TestTargetPopulationQuery(APITestCase):
         rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
         rule_filter.save()
         return targeting_criteria
-
 
     @parameterized.expand(
         [

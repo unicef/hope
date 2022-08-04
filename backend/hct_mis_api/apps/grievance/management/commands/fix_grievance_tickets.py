@@ -1,6 +1,8 @@
+import logging
+from django.db import transaction
 from django.core.management import BaseCommand
 
-from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED
+from hct_mis_api.apps.household.models import Individual, DISABLED, NOT_DISABLED
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.core.models import BusinessArea
 
@@ -8,9 +10,10 @@ from hct_mis_api.apps.core.models import BusinessArea
 # for copying & pasting into the terminal purposes
 # there's this business_area filter
 # additional kwargs go to GrievanceTicket filter
+@transaction.atomic
 def fix_disability_fields(business_area=None, **kwargs):
     def _logic(ba):
-        print(f"Fixing disability fields for {ba}")
+        logging.info(f"Fixing disability fields for {ba}")
         tickets = GrievanceTicket.objects.filter(
             business_area=ba,
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
@@ -21,8 +24,9 @@ def fix_disability_fields(business_area=None, **kwargs):
             **kwargs,
         )
         for ticket in tickets:
-            details = ticket.individual_data_update_ticket_details
-            if not details:
+            try:
+                details = ticket.individual_data_update_ticket_details
+            except GrievanceTicket.individual_data_update_ticket_details.RelatedObjectDoesNotExist:
                 continue
             data = details.individual_data
             if not data:
@@ -38,7 +42,7 @@ def fix_disability_fields(business_area=None, **kwargs):
                 elif disability_value is False:
                     new_disability_value = NOT_DISABLED
                 if new_disability_value is not None:
-                    print(
+                    logging.info(
                         f"Found ticket (id={ticket.id}) with disability: '{disability_value}'. Changing to '{new_disability_value}'"
                     )
                     ticket.individual_data_update_ticket_details.individual_data["disability"][
@@ -51,6 +55,9 @@ def fix_disability_fields(business_area=None, **kwargs):
 
     for _business_area in BusinessArea.objects.all():
         _logic(_business_area)
+
+    Individual.objects.filter(disability="False").update(disability=NOT_DISABLED)
+    Individual.objects.filter(disability="True").update(disability=DISABLED)
 
 
 class Command(BaseCommand):

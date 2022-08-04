@@ -301,8 +301,8 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
             payment_verification.cash_plan_payment_verification.verification_channel
             != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
         ):
-            logger.error(f"You can only update status of payment verification for MANUAL verification method")
-            raise GraphQLError(f"You can only update status of payment verification for MANUAL verification method")
+            logger.error("You can only update status of payment verification for MANUAL verification method")
+            raise GraphQLError("You can only update status of payment verification for MANUAL verification method")
         if payment_verification.cash_plan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             logger.error(
                 f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
@@ -424,10 +424,10 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             raise GraphQLError(f"You can't set received_amount {received_amount} and not set received to YES")
         elif received_amount == 0 and received:
             logger.error(
-                f"If received_amount is 0, you should set received to NO",
+                "If received_amount is 0, you should set received to NO",
             )
             raise GraphQLError(
-                f"If received_amount is 0, you should set received to NO",
+                "If received_amount is 0, you should set received to NO",
             )
         elif received_amount is not None and received_amount != 0 and not received:
             logger.error(f"If received_amount({received_amount}) is not 0, you should set received to YES")

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.contrib.admin import FieldListFilter, ListFilter, RelatedFieldListFilter
+from django.contrib.admin import ListFilter, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
 from django.forms import TextInput
 
