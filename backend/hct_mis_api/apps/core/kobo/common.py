@@ -16,7 +16,7 @@ def reduce_asset(asset: dict, *args, **kwargs) -> dict:
         "sector": "Humanitarian - Education",
         "country": "Afghanistan",
         "asset_type": "survey",
-        "date_modified": "2020-05-20 10:43:58.781178-00:00",
+        "date_modified": "2020-05-20T10:43:58.781178Z",
         "deployment_active": False,
         "has_deployment": False,
         "xls_link": "https://kobo.humanitarianresponse.info/
