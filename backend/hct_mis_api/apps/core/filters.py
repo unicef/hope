@@ -177,5 +177,5 @@ class BusinessAreaSlugFilter(Filter):
     field_class = CharField
 
     def filter(self, qs, business_area_slug):
-        business_area_id =cached_business_areas_slug_id_dict()[business_area_slug]
+        business_area_id = cached_business_areas_slug_id_dict()[business_area_slug]
         return qs.filter(business_area_id=business_area_id)

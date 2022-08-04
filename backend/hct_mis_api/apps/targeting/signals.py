@@ -26,9 +26,9 @@ def calculate_candidate_counts(target_population):
         households = target_population.vulnerability_score_filtered_households
     households_count = households.count()
     individuals_count = (
-        households.annotate(
-            individuals_count=Count("individuals", distinct=True)
-        ).aggregate(sum=Sum("individuals_count")).get("sum")
+        households.annotate(individuals_count=Count("individuals", distinct=True))
+        .aggregate(sum=Sum("individuals_count"))
+        .get("sum")
     )
     target_population.candidate_list_total_households = households_count
     target_population.candidate_list_total_individuals = individuals_count

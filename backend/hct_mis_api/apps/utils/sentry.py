@@ -6,6 +6,7 @@ def sentry_tags(func):
     """
     add sentry tags 'celery' and 'celery_task'
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         with configure_scope() as scope:
@@ -13,4 +14,5 @@ def sentry_tags(func):
             scope.set_tag("celery_task", func.__name__)
 
             return func(*args, **kwargs)
+
     return wrapper

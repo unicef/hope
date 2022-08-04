@@ -56,7 +56,6 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
             cash_plan=cash_plan,
             verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX,
             status=CashPlanPaymentVerification.STATUS_ACTIVE,
-
         )
         cls.content = Path(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_updated.xls").read_bytes()
         cls.xlsx_file = XlsxCashPlanPaymentVerificationFile.objects.create(

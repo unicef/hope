@@ -114,7 +114,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         )
 
     def resolve_import_id(parent, info):
-        row = ''
+        row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
         if parent.kobo_asset_id:
@@ -173,7 +173,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.age
 
     def resolve_import_id(parent, info):
-        row = ''
+        row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
         if parent.kobo_asset_id:
