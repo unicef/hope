@@ -3,13 +3,12 @@ import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  AllPaymentPlansQuery,
+  AllPaymentPlansForTableQuery,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import {
-  choicesToDict,
   formatCurrency,
   paymentPlanStatusMapping,
   paymentPlanStatusToColor,
@@ -22,8 +21,9 @@ const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
 `;
+
 interface PaymentVerificationTableRowProps {
-  plan: AllPaymentPlansQuery['allPaymentPlans']['edges'][number]['node'];
+  plan: AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][number]['node'];
   canViewDetails: boolean;
 }
 
@@ -42,9 +42,6 @@ export const PaymentPlanTableRow = ({
   } = useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
-  const deliveryTypeChoicesDict = choicesToDict(
-    statusChoicesData.paymentRecordDeliveryTypeChoices,
-  );
 
   return (
     <ClickableTableRow

@@ -274,7 +274,6 @@ class PaymentFilter(FilterSet):
     order_by = OrderingFilter(
         fields=(
             "id",
-            "household_id",
             "status",
         )
     )

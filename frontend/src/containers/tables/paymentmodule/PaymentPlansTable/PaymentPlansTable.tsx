@@ -1,9 +1,9 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllPaymentPlansQuery,
-  AllPaymentPlansQueryVariables,
-  useAllPaymentPlansQuery,
+  AllPaymentPlansForTableQuery,
+  AllPaymentPlansForTableQueryVariables,
+  useAllPaymentPlansForTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentPlansHeadCells';
@@ -21,7 +21,7 @@ export function PaymentPlansTable({
   businessArea,
 }: PaymentPlansTableProps): ReactElement {
   const { t } = useTranslation();
-  const initialVariables: AllPaymentPlansQueryVariables = {
+  const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
     search: filter.search,
     status: filter.status,
@@ -32,12 +32,12 @@ export function PaymentPlansTable({
 
   return (
     <UniversalTable<
-      AllPaymentPlansQuery['allPaymentPlans']['edges'][number]['node'],
-      AllPaymentPlansQueryVariables
+      AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][number]['node'],
+      AllPaymentPlansForTableQueryVariables
     >
       title={t('Payment Plans')}
       headCells={headCells}
-      query={useAllPaymentPlansQuery}
+      query={useAllPaymentPlansForTableQuery}
       queriedObjectName='allPaymentPlans'
       initialVariables={initialVariables}
       renderRow={(row) => (
