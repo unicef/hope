@@ -1,13 +1,12 @@
 import itertools
 import logging
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
 from time import sleep
 
+from constance import config
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat
-
-from constance import config
 from django_countries.fields import Country
 from elasticsearch_dsl import connections
 from psycopg2._psycopg import IntegrityError
@@ -15,10 +14,6 @@ from psycopg2._psycopg import IntegrityError
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_dict
-from hct_mis_api.apps.grievance.common import (
-    create_grievance_ticket_with_details,
-    prepare_grievance_ticket_documents_deduplication,
-)
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
@@ -843,7 +838,7 @@ class DeduplicateTask:
         all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
         already_processed_signatures = []
         ticket_data_dict = {}
-        individuals_id_set = set()
+        possible_duplicates_individuals_id_set = set()
         for new_document in documents_to_dedup:
             new_document_signature = f"{new_document.type_id}--{new_document.document_number}"
             if new_document_signature in all_matching_number_documents_signatures:
@@ -854,7 +849,7 @@ class DeduplicateTask:
                 )
                 ticket_data["possible_duplicates"].append(new_document)
                 ticket_data_dict[new_document_signature] = ticket_data
-                individuals_id_set.add(str(new_document.individual_id))
+                possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
                 continue
             if (
                 new_document_signature in new_document_signatures_duplicated_in_batch
@@ -862,7 +857,7 @@ class DeduplicateTask:
             ):
                 new_document.status = Document.STATUS_NEED_INVESTIGATION
                 ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
-                individuals_id_set.add(str(new_document.individual_id))
+                possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
                 continue
             new_document.status = Document.STATUS_VALID
             already_processed_signatures.append(new_document_signature)
@@ -885,7 +880,7 @@ class DeduplicateTask:
             raise
         PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
         possible_duplicates_through_existing_list = (
-            PossibleDuplicateThrough.objects.filter(individual__in=individuals_id_set)
+            PossibleDuplicateThrough.objects.filter(individual__in=possible_duplicates_individuals_id_set)
             .order_by("ticketneedsadjudicationdetails")
             .values_list(
                 "ticketneedsadjudicationdetails_id",
@@ -899,18 +894,66 @@ class DeduplicateTask:
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
         ticket_data_collected = []
         for ticket_data in ticket_data_dict.values():
-            prepared_ticket = prepare_grievance_ticket_documents_deduplication(
+            prepared_ticket = cls.prepare_grievance_ticket_documents_deduplication(
                 main_individual=ticket_data["original"].individual,
                 business_area=ticket_data["original"].individual.business_area,
                 registration_data_import=registration_data_import,
-                possible_duplicates=[d.individual for d in ticket_data["possible_duplicates"]],
+                possible_duplicates_individuals=[d.individual for d in ticket_data["possible_duplicates"]],
                 possible_duplicates_through_dict=possible_duplicates_through_dict,
             )
             if prepared_ticket is None:
                 continue
             ticket_data_collected.append(prepared_ticket)
-        GrievanceTicket.objects.bulk_create([x[0] for x in ticket_data_collected])
-        TicketNeedsAdjudicationDetails.objects.bulk_create([x[1] for x in ticket_data_collected])
+        GrievanceTicket.objects.bulk_create([x.ticket for x in ticket_data_collected])
+        TicketNeedsAdjudicationDetails.objects.bulk_create([x.ticket_details for x in ticket_data_collected])
         # makes flat list from list of lists models
-        duplicates_models_to_create_flat = list(itertools.chain(*[x[2] for x in ticket_data_collected]))
+        duplicates_models_to_create_flat = list(
+            itertools.chain(*[x.possible_duplicates_throughs for x in ticket_data_collected])
+        )
         PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
+
+    def prepare_grievance_ticket_documents_deduplication(
+        main_individual,
+        possible_duplicates_individuals,
+        business_area,
+        registration_data_import,
+        possible_duplicates_through_dict,
+    ):
+        from hct_mis_api.apps.grievance.models import (
+            GrievanceTicket,
+            TicketNeedsAdjudicationDetails,
+        )
+
+        new_duplicates_set = {str(main_individual.id), *[str(x.id) for x in possible_duplicates_individuals]}
+        for duplicates_set in possible_duplicates_through_dict.values():
+            if new_duplicates_set.issubset(duplicates_set):
+                return None
+        household = main_individual.household
+        admin_level_2 = household.admin2 if household else None
+        admin_level_2_new = household.admin2_new if household else None
+        area = household.village if household else ""
+
+        ticket = GrievanceTicket(
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            business_area=business_area,
+            admin2=admin_level_2,
+            admin2_new=admin_level_2_new,
+            area=area,
+            registration_data_import=registration_data_import,
+        )
+        ticket_details = TicketNeedsAdjudicationDetails(
+            ticket=ticket,
+            golden_records_individual=main_individual,
+            is_multiple_duplicates_version=True,
+            selected_individual=None,
+        )
+        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
+        possible_duplicates_throughs = []
+        for possible_duplicate_individual in set(possible_duplicates_individuals):
+            possible_duplicates_throughs.append(
+                PossibleDuplicateThrough(
+                    individual=possible_duplicate_individual, ticketneedsadjudicationdetails=ticket_details
+                )
+            )
+        TicketData = namedtuple("TicketData", ("ticket", "ticket_details", "possible_duplicates_throughs"))
+        return TicketData(ticket, ticket_details, possible_duplicates_throughs)

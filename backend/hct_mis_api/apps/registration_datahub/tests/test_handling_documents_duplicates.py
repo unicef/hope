@@ -140,6 +140,11 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="ASD123",
             individual=cls.individuals[1],
         )
+        cls.document8 = Document.objects.create(
+            type=dt,
+            document_number="ASD123",
+            individual=cls.individuals[4],
+        )
 
         cls.document1.save()
         cls.document2.save()
@@ -184,7 +189,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))
             first_dedup_query_count = len(context.captured_queries)
             DeduplicateTask.hard_deduplicate_documents(
-                (self.document2, self.document3, self.document4, self.document5, self.document7),
+                (self.document2, self.document3, self.document4, self.document5, self.document7,self.document8),
                 self.registration_data_import,
             )
             second_dedup_query_count = len(context.captured_queries) - first_dedup_query_count
