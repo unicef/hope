@@ -6,11 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { BlackLink } from '../../../../components/core/BlackLink';
+import { Missing } from '../../../../components/core/Missing';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../../utils/utils';
-import { AllPaymentsQuery } from '../../../../__generated__/graphql';
+import { decodeIdString, formatCurrency } from '../../../../utils/utils';
+import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
 import { WarningTooltipTable } from './WarningTooltipTable';
 
 const ErrorText = styled.div`
@@ -37,12 +38,8 @@ export const StyledLink = styled.div`
   align-content: center;
 `;
 
-const firstTwoOfId = (id: string) => {
-  return decodeIdString(id).split('-').slice(0, 2).join('-');
-};
-
 interface PaymentsTableRowProps {
-  payment: AllPaymentsQuery['allPayments']['edges'][number]['node'];
+  payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
   canViewDetails: boolean;
 }
 
@@ -61,7 +58,7 @@ export function PaymentsTableRow({
     history.push(detailsPath);
   };
 
-  const handleDialogWarningOpen = (e: React.SyntheticEvent<HTMLButtonElement>): void => {
+  const handleDialogWarningOpen = (e: React.SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();
     setDialogWarningOpen(true);
   };
@@ -83,13 +80,13 @@ export function PaymentsTableRow({
           />
         </TableCell>
         <TableCell align='left'>
-            {firstTwoOfId(payment.id)}
+            {decodeIdString(payment.id)}
         </TableCell>
         <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink to={householdDetailsPath}>{firstTwoOfId(payment.household.id)}</BlackLink>
+            <BlackLink to={householdDetailsPath}>{payment.household.unicefId}</BlackLink>
           ) : (
-            firstTwoOfId(payment.household.id)
+            payment.household.unicefId
           )}
         </TableCell>
         <TableCell align='left'>
@@ -99,20 +96,16 @@ export function PaymentsTableRow({
           {payment.household.admin2.name}
         </TableCell>
         <TableCell align='left'>
-          {payment.household.admin2.name}
+          <Missing />
         </TableCell>
         <TableCell align='left'>
-          {false ? (
-            <CheckCircleOutline />
-          ) : (
-            <ErrorText>
-              <ErrorOutline />
-              {t('Missing')}
-            </ErrorText>
-          )}
+          <ErrorText>
+            <ErrorOutline />
+            {t('Missing')}
+          </ErrorText>
         </TableCell>
         <TableCell align='left'>
-          {payment.entitlementQuantityUsd}
+          {formatCurrency(payment.entitlementQuantityUsd, true)}
         </TableCell>
       </ClickableTableRow>
       <WarningTooltipTable
