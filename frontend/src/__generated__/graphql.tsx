@@ -8026,6 +8026,23 @@ export type CreatePpMutation = { __typename?: 'Mutations' } & {
   >;
 };
 
+export type DeletePpMutationVariables = {
+  paymentPlanId: Scalars['ID'];
+};
+
+export type DeletePpMutation = { __typename?: 'Mutations' } & {
+  deletePaymentPlan: Maybe<
+    { __typename?: 'DeletePaymentPlanMutation' } & {
+      paymentPlan: Maybe<
+        { __typename?: 'PaymentPlanNode' } & Pick<
+          PaymentPlanNode,
+          'id' | 'status'
+        >
+      >;
+    }
+  >;
+};
+
 export type UpdatePpMutationVariables = {
   input: UpdatePaymentPlanInput;
 };
@@ -15371,6 +15388,95 @@ export type CreatePpMutationResult = ApolloReactCommon.MutationResult<
 export type CreatePpMutationOptions = ApolloReactCommon.BaseMutationOptions<
   CreatePpMutation,
   CreatePpMutationVariables
+>;
+export const DeletePpDocument = gql`
+  mutation DeletePP($paymentPlanId: ID!) {
+    deletePaymentPlan(paymentPlanId: $paymentPlanId) {
+      paymentPlan {
+        id
+        status
+      }
+    }
+  }
+`;
+export type DeletePpMutationFn = ApolloReactCommon.MutationFunction<
+  DeletePpMutation,
+  DeletePpMutationVariables
+>;
+export type DeletePpComponentProps = Omit<
+  ApolloReactComponents.MutationComponentOptions<
+    DeletePpMutation,
+    DeletePpMutationVariables
+  >,
+  'mutation'
+>;
+
+export const DeletePpComponent = (props: DeletePpComponentProps) => (
+  <ApolloReactComponents.Mutation<DeletePpMutation, DeletePpMutationVariables>
+    mutation={DeletePpDocument}
+    {...props}
+  />
+);
+
+export type DeletePpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<
+  DeletePpMutation,
+  DeletePpMutationVariables
+> &
+  TChildProps;
+export function withDeletePp<TProps, TChildProps = {}>(
+  operationOptions?: ApolloReactHoc.OperationOption<
+    TProps,
+    DeletePpMutation,
+    DeletePpMutationVariables,
+    DeletePpProps<TChildProps>
+  >,
+) {
+  return ApolloReactHoc.withMutation<
+    TProps,
+    DeletePpMutation,
+    DeletePpMutationVariables,
+    DeletePpProps<TChildProps>
+  >(DeletePpDocument, {
+    alias: 'deletePp',
+    ...operationOptions,
+  });
+}
+
+/**
+ * __useDeletePpMutation__
+ *
+ * To run a mutation, you first call `useDeletePpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePpMutation, { data, loading, error }] = useDeletePpMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *   },
+ * });
+ */
+export function useDeletePpMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    DeletePpMutation,
+    DeletePpMutationVariables
+  >,
+) {
+  return ApolloReactHooks.useMutation<
+    DeletePpMutation,
+    DeletePpMutationVariables
+  >(DeletePpDocument, baseOptions);
+}
+export type DeletePpMutationHookResult = ReturnType<typeof useDeletePpMutation>;
+export type DeletePpMutationResult = ApolloReactCommon.MutationResult<
+  DeletePpMutation
+>;
+export type DeletePpMutationOptions = ApolloReactCommon.BaseMutationOptions<
+  DeletePpMutation,
+  DeletePpMutationVariables
 >;
 export const UpdatePpDocument = gql`
   mutation UpdatePP($input: UpdatePaymentPlanInput!) {
