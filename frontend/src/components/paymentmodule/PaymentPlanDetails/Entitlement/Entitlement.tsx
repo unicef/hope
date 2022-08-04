@@ -17,6 +17,11 @@ import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { PAYMENT_PLAN_STATES } from '../../../../utils/constants';
+import {
+  PaymentPlanQuery,
+  PaymentPlanStatus,
+} from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { Missing } from '../../../core/Missing';
@@ -82,14 +87,12 @@ const BoxWithBorderRight = styled(Box)`
 `;
 
 interface EntitlementProps {
-  businessArea: string;
-  permissions: string[];
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function Entitlement({
-  businessArea,
-  permissions,
-}: EntitlementProps): React.ReactElement {
+export const Entitlement = ({
+  paymentPlan,
+}: EntitlementProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const [entitlement, setEntitlement] = useState<string>('');
@@ -102,122 +105,126 @@ export function Entitlement({
   ];
 
   return (
-    <Box m={5}>
-      <ContainerColumnWithBorder>
-        <Box mt={4}>
-          <Title>
-            <Typography variant='h6'>{t('Entitlement')}</Typography>
-          </Title>
-          <GreyText>{t('Select Entitlement Formula')}</GreyText>
-          <Grid alignItems='center' container>
-            <Grid item xs={6}>
-              <FormControl variant='outlined' margin='dense' fullWidth>
-                <InputLabel>{t('Entitlement Formula')}</InputLabel>
-                <Select
-                  value={entitlement}
-                  labelWidth={180}
-                  onChange={(event) =>
-                    setEntitlement(event.target.value as string)
-                  }
-                >
-                  {entitlementChoices.map((each) => (
-                    <MenuItem key={each.value} value={each.value}>
-                      {each.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item>
-              <Box ml={2}>
-                <Button
-                  onClick={() => console.log('Apply')}
-                  variant='contained'
-                  color='primary'
-                >
-                  {t('Apply')}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-          <Box display='flex' alignItems='center'>
-            <OrDivider />
-            <DividerLabel>Or</DividerLabel>
-            <OrDivider />
-          </Box>
-        </Box>
-        <Box display='flex'>
-          <Box width='50%'>
-            <BoxWithBorderRight
-              display='flex'
-              justifyContent='center'
-              alignItems='center'
-              flexDirection='column'
-            >
-              <Button
-                color='primary'
-                startIcon={<DownloadIcon />}
-                onClick={() => console.log('download')}
-              >
-                {t('Download Template')}
-              </Button>
-              <GreyTextSmall>
-                {t(
-                  'Template contains payment list with all targeted households',
-                )}
-              </GreyTextSmall>
-            </BoxWithBorderRight>
-          </Box>
-          <Box width='50%'>
-            <Box
-              display='flex'
-              justifyContent='center'
-              alignItems='center'
-              flexDirection='column'
-            >
-              <Box>
-                <Button
-                  color='primary'
-                  startIcon={<UploadIcon />}
-                  onClick={() => inputRef.current.click()}
-                >
-                  {t('Upload File')}
-                </Button>
-                <input
-                  ref={inputRef}
-                  accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                  type='file'
-                  style={{ display: 'none' }}
-                  onChange={(e) => setFile(e.currentTarget.files[0])}
-                />
-              </Box>
-              {file?.name && (
-                <Box alignItems='center' display='flex'>
-                  <SpinaczIconContainer>
-                    <AttachFileIcon fontSize='inherit' />
-                  </SpinaczIconContainer>
-                  <GreyTextSmall>{file?.name || null}</GreyTextSmall>
-                  <Box ml={2}>
-                    <IconButton
-                      onClick={() => {
-                        setFile(null);
-                      }}
+    <>
+      {paymentPlan.status !== PaymentPlanStatus.Open && (
+        <Box m={5}>
+          <ContainerColumnWithBorder>
+            <Box mt={4}>
+              <Title>
+                <Typography variant='h6'>{t('Entitlement')}</Typography>
+              </Title>
+              <GreyText>{t('Select Entitlement Formula')}</GreyText>
+              <Grid alignItems='center' container>
+                <Grid item xs={6}>
+                  <FormControl variant='outlined' margin='dense' fullWidth>
+                    <InputLabel>{t('Entitlement Formula')}</InputLabel>
+                    <Select
+                      value={entitlement}
+                      labelWidth={180}
+                      onChange={(event) =>
+                        setEntitlement(event.target.value as string)
+                      }
                     >
-                      <Delete />
-                    </IconButton>
+                      {entitlementChoices.map((each) => (
+                        <MenuItem key={each.value} value={each.value}>
+                          {each.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item>
+                  <Box ml={2}>
+                    <Button
+                      onClick={() => console.log('Apply')}
+                      variant='contained'
+                      color='primary'
+                    >
+                      {t('Apply')}
+                    </Button>
                   </Box>
-                </Box>
-              )}
+                </Grid>
+              </Grid>
+              <Box display='flex' alignItems='center'>
+                <OrDivider />
+                <DividerLabel>Or</DividerLabel>
+                <OrDivider />
+              </Box>
             </Box>
-          </Box>
+            <Box display='flex'>
+              <Box width='50%'>
+                <BoxWithBorderRight
+                  display='flex'
+                  justifyContent='center'
+                  alignItems='center'
+                  flexDirection='column'
+                >
+                  <Button
+                    color='primary'
+                    startIcon={<DownloadIcon />}
+                    onClick={() => console.log('download')}
+                  >
+                    {t('Download Template')}
+                  </Button>
+                  <GreyTextSmall>
+                    {t(
+                      'Template contains payment list with all targeted households',
+                    )}
+                  </GreyTextSmall>
+                </BoxWithBorderRight>
+              </Box>
+              <Box width='50%'>
+                <Box
+                  display='flex'
+                  justifyContent='center'
+                  alignItems='center'
+                  flexDirection='column'
+                >
+                  <Box>
+                    <Button
+                      color='primary'
+                      startIcon={<UploadIcon />}
+                      onClick={() => inputRef.current.click()}
+                    >
+                      {t('Upload File')}
+                    </Button>
+                    <input
+                      ref={inputRef}
+                      accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                      type='file'
+                      style={{ display: 'none' }}
+                      onChange={(e) => setFile(e.currentTarget.files[0])}
+                    />
+                  </Box>
+                  {file?.name && (
+                    <Box alignItems='center' display='flex'>
+                      <SpinaczIconContainer>
+                        <AttachFileIcon fontSize='inherit' />
+                      </SpinaczIconContainer>
+                      <GreyTextSmall>{file?.name || null}</GreyTextSmall>
+                      <Box ml={2}>
+                        <IconButton
+                          onClick={() => {
+                            setFile(null);
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+            <Divider />
+            <LabelizedField label={t('Total Cash Received')}>
+              <BigValue>
+                USD <Missing />
+              </BigValue>
+            </LabelizedField>
+          </ContainerColumnWithBorder>
         </Box>
-        <Divider />
-        <LabelizedField label={t('Total Cash Received')}>
-          <BigValue>
-            USD <Missing />
-          </BigValue>
-        </LabelizedField>
-      </ContainerColumnWithBorder>
-    </Box>
+      )}
+    </>
   );
-}
+};

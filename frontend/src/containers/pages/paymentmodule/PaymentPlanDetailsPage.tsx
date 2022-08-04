@@ -41,7 +41,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
         paymentPlan={data.paymentPlan}
       />
       <AcceptanceProcess paymentPlan={data.paymentPlan} />
-      <Entitlement businessArea={businessArea} permissions={permissions} />
+      <Entitlement paymentPlan={data.paymentPlan} />
       <FspSection businessArea={businessArea} permissions={permissions} />
       <PaymentPlanDetailsResults paymentPlan={data.paymentPlan} />
       <PaymentsTable businessArea={businessArea} paymentPlan={data.paymentPlan} />
