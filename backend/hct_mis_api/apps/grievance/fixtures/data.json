@@ -3,8 +3,8 @@
   "model": "grievance.grievanceticket",
   "pk": "bb62b92a-7cf0-4b40-a358-5a880d82862f",
   "fields": {
-    "created_at": "2022-03-30T09:54:07.827",
-    "updated_at": "2022-03-30T09:54:07.827",
+    "created_at": "2022-03-30 09:54:07.827-00:00",
+    "updated_at": "2022-03-30 09:54:07.827-00:00",
     "version": 1648633101142787,
     "user_modified": null,
     "last_notification_sent": null,
@@ -29,8 +29,8 @@
   "model": "grievance.ticketneedsadjudicationdetails",
   "pk": "f1e1a58a-dba8-4311-b03f-8ea4b83d2f83",
   "fields": {
-    "created_at": "2022-03-30T09:54:07.830",
-    "updated_at": "2022-03-30T09:54:07.830",
+    "created_at": "2022-03-30 09:54:07.830-00:00",
+    "updated_at": "2022-03-30 09:54:07.830-00:00",
     "ticket": "bb62b92a-7cf0-4b40-a358-5a880d82862f",
     "golden_records_individual": "cedd4b49-54e0-4408-8fd2-1030f05a7a6a",
     "possible_duplicate": "a94e76d8-ecc2-479e-ae14-db8f49017546",
