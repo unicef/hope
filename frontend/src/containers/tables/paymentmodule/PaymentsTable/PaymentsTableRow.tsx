@@ -1,5 +1,4 @@
 import TableCell from '@material-ui/core/TableCell';
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,10 +18,6 @@ const ErrorText = styled.div`
   align-items: center;
   text-transform: uppercase;
   color: #ec2323;
-`;
-
-const CheckCircleOutline = styled(CheckCircleOutlineIcon)`
-  color: #8ece32;
 `;
 
 const ErrorOutline = styled(ErrorOutlineIcon)`
