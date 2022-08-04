@@ -18,14 +18,14 @@ import { FormikTextField } from '../../../../shared/Formik/FormikTextField/Formi
 import { LoadingButton } from '../../../core/LoadingButton';
 import { GreyText } from '../../../core/GreyText';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
-import { Action } from '../../../../__generated__/graphql';
+import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 
 export interface ApprovePaymentPlanProps {
-  paymentPlanId: string;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const ApprovePaymentPlan = ({
-  paymentPlanId,
+  paymentPlan,
 }: ApprovePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
@@ -35,7 +35,7 @@ export const ApprovePaymentPlan = ({
     loading: loadingApprove,
   } = usePaymentPlanAction(
     Action.Approve,
-    paymentPlanId,
+    paymentPlan.id,
     () => showMessage(t('Payment Plan has been approved.')),
     () => showMessage(t('Error during approving Payment Plan.')),
     () => setApproveDialogOpen(false),
@@ -49,6 +49,14 @@ export const ApprovePaymentPlan = ({
       .min(2, 'Too short')
       .max(255, 'Too long'),
   });
+
+  const shouldShowLastApproverMessage = (): boolean => {
+    const { approvalNumberRequired } = paymentPlan;
+    const approvalsCount =
+      paymentPlan.approvalProcess.edges[0].node.actions.approval.length;
+
+    return approvalNumberRequired - 1 === approvalsCount;
+  };
 
   return (
     <>
@@ -89,13 +97,15 @@ export const ApprovePaymentPlan = ({
                   <Box p={5}>
                     {t('Are you sure you want to approve this Payment Plan?')}
                   </Box>
-                  <Box p={5}>
-                    <GreyText>
-                      {t(
-                        'Note: You are the last approver. Upon proceeding, this Payment Plan will be automatically moved to authorization stage.',
-                      )}
-                    </GreyText>
-                  </Box>
+                  {shouldShowLastApproverMessage() && (
+                    <Box p={5}>
+                      <GreyText>
+                        {t(
+                          'Note: You are the last approver. Upon proceeding, this Payment Plan will be automatically moved to authorization stage.',
+                        )}
+                      </GreyText>
+                    </Box>
+                  )}
                   <Form>
                     <Field
                       name='comment'
