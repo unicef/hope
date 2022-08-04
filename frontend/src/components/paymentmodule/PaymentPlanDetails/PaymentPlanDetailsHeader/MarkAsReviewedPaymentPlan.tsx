@@ -46,7 +46,7 @@ export const MarkAsReviewedPaymentPlan = ({
   const shouldShowLastReviewerMessage = (): boolean => {
     const { financeReviewNumberRequired } = paymentPlan;
     const financeReviewsCount =
-      paymentPlan.approvalProcess.edges[0].node.actions.financeReview.length;
+      paymentPlan.approvalProcess?.edges[0]?.node.actions.financeReview.length;
 
     return financeReviewNumberRequired - 1 === financeReviewsCount;
   };
