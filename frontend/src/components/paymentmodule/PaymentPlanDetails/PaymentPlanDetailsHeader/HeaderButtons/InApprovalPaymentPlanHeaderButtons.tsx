@@ -18,7 +18,7 @@ export const InApprovalPaymentPlanHeaderButtons = ({
   return (
     <Box display='flex' alignItems='center'>
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
-      {canApprove && <ApprovePaymentPlan paymentPlanId={paymentPlan.id} />}
+      {canApprove && <ApprovePaymentPlan paymentPlan={paymentPlan} />}
     </Box>
   );
 };

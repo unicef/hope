@@ -18,14 +18,14 @@ import { FormikTextField } from '../../../../shared/Formik/FormikTextField/Formi
 import { LoadingButton } from '../../../core/LoadingButton';
 import { GreyText } from '../../../core/GreyText';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
-import { Action } from '../../../../__generated__/graphql';
+import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 
 export interface AuthorizePaymentPlanProps {
-  paymentPlanId: string;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const AuthorizePaymentPlan = ({
-  paymentPlanId,
+  paymentPlan,
 }: AuthorizePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [authorizeDialogOpen, setAuthorizeDialogOpen] = useState(false);
@@ -35,7 +35,7 @@ export const AuthorizePaymentPlan = ({
     loading: loadingAuthorize,
   } = usePaymentPlanAction(
     Action.Authorize,
-    paymentPlanId,
+    paymentPlan.id,
     () => showMessage(t('Payment Plan has been authorized.')),
     () => showMessage(t('Error during authorizing Payment Plan.')),
     () => setAuthorizeDialogOpen(false),
@@ -49,6 +49,14 @@ export const AuthorizePaymentPlan = ({
       .min(2, 'Too short')
       .max(255, 'Too long'),
   });
+
+  const shouldShowLastAuthorizerMessage = (): boolean => {
+    const { authorizationNumberRequired } = paymentPlan;
+    const authorizationsCount =
+      paymentPlan.approvalProcess.edges[0].node.actions.authorization.length;
+
+    return authorizationNumberRequired - 1 === authorizationsCount;
+  };
 
   return (
     <>
@@ -89,13 +97,15 @@ export const AuthorizePaymentPlan = ({
                   <Box p={5}>
                     {t('Are you sure you want to authorize this Payment Plan?')}
                   </Box>
-                  <Box p={5}>
-                    <GreyText>
-                      {t(
-                        'Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Review stage.',
-                      )}
-                    </GreyText>
-                  </Box>
+                  {shouldShowLastAuthorizerMessage() && (
+                    <Box p={5}>
+                      <GreyText>
+                        {t(
+                          'Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Review stage.',
+                        )}
+                      </GreyText>
+                    </Box>
+                  )}
                   <Form>
                     <Field
                       name='comment'
