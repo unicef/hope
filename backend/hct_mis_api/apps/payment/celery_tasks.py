@@ -42,7 +42,7 @@ def create_cash_plan_payment_verification_xls(cash_plan_payment_verification_id,
 
             service = XlsxVerificationExportService(cash_plan_payment_verification)
             # if no file will start creating it
-            if not getattr(cash_plan_payment_verification, 'xlsx_cashplan_payment_verification_file', None):
+            if not getattr(cash_plan_payment_verification, "xlsx_cashplan_payment_verification_file", None):
                 service.save_xlsx_file(user)
 
             cash_plan_payment_verification.xlsx_file_exporting = False
