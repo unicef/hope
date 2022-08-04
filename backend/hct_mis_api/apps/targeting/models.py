@@ -395,7 +395,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         )
         if tp is None:
             return None
-        return tp.steficon_rule
+        return tp.steficon_rule.rule
 
     def set_to_ready_for_cash_assist(self):
         self.status = self.STATUS_READY_FOR_CASH_ASSIST
