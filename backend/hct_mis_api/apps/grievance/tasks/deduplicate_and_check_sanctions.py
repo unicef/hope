@@ -20,7 +20,7 @@ from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge 
 
 
 class DeduplicateAndCheckAgainstSanctionsListTask:
-    @transaction.atomic(using="default")
+    @transaction.atomic(using="default", durable=True)
     def execute(self, should_populate_index: bool, registration_data_import_id: str, individuals_ids: Sequence[str]):
         registration_data_import = (
             RegistrationDataImport.objects.get(id=registration_data_import_id) if registration_data_import_id else None

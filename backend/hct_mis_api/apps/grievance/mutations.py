@@ -672,7 +672,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    @transaction.atomic
+    @transaction.atomic(durable=True)
     def mutate(cls, root, info, grievance_ticket_id, status, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
