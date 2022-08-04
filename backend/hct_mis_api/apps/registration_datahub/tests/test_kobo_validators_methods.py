@@ -22,8 +22,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "_bamboo_dataset_id": "",
             "_tags": [],
             "health_questions/pregnant_member_h_c": "0",
-            "health_questions/start": "2020-04-28T17:34:22.979+02:00",
-            "health_questions/end": "2020-05-28T18:56:33.979+02:00",
+            "health_questions/start": "2020-04-28 17:34:22.979+02:00-00:00",
+            "health_questions/end": "2020-05-28 18:56:33.979+02:00-00:00",
             "household_questions/first_registration_date_h_c": "2020-07-18",
             "household_questions/f_0_5_disability_h_c": "0",
             "household_questions/size_h_c": "1",
@@ -66,7 +66,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "wash_questions/score_womencloth": "5",
             "household_questions/f_12_17_age_group_h_c": "0",
             "wash_questions/score_jerrycan": "5",
-            "start": "2020-05-28T17:32:43.054+02:00",
+            "start": "2020-05-28 17:32:43.054+02:00-00:00",
             "_attachments": [
                 {
                     "mimetype": "image/png",
@@ -107,7 +107,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "wash_questions/score_total": "40",
             "_submitted_by": None,
             "individual_questions_count": "1",
-            "end": "2020-05-28T17:34:22.979+02:00",
+            "end": "2020-05-28 17:34:22.979+02:00-00:00",
             "household_questions/pregnant_h_c": "0",
             "household_questions/m_6_11_disability_h_c": "0",
             "household_questions/m_0_5_disability_h_c": "0",
@@ -116,7 +116,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "monthly_income_questions/round_total_income_h_f": "0",
             "wash_questions/score_cookingpot": "5",
             "household_questions/m_adults_disability_h_c": "0",
-            "_submission_time": "2020-05-28T15:34:37",
+            "_submission_time": "2020-05-28 15:34:37-00:00",
             "household_questions/household_location/residence_status_h_c": "refugee",
             "_geolocation": [None, None],
             "monthly_expenditures_questions/round_total_expense_h_f": "0",
@@ -156,7 +156,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "food_security_questions/meat_fish_h_f": "0",
             "wash_questions/odor_taste_color_h_f": "0",
             "monthly_income_questions/round_total_income_h_f": "123",
-            "_submission_time": "2020-05-26T12:35:58",
+            "_submission_time": "2020-05-26 12:35:58-00:00",
             "household_questions/household_location/residence_status_h_c": "host",
             "_geolocation": [33.760882, 67.661513],
             "wash_questions/latrine_h_f": "not_shared",
@@ -170,7 +170,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "wash_questions/hygiene_materials_h_f": "soap_material",
             "food_security_questions/tubers_roots_h_f": "3",
             "wash_questions/score_childclothes": "2.5",
-            "end": "2020-05-26T14:35:43.469+02:00",
+            "end": "2020-05-26 14:35:43.469+02:00-00:00",
             "wash_questions/total_liter_yesterday_h_f": "30",
             "level_debt_h_f": "111",
             "enumerator/name_enumerator": "test",
@@ -306,7 +306,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "monthly_income_questions/total_inc_h_f": "123",
             "child_protection_questions/law_against_underage_work_h_f": "level_rarely",
             "consent/consent_sign_h_c": "signature-12_13_0.png",
-            "start": "2020-05-26T12:11:01.475+02:00",
+            "start": "2020-05-26 12:11:01.475+02:00-00:00",
             "formhub/uuid": "59f3ce8716a0487bb2f82b10a4f3e8e3",
             "household_questions/household_location/hh_geopoint_h_c": "33.760882 67.661513 0 0",
             "household_questions/org_enumerator_h_c": "UNICEF",
@@ -476,10 +476,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
     def test_date_validator(self):
         test_data = (
-            {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None},
+            {"args": ("2020-05-28 17:13:31.590+02:00", "birth_date_i_c"), "expected-00:00": None},
             {"args": ("2020-05-28", "birth_date_i_c"), "expected": None},
             {
-                "args": ("2020-13-32T25:13:31.590+02:00", "birth_date_i_c"),
+                "args": ("2020-13-32 25:13:31.590+02:00", "birth_date_i_c-00:00"),
                 "expected": (
                     "Invalid datetime/date 2020-13-32T25:13:31.590+02:00 for "
                     "field birth_date_i_c, "
@@ -549,7 +549,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {
                 "args": (
                     "birth_date_i_c",
-                    "2020-05-28T17:13:31.590+02:00",
+                    "2020-05-28 17:13:31.590+02:00-00:00",
                     attachments,
                 ),
                 "expected": None,
