@@ -19,7 +19,7 @@ export const InReviewPaymentPlanHeaderButtons = ({
     <Box display='flex' alignItems='center'>
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
       {canMarkAsReviewed && (
-        <MarkAsReviewedPaymentPlan paymentPlanId={paymentPlan.id} />
+        <MarkAsReviewedPaymentPlan paymentPlan={paymentPlan} />
       )}
     </Box>
   );
