@@ -3,8 +3,8 @@ import os
 from celery import Celery
 from kombu import Exchange, Queue
 
-CELERY_QUEUE_DEFAULT = 'default'
-CELERY_QUEUE_OTHER = 'priority'
+CELERY_QUEUE_DEFAULT = "default"
+CELERY_QUEUE_OTHER = "priority"
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hct_mis_api.settings")
@@ -24,7 +24,7 @@ app.conf["task_queues"] = (
         routing_key=CELERY_QUEUE_OTHER,
     ),
 )
-app.conf['worker_prefetch_multiplier'] = 1
+app.conf["worker_prefetch_multiplier"] = 1
 app.conf["task_default_queue"] = CELERY_QUEUE_DEFAULT
 
 # Load task modules from all registered Django app configs.

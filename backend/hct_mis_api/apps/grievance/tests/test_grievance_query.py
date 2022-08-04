@@ -257,9 +257,8 @@ class TestGrievanceQuery(APITestCase):
             golden_records_individual=cls.individual_1,
             possible_duplicate=cls.individual_2,
             score_min=100,
-            score_max=150
+            score_max=150,
         )
-
 
     @parameterized.expand(
         [
