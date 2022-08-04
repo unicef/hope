@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Box, Button, IconButton } from '@material-ui/core';
-import { EditRounded, Delete } from '@material-ui/icons';
+import { Box, Button } from '@material-ui/core';
+import { EditRounded } from '@material-ui/icons';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LockPaymentPlan } from '../LockPaymentPlan';
-import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
+import { Link } from 'react-router-dom';
 import { useBusinessArea } from '../../../../../hooks/useBusinessArea';
+import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
+import { DeletePaymentPlan } from '../DeletePaymentPlan';
+import { LockPaymentPlan } from '../LockPaymentPlan';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -22,16 +23,11 @@ export const OpenPaymentPlanHeaderButtons = ({
 }: OpenPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-  const [openLock, setOpenLock] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
   const { id } = paymentPlan;
+
   return (
     <Box display='flex' alignItems='center'>
-      {canRemove && (
-        <IconButton onClick={() => setOpenDelete(true)}>
-          <Delete />
-        </IconButton>
-      )}
+      {canRemove && <DeletePaymentPlan paymentPlan={paymentPlan} />}
       {canEdit && (
         <Box m={2}>
           <Button
