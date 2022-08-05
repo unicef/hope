@@ -1,5 +1,4 @@
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
-
 from django.shortcuts import get_object_or_404
 
 import graphene
@@ -14,6 +13,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.schema import LogEntryNode
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
@@ -28,40 +28,41 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
+    CashPlanPaymentVerificationFilter,
+    FinancialServiceProviderFilter,
+    FinancialServiceProviderXlsxReportFilter,
+    FinancialServiceProviderXlsxTemplateFilter,
+    PaymentFilter,
+    PaymentPlanFilter,
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter,
-    FinancialServiceProviderXlsxTemplateFilter,
-    FinancialServiceProviderXlsxReportFilter,
-    FinancialServiceProviderFilter,
-    PaymentPlanFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
+    Approval,
+    ApprovalProcess,
+    CashPlan,
     CashPlanPaymentVerification,
     CashPlanPaymentVerificationSummary,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
+    Payment,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FinancialServiceProviderXlsxReport,
-    FinancialServiceProvider,
-    ApprovalProcess,
-    Approval,
-    PaymentPlan,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
-from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
     SectionTotalNode,
     TableTotalCashTransferred,
 )
-from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 
 
 class RapidProFlowResult(graphene.ObjectType):
@@ -225,6 +226,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     dispersion_end_date = graphene.Date()
     start_date = graphene.Date()
     end_date = graphene.Date()
+    currency_name = graphene.String()
+
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)
@@ -242,6 +245,18 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_finance_review_number_required(self, info):
         return self.business_area.finance_review_number_required
+
+    def resolve_currency_name(self, info):
+        return self.get_currency_display()
+
+
+class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+
+    class Meta:
+        model = Payment
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):
@@ -352,6 +367,13 @@ class Query(graphene.ObjectType):
     payment_plan_status_choices = graphene.List(ChoiceObject)
 
     currency_choices = graphene.List(ChoiceObject)
+
+    payment = relay.Node.Field(PaymentNode)
+    all_payments = DjangoPermissionFilterConnectionField(
+        PaymentNode,
+        filterset_class=PaymentFilter,
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
+    )
 
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (

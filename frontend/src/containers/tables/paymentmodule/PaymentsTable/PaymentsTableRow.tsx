@@ -1,9 +1,6 @@
-import { IconButton } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
-import { Edit } from '@material-ui/icons';
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -12,9 +9,8 @@ import { Missing } from '../../../../components/core/Missing';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
-import { SuggestNewAmount } from './SuggestNewAmount';
-import { WarningTooltipTable } from './WarningTooltipTable';
+import { decodeIdString, formatCurrency } from '../../../../utils/utils';
+import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
 
 const ErrorText = styled.div`
   display: flex;
@@ -23,14 +19,11 @@ const ErrorText = styled.div`
   color: #ec2323;
 `;
 
-const CheckCircleOutline = styled(CheckCircleOutlineIcon)`
-  color: #8ece32;
-`;
-
 const ErrorOutline = styled(ErrorOutlineIcon)`
   color: #e90202;
   margin-right: 5px;
 `;
+
 export const StyledLink = styled.div`
   color: #000;
   text-decoration: underline;
@@ -40,37 +33,29 @@ export const StyledLink = styled.div`
 `;
 
 interface PaymentsTableRowProps {
-  ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
-  statusChoices: { [id: number]: string };
-  categoryChoices: { [id: number]: string };
+  payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
   canViewDetails: boolean;
+  onWarningClick?: (payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node']) => void;
 }
 
 export function PaymentsTableRow({
-  ticket,
-  statusChoices,
-  categoryChoices,
+  payment,
   canViewDetails,
+  onWarningClick,
 }: PaymentsTableRowProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const [dialogAmountOpen, setDialogAmountOpen] = useState(false);
-  const [dialogWarningOpen, setDialogWarningOpen] = useState(false);
-  const detailsPath = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
+  const detailsPath = `/${businessArea}/payment/${payment.id}`;
+  const householdDetailsPath = `/${businessArea}/population/household/${payment.household.id}`;
 
   const handleClick = (): void => {
     history.push(detailsPath);
   };
 
-  const handleDialogAmountOpen = (e): void => {
+  const handleDialogWarningOpen = (e: React.SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();
-    setDialogAmountOpen(true);
-  };
-
-  const handleDialogWarningOpen = (e): void => {
-    e.stopPropagation();
-    setDialogWarningOpen(true);
+    onWarningClick(payment);
   };
 
   return (
@@ -79,7 +64,7 @@ export function PaymentsTableRow({
         hover
         onClick={canViewDetails ? handleClick : undefined}
         role='checkbox'
-        key={ticket.id}
+        key={payment.id}
       >
         <TableCell align='left'>
           <WarningTooltip
@@ -90,51 +75,35 @@ export function PaymentsTableRow({
           />
         </TableCell>
         <TableCell align='left'>
+          {/* TODO: replace with unicefId */}
+          {decodeIdString(payment.id)}
+        </TableCell>
+        <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink to={detailsPath}>{ticket.unicefId}</BlackLink>
+            <BlackLink to={householdDetailsPath}>{payment.household.unicefId}</BlackLink>
           ) : (
-            ticket.unicefId
+            payment.household.unicefId
           )}
         </TableCell>
         <TableCell align='left'>
-          <Missing />
+          {payment.household.size}
+        </TableCell>
+        <TableCell align='left'>
+          {payment.household.admin2.name}
         </TableCell>
         <TableCell align='left'>
           <Missing />
         </TableCell>
         <TableCell align='left'>
-          <Missing />
+          <ErrorText>
+            <ErrorOutline />
+            {t('Missing')}
+          </ErrorText>
         </TableCell>
         <TableCell align='left'>
-          {false ? (
-            <CheckCircleOutline />
-          ) : (
-            <ErrorText>
-              <ErrorOutline />
-              {t('Missing')}
-            </ErrorText>
-          )}
-        </TableCell>
-        <TableCell align='left'>
-          <Missing />
-        </TableCell>
-        <TableCell align='left'>
-          <Missing />
-          <IconButton onClick={(e) => handleDialogAmountOpen(e)}>
-            <Edit />
-          </IconButton>
+          {formatCurrency(payment.entitlementQuantityUsd, true)}
         </TableCell>
       </ClickableTableRow>
-      <SuggestNewAmount
-        businessArea={businessArea}
-        setDialogOpen={setDialogAmountOpen}
-        dialogOpen={dialogAmountOpen}
-      />
-      <WarningTooltipTable
-        businessArea={businessArea}
-        setDialogOpen={setDialogWarningOpen}
-        dialogOpen={dialogWarningOpen}
-      />
     </>
   );
 }

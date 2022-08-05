@@ -1,8 +1,8 @@
-import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
+import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
 import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
 
 export const headCells: HeadCell<
-  AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node']
+AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,
@@ -13,31 +13,31 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Payment Id',
-    id: 'id',
+    id: 'payment_id',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Household Id',
-    id: 'household__id',
+    id: 'payment_household__id',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Household Size',
-    id: 'household__size',
+    id: 'payment_household__size',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Administrative Level 2',
-    id: 'household__admin2',
+    id: 'payment_household__admin2',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Collector',
-    id: 'household__collector_id',
+    id: 'payment_household__collector_id',
     numeric: false,
   },
   {
@@ -49,7 +49,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Entitlement (USD)',
-    id: 'entitlement',
+    id: 'payment_entitlement',
     numeric: false,
   },
 ];

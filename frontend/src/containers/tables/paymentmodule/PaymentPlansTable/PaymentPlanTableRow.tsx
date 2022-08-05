@@ -3,15 +3,15 @@ import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  AllCashPlansQuery,
+  AllPaymentPlansForTableQuery,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import {
-  choicesToDict,
-  formatCurrencyWithSymbol,
-  paymentVerificationStatusToColor,
+  formatCurrency,
+  paymentPlanStatusMapping,
+  paymentPlanStatusToColor,
 } from '../../../../utils/utils';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
@@ -21,8 +21,9 @@ const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
 `;
+
 interface PaymentVerificationTableRowProps {
-  plan: AllCashPlansQuery['allCashPlans']['edges'][number]['node'];
+  plan: AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][number]['node'];
   canViewDetails: boolean;
 }
 
@@ -41,9 +42,6 @@ export const PaymentPlanTableRow = ({
   } = useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
-  const deliveryTypeChoicesDict = choicesToDict(
-    statusChoicesData.paymentRecordDeliveryTypeChoices,
-  );
 
   return (
     <ClickableTableRow
@@ -54,35 +52,40 @@ export const PaymentPlanTableRow = ({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={paymentPlanPath}>{plan.caId}</BlackLink>
+          <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
         ) : (
-          plan.caId
+          plan.unicefId
         )}
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
-            status={plan.cashPlanPaymentVerificationSummary.status}
-            statusToColor={paymentVerificationStatusToColor}
+            status={plan.status}
+            statusToColor={paymentPlanStatusToColor}
+            statusNameMapping={paymentPlanStatusMapping}
           />
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>
-        {plan.serviceProvider?.fullName || '-'}
+        {plan.totalHouseholdsCount || '-'}
       </TableCell>
       <TableCell align='left'>
-        {deliveryTypeChoicesDict[plan.deliveryType]}
+        {plan.currencyName}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}
+        {formatCurrency(plan.totalEntitledQuantity, true)}
+      </TableCell>
+      <TableCell align='right'>
+        {formatCurrency(plan.totalDeliveredQuantity, true)}
+      </TableCell>
+      <TableCell align='right'>
+        {formatCurrency(plan.totalUndeliveredQuantity, true)}
       </TableCell>
       <TableCell align='left'>
-        <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
-        <UniversalMoment>{plan.endDate}</UniversalMoment>
+        <UniversalMoment>{plan.dispersionStartDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{plan.program.name}</TableCell>
       <TableCell align='left'>
-        <UniversalMoment>{plan.updatedAt}</UniversalMoment>
+        <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );
