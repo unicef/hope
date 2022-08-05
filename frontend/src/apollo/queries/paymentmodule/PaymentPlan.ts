@@ -21,6 +21,7 @@ export const PaymentPlan = gql`
         name
       }
       currency
+      currencyName
       startDate
       endDate
       dispersionStartDate
@@ -31,6 +32,9 @@ export const PaymentPlan = gql`
       maleAdultsCount
       totalHouseholdsCount
       totalIndividualsCount
+      totalEntitledQuantity
+      totalDeliveredQuantity
+      totalUndeliveredQuantity
     }
   }
 `;

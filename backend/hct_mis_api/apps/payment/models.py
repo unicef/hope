@@ -1,20 +1,20 @@
+from datetime import datetime
 from decimal import Decimal
-from dateutil.relativedelta import relativedelta
 from functools import cached_property
 from typing import Optional
-from datetime import datetime
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField, Q, Count, Sum
+from django.db.models import Count, JSONField, Q, Sum
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django_fsm import FSMField, transition
 
+from dateutil.relativedelta import relativedelta
+from django_fsm import FSMField, transition
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
@@ -23,8 +23,8 @@ from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
+from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
-from hct_mis_api.apps.household.models import Individual, MALE, FEMALE
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
@@ -437,7 +437,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
     distribution_limit = models.DecimalField(
         decimal_places=2,
         max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0.00"))],
         null=True,
         help_text="The maximum amount of money that can be distributed or unlimited if 0",
         db_index=True,

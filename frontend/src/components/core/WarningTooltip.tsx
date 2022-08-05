@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip, TooltipProps } from '@material-ui/core';
 import WarningIcon from '@material-ui/icons/Warning';
 
 const StyledWarning = styled(WarningIcon)`
@@ -11,8 +11,9 @@ const StyledWarning = styled(WarningIcon)`
 interface WarningTooltipProps {
   confirmed?: boolean;
   message?: string;
-  handleClick?: (e) => void;
+  handleClick?: TooltipProps['onClick'];
 }
+
 export const WarningTooltip = ({
   confirmed,
   message = '',
