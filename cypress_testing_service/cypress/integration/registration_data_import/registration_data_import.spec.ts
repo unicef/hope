@@ -10,9 +10,9 @@ Given('I am authenticated', () => {
   cy.get('input').contains('Log in').click();
 });
 
-Given("There are no RDI imports", () => {
+Given('There are no RDI imports', () => {
   cy.exec('yarn run generate-xlsx-files');
-})
+});
 
 const clearCache = () => {
   cy.get('[data-cy="menu-user-profile"]').click();
@@ -21,14 +21,13 @@ const clearCache = () => {
   cy.wait(2000);
 };
 
-
 When('I visit the main dashboard', () => {
   cy.visit('/');
-  clearCache()
+  clearCache();
 });
 
 Then('I should see the side panel with RDI option', () => {
-  cy.get('span').contains('Registration Data Import', {timeout: 10000})
+  cy.get('span').contains('Registration Data Import', { timeout: 10000 });
 });
 
 When('I click on RDI option', () => {
@@ -87,46 +86,45 @@ Then('I should see a new import with status in review', () => {
   cy.get('div').contains('IN REVIEW');
 });
 
-
 When('I merge the import', () => {
   cy.get('span').contains('Merge').click({ force: true }); // top of page
   cy.get('span').contains('MERGE').click({ force: true }); // inside modal
-})
+});
 
-Then("I see that the status is merging", () => {
+Then('I see that the status is merging', () => {
   cy.get('div').contains('MERGING');
-})
+});
 
-When("I refresh the page", () => {
+When('I refresh the page', () => {
   cy.reload();
-})
+});
 
-Then("I see that the status is merged", () => {
+Then('I see that the status is merged', () => {
   cy.get('div').contains('MERGED');
   cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
     householdId = $td.text().split(' (')[0];
-  })
+  });
   cy.get('button > span').contains('Individuals').click({ force: true });
   cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
     individualId = $td.text().split(' (')[0];
-  })
-})
+  });
+});
 
 When('I visit the Households dashboard', () => {
   cy.get('span').contains('Population').click();
   cy.get('span').contains('Households').click();
-})
+});
 
 Then('I see a newly imported household', () => {
   // after 10+ runs, it may fail, because there are 10 rows in this table by default
   cy.get('td').should('contain', householdId);
-})
+});
 
 When('I visit the Individuals dashboard', () => {
   cy.get('span').contains('Individuals').click();
-})
+});
 
 Then('I see the newly imported individuals', () => {
   // after 10+ runs, it may fail, because there are 10 rows in this table by default
   cy.get('td').should('contain', individualId);
-})
+});
