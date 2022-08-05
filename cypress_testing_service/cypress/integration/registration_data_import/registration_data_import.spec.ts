@@ -1,7 +1,7 @@
-import { When, Then, And, Given } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
 
-var householdId;
-var individualId;
+let householdId;
+let individualId;
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -18,7 +18,7 @@ const clearCache = () => {
   cy.get('[data-cy="menu-user-profile"]').click();
   cy.get('[data-cy="menu-item-clear-cache"]').click();
   // hack to let the page reload
-  cy.wait(2000);
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
 };
 
 When('I visit the main dashboard', () => {
@@ -77,9 +77,9 @@ When('I press import', () => {
 });
 
 Then('I should see a new import with status in review', () => {
-  cy.wait(1000);
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
-  cy.wait(500);
+  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
   // it lets the browser load the status
 
   cy.get('div').contains('IMPORT ERROR').should('not.exist');
