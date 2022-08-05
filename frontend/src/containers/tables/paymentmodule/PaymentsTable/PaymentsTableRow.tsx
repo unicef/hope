@@ -1,6 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -11,7 +11,6 @@ import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { decodeIdString, formatCurrency } from '../../../../utils/utils';
 import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
-import { WarningTooltipTable } from './WarningTooltipTable';
 
 const ErrorText = styled.div`
   display: flex;
@@ -36,16 +35,17 @@ export const StyledLink = styled.div`
 interface PaymentsTableRowProps {
   payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
   canViewDetails: boolean;
+  onWarningClick?: (payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node']) => void;
 }
 
 export function PaymentsTableRow({
   payment,
   canViewDetails,
+  onWarningClick,
 }: PaymentsTableRowProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const [dialogWarningOpen, setDialogWarningOpen] = useState(false);
   const detailsPath = `/${businessArea}/payment/${payment.id}`;
   const householdDetailsPath = `/${businessArea}/population/household/${payment.household.id}`;
 
@@ -55,7 +55,7 @@ export function PaymentsTableRow({
 
   const handleDialogWarningOpen = (e: React.SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();
-    setDialogWarningOpen(true);
+    onWarningClick(payment);
   };
 
   return (
@@ -75,7 +75,8 @@ export function PaymentsTableRow({
           />
         </TableCell>
         <TableCell align='left'>
-            {decodeIdString(payment.id)}
+          {/* TODO: replace with unicefId */}
+          {decodeIdString(payment.id)}
         </TableCell>
         <TableCell align='left'>
           {canViewDetails ? (
@@ -103,11 +104,6 @@ export function PaymentsTableRow({
           {formatCurrency(payment.entitlementQuantityUsd, true)}
         </TableCell>
       </ClickableTableRow>
-      <WarningTooltipTable
-        businessArea={businessArea}
-        setDialogOpen={setDialogWarningOpen}
-        dialogOpen={dialogWarningOpen}
-      />
     </>
   );
 }
