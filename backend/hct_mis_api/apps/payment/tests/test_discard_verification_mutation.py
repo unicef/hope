@@ -73,8 +73,7 @@ class TestDiscardVerificationMutation(APITestCase):
             business_area=cls.business_area,
         )
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
-            cash_plan=cash_plan,
-            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
+            cash_plan=cash_plan, verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
         )
         cash_plan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
         cash_plan_payment_verification.save()

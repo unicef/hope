@@ -43,7 +43,6 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
-    Document,
     Household,
     Individual,
 )
@@ -387,14 +386,15 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             TargetPopulation.objects.filter(
                 program=self.program,
                 steficon_rule__isnull=False,
-                status=TargetPopulation.STATUS_PROCESSING,
             )
+            .filter(status__in=(TargetPopulation.STATUS_PROCESSING, TargetPopulation.STATUS_READY_FOR_CASH_ASSIST))
             .order_by("-created_at")
+            .distinct()
             .first()
         )
         if tp is None:
             return None
-        return tp.steficon_rule
+        return tp.steficon_rule.rule
 
     def set_to_ready_for_cash_assist(self):
         self.status = self.STATUS_READY_FOR_CASH_ASSIST

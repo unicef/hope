@@ -243,10 +243,12 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
 
     @property
     def has_xlsx_cash_plan_payment_verification_file(self):
-        if all([
-            self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
-            getattr(self, 'xlsx_cashplan_payment_verification_file', None)
-        ]):
+        if all(
+            [
+                self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
+                getattr(self, "xlsx_cashplan_payment_verification_file", None),
+            ]
+        ):
             return True
         return False
 

@@ -1,4 +1,3 @@
-from datetime import datetime
 from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta

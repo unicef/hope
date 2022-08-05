@@ -1,10 +1,6 @@
-from decimal import Decimal
-
 from django.core.management import BaseCommand
 
-from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.exchange_rates.utils import fix_exchange_rates
-from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 class Command(BaseCommand):

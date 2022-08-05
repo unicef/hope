@@ -131,6 +131,7 @@ class IndividualDocument(Document):
             "updated_at",
         ]
 
+
 @registry.register_document
 class HouseholdDocument(Document):
     head_of_household = fields.ObjectField(
@@ -163,8 +164,8 @@ class HouseholdDocument(Document):
     class Django:
         model = Household
 
-        fields = [
-        ]
+        fields = []
+
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households"
         settings = {
