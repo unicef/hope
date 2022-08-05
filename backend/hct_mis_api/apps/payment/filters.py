@@ -275,5 +275,9 @@ class PaymentFilter(FilterSet):
         fields=(
             "id",
             "status",
+            "household_id",
+            "household__size",
+            "household__admin2__name",
+            "entitlement_quantity_usd",
         )
     )
