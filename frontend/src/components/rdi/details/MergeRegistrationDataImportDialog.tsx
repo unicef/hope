@@ -82,7 +82,6 @@ export function MergeRegistrationDataImportDialog({
               color='primary'
               variant='contained'
               onClick={merge}
-              data-cy='merge-registration-data-import-button'
             >
               {t('MERGE')}
             </LoadingButton>

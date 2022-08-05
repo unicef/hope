@@ -7,12 +7,25 @@ Given('I am authenticated', () => {
   cy.get('input').contains('Log in').click();
 });
 
+Given("There are no RDI imports", () => {
+  cy.exec('yarn run initdb'); // this may take ~20s
+  // TODO: think about a better approach
+  // maybe with the grievance tickets,
+  // we can deactivate each household?
+  // or the xlsx may be randomly generated, so there are no duplicates?
+})
+
 When('I visit the main dashboard', () => {
   cy.visit('/');
+  // clear the cache
+  cy.get('[data-cy="menu-user-profile"]').click();
+  cy.get('[data-cy="menu-item-clear-cache"]').click();
+  // hack to let the page reload
+  cy.wait(3000);
 });
 
 Then('I should see the side panel with RDI option', () => {
-  cy.get('span').contains('Registration Data Import');
+  cy.get('span').contains('Registration Data Import', {timeout: 10000})
 });
 
 When('I click on RDI option', () => {
@@ -21,6 +34,8 @@ When('I click on RDI option', () => {
 
 Then('I should see the RDI page', () => {
   cy.get('h5').contains('Registration Data Import');
+  // table is empty
+  cy.get('tbody').find('tr').should('have.length', 1); // last "cell" is a filler on FE
 });
 
 When('I click the import button', () => {
@@ -74,5 +89,37 @@ Then('I should see a new import with status in review', () => {
 
 
 When('I merge the import', () => {
-    cy.get('[data-cy="merge-registration-data-import-button"]').click();
+  cy.get('span').contains('Merge').click({ force: true }); // top of page
+  cy.get('span').contains('MERGE').click({ force: true }); // inside modal
+})
+
+Then("I see that the status is merging", () => {
+  cy.get('div').contains('MERGING');
+})
+
+When("I refresh the page", () => {
+  cy.reload();
+})
+
+Then("I see that the status is merged", () => {
+  cy.get('div').contains('MERGED');
+})
+
+When('I visit the Households dashboard', () => {
+  cy.get('span').contains('Population').click();
+  cy.get('span').contains('Households').click();
+})
+
+Then('I see a newly imported household', () => {
+  // table with 1 element - 2nd is a filler
+  cy.get('tbody').find('tr').should('have.length', 2);
+})
+
+When('I visit the Individuals dashboard', () => {
+  cy.get('span').contains('Individuals').click();
+})
+
+Then('I see a newly imported individuals', () => {
+  // table with 4 elements - 5th is a filler
+  cy.get('tbody').find('tr').should('have.length', 5);
 })

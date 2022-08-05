@@ -7,7 +7,8 @@
     "lint": "eslint 'cypress/**/*.{js,ts,tsx}'",
     "pretty": "prettier --write \"cypress/**/*.{ts,js,jsx,json}\"",
     "cy:run": "cypress run --config video=false",
-    "cy:open": "cypress open"
+    "cy:open": "cypress open",
+    "initdb": "docker-compose run --rm backend sh -c './manage.py initcypress --skip-drop'"
   },
   "devDependencies": {
     "@types/cypress-cucumber-preprocessor": "^1.14.1",

@@ -1,7 +1,8 @@
 Feature: Registration Data Import
-    Checks, if importing RDI populates the list of imports
+    Checks, if importing RDI populates the list of imports and if merging RDI works.
 
     Background:
+        Given There are no RDI imports
         Given I am authenticated
 
     Scenario: Visit RDI page and import RDI data
@@ -16,3 +17,10 @@ Feature: Registration Data Import
         When I press import
         Then I should see a new import with status in review
         When I merge the import
+        Then I see that the status is merging
+        When I refresh the page
+        Then I see that the status is merged
+        When I visit the Households dashboard
+        Then I see a newly imported household
+        When I visit the Individuals dashboard
+        Then I see a newly imported individuals
