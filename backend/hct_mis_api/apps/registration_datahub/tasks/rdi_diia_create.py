@@ -9,10 +9,10 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
     HEAD,
-    IDENTIFICATION_TYPE_DICT,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    IDENTIFICATION_TYPE_TAX_ID,
     DISABLED,
     NOT_DISABLED,
     WIFE_HUSBAND,
@@ -21,6 +21,8 @@ from hct_mis_api.apps.household.models import (
     MALE,
     FEMALE,
     YES,
+    Document,
+    DocumentType,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -41,13 +43,16 @@ from hct_mis_api.apps.registration_datahub.models import (
     DIIA_RELATIONSHIP_HUSBAND,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
 
 
 logger = logging.getLogger(__name__)
 
 
-class RdiDiiaCreateTask(RdiBaseCreateTask):
+class RdiDiiaCreateTask:
+    """
+    Imports project data from DIIA models
+    """
+
     DIIA_DISABILITY_MAP = {DIIA_DISABLED: DISABLED}
     DIIA_RELATION = {
         DIIA_RELATIONSHIP_HEAD: HEAD,
@@ -57,14 +62,16 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
         DIIA_RELATIONSHIP_HUSBAND: WIFE_HUSBAND,
     }
     DIIA_SEX_MAP = {"M": MALE, "F": FEMALE}
-    """
-    Imports project data from DIIA models
-    """
+
+    def __init__(self):
+        self.bank_accounts = []
+        self.documents = []
+        self.business_area = BusinessArea.objects.get(slug="ukraine")
 
     @transaction.atomic("default")
     @transaction.atomic("registration_datahub")
     def create_rdi(self, imported_by, rdi_name="rdi_name"):
-        business_area = BusinessArea.objects.get(slug="ukraine")
+
         number_of_individuals = 0
         number_of_households = 0
 
@@ -74,13 +81,13 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             imported_by=imported_by,
             number_of_individuals=number_of_individuals,
             number_of_households=number_of_households,
-            business_area=business_area,
+            business_area=self.business_area,
             status=RegistrationDataImport.IMPORTING,
         )
 
         import_data = ImportData.objects.create(
             status=ImportData.STATUS_PENDING,
-            business_area_slug=business_area.slug,
+            business_area_slug=self.business_area.slug,
             data_type=ImportData.DIIA,
             number_of_individuals=number_of_individuals,
             number_of_households=number_of_households,
@@ -91,7 +98,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             hct_id=rdi.id,
             import_data=import_data,
             import_done=RegistrationDataImportDatahub.NOT_STARTED,
-            business_area_slug=business_area.slug,
+            business_area_slug=self.business_area.slug,
         )
         rdi.datahub_id = rdi_datahub.id
         rdi.save()
@@ -135,7 +142,6 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
 
         for diia_household_id in diia_household_import_ids:
             diia_household = DiiaHousehold.objects.defer("source_data").get(id=diia_household_id)
-
             try:
                 all_individuals = DiiaIndividual.objects.filter(rec_id=diia_household.rec_id)
                 household_obj = ImportedHousehold(
@@ -150,21 +156,37 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                     country=Country("UA"),
                 )
 
+                # if True ignore create HH and Individuals and set status 'STATUS_TAX_ID_ERROR'
+                pass_hh_and_individuals_tax_id_error = False
+
                 individuals_to_create_list = []
                 individuals_to_update_list = []
                 head_of_household = None
-                documents = []
-                bank_accounts = []
+                self.bank_accounts = []
+                self.documents = []
                 individual_count += all_individuals.count()
 
                 for individual in all_individuals:
+                    if pass_hh_and_individuals_tax_id_error:
+                        continue
+
+                    # validate tax_id
+                    if individual.individual_id and self.tax_id_exists(individual.individual_id.replace(" ", "")):
+                        pass_hh_and_individuals_tax_id_error = True
+                        individuals_to_create_list = []
+                        individuals_to_update_list = []
+                        head_of_household = None
+                        individual_count -= all_individuals.count()
+                        self.bank_accounts = []
+                        self.documents = []
+                        continue
+
                     b_date = (
                         dateutil.parser.parse(individual.birth_date, dayfirst=True) if individual.birth_date else ""
                     )
-                    sex_map = {"F": "FEMALE", "M": "MALE"}
 
                     individual_obj = ImportedIndividual(
-                        individual_id=individual.individual_id if individual.individual_id else "",
+                        individual_id=individual.individual_id.replace(" ", "") if individual.individual_id else "",
                         given_name=individual.first_name,
                         middle_name=individual.second_name,
                         family_name=individual.last_name,
@@ -192,13 +214,16 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                             else None,
                             "individual": individual_obj,
                         }
-                        self._add_hh_doc(hh_doc, documents)
+                        self._add_hh_doc(hh_doc)
 
                     if individual.birth_doc:
-                        self._add_birth_document(documents, individual, individual_obj)
+                        self._add_birth_document(individual, individual_obj)
 
                     if individual.iban:
-                        self._add_bank_account(bank_accounts, individual, individual_obj)
+                        self._add_bank_account(individual, individual_obj)
+
+                    if individual.individual_id:
+                        self._add_tax_id_document(individual.individual_id.replace(" ", ""), individual_obj)
 
                     individual.imported_individual = individual_obj
                     individuals_to_update_list.append(individual)
@@ -208,19 +233,25 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 # update imported_individual
                 DiiaIndividual.objects.bulk_update(individuals_to_update_list, ["imported_individual"], 1000)
 
-                if diia_household.vpo_doc:
-                    self._add_vpo_document(documents, head_of_household, diia_household)
+                if diia_household.vpo_doc and not pass_hh_and_individuals_tax_id_error:
+                    self._add_vpo_document(head_of_household, diia_household)
 
-                ImportedDocument.objects.bulk_create(documents)
-                ImportedBankAccountInfo.objects.bulk_create(bank_accounts)
+                if not pass_hh_and_individuals_tax_id_error:
+                    ImportedDocument.objects.bulk_create(self.documents)
+                    ImportedBankAccountInfo.objects.bulk_create(self.bank_accounts)
 
-                household_obj.head_of_household = head_of_household
-                households_to_create.append(household_obj)
+                    household_obj.head_of_household = head_of_household
+                    households_to_create.append(household_obj)
+                    diia_household.imported_household = household_obj
+                    diia_household.registration_data_import = registration_data_import_data_hub
+                    diia_household.status = DiiaHousehold.STATUS_IMPORTED
+                    households_to_update.append(diia_household)
+                else:
+                    # STATUS_TAX_ID_ERROR
+                    logger.error(f"Error importing DiiaHousehold {diia_household.pk}, duplicate Tax ID.")
+                    diia_household.status = DiiaHousehold.STATUS_TAX_ID_ERROR
+                    households_to_update.append(diia_household)
 
-                diia_household.imported_household = household_obj
-                diia_household.registration_data_import = registration_data_import_data_hub
-                diia_household.status = DiiaHousehold.STATUS_IMPORTED
-                households_to_update.append(diia_household)
             except Exception as e:
                 logger.exception(f"Error importing DiiaHousehold {diia_household.pk}. {e}")
                 diia_household.status = DiiaHousehold.STATUS_ERROR
@@ -249,8 +280,8 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 registration_data_import_datahub=registration_data_import_data_hub
             )
 
-    def _add_bank_account(self, bank_accounts, individual, individual_obj):
-        bank_accounts.append(
+    def _add_bank_account(self, individual, individual_obj):
+        self.bank_accounts.append(
             ImportedBankAccountInfo(
                 individual=individual_obj,
                 bank_name=individual.bank_name,
@@ -258,10 +289,10 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             )
         )
 
-    def _add_vpo_document(self, documents, head_of_household, household):
+    def _add_vpo_document(self, head_of_household, household):
         vpo_doc_date = dateutil.parser.parse(household.vpo_doc_date)
 
-        documents.append(
+        self.documents.append(
             ImportedDocument(
                 document_number=household.vpo_doc_id,
                 individual=head_of_household,
@@ -271,8 +302,8 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             )
         )
 
-    def _add_birth_document(self, documents, individual, individual_obj):
-        documents.append(
+    def _add_birth_document(self, individual, individual_obj):
+        self.documents.append(
             ImportedDocument(
                 document_number=individual.birth_doc,
                 individual=individual_obj,
@@ -280,11 +311,10 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             )
         )
 
-    def _add_hh_doc(self, data, documents):
-        # TODO: add more types maybe
+    def _add_hh_doc(self, data):
         doc_type = self.national_passport_document_type if data.get("type") == "passport" else self.other_document_type
 
-        documents.append(
+        self.documents.append(
             ImportedDocument(
                 document_number=data.get("document_number"),
                 individual=data.get("individual"),
@@ -293,19 +323,39 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             )
         )
 
+    def _add_tax_id_document(self, tax_id, individual_obj):
+        self.documents.append(
+            ImportedDocument(
+                document_number=tax_id,
+                individual=individual_obj,
+                type=self.imported_doc_type_for_tax_id,
+            )
+        )
+
     def _get_document_types(self):
         self.national_passport_document_type, _ = ImportedDocumentType.objects.get_or_create(
             country=Country("UA"),  # DiiaIndividual don't has issuing country
-            label=IDENTIFICATION_TYPE_DICT.get(IDENTIFICATION_TYPE_NATIONAL_PASSPORT),
             type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
         )
         self.birth_document_type, _ = ImportedDocumentType.objects.get_or_create(
             country=Country("UA"),  # DiiaIndividual don't has issuing country
-            label=IDENTIFICATION_TYPE_DICT.get(IDENTIFICATION_TYPE_BIRTH_CERTIFICATE),
             type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         )
         self.other_document_type, _ = ImportedDocumentType.objects.get_or_create(
             country=Country("UA"),  # DiiaIndividual don't has issuing country
-            label=IDENTIFICATION_TYPE_DICT.get(IDENTIFICATION_TYPE_OTHER),
             type=IDENTIFICATION_TYPE_OTHER,
+        )
+        self.imported_doc_type_for_tax_id, _ = ImportedDocumentType.objects.get_or_create(
+            country=Country("UA"),  # DiiaIndividual don't has issuing country
+            type=IDENTIFICATION_TYPE_TAX_ID,
+        )
+        self.doc_type_for_tax_id, _ = DocumentType.objects.get_or_create(
+            country=Country("UA"),
+            type=IDENTIFICATION_TYPE_TAX_ID,
+        )
+
+    def tax_id_exists(self, tax_id):
+        return (
+            ImportedDocument.objects.filter(document_number=tax_id, type=self.imported_doc_type_for_tax_id).exists()
+            or Document.objects.filter(document_number=tax_id, type=self.doc_type_for_tax_id).exists()
         )
