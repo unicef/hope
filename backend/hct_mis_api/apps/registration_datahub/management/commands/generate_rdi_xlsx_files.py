@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 import openpyxl
 
 from django.core.management import BaseCommand
@@ -168,10 +169,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Generating xlsx files")
 
-        generated_dir = os.path.join(settings.PROJECT_ROOT, "generated")
-        if not os.path.exists(generated_dir):
-            os.makedirs(generated_dir)
-        filepath = os.path.join(generated_dir, "..", "rdi_import_1_hh_1_ind.xlsx")
+        generated_dir = os.path.join(settings.PROJECT_ROOT, "..", "generated")
+        if os.path.exists(generated_dir):
+            shutil.rmtree(generated_dir)
+        os.makedirs(generated_dir)
+
+        filepath = os.path.join(generated_dir, "rdi_import_1_hh_1_ind.xlsx")
         wb = openpyxl.Workbook()
         wb.remove_sheet(wb.get_sheet_by_name(wb.get_sheet_names()[0]))
 

@@ -1,5 +1,8 @@
 import { When, Then, And, Given } from 'cypress-cucumber-preprocessor/steps';
 
+var householdId;
+var individualId;
+
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
   cy.get('input[name="username"]').type(Cypress.env('username'));
@@ -8,13 +11,7 @@ Given('I am authenticated', () => {
 });
 
 Given("There are no RDI imports", () => {
-  cy.exec('yarn run initdb'); // this may take ~20s
-  // TODO: think about a better approach
-  // maybe with the grievance tickets,
-  // we can deactivate each household?
-
-  // or the xlsx may be randomly generated, so there are no duplicates?
-  // cy.exec('yarn run generate-xlsx-files');
+  cy.exec('yarn run generate-xlsx-files');
 })
 
 const clearCache = () => {
@@ -40,8 +37,6 @@ When('I click on RDI option', () => {
 
 Then('I should see the RDI page', () => {
   cy.get('h5').contains('Registration Data Import');
-  // table is empty
-  cy.get('tbody').find('tr').should('have.length', 1); // last "cell" is a filler on FE
 });
 
 When('I click the import button', () => {
@@ -60,7 +55,7 @@ When('I select the xlsx file', () => {
     'Test import '.concat(new Date().toISOString()),
   );
 
-  const fileName = 'rdi_1_hh_4_ind.xlsx';
+  const fileName = 'rdi_import_1_hh_1_ind.xlsx';
   cy.fixture(fileName, 'base64').then((fileContent) => {
     cy.get('[data-cy="rdi-file-input"]').upload({
       fileContent,
@@ -74,7 +69,7 @@ When('I select the xlsx file', () => {
 
 Then('I see it was chosen', () => {
   cy.get('div').contains('1 Household available to import', { timeout: 10000 });
-  cy.get('div').contains('4 Individuals available to import');
+  cy.get('div').contains('1 Individual available to import');
   cy.get('div').contains('Errors').should('not.exist');
 });
 
@@ -83,9 +78,6 @@ When('I press import', () => {
 });
 
 Then('I should see a new import with status in review', () => {
-  cy.get('div').contains('Status');
-  cy.get('div').contains('IMPORTING');
-
   cy.wait(1000);
   cy.reload();
   cy.wait(500);
@@ -111,6 +103,13 @@ When("I refresh the page", () => {
 
 Then("I see that the status is merged", () => {
   cy.get('div').contains('MERGED');
+  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
+    householdId = $td.text().split(' (')[0];
+  })
+  cy.get('button > span').contains('Individuals').click({ force: true });
+  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
+    individualId = $td.text().split(' (')[0];
+  })
 })
 
 When('I visit the Households dashboard', () => {
@@ -119,8 +118,8 @@ When('I visit the Households dashboard', () => {
 })
 
 Then('I see a newly imported household', () => {
-  // table with 1 element - 2nd is a filler
-  cy.get('tbody').find('tr').should('have.length', 2);
+  // after 10+ runs, it may fail, because there are 10 rows in this table by default
+  cy.get('td').should('contain', householdId);
 })
 
 When('I visit the Individuals dashboard', () => {
@@ -128,6 +127,6 @@ When('I visit the Individuals dashboard', () => {
 })
 
 Then('I see the newly imported individuals', () => {
-  // table with 4 elements - 5th is a filler
-  cy.get('tbody').find('tr').should('have.length', 5);
+  // after 10+ runs, it may fail, because there are 10 rows in this table by default
+  cy.get('td').should('contain', individualId);
 })
