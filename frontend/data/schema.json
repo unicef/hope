@@ -7550,7 +7550,7 @@
           },
           {
             "kind": "OBJECT",
-            "name": "AcceptanceProcessNode",
+            "name": "ApprovalProcessNode",
             "ofType": null
           },
           {
@@ -18474,7 +18474,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "AcceptanceProcessNodeConnection",
+                "name": "ApprovalProcessNodeConnection",
                 "ofType": null
               }
             },
@@ -29803,7 +29803,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AcceptanceProcessNodeConnection",
+        "name": "ApprovalProcessNodeConnection",
         "description": null,
         "fields": [
           {
@@ -29834,7 +29834,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
-                  "name": "AcceptanceProcessNodeEdge",
+                  "name": "ApprovalProcessNodeEdge",
                   "ofType": null
                 }
               }
@@ -29874,7 +29874,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AcceptanceProcessNodeEdge",
+        "name": "ApprovalProcessNodeEdge",
         "description": null,
         "fields": [
           {
@@ -29883,7 +29883,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "AcceptanceProcessNode",
+              "name": "ApprovalProcessNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -29913,7 +29913,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AcceptanceProcessNode",
+        "name": "ApprovalProcessNode",
         "description": null,
         "fields": [
           {
@@ -30053,25 +30053,25 @@
             "deprecationReason": null
           },
           {
-            "name": "approvals",
+            "name": "rejectedOn",
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "ApprovalNode",
-                    "ofType": null
-                  }
-                }
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "actions",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "FilteredActionsListNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -30085,6 +30085,81 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "FilteredActionsListNode",
+        "description": null,
+        "fields": [
+          {
+            "name": "approval",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ApprovalNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "authorization",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ApprovalNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "financeReview",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ApprovalNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "reject",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ApprovalNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -30110,28 +30185,24 @@
             "deprecationReason": null
           },
           {
-            "name": "type",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "ApprovalType",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "comment",
             "description": null,
             "args": [],
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdBy",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "UserNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -30153,41 +30224,6 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "ApprovalType",
-        "description": null,
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "APPROVAL",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "AUTHORIZATION",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "FINANCE_REVIEW",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "REJECT",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
         "possibleTypes": null
       },
       {

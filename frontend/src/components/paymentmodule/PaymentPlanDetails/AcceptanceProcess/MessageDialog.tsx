@@ -11,6 +11,11 @@ import MessageIcon from '@material-ui/icons/Message';
 import styled from 'styled-components';
 import { Dialog } from '../../../../containers/dialogs/Dialog';
 import { DialogActions } from '../../../../containers/dialogs/DialogActions';
+import { UniversalMoment } from '../../../core/UniversalMoment';
+import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
+import { DividerLine } from '../../../core/DividerLine';
+import { renderUserName } from '../../../../utils/utils';
+import { UserNode } from '../../../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -35,26 +40,24 @@ const MessageIconContainer = styled(Box)`
 `;
 
 export interface MessageDialogProps {
-  message: string;
-  author: string;
+  comment: string;
+  author: Pick<UserNode, 'id' | 'email' | 'firstName' | 'lastName'>;
   date: string;
 }
-export function MessageDialog({
-  message,
+export const MessageDialog = ({
+  comment,
   author,
   date,
-}: MessageDialogProps): React.ReactElement {
+}: MessageDialogProps): React.ReactElement => {
   const { t } = useTranslation();
   const [MessageDialogOpen, setMessageDialogOpen] = useState(false);
   return (
     <>
-      <Box p={2}>
-        <IconButton size='small' onClick={() => setMessageDialogOpen(true)}>
-          <MessageIconContainer>
-            <MessageIcon fontSize='inherit' />
-          </MessageIconContainer>
-        </IconButton>
-      </Box>
+      <IconButton size='small' onClick={() => setMessageDialogOpen(true)}>
+        <MessageIconContainer>
+          <MessageIcon fontSize='inherit' />
+        </MessageIconContainer>
+      </IconButton>
       <Dialog
         open={MessageDialogOpen}
         onClose={() => setMessageDialogOpen(false)}
@@ -66,20 +69,24 @@ export function MessageDialog({
           <DialogTitle id='scroll-dialog-title'>{t('Comment')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <Box display='flex' flexDirection='column'>
-            <Box display='flex'>
-              {author}{' '}
-              <GreyText>
-                <Box ml={1}>on {date}</Box>
-              </GreyText>
+          <DialogContainer>
+            <Box display='flex' flexDirection='column'>
+              <Box mt={2} display='flex'>
+                {renderUserName(author)}{' '}
+                <GreyText>
+                  <Box ml={1}>
+                    on <UniversalMoment>{date}</UniversalMoment>
+                  </Box>
+                </GreyText>
+              </Box>
+              <DividerLine />
+              {comment}
             </Box>
-            {message}
-          </Box>
+          </DialogContainer>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
             <Button
-              type='submit'
               color='primary'
               variant='contained'
               onClick={() => setMessageDialogOpen(false)}
@@ -91,4 +98,4 @@ export function MessageDialog({
       </Dialog>
     </>
   );
-}
+};

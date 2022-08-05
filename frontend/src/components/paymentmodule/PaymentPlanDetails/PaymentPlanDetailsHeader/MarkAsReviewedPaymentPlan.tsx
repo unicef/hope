@@ -16,16 +16,16 @@ import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWr
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField/FormikTextField';
-import { Action } from '../../../../__generated__/graphql';
+import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
 
 export interface MarkAsReviewedPaymentPlanProps {
-  paymentPlanId: string;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const MarkAsReviewedPaymentPlan = ({
-  paymentPlanId,
+  paymentPlan,
 }: MarkAsReviewedPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [markAsReviewedDialogOpen, setMarkAsReviewedDialogOpen] = useState(
@@ -37,10 +37,20 @@ export const MarkAsReviewedPaymentPlan = ({
     loading: loadingReview,
   } = usePaymentPlanAction(
     Action.Review,
-    paymentPlanId,
+    paymentPlan.id,
     () => showMessage(t('Payment Plan has been marked as reviewed.')),
     () => showMessage(t('Error during marking Payment Plan as reviewed.')),
+    () => setMarkAsReviewedDialogOpen(false),
   );
+
+  const shouldShowLastReviewerMessage = (): boolean => {
+    const { financeReviewNumberRequired } = paymentPlan;
+    const financeReviewsCount =
+      paymentPlan.approvalProcess?.edges[0]?.node.actions.financeReview.length;
+
+    return financeReviewNumberRequired - 1 === financeReviewsCount;
+  };
+
   const initialValues = {
     comment: '',
   };
@@ -92,13 +102,15 @@ export const MarkAsReviewedPaymentPlan = ({
                       'Are you sure you want to mark this Payment Plan as reviewed?',
                     )}
                   </Box>
-                  <Box p={5}>
-                    <GreyText>
-                      {t(
-                        'Note: You are the last reviewer. Upon proceeding, this Payment Plan will be automatically moved to accepted status',
-                      )}
-                    </GreyText>
-                  </Box>
+                  {shouldShowLastReviewerMessage() && (
+                    <Box p={5}>
+                      <GreyText>
+                        {t(
+                          'Note: You are the last reviewer. Upon proceeding, this Payment Plan will be automatically moved to accepted status',
+                        )}
+                      </GreyText>
+                    </Box>
+                  )}
                   <Form>
                     <Field
                       name='comment'

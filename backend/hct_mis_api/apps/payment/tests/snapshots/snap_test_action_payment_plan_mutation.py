@@ -70,8 +70,17 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                ],
+                                'actions': {
+                                    'approval': [
+                                    ],
+                                    'authorization': [
+                                    ],
+                                    'financeReview': [
+                                    ],
+                                    'reject': [
+                                    ]
+                                },
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -97,13 +106,21 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                    {
-                                        'comment': 'lock_approve_authorize_reject, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    }
-                                ],
+                                'actions': {
+                                    'approval': [
+                                        {
+                                            'comment': 'lock_approve_authorize_reject, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        }
+                                    ],
+                                    'authorization': [
+                                    ],
+                                    'financeReview': [
+                                    ],
+                                    'reject': [
+                                    ]
+                                },
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -149,18 +166,25 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                    {
-                                        'comment': 'lock_approve_authorize_reject, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'lock_approve_authorize_reject, action: REJECT',
-                                        'info': 'Rejected by Rachel Walker',
-                                        'type': 'REJECT'
-                                    }
-                                ],
+                                'actions': {
+                                    'approval': [
+                                        {
+                                            'comment': 'lock_approve_authorize_reject, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        }
+                                    ],
+                                    'authorization': [
+                                    ],
+                                    'financeReview': [
+                                    ],
+                                    'reject': [
+                                        {
+                                            'comment': 'lock_approve_authorize_reject, action: REJECT',
+                                            'info': 'Rejected by Rachel Walker'
+                                        }
+                                    ]
+                                },
+                                'rejectedOn': 'IN_APPROVAL',
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -186,8 +210,17 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                ],
+                                'actions': {
+                                    'approval': [
+                                    ],
+                                    'authorization': [
+                                    ],
+                                    'financeReview': [
+                                    ],
+                                    'reject': [
+                                    ]
+                                },
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -213,13 +246,21 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    }
-                                ],
+                                'actions': {
+                                    'approval': [
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        }
+                                    ],
+                                    'authorization': [
+                                    ],
+                                    'financeReview': [
+                                    ],
+                                    'reject': [
+                                    ]
+                                },
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -245,18 +286,25 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    }
-                                ],
+                                'actions': {
+                                    'approval': [
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        }
+                                    ],
+                                    'authorization': [
+                                    ],
+                                    'financeReview': [
+                                    ],
+                                    'reject': [
+                                    ]
+                                },
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -285,23 +333,29 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: AUTHORIZE',
-                                        'info': 'Authorized by Rachel Walker',
-                                        'type': 'AUTHORIZATION'
-                                    }
-                                ],
+                                'actions': {
+                                    'approval': [
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        }
+                                    ],
+                                    'authorization': [
+                                        {
+                                            'comment': 'all_steps, action: AUTHORIZE',
+                                            'info': 'Authorized by Rachel Walker'
+                                        }
+                                    ],
+                                    'financeReview': [
+                                    ],
+                                    'reject': [
+                                    ]
+                                },
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -330,28 +384,33 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: AUTHORIZE',
-                                        'info': 'Authorized by Rachel Walker',
-                                        'type': 'AUTHORIZATION'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: AUTHORIZE',
-                                        'info': 'Authorized by Rachel Walker',
-                                        'type': 'AUTHORIZATION'
-                                    }
-                                ],
+                                'actions': {
+                                    'approval': [
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        }
+                                    ],
+                                    'authorization': [
+                                        {
+                                            'comment': 'all_steps, action: AUTHORIZE',
+                                            'info': 'Authorized by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: AUTHORIZE',
+                                            'info': 'Authorized by Rachel Walker'
+                                        }
+                                    ],
+                                    'financeReview': [
+                                    ],
+                                    'reject': [
+                                    ]
+                                },
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -383,33 +442,37 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: AUTHORIZE',
-                                        'info': 'Authorized by Rachel Walker',
-                                        'type': 'AUTHORIZATION'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: AUTHORIZE',
-                                        'info': 'Authorized by Rachel Walker',
-                                        'type': 'AUTHORIZATION'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: REVIEW',
-                                        'info': 'Reviewed by Rachel Walker',
-                                        'type': 'FINANCE_REVIEW'
-                                    }
-                                ],
+                                'actions': {
+                                    'approval': [
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        }
+                                    ],
+                                    'authorization': [
+                                        {
+                                            'comment': 'all_steps, action: AUTHORIZE',
+                                            'info': 'Authorized by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: AUTHORIZE',
+                                            'info': 'Authorized by Rachel Walker'
+                                        }
+                                    ],
+                                    'financeReview': [
+                                        {
+                                            'comment': 'all_steps, action: REVIEW',
+                                            'info': 'Reviewed by Rachel Walker'
+                                        }
+                                    ],
+                                    'reject': [
+                                    ]
+                                },
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -441,38 +504,41 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: AUTHORIZE',
-                                        'info': 'Authorized by Rachel Walker',
-                                        'type': 'AUTHORIZATION'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: AUTHORIZE',
-                                        'info': 'Authorized by Rachel Walker',
-                                        'type': 'AUTHORIZATION'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: REVIEW',
-                                        'info': 'Reviewed by Rachel Walker',
-                                        'type': 'FINANCE_REVIEW'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: REVIEW',
-                                        'info': 'Reviewed by Rachel Walker',
-                                        'type': 'FINANCE_REVIEW'
-                                    }
-                                ],
+                                'actions': {
+                                    'approval': [
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        }
+                                    ],
+                                    'authorization': [
+                                        {
+                                            'comment': 'all_steps, action: AUTHORIZE',
+                                            'info': 'Authorized by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: AUTHORIZE',
+                                            'info': 'Authorized by Rachel Walker'
+                                        }
+                                    ],
+                                    'financeReview': [
+                                        {
+                                            'comment': 'all_steps, action: REVIEW',
+                                            'info': 'Reviewed by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: REVIEW',
+                                            'info': 'Reviewed by Rachel Walker'
+                                        }
+                                    ],
+                                    'reject': [
+                                    ]
+                                },
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'
@@ -504,43 +570,45 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_3_all_
                     'edges': [
                         {
                             'node': {
-                                'approvals': [
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: APPROVE',
-                                        'info': 'Approved by Rachel Walker',
-                                        'type': 'APPROVAL'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: AUTHORIZE',
-                                        'info': 'Authorized by Rachel Walker',
-                                        'type': 'AUTHORIZATION'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: AUTHORIZE',
-                                        'info': 'Authorized by Rachel Walker',
-                                        'type': 'AUTHORIZATION'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: REVIEW',
-                                        'info': 'Reviewed by Rachel Walker',
-                                        'type': 'FINANCE_REVIEW'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: REVIEW',
-                                        'info': 'Reviewed by Rachel Walker',
-                                        'type': 'FINANCE_REVIEW'
-                                    },
-                                    {
-                                        'comment': 'all_steps, action: REVIEW',
-                                        'info': 'Reviewed by Rachel Walker',
-                                        'type': 'FINANCE_REVIEW'
-                                    }
-                                ],
+                                'actions': {
+                                    'approval': [
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: APPROVE',
+                                            'info': 'Approved by Rachel Walker'
+                                        }
+                                    ],
+                                    'authorization': [
+                                        {
+                                            'comment': 'all_steps, action: AUTHORIZE',
+                                            'info': 'Authorized by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: AUTHORIZE',
+                                            'info': 'Authorized by Rachel Walker'
+                                        }
+                                    ],
+                                    'financeReview': [
+                                        {
+                                            'comment': 'all_steps, action: REVIEW',
+                                            'info': 'Reviewed by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: REVIEW',
+                                            'info': 'Reviewed by Rachel Walker'
+                                        },
+                                        {
+                                            'comment': 'all_steps, action: REVIEW',
+                                            'info': 'Reviewed by Rachel Walker'
+                                        }
+                                    ],
+                                    'reject': [
+                                    ]
+                                },
+                                'rejectedOn': None,
                                 'sentForApprovalBy': {
                                     'firstName': 'Rachel',
                                     'lastName': 'Walker'

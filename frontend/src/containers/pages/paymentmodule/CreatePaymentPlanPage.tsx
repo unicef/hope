@@ -32,7 +32,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     dispersionStartDate: '',
     dispersionEndDate: '',
   };
-  const [mutate] = useCreatePpMutation();
+  const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -113,15 +113,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
         historyMethod: 'push',
       });
     } catch (e) {
-      const { nonValidationErrors } = handleValidationErrors(
-        'createPaymentPlan',
-        e,
-        setFieldError,
-        showMessage,
-      );
-      if (nonValidationErrors.length > 0) {
-        showMessage(t('Unexpected problem while creating Payment Plan'));
-      }
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
@@ -137,6 +129,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
             handleSubmit={submitForm}
             businessArea={businessArea}
             permissions={permissions}
+            loadingCreate={loadingCreate}
           />
           <PaymentPlanTargeting
             allTargetPopulations={allTargetPopulationsData}

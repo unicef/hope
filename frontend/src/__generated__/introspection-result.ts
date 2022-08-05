@@ -96,7 +96,7 @@
             "name": "FinancialServiceProviderXlsxReportNode"
           },
           {
-            "name": "AcceptanceProcessNode"
+            "name": "ApprovalProcessNode"
           },
           {
             "name": "GrievanceTicketNode"

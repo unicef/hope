@@ -1,21 +1,38 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Button, Typography } from '@material-ui/core';
+import styled from 'styled-components';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { Title } from '../../../core/Title';
-import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
-import { GreyInfoCard } from './GreyInfoCard';
+import { AcceptanceProcessRow } from './AcceptanceProcessRow';
+
+const ButtonContainer = styled(Box)`
+  width: 200px;
+`;
 
 interface AcceptanceProcessProps {
-  businessArea: string;
-  permissions: string[];
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function AcceptanceProcess({
-  businessArea,
-  permissions,
-}: AcceptanceProcessProps): React.ReactElement {
+export const AcceptanceProcess = ({
+  paymentPlan,
+}: AcceptanceProcessProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { edges } = paymentPlan.approvalProcess;
+  const [showAll, setShowAll] = useState(false);
+
+  const matchDataSize = (
+    data,
+  ): PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'] => {
+    return showAll ? data : [data[0]];
+  };
+
+  if (!edges.length) {
+    return null;
+  }
 
   return (
     <Box m={5}>
@@ -25,19 +42,26 @@ export function AcceptanceProcess({
             <Typography variant='h6'>{t('Acceptance Process')}</Typography>
           </Title>
         </Box>
-        <AcceptanceProcessStepper />
-        <Grid container>
-          <Grid item xs={4}>
-            <GreyInfoCard />
-          </Grid>
-          <Grid item xs={4}>
-            <GreyInfoCard />
-          </Grid>
-          <Grid item xs={4}>
-            <GreyInfoCard />
-          </Grid>
-        </Grid>
+        {matchDataSize(edges).map((edge) => (
+          <AcceptanceProcessRow
+            key={edge.node.id}
+            acceptanceProcess={edge.node}
+            paymentPlan={paymentPlan}
+          />
+        ))}
+        {edges.length > 1 && (
+          <ButtonContainer>
+            <Button
+              variant='outlined'
+              color='primary'
+              onClick={() => setShowAll(!showAll)}
+              endIcon={showAll ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            >
+              {showAll ? t('HIDE') : t('SHOW PREVIOUS')}
+            </Button>
+          </ButtonContainer>
+        )}
       </ContainerColumnWithBorder>
     </Box>
   );
-}
+};
