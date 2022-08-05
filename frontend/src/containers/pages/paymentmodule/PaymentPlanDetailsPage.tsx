@@ -11,7 +11,10 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
-import { usePaymentPlanQuery } from '../../../__generated__/graphql';
+import {
+  PaymentPlanStatus,
+  usePaymentPlanQuery,
+} from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
@@ -29,26 +32,27 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   if (!hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
 
+  const { paymentPlan } = data;
   return (
     <>
       <PaymentPlanDetailsHeader
-        paymentPlan={data.paymentPlan}
+        paymentPlan={paymentPlan}
         businessArea={businessArea}
         permissions={permissions}
       />
       <PaymentPlanDetails
         businessArea={businessArea}
-        permissions={permissions}
-        paymentPlan={data.paymentPlan}
+        paymentPlan={paymentPlan}
       />
-      <AcceptanceProcess
-        businessArea={businessArea}
-        permissions={permissions}
-      />
-      <Entitlement businessArea={businessArea} permissions={permissions} />
-      <FspSection businessArea={businessArea} permissions={permissions} />
-      <PaymentPlanDetailsResults paymentPlan={data.paymentPlan} />
-      <PaymentsTable businessArea={businessArea} paymentPlan={data.paymentPlan} />
+      <AcceptanceProcess paymentPlan={paymentPlan} />
+      {paymentPlan.status !== PaymentPlanStatus.Open && (
+        <>
+          <Entitlement paymentPlan={paymentPlan} />
+          <FspSection businessArea={businessArea} permissions={permissions} />
+        </>
+      )}
+      <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+      <PaymentsTable businessArea={businessArea} paymentPlan={paymentPlan} />
     </>
   );
 };

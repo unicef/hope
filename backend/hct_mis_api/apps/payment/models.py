@@ -949,7 +949,7 @@ class ApprovalProcess(TimeStampedUUIDModel):
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="approval_process")
 
     class Meta:
-        ordering = ("created_at",)
+        ordering = ("-created_at",)
         verbose_name_plural = "Approval Processes"
 
 
@@ -971,7 +971,7 @@ class Approval(TimeStampedUUIDModel):
     approval_process = models.ForeignKey(ApprovalProcess, on_delete=models.CASCADE, related_name="approvals")
 
     class Meta:
-        ordering = ("created_at",)
+        ordering = ("-created_at",)
 
     def __str__(self):
         return self.type

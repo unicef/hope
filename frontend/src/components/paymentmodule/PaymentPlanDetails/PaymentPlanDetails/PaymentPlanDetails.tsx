@@ -12,13 +12,11 @@ import { UniversalMoment } from '../../../core/UniversalMoment';
 
 interface PaymentPlanDetailsProps {
   businessArea: string;
-  permissions: string[];
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const PaymentPlanDetails = ({
   businessArea,
-  permissions,
   paymentPlan,
 }: PaymentPlanDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
