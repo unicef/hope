@@ -35,6 +35,86 @@ export const PaymentPlan = gql`
       totalEntitledQuantity
       totalDeliveredQuantity
       totalUndeliveredQuantity
+      approvalProcess {
+        totalCount
+        edgeCount
+        edges {
+          node {
+            id
+            sentForApprovalBy {
+              id
+              firstName
+              lastName
+              email
+            }
+            sentForApprovalDate
+            sentForAuthorizationBy {
+              id
+              firstName
+              lastName
+              email
+            }
+            sentForAuthorizationDate
+            sentForFinanceReviewBy {
+              id
+              firstName
+              lastName
+              email
+            }
+            sentForFinanceReviewDate
+            actions {
+              approval {
+                createdAt
+                comment
+                info
+                createdBy {
+                  id
+                  firstName
+                  lastName
+                  email
+                }
+              }
+              authorization {
+                createdAt
+                comment
+                info
+                createdBy {
+                  id
+                  firstName
+                  lastName
+                  email
+                }
+              }
+              financeReview {
+                createdAt
+                comment
+                info
+                createdBy {
+                  id
+                  firstName
+                  lastName
+                  email
+                }
+              }
+              reject {
+                createdAt
+                comment
+                info
+                createdBy {
+                  id
+                  firstName
+                  lastName
+                  email
+                }
+              }
+            }
+            rejectedOn
+          }
+        }
+      }
+      approvalNumberRequired
+      authorizationNumberRequired
+      financeReviewNumberRequired
     }
   }
 `;

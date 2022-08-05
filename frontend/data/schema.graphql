@@ -3,32 +3,6 @@ schema {
   mutation: Mutations
 }
 
-type AcceptanceProcessNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  sentForApprovalBy: UserNode
-  sentForApprovalDate: DateTime
-  sentForAuthorizationBy: UserNode
-  sentForAuthorizationDate: DateTime
-  sentForFinanceReviewBy: UserNode
-  sentForFinanceReviewDate: DateTime
-  paymentPlan: PaymentPlanNode!
-  approvals: [ApprovalNode!]!
-}
-
-type AcceptanceProcessNodeConnection {
-  pageInfo: PageInfo!
-  edges: [AcceptanceProcessNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type AcceptanceProcessNodeEdge {
-  node: AcceptanceProcessNode
-  cursor: String!
-}
-
 enum Action {
   LOCK
   UNLOCK
@@ -118,16 +92,36 @@ enum AgencyType {
 
 type ApprovalNode {
   createdAt: DateTime!
-  type: ApprovalType!
   comment: String
+  createdBy: UserNode
   info: String
 }
 
-enum ApprovalType {
-  APPROVAL
-  AUTHORIZATION
-  FINANCE_REVIEW
-  REJECT
+type ApprovalProcessNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  sentForApprovalBy: UserNode
+  sentForApprovalDate: DateTime
+  sentForAuthorizationBy: UserNode
+  sentForAuthorizationDate: DateTime
+  sentForFinanceReviewBy: UserNode
+  sentForFinanceReviewDate: DateTime
+  paymentPlan: PaymentPlanNode!
+  rejectedOn: String
+  actions: FilteredActionsListNode
+}
+
+type ApprovalProcessNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ApprovalProcessNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ApprovalProcessNodeEdge {
+  node: ApprovalProcessNode
+  cursor: String!
 }
 
 type ApproveTargetPopulationMutation {
@@ -790,6 +784,13 @@ type FieldAttributeNode {
   choices: [CoreFieldChoiceObject]
   associatedWith: String
   isFlexField: Boolean
+}
+
+type FilteredActionsListNode {
+  approval: [ApprovalNode]
+  authorization: [ApprovalNode]
+  financeReview: [ApprovalNode]
+  reject: [ApprovalNode]
 }
 
 type FinalizeTargetPopulationMutation {
@@ -2624,7 +2625,7 @@ type PaymentPlanNode implements Node {
   totalHouseholdsCount: Int!
   totalIndividualsCount: Int!
   payments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): AcceptanceProcessNodeConnection!
+  approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   approvalNumberRequired: Int
   authorizationNumberRequired: Int
   financeReviewNumberRequired: Int

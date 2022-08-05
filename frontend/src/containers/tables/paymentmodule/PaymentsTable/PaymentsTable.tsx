@@ -28,14 +28,15 @@ export const PaymentsTable = ({
   canViewDetails = false,
 }: PaymentsTableProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [dialogPayment, setDialogPayment] = useState<AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null>();
+  const [dialogPayment, setDialogPayment] = useState<
+    AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
+  >();
   const initialVariables: AllPaymentsForTableQueryVariables = {
     businessArea,
     paymentPlanId: paymentPlan.id,
   };
 
   // TODO: set payment to state to pass to warning popup modal
-  
 
   return (
     <>

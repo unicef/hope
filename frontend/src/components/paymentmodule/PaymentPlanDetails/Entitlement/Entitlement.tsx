@@ -17,6 +17,11 @@ import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { PAYMENT_PLAN_STATES } from '../../../../utils/constants';
+import {
+  PaymentPlanQuery,
+  PaymentPlanStatus,
+} from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { Missing } from '../../../core/Missing';
@@ -82,14 +87,12 @@ const BoxWithBorderRight = styled(Box)`
 `;
 
 interface EntitlementProps {
-  businessArea: string;
-  permissions: string[];
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function Entitlement({
-  businessArea,
-  permissions,
-}: EntitlementProps): React.ReactElement {
+export const Entitlement = ({
+  paymentPlan,
+}: EntitlementProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const [entitlement, setEntitlement] = useState<string>('');
@@ -220,4 +223,4 @@ export function Entitlement({
       </ContainerColumnWithBorder>
     </Box>
   );
-}
+};

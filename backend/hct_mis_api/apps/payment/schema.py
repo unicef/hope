@@ -204,17 +204,47 @@ class ApprovalNode(DjangoObjectType):
 
     class Meta:
         model = Approval
-        fields = ("type", "created_at", "comment", "info")
+        fields = ("created_at", "comment", "info", "created_by")
 
     def resolve_info(self, info):
         return self.info
 
 
-class AcceptanceProcessNode(DjangoObjectType):
+class FilteredActionsListNode(graphene.ObjectType):
+    approval = graphene.List(ApprovalNode)
+    authorization = graphene.List(ApprovalNode)
+    finance_review = graphene.List(ApprovalNode)
+    reject = graphene.List(ApprovalNode)
+
+
+class ApprovalProcessNode(DjangoObjectType):
+    rejected_on = graphene.String()
+    actions = graphene.Field(FilteredActionsListNode)
+
     class Meta:
         model = ApprovalProcess
+        exclude = ("approvals",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_rejected_on(self, info):
+        if self.approvals.filter(type=Approval.REJECT).exists():
+            if self.sent_for_finance_review_date:
+                return "IN_REVIEW"
+            if self.sent_for_authorization_date:
+                return "IN_AUTHORIZATION"
+            if self.sent_for_approval_date:
+                return "IN_APPROVAL"
+        return None
+
+    def resolve_actions(self, info):
+        resp = FilteredActionsListNode(
+            approval=self.approvals.filter(type=Approval.APPROVAL),
+            authorization=self.approvals.filter(type=Approval.AUTHORIZATION),
+            finance_review=self.approvals.filter(type=Approval.FINANCE_REVIEW),
+            reject=self.approvals.filter(type=Approval.REJECT)
+        )
+        return resp
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -232,10 +262,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         model = PaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-
-    def resolve_status(self, info):
-        # in test it fails without str()
-        return str(self.status)
 
     def resolve_approval_number_required(self, info):
         return self.business_area.approval_number_required

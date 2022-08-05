@@ -5,17 +5,20 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
+import { LoadingButton } from '../../../core/LoadingButton';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
   businessArea: string;
   permissions: string[];
+  loadingCreate: boolean;
 }
 
 export const CreatePaymentPlanHeader = ({
   handleSubmit,
   businessArea,
   permissions,
+  loadingCreate,
 }: CreatePaymentPlanHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -41,9 +44,14 @@ export const CreatePaymentPlanHeader = ({
             {t('Cancel')}
           </Button>
         </Box>
-        <Button variant='contained' color='primary' onClick={handleSubmit}>
+        <LoadingButton
+          loading={loadingCreate}
+          variant='contained'
+          color='primary'
+          onClick={handleSubmit}
+        >
           {t('Save')}
-        </Button>
+        </LoadingButton>
       </Box>
     </PageHeader>
   );
