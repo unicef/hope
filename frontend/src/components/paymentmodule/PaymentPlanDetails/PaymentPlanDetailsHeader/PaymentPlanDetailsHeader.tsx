@@ -46,7 +46,6 @@ export const PaymentPlanDetailsHeader = ({
   const canEdit = true;
   const canLock = true;
   const canSendForApproval = true;
-  const canDuplicate = true;
   const canReject = true;
   const canApprove = true;
   const canAuthorize = true;
@@ -73,7 +72,6 @@ export const PaymentPlanDetailsHeader = ({
         <>
           <LockedPaymentPlanHeaderButtons
             paymentPlan={paymentPlan}
-            canDuplicate={canDuplicate}
             canLock={canLock}
             canSendForApproval={canSendForApproval}
           />
