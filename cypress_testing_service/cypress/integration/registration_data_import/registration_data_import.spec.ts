@@ -12,7 +12,9 @@ Given("There are no RDI imports", () => {
   // TODO: think about a better approach
   // maybe with the grievance tickets,
   // we can deactivate each household?
+
   // or the xlsx may be randomly generated, so there are no duplicates?
+  // cy.exec('yarn run generate-xlsx-files');
 })
 
 const clearCache = () => {
