@@ -68,6 +68,7 @@ stages:
                 backend.secret.MEDIA_STORAGE_AZURE_ACCOUNT_KEY=$(MEDIA_STORAGE_AZURE_ACCOUNT_KEY),\
                 backend.secret.SENTRY_DSN=$(SENTRY_DSN),\
                 backend.secret.EMAIL_HOST=$(EMAIL_HOST),\
+                backend.secret.EMAIL_USE_TLS=$(EMAIL_USE_TLS),\
                 backend.secret.KOBO_API_URL=$(KOBO_API_URL),\
                 backend.secret.KOBO_MASTER_API_TOKEN=$(KOBO_MASTER_API_TOKEN),\
                 backend.secret.DATAMART_USER=$(DATAMART_USER),\
