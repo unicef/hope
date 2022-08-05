@@ -1,22 +1,30 @@
-from django.db.models import Q, Count
+from django.db.models import Count, Q
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, FilterSet, OrderingFilter, UUIDFilter, MultipleChoiceFilter, DateFilter
+from django_filters import (
+    CharFilter,
+    DateFilter,
+    FilterSet,
+    MultipleChoiceFilter,
+    OrderingFilter,
+    UUIDFilter,
+)
 
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid
-from hct_mis_api.apps.core.filters import DecimalRangeFilter
-from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
+from hct_mis_api.apps.core.filters import DecimalRangeFilter
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid
+from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     CashPlanPaymentVerification,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
+    GenericPayment,
+    Payment,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
-    PaymentPlan,
-    GenericPayment,
 )
 
 
@@ -250,3 +258,26 @@ class PaymentPlanFilter(FilterSet):
 
     def search_filter(self, qs, name, value):
         return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value))
+
+
+class PaymentFilter(FilterSet):
+    business_area = CharFilter(field_name="payment_plan__business_area__slug", required=True)
+    payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
+
+    def payment_plan_id_filter(self, qs, name, value):
+        return qs
+
+    class Meta:
+        fields = tuple()
+        model = Payment
+
+    order_by = OrderingFilter(
+        fields=(
+            "id",
+            "status",
+            "household_id",
+            "household__size",
+            "household__admin2__name",
+            "entitlement_quantity_usd",
+        )
+    )

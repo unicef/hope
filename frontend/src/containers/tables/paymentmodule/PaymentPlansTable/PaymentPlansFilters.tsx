@@ -9,9 +9,19 @@ import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
 import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
 
+export interface FilterProps {
+  search: string;
+  dispersionDate: string;
+  status: string;
+  entitlement: {
+      min: number;
+      max: number;
+  };
+}
+
 interface PaymentPlansFiltersProps {
-  onFilterChange;
-  filter;
+  onFilterChange: (filter: FilterProps) => void;
+  filter: FilterProps;
 }
 export function PaymentPlansFilters({
   onFilterChange,
@@ -41,7 +51,7 @@ export function PaymentPlansFilters({
         <Grid item>
           <DatePickerFilter
             label={t('Dispersion Date')}
-            onChange={(date) =>
+            onChange={(date: string) =>
               onFilterChange({
                 ...filter,
                 dispersionDate: moment(date)
@@ -54,7 +64,7 @@ export function PaymentPlansFilters({
         </Grid>
         <Grid item>
           <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'status')}
+            onChange={(e: unknown) => handleFilterChange(e, 'status')}
             variant='outlined'
             label={t('Status')}
             multiple
