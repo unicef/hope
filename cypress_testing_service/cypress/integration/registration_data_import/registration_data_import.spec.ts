@@ -15,13 +15,17 @@ Given("There are no RDI imports", () => {
   // or the xlsx may be randomly generated, so there are no duplicates?
 })
 
-When('I visit the main dashboard', () => {
-  cy.visit('/');
-  // clear the cache
+const clearCache = () => {
   cy.get('[data-cy="menu-user-profile"]').click();
   cy.get('[data-cy="menu-item-clear-cache"]').click();
   // hack to let the page reload
-  cy.wait(3000);
+  cy.wait(2000);
+};
+
+
+When('I visit the main dashboard', () => {
+  cy.visit('/');
+  clearCache()
 });
 
 Then('I should see the side panel with RDI option', () => {
@@ -83,6 +87,8 @@ Then('I should see a new import with status in review', () => {
   cy.wait(1000);
   cy.reload();
   cy.wait(500);
+  // it lets the browser load the status
+
   cy.get('div').contains('IMPORT ERROR').should('not.exist');
   cy.get('div').contains('IN REVIEW');
 });
@@ -119,7 +125,7 @@ When('I visit the Individuals dashboard', () => {
   cy.get('span').contains('Individuals').click();
 })
 
-Then('I see a newly imported individuals', () => {
+Then('I see the newly imported individuals', () => {
   // table with 4 elements - 5th is a filler
   cy.get('tbody').find('tr').should('have.length', 5);
 })

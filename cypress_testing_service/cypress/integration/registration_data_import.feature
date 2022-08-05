@@ -23,4 +23,4 @@ Feature: Registration Data Import
         When I visit the Households dashboard
         Then I see a newly imported household
         When I visit the Individuals dashboard
-        Then I see a newly imported individuals
+        Then I see the newly imported individuals
