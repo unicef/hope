@@ -384,48 +384,58 @@ def check_and_set_taxid(queryset):
 
 
 @app.task
+@log_start_and_end
 @sentry_tags
 def automate_registration_diia_import_task(page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters):
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
+    from hct_mis_api.apps.core.models import BusinessArea
 
     with locked_cache(key="automate_rdi_diia_creation_task"):
         try:
-            service = RdiDiiaCreateTask()
-            rdi_name = template.format(
-                date=timezone.now(),
-                page_size=page_size,
-            )
-            rdi = service.create_rdi(None, rdi_name)
-            service.execute(rdi.id, diia_hh_count=page_size)
-            return [rdi_name, page_size]
+            with configure_scope() as scope:
+                scope.set_tag("business_area", BusinessArea.objects.get(slug="ukraine"))
+                service = RdiDiiaCreateTask()
+                rdi_name = template.format(
+                    date=timezone.now(),
+                    page_size=page_size,
+                )
+                rdi = service.create_rdi(None, rdi_name)
+                service.execute(rdi.id, diia_hh_count=page_size)
+                return [rdi_name, page_size]
         except Exception:
             raise
 
 
 @app.task
+@log_start_and_end
 @sentry_tags
 def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters):
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
+    from hct_mis_api.apps.core.models import BusinessArea
 
     with locked_cache(key="registration_diia_import_task"):
         try:
-            service = RdiDiiaCreateTask()
-            rdi_name = template.format(
-                date=timezone.now(),
-                page_size=len(diia_hh_ids),
-            )
-            rdi = service.create_rdi(None, rdi_name)
-            service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
-            return [rdi_name, len(diia_hh_ids)]
+            with configure_scope() as scope:
+                scope.set_tag("business_area", BusinessArea.objects.get(slug="ukraine"))
+                service = RdiDiiaCreateTask()
+                rdi_name = template.format(
+                    date=timezone.now(),
+                    page_size=len(diia_hh_ids),
+                )
+                rdi = service.create_rdi(None, rdi_name)
+                service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
+                return [rdi_name, len(diia_hh_ids)]
         except Exception:
             raise
 
 
 @app.task
+@log_start_and_end
+@sentry_tags
 def deduplicate_documents():
     with locked_cache(key="deduplicate_documents"):
         with transaction.atomic():
