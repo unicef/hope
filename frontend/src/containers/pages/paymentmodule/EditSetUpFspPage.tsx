@@ -124,7 +124,6 @@ export const EditSetUpFspPage = (): React.ReactElement => {
                       <>
                         {values.deliveryMechanisms.map((item, index) => (
                           <DeliveryMechanismRow
-                            baseName='mobileMoney'
                             index={index}
                             step={activeStep}
                             values={values}
