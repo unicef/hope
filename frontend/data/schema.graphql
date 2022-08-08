@@ -468,7 +468,6 @@ input CreateGrievanceTicketInput {
   extras: CreateGrievanceTicketExtrasInput
   priority: Int
   urgency: Int
-  postponeDeduplication: Boolean
 }
 
 type CreateGrievanceTicketMutation {
@@ -3596,7 +3595,6 @@ input UpdateGrievanceTicketInput {
   extras: UpdateGrievanceTicketExtrasInput
   priority: Int
   urgency: Int
-  postponeDeduplication: Boolean
 }
 
 type UpdateGrievanceTicketMutation {

@@ -782,7 +782,6 @@ export type CreateGrievanceTicketInput = {
   extras?: Maybe<CreateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
-  postponeDeduplication?: Maybe<Scalars['Boolean']>,
 };
 
 export type CreateGrievanceTicketMutation = {
@@ -5736,7 +5735,6 @@ export type UpdateGrievanceTicketInput = {
   extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
-  postponeDeduplication?: Maybe<Scalars['Boolean']>,
 };
 
 export type UpdateGrievanceTicketMutation = {
