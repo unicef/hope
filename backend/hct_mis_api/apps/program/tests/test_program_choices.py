@@ -40,7 +40,6 @@ class TestProgramChoices(APITestCase):
     }
     """
 
-
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory()

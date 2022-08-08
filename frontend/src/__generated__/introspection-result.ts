@@ -162,6 +162,9 @@
             "name": "IndividualIdentityNode"
           },
           {
+            "name": "BankAccountInfoNode"
+          },
+          {
             "name": "LogEntryNode"
           },
           {

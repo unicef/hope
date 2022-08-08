@@ -4,7 +4,7 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
-import { thingForSpecificGrievanceType } from '../../../utils/utils';
+import { thingForSpecificGrievanceType, camelizeArrayObjects } from '../../../utils/utils';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
@@ -71,6 +71,9 @@ function prepareInitialValueEditIndividual(
   const identities = individualData?.identities;
   const identitiesToRemove = individualData?.identities_to_remove;
   const identitiesEdited = individualData?.identities_to_edit;
+  const paymentChannels = individualData?.payment_channels;
+  const paymentChannelsToRemove = individualData?.payment_channels_to_remove;
+  const paymentChannelsEdited = individualData?.payment_channels_to_edit;
   const flexFields = individualData.flex_fields;
   delete individualData.documents;
   delete individualData.documents_to_remove;
@@ -78,6 +81,10 @@ function prepareInitialValueEditIndividual(
   delete individualData.identities;
   delete individualData.identities_to_remove;
   delete individualData.identities_to_edit;
+  delete individualData.payment_channels;
+  delete individualData.payment_channels_to_remove;
+  delete individualData.payment_channels_to_edit;
+  delete individualData.previous_payment_channels;
   delete individualData.previous_documents;
   delete individualData.previous_identities;
   delete individualData.flex_fields;
@@ -114,6 +121,15 @@ function prepareInitialValueEditIndividual(
   ).map((item) => item.value);
   initialValues.individualDataUpdateIdentitiesToEdit = (
     identitiesEdited || []
+  ).map((item) => item.value);
+  initialValues.individualDataUpdateFieldsPaymentChannels = (
+    camelizeArrayObjects(paymentChannels) || []
+  ).map((item) => item.value);
+  initialValues.individualDataUpdatePaymentChannelsToRemove = (
+    camelizeArrayObjects(paymentChannelsToRemove) || []
+  ).map((item) => item.value);
+  initialValues.individualDataUpdatePaymentChannelsToEdit = (
+    camelizeArrayObjects(paymentChannelsEdited) || []
   ).map((item) => item.value);
   return initialValues;
 }
@@ -351,6 +367,11 @@ function prepareEditIndividualVariables(requiredVariables, values) {
               identities: values.individualDataUpdateFieldsIdentities,
               identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
               identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
+              paymentChannels: values.individualDataUpdateFieldsPaymentChannels,
+              paymentChannelsToRemove:
+                values.individualDataUpdatePaymentChannelsToRemove,
+              paymentChannelsToEdit:
+                values.individualDataUpdatePaymentChannelsToEdit,
             },
           },
         },

@@ -42,6 +42,7 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
 )
+from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 
 logger = logging.getLogger(__name__)
 
@@ -372,7 +373,7 @@ class RdiMergeTask:
                             golden_record_duplicates,
                             "duplicates",
                             obj_hct.business_area,
-                            registration_data_import=obj_hct
+                            registration_data_import=obj_hct,
                         )
 
                         needs_adjudication = Individual.objects.filter(
@@ -392,7 +393,7 @@ class RdiMergeTask:
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
-                    DeduplicateTask.hard_deduplicate_documents(documents_to_create, registration_data_import=obj_hct)
+                    deduplicate_documents.delay()
                     log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
 
             self._update_individuals_and_households(individual_ids)

@@ -1,5 +1,3 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -27,7 +25,6 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         }
         """
 
-    
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()

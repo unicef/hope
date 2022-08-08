@@ -16,7 +16,7 @@ from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
     PaymentRecordFactory,
-    CashPlanPaymentVerificationFactory
+    CashPlanPaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification, CashPlanPaymentVerification
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
@@ -132,8 +132,8 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_UPDATE],
+                "with_permission",
+                [Permissions.GRIEVANCES_UPDATE],
             ),
             ("without_permission", []),
         ]
@@ -141,10 +141,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
     def test_update_payment_verification_ticket_with_new_received_amount_extras(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        extras = {
-            "newReceivedAmount": 1234.99,
-            "newStatus": PaymentVerification.STATUS_RECEIVED
-        }
+        extras = {"newReceivedAmount": 1234.99, "newStatus": PaymentVerification.STATUS_RECEIVED}
         input_data = self._prepare_input(extras)
 
         self.snapshot_graphql_request(
@@ -153,12 +150,11 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             variables=input_data,
         )
 
-
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION],
+                "with_permission",
+                [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION],
             ),
             ("without_permission", []),
         ]
@@ -170,9 +166,9 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
-                "grievanceTicketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
-                "approveStatus": True
-            }
+            "grievanceTicketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
+            "approveStatus": True,
+        }
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_QUERY,

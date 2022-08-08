@@ -1,4 +1,3 @@
-from datetime import datetime
 from operator import itemgetter
 
 from django import forms
@@ -138,7 +137,7 @@ class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 mis_funds_commitment.business_area = obj.business_office_code
                 mis_funds_commitment.save()
                 obj.mis_sync_flag = True
-                obj.mis_sync_date = datetime.now()
+                obj.mis_sync_date = timezone.now()
                 obj.save()
                 return redirect(f"/api/admin/erp_datahub/fundscommitment/{pk}/")
 
@@ -229,7 +228,7 @@ class DownPaymentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 mis_down_payment = mis_models.DownPayment(**SyncToMisDatahubTask.get_model_dict(obj))
                 mis_down_payment.business_area = obj.business_office_code
                 obj.mis_sync_flag = True
-                obj.mis_sync_date = datetime.now()
+                obj.mis_sync_date = timezone.now()
                 obj.save()
                 mis_down_payment.save()
                 return redirect(f"/api/admin/erp_datahub/downpayment/{pk}/")

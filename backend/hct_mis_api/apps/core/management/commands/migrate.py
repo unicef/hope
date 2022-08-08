@@ -189,7 +189,12 @@ class Command(BaseCommand):
                 )
             else:
                 if targets[0][1] is None:
-                    self.stdout.write(self.style.MIGRATE_LABEL("  Unapply all migrations: ") + "{}".format(targets[0][0],))
+                    self.stdout.write(
+                        self.style.MIGRATE_LABEL("  Unapply all migrations: ")
+                        + "{}".format(
+                            targets[0][0],
+                        )
+                    )
                 else:
                     self.stdout.write(
                         self.style.MIGRATE_LABEL("  Target specific migration: ")
