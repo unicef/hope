@@ -1,3 +1,4 @@
+import json
 from unittest.mock import patch
 
 from django.test import TestCase
@@ -5,7 +6,7 @@ from django.db.utils import IntegrityError
 
 from hct_mis_api.apps.household.fixtures import IndividualFactory, HouseholdFactory
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentFactory
-from hct_mis_api.apps.payment.models import PaymentPlan, Payment
+from hct_mis_api.apps.payment.models import PaymentPlan, Payment, PaymentChannel, GenericPayment
 from hct_mis_api.apps.core.models import BusinessArea
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -134,3 +135,70 @@ class TestPaymentModel(TestCase):
         p1 = PaymentFactory(payment_plan=pp, excluded=False, household=hh1)
         with self.assertRaises(IntegrityError):
             p2 = PaymentFactory(payment_plan=pp, excluded=False, household=hh1)
+
+    def test_manager_annotations__pp_conflicts(self):
+        pp1 = PaymentPlanFactory()
+
+        # create hard conflicted payment
+        pp2 = PaymentPlanFactory(start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.LOCKED)
+        # create soft conflicted payments
+        pp3 = PaymentPlanFactory(start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.OPEN)
+        pp4 = PaymentPlanFactory(start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.OPEN)
+        p1 = PaymentFactory(payment_plan=pp1, excluded=False)
+        p2 = PaymentFactory(payment_plan=pp2, household=p1.household, excluded=False)
+        p3 = PaymentFactory(payment_plan=pp3, household=p1.household, excluded=False)
+        p4 = PaymentFactory(payment_plan=pp4, household=p1.household, excluded=False)
+
+        p1_data = Payment.objects.filter(id=p1.id).values()[0]
+        self.assertEqual(p1_data["payment_plan_hard_conflicted"], True)
+        self.assertEqual(p1_data["payment_plan_soft_conflicted"], True)
+
+        self.assertEqual(len(p1_data["payment_plan_hard_conflicted_data"]), 1)
+        self.assertEqual(
+            json.loads(p1_data["payment_plan_hard_conflicted_data"][0]),
+            {
+                "payment_id": str(p2.id),
+                "payment_plan_id": str(pp2.id),
+                "payment_plan_status": str(pp2.status),
+                "payment_plan_start_date": pp2.start_date.strftime("%d-%m-%Y"),
+                "payment_plan_end_date": pp2.end_date.strftime("%d-%m-%Y"),
+            },
+        )
+        self.assertEqual(len(p1_data["payment_plan_soft_conflicted_data"]), 2)
+        self.assertCountEqual(
+            [json.loads(conflict_data) for conflict_data in p1_data["payment_plan_soft_conflicted_data"]],
+            [
+                {
+                    "payment_id": str(p3.id),
+                    "payment_plan_id": str(pp3.id),
+                    "payment_plan_status": str(pp3.status),
+                    "payment_plan_start_date": pp3.start_date.strftime("%d-%m-%Y"),
+                    "payment_plan_end_date": pp3.end_date.strftime("%d-%m-%Y"),
+                },
+                {
+                    "payment_id": str(p4.id),
+                    "payment_plan_id": str(pp4.id),
+                    "payment_plan_status": str(pp4.status),
+                    "payment_plan_start_date": pp4.start_date.strftime("%d-%m-%Y"),
+                    "payment_plan_end_date": pp4.end_date.strftime("%d-%m-%Y"),
+                },
+            ],
+        )
+
+    def test_manager_annotations__payment_channels(self):
+        pp1 = PaymentPlanFactory()
+        p1 = PaymentFactory(payment_plan=pp1, excluded=False)
+
+        p1_data = Payment.objects.filter(id=p1.id).values()[0]
+        self.assertEqual(p1_data["has_defined_payment_channel"], False)
+        self.assertEqual(p1_data["has_assigned_payment_channel"], False)
+
+        pc1 = PaymentChannel.objects.create(
+            individual=p1.collector, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+        )
+        p1.assigned_payment_channel = pc1
+        p1.save()
+
+        p1_data = Payment.objects.filter(id=p1.id).values()[0]
+        self.assertEqual(p1_data["has_defined_payment_channel"], True)
+        self.assertEqual(p1_data["has_assigned_payment_channel"], True)
