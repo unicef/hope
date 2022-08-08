@@ -101,7 +101,6 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     extras = CreateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
-    postpone_deduplication = graphene.Boolean(required=False)
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -118,7 +117,6 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     extras = UpdateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
-    postpone_deduplication = graphene.Boolean(required=False)
 
 
 class CreateTicketNoteInput(graphene.InputObjectType):
