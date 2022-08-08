@@ -1,4 +1,5 @@
-from datetime import datetime
+from django.utils import timezone
+
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -100,7 +101,7 @@ class DashboardReport(TimeStampedUUIDModel):
     report_type = ChoiceArrayField(models.CharField(choices=REPORT_TYPES, max_length=255))
 
     # filters
-    year = models.PositiveSmallIntegerField(default=datetime.now().year)
+    year = models.PositiveSmallIntegerField(default=timezone.now().year)
     program = models.ForeignKey(
         "program.Program",
         on_delete=models.CASCADE,

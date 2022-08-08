@@ -61,6 +61,8 @@ export const PAYMENT_RECORD_QUERY = gql`
           id
           phoneNo
           phoneNoAlternative
+          phoneNoValid
+          phoneNoAlternativeValid
         }
       }
       fullName

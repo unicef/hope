@@ -1,3 +1,6 @@
+from datetime import timedelta
+from django.utils import timezone
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -15,6 +18,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.reporting.models import Report
+from hct_mis_api.apps.reporting.fixtures import ReportFactory
 from hct_mis_api.apps.reporting.validators import ReportValidator
 
 
@@ -32,6 +36,17 @@ class TestReportingMutation(APITestCase):
         }
     }
     """
+
+    RESTART_CREATE_REPORT = """
+        mutation RestartCreateReport($reportData: RestartCreateReportInput!) {
+            restartCreateReport(reportData: $reportData) {
+                report {
+                    reportType
+                    status
+                }
+            }
+        }
+        """
 
     @classmethod
     def setUpTestData(cls):
@@ -71,6 +86,12 @@ class TestReportingMutation(APITestCase):
                 },
                 [{"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]}],
             )
+        report_updated_at = timezone.now() - timedelta(minutes=31)
+        cls.report = ReportFactory(
+            business_area=cls.business_area, status=Report.IN_PROGRESS, report_type=Report.INDIVIDUALS
+        )
+        cls.report.update_at = report_updated_at
+        cls.report.save()
 
     @parameterized.expand(
         [
@@ -146,3 +167,50 @@ class TestReportingMutation(APITestCase):
             self.assertTrue(should_exist_field in report_data)
         if should_not_exist_field:
             self.assertFalse(should_not_exist_field in report_data)
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.REPORTING_EXPORT]),
+            ("without_permission", []),
+        ]
+    )
+    def test_restart_create_report(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.snapshot_graphql_request(
+            request_string=self.RESTART_CREATE_REPORT,
+            context={"user": self.user},
+            variables={
+                "reportData": {
+                    "businessAreaSlug": self.business_area_slug,
+                    "reportId": encode_id_base64(self.report.id, Report),
+                }
+            },
+        )
+
+    def test_restart_create_report_invalid_status_update_time(self):
+        self.create_user_role_with_permissions(self.user, [Permissions.REPORTING_EXPORT], self.business_area)
+        self.report.status = Report.COMPLETED
+        self.report.save()
+        self.snapshot_graphql_request(
+            request_string=self.RESTART_CREATE_REPORT,
+            context={"user": self.user},
+            variables={
+                "reportData": {
+                    "businessAreaSlug": self.business_area_slug,
+                    "reportId": encode_id_base64(self.report.id, Report),
+                }
+            },
+        )
+
+        self.report.updated_at = timezone.now() - timedelta(minutes=29)
+        self.report.save()
+        self.snapshot_graphql_request(
+            request_string=self.RESTART_CREATE_REPORT,
+            context={"user": self.user},
+            variables={
+                "reportData": {
+                    "businessAreaSlug": self.business_area_slug,
+                    "reportId": encode_id_base64(self.report.id, Report),
+                }
+            },
+        )

@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from django.contrib.admin import site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.urls import reverse

@@ -1,3 +1,4 @@
+import random
 import time
 
 from django.contrib.gis.geos import Point
@@ -19,6 +20,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     RegistrationDataImportDatahub,
+    ImportedDocument,
+    ImportedDocumentType,
 )
 
 faker = Faker()
@@ -59,8 +62,8 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     registration_data_import = factory.SubFactory(
         RegistrationDataImportDatahubFactory,
     )
-    first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
-    last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     admin1 = ""
     admin2 = ""
     geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
@@ -85,7 +88,7 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     male_age_group_12_17_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
     male_age_group_18_59_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
     male_age_group_60_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
-    start = factory.Faker("date_this_month", before_today=True, after_today=False)
+    start = factory.Faker("date_time_this_month", before_now=True, after_now=False, tzinfo=utc)
     deviceid = factory.Faker("md5")
     name_enumerator = factory.Faker("name")
     org_enumerator = factory.fuzzy.FuzzyChoice(
@@ -119,8 +122,8 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
     disability = False
     household = factory.SubFactory(ImportedHouseholdFactory)
-    first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
-    last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
 
 
 def create_imported_household(household_args=None, individual_args=None):
@@ -149,3 +152,19 @@ def create_imported_household_and_individuals(household_data=None, individuals_d
     household.head_of_household = individuals[0]
     household.save()
     return household, individuals
+
+
+class ImportedDocumentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = ImportedDocument
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.LazyAttribute(lambda o: ImportedDocumentType.objects.order_by("?").first())
+    individual = factory.SubFactory(ImportedIndividualFactory)
+
+
+class ImportedDocumentTypeFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = ImportedDocumentType
+
+    type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])

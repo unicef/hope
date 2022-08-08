@@ -24,6 +24,8 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
             id
             phoneNo
             phoneNoAlternative
+            phoneNoValid
+            phoneNoAlternativeValid
           }
         }
         fullName

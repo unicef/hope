@@ -2,31 +2,11 @@
 
 from django.db import migrations
 
-from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
-
 
 def set_business_areas(apps, schema_editor):
     Individual = apps.get_model("household", "Individual")
     BusinessArea = apps.get_model("core", "BusinessArea")
     Individual.objects.all().update(business_area=BusinessArea.objects.first())
-    # individuals_to_update = []
-    # for individual in Individual.objects.all():
-    #     household = individual.household
-    #     registration_data_import = individual.registration_data_import
-    #     households_and_roles = individual.households_and_roles.filter(role__in=(ROLE_PRIMARY, ROLE_ALTERNATE))
-    #
-    #     if household is not None:
-    #         individual.business_area = household.business_area
-    #     elif registration_data_import.business_area is not None:
-    #         individual.business_area = registration_data_import.business_area
-    #     elif households_and_roles.exists() is True:
-    #         individual.business_area = households_and_roles.first().household.business_area
-    #     else:
-    #         individual.business_area = BusinessArea.objects.first()
-    #
-    #     individuals_to_update.append(individual)
-    #
-    #     Individual.objects.bulk_update(individuals_to_update, ["business_area"])
 
 
 def revert_setting_business_areas(apps, schema_editor):
@@ -37,7 +17,7 @@ def revert_setting_business_areas(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('household', '0037_migration'),
+        ("household", "0037_migration"),
     ]
 
     operations = [

@@ -114,7 +114,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         )
 
     def resolve_import_id(parent, info):
-        row = ''
+        row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
         if parent.kobo_asset_id:
@@ -146,6 +146,8 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     observed_disability = graphene.List(graphene.String)
     age = graphene.Int()
     import_id = graphene.String()
+    phone_no_valid = graphene.Boolean()
+    phone_no_alternative_valid = graphene.Boolean()
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -171,7 +173,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.age
 
     def resolve_import_id(parent, info):
-        row = ''
+        row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
         if parent.kobo_asset_id:
@@ -180,6 +182,12 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
             row = f" (XLS row {parent.row_id})"
 
         return resp + row
+
+    def resolve_phone_no_valid(parent, info):
+        return parent.phone_no_valid
+
+    def resolve_phone_no_alternative_valid(parent, info):
+        return parent.phone_no_alternative_valid
 
     class Meta:
         model = ImportedIndividual

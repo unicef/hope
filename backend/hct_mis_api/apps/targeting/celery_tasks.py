@@ -1,11 +1,14 @@
 import logging
 
+from sentry_sdk import configure_scope
+
 from django.db.transaction import atomic
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.utils.sentry import sentry_tags
 
 from ..targeting.models import HouseholdSelection, TargetPopulation
 
@@ -13,14 +16,18 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(queue="priority")
+@sentry_tags
 def target_population_apply_steficon(target_population_id):
     from hct_mis_api.apps.steficon.models import RuleCommit
 
     try:
         target_population = TargetPopulation.objects.get(pk=target_population_id)
-        rule: RuleCommit = target_population.steficon_rule
-        if not rule:
-            raise Exception("TargetPopulation does not have a Steficon rule")
+        with configure_scope() as scope:
+            scope.set_tag("business_area", target_population.business_area)
+
+            rule: RuleCommit = target_population.steficon_rule
+            if not rule:
+                raise Exception("TargetPopulation does not have a Steficon rule")
     except Exception as e:
         logger.exception(e)
         raise

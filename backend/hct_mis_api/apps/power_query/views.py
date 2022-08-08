@@ -1,4 +1,3 @@
-import base64
 import pickle
 
 from django.contrib.auth.decorators import login_required
@@ -17,9 +16,9 @@ def report(request, pk):
         if report.result is None:
             return HttpResponse("This report is not currently available", status=400)
         data = pickle.loads(report.result)
-        if report.formatter.content_type == 'xls':
+        if report.formatter.content_type == "xls":
             response = HttpResponse(data, content_type=report.formatter.content_type)
-            response['Content-Disposition'] = f'attachment; filename={report.name}.xls'
+            response["Content-Disposition"] = f"attachment; filename={report.name}.xls"
             return response
         else:
             return HttpResponse(data, content_type=report.formatter.content_type)

@@ -5,15 +5,20 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useSnackbar } from '../../hooks/useSnackBar';
 import {
   choicesToDict,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
 import {
+  CashPlanPaymentVerificationStatus,
   CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
+  useExportXlsxCashPlanVerificationMutation,
+  useInvalidCashPlanPaymentVerificationMutation,
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
+import { LoadingButton } from '../core/LoadingButton';
 import { StatusBox } from '../core/StatusBox';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
@@ -48,6 +53,13 @@ const StyledLink = styled.a`
   text-decoration: none;
 `;
 
+const StyledBox = styled(Box)`
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+`;
+
 export const VerificationPlanDetails = ({
   verificationPlan,
   samplingChoicesData,
@@ -55,6 +67,18 @@ export const VerificationPlanDetails = ({
 }: VerificationPlanDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
+  const { showMessage } = useSnackbar();
+
+  const [
+    mutateExport,
+    { loading: loadingExport },
+  ] = useExportXlsxCashPlanVerificationMutation();
+
+  const [
+    mutateInvalid,
+    { loading: loadingInvalid },
+  ] = useInvalidCashPlanPaymentVerificationMutation();
+
   if (!verificationPlan || !samplingChoicesData || !permissions) return null;
 
   const canEditAndActivateAndDelete = verificationPlan.status === 'PENDING';
@@ -91,88 +115,156 @@ export const VerificationPlanDetails = ({
 
   return (
     <Container>
-      <Box display='flex' justifyContent='space-between'>
-        <Title>
-          <Typography variant='h6'>
-            {t('Verification Plan')} #{verificationPlan.unicefId}
-          </Typography>
-        </Title>
-        <Box display='flex' alignItems='center'>
-          {canEditAndActivateAndDelete && (
-            <>
-              <Box mr={2}>
-                {canDelete && (
-                  <DeleteVerificationPlan
-                    cashPlanVerificationId={verificationPlan.id}
-                    cashPlanId={cashPlan.id}
-                  />
-                )}
-              </Box>
-
-              {canEdit && (
-                <EditVerificationPlan
-                  cashPlanId={cashPlan.id}
-                  cashPlanVerificationId={verificationPlan.id}
-                />
-              )}
-              {canActivate && (
-                <Box alignItems='center' display='flex'>
-                  {canActivate && (
-                    <ActivateVerificationPlan
+      <Grid container>
+        <Grid item xs={6}>
+          <Title>
+            <Typography variant='h6'>
+              {t('Verification Plan')} #{verificationPlan.unicefId}
+            </Typography>
+          </Title>
+        </Grid>
+        <Grid item xs={6}>
+          <StyledBox>
+            {canEditAndActivateAndDelete && (
+              <>
+                <Box mr={2}>
+                  {canDelete && (
+                    <DeleteVerificationPlan
                       cashPlanVerificationId={verificationPlan.id}
                       cashPlanId={cashPlan.id}
                     />
                   )}
                 </Box>
-              )}
-            </>
-          )}
-          {canFinishAndDiscard && (
-            <Box display='flex'>
-              {verificationPlan.verificationChannel === 'XLSX' && (
-                <>
-                  {canExport && (
-                    <Box p={2}>
-                      <StyledLink
-                        download
-                        href={`/api/download-cash-plan-payment-verification/${verificationPlan.id}`}
-                      >
-                        <Button
-                          color='primary'
-                          variant='outlined'
-                          startIcon={<GetApp />}
-                        >
-                          {t('Export XLSX')}
-                        </Button>
-                      </StyledLink>
-                    </Box>
-                  )}
-                  {canImport && (
-                    <Box p={2}>
-                      <ImportXlsx
+
+                {canEdit && (
+                  <EditVerificationPlan
+                    cashPlanId={cashPlan.id}
+                    cashPlanVerificationId={verificationPlan.id}
+                  />
+                )}
+                {canActivate && (
+                  <Box alignItems='center' display='flex'>
+                    {canActivate && (
+                      <ActivateVerificationPlan
+                        cashPlanVerificationId={verificationPlan.id}
                         cashPlanId={cashPlan.id}
-                        verificationPlanId={verificationPlan.id}
                       />
-                    </Box>
+                    )}
+                  </Box>
+                )}
+              </>
+            )}
+            {canFinishAndDiscard && (
+              <Box display='flex'>
+                {verificationPlan.verificationChannel === 'XLSX' && (
+                  <>
+                    {canExport && (
+                      <>
+                        {!verificationPlan.hasXlsxFile && (
+                          <Box p={2}>
+                            <LoadingButton
+                              loading={loadingExport}
+                              disabled={
+                                loadingExport ||
+                                verificationPlan.xlsxFileExporting
+                              }
+                              color='primary'
+                              variant='outlined'
+                              startIcon={<GetApp />}
+                              onClick={async () => {
+                                try {
+                                  await mutateExport({
+                                    variables: {
+                                      cashPlanVerificationId:
+                                        verificationPlan.id,
+                                    },
+                                  });
+                                  showMessage(
+                                    t(
+                                      'Exporting XLSX started. Please check your email.',
+                                    ),
+                                  );
+                                } catch (e) {
+                                  e.graphQLErrors.map((x) =>
+                                    showMessage(x.message),
+                                  );
+                                }
+                              }}
+                            >
+                              {verificationPlan.xlsxFileExporting
+                                ? t('Exporting...')
+                                : t('Export Xlsx')}
+                            </LoadingButton>
+                          </Box>
+                        )}
+                        {!verificationPlan.xlsxFileExporting &&
+                          verificationPlan.hasXlsxFile && (
+                            <Box p={2}>
+                              <StyledLink
+                                download
+                                href={`/api/download-cash-plan-payment-verification/${verificationPlan.id}`}
+                              >
+                                <Button
+                                  color='primary'
+                                  variant='outlined'
+                                  startIcon={<GetApp />}
+                                >
+                                  {t('Download Xlsx')}
+                                </Button>
+                              </StyledLink>
+                            </Box>
+                          )}
+                      </>
+                    )}
+                    {canImport && (
+                      <Box p={2}>
+                        <ImportXlsx
+                          cashPlanId={cashPlan.id}
+                          verificationPlanId={verificationPlan.id}
+                        />
+                      </Box>
+                    )}
+                  </>
+                )}
+                {canFinish &&
+                  verificationPlan.xlsxFileWasDownloaded &&
+                  verificationPlan.xlsxFileImported && (
+                    <FinishVerificationPlan
+                      cashPlanVerificationId={verificationPlan.id}
+                      cashPlanId={cashPlan.id}
+                    />
                   )}
-                </>
-              )}
-              {canFinish && (
-                <FinishVerificationPlan
-                  cashPlanVerificationId={verificationPlan.id}
-                  cashPlanId={cashPlan.id}
-                />
-              )}
-              {canDiscard && (
-                <DiscardVerificationPlan
-                  cashPlanVerificationId={verificationPlan.id}
-                  cashPlanId={cashPlan.id}
-                />
-              )}
-            </Box>
-          )}
-        </Box>
-      </Box>
+                {canDiscard &&
+                  (verificationPlan.xlsxFileWasDownloaded &&
+                  verificationPlan.status ===
+                    CashPlanPaymentVerificationStatus.Active ? (
+                    <Box p={2}>
+                      <LoadingButton
+                        loading={loadingInvalid}
+                        color='primary'
+                        variant='outlined'
+                        onClick={() =>
+                          mutateInvalid({
+                            variables: {
+                              cashPlanVerificationId: verificationPlan.id,
+                            },
+                          })
+                        }
+                      >
+                        {t('Mark as Invalid')}
+                      </LoadingButton>
+                    </Box>
+                  ) : (
+                    <DiscardVerificationPlan
+                      cashPlanVerificationId={verificationPlan.id}
+                      cashPlanId={cashPlan.id}
+                    />
+                  ))}
+              </Box>
+            )}
+          </StyledBox>
+        </Grid>
+      </Grid>
       <Grid container>
         <Grid item xs={11}>
           <Grid container>
