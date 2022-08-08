@@ -5,14 +5,16 @@ from hct_mis_api.apps.core.models import XLSXKoboTemplate
 from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
 )
+from hct_mis_api.apps.utils.logs import log_start_and_end
+from hct_mis_api.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
 
 
 @app.task(bind=True, default_retry_delay=60)
+@log_start_and_end
+@sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_kobo_template_id):
-    logger.info("upload_new_kobo_template_and_update_flex_fields_task_with_retry start")
-
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -20,9 +22,10 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
 
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
     except KoboRetriableError as exc:
-        from datetime import datetime, timedelta
+        from datetime import timedelta
+        from django.utils import timezone
 
-        one_day_earlier_time = datetime.now() - timedelta(days=1)
+        one_day_earlier_time = timezone.now() - timedelta(days=1)
         if exc.xlsx_kobo_template_object.first_connection_failed_time > one_day_earlier_time:
             logger.exception(exc)
             raise self.retry(exc=exc)
@@ -32,13 +35,11 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
         logger.exception(e)
         raise
 
-    logger.info("upload_new_kobo_template_and_update_flex_fields_task_with_retry end")
-
 
 @app.task
+@log_start_and_end
+@sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
-    logger.info("upload_new_kobo_template_and_update_flex_fields_task_with_retry start")
-
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -50,5 +51,3 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
     except Exception as e:
         logger.exception(e)
         raise
-
-    logger.info("upload_new_kobo_template_and_update_flex_fields_task_with_retry end")

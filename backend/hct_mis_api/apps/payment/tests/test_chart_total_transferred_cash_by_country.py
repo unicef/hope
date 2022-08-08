@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils import timezone
 
 from django.core.management import call_command
 
@@ -37,7 +38,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
             business_area = BusinessArea.objects.get(slug=business_area_slug)
             PaymentRecordFactory.create_batch(
                 3,
-                delivery_date=datetime(year=2021, day=1, month=1),
+                delivery_date=timezone.make_aware(datetime(year=2021, day=1, month=1)),
                 business_area=business_area,
                 delivery_type=PaymentRecord.DELIVERY_TYPE_CASH,
                 delivered_quantity_usd=200.20,
@@ -46,7 +47,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
             )
             PaymentRecordFactory.create_batch(
                 3,
-                delivery_date=datetime(year=2021, day=1, month=1),
+                delivery_date=timezone.make_aware(datetime(year=2021, day=1, month=1)),
                 business_area=business_area,
                 delivery_type=PaymentRecord.DELIVERY_TYPE_VOUCHER,
                 delivered_quantity_usd=100.00,

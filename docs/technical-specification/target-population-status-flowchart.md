@@ -2,7 +2,7 @@
 
 Open it in https://mermaid.ink/
 
-```
+```mermaid
 graph TD
     CREATE_PAGE[Create New Target Population] -->|Save| OPEN
     OPEN(STATUS - Open)
