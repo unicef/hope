@@ -25,7 +25,9 @@ export const DeliveryMechanismRow = ({
   ];
 
   const getDeliveryMechanismLabel = (value: string): string => {
-    return deliveryMechanismChoices.find((item) => item.value === value).name;
+    return (
+      deliveryMechanismChoices.find((item) => item.value === value)?.name || ''
+    );
   };
 
   return (
