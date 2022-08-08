@@ -8,15 +8,17 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from smart_admin.utils import match, regex
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 
+from .config import env
+
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
-from .config import env
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
@@ -636,8 +638,6 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 360 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
-
-from smart_admin.utils import match, regex
 
 SMART_ADMIN_SECTIONS = {
     "HOPE": [

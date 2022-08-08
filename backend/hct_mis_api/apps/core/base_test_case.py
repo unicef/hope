@@ -1,5 +1,4 @@
 import base64
-from time import time
 
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase

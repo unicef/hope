@@ -190,7 +190,7 @@ class XlsxVerificationImportService:
                 (
                     "Payment Verifications",
                     received_cell.coordinate,
-                    f"If received_amount is 0, you should set received to NO",
+                    "If received_amount is 0, you should set received to NO",
                 )
             )
         elif received_amount is not None and received_amount != 0 and received != "YES":

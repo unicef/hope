@@ -9,7 +9,6 @@ from django.db.models import JSONField
 from django.template import Context, Template
 from django.utils import timezone
 
-from django_celery_beat.models import CrontabSchedule
 from sentry_sdk import capture_exception
 
 from hct_mis_api.apps.account.models import User

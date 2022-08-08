@@ -72,7 +72,7 @@ class PostgresTestRunner(TestRunner):
             "descriptions": getattr(settings, "TEST_OUTPUT_DESCRIPTIONS", False),
             "failfast": self.failfast,
             "resultclass": self.get_resultclass(),
-            "output": output
+            "output": output,
         }
 
     def run_suite(self, suite, **kwargs):
