@@ -6,12 +6,14 @@ from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields impo
     KoboRetriableError,
 )
 from hct_mis_api.apps.utils.logs import log_start_and_end
+from hct_mis_api.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
 
 
 @app.task(bind=True, default_retry_delay=60)
 @log_start_and_end
+@sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_kobo_template_id):
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
@@ -36,6 +38,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
 
 @app.task
 @log_start_and_end
+@sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (

@@ -17,10 +17,7 @@ class UsersFilter(FilterSet):
 
     class Meta:
         model = get_user_model()
-        fields = {
-            "status": ["exact"],
-            "partner": ["exact"]
-        }
+        fields = {"status": ["exact"], "partner": ["exact"]}
 
     order_by = CustomOrderingFilter(
         fields=(

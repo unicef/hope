@@ -1,22 +1,14 @@
-import json
 import logging
-import operator
-import time
-from io import BytesIO
 
 from django.core.exceptions import ValidationError
-from django.core.files import File
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 
 import graphene
-import openpyxl
 from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.kobo.api import KoboAPI
-from hct_mis_api.apps.core.kobo.common import count_population
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
@@ -42,13 +34,8 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
-    KoboErrorNode,
     XlsxRowErrorNode,
     KoboImportDataNode,
-)
-from hct_mis_api.apps.registration_datahub.validators import (
-    KoboProjectImportDataInstanceValidator,
-    UploadXLSXInstanceValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 

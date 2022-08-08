@@ -3,12 +3,9 @@ import json
 import logging
 
 from django import forms
-from django.conf import settings
-from django.contrib.admin.widgets import AutocompleteSelect
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.forms import HiddenInput, Media, Textarea
-from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
 
 from .config import config
