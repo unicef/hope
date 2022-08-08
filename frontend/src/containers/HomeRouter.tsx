@@ -124,14 +124,8 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute exact path='/:businessArea/payment-module'>
             <PaymentModulePage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
-            <CreateSetUpFspPage />
-          </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/edit'>
             <EditSetUpFspPage />
-          </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp'>
-            <SetUpFspPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/edit'>
             <EditPaymentPlanPage />

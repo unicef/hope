@@ -3,15 +3,20 @@ import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
+import { LabelizedField } from '../../../core/LabelizedField';
 
 interface DeliveryMechanismRowProps {
   index: number;
   baseName: string;
+  step?: number;
+  values?;
 }
 
 export const DeliveryMechanismRow = ({
   index,
   baseName,
+  step,
+  values,
 }: DeliveryMechanismRowProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -19,41 +24,51 @@ export const DeliveryMechanismRow = ({
     <Box flexDirection='column'>
       <Grid container>
         <Grid item xs={3}>
-          <Grid item xs={6}>
+          <Grid item xs={8}>
             <Box display='flex' alignItems='center'>
               <Box mr={4}>{index + 1}</Box>
-              <Field
-                name={`deliveryMechanisms[${index}].deliveryMechanism`}
-                variant='outlined'
-                label={t('Delivery Mechanism')}
-                component={FormikSelectField}
-                choices={[
-                  { name: 'Bank Transfer', value: 'bank_transfer' },
-                  { name: 'eWallet', value: 'e_wallet' },
-                  { name: 'Mobile Money', value: 'mobile_money' },
-                  { name: 'Cash', value: 'cash' },
-                ]}
-                fullwidth
-              />
+              {step === 0 && (
+                <Field
+                  name={`deliveryMechanisms[${index}].deliveryMechanism`}
+                  variant='outlined'
+                  label={t('Delivery Mechanism')}
+                  component={FormikSelectField}
+                  choices={[
+                    { name: 'Bank Transfer', value: 'bank_transfer' },
+                    { name: 'eWallet', value: 'e_wallet' },
+                    { name: 'Mobile Money', value: 'mobile_money' },
+                    { name: 'Cash', value: 'cash' },
+                  ]}
+                  fullwidth
+                />
+              )}
+              {step === 1 && (
+                <LabelizedField
+                  label={t('Delivery Mechanism')}
+                  value={values.deliveryMechanisms[index].deliveryMechanism}
+                />
+              )}
             </Box>
           </Grid>
         </Grid>
-        <Grid item xs={3}>
-          <Grid item xs={6}>
-            <Field
-              name={`deliveryMechanisms[${index}].fsp`}
-              variant='outlined'
-              label={t('FSP')}
-              component={FormikSelectField}
-              choices={[
-                { name: 'City Group', value: 'city_group' },
-                { name: 'Bank Of America', value: 'bank_of_america' },
-                { name: 'Chase Bank', value: 'chase_bank' },
-              ]}
-              fullwidth
-            />
+        {step === 1 && (
+          <Grid item xs={3}>
+            <Grid item xs={8}>
+              <Field
+                name={`deliveryMechanisms[${index}].fsp`}
+                variant='outlined'
+                label={t('FSP')}
+                component={FormikSelectField}
+                choices={[
+                  { name: 'City Group', value: 'city_group' },
+                  { name: 'Bank Of America', value: 'bank_of_america' },
+                  { name: 'Chase Bank', value: 'chase_bank' },
+                ]}
+                fullwidth
+              />
+            </Grid>
           </Grid>
-        </Grid>
+        )}
       </Grid>
     </Box>
   );
