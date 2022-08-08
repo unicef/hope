@@ -7,18 +7,26 @@ import { LabelizedField } from '../../../core/LabelizedField';
 
 interface DeliveryMechanismRowProps {
   index: number;
-  baseName: string;
   step?: number;
   values?;
 }
 
 export const DeliveryMechanismRow = ({
   index,
-  baseName,
   step,
   values,
 }: DeliveryMechanismRowProps): React.ReactElement => {
   const { t } = useTranslation();
+  const deliveryMechanismChoices = [
+    { name: 'Bank Transfer', value: 'bank_transfer' },
+    { name: 'eWallet', value: 'e_wallet' },
+    { name: 'Mobile Money', value: 'mobile_money' },
+    { name: 'Cash', value: 'cash' },
+  ];
+
+  const getDeliveryMechanismLabel = (value: string): string => {
+    return deliveryMechanismChoices.find((item) => item.value === value).name;
+  };
 
   return (
     <Box flexDirection='column'>
@@ -33,19 +41,16 @@ export const DeliveryMechanismRow = ({
                   variant='outlined'
                   label={t('Delivery Mechanism')}
                   component={FormikSelectField}
-                  choices={[
-                    { name: 'Bank Transfer', value: 'bank_transfer' },
-                    { name: 'eWallet', value: 'e_wallet' },
-                    { name: 'Mobile Money', value: 'mobile_money' },
-                    { name: 'Cash', value: 'cash' },
-                  ]}
+                  choices={deliveryMechanismChoices}
                   fullwidth
                 />
               )}
               {step === 1 && (
                 <LabelizedField
                   label={t('Delivery Mechanism')}
-                  value={values.deliveryMechanisms[index].deliveryMechanism}
+                  value={getDeliveryMechanismLabel(
+                    values.deliveryMechanisms[index].deliveryMechanism,
+                  )}
                 />
               )}
             </Box>
