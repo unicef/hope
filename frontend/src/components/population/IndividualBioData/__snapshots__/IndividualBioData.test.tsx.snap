@@ -437,7 +437,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             Phone Number
           </span>
           <div>
-            +48734123423
+            Invalid Phone Number
           </div>
         </div>
       </div>

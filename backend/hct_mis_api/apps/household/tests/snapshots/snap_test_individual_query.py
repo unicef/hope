@@ -103,7 +103,8 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
                         'familyName': 'Franklin',
                         'fullName': 'Jenna Franklin',
                         'givenName': 'Jenna',
-                        'phoneNo': '001-296-358-5428-607'
+                        'phoneNo': '001-296-358-5428-607',
+                        'phoneNoValid': True
                     }
                 },
                 {
@@ -112,7 +113,8 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
                         'familyName': 'Torres',
                         'fullName': 'Eric Torres',
                         'givenName': 'Eric',
-                        'phoneNo': '+12282315473'
+                        'phoneNo': '+12282315473',
+                        'phoneNoValid': True
                     }
                 },
                 {
@@ -121,7 +123,8 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
                         'familyName': 'Ford',
                         'fullName': 'Robin Ford',
                         'givenName': 'Robin',
-                        'phoneNo': '+18663567905'
+                        'phoneNo': '+18663567905',
+                        'phoneNoValid': True
                     }
                 },
                 {
@@ -130,7 +133,8 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
                         'familyName': 'Perry',
                         'fullName': 'Timothy Perry',
                         'givenName': 'Timothy',
-                        'phoneNo': '(548)313-1700-902'
+                        'phoneNo': '(548)313-1700-902',
+                        'phoneNoValid': False
                     }
                 },
                 {
@@ -139,7 +143,8 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
                         'familyName': 'Butler',
                         'fullName': 'Benjamin Butler',
                         'givenName': 'Benjamin',
-                        'phoneNo': '(953)682-4596'
+                        'phoneNo': '(953)682-4596',
+                        'phoneNoValid': False
                     }
                 }
             ]
@@ -205,7 +210,8 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_0_with_p
                         'familyName': 'Franklin',
                         'fullName': 'Jenna Franklin',
                         'givenName': 'Jenna',
-                        'phoneNo': '001-296-358-5428-607'
+                        'phoneNo': '001-296-358-5428-607',
+                        'phoneNoValid': True
                     }
                 }
             ]

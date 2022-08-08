@@ -34,6 +34,7 @@ export const fakeApolloAllReports = [
                 dateTo: '2022-03-02',
                 status: 1,
                 createdAt: '2022-02-28T11:43:03.576723',
+                updatedAt: '2022-02-28T11:45:03.576723',
                 createdBy: {
                   firstName: '',
                   lastName: '',

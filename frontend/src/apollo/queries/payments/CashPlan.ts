@@ -53,6 +53,10 @@ export const CashPlan = gql`
             }
             excludedAdminAreasFilter
             sexFilter
+            xlsxFileExporting
+            hasXlsxFile
+            xlsxFileWasDownloaded
+            xlsxFileImported
           }
         }
       }

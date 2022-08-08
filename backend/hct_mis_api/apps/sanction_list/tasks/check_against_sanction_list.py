@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from django.utils import timezone
 from itertools import permutations
 
 from django.conf import settings
@@ -19,7 +20,7 @@ from hct_mis_api.apps.sanction_list.models import (
 
 class CheckAgainstSanctionListTask:
     def execute(self, uploaded_file_id, original_file_name):
-        today = datetime.now()
+        today = timezone.now()
         uploaded_file = UploadedXLSXFile.objects.get(id=uploaded_file_id)
         wb = load_workbook(uploaded_file.file, data_only=True)
         sheet = wb.worksheets[0]
@@ -87,7 +88,7 @@ class CheckAgainstSanctionListTask:
             "results": results_dict,
             "results_count": len(results_dict),
             "file_name": original_file_name,
-            "today_date": datetime.now(),
+            "today_date": timezone.now(),
         }
         text_body = render_to_string("sanction_list/check_results.txt", context)
         html_body = render_to_string("sanction_list/check_results.html", context)

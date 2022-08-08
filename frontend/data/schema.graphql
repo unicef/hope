@@ -57,6 +57,7 @@ input AddIndividualDataObjectType {
   role: String!
   documents: [IndividualDocumentObjectType]
   identities: [IndividualIdentityObjectType]
+  paymentChannels: [BankTransferObjectType]
   businessArea: String
   flexFields: Arg
 }
@@ -196,7 +197,21 @@ type AreaTypeNodeEdge {
 
 scalar Arg
 
-type BankAccountInfoNode {
+type BankAccountInfoNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
+  lastSyncAt: DateTime
+  individual: IndividualNode!
+  bankName: String!
+  bankAccountNumber: String!
+  type: String
+}
+
+input BankTransferObjectType {
+  type: String!
   bankName: String!
   bankAccountNumber: String!
 }
@@ -327,6 +342,7 @@ type CashPlanPaymentVerificationNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   version: BigInt!
+  unicefId: String
   status: CashPlanPaymentVerificationStatus!
   cashPlan: CashPlanNode!
   sampling: CashPlanPaymentVerificationSampling!
@@ -339,14 +355,17 @@ type CashPlanPaymentVerificationNode implements Node {
   confidenceInterval: Float
   marginOfError: Float
   rapidProFlowId: String!
-  rapidProFlowStartUuid: String!
+  rapidProFlowStartUuids: [String!]!
   ageFilter: AgeFilterObject
   excludedAdminAreasFilter: [String]
   sexFilter: String
   activationDate: DateTime
   completionDate: DateTime
-  unicefId: String!
+  xlsxFileExporting: Boolean!
+  xlsxFileImported: Boolean!
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  xlsxFileWasDownloaded: Boolean
+  hasXlsxFile: Boolean
 }
 
 type CashPlanPaymentVerificationNodeConnection {
@@ -370,6 +389,7 @@ enum CashPlanPaymentVerificationStatus {
   ACTIVE
   FINISHED
   PENDING
+  INVALID
 }
 
 type CashPlanPaymentVerificationSummaryNode implements Node {
@@ -739,6 +759,13 @@ enum DocumentTypeType {
   OTHER
 }
 
+input EditBankTransferObjectType {
+  id: ID!
+  type: String!
+  bankName: String!
+  bankAccountNumber: String!
+}
+
 input EditCashPlanPaymentVerificationInput {
   cashPlanPaymentVerificationId: ID!
   sampling: String!
@@ -770,6 +797,10 @@ input EditIndividualIdentityObjectType {
 }
 
 type EditPaymentVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
+type ExportXlsxCashPlanVerification {
   cashPlan: CashPlanNode
 }
 
@@ -934,6 +965,7 @@ type GrievanceTicketNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   version: BigInt!
+  unicefId: String
   userModified: DateTime
   lastNotificationSent: DateTime
   createdBy: UserNode
@@ -950,7 +982,6 @@ type GrievanceTicketNode implements Node {
   businessArea: UserBusinessAreaNode!
   linkedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   registrationDataImport: RegistrationDataImportNode
-  unicefId: String!
   extras: JSONString!
   ignored: Boolean!
   householdUnicefId: String
@@ -1920,6 +1951,8 @@ type ImportedIndividualNode implements Node {
   role: String
   age: Int
   importId: String
+  phoneNoValid: Boolean
+  phoneNoAlternativeValid: Boolean
 }
 
 type ImportedIndividualNodeConnection {
@@ -2097,6 +2130,9 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
+  phoneNoValid: Boolean
+  phoneNoAlternativeValid: Boolean
+  paymentChannels: [BankAccountInfoNode]
 }
 
 type IndividualNodeConnection {
@@ -2164,7 +2200,7 @@ input IndividualUpdateDataObjectType {
   phoneNo: String
   phoneNoAlternative: String
   relationship: String
-  disability: Boolean
+  disability: String
   workStatus: String
   enrolledInNutritionProgramme: Boolean
   administrationOfRutf: Boolean
@@ -2185,7 +2221,14 @@ input IndividualUpdateDataObjectType {
   identities: [IndividualIdentityObjectType]
   identitiesToRemove: [ID]
   identitiesToEdit: [EditIndividualIdentityObjectType]
+  paymentChannels: [BankTransferObjectType]
+  paymentChannelsToEdit: [EditBankTransferObjectType]
+  paymentChannelsToRemove: [ID]
   flexFields: Arg
+}
+
+type InvalidCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
 }
 
 input IssueTypeExtrasInput {
@@ -2293,12 +2336,13 @@ type MergeRegistrationDataImportMutation {
 
 type Mutations {
   createReport(reportData: CreateReportInput!): CreateReport
+  restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
@@ -2306,15 +2350,17 @@ type Mutations {
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
-  reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
+  reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   createFinancialServiceProvider(businessAreaSlug: String!, inputs: CreateFinancialServiceProviderInput!): CreateFinancialServiceProviderMutation
   editFinancialServiceProvider(businessAreaSlug: String!, financialServiceProviderId: ID!, inputs: CreateFinancialServiceProviderInput!): EditFinancialServiceProviderMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
+  exportXlsxCashPlanVerification(cashPlanVerificationId: ID!): ExportXlsxCashPlanVerification
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
   activateCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): ActivateCashPlanVerificationMutation
   finishCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): FinishCashPlanVerificationMutation
   discardCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DiscardCashPlanVerificationMutation
+  invalidCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): InvalidCashPlanVerificationMutation
   deleteCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DeleteCashPlanVerificationMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
@@ -3217,6 +3263,15 @@ type ReportNodeConnection {
 type ReportNodeEdge {
   node: ReportNode
   cursor: String!
+}
+
+type RestartCreateReport {
+  report: ReportNode
+}
+
+input RestartCreateReportInput {
+  reportId: ID!
+  businessAreaSlug: String!
 }
 
 type RoleNode {

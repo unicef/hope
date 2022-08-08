@@ -193,5 +193,7 @@ export const importedIndividualDetailed = gql`
     }
     phoneNo
     phoneNoAlternative
+    phoneNoValid
+    phoneNoAlternativeValid
   }
 `;

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_flex_field_attr(field):
-    return field.endswith(("_i_f","_h_f"))
+    return field.endswith(("_i_f", "_h_f"))
 
 
 class RdiBaseCreateTask:
@@ -121,4 +121,3 @@ class RdiBaseCreateTask:
                 value = parse(value)
 
         return value
-

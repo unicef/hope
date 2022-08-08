@@ -120,7 +120,16 @@ class Area(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
             params["area_type__area_level"] = admin_level
 
         if business_area_slug:
-            params["area_type__country__name__iexact"] = business_area_slug
+            # slug may look like: `central-african-republic`
+            # after replacing `-` with ` `
+            # it should match case-insensitively `Central African Republic`
+            # also, short_name does not contain dashes
+            # so it won't fail for e.g. Timor-Leste
+            # because short_name for it is just `Timor Leste`
+            unslugged_business_area_slug = business_area_slug.replace("-", " ")
+            params["area_type__country__short_name__iexact"] = unslugged_business_area_slug
+            # still, this approach smells fishy because we're matching business area slug with country name
+            # it's a good approximation for now but it should be improved somehow
 
         queryset = cls.objects.filter(**params).order_by("name")
         return [

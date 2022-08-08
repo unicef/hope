@@ -3,13 +3,17 @@ from uuid import UUID
 
 from concurrency.api import disable_concurrency
 
+from sentry_sdk import configure_scope
+
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.services.household_recalculate_data import recalculate_data
+from hct_mis_api.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
 
 
 @app.task()
+@sentry_tags
 def recalculate_population_fields_task(household_ids: list[UUID] = None):
     logger.info("recalculate_population_fields")
     try:
@@ -26,9 +30,11 @@ def recalculate_population_fields_task(household_ids: list[UUID] = None):
             .prefetch_related("individuals")
             .iterator(chunk_size=10000)
         ):
-            with disable_concurrency(Household):
-                with disable_concurrency(Individual):
-                    recalculate_data(hh)
+            with configure_scope() as scope:
+                scope.set_tag("business_area", hh.business_area)
+                with disable_concurrency(Household):
+                    with disable_concurrency(Individual):
+                        recalculate_data(hh)
 
     except Exception as e:
         logger.exception(e)
@@ -38,6 +44,7 @@ def recalculate_population_fields_task(household_ids: list[UUID] = None):
 
 
 @app.task()
+@sentry_tags
 def calculate_children_fields_for_not_collected_individual_data():
     from hct_mis_api.apps.household.models import Household
     from django.db.models import F
@@ -71,6 +78,7 @@ def calculate_children_fields_for_not_collected_individual_data():
 
 
 @app.task()
+@sentry_tags
 def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_by_id: UUID):
     from hct_mis_api.apps.household.models import XlsxUpdateFile
     from hct_mis_api.apps.household.services.individuals_iban_xlsx_update import IndividualsIBANXlsxUpdate
@@ -79,14 +87,16 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
     uploaded_by = User.objects.get(id=uploaded_by_id)
     try:
         xlsx_update_file = XlsxUpdateFile.objects.get(id=xlsx_update_file_id)
-        updater = IndividualsIBANXlsxUpdate(xlsx_update_file)
-        updater.validate()
-        if updater.validation_errors:
-            updater.send_failure_email()
-            return
+        with configure_scope() as scope:
+            scope.set_tag("business_area", xlsx_update_file.business_area)
+            updater = IndividualsIBANXlsxUpdate(xlsx_update_file)
+            updater.validate()
+            if updater.validation_errors:
+                updater.send_failure_email()
+                return
 
-        updater.update()
-        updater.send_success_email()
+            updater.update()
+            updater.send_success_email()
 
     except Exception as e:
         IndividualsIBANXlsxUpdate.send_error_email(

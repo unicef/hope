@@ -21,7 +21,6 @@ class BaseTest(WebTest):
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
 
 
-
 class HouseholdAdminTest(BaseTest):
     def test_hh_change(self):
         url = reverse("admin:household_household_change", args=[self.household.pk])

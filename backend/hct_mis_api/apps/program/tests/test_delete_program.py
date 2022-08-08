@@ -1,5 +1,3 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -19,7 +17,6 @@ class TestDeleteProgram(APITestCase):
       }
     }
     """
-
 
     @classmethod
     def setUpTestData(cls):
