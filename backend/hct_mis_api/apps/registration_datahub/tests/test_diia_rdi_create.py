@@ -9,11 +9,14 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     RELATIONSHIP_CHOICE,
     MARITAL_STATUS_CHOICE,
+    IDENTIFICATION_TYPE_TAX_ID,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     DiiaHousehold,
+    ImportedDocument,
+    RegistrationDataImportDatahub,
 )
 
 
@@ -44,10 +47,14 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(5, individuals.count())
 
         individual = individuals.get(full_name="Erik Duarte")
-        self.assertEqual(2, individual.documents.count())
+        self.assertEqual(3, individual.documents.count())
         self.assertEqual(1, individual.bank_account_info.count())
         self.assertEqual(
             str(individual.documents.filter(document_number="VPO-DOC-2222").first().doc_date), "2022-04-29"
+        )
+        self.assertEqual(
+            individual.documents.filter(document_number="123412341234999222").first().type.type,
+            IDENTIFICATION_TYPE_TAX_ID,
         )
 
         individual_2 = individuals.get(full_name="Sam Bautista")
@@ -73,6 +80,28 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
             "address": "Ліста майдан, 3, кв. 257, 78242, Мелітополь, Чернівецька область, Ukraine",
         }
         self.assertEqual(household_obj_data, expected)
+
+    def test_execute_staging_data_tax_id_error(self):
+        self.assertEqual(0, ImportedHousehold.objects.all().count())
+        self.assertEqual(0, ImportedIndividual.objects.all().count())
+
+        rdi = self.RdiDiiaCreateTask().create_rdi(None, "Test import Diia")
+        self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[991, 992, 993, 994])
+
+        self.assertEqual(DiiaHousehold.objects.filter(status=DiiaHousehold.STATUS_IMPORTED).count(), 3)
+        self.assertEqual(DiiaHousehold.objects.filter(status=DiiaHousehold.STATUS_TAX_ID_ERROR).count(), 1)
+        self.assertEqual(ImportedDocument.objects.filter(document_number="1234567892222").count(), 1)
+        self.assertEqual(ImportedHousehold.objects.all().count(), 3)
+        self.assertEqual(ImportedIndividual.objects.all().count(), 9)
+        self.assertEqual(
+            RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id).import_data.number_of_households, 3
+        )
+        self.assertEqual(
+            RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id).import_data.number_of_individuals, 9
+        )
+        rdi.refresh_from_db()
+        self.assertEqual(rdi.number_of_households, 3)
+        self.assertEqual(rdi.number_of_individuals, 9)
 
     def test_create_duplicated_imported_households(self):
         self.assertEqual(0, ImportedHousehold.objects.all().count())

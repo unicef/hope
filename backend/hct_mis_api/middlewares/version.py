@@ -1,8 +1,4 @@
-import sys
-
 from django.conf import settings
-
-from sentry_sdk import configure_scope
 
 
 class VersionMiddleware:

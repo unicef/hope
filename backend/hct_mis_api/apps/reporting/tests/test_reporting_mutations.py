@@ -87,7 +87,9 @@ class TestReportingMutation(APITestCase):
                 [{"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]}],
             )
         report_updated_at = timezone.now() - timedelta(minutes=31)
-        cls.report = ReportFactory(business_area=cls.business_area, status=Report.IN_PROGRESS, report_type=Report.INDIVIDUALS)
+        cls.report = ReportFactory(
+            business_area=cls.business_area, status=Report.IN_PROGRESS, report_type=Report.INDIVIDUALS
+        )
         cls.report.update_at = report_updated_at
         cls.report.save()
 

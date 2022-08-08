@@ -26,9 +26,8 @@ class Command(BaseCommand):
 
         ImportedBankAccountInfo.objects.bulk_update(qs, ["bank_account_number", "debit_card_number"], 1000)
 
-
     def handle(self, *args, **options):
         print("Starting fix Bank Account Info")
 
         self.bank_acc_remove_space()
-        print(f"Fixed Bank Account Info")
+        print("Fixed Bank Account Info")

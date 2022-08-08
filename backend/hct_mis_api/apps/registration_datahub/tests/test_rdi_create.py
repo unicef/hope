@@ -7,7 +7,6 @@ from unittest import mock
 
 from django.conf import settings
 from django.contrib.gis.geos import Point
-from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict

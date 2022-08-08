@@ -43,7 +43,6 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
-    Document,
     Household,
     Individual,
 )
