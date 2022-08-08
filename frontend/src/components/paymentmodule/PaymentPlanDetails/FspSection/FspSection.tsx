@@ -30,7 +30,7 @@ export const FspSection = ({
             color='primary'
             variant='contained'
             component={Link}
-            to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp`}
+            to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp/edit`}
           >
             {t('Set up FSP')}
           </Button>
