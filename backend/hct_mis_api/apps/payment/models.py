@@ -226,7 +226,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         related_name="created_payment_plans",
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)  # TODO MB remove?
+    unicef_id = CICharField(max_length=250, blank=True, db_index=True)  # TODO MB populate?
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
@@ -312,7 +312,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @property
     def can_be_locked(self) -> bool:
-        return self.payment_plan.payments.filter(payment_plan_hard_conflicted=False).exists()
+        return self.payments.filter(payment_plan_hard_conflicted=False).exists()
 
     def update_population_count_fields(self):
         households_ids = self.all_active_payments.values_list("household_id", flat=True)
@@ -352,15 +352,15 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
         payments = self.all_active_payments.aggregate(
             total_entitled_quantity=Sum("entitlement_quantity"),
-            entitlement_quantity_usd=Sum("entitlement_quantity_usd"),
-            delivered_quantity=Sum("delivered_quantity"),
-            delivered_quantity_usd=Sum("delivered_quantity_usd"),
+            total_entitled_quantity_usd=Sum("entitlement_quantity_usd"),
+            total_delivered_quantity=Sum("delivered_quantity"),
+            total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
         )
 
-        self.total_entitled_quantity = payments.get("total_entitled_quantity__sum", 0.00)
-        self.total_entitled_quantity_usd = payments.get("entitlement_quantity_usd__sum", 0.00)
-        self.total_delivered_quantity = payments.get("delivered_quantity__sum", 0.00)
-        self.total_delivered_quantity_usd = payments.get("delivered_quantity_usd__sum", 0.00)
+        self.total_entitled_quantity = payments.get("total_entitled_quantity", 0.00)
+        self.total_entitled_quantity_usd = payments.get("total_entitled_quantity_usd", 0.00)
+        self.total_delivered_quantity = payments.get("total_delivered_quantity", 0.00)
+        self.total_delivered_quantity_usd = payments.get("total_delivered_quantity_usd", 0.00)
 
         self.total_undelivered_quantity = self.total_entitled_quantity - self.total_delivered_quantity
         self.total_undelivered_quantity_usd = self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
@@ -719,6 +719,9 @@ class Payment(SoftDeletableModel, GenericPayment):
         "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
+    assigned_payment_channel = models.ForeignKey(
+        "payment.PaymentChannel", on_delete=models.CASCADE, null=True
+    )
 
     objects = PaymentManager()
 

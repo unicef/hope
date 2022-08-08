@@ -1,6 +1,6 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import JSONField, Q, Subquery, OuterRef, Exists, F, Value, Func
+from django.db.models import JSONField, Q, Subquery, OuterRef, Exists, F, Value, Func, Case, When
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 
 
@@ -54,7 +54,6 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 payment_plan__status=PaymentPlan.Status.OPEN,
                 household=OuterRef("household"),
             )
-            .distinct()
         )
         soft_conflicting_pps = _annotate_conflict_data(soft_conflicting_pps)
 
@@ -68,7 +67,6 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 ~Q(payment_plan__status=PaymentPlan.Status.OPEN),
                 Q(household=OuterRef("household")) & Q(excluded=False),
             )
-            .distinct()
         )
         hard_conflicting_pps = _annotate_conflict_data(hard_conflicting_pps)
 
@@ -79,10 +77,22 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             payment_plan_soft_conflicted_data=ArraySubquery(soft_conflicting_pps.values("conflict_data")),
         )
 
+    def with_payment_channels(self):
+        from hct_mis_api.apps.payment.models import PaymentChannel
+
+        return self.select_related("assigned_payment_channel", "collector", "financial_service_provider").annotate(
+            has_defined_payment_channel=Exists(PaymentChannel.objects.filter(individual=OuterRef("collector"))),
+            has_assigned_payment_channel=Case(
+                When(assigned_payment_channel=None, then=Value(False)),
+                default=Value(True),
+                output_field=models.BooleanField(),
+            ),
+        )
+
 
 class PaymentManager(SoftDeletableManager):
     _queryset_class = PaymentQuerySet
     use_for_related_fields = True
 
     def get_queryset(self):
-        return super().get_queryset().with_payment_plan_conflicts()
+        return super().get_queryset().with_payment_plan_conflicts().with_payment_channels()
