@@ -209,7 +209,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        self.stdout.write(f"Generating fixtures...")
+        self.stdout.write("Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")
             call_command("flush", "--noinput", database="cash_assist_datahub_mis")

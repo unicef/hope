@@ -33,7 +33,6 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 
 class TestXlsxVerificationImport(APITestCase):
-
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()

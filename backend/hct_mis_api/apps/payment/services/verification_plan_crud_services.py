@@ -1,7 +1,7 @@
 import logging
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
 )
