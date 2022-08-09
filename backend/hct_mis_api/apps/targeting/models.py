@@ -673,13 +673,13 @@ class TargetingCriteriaFilterMixin:
             "arguments": 1,
             "lookup": "__gte",
             "negative": False,
-            "supported_types": ["INTEGER", "DECIMAL"],
+            "supported_types": ["INTEGER", "DECIMAL", "DATE"],
         },
         "LESS_THAN": {
             "arguments": 1,
             "lookup": "__lte",
             "negative": False,
-            "supported_types": ["INTEGER", "DECIMAL"],
+            "supported_types": ["INTEGER", "DECIMAL", "DATE"],
         },
     }
 
