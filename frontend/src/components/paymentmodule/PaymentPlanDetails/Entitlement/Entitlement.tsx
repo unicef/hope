@@ -27,6 +27,7 @@ import { LabelizedField } from '../../../core/LabelizedField';
 import { Missing } from '../../../core/Missing';
 import { Title } from '../../../core/Title';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
+import { UploadXlsx } from '../UploadXlsx';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -65,10 +66,6 @@ const DividerLabel = styled.div`
   border-radius: 50%;
   background-color: #fff;
   margin-top: 20px;
-`;
-
-const UploadIcon = styled(Publish)`
-  color: #043f91;
 `;
 
 const DownloadIcon = styled(GetApp)`
@@ -179,20 +176,7 @@ export const Entitlement = ({
               flexDirection='column'
             >
               <Box>
-                <Button
-                  color='primary'
-                  startIcon={<UploadIcon />}
-                  onClick={() => inputRef.current.click()}
-                >
-                  {t('Upload File')}
-                </Button>
-                <input
-                  ref={inputRef}
-                  accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                  type='file'
-                  style={{ display: 'none' }}
-                  onChange={(e) => setFile(e.currentTarget.files[0])}
-                />
+                <UploadXlsx paymentPlan={paymentPlan} />
               </Box>
               {file?.name && (
                 <Box alignItems='center' display='flex'>
