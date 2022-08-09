@@ -1,6 +1,6 @@
 import time
 
-import factory
+import factory.fuzzy
 from faker import Faker
 from pytz import utc
 
