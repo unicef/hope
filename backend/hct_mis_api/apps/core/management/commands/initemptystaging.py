@@ -1,5 +1,3 @@
-import subprocess
-
 from django.core.management import BaseCommand, call_command
 from django.db import connections
 

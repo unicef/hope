@@ -49,7 +49,7 @@ api_patterns = [
     path(
         "download-cash-plan-payment-verification/<str:verification_id>",
         hct_mis_api.apps.payment.views.download_cash_plan_payment_verification,
-        name="download-cash-plan-payment-verification"
+        name="download-cash-plan-payment-verification",
     ),
     path(
         "download-sanction-template",

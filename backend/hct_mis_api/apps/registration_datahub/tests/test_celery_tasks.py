@@ -3,12 +3,11 @@ from django.utils import timezone
 import json
 from contextlib import contextmanager
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.test import TestCase
 
-from constance import config
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.models import BusinessArea

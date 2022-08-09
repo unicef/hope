@@ -1,11 +1,9 @@
-from django.conf import settings
 from django.core.cache import caches
-from django.http import HttpResponse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from constance import config
-from smart_admin.site import SmartAdminSite, page
+from smart_admin.site import SmartAdminSite
 
 cache = caches["default"]
 

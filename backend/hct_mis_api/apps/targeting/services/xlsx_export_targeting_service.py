@@ -26,7 +26,7 @@ class XlsxExportTargetingService:
             "Household unicef_id": "household.unicef_id",
             "unicef_id": "unicef_id",
             "Linked Households": self._render_all_linked_households,
-            "Bank account information": self._bank_account_info
+            "Bank account information": self._bank_account_info,
         }
 
     @cached_property
