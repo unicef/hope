@@ -6,6 +6,31 @@ from .models import GrievanceTicket
 from ..household.models import Household
 
 
+URGENCY_CHOICES = {
+    1: "Very urgent",
+    2: "Urgent",
+    3: "Not urgent",
+}
+
+PRIORITY_CHOICES = {
+    1: "High",
+    2: "Medium",
+    3: "Low",
+}
+
+CATEGORY_CHOICES = {
+    1: "Payment Verification",
+    2: "Data Change",
+    3: "Sensitive Grievance",
+    4: "Grievance Complaint",
+    5: "Negative Feedback",
+    6: "Referral",
+    7: "Positive Feedback",
+    8: "Needs Adjudication",
+    9: "System Flagging",
+}
+
+
 @registry.register_document
 class GrievanceTicketDocument(Document):
     created_at = fields.DateField(similarity="boolean")
@@ -16,7 +41,7 @@ class GrievanceTicketDocument(Document):
     category = fields.TextField()
     admin = fields.TextField()
     priority = fields.TextField()
-    urgency = fields.TextField()
+    urgency = fields.KeywordField(similarity="boolean")
     grievance_type = fields.KeywordField(similarity="boolean")
     head_of_household_last_name = fields.KeywordField(similarity="boolean")
     business_area = fields.KeywordField(similarity="boolean")
@@ -29,9 +54,18 @@ class GrievanceTicketDocument(Document):
         if instance.registration_data_import:
             return instance.registration_data_import.id
 
+    def prepare_category(self, instance):
+        return CATEGORY_CHOICES.get(instance.category)
+
     def prepare_admin2_new(self, instance):
         if instance.admin2_new:
             return instance.admin2_new.id
+
+    def prepare_priority(self, instance):
+        return PRIORITY_CHOICES.get(instance.priority)
+
+    def prepare_urgency(self, instance):
+        return URGENCY_CHOICES.get(instance.urgency)
 
     def prepare_grievance_type(self, instance):
         return "user" if instance.category in range(2, 8) else "system"
