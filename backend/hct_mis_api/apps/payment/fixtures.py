@@ -499,12 +499,12 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)
 
     total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
-    total_entitled_quantity_revised = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_entitled_quantity_revised = 0.0
     total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
     total_entitled_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
-    total_entitled_quantity_revised_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_entitled_quantity_revised_usd = 0.0
     total_delivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_undelivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 

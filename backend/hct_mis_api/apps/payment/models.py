@@ -233,8 +233,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         related_name="payment_plans",
     )
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
-    dispersion_start_date = models.DateTimeField()
-    dispersion_end_date = models.DateTimeField()
+    dispersion_start_date = models.DateField()
+    dispersion_end_date = models.DateField()
     female_children_count = models.PositiveSmallIntegerField(default=0)
     male_children_count = models.PositiveSmallIntegerField(default=0)
     female_adults_count = models.PositiveSmallIntegerField(default=0)

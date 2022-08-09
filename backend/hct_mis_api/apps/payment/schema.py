@@ -321,15 +321,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_currency_display()
 
 
-class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
-
-    class Meta:
-        model = Payment
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
@@ -437,13 +428,6 @@ class Query(graphene.ObjectType):
     )
     payment_plan_status_choices = graphene.List(ChoiceObject)
     currency_choices = graphene.List(ChoiceObject)
-    payment = relay.Node.Field(PaymentNode)
-    all_payments = DjangoPermissionFilterConnectionField(
-        PaymentNode,
-        filterset_class=PaymentFilter,
-        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
-    )
-
     payment = relay.Node.Field(PaymentNode)
     all_payments = DjangoPermissionFilterConnectionField(
         PaymentNode,
