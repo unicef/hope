@@ -8,7 +8,6 @@ import requests
 from constance import config
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Individual
 
 logger = logging.getLogger(__name__)
 

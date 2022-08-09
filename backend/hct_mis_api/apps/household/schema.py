@@ -1,5 +1,4 @@
-from django.db.models import DecimalField, IntegerField, Prefetch, Sum, Value
-from django.db.models.functions import Coalesce
+from django.db.models import Prefetch, Sum, Value
 
 import graphene
 from graphene import relay
@@ -390,7 +389,6 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_phone_no_alternative_valid(parent, info):
         return parent.phone_no_alternative_valid
 
-
     @classmethod
     def check_node_permission(cls, info, object_instance):
         super().check_node_permission(info, object_instance)
@@ -423,7 +421,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
     class Meta:
         model = Individual
-        exclude = ("vector_column", )
+        exclude = ("vector_column",)
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

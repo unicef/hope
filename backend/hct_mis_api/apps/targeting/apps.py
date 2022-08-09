@@ -6,4 +6,4 @@ class TargetingConfig(AppConfig):
 
     # noinspection PyUnresolvedReferences
     def ready(self):
-        import hct_mis_api.apps.targeting.signals
+        import hct_mis_api.apps.targeting.signals  # noqa: F401

@@ -1,12 +1,9 @@
 from django.contrib import admin
-from django.contrib.admin import TabularInline
 
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
-    RelatedFieldComboFilter,
-    ValueFilter,
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin

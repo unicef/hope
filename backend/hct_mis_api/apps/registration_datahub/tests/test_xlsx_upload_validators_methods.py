@@ -1,5 +1,5 @@
 import operator
-from unittest import  mock
+from unittest import mock
 
 from django.conf import settings
 from django.core.management import call_command

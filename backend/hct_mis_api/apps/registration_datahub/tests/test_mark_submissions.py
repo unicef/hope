@@ -5,7 +5,6 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
-from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.core.models import BusinessArea

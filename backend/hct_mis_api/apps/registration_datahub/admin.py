@@ -449,17 +449,11 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 @admin.register(DiiaIndividual)
 class DiiaIndividualAdmin(HOPEModelAdminBase):
-    list_display = (
-        "registration_data_import",
-        "individual_id",
-        "full_name",
-        "sex",
-        "disability"
-    )
+    list_display = ("registration_data_import", "individual_id", "full_name", "sex", "disability")
     list_filter = (
         ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
         ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
-        "disability"
+        "disability",
     )
 
 
@@ -471,5 +465,10 @@ class DiiaHouseholdAdmin(HOPEModelAdminBase):
     date_hierarchy = "registration_data_import__import_date"
     list_filter = (
         ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
-        ("rec_id", ValueFilter.factory(lookup_name="istartswith",)),
+        (
+            "rec_id",
+            ValueFilter.factory(
+                lookup_name="istartswith",
+            ),
+        ),
     )

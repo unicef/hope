@@ -2,7 +2,6 @@ import datetime as dt
 import random
 
 import factory
-from factory import fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
