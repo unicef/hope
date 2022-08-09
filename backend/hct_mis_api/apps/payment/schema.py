@@ -53,6 +53,11 @@ from hct_mis_api.apps.utils.schema import (
 )
 
 
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+    does_payment_record_have_right_hoh_phone_number,
+)
+
+
 class RapidProFlowResult(graphene.ObjectType):
     key = graphene.String()
     name = graphene.String()
@@ -260,6 +265,14 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info, input, **kwargs):
+        def get_payment_records(cash_plan, payment_verification_plan, verification_channel):
+            if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
+                return cash_plan.available_payment_records(
+                    payment_verification_plan=payment_verification_plan,
+                    extra_validation=does_payment_record_have_right_hoh_phone_number,
+                )
+            return cash_plan.available_payment_records(payment_verification_plan=payment_verification_plan)
+
         cash_plan_id = decode_id_string(input.get("cash_plan_id"))
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
 
@@ -267,7 +280,7 @@ class Query(graphene.ObjectType):
         if payment_verification_plan_id := decode_id_string(input.get("cash_plan_payment_verification_id")):
             payment_verification_plan = get_object_or_404(CashPlanPaymentVerification, id=payment_verification_plan_id)
 
-        payment_records = cash_plan.available_payment_records(payment_verification_plan)
+        payment_records = get_payment_records(cash_plan, payment_verification_plan, input.get("verification_channel"))
         if not payment_records:
             return {
                 "sample_size": 0,
