@@ -17,9 +17,6 @@ from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
-    does_payment_record_have_right_hoh_phone_number,
-)
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -282,7 +279,9 @@ class CashPlan(TimeStampedUUIDModel):
     def can_create_payment_verification_plan(self):
         return self.available_payment_records().count() > 0
 
-    def available_payment_records(self, payment_verification_plan: Optional[CashPlanPaymentVerification] = None):
+    def available_payment_records(
+        self, payment_verification_plan: Optional[CashPlanPaymentVerification] = None, extra_validation=None
+    ):
         params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
@@ -294,12 +293,10 @@ class CashPlan(TimeStampedUUIDModel):
 
         payment_records = self.payment_records.filter(params).distinct()
 
-        valid_payment_records_list = [
-            payment_record.pk
-            for payment_record in payment_records
-            if does_payment_record_have_right_hoh_phone_number(payment_record)
-        ]
-        return PaymentRecord.objects.filter(pk__in=valid_payment_records_list)
+        if extra_validation:
+            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+
+        return PaymentRecord.objects.filter(pk__in=payment_records)
 
     class Meta:
         verbose_name = "Cash Plan"
