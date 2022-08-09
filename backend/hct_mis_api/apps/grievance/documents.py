@@ -30,17 +30,51 @@ CATEGORY_CHOICES = {
     9: "System Flagging",
 }
 
+STATUS_CHOICES = {
+    1: "New",
+    2: "Assigned",
+    3: "In Progress",
+    4: "On Hold",
+    5: "For Approval",
+    6: "Closed",
+}
+
+ISSUE_TYPES_CHOICES = {
+    2: {
+        13: "Household Data Update",
+        14: "Individual Data Update",
+        15: "Withdraw Individual",
+        16: "Add Individual",
+        17: "Withdraw Household",
+    },
+    3: {
+        1: "Data breach",
+        2: "Bribery, corruption or kickback",
+        3: "Fraud and forgery",
+        4: "Fraud involving misuse of programme funds by third party",
+        5: "Harassment and abuse of authority",
+        6: "Inappropriate staff conduct",
+        7: "Unauthorized use, misuse or waste of UNICEF property or funds",
+        8: "Conflict of interest",
+        9: "Gross mismanagement",
+        10: "Personal disputes",
+        11: "Sexual harassment and sexual exploitation",
+        12: "Miscellaneous",
+
+    },
+}
+
 
 @registry.register_document
 class GrievanceTicketDocument(Document):
     created_at = fields.DateField(similarity="boolean")
     assigned_to = fields.TextField()
     registration_data_import = fields.TextField()
-    status = fields.TextField()
+    status = fields.KeywordField(similarity="boolean")
     issue_type = fields.TextField()
-    category = fields.TextField()
+    category = fields.KeywordField(similarity="boolean")
     admin = fields.TextField()
-    priority = fields.TextField()
+    priority = fields.KeywordField(similarity="boolean")
     urgency = fields.KeywordField(similarity="boolean")
     grievance_type = fields.KeywordField(similarity="boolean")
     head_of_household_last_name = fields.KeywordField(similarity="boolean")
@@ -53,6 +87,13 @@ class GrievanceTicketDocument(Document):
     def prepare_registration_data_import(self, instance):
         if instance.registration_data_import:
             return instance.registration_data_import.id
+
+    def prepare_status(self, instance):
+        return STATUS_CHOICES.get(instance.status)
+
+    def prepare_issue_type(self, instance):
+        if instance.category in range(2, 4):
+            return ISSUE_TYPES_CHOICES[instance.category].get(instance.issue_type)
 
     def prepare_category(self, instance):
         return CATEGORY_CHOICES.get(instance.category)
