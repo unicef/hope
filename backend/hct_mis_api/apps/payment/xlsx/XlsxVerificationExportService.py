@@ -169,9 +169,10 @@ class XlsxVerificationExportService:
             "email": user.email,
             "message": msg,
             "link": link,
+            "title": "Verification Plan XLSX file generated",
         }
-        text_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.txt", context=context)
-        html_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.html", context=context)
+        text_body = render_to_string("payment/xlsx_file_generated_email.txt", context=context)
+        html_body = render_to_string("payment/xlsx_file_generated_email.html", context=context)
 
         email = EmailMultiAlternatives(
             subject="Verification Plan XLSX file generated",

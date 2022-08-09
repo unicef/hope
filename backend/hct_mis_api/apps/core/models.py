@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.validators import MinValueValidator
 from django.db.models import JSONField
@@ -8,7 +9,7 @@ from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from django_countries.fields import CountryField
 from model_utils import Choices
-from model_utils.models import SoftDeletableModel
+from model_utils.models import SoftDeletableModel, TimeStampedModel
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
@@ -496,3 +497,28 @@ class CustomModelEntry(ModelEntry):
 
 class CustomDatabaseScheduler(DatabaseScheduler):
     Entry = CustomModelEntry
+
+
+class XLSXFileTemp(TimeStampedModel):
+    """Use this model for temporary store xlsx files"""
+
+    EXPORT = "EXPORT"
+    IMPORT = "IMPORT"
+
+    FILE_TYPE_CHOICES = (
+        (EXPORT, "Export"),
+        (IMPORT, "Import"),
+    )
+    object_id = models.CharField(max_length=120, null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    type = models.CharField(max_length=50, null=True, choices=FILE_TYPE_CHOICES)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="+"
+    )
+    file = models.FileField()
+
+    def __str__(self):
+        return f"{self.file.name} - {self.created} - {self.type}"
