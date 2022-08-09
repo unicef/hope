@@ -1,5 +1,4 @@
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
-
 from django.shortcuts import get_object_or_404
 
 import graphene
@@ -28,10 +27,10 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
+    CashPlanPaymentVerificationFilter,
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -319,7 +318,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="payment_record__cash_plan__program__id",
-                    administrative_area_path="payment_record__household__admin_area_new",
+                    administrative_area_path="payment_record__household__admin_area",
                 )
             },
             year_filter_path="payment_record__delivery_date",

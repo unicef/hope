@@ -117,12 +117,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     ca_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
     ca_hash_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
-    admin_areas = models.ManyToManyField(
-        "core.AdminArea",
-        related_name="programs",
-        blank=True,
-    )
-    admin_areas_new = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
+    admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     budget = models.DecimalField(
         decimal_places=2,
