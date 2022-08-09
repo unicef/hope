@@ -20,6 +20,7 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import { handleValidationErrors } from '../../../utils/utils';
 import { useCreateTpMutation } from '../../../__generated__/graphql';
+import { DeliveryMechanismWarning } from '../../../components/paymentmodule/EditSetUpFsp/DeliveryMechanismWarning';
 
 const StyledBox = styled(Box)`
   width: 100%;
@@ -117,6 +118,7 @@ export const EditSetUpFspPage = (): React.ReactElement => {
                     })}
                   </Stepper>
                 </StyledBox>
+                <DeliveryMechanismWarning />
                 <FieldArray
                   name='deliveryMechanisms'
                   render={(arrayHelpers) => {
@@ -132,7 +134,7 @@ export const EditSetUpFspPage = (): React.ReactElement => {
                         {activeStep === 0 && (
                           <Grid container>
                             <Grid item xs={12}>
-                              <Box>
+                              <Box pt={3}>
                                 <Button
                                   color='primary'
                                   startIcon={<AddCircleOutline />}
@@ -153,7 +155,7 @@ export const EditSetUpFspPage = (): React.ReactElement => {
                     );
                   }}
                 />
-                <Box display='flex'>
+                <Box pt={3} display='flex'>
                   <Box mr={3}>
                     {activeStep === 0 && (
                       <Button
