@@ -7,11 +7,11 @@ from django.utils import timezone
 from hct_mis_api.apps.core.models import CountryCodeMap
 from hct_mis_api.apps.core.utils import build_arg_dict
 from hct_mis_api.apps.household.models import (
+    Document,
     Household,
     Individual,
-    IndividualRoleInHousehold,
-    Document,
     IndividualIdentity,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.mis_datahub import models as dh_mis_models
 from hct_mis_api.apps.targeting.models import HouseholdSelection
@@ -46,8 +46,8 @@ class SendTPToDatahubTask:
         "status": "status",
         "household_size": "size",
         "address": "address",
-        "admin1": "admin1.title",
-        "admin2": "admin2.title",
+        "admin1": "admin1.name",
+        "admin2": "admin2.name",
         "residence_status": "residence_status",
         "registration_date": "last_registration_date",
         "village": "village",
@@ -231,7 +231,7 @@ class SendTPToDatahubTask:
 
     def _prepare_datahub_object_household(self, household):
         dh_household_args = build_arg_dict(household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT)
-        dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.code)
+        dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.iso_code2)
         dh_household = dh_mis_models.Household(**dh_household_args)
         dh_household.unhcr_id = self._get_unhcr_household_id(household)
         dh_household.session = self.dh_session

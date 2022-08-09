@@ -4,11 +4,7 @@ from django.test import TestCase
 from parameterized import parameterized
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -43,6 +39,7 @@ class TestSendTpToDatahub(TestCase):
     @staticmethod
     def _pre_test_commands():
         create_afghanistan()
+        call_command("loadcountries")
         call_command("generatedocumenttypes")
         call_command("loadcountrycodes")
         business_area_with_data_sharing = BusinessArea.objects.first()
@@ -78,12 +75,6 @@ class TestSendTpToDatahub(TestCase):
         cls._pre_test_commands()
 
         business_area_with_data_sharing = BusinessArea.objects.first()
-        state_area_type = AdminAreaLevelFactory(
-            name="State",
-            business_area=business_area_with_data_sharing,
-            admin_level=1,
-        )
-        admin_area = AdminAreaFactory(admin_area_level=state_area_type, p_code="asdfgfhghkjltr")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -91,7 +82,7 @@ class TestSendTpToDatahub(TestCase):
             country=country,
             area_level=1,
         )
-        admin_area_new = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR")
         test_agency = Agency.objects.create(type="test", label="test")
@@ -115,13 +106,11 @@ class TestSendTpToDatahub(TestCase):
             size=4,
             registration_data_import=rdi,
             admin_area=admin_area,
-            admin_area_new=admin_area_new,
         )
         cls.household_second = HouseholdFactory.build(
             size=1,
             registration_data_import=rdi_second,
             admin_area=admin_area,
-            admin_area_new=admin_area_new,
         )
         cls.second_household_head = IndividualFactory(
             household=cls.household_second,
@@ -318,7 +307,7 @@ class TestSendTpToDatahub(TestCase):
     )
     def test_send_household_country(self, _, iso_code2, expected_ca_code):
         (household, individuals) = create_household(household_args={"size": 1})
-        household.country = iso_code2
+        household.country = geo_models.Country.objects.filter(iso_code2=iso_code2).first()
         household.save()
         task = SendTPToDatahubTask()
         task.dh_session = dh_models.Session()
