@@ -13,17 +13,17 @@ import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { Action } from '../../../../__generated__/graphql';
+import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { Missing } from '../../../core/Missing';
 
 export interface LockPaymentPlanProps {
-  paymentPlanId: string;
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const LockPaymentPlan = ({
-  paymentPlanId,
+  paymentPlan,
 }: LockPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -33,7 +33,7 @@ export const LockPaymentPlan = ({
     loading: loadingLock,
   } = usePaymentPlanAction(
     Action.Lock,
-    paymentPlanId,
+    paymentPlan.id,
     () => showMessage(t('Payment Plan has been locked.')),
     () => showMessage(t('Error during locking Payment Plan.')),
     () => setLockDialogOpen(false),
@@ -72,10 +72,10 @@ export const LockPaymentPlan = ({
             </Box>
             <Box p={5}>
               <GreyText>
-                {t('Note:')} {t('There are')} <Missing />{' '}
-                {t(
-                  'households missing payment channel information. Grievance tickets will be automatically created.',
-                )}
+                {t('Note:')} {t('There are')}{' '}
+                {/* {paymentPlan.paymentsConflictsCount}{' '} */}
+                <Missing />
+                {t('households that will be ignored in this Payment Plan.')}
               </GreyText>
             </Box>
           </DialogContainer>
