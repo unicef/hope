@@ -2,13 +2,13 @@ import contextlib
 import os
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
-from django.utils import timezone
 from typing import Any, Iterable, Union
 from urllib.request import urlopen
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, QuerySet
 from django.forms import model_to_dict
+from django.utils import timezone
 from django.utils.functional import cached_property
 
 import dateutil.parser
@@ -377,11 +377,12 @@ class LoadSanctionListXMLTask:
 
         if field.get_internal_type() == "DateTimeField":
             year, month, day, *time = value.split("-")
+            hour, minute = 0, 0
             if time:
                 hour, minute = time[0].split(":")
-                return timezone.make_aware(
-                    datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute)),
-                )
+            return timezone.make_aware(
+                datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute)),
+            )
         if field.get_internal_type() == "DateField":
             year, month, day, *time = value.split("-")
             return date(year=int(year), month=int(month), day=int(day))
