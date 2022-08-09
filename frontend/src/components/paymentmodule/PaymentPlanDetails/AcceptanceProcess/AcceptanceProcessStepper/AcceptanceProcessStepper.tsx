@@ -61,34 +61,30 @@ export const AcceptanceProcessStepper = ({
         actions.approval.length
       }/${approvalNumberRequired})`,
       hasError: rejectedOn === 'IN_APPROVAL',
+      isCompleted: actions.approval.length === approvalNumberRequired,
     },
     {
       name: `${t('Authorization')} (${
         actions.authorization.length
       }/${authorizationNumberRequired})`,
       hasError: rejectedOn === 'IN_AUTHORIZATION',
+      isCompleted: actions.authorization.length === authorizationNumberRequired,
     },
     {
       name: `${t('Finance Review')} (${
         actions.financeReview.length
       }/${financeReviewNumberRequired})`,
       hasError: rejectedOn === 'IN_REVIEW',
+      isCompleted: actions.financeReview.length === financeReviewNumberRequired,
     },
   ];
-
-  const getStepCompleted = (): boolean | null => {
-    if (financeReviewNumberRequired === actions.financeReview.length) {
-      return true;
-    }
-    return null;
-  };
 
   return (
     <StyledBox>
       <Stepper activeStep={activeStep}>
         {steps.map((step) => {
           return (
-            <Step completed={getStepCompleted()} key={step.name}>
+            <Step completed={step.isCompleted} key={step.name}>
               <StepLabel
                 error={step.hasError}
                 StepIconComponent={step.hasError ? StyledCancelIcon : null}
