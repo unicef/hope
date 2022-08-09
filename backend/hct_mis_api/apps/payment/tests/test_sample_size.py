@@ -3,6 +3,7 @@ from hct_mis_api.apps.program.fixtures import CashPlanFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
 )
@@ -48,7 +49,13 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
 
     def test_sample_size_in_manual_verification_plan(self):
         cash_plan = CashPlanFactory()
-        PaymentRecordFactory(cash_plan=cash_plan, business_area=self.business_area, household=self.household)
+        PaymentRecordFactory(
+            cash_plan=cash_plan,
+            business_area=self.business_area,
+            household=self.household,
+            head_of_household_id=self.individuals[0].id,
+            status=PaymentRecord.STATUS_SUCCESS,
+        )
         manual_sample_query_variables = create_query_variables(cash_plan, "MANUAL")
         manual_response = self.graphql_request(
             request_string=self.SAMPLE_SIZE_QUERY,
