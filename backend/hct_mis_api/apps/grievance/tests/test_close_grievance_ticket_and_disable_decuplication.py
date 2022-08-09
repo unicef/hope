@@ -39,22 +39,13 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 # from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
-class TestUpdateCloseGrievanceTicketAndDisableDeduplication(APITestCase):
+class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
     UPDATE_GRIEVANCE_TICKET_STATUS_CHANGE_MUTATION = """
     mutation GrievanceTicketStatusChange($grievanceTicketId: ID, $status: Int) {
         grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
             grievanceTicket {
                 id
                 status
-                createdAt
-                updatedAt
-                createdBy {
-                    id
-                    firstName
-                    lastName
-                    username
-                    email
-                }
             }
         }
     }
@@ -136,18 +127,8 @@ class TestUpdateCloseGrievanceTicketAndDisableDeduplication(APITestCase):
             approve_status=True,
         )
 
-        cls.individual_data_change_grievance_ticket = GrievanceTicketFactory(
-            id="acd57aa1-efd8-4c81-ac19-b8cabebe8089",
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=cls.admin_area_1,
-            admin2_new=cls.admin_area_1_new,
-            business_area=cls.business_area,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-            created_by=cls.user,
-        )
         TicketIndividualDataUpdateDetailsFactory(
-            ticket=cls.individual_data_change_grievance_ticket,
+            ticket=cls.add_individual_grievance_ticket,
             individual=cls.individual,
             individual_data={
                 "given_name": {"value": "Test", "approve_status": True},
@@ -174,29 +155,32 @@ class TestUpdateCloseGrievanceTicketAndDisableDeduplication(APITestCase):
 
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_add_individual_close_ticket_for_postponed_deduplication(self):
-        permissions = [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR]
+        permissions = [
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        ]
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        self.individual_data_change_grievance_ticket.postpone_deduplication = True
-        self.individual_data_change_grievance_ticket.save()
-
-        input_data = {
-            "grievanceTicketId": self.id_to_base64(self.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
-            "status": GrievanceTicket.STATUS_CLOSED,
-        }
+        self.add_individual_grievance_ticket.postpone_deduplication = True
+        self.add_individual_grievance_ticket.save()
 
         response = self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_STATUS_CHANGE_MUTATION,
             context={"user": self.user},
-            variables=input_data,
+            variables={
+                "grievanceTicketId": self.id_to_base64(self.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
+                "status": GrievanceTicket.STATUS_CLOSED,
+            },
         )
 
         self.assertFalse("errors" in response)
+        self.assertTrue("data" in response)
+        self.assertEqual(
+            response["data"]["grievanceStatusChange"]["grievanceTicket"]["status"], GrievanceTicket.STATUS_CLOSED
+        )
 
-        # DeduplicateTask
         self.individual.refresh_from_db()
-        self.individual_data_change_grievance_ticket.refresh_from_db()
-
-        self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_CLOSED)
         self.assertEqual(self.individual.deduplication_batch_status, UNIQUE_IN_BATCH)
         self.assertEqual(self.individual.deduplication_golden_record_results, dict())
+
+        self.add_individual_grievance_ticket.refresh_from_db()
+        self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_CLOSED)
