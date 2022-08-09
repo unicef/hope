@@ -694,5 +694,6 @@
   "Rejected": "Rejected",
   "Are you sure you want to delete this Payment Plan?": "Are you sure you want to delete this Payment Plan?",
   "Back": "Back",
-  "Selected delivery mechanisms are not sufficient to serve all beneficiaries. Please add Cash and Mobile Money to move to the next step.": "Selected delivery mechanisms are not sufficient to serve all beneficiaries. Please add Cash and Mobile Money to move to the next step."
+  "Selected delivery mechanisms are not sufficient to serve all beneficiaries. Please add Cash and Mobile Money to move to the next step.": "Selected delivery mechanisms are not sufficient to serve all beneficiaries. Please add Cash and Mobile Money to move to the next step.",
+  "Edit FSP": "Edit FSP"
 }
