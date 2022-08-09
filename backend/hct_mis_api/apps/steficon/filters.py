@@ -5,5 +5,5 @@ from hct_mis_api.apps.steficon.models import Rule
 
 class SteficonRuleFilter(FilterSet):
     class Meta:
-        fields = ("enabled", "deprecated")
+        fields = ("enabled", "deprecated", "type")
         model = Rule
