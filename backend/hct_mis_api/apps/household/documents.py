@@ -1,10 +1,12 @@
+from django.conf import settings
+
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from django.conf import settings
+
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 
 from .elasticsearch_utils import DEFAULT_SCRIPT
-from .models import Individual, Household
+from .models import Household, Individual
 
 
 @registry.register_document
@@ -29,10 +31,10 @@ class IndividualDocument(Document):
         properties={
             "unicef_id": fields.TextField(),
             "residence_status": fields.KeywordField(similarity="boolean"),
-            "country_origin": fields.KeywordField(attr="country_origin.alpha3", similarity="boolean"),
+            "country_origin": fields.KeywordField(attr="country_origin.iso_code3", similarity="boolean"),
             "size": fields.IntegerField(),
             "address": fields.TextField(),
-            "country": fields.KeywordField(attr="country.alpha3", similarity="boolean"),
+            "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
             "female_age_group_0_5_count": fields.IntegerField(),
             "female_age_group_6_11_count": fields.IntegerField(),
             "female_age_group_12_17_count": fields.IntegerField(),
@@ -66,7 +68,7 @@ class IndividualDocument(Document):
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
             "type": fields.KeywordField(attr="type.type", similarity="boolean"),
-            "country": fields.KeywordField(attr="type.country.alpha3", similarity="boolean"),
+            "country": fields.KeywordField(attr="type.country.iso_code3", similarity="boolean"),
         }
     )
     identities = fields.ObjectField(
