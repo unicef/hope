@@ -7,7 +7,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Ticket Id',
-    id: 'id',
+    id: 'ticket-id',
     numeric: false,
     dataCy: 'ticket-id',
   },
@@ -63,7 +63,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Linked Tickets',
-    id: 'id',
+    id: 'linked_tickets',
     numeric: false,
     dataCy: 'linkedTickets',
   },
@@ -80,5 +80,12 @@ export const headCells: HeadCell<
     id: 'user_modified',
     numeric: false,
     dataCy: 'userModified',
+  },
+  {
+    disablePadding: false,
+    label: 'Total days',
+    id: 'total_days',
+    numeric: true,
+    dataCy: 'totalDays',
   },
 ];
