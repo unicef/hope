@@ -392,5 +392,26 @@ export function validateUsingSteps(
   if (activeStep === 1 && !values.selectedHousehold) {
     errors.selectedHousehold = 'Household is Required';
   }
+  if (activeStep === 1) {
+    const individualRequiredIssueTypes = [
+      GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL,
+      GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL,
+    ];
+    const householdRequiredIssueTypes = [
+      GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD,
+      GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD,
+    ];
+    const isHouseholdRequired = householdRequiredIssueTypes.includes(
+      values.issueType,
+    );
+    const isIndividualRequired = individualRequiredIssueTypes.includes(
+      values.issueType,
+    );
+    if (isIndividualRequired && !values.selectedIndividual) {
+      errors.selectedHousehold = 'Individual is Required';
+    } else if (isHouseholdRequired && !values.selectedHousehold) {
+      errors.selectedHousehold = 'Household is Required';
+    }
+  }
   return errors;
 }
