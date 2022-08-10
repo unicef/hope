@@ -6,7 +6,7 @@ from django.db.transaction import atomic
 from django.urls import reverse
 from django.utils import timezone
 
-from celery.app import default_app
+from hct_mis_api.apps.utils.sentry import sentry_tags
 
 from ..core.celery import app
 from .models import Query, Report
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.task()
+@sentry_tags
 def queue(query_id):
     try:
         query = Query.objects.get(pk=query_id)
@@ -37,6 +38,7 @@ results available here: {url}.
 
 
 @app.task()
+@sentry_tags
 def refresh_reports():
     try:
         for report in Report.objects.filter(refresh=True):

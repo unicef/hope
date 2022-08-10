@@ -34,7 +34,7 @@ from hct_mis_api.apps.utils.schema import Arg
 
 
 def get_field_by_name(field_name: str):
-    field = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.TARGETING]).to_dict_by("name").get(field_name)
+    field = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name").get(field_name)
     choices = field.get("choices")
     if choices and callable(choices):
         field["choices"] = choices()

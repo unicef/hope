@@ -1,6 +1,5 @@
 import json
 import secrets
-
 from datetime import date
 from io import BytesIO
 from pathlib import Path
@@ -9,7 +8,6 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
-from django.core.exceptions import ValidationError
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 
@@ -23,6 +21,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
+    IDENTIFICATION_TYPE_TAX_ID,
     DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -33,11 +32,11 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
-    DiiaHousehold,
 )
 
 
@@ -57,20 +56,29 @@ class CellMock:
         self.coordinate = coordinate
 
 
+def create_document_image():
+    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
+    return File(BytesIO(content), name="image.png")
+
+
 class TestRdiCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+            RdiKoboCreateTask,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/new_reg_data_import.xlsx"
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
         business_area = BusinessArea.objects.first()
@@ -90,6 +98,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
         cls.business_area = BusinessArea.objects.first()
+        ImportedDocumentType.objects.create(
+            country=Country("AFG"),
+            label="Tax Number Identification",
+            type=IDENTIFICATION_TYPE_TAX_ID,
+        )
 
     def test_execute(self):
         task = self.RdiXlsxCreateTask()
@@ -216,7 +229,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     )
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.timezone.now",
-        lambda: "2020-06-22 12:00",
+        lambda: "2020-06-22 12:00:00-0000",
     )
     def test_handle_document_photo_fields(self):
         task = self.RdiXlsxCreateTask()
@@ -234,7 +247,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertIn("individual_14_birth_certificate_i_c", task.documents.keys())
         birth_certificate = task.documents["individual_14_birth_certificate_i_c"]
         self.assertEqual(birth_certificate["individual"], individual)
-        self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00.jpg")
+        self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00:00-0000.jpg")
 
         birth_cert_doc = {
             "individual_14_birth_certificate_i_c": {
@@ -257,7 +270,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(birth_certificate["name"], "Birth Certificate")
         self.assertEqual(birth_certificate["type"], "BIRTH_CERTIFICATE")
         self.assertEqual(birth_certificate["value"], "CD1247246Q12W")
-        self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00.jpg")
+        self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00:00-0000.jpg")
 
     def test_handle_geopoint_field(self):
         empty_geopoint = ""
@@ -274,8 +287,6 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     def test_create_documents(self):
         task = self.RdiXlsxCreateTask()
         individual = ImportedIndividualFactory()
-        content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
-        image = File(BytesIO(content), name="image.png")
         task.business_area = self.business_area
         doc_type = ImportedDocumentType.objects.create(
             country=Country("AFG"),
@@ -289,7 +300,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
                 "type": "BIRTH_CERTIFICATE",
                 "value": "CD1247246Q12W",
                 "issuing_country": Country("AFG"),
-                "photo": image,
+                "photo": create_document_image(),
             }
         }
         task._create_documents()
@@ -345,6 +356,31 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         [self.assertTrue(household.row_id in [3, 4, 5]) for household in households]
         [self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8]) for individual in individuals]
 
+    def test_create_bank_account(self):
+        task = self.RdiXlsxCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+        )
+
+        bank_account_info = ImportedBankAccountInfo.objects.filter(individual__row_id=6).first()
+        self.assertEqual(bank_account_info.bank_name, "Bank testowy")
+        self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
+        self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
+
+    def test_create_tax_id_document(self):
+        task = self.RdiXlsxCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+        )
+
+        document = ImportedDocument.objects.filter(individual__row_id=5).first()
+        self.assertEqual(document.type.type, IDENTIFICATION_TYPE_TAX_ID)
+        self.assertEqual(document.document_number, "CD1247246Q12W")
+
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
@@ -358,8 +394,12 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+            RdiKoboCreateTask,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -787,5 +827,3 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             "w+",
         ) as json_file:
             json_file.write(json.dumps(result))
-
-

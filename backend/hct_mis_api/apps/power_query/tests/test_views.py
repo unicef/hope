@@ -4,7 +4,7 @@ import random
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from parameterized import parameterized, parameterized_class
+from parameterized import parameterized
 
 from ...account.fixtures import UserFactory
 from ..apps import create_defaults

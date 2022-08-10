@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
+from django.contrib.postgres.indexes import GinIndex
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
@@ -19,6 +20,7 @@ from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
+from django.contrib.postgres.search import SearchVectorField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -28,6 +30,7 @@ from hct_mis_api.apps.utils.models import (
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
 )
+from hct_mis_api.apps.utils.phone_number import is_right_phone_number_format
 
 BLANK = ""
 IDP = "IDP"
@@ -771,6 +774,16 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
 
+    vector_column = SearchVectorField(null=True)
+
+    @property
+    def phone_no_valid(self):
+        return is_right_phone_number_format(self.phone_no)
+
+    @property
+    def phone_no_alternative_valid(self):
+        return is_right_phone_number_format(self.phone_no_alternative)
+
     @property
     def age(self):
         return relativedelta(date.today(), self.birth_date).years
@@ -834,6 +847,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     class Meta:
         verbose_name = "Individual"
+        indexes = (GinIndex(fields=["vector_column"]),)
 
     def set_sys_field(self, key, value):
         if "sys" not in self.user_fields:

@@ -1,7 +1,6 @@
 import random
 
 import factory
-from factory import fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -21,7 +20,8 @@ from hct_mis_api.apps.grievance.models import (
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails, TicketPaymentVerificationDetails,
+    TicketSystemFlaggingDetails,
+    TicketPaymentVerificationDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, PaymentVerificationFactory
@@ -282,6 +282,5 @@ class TicketPaymentVerificationDetailsFactory(factory.DjangoModelFactory):
 
     ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION)
     payment_verification = factory.SubFactory(
-        PaymentVerificationFactory,
-        status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        PaymentVerificationFactory, status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
     )

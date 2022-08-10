@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory

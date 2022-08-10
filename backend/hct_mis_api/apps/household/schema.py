@@ -1,5 +1,4 @@
-from django.db.models import DecimalField, IntegerField, Prefetch, Sum
-from django.db.models.functions import Coalesce
+from django.db.models import Prefetch, Sum, Value
 
 import graphene
 from graphene import relay
@@ -32,7 +31,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.filters import IndividualFilter, HouseholdFilter
+from hct_mis_api.apps.household.filters import HouseholdFilter, IndividualFilter
 from hct_mis_api.apps.household.models import (
     AGENCY_TYPE_CHOICES,
     DUPLICATE,
@@ -57,8 +56,9 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import \
-    programs_with_delivered_quantity
+from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
+    programs_with_delivered_quantity,
+)
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
@@ -302,12 +302,13 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
 
 
 class BankAccountInfoNode(DjangoObjectType):
+    type = graphene.String(required=False)
+
     class Meta:
         model = BankAccountInfo
-        fields = (
-            "bank_name",
-            "bank_account_number",
-        )
+        exclude = ("debit_card_number",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -332,6 +333,13 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     age = graphene.Int()
     bank_account_info = graphene.Field(BankAccountInfoNode, required=False)
     sanction_list_last_check = graphene.DateTime()
+    phone_no_valid = graphene.Boolean()
+    phone_no_alternative_valid = graphene.Boolean()
+    payment_channels = graphene.List(BankAccountInfoNode)
+
+    @staticmethod
+    def resolve_payment_channels(parent: Individual, info):
+        return BankAccountInfo.objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
 
     def resolve_bank_account_info(parent, info):
         bank_account_info = parent.bank_account_info.first()
@@ -375,6 +383,11 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_sanction_list_last_check(parent, info):
         return parent.sanction_list_last_check
 
+    def resolve_phone_no_valid(parent, info):
+        return parent.phone_no_valid
+
+    def resolve_phone_no_alternative_valid(parent, info):
+        return parent.phone_no_alternative_valid
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -408,6 +421,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
     class Meta:
         model = Individual
+        exclude = ("vector_column",)
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

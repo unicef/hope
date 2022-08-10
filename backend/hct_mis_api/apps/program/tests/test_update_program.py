@@ -1,5 +1,3 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -23,14 +21,11 @@ class TestUpdateProgram(APITestCase):
     }
     """
 
-
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.program = ProgramFactory.create(
-            name="initial name", status=Program.DRAFT, business_area=cls.business_area
-        )
+        cls.program = ProgramFactory.create(name="initial name", status=Program.DRAFT, business_area=cls.business_area)
 
     def test_update_program_not_authenticated(self):
         self.snapshot_graphql_request(

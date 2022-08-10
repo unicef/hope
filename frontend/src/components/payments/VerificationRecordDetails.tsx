@@ -6,6 +6,7 @@ import { UniversalActivityLogTable } from '../../containers/tables/UniversalActi
 import {
   choicesToDict,
   formatCurrencyWithSymbol,
+  getPhoneNoLabel,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
@@ -129,19 +130,23 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('PHONE NUMBER')}
-              value={
+              value={getPhoneNoLabel(
                 paymentVerification.paymentRecord.household.headOfHousehold
-                  .phoneNo
-              }
+                  .phoneNo,
+                paymentVerification.paymentRecord.household.headOfHousehold
+                  .phoneNoValid,
+              )}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('ALT. PHONE NUMBER')}
-              value={
+              value={getPhoneNoLabel(
                 paymentVerification.paymentRecord.household.headOfHousehold
-                  .phoneNoAlternative
-              }
+                  .phoneNoAlternative,
+                paymentVerification.paymentRecord.household.headOfHousehold
+                  .phoneNoAlternativeValid,
+              )}
             />
           </Grid>
         </Grid>

@@ -1,5 +1,6 @@
 import base64
-import json
+import hashlib
+import logging
 import uuid
 from typing import List
 
@@ -8,7 +9,6 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.transaction import atomic
 from django.forms import modelform_factory
-
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
@@ -40,6 +40,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     Record,
     RegistrationDataImportDatahub,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class FlexRegistrationService:
@@ -120,10 +122,10 @@ class FlexRegistrationService:
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
         import_data = rdi_datahub.import_data
 
-        Record.objects.filter(pk__in=records_ids).update(registration_data_import=rdi_datahub)
         records_ids_to_import = (
             Record.objects.filter(id__in=records_ids)
             .exclude(status=Record.STATUS_IMPORTED)
+            .exclude(ignored=True)
             .values_list("id", flat=True)
         )
         imported_records_ids = []
@@ -136,6 +138,7 @@ class FlexRegistrationService:
                             self.create_household_for_rdi_household(record, rdi_datahub)
                             imported_records_ids.append(record_id)
                 except ValidationError as e:
+                    logger.exception(e)
                     record.mark_as_invalid(str(e))
 
             number_of_individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).count()
@@ -161,13 +164,16 @@ class FlexRegistrationService:
                 )
             )
 
-            Record.objects.filter(id__in=imported_records_ids).update(status=Record.STATUS_IMPORTED)
+            Record.objects.filter(id__in=imported_records_ids).update(
+                status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
+            )
             if not rdi.business_area.postpone_deduplication:
                 transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
             else:
                 rdi.status = RegistrationDataImport.IN_REVIEW
                 rdi.save()
         except Exception as e:
+            logger.exception(e)
             rdi.status = RegistrationDataImport.IMPORT_ERROR
             rdi.error_message = str(e)
             rdi.save(
@@ -308,6 +314,8 @@ class FlexRegistrationService:
                 phone_no = phone_no[1:]
             if not phone_no.startswith("+380"):
                 individual_data["phone_no"] = f"+380{phone_no}"
+        else:
+            individual_data["phone_no"] = ""
 
         if disability_certificate_picture:
             certificate_picture = f"CERTIFICATE_PICTURE_{uuid.uuid4()}"
@@ -342,12 +350,16 @@ class FlexRegistrationService:
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
             document_type = ImportedDocumentType.objects.get(type=document_type_string, country="UA")
-            document = ImportedDocument(
-                type=document_type,
-                document_number=document_number,
-                photo=certificate_picture,
-                individual=individual,
-            )
+            document_kwargs = {
+                "type": document_type,
+                "document_number": document_number,
+                "individual": individual,
+            }
+            ModelClassForm = modelform_factory(ImportedDocument, fields=document_kwargs.keys())
+            form = ModelClassForm(document_kwargs)
+            if not form.is_valid():
+                raise ValidationError(form.errors)
+            document = ImportedDocument(photo=certificate_picture, **document_kwargs)
             documents.append(document)
 
         return documents
@@ -355,9 +367,8 @@ class FlexRegistrationService:
     def _prepare_picture_from_base64(self, certificate_picture, document_number):
         if certificate_picture:
             format_image = "jpg"
-            certificate_picture = ContentFile(
-                base64.b64decode(certificate_picture), name=f"{document_number}.{format_image}"
-            )
+            name = hashlib.md5(document_number.encode()).hexdigest()
+            certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture
 
     def _prepare_bank_account_info(self, individual_dict: dict, individual: ImportedIndividual):

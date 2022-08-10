@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class GrievanceTicketManager(models.Manager):
         )
 
 
-class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
+class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "user_modified",
@@ -304,7 +304,6 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         blank=True,
         on_delete=models.CASCADE,
     )
-    unicef_id = models.CharField(max_length=250, blank=True, default="")
     extras = JSONField(blank=True, default=dict)
     ignored = models.BooleanField(default=False, db_index=True)
     household_unicef_id = models.CharField(max_length=250, blank=True, null=True)
@@ -376,6 +375,8 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
     def save(self, *args, **kwargs):
         self.full_clean()
+        if self.ticket_details and self.ticket_details.household:
+            self.household_unicef_id = self.ticket_details.household.unicef_id
         return super().save(*args, **kwargs)
 
     def __str__(self):

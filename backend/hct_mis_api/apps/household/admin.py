@@ -126,16 +126,19 @@ class HouseholdAdmin(
         "country",
         "head_of_household",
         "size",
+        "registration_data_import",
     )
     list_filter = (
         ("unicef_id", MultiValueFilter),
         ("unhcr_id", MultiValueFilter),
         ("id", MultiValueFilter),
+        ("registration_data_import", AutoCompleteFilter),
         # ("country", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("size", MaxMinFilter),
         "org_enumerator",
         "last_registration_date",
+        QueryStringFilter,
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")

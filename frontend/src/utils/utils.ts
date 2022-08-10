@@ -1,3 +1,4 @@
+import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
 import localForage from 'localforage';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
@@ -290,6 +291,29 @@ export function camelToUnderscore(key): string {
   return key.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function camelizeObjectKeys(obj): { [key: string]: any } {
+  if (!obj) {
+    return obj;
+  }
+  return Object.keys(obj).reduce((acc, current) => {
+    if (typeof obj[current] === 'object') {
+      acc[camelToUnderscore(current)] = camelizeObjectKeys(obj[current]);
+    } else {
+      acc[camelCase(current)] = obj[current];
+    }
+    return acc;
+  }, {});
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function camelizeArrayObjects(arr): { [key: string]: any }[] {
+  if (!arr) {
+    return arr;
+  }
+  return arr.map(camelizeObjectKeys);
+}
+
 export function columnToOrderBy(
   column: string,
   orderDirection: string,
@@ -450,6 +474,17 @@ export function renderUserName(user): string {
     ? `${user?.firstName} ${user?.lastName}`
     : `${user?.email}`;
 }
+
+export const getPhoneNoLabel = (
+  phoneNo: string,
+  phoneNoValid: boolean,
+): string => {
+  if (!phoneNo) return '-';
+  if (phoneNoValid) {
+    return phoneNo;
+  }
+  return 'Invalid Phone Number';
+};
 
 const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
   [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
