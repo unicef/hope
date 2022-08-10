@@ -10,6 +10,7 @@ from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -20,7 +21,7 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
-from hct_mis_api.apps.payment.celery_tasks import fsp_generate_xlsx_report_task
+from hct_mis_api.apps.payment.celery_tasks import fsp_generate_xlsx_report_task, payment_plan_apply_steficon
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
@@ -45,6 +46,8 @@ from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
 )
 from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
+from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.steficon.schema import SteficonRuleNode
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 logger = logging.getLogger(__name__)
@@ -692,6 +695,112 @@ class DeletePaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, payment_plan_id, **kwargs):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        old_payment_plan = copy_model_object(payment_plan)
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user=info.context.user)
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+
+        return cls(payment_plan=payment_plan)
+
+
+class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+    errors = graphene.List(XlsxErrorNode)
+
+    class Arguments:
+        file = Upload(required=True)
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, file, payment_plan_id):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            logger.error("You can only import entitlement for LOCKED Payment Plan")
+            raise GraphQLError("You can only import entitlement for LOCKED Payment Plan")
+
+        import_service = XlsxPaymentPlanImportService(payment_plan, file)
+        import_service.open_workbook()
+        import_service.validate()
+        if len(import_service.errors):
+            return ImportXlsxCashPlanVerification(None, import_service.errors)
+
+        # TODO: celery task?
+        import_service.import_payment_entitlement()
+        # TODO: some calculation here??
+        # payment_plan.status = PaymentPlan.Status.LOCKED
+        # payment_plan.save()
+
+        return cls(payment_plan, import_service.errors)
+
+
+class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Input:
+        payment_plan_id = graphene.ID(required=True)
+        steficon_rule_id = graphene.ID(required=False)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, file, payment_plan_id, steficon_rule_id):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        old_payment_plan = copy_model_object(payment_plan)
+
+        if steficon_rule_id:
+            # TODO: add steficon validation here
+            # logger.error("formula validation")
+            # raise GraphQLError("formula validation")
+
+            steficon_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
+            steficon_rule_commit = steficon_rule.latest
+            if not steficon_rule.enabled or steficon_rule.deprecated:
+                logger.error("This steficon rule is not enabled or is deprecated.")
+                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
+
+            # payment_plan.steficon_rule = steficon_rule_commit
+            # payment_plan.status = PaymentPlan.Status.STATUS_STEFICON_WAIT
+            payment_plan.save()
+            payment_plan_apply_steficon.delay(payment_plan.pk)
+        else:
+            payment_plan.steficon_rule = None
+            payment_plan.save()
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
+
+
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
     create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
@@ -712,3 +821,7 @@ class Mutations(graphene.ObjectType):
     create_payment_plan = CreatePaymentPlanMutation.Field()
     update_payment_plan = UpdatePaymentPlanMutation.Field()
     delete_payment_plan = DeletePaymentPlanMutation.Field()
+
+    export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()
+    import_xlsx_payment_plan_payment_list = ImportXLSXPaymentPlanPaymentListMutation.Field()
+    set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
