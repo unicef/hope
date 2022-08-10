@@ -94,13 +94,13 @@ class IndividualDocument(Document):
         household = instance.household
         if household:
             if household.admin1:
-                return household.admin1.title
+                return household.admin1.name
 
     def prepare_admin2(self, instance):
         household = instance.household
         if household:
             if household.admin2:
-                return household.admin2.title
+                return household.admin2.name
 
     def prepare_hash_key(self, instance):
         return instance.get_hash_key
@@ -153,12 +153,12 @@ class HouseholdDocument(Document):
     def prepare_admin1(self, household):
         if household:
             if household.admin1:
-                return household.admin1.title
+                return household.admin1.name
 
     def prepare_admin2(self, household):
         if household:
             if household.admin2:
-                return household.admin2.title
+                return household.admin2.name
 
     def prepare_business_area(self, instance):
         return instance.business_area.slug
