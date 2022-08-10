@@ -1,29 +1,24 @@
-import { When, Then, Before } from 'cypress-cucumber-preprocessor/steps';
-import '../../support/before';
+import { When, Then, And } from 'cypress-cucumber-preprocessor/steps';
 
-Before(() => {
-  // workaround due to app code issue:
-  // 'Warning: Each child in a list should have a unique "key" prop.'
-  Cypress.on('uncaught:exception', () => {
-    return false;
-  });
-});
+When('I visit /', () => {
+  cy.visit('/');
+})
 
-Then('I should get redirected to login', () => {
-  cy.location('pathname').should('eq', '/login');
+Then("I should see the AD login page", () => {
   cy.get('a').contains('Sign in');
-});
+})
 
-Then('I should see the Dashboard', () => {
-  cy.getByTestId('main-content').contains('Dashboard');
-});
+When("I visit admin panel", () => {
+  cy.visit('/api/unicorn/');
+})
 
-When('I make a request to GraphQL endpoint', () => {
-  cy.request('POST', 'api/graphql').as('graphQLRequest');
-});
+And("I fill in the login form", () => {
+  cy.get('input[name="username"]').type(Cypress.env("username"));
+  cy.get('input[name="password"]').type(Cypress.env("password"));
+  cy.get('input').contains('Log in').click();
+})
 
-Then('I get a 200 response', () => {
-  cy.wait('@graphQLRequest').then((response) => {
-    expect(response.status).to.eq(200);
-  });
-});
+Then("I should see the admin panel contents", () => {
+  cy.get('a').contains('HOPE Administration');
+  cy.get('p').contains("Please enter the correct username").should("not.exist")
+})

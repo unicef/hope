@@ -56,7 +56,7 @@ class TargetingCriteriaRuleFilterInputValidator:
     def validate(rule_filter):
         is_flex_field = rule_filter.is_flex_field
         if not is_flex_field:
-            attributes = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.TARGETING]).to_dict_by("name")
+            attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")
             attribute = attributes.get(rule_filter.field_name)
             if attribute is None:
                 logger.error(f"Can't find any core field attribute associated with {rule_filter.field_name} field name")

@@ -88,15 +88,19 @@ export function EditGrievancePage(): React.ReactElement {
     },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const {
+    data: currentUserData,
+    loading: currentUserDataLoading,
+  } = useMeQuery();
 
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useGrievancesChoiceDataQuery();
 
   const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
@@ -104,8 +108,10 @@ export function EditGrievancePage(): React.ReactElement {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
+  const {
+    data: householdFieldsData,
+    loading: householdFieldsLoading,
+  } = useAllEditHouseholdFieldsQuery();
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -194,6 +200,8 @@ export function EditGrievancePage(): React.ReactElement {
       'individualDataUpdateFieldsIdentities',
       'individualDataUpdateDocumentsToEdit',
       'individualDataUpdateIdentitiesToEdit',
+      'individualDataUpdateFieldsPaymentChannels',
+      'individualDataUpdatePaymentChannelsToEdit',
     ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (

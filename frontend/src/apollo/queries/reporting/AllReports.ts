@@ -44,6 +44,7 @@ export const ALL_REPORTS_QUERY = gql`
           dateTo
           status
           createdAt
+          updatedAt
           createdBy {
             firstName
             lastName

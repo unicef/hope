@@ -1,44 +1,51 @@
 import json
 import numbers
-
 from collections import defaultdict
 from typing import Union
 
-from dateutil.parser import parse
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
+
+from dateutil.parser import parse
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.kobo.api import KoboAPI
-from hct_mis_api.apps.core.kobo.common import get_field_name, KOBO_FORM_INDIVIDUALS_COLUMN_NAME
+from hct_mis_api.apps.core.kobo.common import (
+    KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
+    get_field_name,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import rename_dict_keys
 from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_OTHER,
-    IDENTIFICATION_TYPE_DICT,
-    NON_BENEFICIARY,
     HEAD,
+    IDENTIFICATION_TYPE_DICT,
+    IDENTIFICATION_TYPE_OTHER,
+    NON_BENEFICIARY,
+    ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    ROLE_ALTERNATE
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportedIndividual,
-    ImportedHousehold,
-    ImportedAgency,
-    ImportedIndividualIdentity,
-    ImportedDocumentType,
-    ImportedDocument,
-    ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
     ImportData,
-    KoboImportedSubmission
+    ImportedAgency,
+    ImportedDocument,
+    ImportedDocumentType,
+    ImportedHousehold,
+    ImportedIndividual,
+    ImportedIndividualIdentity,
+    ImportedIndividualRoleInHousehold,
+    KoboImportedSubmission,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask, is_flex_field_attr, logger
+from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
+    RdiBaseCreateTask,
+    is_flex_field_attr,
+    logger,
+)
 from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
 
 
@@ -344,8 +351,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
         rdi_mis.save()
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
-
-        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
+        if not self.business_area.postpone_deduplication:
+            DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
 
     def _handle_exception(self, assigned_to, field_name, e):
         logger.exception(e)

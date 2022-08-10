@@ -18,8 +18,7 @@ export function validate(
 ) {
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const errors: { [id: string]: any } = {};
+  const errors: { [key: string]: string | { [key: string]: string } } = {};
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
       if (!values.selectedHousehold) {
@@ -76,7 +75,10 @@ export function validate(
         !values.individualDataUpdateFieldsIdentities?.length &&
         !values.individualDataUpdateIdentitiesToRemove?.length &&
         !values.individualDataUpdateDocumentsToEdit?.length &&
-        !values.individualDataUpdateIdentitiesToEdit?.length
+        !values.individualDataUpdateIdentitiesToEdit?.length &&
+        !values.individualDataUpdateFieldsPaymentChannels?.length &&
+        !values.individualDataUpdatePaymentChannelsToRemove?.length &&
+        !values.individualDataUpdatePaymentChannelsToEdit?.length
       ) {
         errors.individualDataUpdateFields =
           'Individual Data Change is Required';
@@ -135,8 +137,31 @@ export function validate(
             const doc =
               values.individualDataUpdateFieldsIdentitiesToEdit[index];
             if (!doc.country || !doc.agency || !doc.number) {
-              errors.individualDataUpdateFieldsIdentities =
+              errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity country, agency and number are required';
+            }
+          },
+        );
+      }
+      if (values.individualDataUpdateFieldsPaymentChannelsToEdit?.length) {
+        values.individualDataUpdateFieldsPaymentChannelsToEdit.forEach(
+          (el, index) => {
+            const doc =
+              values.individualDataUpdateFieldsPaymentChannelsToEdit[index];
+            if (!doc.bankName || !doc.bankAccountNumber) {
+              errors.individualDataUpdateFieldsPaymentChannelsToEdit =
+                'Bank name and bank account number are required';
+            }
+          },
+        );
+      }
+      if (values.individualDataUpdateFieldsPaymentChannels?.length) {
+        values.individualDataUpdateFieldsPaymentChannels.forEach(
+          (el, index) => {
+            const doc = values.individualDataUpdateFieldsPaymentChannels[index];
+            if (!doc.bankName || !doc.bankAccountNumber) {
+              errors.individualDataUpdateFieldsPaymentChannels =
+                'Bank name and bank account number are required';
             }
           },
         );
