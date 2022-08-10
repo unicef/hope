@@ -9913,6 +9913,17 @@ export type CashPlanVerificationStatusChoicesQuery = (
   )>>> }
 );
 
+export type PaymentPlanStatusChoicesQueryQueryVariables = {};
+
+
+export type PaymentPlanStatusChoicesQueryQuery = (
+  { __typename?: 'Query' }
+  & { paymentPlanStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
 export type PaymentRecordVerificationQueryVariables = {
   id: Scalars['ID']
 };
@@ -18153,6 +18164,56 @@ export function useCashPlanVerificationStatusChoicesLazyQuery(baseOptions?: Apol
 export type CashPlanVerificationStatusChoicesQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesQuery>;
 export type CashPlanVerificationStatusChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesLazyQuery>;
 export type CashPlanVerificationStatusChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>;
+export const PaymentPlanStatusChoicesQueryDocument = gql`
+    query PaymentPlanStatusChoicesQuery {
+  paymentPlanStatusChoices {
+    name
+    value
+  }
+}
+    `;
+export type PaymentPlanStatusChoicesQueryComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>, 'query'>;
+
+    export const PaymentPlanStatusChoicesQueryComponent = (props: PaymentPlanStatusChoicesQueryComponentProps) => (
+      <ApolloReactComponents.Query<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables> query={PaymentPlanStatusChoicesQueryDocument} {...props} />
+    );
+    
+export type PaymentPlanStatusChoicesQueryProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables> & TChildProps;
+export function withPaymentPlanStatusChoicesQuery<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  PaymentPlanStatusChoicesQueryQuery,
+  PaymentPlanStatusChoicesQueryQueryVariables,
+  PaymentPlanStatusChoicesQueryProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables, PaymentPlanStatusChoicesQueryProps<TChildProps>>(PaymentPlanStatusChoicesQueryDocument, {
+      alias: 'paymentPlanStatusChoicesQuery',
+      ...operationOptions
+    });
+};
+
+/**
+ * __usePaymentPlanStatusChoicesQueryQuery__
+ *
+ * To run a query within a React component, call `usePaymentPlanStatusChoicesQueryQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentPlanStatusChoicesQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentPlanStatusChoicesQueryQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePaymentPlanStatusChoicesQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>(PaymentPlanStatusChoicesQueryDocument, baseOptions);
+      }
+export function usePaymentPlanStatusChoicesQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>(PaymentPlanStatusChoicesQueryDocument, baseOptions);
+        }
+export type PaymentPlanStatusChoicesQueryQueryHookResult = ReturnType<typeof usePaymentPlanStatusChoicesQueryQuery>;
+export type PaymentPlanStatusChoicesQueryLazyQueryHookResult = ReturnType<typeof usePaymentPlanStatusChoicesQueryLazyQuery>;
+export type PaymentPlanStatusChoicesQueryQueryResult = ApolloReactCommon.QueryResult<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>;
 export const PaymentRecordVerificationDocument = gql`
     query PaymentRecordVerification($id: ID!) {
   paymentRecordVerification(id: $id) {
