@@ -765,7 +765,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, file, payment_plan_id, steficon_rule_id):
+    def mutate(cls, root, info, payment_plan_id, steficon_rule_id):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
@@ -783,8 +783,8 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
                 logger.error("This steficon rule is not enabled or is deprecated.")
                 raise GraphQLError("This steficon rule is not enabled or is deprecated.")
 
-            # payment_plan.steficon_rule = steficon_rule_commit
-            # payment_plan.status = PaymentPlan.Status.STATUS_STEFICON_WAIT
+            payment_plan.steficon_rule = steficon_rule_commit
+            payment_plan.status = PaymentPlan.Status.STEFICON_WAIT
             payment_plan.save()
             payment_plan_apply_steficon.delay(payment_plan.pk)
         else:

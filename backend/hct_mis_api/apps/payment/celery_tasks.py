@@ -3,6 +3,7 @@ import datetime
 
 from concurrency.api import disable_concurrency
 from django.db.transaction import atomic
+from django.utils import timezone
 from sentry_sdk import configure_scope
 
 from django.contrib.auth import get_user_model
@@ -136,25 +137,26 @@ def payment_plan_apply_steficon(payment_plan_id):
         logger.exception(e)
         raise
     try:
-        # payment_plan.status = PaymentPlan.Status.STATUS_STEFICON_RUN
-        # payment_plan.steficon_applied_date = timezone.now()
-        # payment_plan.save()
+        payment_plan.status = PaymentPlan.Status.STEFICON_RUN
+        payment_plan.steficon_applied_date = timezone.now()
+        payment_plan.save()
         updates = []
         with atomic():
             entry: Payment
-            for entry in payment_plan.payments.all():
-                result = rule.execute({"payment": entry, "payment_plan": payment_plan})
-                entry.entitlement_quantity = result.entitlement_quantity
-                entry.entitlement_quantity_usd = result.entitlement_quantity_usd
-                updates.append(entry)
+            for entry in payment_plan.payments.all_active_payments:
+                pass
+                # TODO: not sure how will work steficon function
+                # result = rule.execute({"household": entry.household, "payment_plan": payment_plan})
+                # entry.entitlement_quantity = result.entitlement_quantity
+                # updates.append(entry)
             Payment.objects.bulk_update(updates, ["entitlement_quantity", "entitlement_quantity_usd"])
-        # payment_plan.status = PaymentPlan.Status.STATUS_STEFICON_COMPLETED
-        # payment_plan.steficon_applied_date = timezone.now()
+        payment_plan.status = PaymentPlan.Status.STEFICON_COMPLETED
+        payment_plan.steficon_applied_date = timezone.now()
         with disable_concurrency(payment_plan):
             payment_plan.save()
     except Exception as e:
         logger.exception(e)
-        # payment_plan.steficon_applied_date = timezone.now()
-        # payment_plan.status = PaymentPlan.Status.STATUS_STEFICON_ERROR
+        payment_plan.steficon_applied_date = timezone.now()
+        payment_plan.status = PaymentPlan.Status.STEFICON_ERROR
         payment_plan.save()
         raise
