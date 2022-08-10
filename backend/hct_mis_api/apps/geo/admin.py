@@ -4,23 +4,22 @@ from django.contrib import admin
 from django.shortcuts import redirect
 from django.contrib.admin import FieldListFilter, ListFilter, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
-from django.forms import TextInput
+from django.forms import TextInput, Form, FileField, FileInput
+from admin_extra_buttons.decorators import button
 
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
 from smart_admin.mixins import FieldsetMixin
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
-from .models import Area, AreaType, Country
-from django import forms
+from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from django.template.response import TemplateResponse
-from .utils import initialise_area_types, initialise_areas, initialise_countries
 
 logger = logging.getLogger(__name__)
 
 
-class ImportCSVForm(forms.Form):
-    file = forms.FileField(widget=forms.FileInput(attrs={'accept':'text/csv'}))
+class ImportCSVForm(Form):
+    file = FileField(widget=FileInput(attrs={'accept':'text/csv'}))
 
 
 class ActiveRecordFilter(ListFilter):
