@@ -4,8 +4,6 @@ import itertools
 import logging
 import string
 from collections import MutableMapping, OrderedDict
-from time import sleep
-from typing import List
 
 from django.db.models import QuerySet
 
@@ -19,31 +17,6 @@ logger = logging.getLogger(__name__)
 class CaseInsensitiveTuple(tuple):
     def __contains__(self, key, *args, **kwargs):
         return key.casefold() in (element.casefold() for element in self)
-
-
-class LazyEvalMethodsDict(MutableMapping):
-    def __init__(self, *args, **kwargs):
-        self._ignored_method_fields = kwargs.pop("ignored_method_fields", [])
-        self._dict = dict(*args, **kwargs)
-
-    def __getitem__(self, k):
-        v = self._dict.__getitem__(k)
-        if callable(v) and k not in self._ignored_method_fields:
-            v = v()
-            self.__setitem__(k, v)
-        return v
-
-    def __setitem__(self, key, value):
-        self._dict[key] = value
-
-    def __delitem__(self, key):
-        return self._dict[key]
-
-    def __iter__(self):
-        return iter(self._dict)
-
-    def __len__(self):
-        return len(self._dict)
 
 
 def decode_id_string(id_string):
@@ -214,15 +187,14 @@ def serialize_flex_attributes():
 
 
 def get_combined_attributes():
-    from hct_mis_api.apps.core.core_fields_attributes import (
-        CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
-    )
+    from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
     flex_attrs = serialize_flex_attributes()
     return {
-        **CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY["individuals"],
+        **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
+        .apply_business_area(None)
+        .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
-        **CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY["households"],
         **flex_attrs["households"],
     }
 
@@ -469,7 +441,7 @@ def update_labels_mapping(csv_file):
 
     from django.conf import settings
 
-    from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+    from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
     with open(csv_file, newline="") as csv_file:
         reader = csv.reader(csv_file)
@@ -481,7 +453,7 @@ def update_labels_mapping(csv_file):
             "old": core_field_data["label"],
             "new": {"English(EN)": fields_mapping.get(core_field_data["xlsx_field"], "")},
         }
-        for core_field_data in CORE_FIELDS_ATTRIBUTES
+        for core_field_data in FieldFactory.from_scope(Scope.GLOBAL)
         if core_field_data["label"].get("English(EN)", "") != fields_mapping.get(core_field_data["xlsx_field"], "")
     }
 
@@ -603,20 +575,6 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
             }
         )
     return filter_query
-
-
-def admin_area1_query(comparision_method, args):
-    from django.db.models import Q
-
-    return Q(Q(admin_area_new__p_code=args[0]) & Q(admin_area_new__area_type__area_level=1)) | Q(
-        Q(admin_area_new__parent__p_code=args[0]) & Q(admin_area_new__parent__area_type__area_level=1)
-    )
-
-
-def registration_data_import_query(comparison_method, args):
-    from django.db.models import Q
-
-    return Q(registration_data_import__pk__in=args)
 
 
 class CaIdIterator:

@@ -9,7 +9,6 @@ from faker import Faker
 from openpyxl.drawing.image import Image
 
 from hct_mis_api.apps.core.core_fields_attributes import (
-    COLLECTORS_FIELDS,
     TYPE_BOOL,
     TYPE_DATE,
     TYPE_GEOPOINT,
@@ -46,7 +45,7 @@ class Command(BaseCommand):
         wb = TemplateFileGenerator.get_template_file()
         households_ws = wb["Households"]
         individuals_ws = wb["Individuals"]
-        combined_fields = {**get_combined_attributes(), **COLLECTORS_FIELDS}
+        combined_fields = get_combined_attributes()
         faker = Faker()
         today = datetime.date.today()
 

@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 import logging
 
 from django.conf import settings
@@ -19,7 +19,6 @@ from adminfilters.mixin import AdminFiltersMixin
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
 
-logger = logging.getLogger(__name__)
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
     CashPlan,
@@ -30,10 +29,11 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
     TargetPopulation,
 )
 from hct_mis_api.apps.household import models as people
-from hct_mis_api.apps.payment import models as payment
 from hct_mis_api.apps.program import models as program
 from hct_mis_api.apps.targeting import models as targeting
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+
+logger = logging.getLogger(__name__)
 
 MINUTE = 60
 HOUR = MINUTE * 60
@@ -59,8 +59,8 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     readonly_fields = ("timestamp", "last_modified_date", "sentry_id", "source", "business_area")
 
     def run_time(self, obj):
-        if obj.status in [obj.STATUS_PROCESSING, obj.STATUS_LOADING]:
-            elapsed = datetime.datetime.now() - obj.timestamp
+        if obj.status in (obj.STATUS_PROCESSING, obj.STATUS_LOADING):
+            elapsed = timezone.now() - obj.timestamp
             if elapsed.total_seconds() >= HOUR:
                 return elapsed
 
@@ -80,7 +80,6 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             msg = f"{e.__class__.__name__}: {str(e)}"
             self.message_user(request, msg, messages.ERROR)
 
-    # @button(label="test import", permission="account.can_debug")
     @button()
     def simulate_import(self, request, pk):
         context = self.get_common_context(request, pk, title="Test Import")
@@ -145,22 +144,21 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         errors = 0
         errors = 0
         has_content = False
-        business_area = BusinessArea.objects.get(code=obj.business_area)
         if settings.SENTRY_URL and obj.sentry_id:
             context["sentry_url"] = f"{settings.SENTRY_URL}?query={obj.sentry_id}"
 
         if obj.status == obj.STATUS_EMPTY:
-            warnings.append([messages.WARNING, f"Session is empty"])
+            warnings.append([messages.WARNING, "Session is empty"])
         elif obj.status == obj.STATUS_FAILED:
-            warnings.append([messages.ERROR, f"Session is failed"])
+            warnings.append([messages.ERROR, "Session is failed"])
         elif obj.status == obj.STATUS_PROCESSING:
-            elapsed = datetime.datetime.now() - obj.timestamp
+            elapsed = timezone.now() - obj.timestamp
             if elapsed.total_seconds() >= DAY:
                 warnings.append([messages.ERROR, f"Session is running more than {elapsed}"])
             elif elapsed.total_seconds() >= HOUR:
                 warnings.append([messages.WARNING, f"Session is running more than {elapsed}"])
 
-        for model in [Programme, CashPlan, TargetPopulation, PaymentRecord, ServiceProvider]:
+        for model in (Programme, CashPlan, TargetPopulation, PaymentRecord, ServiceProvider):
             count = model.objects.filter(session=pk).count()
             has_content = has_content or count
             context["data"][model] = {"count": count, "warnings": [], "errors": [], "meta": model._meta}
@@ -210,12 +208,12 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             warnings.append([messages.ERROR, f"{errors} Errors found"])
 
         if (obj.status == obj.STATUS_EMPTY) and has_content:
-            warnings.append([messages.ERROR, f"Session marked as Empty but records found"])
+            warnings.append([messages.ERROR, "Session marked as Empty but records found"])
 
         area = BusinessArea.objects.filter(code=obj.business_area.strip()).first()
         context["area"] = area
         if not area:
-            warnings.append([messages.ERROR, f"Invalid Business Area"])
+            warnings.append([messages.ERROR, "Invalid Business Area"])
 
         context["warnings"] = [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings]
         return TemplateResponse(request, "admin/cash_assist_datahub/session/inspect.html", context)
@@ -278,12 +276,12 @@ class PaymentRecordAdmin(ExtraButtonsMixin, AdminFiltersMixin, admin.ModelAdmin)
         from hct_mis_api.apps.household.models import Household, Individual
 
         # ba = BusinessArea.objects.get(code=payment_record.business_area)
-        for field_name, model, rk in [
+        for field_name, model, rk in (
             ("business_area", BusinessArea, "code"),
             ("household_mis_id", Household, "pk"),
             ("head_of_household_mis_id", Individual, "pk"),
             ("target_population_mis_id", TargetPopulation, "pk"),
-        ]:
+        ):
             instance = model.objects.filter(**{rk: getattr(payment_record, field_name)}).first()
             details = None
             if instance:

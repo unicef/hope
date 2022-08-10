@@ -1,13 +1,12 @@
+from datetime import timedelta
+from django.utils import timezone
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo import models as geo_models
@@ -15,6 +14,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.reporting.models import Report
+from hct_mis_api.apps.reporting.fixtures import ReportFactory
 from hct_mis_api.apps.reporting.validators import ReportValidator
 
 
@@ -33,6 +33,17 @@ class TestReportingMutation(APITestCase):
     }
     """
 
+    RESTART_CREATE_REPORT = """
+        mutation RestartCreateReport($reportData: RestartCreateReportInput!) {
+            restartCreateReport(reportData: $reportData) {
+                report {
+                    reportType
+                    status
+                }
+            }
+        }
+        """
+
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory()
@@ -41,13 +52,6 @@ class TestReportingMutation(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug=cls.business_area_slug)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         last_registration_dates = ("2020-01-01", "2021-01-01")
-
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        AdminAreaFactory(title="Adminarea Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -71,6 +75,12 @@ class TestReportingMutation(APITestCase):
                 },
                 [{"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]}],
             )
+        report_updated_at = timezone.now() - timedelta(minutes=31)
+        cls.report = ReportFactory(
+            business_area=cls.business_area, status=Report.IN_PROGRESS, report_type=Report.INDIVIDUALS
+        )
+        cls.report.update_at = report_updated_at
+        cls.report.save()
 
     @parameterized.expand(
         [
@@ -146,3 +156,50 @@ class TestReportingMutation(APITestCase):
             self.assertTrue(should_exist_field in report_data)
         if should_not_exist_field:
             self.assertFalse(should_not_exist_field in report_data)
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.REPORTING_EXPORT]),
+            ("without_permission", []),
+        ]
+    )
+    def test_restart_create_report(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.snapshot_graphql_request(
+            request_string=self.RESTART_CREATE_REPORT,
+            context={"user": self.user},
+            variables={
+                "reportData": {
+                    "businessAreaSlug": self.business_area_slug,
+                    "reportId": encode_id_base64(self.report.id, Report),
+                }
+            },
+        )
+
+    def test_restart_create_report_invalid_status_update_time(self):
+        self.create_user_role_with_permissions(self.user, [Permissions.REPORTING_EXPORT], self.business_area)
+        self.report.status = Report.COMPLETED
+        self.report.save()
+        self.snapshot_graphql_request(
+            request_string=self.RESTART_CREATE_REPORT,
+            context={"user": self.user},
+            variables={
+                "reportData": {
+                    "businessAreaSlug": self.business_area_slug,
+                    "reportId": encode_id_base64(self.report.id, Report),
+                }
+            },
+        )
+
+        self.report.updated_at = timezone.now() - timedelta(minutes=29)
+        self.report.save()
+        self.snapshot_graphql_request(
+            request_string=self.RESTART_CREATE_REPORT,
+            context={"user": self.user},
+            variables={
+                "reportData": {
+                    "businessAreaSlug": self.business_area_slug,
+                    "reportId": encode_id_base64(self.report.id, Report),
+                }
+            },
+        )

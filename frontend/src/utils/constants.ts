@@ -51,3 +51,9 @@ export const REPORT_TYPES = {
   PROGRAM: '7',
   INDIVIDUALS_AND_PAYMENT: '8',
 };
+
+export const REPORTING_STATES = {
+  PROCESSING: 1,
+  GENERATED: 2,
+  FAILED: 3
+};

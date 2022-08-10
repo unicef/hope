@@ -2,12 +2,11 @@ import uuid
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
-from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
@@ -29,6 +28,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 
 class TestRapidProVerificationTask(TestCase):
@@ -85,8 +85,7 @@ class TestRapidProVerificationTask(TestCase):
         user = UserFactory()
 
         program = ProgramFactory(business_area=BusinessArea.objects.first())
-        program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
-        program.admin_areas_new.set(Area.objects.order_by("?")[:3])
+        program.admin_areas.set(Area.objects.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
 
         target_population = TargetPopulationFactory(
@@ -111,8 +110,7 @@ class TestRapidProVerificationTask(TestCase):
             household, individuals = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": AdminArea.objects.order_by("?").first(),
-                    "admin_area_new": Area.objects.order_by("?").first(),
+                    "admin_area": Area.objects.order_by("?").first(),
                 },
                 {"registration_data_import": registration_data_import},
             )
@@ -149,7 +147,7 @@ class TestRapidProVerificationTask(TestCase):
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
-            mapped_dict = api.get_mapped_flow_runs(uuid.uuid4())
+            mapped_dict = api.get_mapped_flow_runs([uuid.uuid4()])
             self.assertEqual(
                 mapped_dict,
                 [],
@@ -168,7 +166,7 @@ class TestRapidProVerificationTask(TestCase):
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
-            mapped_dict = api.get_mapped_flow_runs(TestRapidProVerificationTask.START_UUID)
+            mapped_dict = api.get_mapped_flow_runs([TestRapidProVerificationTask.START_UUID])
             self.assertEqual(
                 mapped_dict,
                 [
@@ -194,6 +192,7 @@ class TestRapidProVerificationTask(TestCase):
             payment_record_verification.status,
             PaymentVerification.STATUS_PENDING,
         )
+
         fake_data_to_return_from_rapid_pro_api = [
             {
                 "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
@@ -282,3 +281,50 @@ class TestRapidProVerificationTask(TestCase):
                 payment_record_verification.received_amount,
                 payment_record_verification.payment_record.delivered_quantity,
             )
+
+    @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
+    def test_wrong_phone_number(self, mock_parent_init):
+        mock_parent_init.return_value = None
+        payment_record_verification = (
+            TestRapidProVerificationTask.verification.payment_record_verifications.prefetch_related(
+                "payment_record__head_of_household"
+            )
+            .order_by("?")
+            .first()
+        )
+        self.assertEqual(
+            payment_record_verification.status,
+            PaymentVerification.STATUS_PENDING,
+        )
+        fake_data_to_return_from_rapid_pro_api = [
+            {
+                "phone_number": "123-not-really-a-phone-number",
+                "received": True,
+                "received_amount": payment_record_verification.payment_record.delivered_quantity,
+            }
+        ]
+        mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
+        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+            task = CheckRapidProVerificationTask()
+            task.execute()
+            mock.assert_called()
+
+            payment_record_verification.refresh_from_db()
+            # verification is still pending, so it was not considered within the verification plan
+            self.assertEqual(
+                payment_record_verification.status,
+                PaymentVerification.STATUS_PENDING,
+            )
+
+
+class TestPhoneNumberVerification(TestCase):
+    def test_phone_numbers(self):
+        assert is_right_phone_number_format("+40032215789")
+
+        assert is_right_phone_number_format("+48 123 234 345")
+        assert is_right_phone_number_format("0048 123 234 345")
+
+        assert not is_right_phone_number_format("(201) 555-0123")
+        assert is_right_phone_number_format("+1 (201) 555-0123")
+
+        assert not is_right_phone_number_format("123-not-really-a-phone-number")

@@ -1,5 +1,5 @@
 import base64
-import datetime
+from django.utils import timezone
 import logging
 
 from django import forms
@@ -41,6 +41,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     DiiaHousehold,
     DiiaIndividual,
 )
+from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
 )
@@ -380,7 +381,7 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         service = FlexRegistrationService()
         try:
             records_ids = queryset.values_list("id", flat=True)
-            rdi = service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
+            rdi = service.create_rdi(request.user, f"ukraine rdi {timezone.now()}")
 
             process_flex_records_task.delay(rdi.id, list(records_ids))
             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
@@ -431,55 +432,11 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 response.set_cookie(k, v)
         return response
 
-    # @view()
-    # def validate_document(self, request, pk, target, fieldname):
-    #     ctx = self.get_common_context(request, pk)
-    #     cookies = {}
-    #     if request.method == "POST":
-    #         form = ValidateForm(request.POST)
-    #         if form.is_valid():
-    #             if form.cleaned_data["remember"]:
-    #                 cookies = {form.SYNC_COOKIE: form.get_signed_cookie(request)}
-    #             from PIL import Image
-    #             import pytesseract
-    #             try:
-    #                 childs, offset = target.split(":")
-    #                 record = self.object.data[childs][int(offset)-1]
-    #                 img = record[fieldname]
-    #                 imgdata = base64.b64decode(str(img))
-    #                 im = Image.open(io.BytesIO(imgdata))
-    #                 content = pytesseract.image_to_string(im)
-    #                 ctx['content'] = content
-    #                 self.message_user(request, "Done")
-    #             except Exception as e:
-    #                 logger.exception(e)
-    #                 self.message_error_to_user(request, e)
-    #     else:
-    #         initial = FetchForm.get_saved_config(request)
-    #         initial['picture_field'] = fieldname
-    #         childs, offset = target.split(":")
-    #         record = self.object.data[childs][int(offset)-1]
-    #         img = record[fieldname]
-    #         ctx['img'] = img
-    #         form = ValidateForm(initial=initial)
-    #
-    #     ctx["form"] = form
-    #     response = TemplateResponse(request, "registration_datahub/admin/record/validate_document.html", ctx)
-    #     if cookies:
-    #         for k, v in cookies.items():
-    #             response.set_cookie(k, v)
-    #     return response
-
-    # @button()
-    # def extract_all(self, request):
-    #     records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)
-    #     Record.extract(records_ids)
-    #
     @button(label="Extract")
     def extract_single(self, request, pk):
         records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
         try:
-            Record.extract(records_ids, raise_exception=True)
+            extract(records_ids, raise_exception=True)
         except Exception as e:
             self.message_error_to_user(request, e)
 
@@ -489,29 +446,29 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     def has_delete_permission(self, request, obj=None):
         return is_root(request)
 
+
 @admin.register(DiiaIndividual)
 class DiiaIndividualAdmin(HOPEModelAdminBase):
-    list_display = (
-        "registration_data_import",
-        "individual_id",
-        "full_name",
-        "sex",
-        "disability"
-    )
+    list_display = ("registration_data_import", "individual_id", "full_name", "sex", "disability")
     list_filter = (
         ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
         ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
-        "disability"
+        "disability",
     )
 
 
 @admin.register(DiiaHousehold)
 class DiiaHouseholdAdmin(HOPEModelAdminBase):
     search_fields = ("id", "registration_data_import", "rec_id")
-    list_display = ("registration_data_import", "rec_id")
+    list_display = ("registration_data_import", "status", "rec_id")
     raw_id_fields = ("registration_data_import",)
     date_hierarchy = "registration_data_import__import_date"
     list_filter = (
         ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
-        ("rec_id", ValueFilter.factory(lookup_name="istartswith",)),
+        (
+            "rec_id",
+            ValueFilter.factory(
+                lookup_name="istartswith",
+            ),
+        ),
     )

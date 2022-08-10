@@ -20,6 +20,7 @@ import { isPermissionDeniedError } from '../../../utils/utils';
 import {
   HouseholdNode,
   useAllHouseholdsFlexFieldsAttributesQuery,
+  useGrievancesChoiceDataQuery,
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
 } from '../../../__generated__/graphql';
@@ -72,6 +73,9 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
+  const {
+    data: grievancesChoices,
+  } = useGrievancesChoiceDataQuery();
 
   if (loading || choicesLoading || flexFieldsDataLoading)
     return <LoadingComponent />;
@@ -131,8 +135,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       <HouseholdDetails
         choicesData={choicesData}
         household={household as HouseholdNode}
-        businessArea={businessArea}
-      />
+        businessArea={businessArea} grievancesChoices={grievancesChoices} />
       <HouseholdCompositionTable household={household as HouseholdNode} />
       <Container>
         <HouseholdIndividualsTable
@@ -143,16 +146,16 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
           permissions,
         ) && (
-          <PaymentRecordHouseholdTable
-            openInNewTab
-            household={household as HouseholdNode}
-            businessArea={businessArea}
-            canViewPaymentRecordDetails={hasPermissions(
-              PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
-              permissions,
-            )}
-          />
-        )}
+            <PaymentRecordHouseholdTable
+              openInNewTab
+              household={household as HouseholdNode}
+              businessArea={businessArea}
+              canViewPaymentRecordDetails={hasPermissions(
+                PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+                permissions,
+              )}
+            />
+          )}
         <HouseholdVulnerabilities
           household={household as HouseholdNode}
           flexFieldsData={flexFieldsData}
@@ -183,7 +186,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('User name')}>
-                {household.registrationDataImport.importedBy.email}
+                {household.registrationDataImport.importedBy?.email}
               </LabelizedField>
             </Grid>
           </Grid>

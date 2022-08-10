@@ -1,8 +1,10 @@
 import datetime as dt
 import logging
 
-from dateutil.relativedelta import relativedelta
+from django.core.exceptions import ValidationError
 from django.db.models import Q
+
+from dateutil.relativedelta import relativedelta
 from prompt_toolkit.validation import ValidationError
 
 from hct_mis_api.apps.core.countries import Countries
@@ -13,6 +15,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
+    IDENTIFICATION_TYPE_TAX_ID,
     UNHCR,
     WFP,
 )
@@ -67,6 +70,10 @@ def get_birth_certificate_document_number_query(_, args):
     return get_documents_number_query(IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, args[0])
 
 
+def get_tax_id_document_number_query(_, args):
+    return get_documents_number_query(IDENTIFICATION_TYPE_TAX_ID, args[0])
+
+
 def get_drivers_license_document_number_query(_, args):
     return get_documents_number_query(IDENTIFICATION_TYPE_DRIVERS_LICENSE, args[0])
 
@@ -95,6 +102,10 @@ def get_birth_certificate_issuer_query(_, args):
     return get_documents_issuer_query(IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, args[0])
 
 
+def get_tax_id_issuer_query(_, args):
+    return get_documents_issuer_query(IDENTIFICATION_TYPE_TAX_ID, args[0])
+
+
 def get_drivers_licensee_issuer_query(_, args):
     return get_documents_issuer_query(IDENTIFICATION_TYPE_DRIVERS_LICENSE, args[0])
 
@@ -116,8 +127,7 @@ def get_other_issuer_query(_, args):
 
 
 def get_documents_issuer_query(document_type, country_alpha3):
-    alpha2 = Countries.get_country_value(country_alpha3)
-    return Q(documents__type__type=document_type, documents__type__country=alpha2)
+    return Q(documents__type__type=document_type, documents__type__country__iso_code3=country_alpha3)
 
 
 def get_role_query(_, args):
@@ -129,8 +139,7 @@ def get_scope_id_number_query(_, args):
 
 
 def get_scope_id_issuer_query(_, args):
-    alpha2 = Countries.get_country_value(args[0])
-    return Q(identities__agency__type=WFP, identities__agency__country=alpha2)
+    return Q(identities__agency__type=WFP, identities__agency__country__iso_code3=args[0])
 
 
 def get_unhcr_id_number_query(_, args):
@@ -138,8 +147,7 @@ def get_unhcr_id_number_query(_, args):
 
 
 def get_unhcr_id_issuer_query(_, args):
-    alpha2 = Countries.get_country_value(args[0])
-    return Q(identities__agency__type=UNHCR, identities__agency__country=alpha2)
+    return Q(identities__agency__type=UNHCR, identities__agency__country__iso_code3=args[0])
 
 
 def get_has_phone_number_query(_, args):
@@ -157,3 +165,35 @@ def get_has_bank_account_number_query(_, args):
 def get_has_tax_id_query(_, args):
     has_tax_id = args[0] in [True, "True"]
     return Q(documents__type__type="TAX_ID") if has_tax_id else ~Q(documents__type__type="TAX_ID")
+
+
+def country_generic_query(comparision_method, args, lookup):
+    query = Q(**{lookup: Countries.get_country_value(args[0])})
+    if comparision_method == "EQUALS":
+        return query
+    elif comparision_method == "NOT_EQUALS":
+        return ~query
+    logger.error(f"Country filter query does not support {comparision_method} type")
+    raise ValidationError(f"Country filter query does not support {comparision_method} type")
+
+
+def country_query(comparision_method, args):
+    return country_generic_query(comparision_method, args, "country")
+
+
+def country_origin_query(comparision_method, args):
+    return country_generic_query(comparision_method, args, "country_origin")
+
+
+def admin_area1_query(comparision_method, args):
+    from django.db.models import Q
+
+    return Q(Q(admin_area_new__p_code=args[0]) & Q(admin_area_new__area_type__area_level=1)) | Q(
+        Q(admin_area_new__parent__p_code=args[0]) & Q(admin_area_new__parent__area_type__area_level=1)
+    )
+
+
+def registration_data_import_query(comparison_method, args):
+    from django.db.models import Q
+
+    return Q(registration_data_import__pk__in=args)

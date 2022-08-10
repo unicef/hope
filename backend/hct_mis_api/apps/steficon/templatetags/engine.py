@@ -141,12 +141,11 @@ def pygmentize(code):
 
 @register.filter
 def diff(commit, panels="before,after"):
-    left, right = panels.split(",")
     rule = commit.rule
     left_panel, right_panel = [], []
     right_label = "No data"
     if panels == "before,after":
-        left_label = f"No Data (First Commit"
+        left_label = "No Data (First Commit"
         if "definition" in commit.before:
             left_label = f"Version before commit ({commit.prev.version})"
             left_panel = commit.before["definition"].split("\n")
@@ -154,7 +153,7 @@ def diff(commit, panels="before,after"):
         right_label = f"Version after commit ({commit.version})"
         right_panel = commit.after["definition"].split("\n")
     elif panels == "after,current":
-        left_label = f"Version  commit ({commit.version})"
+        left_label = f"Version commit ({commit.version})"
         left_panel = commit.after["definition"].split("\n")
 
         right_label = f"Version current ({rule.version})"

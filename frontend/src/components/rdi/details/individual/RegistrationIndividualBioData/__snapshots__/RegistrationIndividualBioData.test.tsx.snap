@@ -417,7 +417,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             Phone Number
           </span>
           <div>
-            0048503123555
+            Invalid Phone Number
           </div>
         </div>
       </div>

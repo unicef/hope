@@ -1,6 +1,4 @@
 import logging
-import graphene
-
 from enum import Enum
 from typing import Union
 
@@ -8,12 +6,14 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.account.schema import UserNode
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.schema import BusinessAreaNode
@@ -61,8 +61,9 @@ from hct_mis_api.apps.grievance.mutations_extras.system_tickets import (
     close_needs_adjudication_ticket,
     close_system_flagging_ticket,
 )
-from hct_mis_api.apps.grievance.mutations_extras.ticket_payment_verification_details import \
-    update_ticket_payment_verification_details_extras
+from hct_mis_api.apps.grievance.mutations_extras.ticket_payment_verification_details import (
+    update_ticket_payment_verification_details_extras,
+)
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     remove_parsed_data_fields,
     verify_required_arguments,
@@ -301,16 +302,13 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "business_area", "assigned_to"))
         admin = input.pop("admin", None)
         admin_object = None
-        admin_object_new = None
         if admin:
-            admin_object = get_object_or_404(AdminArea, p_code=admin)
-            admin_object_new = get_object_or_404(Area, p_code=admin)
+            admin_object = get_object_or_404(Area, p_code=admin)
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
         grievance_ticket = GrievanceTicket.objects.create(
             **input,
             admin2=admin_object,
-            admin2_new=admin_object_new,
             business_area=business_area,
             created_by=user,
             user_modified=timezone.now(),
@@ -451,16 +449,16 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.CATEGORY_REFERRAL: update_referral_extras,
             GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK: update_positive_feedback_extras,
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: update_negative_feedback_extras,
-            GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: update_ticket_payment_verification_details_extras
+            GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: update_ticket_payment_verification_details_extras,
         }
         update_extra_method = update_extra_methods.get(grievance_ticket.category)
         if update_extra_method:
             grievance_ticket = update_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
 
-        if grievance_ticket.category in [
+        if grievance_ticket.category in (
             GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
             GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-        ]:
+        ):
             ticket_details = grievance_ticket.ticket_details
 
             if ticket_details.household and ticket_details.household != household:
@@ -514,8 +512,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 
         admin = input.pop("admin", None)
         if admin:
-            grievance_ticket.admin2 = get_object_or_404(AdminArea, p_code=admin)
-            grievance_ticket.admin2_new = get_object_or_404(Area, p_code=admin)
+            grievance_ticket.admin2 = get_object_or_404(Area, p_code=admin)
         grievance_ticket.user_modified = timezone.now()
         grievance_ticket.save()
 
@@ -810,6 +807,9 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_identities_to_create = graphene.List(graphene.Int)
         approved_identities_to_edit = graphene.List(graphene.Int)
         approved_identities_to_remove = graphene.List(graphene.Int)
+        approved_payment_channels_to_create = graphene.List(graphene.Int)
+        approved_payment_channels_to_edit = graphene.List(graphene.Int)
+        approved_payment_channels_to_remove = graphene.List(graphene.Int)
         flex_fields_approve_data = graphene.JSONString()
         version = BigInt(required=False)
 
@@ -828,6 +828,9 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_identities_to_create,
         approved_identities_to_edit,
         approved_identities_to_remove,
+        approved_payment_channels_to_create,
+        approved_payment_channels_to_edit,
+        approved_payment_channels_to_remove,
         flex_fields_approve_data,
         **kwargs,
     ):
@@ -858,6 +861,9 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
             "identities": approved_identities_to_create,
             "identities_to_remove": approved_identities_to_remove,
             "identities_to_edit": approved_identities_to_edit,
+            "payment_channels": approved_payment_channels_to_create,
+            "payment_channels_to_remove": approved_payment_channels_to_remove,
+            "payment_channels_to_edit": approved_payment_channels_to_edit,
         }
 
         for field_name, item in individual_data.items():
@@ -1001,13 +1007,14 @@ class ReassignRoleMutation(graphene.Mutation):
         household_id = graphene.Argument(graphene.ID, required=True)
         household_version = BigInt(required=False)
         individual_id = graphene.Argument(graphene.ID, required=True)
+        new_individual_id = graphene.Argument(graphene.ID, required=False)
         individual_version = BigInt(required=False)
         role = graphene.String(required=True)
         version = BigInt(required=False)
 
     @classmethod
     def verify_role_choices(cls, role):
-        if role not in [ROLE_PRIMARY, ROLE_ALTERNATE, HEAD]:
+        if role not in (ROLE_PRIMARY, ROLE_ALTERNATE, HEAD):
             logger.error("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
             raise GraphQLError("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
@@ -1052,7 +1059,10 @@ class ReassignRoleMutation(graphene.Mutation):
 
         ticket_details = grievance_ticket.ticket_details
         if grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION:
-            ticket_individual = ticket_details.selected_individual
+            if ticket_details.is_multiple_duplicates_version:
+                ticket_individual = individual
+            else:
+                ticket_individual = ticket_details.selected_individual
         elif grievance_ticket.category == GrievanceTicket.CATEGORY_SYSTEM_FLAGGING:
             ticket_individual = ticket_details.golden_records_individual
         else:
@@ -1075,6 +1085,10 @@ class ReassignRoleMutation(graphene.Mutation):
             "household": household_id,
             "individual": individual_id,
         }
+
+        if getattr(ticket_details, "is_multiple_duplicates_version", False):
+            new_individual_id = kwargs.get("new_individual_id")
+            ticket_details.role_reassign_data[role_data_key]["new_individual"] = new_individual_id
         ticket_details.save()
 
         return cls(household=household, individual=individual)

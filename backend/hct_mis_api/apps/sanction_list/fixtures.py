@@ -22,4 +22,4 @@ class SanctionListIndividualFactory(factory.DjangoModelFactory):
     city = factory.Faker("sentence", nb_words=2)
     state_province = factory.Faker("sentence", nb_words=2)
     address_note = factory.Faker("sentence", nb_words=2)
-    country_of_birth = Country(code="IN")
+    country_of_birth = None

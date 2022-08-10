@@ -68,6 +68,8 @@ export const importedHouseholdMinimal = gql`
     flexFields
     deviceid
     start
+    koboAssetId
+    rowId
     firstRegistrationDate
     lastRegistrationDate
     hasDuplicates
@@ -78,7 +80,6 @@ export const importedHouseholdMinimal = gql`
 export const importedHouseholdDetailed = gql`
   fragment importedHouseholdDetailed on ImportedHouseholdNode {
     ...importedHouseholdMinimal
-
     residenceStatus
     country
     countryOrigin
@@ -192,5 +193,7 @@ export const importedIndividualDetailed = gql`
     }
     phoneNo
     phoneNoAlternative
+    phoneNoValid
+    phoneNoAlternativeValid
   }
 `;

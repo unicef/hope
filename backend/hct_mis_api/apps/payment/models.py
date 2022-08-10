@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField
@@ -7,11 +8,12 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 from model_utils import Choices
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
 class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
@@ -160,7 +162,7 @@ class ServiceProvider(TimeStampedUUIDModel):
         return self.full_name
 
 
-class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
+class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -175,7 +177,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
             "confidence_interval",
             "margin_of_error",
             "rapid_pro_flow_id",
-            "rapid_pro_flow_start_uuid",
+            "rapid_pro_flow_start_uuids",
             "age_filter",
             "excluded_admin_areas_filter",
             "sex_filter",
@@ -186,6 +188,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_PENDING = "PENDING"
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
+    STATUS_INVALID = "INVALID"
     SAMPLING_FULL_LIST = "FULL_LIST"
     SAMPLING_RANDOM = "RANDOM"
     VERIFICATION_CHANNEL_RAPIDPRO = "RAPIDPRO"
@@ -195,6 +198,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         (STATUS_ACTIVE, "Active"),
         (STATUS_FINISHED, "Finished"),
         (STATUS_PENDING, "Pending"),
+        (STATUS_INVALID, "Invalid"),
     )
     SAMPLING_CHOICES = (
         (SAMPLING_FULL_LIST, "Full list"),
@@ -221,13 +225,14 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     confidence_interval = models.FloatField(null=True)
     margin_of_error = models.FloatField(null=True)
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
-    rapid_pro_flow_start_uuid = models.CharField(max_length=255, blank=True)
+    rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
     age_filter = JSONField(null=True)
     excluded_admin_areas_filter = JSONField(null=True)
     sex_filter = models.CharField(null=True, max_length=10)
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
-    unicef_id = models.CharField(blank=True, max_length=250)
+    xlsx_file_exporting = models.BooleanField(default=False)
+    xlsx_file_imported = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("created_at",)
@@ -235,6 +240,29 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     @property
     def business_area(self):
         return self.cash_plan.business_area
+
+    @property
+    def has_xlsx_cash_plan_payment_verification_file(self):
+        if all(
+            [
+                self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
+                getattr(self, "xlsx_cashplan_payment_verification_file", None),
+            ]
+        ):
+            return True
+        return False
+
+    @property
+    def xlsx_cash_plan_payment_verification_file_link(self):
+        if self.has_xlsx_cash_plan_payment_verification_file:
+            return self.xlsx_cashplan_payment_verification_file.file.url
+        return None
+
+    @property
+    def xlsx_cash_plan_payment_verification_file_was_downloaded(self):
+        if self.has_xlsx_cash_plan_payment_verification_file:
+            return self.xlsx_cashplan_payment_verification_file.was_downloaded
+        return False
 
     def set_active(self):
         self.status = CashPlanPaymentVerification.STATUS_ACTIVE
@@ -247,7 +275,16 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         self.not_received_count = None
         self.received_with_problems_count = None
         self.activation_date = None
-        self.rapid_pro_flow_start_uuid = ""
+        self.rapid_pro_flow_start_uuids = []
+
+
+class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
+    file = models.FileField()
+    cash_plan_payment_verification = models.OneToOneField(
+        CashPlanPaymentVerification, related_name="xlsx_cashplan_payment_verification_file", on_delete=models.CASCADE
+    )
+    was_downloaded = models.BooleanField(default=False)
+    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
 
 
 def build_summary(cash_plan):

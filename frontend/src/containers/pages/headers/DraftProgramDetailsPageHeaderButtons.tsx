@@ -1,13 +1,9 @@
-import styled from 'styled-components';
+import { Box } from '@material-ui/core';
 import React from 'react';
+import { ProgramNode } from '../../../__generated__/graphql';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
-import { ProgramNode } from '../../../__generated__/graphql';
 import { EditProgram } from '../../dialogs/programs/EditProgram';
-
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
 
 export interface DraftProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
@@ -15,29 +11,29 @@ export interface DraftProgramDetailsPageHeaderPropTypes {
   canEdit: boolean;
   canActivate: boolean;
 }
-export function DraftProgramDetailsPageHeaderButtons({
+export const DraftProgramDetailsPageHeaderButtons = ({
   program,
   canRemove,
   canEdit,
   canActivate,
-}: DraftProgramDetailsPageHeaderPropTypes): React.ReactElement {
+}: DraftProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canRemove && (
-        <ButtonContainer>
+        <Box m={2}>
           <DeleteProgram program={program} />
-        </ButtonContainer>
+        </Box>
       )}
       {canEdit && (
-        <ButtonContainer>
+        <Box m={2}>
           <EditProgram program={program} />
-        </ButtonContainer>
+        </Box>
       )}
       {canActivate && (
-        <ButtonContainer>
+        <Box m={2}>
           <ActivateProgram program={program} />
-        </ButtonContainer>
+        </Box>
       )}
-    </div>
+    </Box>
   );
-}
+};

@@ -3,8 +3,10 @@ import random
 import factory
 from factory import enums, fuzzy
 from pytz import utc
+from faker import Faker
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
     MARITAL_STATUS_CHOICE,
@@ -26,6 +28,8 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+
+faker = Faker()
 
 
 def flex_field_households(o):
@@ -80,18 +84,18 @@ class HouseholdFactory(factory.DjangoModelFactory):
         RESIDENCE_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    country_origin = factory.Faker("country_code")
-    country = factory.Faker("country_code")
+    country_origin = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
     size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
     registration_data_import = factory.SubFactory(
         RegistrationDataImportFactory,
     )
-    first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
-    last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     flex_fields = factory.LazyAttribute(flex_field_households)
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
-    start = factory.Faker("date_this_month", before_today=True, after_today=False)
+    start = factory.Faker("date_time_this_month", before_now=True, after_now=False, tzinfo=utc)
     deviceid = factory.Faker("md5")
     name_enumerator = factory.Faker("name")
     org_enumerator = factory.fuzzy.FuzzyChoice(
@@ -144,15 +148,15 @@ class IndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.Faker("phone_number")
+    phone_no = factory.LazyAttribute(lambda _: f"{faker.country_calling_code()} {faker.msisdn()[3:]}")
     phone_no_alternative = ""
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
     disability = NOT_DISABLED
     flex_fields = factory.LazyAttribute(flex_field_individual)
-    first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
-    last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
 
 
@@ -162,7 +166,7 @@ class BankAccountInfoFactory(factory.DjangoModelFactory):
 
     individual = factory.SubFactory(IndividualFactory)
     bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
-    bank_account_number = random.randint(10 ** 26, 10 ** 27 - 1)
+    bank_account_number = random.randint(10**26, 10**27 - 1)
 
 
 class DocumentFactory(factory.DjangoModelFactory):

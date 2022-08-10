@@ -2,7 +2,6 @@ import json
 import logging
 import re
 from datetime import date
-from typing import List
 
 from django.contrib.gis.db.models import PointField
 from django.core.validators import (
@@ -35,14 +34,16 @@ from hct_mis_api.apps.household.models import (
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
+    ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     UNIQUE,
     WORK_STATUS_CHOICE,
     YES_NO_CHOICE,
 )
-from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
+from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
@@ -53,6 +54,14 @@ DEDUPLICATION_BATCH_STATUS_CHOICE = (
     (DUPLICATE_IN_BATCH, "Duplicate in batch"),
     (UNIQUE_IN_BATCH, "Unique in batch"),
     (NOT_PROCESSED, "Not Processed"),
+)
+
+# using in Diia models
+MALE = "M"
+FEMALE = "F"
+DIIA_SEX_CHOICE = (
+    (MALE, _("Male")),
+    (FEMALE, _("Female")),
 )
 
 logger = logging.getLogger(__name__)
@@ -249,6 +258,19 @@ class ImportedIndividual(TimeStampedUUIDModel):
     def business_area(self):
         return self.registration_data_import.business_area
 
+    @property
+    def phone_no_valid(self):
+        return is_right_phone_number_format(str(self.phone_no))
+
+    @property
+    def phone_no_alternative_valid(self):
+        return is_right_phone_number_format(str(self.phone_no_alternative))
+
+    @property
+    def role(self):
+        role = self.households_and_roles.first()
+        return role.role if role is not None else ROLE_NO_ROLE
+
 
 class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
     individual = models.ForeignKey(
@@ -291,6 +313,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         null=True,
     )
     import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
+    # TODO: Add business_area FK field instead
     business_area_slug = models.CharField(max_length=250, blank=True)
 
     class Meta:
@@ -308,10 +331,12 @@ class ImportData(TimeStampedUUIDModel):
     XLSX = "XLSX"
     JSON = "JSON"
     FLEX_REGISTRATION = "FLEX"
+    DIIA = "DIIA"
     DATA_TYPE_CHOICES = (
         (XLSX, _("XLSX File")),
         (JSON, _("JSON File")),
         (FLEX_REGISTRATION, _("Flex Registration")),
+        (DIIA, _("DIIA")),
     )
     STATUS_PENDING = "PENDING"
     STATUS_RUNNING = "RUNNING"
@@ -411,7 +436,7 @@ class ImportedIndividualIdentity(models.Model):
     )
 
     class Meta:
-        verbose_name_plural = 'Imported Individual Identities'
+        verbose_name_plural = "Imported Individual Identities"
 
     def __str__(self):
         return f"{self.agency} {self.individual} {self.document_number}"
@@ -480,67 +505,11 @@ class Record(models.Model):
         self.status = self.STATUS_IMPORTED
         self.save()
 
-    @classmethod
-    def extract(cls, records_ids: List[int], raise_exception=False):
-        def _filter(d):
-            if isinstance(d, list):
-                return [_filter(v) for v in d]
-            elif isinstance(d, dict):
-                return {k: _filter(v) for k, v in d.items()}
-            elif is_image(d):
-                return "::image::"
-            else:
-                return d
-
-        for record_id in records_ids:
-            record = cls.objects.get(pk=record_id)
-            try:
-                extracted = json.loads(record.storage.tobytes().decode())
-                record.data = _filter(extracted)
-
-                individuals = record.data.get("individuals", {})
-                collectors = [individual for individual in individuals if individual.get("role_i_c", "n") == "y"]
-                heads = [individual for individual in individuals if individual.get("relationship_i_c") == "head"]
-
-                record.data["w_counters"] = {
-                    "individuals_num": len(individuals),
-                    "collectors_num": len(collectors),
-                    "head": len(heads),
-                    "valid_phones": len([individual for individual in individuals if individual.get("phone_no_i_c")]),
-                    "valid_taxid": len(
-                        [head for head in heads if head.get("tax_id_no_i_c") and head.get("bank_account")]
-                    ),
-                    "valid_payment": len(
-                        [
-                            individual
-                            for individual in individuals
-                            if individual.get("tax_id_no_i_c") and individual.get("bank_account")
-                        ]
-                    ),
-                    "birth_certificate": len(
-                        [
-                            individual
-                            for individual in individuals
-                            if individual.get("birth_certificate_picture") == "::image::"
-                        ]
-                    ),
-                    "disability_certificate_match": (
-                        len(
-                            [
-                                individual
-                                for individual in individuals
-                                if individual.get("disability_certificate_picture") == "::image::"
-                            ]
-                        )
-                        == len([individual for individual in individuals if individual.get("disability_i_c") == "y"])
-                    ),
-                    "collector_bank_account": len([individual.get("bank_account") for individual in collectors]) > 0,
-                }
-                record.save()
-            except Exception as e:
-                if raise_exception:
-                    raise
-                logger.exception(e)
+    def get_data(self):
+        if self.storage:
+            return json.loads(self.storage.tobytes().decode())
+        files = json.loads(self.files.tobytes().decode())
+        return combine_collections(files, self.fields)
 
 
 class ImportedBankAccountInfo(TimeStampedUUIDModel):
@@ -559,65 +528,105 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
         super().save(*args, **kwargs)
 
 
-class DiiaHousehold(TimeStampedUUIDModel):
+class DiiaHousehold(models.Model):
+    STATUS_TO_IMPORT = None
+    STATUS_IMPORTED = "IMPORTED"
+    STATUS_ERROR = "ERROR"
+    STATUS_IGNORED = "IGNORED"
+    STATUS_TAX_ID_ERROR = "TAX_ID_ERROR"
+
+    STATUSES_CHOICES = (
+        (STATUS_TO_IMPORT, "To import"),
+        (STATUS_IMPORTED, "Imported"),
+        (STATUS_ERROR, "Error"),
+        (STATUS_TAX_ID_ERROR, "Tax ID Error"),
+    )
+
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
     vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True, null=True)
     vpo_doc_id = models.CharField(max_length=128, blank=True, null=True)
-    vpo_doc_date = models.DateField(blank=True, null=True)
+    vpo_doc_date = models.CharField(max_length=64, blank=True, null=True)
     address = models.CharField(max_length=1024, blank=True, null=True)
     consent = models.BooleanField(null=True)
-    source_data = models.JSONField(default=dict, blank=True, null=True)
+    source_data = models.TextField(default="", blank=True, null=True)
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="diia_households",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
-        blank=True
+        blank=True,
     )
     imported_household = models.ForeignKey(
-        "ImportedHousehold",
-        on_delete=models.CASCADE,
-        related_name="diia_households",
-        null=True,
-        blank=True
+        "ImportedHousehold", on_delete=models.SET_NULL, related_name="diia_households", null=True, blank=True
     )
+    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
 
     def __str__(self):
         return f"Diia Household ID: {self.id}"
 
 
-class DiiaIndividual(TimeStampedUUIDModel):
+DIIA_DISABLED = "True"
+DIIA_NOT_DISABLED = "False"
+
+DIIA_DISABILITY_CHOICES = (
+    (
+        DIIA_DISABLED,
+        "disabled",
+    ),
+    (
+        DIIA_NOT_DISABLED,
+        "not disabled",
+    ),
+)
+
+
+DIIA_RELATIONSHIP_HEAD = "HEAD"
+DIIA_RELATIONSHIP_SON = "SON"
+DIIA_RELATIONSHIP_DAUGHTER = "DAUGHTER"
+DIIA_RELATIONSHIP_WIFE = "WIFE"
+DIIA_RELATIONSHIP_HUSBAND = "HUSBAND"
+DIIA_RELATIONSHIP_RELATIONSHIP_UNKNOWN = None
+
+DIIA_RELATIONSHIP_CHOICE = (
+    (DIIA_RELATIONSHIP_RELATIONSHIP_UNKNOWN, "Unknown"),
+    (DIIA_RELATIONSHIP_HEAD, "Head of household (self)"),
+    (DIIA_RELATIONSHIP_SON, "Son"),
+    (DIIA_RELATIONSHIP_DAUGHTER, "Daughter"),
+    (DIIA_RELATIONSHIP_HUSBAND, "Husband"),
+    (DIIA_RELATIONSHIP_WIFE, "Wife"),
+)
+
+
+class DiiaIndividual(models.Model):
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
-    individual_id = models.CharField(max_length=128, blank=True, null=True)  # RNOKPP
+    individual_id = models.CharField(max_length=128, blank=True, null=True)  # RNOKPP - ukrainian tax_id
     last_name = models.CharField(max_length=85, blank=True, null=True)
     first_name = models.CharField(max_length=85, blank=True, null=True)
     second_name = models.CharField(max_length=85, blank=True, null=True)
-    relationship = models.CharField(max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, null=True)
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE, null=True)
-    birth_date = models.DateField(null=True)
+    relationship = models.CharField(max_length=255, blank=True, choices=DIIA_RELATIONSHIP_CHOICE, null=True)
+    sex = models.CharField(max_length=255, choices=DIIA_SEX_CHOICE, null=True, blank=True)
+    birth_date = models.CharField(max_length=64, blank=True, null=True)
     birth_doc = models.CharField(max_length=128, blank=True, null=True)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, null=True, blank=True)
-    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, null=True, blank=True)
+    disability = models.CharField(
+        max_length=20, choices=DIIA_DISABILITY_CHOICES, default=NOT_DISABLED, null=True, blank=True
+    )
     iban = models.CharField(max_length=255, blank=True, null=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
     doc_type = models.CharField(max_length=128, blank=True, null=True)
     doc_serie = models.CharField(max_length=64, blank=True, null=True)
     doc_number = models.CharField(max_length=64, blank=True, null=True)
-    doc_issue_date = models.DateField(null=True, blank=True)
+    doc_issue_date = models.CharField(max_length=64, blank=True, null=True)
 
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="diia_individuals",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
-        blank=True
+        blank=True,
     )
     imported_individual = models.ForeignKey(
-        "ImportedIndividual",
-        on_delete=models.CASCADE,
-        related_name="diia_individuals",
-        null=True,
-        blank=True
+        "ImportedIndividual", on_delete=models.SET_NULL, related_name="diia_individuals", null=True, blank=True
     )
 
     @property

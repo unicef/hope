@@ -1,12 +1,9 @@
 from operator import itemgetter
 
-from django.conf import settings
 from django.test import TestCase
 
-from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
-from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
@@ -14,6 +11,7 @@ from hct_mis_api.apps.registration_datahub.validators import (
 
 class TestKoboSaveValidatorsMethods(TestCase):
     databases = ("default", "registration_datahub")
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
     VALID_JSON = [
         {
             "_notes": [],
@@ -595,12 +593,6 @@ class TestKoboSaveValidatorsMethods(TestCase):
             self.assertEqual(result, data["expected"])
 
     def test_validate_everything(self):
-        # TODO Fix admin choices
-        fields_admin1 = [x for x in CORE_FIELDS_ATTRIBUTES if x["name"] == "admin1"]
-        fields_admin1[0]["choices"] = Area.get_admin_areas_as_choices(1)
-        fields_admin2 = [x for x in CORE_FIELDS_ATTRIBUTES if x["name"] == "admin2"]
-        fields_admin2[0]["choices"] = Area.get_admin_areas_as_choices(2)
-        self.maxDiff = None
         validator = KoboProjectImportDataInstanceValidator()
         business_area = BusinessArea.objects.first()
 
@@ -611,14 +603,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
         result.sort(key=itemgetter("header"))
         expected = [
-            {
-                "header": "admin1_h_c",
-                "message": "Invalid choice SO25 for field admin1_h_c"
-            },
-            {
-                "header": "admin2_h_c",
-                "message": "Invalid choice SO2502 for field admin2_h_c"
-            },
+            {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
+            {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
             {
                 "header": "birth_certificate_no_i_c",
                 "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
@@ -627,13 +613,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "header": "birth_certificate_no_i_c",
                 "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
             },
-            {
-                "header": "role_i_c",
-                "message": "Only one person can be a primary collector"
-            },
-            {
-                "header": "size_h_c", "message":
-                "Missing household required field size_h_c"
-            },
+            {"header": "role_i_c", "message": "Only one person can be a primary collector"},
+            {"header": "size_h_c", "message": "Missing household required field size_h_c"},
         ]
         self.assertEqual(result, expected)

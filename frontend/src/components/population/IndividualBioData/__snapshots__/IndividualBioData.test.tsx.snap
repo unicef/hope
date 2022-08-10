@@ -3,7 +3,7 @@
 exports[`components/population/IndividualBioData should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-dnqmqq fafuoy MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root sc-cSHVUG gnjeDy MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
       class="sc-bxivhb jsIVNl"
@@ -255,7 +255,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
       >
         <div
-          class="sc-iwsKbI AgGOt"
+          class="sc-kAzzGY ZtRWH"
         />
       </div>
       <div
@@ -382,7 +382,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
       >
         <div
-          class="sc-iwsKbI AgGOt"
+          class="sc-kAzzGY ZtRWH"
         />
       </div>
       <div
@@ -423,7 +423,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
       >
         <div
-          class="sc-iwsKbI AgGOt"
+          class="sc-kAzzGY ZtRWH"
         />
       </div>
       <div
@@ -437,7 +437,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             Phone Number
           </span>
           <div>
-            0048734123423
+            Invalid Phone Number
           </div>
         </div>
       </div>
@@ -460,7 +460,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
       >
         <div
-          class="sc-iwsKbI AgGOt"
+          class="sc-kAzzGY ZtRWH"
         />
       </div>
       <div
@@ -479,6 +479,28 @@ exports[`components/population/IndividualBioData should render 1`] = `
             >
               8 Feb 2022
             </time>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+      >
+        <div>
+          <span
+            class="sc-bwzfXH eoWrid"
+            color="textSecondary"
+          >
+            Linked Grievances
+          </span>
+          <div>
+            <span
+              class="sc-htpNat cwQQYq"
+              color="textSecondary"
+            >
+              <span>
+                -
+              </span>
+            </span>
           </div>
         </div>
       </div>

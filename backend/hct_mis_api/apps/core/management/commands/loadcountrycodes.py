@@ -4,6 +4,7 @@ from pathlib import Path
 from django.core.management import BaseCommand
 
 from hct_mis_api.apps.core.models import CountryCodeMap
+from hct_mis_api.apps.geo.models import Country
 
 logger = logging.getLogger(__name__)
 
@@ -26,4 +27,5 @@ class Command(BaseCommand):
         with Path(options["file"]).open() as f:
             for line in f.readlines():
                 iso_code, ca_code = line.split()
-                CountryCodeMap.objects.get_or_create(country=iso_code, defaults={"ca_code": ca_code})
+                country = Country.objects.get(iso_code3=iso_code)
+                CountryCodeMap.objects.get_or_create(country=country, defaults={"ca_code": ca_code})
