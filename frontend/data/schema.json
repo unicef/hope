@@ -4159,26 +4159,6 @@
                 "defaultValue": null
               },
               {
-                "name": "countryOrigin",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "countryOrigin_Startswith",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "address",
                 "description": null,
                 "type": {
@@ -4253,7 +4233,7 @@
                 "defaultValue": null
               },
               {
-                "name": "adminAreaNew",
+                "name": "adminArea",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -4351,6 +4331,16 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "countryOrigin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -4520,16 +4510,6 @@
               },
               {
                 "name": "household_AdminArea",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "household_AdminAreaNew",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -7955,18 +7935,6 @@
           },
           {
             "name": "admin2",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "AreaNode",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "admin2New",
             "description": null,
             "args": [],
             "type": {
@@ -13746,7 +13714,7 @@
             "deprecationReason": null
           },
           {
-            "name": "adminAreasNew",
+            "name": "adminAreas",
             "description": null,
             "args": [
               {
@@ -15009,18 +14977,6 @@
           },
           {
             "name": "adminArea",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "AreaNode",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "adminAreaNew",
             "description": null,
             "args": [],
             "type": {
@@ -29601,83 +29557,6 @@
               "kind": "OBJECT",
               "name": "AreaNodeConnection",
               "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "adminAreaNew",
-            "description": null,
-            "args": [
-              {
-                "name": "offset",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "before",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "after",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "first",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "last",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "name",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "AreaNodeConnection",
-                "ofType": null
-              }
             },
             "isDeprecated": false,
             "deprecationReason": null
