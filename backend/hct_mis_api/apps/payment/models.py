@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import Optional
 
 from django.conf import settings
+from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.postgres.fields import CICharField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
@@ -21,6 +22,8 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 
+from hct_mis_api.apps.core.models import XLSXFileTemp
+from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -209,6 +212,12 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
+        STEFICON_WAIT = "STEFICON_WAIT", "Waiting for Rule Engine"
+        STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
+        STEFICON_COMPLETED = "STEFICON_COMPLETED", "Rule Engine Completed"
+        STEFICON_ERROR = "STEFICON_ERROR", "Rule Engine Errored"
+        XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
+        XLSX_IMPORTING = "XLSX_IMPORTING", "Importing XLSX file"
 
     class Action(models.TextChoices):
         LOCK = "LOCK", "Lock"
@@ -240,6 +249,15 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     male_adults_count = models.PositiveSmallIntegerField(default=0)
     total_households_count = models.PositiveSmallIntegerField(default=0)
     total_individuals_count = models.PositiveSmallIntegerField(default=0)
+    xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
+    steficon_rule = models.ForeignKey(
+        RuleCommit,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
+        blank=True,
+    )
+    steficon_applied_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -247,7 +265,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
-        source=Status.OPEN,
+        source=[Status.OPEN, Status.XLSX_EXPORTING, Status.XLSX_IMPORTING],
         target=Status.LOCKED,
     )
     def status_lock(self):
@@ -299,6 +317,22 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         target=Status.ACCEPTED,
     )
     def status_mark_as_reviewed(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.LOCKED,
+        target=Status.XLSX_EXPORTING,
+    )
+    def status_exporting(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.LOCKED,
+        target=Status.XLSX_IMPORTING,
+    )
+    def status_importing(self):
         self.status_date = timezone.now()
 
     @property
@@ -371,6 +405,27 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
                 "total_undelivered_quantity_usd",
             ]
         )
+
+    def get_payment_plan_payment_list_xlsx_file_obj(self):
+        file_obj = XLSXFileTemp.objects.filter(
+            object_id=self.pk,
+            content_type=get_content_type_for_model(self),
+        ).first()
+        return file_obj
+
+    @property
+    def has_payment_plan_payment_list_xlsx_file(self):
+        if self.get_payment_plan_payment_list_xlsx_file_obj():
+            return True
+        else:
+            return False
+
+    @property
+    def xlsx_payment_plan_payment_list_file_link(self):
+        file_obj = self.get_payment_plan_payment_list_xlsx_file_obj()
+        if file_obj:
+            return file_obj.file.url
+        return None
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
