@@ -3,6 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PaperContainer } from './PaperContainer';
 import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';
@@ -17,7 +18,7 @@ export function TargetPopulationCore({
   id,
   status,
   targetPopulation,
-  canViewHouseholdDetails,
+  permissions,
 }): React.ReactElement {
   const { t } = useTranslation();
   if (!candidateList) return null;
@@ -61,7 +62,10 @@ export function TargetPopulationCore({
         <TargetingHouseholds
           id={id}
           status={status}
-          canViewDetails={canViewHouseholdDetails}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            permissions,
+          )}
         />
       ) : (
         <PaperContainer>
@@ -71,7 +75,9 @@ export function TargetPopulationCore({
           <Label>{t('Add targeting criteria to see results.')}</Label>
         </PaperContainer>
       )}
-      <UniversalActivityLogTable objectId={targetPopulation.id} />
+      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+        <UniversalActivityLogTable objectId={targetPopulation.id} />
+      )}
     </>
   );
 }
