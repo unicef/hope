@@ -3,6 +3,7 @@ import {
   Button,
   FormHelperText,
   Grid,
+  GridSize,
   Step,
   StepLabel,
   Stepper,
@@ -31,7 +32,7 @@ import {
 } from '../../../utils/constants';
 import {
   isInvalid,
-  renderUserName,
+  reduceChoices,
   thingForSpecificGrievanceType,
 } from '../../../utils/utils';
 import {
@@ -50,13 +51,16 @@ import { AddIndividualDataChange } from '../../../components/grievances/AddIndiv
 import { Consent } from '../../../components/grievances/Consent';
 import { EditHouseholdDataChange } from '../../../components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
 import { EditIndividualDataChange } from '../../../components/grievances/EditIndividualDataChange/EditIndividualDataChange';
-import { LookUpSection } from '../../../components/grievances/LookUpSection';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
 import { TicketsAlreadyExist } from '../../../components/grievances/TicketsAlreadyExist';
 import { prepareVariables } from '../../../components/grievances/utils/createGrievanceUtils';
-import { validate } from '../../../components/grievances/utils/validateGrievance';
-import { validationSchema } from '../../../components/grievances/utils/validationSchema';
+import { validateUsingSteps } from '../../../components/grievances/utils/validateGrievance';
+import { validationSchemaWithSteps } from '../../../components/grievances/utils/validationSchema';
 import { LoadingButton } from '../../../components/core/LoadingButton';
+import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
+import { LabelizedField } from '../../../components/core/LabelizedField';
+import { OverviewContainer } from '../../../components/core/OverviewContainer';
+import { ContentLink } from '../../../components/core/ContentLink';
 
 const steps = [
   'Category Selection',
@@ -112,7 +116,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
 
   const initialValues = {
     description: '',
-    assignedTo: '',
     category: null,
     language: '',
     consent: false,
@@ -132,20 +135,26 @@ export const CreateGrievancePage = (): React.ReactElement => {
     variables: { businessArea, first: 1000 },
   });
 
-  const mappedPriorities = Array.from(Array(3).keys()).map((i) => ({
-    name: (i + 1).toString(),
-    value: i + 1,
-  }));
-
-  const mappedUrgencies = Array.from(Array(3).keys()).map((i) => ({
-    name: (i + 1).toString(),
-    value: i + 1,
-  }));
-
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
+
+  const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
+  const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
+  const categoryChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+
+  const mappedPriorities = Array.from(Array(3).keys()).map((i) => ({
+    name: priorityChoicesData[i]?.name,
+    value: i + 1,
+  }));
+
+  const mappedUrgencies = Array.from(Array(3).keys()).map((i) => ({
+    name: urgencyChoicesData[i]?.name,
+    value: i + 1,
+  }));
 
   const [mutate, { loading }] = useCreateGrievanceMutation();
   const {
@@ -197,14 +206,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance-and-feedback/`,
+      to: `/${businessArea}/grievance-and-feedback/tickets/`,
     },
   ];
-
-  const mappedIndividuals = userData.allUsers.edges.map((edge) => ({
-    name: renderUserName(edge.node),
-    value: edge.node.id,
-  }));
 
   const dataChangeErrors = (errors, touched): ReactElement[] =>
     [
@@ -255,37 +259,44 @@ export const CreateGrievancePage = (): React.ReactElement => {
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
-        try {
-          const response = await mutate(prepareVariables(businessArea, values));
-          if (values.selectedPaymentRecords.length > 1) {
-            showMessage(
-              `${values.selectedPaymentRecords.length} ${t(
-                'Grievance Tickets created',
-              )}.`,
-              {
-                pathname: `/${businessArea}/grievance-and-feedback`,
-                historyMethod: 'push',
-              },
+        if (activeStep === steps.length - 1) {
+          try {
+            const response = await mutate(
+              prepareVariables(businessArea, values),
             );
-          } else {
-            showMessage(t('Grievance Ticket created.'), {
-              pathname: `/${businessArea}/grievance-and-feedback/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
-              historyMethod: 'push',
-            });
+            if (values.selectedPaymentRecords.length > 1) {
+              showMessage(
+                `${values.selectedPaymentRecords.length} ${t(
+                  'Grievance Tickets created',
+                )}.`,
+                {
+                  pathname: `/${businessArea}/grievance-and-feedback`,
+                  historyMethod: 'push',
+                },
+              );
+            } else {
+              showMessage(t('Grievance Ticket created.'), {
+                pathname: `/${businessArea}/grievance-and-feedback/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
+                historyMethod: 'push',
+              });
+            }
+          } catch (e) {
+            e.graphQLErrors.map((x) => showMessage(x.message));
           }
-        } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+        } else {
+          handleNext();
         }
       }}
       validate={(values) =>
-        validate(
+        validateUsingSteps(
           values,
           allAddIndividualFieldsData,
           individualFieldsDict,
           householdFieldsDict,
+          activeStep,
         )
       }
-      validationSchema={validationSchema}
+      validationSchema={validationSchemaWithSteps(activeStep)}
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
         const DatachangeComponent = thingForSpecificGrievanceType(
@@ -379,14 +390,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                       {activeStep === 1 && (
                         <BoxWithBorders>
                           <Box display='flex' flexDirection='column'>
-                            <Consent />
-                            <Field
-                              name='consent'
-                              label={t('Received Consent*')}
-                              color='primary'
-                              component={FormikCheckboxField}
-                            />
-                            <LookUpSection
+                            <LookUpHouseholdIndividualSelection
                               values={values}
                               onValueChange={setFieldValue}
                               errors={errors}
@@ -396,22 +400,84 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         </BoxWithBorders>
                       )}
                       {activeStep === 2 && (
-                        <BoxWithBorderBottom>
-                          <Grid container spacing={3}>
-                            <Grid item xs={6}>
-                              <Field
-                                name='assignedTo'
-                                label={t('Assigned to*')}
-                                variant='outlined'
-                                choices={mappedIndividuals}
-                                component={FormikSelectField}
-                              />
-                            </Grid>
-                          </Grid>
-                        </BoxWithBorderBottom>
+                        <BoxWithBorders>
+                          <Consent />
+                          <Field
+                            name='consent'
+                            label={t('Received Consent*')}
+                            color='primary'
+                            component={FormikCheckboxField}
+                          />
+                        </BoxWithBorders>
                       )}
                       {activeStep === steps.length - 1 && (
                         <BoxPadding>
+                          <OverviewContainer>
+                            <Grid container spacing={6}>
+                              {[
+                                {
+                                  label: t('CATEGORY'),
+                                  value: (
+                                    <span>
+                                      {categoryChoices[values.category]}
+                                    </span>
+                                  ),
+                                  size: 3,
+                                },
+                                {
+                                  label: t('Issue Type'),
+                                  value: <span>{values.issueType || '-'}</span>,
+                                  size: 9,
+                                },
+                                {
+                                  label: t('HOUSEHOLD ID'),
+                                  value: (
+                                    <span>
+                                      {values.selectedHousehold?.id ? (
+                                        <ContentLink
+                                          href={`/${businessArea}/population/household/${values.selectedHousehold.id}`}
+                                        >
+                                          {values.selectedHousehold.unicefId}
+                                        </ContentLink>
+                                      ) : (
+                                        '-'
+                                      )}
+                                    </span>
+                                  ),
+                                  size: 3,
+                                },
+                                {
+                                  label: t('INDIVIDUAL ID'),
+                                  value: (
+                                    <span>
+                                      {values.selectedIndividual?.id ? (
+                                        <ContentLink
+                                          href={`/${businessArea}/population/individuals/${values.selectedIndividual.id}`}
+                                        >
+                                          {values.selectedIndividual.unicefId}
+                                        </ContentLink>
+                                      ) : (
+                                        '-'
+                                      )}
+                                    </span>
+                                  ),
+                                  size: 3,
+                                },
+                              ].map((el) => (
+                                <Grid
+                                  key={el.label}
+                                  item
+                                  xs={el.size as GridSize}
+                                >
+                                  <LabelizedField label={el.label}>
+                                    {el.value}
+                                  </LabelizedField>
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </OverviewContainer>
+                          <BoxWithBorderBottom />
+                          <BoxPadding />
                           <Grid container spacing={3}>
                             <Grid item xs={12}>
                               <Field
@@ -475,13 +541,11 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           </Grid>
                         </BoxPadding>
                       )}
-                      {/* <BoxPadding> */}
                       <DatachangeComponent
                         values={values}
                         setFieldValue={setFieldValue}
                       />
                       {dataChangeErrors(errors, touched)}
-                      {/* <BoxWithBorderBottom /> */}
                       <Box pt={3} display='flex' flexDirection='row'>
                         <Box mr={3}>
                           <Button
@@ -498,24 +562,16 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           >
                             {t('Back')}
                           </Button>
-                          {activeStep === steps.length - 1 ? (
-                            <LoadingButton
-                              loading={loading}
-                              color='primary'
-                              variant='contained'
-                              onClick={submitForm}
-                            >
-                              {t('Save')}
-                            </LoadingButton>
-                          ) : (
-                            <Button
-                              onClick={handleNext}
-                              color='primary'
-                              variant='contained'
-                            >
-                              {t('Next')}
-                            </Button>
-                          )}
+                          <LoadingButton
+                            loading={loading}
+                            color='primary'
+                            variant='contained'
+                            onClick={submitForm}
+                          >
+                            {activeStep === steps.length - 1
+                              ? t('Save')
+                              : t('Next')}
+                          </LoadingButton>
                         </Box>
                       </Box>
                     </ContainerColumnWithBorder>
