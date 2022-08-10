@@ -72,3 +72,10 @@ export const GrievanceSearchTypes = {
   HouseholdID: 'ticket_hhid',
   LastName: 'last_name',
 };
+
+export const GrievanceSteps = {
+  Selection: 0,
+  Lookup: 1,
+  Verification: 2,
+  Description: 3,
+};

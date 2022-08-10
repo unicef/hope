@@ -1,5 +1,6 @@
 import camelCase from 'lodash/camelCase';
 import {
+  GrievanceSteps,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
@@ -213,12 +214,12 @@ export function validateUsingSteps(
   const errors: { [key: string]: string | { [key: string]: string } } = {};
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
-      if (!values.selectedHousehold && activeStep === 1) {
+      if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
         errors.selectedHousehold = 'Household is Required';
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD) {
-      if (!values.selectedHousehold && activeStep === 1) {
+      if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
         errors.selectedHousehold = 'Household is Required';
       }
       if (
@@ -246,17 +247,17 @@ export function validateUsingSteps(
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
-      if (!values.selectedIndividual && activeStep === 1) {
+      if (!values.selectedIndividual && activeStep === GrievanceSteps.Lookup) {
         errors.selectedIndividual = 'Individual is Required';
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD) {
-      if (!values.selectedHousehold && activeStep === 1) {
+      if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
         errors.selectedHousehold = 'Household is Required';
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
-      if (!values.selectedIndividual && activeStep === 1) {
+      if (!values.selectedIndividual && activeStep === GrievanceSteps.Lookup) {
         errors.selectedIndividual = 'Individual is Required';
       }
       if (
@@ -389,10 +390,10 @@ export function validateUsingSteps(
       }
     }
   }
-  if (activeStep === 1 && !values.selectedHousehold) {
+  if (activeStep === GrievanceSteps.Lookup && !values.selectedHousehold) {
     errors.selectedHousehold = 'Household is Required';
   }
-  if (activeStep === 1) {
+  if (activeStep === GrievanceSteps.Lookup) {
     const individualRequiredIssueTypes = [
       GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL,
       GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL,
