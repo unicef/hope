@@ -27,6 +27,7 @@ import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField'
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
+  GrievanceSteps,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
@@ -61,6 +62,7 @@ import { LookUpHouseholdIndividualSelection } from '../../../components/grievanc
 import { LabelizedField } from '../../../components/core/LabelizedField';
 import { OverviewContainer } from '../../../components/core/OverviewContainer';
 import { ContentLink } from '../../../components/core/ContentLink';
+import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 
 const steps = [
   'Category Selection',
@@ -110,7 +112,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
 
   const linkedTicketId = history.location.state?.linkedTicketId;
 
@@ -334,7 +336,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           })}
                         </Stepper>
                       </NoRootPadding>
-                      {activeStep === 0 && (
+                      {activeStep === GrievanceSteps.Selection && (
                         <Grid container spacing={3}>
                           <Grid item xs={6}>
                             <Field
@@ -387,7 +389,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           )}
                         </Grid>
                       )}
-                      {activeStep === 1 && (
+                      {activeStep === GrievanceSteps.Lookup && (
                         <BoxWithBorders>
                           <Box display='flex' flexDirection='column'>
                             <LookUpHouseholdIndividualSelection
@@ -399,7 +401,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           </Box>
                         </BoxWithBorders>
                       )}
-                      {activeStep === 2 && (
+                      {activeStep === GrievanceSteps.Verification && (
                         <BoxWithBorders>
                           <Consent />
                           <Field
@@ -539,6 +541,18 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               />
                             </Grid>
                           </Grid>
+                          <Box pt={5}>
+                            <BoxWithBorders>
+                              <Grid item xs={6}>
+                                <Box py={3}>
+                                  <LookUpRelatedTickets
+                                    values={values}
+                                    onValueChange={setFieldValue}
+                                  />
+                                </Box>
+                              </Grid>
+                            </BoxWithBorders>
+                          </Box>
                         </BoxPadding>
                       )}
                       <DatachangeComponent
