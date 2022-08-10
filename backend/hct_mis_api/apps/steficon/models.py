@@ -22,8 +22,8 @@ class RuleManager(models.Manager):
 
 
 class Rule(models.Model):
-    TYPE_PAYMENT_PLAN = "TYPE_PAYMENT_PLAN"
-    TYPE_TARGETING = "TYPE_TARGETING"
+    TYPE_PAYMENT_PLAN = "PAYMENT_PLAN"
+    TYPE_TARGETING = "TARGETING"
 
     TYPE_CHOICES = (
         (TYPE_PAYMENT_PLAN, "Payment Plan"),

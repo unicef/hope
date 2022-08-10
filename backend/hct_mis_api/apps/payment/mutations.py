@@ -21,7 +21,7 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
-from hct_mis_api.apps.payment.celery_tasks import fsp_generate_xlsx_report_task
+from hct_mis_api.apps.payment.celery_tasks import fsp_generate_xlsx_report_task, payment_plan_apply_steficon
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
@@ -46,6 +46,8 @@ from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
 )
 from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
+from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.steficon.schema import SteficonRuleNode
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 logger = logging.getLogger(__name__)
@@ -758,14 +760,8 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
     class Input:
-        payment_plan_id = graphene.GlobalID(
-            required=True,
-            node=PaymentPlanNode,
-        )
-        steficon_rule_id = graphene.GlobalID(
-            required=False,
-            node=SteficonRuleNode,
-        )
+        payment_plan_id = graphene.ID(required=True)
+        steficon_rule_id = graphene.ID(required=False)
 
     @classmethod
     @is_authenticated

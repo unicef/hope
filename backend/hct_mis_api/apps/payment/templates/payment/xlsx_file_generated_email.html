@@ -7,6 +7,6 @@
   <body>
     <p>Dear {{first_name}} {{last_name}},</p>
     <p>{{message}}</p>
-    <p>{{link}}</p>
+    {% if link %}<p>{{link}}</p>{% endif %}
   </body>
 </html>
