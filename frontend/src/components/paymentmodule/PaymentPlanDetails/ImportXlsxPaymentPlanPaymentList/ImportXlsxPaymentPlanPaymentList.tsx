@@ -7,18 +7,17 @@ import {
 } from '@material-ui/core';
 import { Publish } from '@material-ui/icons';
 import get from 'lodash/get';
-import React, { ReactElement, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { PAYMENT_PLAN_QUERY } from '../../../../apollo/queries/paymentmodule/PaymentPlan';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { ImportErrors } from '../../../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
-import { usePaymentRefetchQueries } from '../../../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
-  useImportXlsxCashPlanVerificationMutation,
-  ImportXlsxCashPlanVerificationMutation,
-  XlsxErrorNode,
+  ImportXlsxPpListMutation,
   PaymentPlanQuery,
+  useImportXlsxPpListMutation,
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
 
@@ -31,13 +30,13 @@ const UploadIcon = styled(Publish)`
   color: #043f91;
 `;
 
-interface UploadXlsxProps {
+interface ImportXlsxPaymentPlanPaymentListProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const UploadXlsx = ({
+export const ImportXlsxPaymentPlanPaymentList = ({
   paymentPlan,
-}: UploadXlsxProps): React.ReactElement => {
+}: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
@@ -47,34 +46,39 @@ export const UploadXlsx = ({
   const [
     mutate,
     { data: uploadData, loading: fileLoading, error },
-  ] = useImportXlsxCashPlanVerificationMutation();
+  ] = useImportXlsxPpListMutation();
 
-  const xlsxErrors: ImportXlsxCashPlanVerificationMutation['importXlsxCashPlanVerification']['errors'] = get(
+  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] = get(
     uploadData,
-    'importXlsxCashPlanVerification.errors',
+    'importXlsxPaymentPlanPaymentList.errors',
   );
 
-  const handleImport = (): void => {
-    // if (fileToImport) {
-    //   try {
-    //     const { data, errors } = await mutate({
-    //       variables: {
-    //         cashPlanVerificationId: verificationPlanId,
-    //         file: fileToImport,
-    //       },
-    //       refetchQueries,
-    //     });
-
-    //     if (!errors && !data?.importXlsxCashPlanVerification?.errors.length) {
-    //       setOpenImport(false);
-    //       showMessage(t('Your import was successful!'));
-    //     }
-    //   } catch (e) {
-    //     // eslint-disable-next-line no-console
-    //     console.error(e);
-    //   }
-    // }
-    console.log('IMPORT');
+  const handleImport = async (): Promise<void> => {
+    if (fileToImport) {
+      try {
+        const { data, errors } = await mutate({
+          variables: {
+            paymentPlanId: paymentPlan.id,
+            file: fileToImport,
+          },
+          refetchQueries: () => [
+            {
+              query: PAYMENT_PLAN_QUERY,
+              variables: {
+                id: paymentPlan.id,
+              },
+            },
+          ],
+        });
+        if (!errors && !data?.importXlsxPaymentPlanPaymentList.errors.length) {
+          setOpenImport(false);
+          showMessage(t('Your import was successful!'));
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
+    }
   };
 
   return (
@@ -125,7 +129,7 @@ export const UploadXlsx = ({
                 {error
                   ? error.graphQLErrors.map((x) => <p>{x.message}</p>)
                   : null}
-                <ImportErrors errors={xlsxErrors as XlsxErrorNode[]} />
+                <ImportErrors errors={xlsxErrors} />
               </Error>
             ) : null}
           </>
