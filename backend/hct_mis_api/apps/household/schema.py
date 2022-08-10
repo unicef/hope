@@ -87,11 +87,11 @@ class DocumentTypeNode(DjangoObjectType):
     country = graphene.String(description="Country name")
     country_iso3 = graphene.String(description="Country ISO3")
 
-    def resolve_country(parent, info):
+    def resolve_country(parent: DocumentType, info):
         return parent.country.name
 
-    def resolve_country_iso3(parent, info):
-        return parent.country.alpha3
+    def resolve_country_iso3(parent: DocumentType, info):
+        return parent.country.iso_code3
 
     class Meta:
         model = DocumentType
@@ -101,11 +101,11 @@ class AgencyNode(DjangoObjectType):
     country = graphene.String(description="Country name")
     country_iso3 = graphene.String(description="Country ISO3")
 
-    def resolve_country(parent, info):
+    def resolve_country(parent: Agency, info):
         return parent.country.name
 
-    def resolve_country_iso3(parent, info):
-        return parent.country.alpha3
+    def resolve_country_iso3(parent: Agency, info):
+        return parent.country.iso_code3
 
     class Meta:
         model = Agency
