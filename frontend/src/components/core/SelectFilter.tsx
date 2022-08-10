@@ -15,11 +15,13 @@ export const SelectFilter = ({
   onChange,
   icon = null,
   borderRadius = '4px',
+  fullWidth = false,
   ...otherProps
 }): React.ReactElement => {
   return (
     <StyledFormControl
       borderRadius={borderRadius}
+      fullWidth={fullWidth}
       variant='outlined'
       margin='dense'
     >

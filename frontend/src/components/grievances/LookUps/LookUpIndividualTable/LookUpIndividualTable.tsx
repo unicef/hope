@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../../utils/utils';
 import {
@@ -22,7 +23,15 @@ interface LookUpIndividualTableProps {
   ticket?;
   excludedId?;
   withdrawn?: boolean;
+  noTableStyling?;
 }
+
+const NoTableStyling = styled.div`
+  .MuiPaper-elevation1 {
+    box-shadow: none;
+    padding: 0 !important;
+  }
+`;
 
 export const LookUpIndividualTable = ({
   businessArea,
@@ -35,6 +44,7 @@ export const LookUpIndividualTable = ({
   ticket,
   excludedId,
   withdrawn,
+  noTableStyling = false,
 }: LookUpIndividualTableProps): React.ReactElement => {
   const handleRadioChange = (individual): void => {
     if (individual.household?.id) {
@@ -67,15 +77,14 @@ export const LookUpIndividualTable = ({
   if (withdrawn !== null && withdrawn !== undefined) {
     initialVariables.withdrawn = withdrawn;
   }
-
-  return (
-    <TableWrapper>
+  const renderTable = (): React.ReactElement => {
+    return (
       <UniversalTable<
         AllIndividualsQuery['allIndividuals']['edges'][number]['node'],
         AllIndividualsQueryVariables
       >
         headCells={headCells}
-        rowsPerPageOptions={[10, 15, 20]}
+        rowsPerPageOptions={[5, 10, 15, 20]}
         query={useAllIndividualsQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
@@ -88,6 +97,11 @@ export const LookUpIndividualTable = ({
           />
         )}
       />
-    </TableWrapper>
+    );
+  };
+  return noTableStyling ? (
+    <NoTableStyling>{renderTable()}</NoTableStyling>
+  ) : (
+    <TableWrapper>{renderTable()}</TableWrapper>
   );
 };
