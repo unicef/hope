@@ -84,32 +84,6 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
 
-  const shouldBeDisabled = (values): boolean => {
-    const individualRequiredIssueTypes = [
-      GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL,
-      GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL,
-    ];
-    const householdRequiredIssueTypes = [
-      GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD,
-      GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD,
-    ];
-    const isHouseholdRequired = householdRequiredIssueTypes.includes(
-      values.issueType,
-    );
-    const isIndividualRequired = individualRequiredIssueTypes.includes(
-      values.issueType,
-    );
-    let result = false;
-    if (isIndividualRequired) {
-      result = !selectedIndividual || !values.identityVerified;
-    } else if (isHouseholdRequired) {
-      result = !selectedHousehold || !values.identityVerified;
-    } else {
-      result = !values.identityVerified;
-    }
-    return result;
-  };
-
   const onSelect = (key, value): void => {
     onValueChange(key, value);
   };
