@@ -10,6 +10,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField, Q, Count, Sum, UniqueConstraint
 from django.db.models.signals import post_delete, post_save
+from django.db.models.functions import Coalesce
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -349,12 +350,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     def update_money_fields(self):
         self.exchange_rate = self.get_exchange_rate()
-
         payments = self.all_active_payments.aggregate(
-            total_entitled_quantity=Sum("entitlement_quantity"),
-            total_entitled_quantity_usd=Sum("entitlement_quantity_usd"),
-            total_delivered_quantity=Sum("delivered_quantity"),
-            total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
+            total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
+            total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
+            total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
+            total_delivered_quantity_usd=Coalesce(Sum("delivered_quantity_usd"), Decimal(0.0)),
         )
 
         self.total_entitled_quantity = payments.get("total_entitled_quantity", 0.00)
@@ -719,9 +719,7 @@ class Payment(SoftDeletableModel, GenericPayment):
         "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
-    assigned_payment_channel = models.ForeignKey(
-        "payment.PaymentChannel", on_delete=models.CASCADE, null=True
-    )
+    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
 
     objects = PaymentManager()
 

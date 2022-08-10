@@ -188,7 +188,6 @@ class PaymentPlanService:
 
     def _create_payments(self, payment_plan: PaymentPlan):
         payments_to_create = []
-
         for household in payment_plan.target_population.households.all():
             payments_to_create.append(
                 Payment(
@@ -262,13 +261,18 @@ class PaymentPlanService:
         targeting_id = decode_id_string(input_data.get("targeting_id"))
         if targeting_id and targeting_id != str(self.payment_plan.target_population.id):
             try:
-                target_population = TargetPopulation.objects.get(id=targeting_id, status=TargetPopulation.STATUS_READY)
+                new_target_population = TargetPopulation.objects.get(
+                    id=targeting_id, status=TargetPopulation.STATUS_READY
+                )
 
-                if not target_population.program:
+                if not new_target_population.program:
                     raise GraphQLError(f"TargetPopulation should have related Program defined")
 
-                self.payment_plan.target_population = target_population
-                self.payment_plan.program = target_population.program
+                self.payment_plan.target_population.status = TargetPopulation.STATUS_READY
+                self.payment_plan.target_population.save()
+
+                self.payment_plan.target_population = new_target_population
+                self.payment_plan.program = new_target_population.program
                 self.payment_plan.target_population.status = TargetPopulation.STATUS_ASSIGNED
                 self.payment_plan.target_population.save()
                 recalculate = True
@@ -277,7 +281,7 @@ class PaymentPlanService:
                 raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
 
         if (
-            input_data["dispersion_end_date"]
+            input_data.get("dispersion_end_date")
             and input_data["dispersion_end_date"] != self.payment_plan.dispersion_end_date
         ):
             if input_data["dispersion_end_date"] <= timezone.now().date():
@@ -285,7 +289,7 @@ class PaymentPlanService:
             self.payment_plan.dispersion_end_date = input_data["dispersion_end_date"]
             recalculate = True
 
-        if input_data["currency"] and input_data["currency"] != self.payment_plan.currency:
+        if input_data.get("currency") and input_data["currency"] != self.payment_plan.currency:
             self.payment_plan.currency = input_data["currency"]
             recalculate = True
 
