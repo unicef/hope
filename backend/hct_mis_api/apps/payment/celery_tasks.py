@@ -66,7 +66,7 @@ def create_cash_plan_payment_verification_xls(cash_plan_payment_verification_id,
 
             cash_plan_payment_verification.xlsx_file_exporting = False
             cash_plan_payment_verification.save()
-            service.send_email(user, cash_plan_payment_verification_id)
+            service.send_email(service.get_context(user))
     except Exception as e:
         logger.exception(e)
         raise
@@ -107,18 +107,19 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
                 service = XlsxPaymentPlanExportService(payment_plan)
                 service.save_xlsx_file(user)
 
-            # service.send_email(user, payment_plan_id)
-
-            payment_plan.status = PaymentPlan.Status.LOCKED
+            payment_plan.status_lock()
             payment_plan.save()
+
+            service.send_email(service.get_context(user))
+
     except Exception as e:
         logger.exception(e)
         raise
 
 
 @app.task
-# @log_start_and_end
-# @sentry_tags  # TODO: uncomment after develop merge
+@log_start_and_end
+@sentry_tags
 def payment_plan_apply_steficon(payment_plan_id):
     from hct_mis_api.apps.steficon.models import RuleCommit
     from hct_mis_api.apps.payment.models import PaymentPlan, Payment

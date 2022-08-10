@@ -22,8 +22,8 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 
-from apps.core.models import XLSXFileTemp
-from apps.steficon.models import RuleCommit
+from hct_mis_api.apps.core.models import XLSXFileTemp
+from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -216,8 +216,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
         STEFICON_COMPLETED = "STEFICON_COMPLETED", "Rule Engine Completed"
         STEFICON_ERROR = "STEFICON_ERROR", "Rule Engine Errored"
-        XLSX_EXPORTING = "STEFICON_WAIT", "Exporting XLSX file"
-        XLSX_IMPORTING = "STEFICON_RUN", "Importing XLSX file"
+        XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
+        XLSX_IMPORTING = "XLSX_IMPORTING", "Importing XLSX file"
 
     class Action(models.TextChoices):
         LOCK = "LOCK", "Lock"
@@ -265,7 +265,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
-        source=Status.OPEN,
+        source=[Status.OPEN, Status.XLSX_EXPORTING, Status.XLSX_IMPORTING],
         target=Status.LOCKED,
     )
     def status_lock(self):
@@ -321,10 +321,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
-        source=[
-            Status.LOCKED, Status.STEFICON_WAIT, Status.STEFICON_RUN,
-            Status.STEFICON_COMPLETED, Status.STEFICON_ERROR, Status.XLSX_IMPORTING
-        ],
+        source=Status.LOCKED,
         target=Status.XLSX_EXPORTING,
     )
     def status_exporting(self):
@@ -332,10 +329,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
-        source=[
-            Status.LOCKED, Status.STEFICON_WAIT, Status.STEFICON_RUN,
-            Status.STEFICON_COMPLETED, Status.STEFICON_ERROR,  Status.XLSX_EXPORTING
-        ],
+        source=Status.LOCKED,
         target=Status.XLSX_IMPORTING,
     )
     def status_importing(self):

@@ -47,18 +47,8 @@ def download_payment_plan_payment_list(request, payment_plan_id):
         logger.error("Permission Denied: User does not have correct permission.")
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
-    statuses = (
-        PaymentPlan.Status.LOCKED, PaymentPlan.Status.STEFICON_WAIT, PaymentPlan.Status.STEFICON_RUN,
-        PaymentPlan.Status.STEFICON_COMPLETED, PaymentPlan.Status.STEFICON_ERROR, PaymentPlan.Status.XLSX_IMPORTING
-    )
-    if payment_plan.status not in statuses:
-        logger.error(f"Export payment list is possible only for Payment Plan within statuses {statuses}")
-        raise GraphQLError(f"Export payment list is possible only for Payment Plan within statuses {statuses}")
-
     if payment_plan.has_payment_plan_payment_list_xlsx_file:
         return redirect(payment_plan.xlsx_payment_plan_payment_list_file_link)
     else:
         logger.error(f"File not found. CashPlanPaymentVerification ID: {payment_plan_id}")
         raise GraphQLError("File not found")
-
-

@@ -504,14 +504,16 @@ class XLSXFileTemp(TimeStampedModel):
 
     EXPORT = "EXPORT"
     IMPORT = "IMPORT"
+    TEMP = "TEMP"
 
     FILE_TYPE_CHOICES = (
         (EXPORT, "Export"),
         (IMPORT, "Import"),
+        (TEMP, "Temporary"),
     )
     object_id = models.CharField(max_length=120, null=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    type = models.CharField(max_length=50, null=True, choices=FILE_TYPE_CHOICES)
+    type = models.CharField(max_length=50, null=True, choices=FILE_TYPE_CHOICES, default=TEMP)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
