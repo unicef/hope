@@ -1,5 +1,4 @@
-import { Button } from '@material-ui/core';
-import styled from 'styled-components';
+import { Box, Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import {
@@ -10,48 +9,46 @@ import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 import { EditProgram } from '../../dialogs/programs/EditProgram';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
-
 export interface ActiveProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
   canFinish: boolean;
   canEdit: boolean;
 }
-export function ActiveProgramDetailsPageHeaderButtons({
+export const ActiveProgramDetailsPageHeaderButtons = ({
   program,
   canFinish,
   canEdit,
-}: ActiveProgramDetailsPageHeaderPropTypes): React.ReactElement {
-  const { data, loading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
+}: ActiveProgramDetailsPageHeaderPropTypes): React.ReactElement => {
+  const { data, loading } = useCashAssistUrlPrefixQuery({
+    fetchPolicy: 'cache-first',
+  });
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canFinish && (
-        <ButtonContainer>
+        <Box m={2}>
           <FinishProgram program={program} />
-        </ButtonContainer>
+        </Box>
       )}
       {canEdit && (
-        <ButtonContainer>
+        <Box m={2}>
           <EditProgram program={program} />
-        </ButtonContainer>
+        </Box>
       )}
-      <ButtonContainer>
+      <Box m={2}>
         <Button
           variant='contained'
           color='primary'
           component='a'
           disabled={!program.caHashId}
-          target="_blank"
+          target='_blank'
           href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_program&id=${program.caHashId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
           Open in CashAssist
         </Button>
-      </ButtonContainer>
-    </div>
+      </Box>
+    </Box>
   );
-}
+};

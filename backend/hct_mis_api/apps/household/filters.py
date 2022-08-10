@@ -1,10 +1,10 @@
 import json
 import re
 
-from constance import config
 from django.db.models import Q
 from django.db.models.functions import Lower
 
+from constance import config
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -13,16 +13,15 @@ from django_filters import (
     MultipleChoiceFilter,
 )
 
-from hct_mis_api.apps.account.admin import BusinessAreaFilter
 from hct_mis_api.apps.core.filters import (
     AgeRangeFilter,
+    BusinessAreaSlugFilter,
     DateRangeFilter,
     IntegerRangeFilter,
-    BusinessAreaSlugFilter,
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.documents import IndividualDocument, HouseholdDocument
+from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     INDIVIDUAL_FLAGS_CHOICES,
@@ -40,26 +39,57 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.models import Program
 
 
+def _prepare_kobo_asset_id_value(code):
+    """
+    preparing value for filter by kobo_asset_id
+    value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
+    return asset_id number like 111222
+    """
+    if len(code) < 6:
+        return code
+
+    code = code[5:].split("/")[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
+    if code.startswith("20223"):
+        # month 3 day 25...31 id is 44...12067
+        code = code[7:]
+
+    if code.startswith("20224"):
+        # TODO: not sure if this one is correct?
+        # code[5] is the day of month (or the first digit of it)
+        # month 4 id is 12068..157380
+        if code[5] in [1, 2, 3] and len(code) == 12:
+            code = code[-5:]
+        else:
+            code = code[-6:]
+
+    if code.startswith("20225"):
+        # month 5 id is 157381...392136
+        code = code[-6:]
+
+    if code.startswith("20226"):
+        # month 6 id is 392137...
+        code = code[-6:]
+    return code
+
+
 class HouseholdFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin2 = ModelMultipleChoiceFilter(
-        field_name="admin_area_new", queryset=Area.objects.filter(area_type__area_level=2)
-    )
+    admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=Area.objects.filter(area_type__area_level=2))
     withdrawn = BooleanFilter(field_name="withdrawn")
+    country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
 
     class Meta:
         model = Household
         fields = {
             "business_area": ["exact"],
-            "country_origin": ["exact", "startswith"],
             "address": ["exact", "startswith"],
             "head_of_household__full_name": ["exact", "startswith"],
             "size": ["range", "lte", "gte"],
-            "admin_area_new": ["exact"],
+            "admin_area": ["exact"],
             "target_populations": ["exact"],
             "programs": ["exact"],
             "residence_status": ["exact"],
@@ -76,7 +106,7 @@ class HouseholdFilter(FilterSet):
             "household_ca_id",
             "size",
             Lower("head_of_household__full_name"),
-            Lower("admin_area_new__name"),
+            Lower("admin_area__name"),
             "residence_status",
             Lower("registration_data_import__name"),
             "total_cash_received",
@@ -92,44 +122,22 @@ class HouseholdFilter(FilterSet):
             HouseholdDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
-        return qs.filter(Q(id__in=es_ids)).distinct()
+
+        split_values_list = value.split(" ")
+        inner_query = Q()
+        for split_value in split_values_list:
+            striped_value = split_value.strip(",")
+            if striped_value.startswith(("HOPE-", "KOBO-")):
+                _value = _prepare_kobo_asset_id_value(value)
+                # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                # will filter by '111222' like 111222 is ID
+                inner_query |= Q(kobo_asset_id__endswith=_value)
+        return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
     def search_filter(self, qs, name, value):
-        if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
+        if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)
-
-    def _prepare_kobo_asset_id_value(self, code):
-        """
-        preparing value for filter by kobo_asset_id
-        value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
-        return asset_id number like 111222
-        """
-        if len(code) < 6:
-            return code
-
-        code = code[5:].split("/")[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
-        if code.startswith("20223"):
-            # month 3 day 25...31 id is 44...12067
-            code = code[7:]
-
-        if code.startswith("20224"):
-            # TODO: not sure if this one is correct?
-            # code[5] is the day of month (or the first digit of it)
-            # month 4 id is 12068..157380
-            if code[5] in [1, 2, 3] and len(code) == 12:
-                code = code[-5:]
-            else:
-                code = code[-6:]
-
-        if code.startswith("20225"):
-            # month 5 id is 157381...392136
-            code = code[-6:]
-
-        if code.startswith("20226"):
-            # month 6 id is 392137...
-            code = code[-6:]
-        return code
 
     def _search_db(self, qs, value):
         if re.match(r"([\"\']).+\1", value):
@@ -138,6 +146,7 @@ class HouseholdFilter(FilterSet):
             values = value.split(" ")
         q_obj = Q()
         for value in values:
+            value = value.strip(",")
             inner_query = Q()
             inner_query |= Q(head_of_household__full_name__istartswith=value)
             inner_query |= Q(head_of_household__given_name__istartswith=value)
@@ -145,7 +154,7 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(head_of_household__family_name__istartswith=value)
             inner_query |= Q(residence_status__istartswith=value)
             inner_query |= Q(admin_area__title__istartswith=value)
-            inner_query |= Q(admin_area_new__name__istartswith=value)
+            inner_query |= Q(admin_area__name__istartswith=value)
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
             if value.startswith(("HOPE-", "KOBO-")):
@@ -165,7 +174,7 @@ class IndividualFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
-        field_name="household__admin_area_new", queryset=Area.objects.filter(area_type__area_level=2)
+        field_name="household__admin_area", queryset=Area.objects.filter(area_type__area_level=2)
     )
     status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
     excluded_id = CharFilter(method="filter_excluded_id")
@@ -180,7 +189,6 @@ class IndividualFilter(FilterSet):
             "full_name": ["exact", "startswith", "endswith"],
             "sex": ["exact"],
             "household__admin_area": ["exact"],
-            "household__admin_area_new": ["exact"],
             "withdrawn": ["exact"],
         }
 
@@ -194,7 +202,7 @@ class IndividualFilter(FilterSet):
             "birth_date",
             "sex",
             "relationship",
-            Lower("household__admin_area_new__name"),
+            Lower("household__admin_area__name"),
             "last_registration_date",
             "first_registration_date",
         )
@@ -234,8 +242,7 @@ class IndividualFilter(FilterSet):
             values = value.split(" ")
         q_obj = Q()
         for value in values:
-            inner_query = Q(household__admin_area__title__istartswith=value)
-            inner_query |= Q(household__admin_area_new__name__istartswith=value)
+            inner_query = Q(household__admin_area__name__istartswith=value)
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
             inner_query |= Q(household__unicef_id__istartswith=value)
@@ -495,6 +502,5 @@ def get_elasticsearch_query_for_households(value, business_area):
         },
     }
     if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:
-        query["query"]["bool"]["filter"] = {"term": {"business_area": business_area}},
-    print(json.dumps(query))
+        query["query"]["bool"]["filter"] = ({"term": {"business_area": business_area}},)
     return query

@@ -6,46 +6,65 @@ import { AllChartsQuery } from '../../../__generated__/graphql';
 interface PaymentVerificationChartProps {
   data: AllChartsQuery['chartPaymentVerification'];
 }
+
+type DatasetTypes =
+  | 'RECEIVED'
+  | 'PENDING'
+  | 'NOT RECEIVED'
+  | 'RECEIVED WITH ISSUES';
+
+type Dataset = {
+  [key in DatasetTypes]: Array<number>;
+};
+
 export const PaymentVerificationChart = ({
   data,
 }: PaymentVerificationChartProps): React.ReactElement => {
   if (!data) return null;
 
+  const datasets = data.datasets.reduce(
+    (previousValue, currentValue) => ({
+      ...previousValue,
+      [currentValue.label]: currentValue.data,
+    }),
+    {},
+  ) as Dataset;
+
+  const convertToPercent = (dataset: Array<number>): string =>
+    `${(dataset[0] * 100).toFixed(0)}%`;
+
+  const defaults = {
+    categoryPercentage: 0.5,
+    stack: 4,
+  };
+
   const chartData = {
     datasets: [
       {
-        categoryPercentage: 0.5,
-        label: `Received - ${(data.datasets[1]?.data[0] * 100).toFixed(0)}%`,
+        ...defaults,
+        label: `Received - ${convertToPercent(datasets.RECEIVED)}`,
         backgroundColor: '#8BD241',
-        data: [...data.datasets[1]?.data],
-        stack: 4,
+        data: [...datasets.RECEIVED],
       },
       {
-        categoryPercentage: 0.5,
-        label: `Received with Issues - ${(
-          data.datasets[3]?.data[0] * 100
-        ).toFixed(0)}%`,
+        ...defaults,
+        label: `Received with Issues - ${convertToPercent(
+          datasets['RECEIVED WITH ISSUES'],
+        )}`,
         backgroundColor: '#FDE8AC',
-        data: [...data.datasets[3]?.data],
-        stack: 4,
+        data: [...datasets['RECEIVED WITH ISSUES']],
       },
       {
-        categoryPercentage: 0.5,
-        label: `Not received - ${(data.datasets[2]?.data[0] * 100).toFixed(
-          0,
-        )}%`,
+        ...defaults,
+        label: `Not received - ${convertToPercent(datasets['NOT RECEIVED'])}`,
         backgroundColor: '#E02020',
-        data: [...data.datasets[2]?.data],
-        stack: 4,
+        data: [...datasets['NOT RECEIVED']],
       },
       {
-        categoryPercentage: 0.5,
-        label: `Not responded - ${(data.datasets[0]?.data[0] * 100).toFixed(
-          0,
-        )}%`,
+        ...defaults,
+        label: `Not responded - ${convertToPercent(datasets.PENDING)}`,
         backgroundColor: '#C3D1D8',
-        data: [...data.datasets[0]?.data],
-        stack: 4,
+        data: [...datasets.PENDING],
       },
     ],
   };

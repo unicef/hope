@@ -16,12 +16,9 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.core_fields_attributes import (
-    _HOUSEHOLD,
-    _INDIVIDUAL,
-    CORE_FIELDS_ATTRIBUTES,
-    HOUSEHOLD_EDIT_ONLY_FIELDS,
-    KOBO_ONLY_INDIVIDUAL_FIELDS,
     TYPE_IMAGE,
+    FieldFactory,
+    Scope,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
@@ -32,7 +29,6 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     choices_to_dict,
     encode_ids,
-    nested_getattr,
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
@@ -132,16 +128,18 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_admin(grievance_ticket: GrievanceTicket, info):
-        return getattr(grievance_ticket.admin2_new, "name", None)
+        return getattr(grievance_ticket.admin2, "name", None)
 
     @staticmethod
     def resolve_admin2(grievance_ticket: GrievanceTicket, info):
-        return grievance_ticket.admin2_new
+        return grievance_ticket.admin2
 
     @staticmethod
     def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
-        return GrievanceTicket.objects.filter(household_unicef_id=grievance_ticket.household_unicef_id).exclude(
-            pk=grievance_ticket.pk
+        return (
+            GrievanceTicket.objects.exclude(household_unicef_id__isnull=True)
+            .filter(household_unicef_id=grievance_ticket.household_unicef_id)
+            .exclude(pk=grievance_ticket.pk)
         )
 
 
@@ -464,100 +462,22 @@ class Query(graphene.ObjectType):
         ]
 
     def resolve_all_add_individuals_fields_attributes(self, info, **kwargs):
-        ACCEPTABLE_FIELDS = [
-            "full_name",
-            "given_name",
-            "middle_name",
-            "family_name",
-            "sex",
-            "birth_date",
-            "estimated_birth_date",
-            "marital_status",
-            "phone_no",
-            "phone_no_alternative",
-            "relationship",
-            "disability",
-            "work_status",
-            "enrolled_in_nutrition_programme",
-            "administration_of_rutf",
-            "pregnant",
-            "observed_disability",
-            "seeing_disability",
-            "hearing_disability",
-            "physical_disability",
-            "memory_disability",
-            "selfcare_disability",
-            "comms_disability",
-            "who_answers_phone",
-            "who_answers_alt_phone",
-        ]
-
-        all_options = (
-            [
-                x
-                for x in CORE_FIELDS_ATTRIBUTES
-                if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
-            ]
-            + list(KOBO_ONLY_INDIVIDUAL_FIELDS.values())
-            + list(FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL))
+        fields = FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE).associated_with_individual()
+        all_options = list(fields) + list(
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
         )
-
         return sort_by_attr(all_options, "label.English(EN)")
 
     def resolve_all_edit_household_fields_attributes(self, info, **kwargs):
-        ACCEPTABLE_FIELDS = [
-            "status",
-            "consent",
-            "consent_sharing",
-            "residence_status",
-            "country_origin",
-            "country",
-            "size",
-            "address",
-            "admin_area_title",
-            "female_age_group_0_5_count",
-            "female_age_group_6_11_count",
-            "female_age_group_12_17_count",
-            "female_age_group_18_59_count",
-            "female_age_group_60_count",
-            "pregnant_count",
-            "male_age_group_0_5_count",
-            "male_age_group_6_11_count",
-            "male_age_group_12_17_count",
-            "male_age_group_18_59_count",
-            "male_age_group_60_count",
-            "female_age_group_0_5_disabled_count",
-            "female_age_group_6_11_disabled_count",
-            "female_age_group_12_17_disabled_count",
-            "female_age_group_18_59_disabled_count",
-            "female_age_group_60_disabled_count",
-            "male_age_group_0_5_disabled_count",
-            "male_age_group_6_11_disabled_count",
-            "male_age_group_12_17_disabled_count",
-            "male_age_group_18_59_disabled_count",
-            "male_age_group_60_disabled_count",
-            "returnee",
-            "fchild_hoh",
-            "child_hoh",
-            "start",
-            "end",
-            "name_enumerator",
-            "org_enumerator",
-            "org_name_enumerator",
-            "village",
-            "registration_method",
-            "collect_individual_data",
-            "currency",
-            "unhcr_id",
-        ]
-
-        # yield from FlexibleAttribute.objects.order_by("name").all()
-        all_options = [
-            x
-            for x in HOUSEHOLD_EDIT_ONLY_FIELDS + CORE_FIELDS_ATTRIBUTES
-            if x.get("associated_with") == _HOUSEHOLD and x.get("name") in ACCEPTABLE_FIELDS
-        ] + list(FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD))
-
+        business_area_slug = info.context.headers.get("Business-Area")
+        fields = (
+            FieldFactory.from_scope(Scope.HOUSEHOLD_UPDATE)
+            .associated_with_household()
+            .apply_business_area(business_area_slug)
+        )
+        all_options = list(fields) + list(
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
+        )
         return sort_by_attr(all_options, "label.English(EN)")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -572,7 +492,7 @@ class Query(graphene.ObjectType):
         if filters.get("administrative_area") is not None:
             try:
                 grievance_tickets = grievance_tickets.filter(
-                    admin2_new=Area.objects.get(id=filters.get("administrative_area"))
+                    admin2=Area.objects.get(id=filters.get("administrative_area"))
                 )
             except Area.DoesNotExist:
                 pass

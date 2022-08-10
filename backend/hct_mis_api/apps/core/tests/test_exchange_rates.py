@@ -5,6 +5,7 @@ from unittest import mock
 
 from django.core.management import call_command
 from django.test import TestCase
+from django.utils import timezone
 
 import requests_mock
 from parameterized import parameterized
@@ -192,7 +193,7 @@ class TestExchangeRates(TestCase):
             ("xeu_out_of_range_date", "XEU", datetime(1994, 3, 1), None),
             ("xeu_historical_date_1", "XEU", datetime(1998, 2, 7), 0.926),
             ("xeu_historical_date_2", "XEU", datetime(1998, 3, 1), 0.909),
-            ("cup1_future_date", "CUP1", datetime.now() + timedelta(weeks=200), 24),
+            ("cup1_future_date", "CUP1", timezone.now() + timedelta(weeks=200), 24),
         ]
     )
     def test_get_exchange_rate_for_currency_code(self, _, currency_code, dispersion_date, expected_result):
@@ -225,9 +226,18 @@ class TestFixExchangeRatesCommand(TestCase):
         ServiceProviderFactory.create_batch(3)
         program = RealProgramFactory()
         cash_plans_with_currency = (
-            ("PLN", RealCashPlanFactory(program=program, dispersion_date=datetime(2021, 4, 4))),  # x_rate == 3.973
-            ("AFN", RealCashPlanFactory(program=program, dispersion_date=datetime(2020, 3, 3))),  # x_rate == 76.55
-            ("USD", RealCashPlanFactory(program=program, dispersion_date=datetime(2020, 3, 3))),  # x_rate ==  1
+            (
+                "PLN",
+                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2021, 4, 4))),
+            ),  # x_rate == 3.973
+            (
+                "AFN",
+                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2020, 3, 3))),
+            ),  # x_rate == 76.55
+            (
+                "USD",
+                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2020, 3, 3))),
+            ),  # x_rate ==  1
         )
         for currency, cash_plan in cash_plans_with_currency:
             RealPaymentRecordFactory(

@@ -3,7 +3,7 @@
 exports[`components/population/HouseholdDetails should render 1`] = `
 <div>
   <div
-    class="sc-jzJRlG ezheHU"
+    class="sc-ckVGcZ jaqOpI"
   >
     <div
       class="sc-bxivhb jsIVNl"
@@ -15,7 +15,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
       </h6>
     </div>
     <div
-      class="sc-cSHVUG cvBNnC"
+      class="sc-jKJlTe cydhVN"
     >
       <div
         class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3"
@@ -266,11 +266,33 @@ Jameschester, SC 24934
             </div>
           </div>
         </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Linked Grievances
+            </span>
+            <div>
+              <span
+                class="sc-htpNat cwQQYq"
+                color="textSecondary"
+              >
+                <span>
+                  -
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
   <div
-    class="MuiPaper-root sc-kAzzGY evDEes MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root sc-eNQAEJ kOdPfR MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
       class="sc-bxivhb jsIVNl"
@@ -294,7 +316,7 @@ Jameschester, SC 24934
             class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
           >
             <span
-              class="sc-chPdSV SJTLX"
+              class="sc-hMqMXs dCeKbh"
               color="textSecondary"
             >
               PrOgRAmmE(S) ENROLLED
@@ -304,7 +326,7 @@ Jameschester, SC 24934
             class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
           >
             <span
-              class="sc-chPdSV SJTLX"
+              class="sc-hMqMXs dCeKbh"
               color="textSecondary"
             >
               Cash received

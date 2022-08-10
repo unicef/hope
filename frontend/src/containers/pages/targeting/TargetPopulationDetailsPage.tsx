@@ -71,10 +71,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
             status={status}
             candidateList={targetPopulation.candidateListTargetingCriteria}
             targetPopulation={targetPopulation}
-            canViewHouseholdDetails={hasPermissions(
-              PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
-              permissions,
-            )}
+            permissions={permissions}
           />
         </>
       )}

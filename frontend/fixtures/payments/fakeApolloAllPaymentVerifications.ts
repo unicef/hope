@@ -52,7 +52,7 @@ export const fakeApolloAllPaymentVerifications = [
                         'SW5kaXZpZHVhbE5vZGU6OWM2ZDljMmUtZTgxNC00NDk3LWJkNTAtYzgzYmM2ODY3ZWJm',
                       fullName: 'Agata Kowalska',
                       familyName: 'Kowalska',
-                      phoneNo: '0048875012932',
+                      phoneNo: '+48875012932',
                       phoneNoAlternative: '',
                       __typename: 'IndividualNode',
                     },

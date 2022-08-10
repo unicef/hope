@@ -1,5 +1,5 @@
 import logging
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -8,7 +8,6 @@ import requests
 from constance import config
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Individual
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,6 @@ class RapidProAPI:
         self._init_token(business_area_slug)
 
     def _init_token(self, business_area_slug):
-
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         token = business_area.rapid_pro_api_key
         self.url = business_area.rapid_pro_host
@@ -86,32 +84,37 @@ class RapidProAPI:
         return flows["results"]
 
     def start_flow(self, flow_uuid, phone_numbers):
-        urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
-        data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
+        array_size_limit = 100  # https://app.rapidpro.io/api/v2/flow_starts
+        # urns - the URNs you want to start in this flow (array of up to 100 strings, optional)
 
-        try:
-            response = self._handle_post_request(
-                RapidProAPI.FLOW_STARTS_ENDPOINT,
-                data,
-            )
-            return response
-        except requests.exceptions.HTTPError as e:
-            errors = self._parse_json_urns_error(e, phone_numbers)
-            if errors:
-                logger.error("wrong phone numbers " + str(errors))
-                raise ValidationError(message={"phone_numbers": errors})
-            else:
-                raise
+        all_urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
+        by_limit = [all_urns[i : i + array_size_limit] for i in range(0, len(all_urns), array_size_limit)]
+
+        def _start_flow(data):
+            try:
+                return self._handle_post_request(
+                    RapidProAPI.FLOW_STARTS_ENDPOINT,
+                    data,
+                )
+            except requests.exceptions.HTTPError as e:
+                errors = self._parse_json_urns_error(e, phone_numbers)
+                if errors:
+                    logger.error("wrong phone numbers " + str(errors))
+                    raise ValidationError(message={"phone_numbers": errors})
+                else:
+                    raise
+
+        return [_start_flow({"flow": flow_uuid, "urns": urns, "restart_participants": True}) for urns in by_limit]
 
     def get_flow_runs(self):
         return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
 
-    def get_mapped_flow_runs(self, start_uuid):
+    def get_mapped_flow_runs(self, start_uuids):
         results = self.get_flow_runs()
         mapped_results = [
             self._map_to_internal_structure(x)
             for x in results
-            if x.get("start") is not None and x.get("start").get("uuid") == start_uuid
+            if x.get("start") is not None and x.get("start").get("uuid") in start_uuids
         ]
         return mapped_results
 
@@ -136,36 +139,14 @@ class RapidProAPI:
             return {"phone_number": phone_number, "received": None, "received_amount": None}
         received_variable = values.get(variable_received_name)
         if received_variable is not None:
-            received = received_variable.get("value").upper() == variable_received_positive_string
+            received = received_variable.get("category").upper() == variable_received_positive_string
         received_amount_variable = values.get(variable_amount_name)
         if received_amount_variable is not None:
-            received_amount = Decimal(received_amount_variable.get("value", 0))
+            try:
+                received_amount = Decimal(received_amount_variable.get("value", 0))
+            except InvalidOperation:
+                received_amount = 0
         return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
-
-    def create_group(self, name):
-        group = self._handle_post_request(RapidProAPI.GROUPS_ENDPOINT, {"name": name})
-        return group
-
-    def create_contact(self, name, tel, group_uuid):
-        contact = self._handle_post_request(
-            RapidProAPI.CONTACTS_ENDPOINT,
-            {"name": name, "groups": [group_uuid], "urns": [f"{config.RAPID_PRO_PROVIDER}:{tel}"]},
-        )
-        return contact
-
-    def create_contacts_and_groups_for_verification(self, cash_plan_verification):
-        individuals = Individual.objects.filter(
-            heading_household__payment_records__verifications__cash_plan_payment_verification=cash_plan_verification.id
-        )
-        group = self.create_group(f"Verify: {cash_plan_verification.id}")
-        for individual in individuals:
-            self.create_contact(
-                f"{individual.unicef_id}",
-                individual.phone_no,
-                group["uuid"],
-            )
-
-        return group
 
     def test_connection_start_flow(self, flow_name, phone_number):
         # find flow by name, get its uuid and start it

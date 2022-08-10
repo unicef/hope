@@ -16,6 +16,8 @@ import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
+import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
+import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -65,12 +67,11 @@ export const EditIndividualDataChange = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { data, loading } = useAllAddIndividualFieldsQuery();
   if (!individual) {
     return <div>{t('You have to select an individual earlier')}</div>;
   }
   if (
-    loading ||
+    addIndividualFieldsLoading ||
     fullIndividualLoading ||
     addIndividualFieldsLoading ||
     !fullIndividual
@@ -100,7 +101,9 @@ export const EditIndividualDataChange = ({
                       itemValue={item}
                       index={index}
                       individual={fullIndividual.individual}
-                      fields={data.allAddIndividualsFieldsAttributes}
+                      fields={
+                        addIndividualFieldsData.allAddIndividualsFieldsAttributes
+                      }
                       notAvailableFields={notAvailableItems}
                       onDelete={() => arrayHelpers.remove(index)}
                       values={values}
@@ -153,6 +156,17 @@ export const EditIndividualDataChange = ({
           values={values}
           addIndividualFieldsData={addIndividualFieldsData}
         />
+      </Box>
+      <Box mt={3}>
+        <Title>
+          <Typography variant='h6'>{t('Payment Channel')}</Typography>
+        </Title>
+        <ExistingPaymentChannelFieldArray
+          values={values}
+          setFieldValue={setFieldValue}
+          individual={individual}
+        />
+        <NewPaymentChannelFieldArray values={values} />
       </Box>
     </>
   );

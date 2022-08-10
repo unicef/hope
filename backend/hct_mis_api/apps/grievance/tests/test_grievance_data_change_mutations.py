@@ -4,22 +4,18 @@ from unittest import mock
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
-from django_countries.fields import Country
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
+    BankAccountInfoFactory,
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -83,14 +79,6 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="dffgh565556")
-        AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="fggtyjyj")
-
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
             name="Admin type one",
@@ -109,7 +97,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country="AFG")
+        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country=country)
         household_two = HouseholdFactory.build(id="ac540aa1-5c7a-47d0-a013-32054e2af454")
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
@@ -191,7 +179,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_two.save()
         cls.household_one = household_one
 
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country_pl = geo_models.Country.objects.get(iso_code2="PL")
+        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
         cls.national_id = DocumentFactory.create(
             id="d367e431-b807-4c1f-a811-ef2e0d217cc4",
             type=national_id_type,
@@ -199,7 +188,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             individual=cls.individuals[0],
         )
 
-        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country="POL")
+        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country=country_pl)
         cls.identity = IndividualIdentityFactory.create(
             id=1,
             agency=unhcr_agency,
@@ -258,6 +247,13 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "number": "2222",
                                     }
                                 ],
+                                "paymentChannels": [
+                                    {
+                                        "type": "BANK_TRANSFER",
+                                        "bankName": "privatbank",
+                                        "bankAccountNumber": 2356789789789789,
+                                    },
+                                ],
                             },
                         }
                     }
@@ -281,6 +277,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_grievance_update_individual_data_change(self, _, permissions):
+        self.maxDiff = None
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {
@@ -333,6 +330,106 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "country": "POL",
                                         "number": "3333",
                                     }
+                                ],
+                                "disability": "disabled",
+                            },
+                        }
+                    }
+                },
+            }
+        }
+        self.maxDiff = None
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_create_payment_channel_for_individual(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        variables = {
+            "input": {
+                "description": "Test",
+                "businessArea": "afghanistan",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "issueType": 14,
+                "category": 2,
+                "consent": True,
+                "language": "PL",
+                "extras": {
+                    "issueType": {
+                        "individualDataUpdateIssueTypeExtras": {
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "individualData": {
+                                "paymentChannels": [
+                                    {
+                                        "type": "BANK_TRANSFER",
+                                        "bankName": "privatbank",
+                                        "bankAccountNumber": 2356789789789789,
+                                    },
+                                ],
+                            },
+                        }
+                    }
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_edit_payment_channel_for_individual(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        bank_account = BankAccountInfoFactory(
+            id="413b2a07-4bc1-43a7-80e6-91abb486aa9d",
+            individual=self.individuals[0],
+            bank_name="privatbank",
+            bank_account_number=2356789789789789,
+        )
+
+        variables = {
+            "input": {
+                "description": "Test",
+                "businessArea": "afghanistan",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "issueType": 14,
+                "category": 2,
+                "consent": True,
+                "language": "PL",
+                "extras": {
+                    "issueType": {
+                        "individualDataUpdateIssueTypeExtras": {
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "individualData": {
+                                "paymentChannelsToEdit": [
+                                    {
+                                        "id": self.id_to_base64(bank_account.id, "BankAccountInfoNode"),
+                                        "type": "BANK_TRANSFER",
+                                        "bankName": "privatbank",
+                                        "bankAccountNumber": 1111222233334444,
+                                    },
                                 ],
                             },
                         }

@@ -1,4 +1,5 @@
-from datetime import datetime
+from django.utils import timezone
+
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -54,8 +55,7 @@ class Report(TimeStampedUUIDModel):
         null=True,
         related_name="reports",
     )
-    admin_area = models.ManyToManyField("core.AdminArea", blank=True, related_name="reports")
-    admin_area_new = models.ManyToManyField("geo.Area", blank=True, related_name="reports")
+    admin_area = models.ManyToManyField("geo.Area", blank=True, related_name="reports")
 
     def __str__(self):
         return f"[{self.report_type}] Report for [{self.business_area}]"
@@ -100,7 +100,7 @@ class DashboardReport(TimeStampedUUIDModel):
     report_type = ChoiceArrayField(models.CharField(choices=REPORT_TYPES, max_length=255))
 
     # filters
-    year = models.PositiveSmallIntegerField(default=datetime.now().year)
+    year = models.PositiveSmallIntegerField(default=timezone.now().year)
     program = models.ForeignKey(
         "program.Program",
         on_delete=models.CASCADE,
@@ -109,13 +109,6 @@ class DashboardReport(TimeStampedUUIDModel):
         related_name="dashboard_reports",
     )
     admin_area = models.ForeignKey(
-        "core.AdminArea",
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        related_name="dashboard_reports",
-    )
-    admin_area_new = models.ForeignKey(
         "geo.Area",
         on_delete=models.CASCADE,
         blank=True,

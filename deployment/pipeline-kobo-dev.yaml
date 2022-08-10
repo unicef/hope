@@ -1,0 +1,55 @@
+trigger: none
+pr: none
+
+variables:
+  # ========================================================================
+  #                          Mandatory variables
+  # ========================================================================
+  Kubernetes.serviceConnection: "ICTD-HOPE-TRN-uni-apps-aks-hope-dev-ictd-hope-trn-1616938354772"
+  Kubernetes.namespace: "ictd-hope-trn"
+
+stages:
+  - stage: deploy
+    displayName: DEPLOY
+    jobs:
+      - job: deploy_hope
+        displayName: "[KOBO] Deployment"
+        steps:
+          - task: HelmDeploy@0
+            displayName: "Update Chart dependencies"
+            inputs:
+              connectionType: "Kubernetes Service Connection"
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)
+              command: package
+              updatedependency: true
+              chartPath: "**/deployment/kobo"
+          - task: HelmDeploy@0
+            displayName: "DEPLOY"
+            inputs:
+              connectionType: "Kubernetes Service Connection"
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)
+              namespace: $(Kubernetes.namespace)
+              command: "upgrade"
+              chartType: "FilePath"
+              chartPath: "**/deployment/kobo"
+              releaseName: "kobo"
+              install: true
+              waitForExecution: false
+              failOnStderr: false
+              arguments: "--timeout 600s"
+              overrideValues: "
+                global.storageClass=default,\
+                kobotoolbox.superuserPassword=$(KOBO_SUPERUSER_PASSWORD),\
+                mongodb.mongodbPassword=$(MONGO_PASSWORD),\
+                postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
+                rediscache.password=$(REDIS_CACHE_PASSWORD),\
+                redismain.password=$(REDIS_MAIN_PASSWORD),\
+                smtp.host=$(SMTP_HOST),\
+                smtp.email=kobo@unitst.org,\
+                ingress.host=$(DOMAIN),\
+                kpi.subdomain=kf-hope,\
+                kobocat.subdomain=kc-hope,\
+                enketo.subdomain=ek-hope,\
+                ingress.tlsSecret=aks-unitst-tls,\
+                ingress.scheme=https,\
+                ingress.tls=true,"

@@ -26,13 +26,13 @@ interface GrievancesDetailsProps {
   canViewIndividualDetails: boolean;
 }
 
-export function GrievancesDetails({
+export const GrievancesDetails = ({
   ticket,
   choicesData,
   businessArea,
   canViewHouseholdDetails,
   canViewIndividualDetails,
-}: GrievancesDetailsProps): React.ReactElement {
+}: GrievancesDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const statusChoices: {
     [id: number]: string;
@@ -140,12 +140,12 @@ export function GrievancesDetails({
               },
               {
                 label: t('CONSENT'),
-                value: <span>{ticket.consent ? 'Yes' : 'No'}</span>,
+                value: ticket.consent ? 'Yes' : 'No',
                 size: 3,
               },
               {
                 label: t('CREATED BY'),
-                value: <span>{renderUserName(ticket.createdBy)}</span>,
+                value: renderUserName(ticket.createdBy),
                 size: 3,
               },
               {
@@ -160,27 +160,27 @@ export function GrievancesDetails({
               },
               {
                 label: t('DESCRIPTION'),
-                value: <span>{ticket.description || '-'}</span>,
+                value: ticket.description,
                 size: 6,
               },
               {
                 label: t('ASSIGNED TO'),
-                value: <span>{renderUserName(ticket.assignedTo) || '-'}</span>,
+                value: renderUserName(ticket.assignedTo),
                 size: 6,
               },
               {
                 label: t('ADMINISTRATIVE LEVEL 2'),
-                value: <span>{ticket.admin}</span>,
+                value: ticket.admin,
                 size: 3,
               },
               {
                 label: t('AREA / VILLAGE / PAY POINT'),
-                value: <span>{ticket.area}</span>,
+                value: ticket.area,
                 size: 3,
               },
               {
                 label: t('LANGUAGES SPOKEN'),
-                value: <span>{ticket.language || '-'}</span>,
+                value: ticket.language,
                 size: 3,
               },
             ].map((el) => (
@@ -193,4 +193,4 @@ export function GrievancesDetails({
       </ContainerColumnWithBorder>
     </Grid>
   );
-}
+};

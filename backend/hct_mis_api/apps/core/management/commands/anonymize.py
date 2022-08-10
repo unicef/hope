@@ -1,7 +1,6 @@
 import hashlib
 from collections import defaultdict
 from random import random
-from time import time
 
 from django.core.management import BaseCommand
 from django.db.transaction import atomic
@@ -13,6 +12,7 @@ from hct_mis_api.apps.household.models import Document, Individual, MALE, BankAc
 
 class Command(BaseCommand):
     help = "Anonymize data"
+
     @atomic()
     def handle(self, *args, **options):
         pl_faker = Faker("pl_PL")
@@ -35,9 +35,11 @@ class Command(BaseCommand):
         index = 0
         print("Individuals update Started")
         bulk_update_list = []
-        for individual in Individual.all_objects.all().only(
-            "given_name", "middle_name", "family_name", "full_name", "sex", "business_area_id", "phone_no"
-        ).iterator():
+        for individual in (
+            Individual.all_objects.all()
+            .only("given_name", "middle_name", "family_name", "full_name", "sex", "business_area_id", "phone_no")
+            .iterator()
+        ):
             index += 1
             business_area = business_areas_dict[individual.business_area_id]
             given_name_hash = hash(individual.given_name)
@@ -68,13 +70,15 @@ class Command(BaseCommand):
 
             bulk_update_list.append(individual)
             if index % 1000 == 0:
-                Individual.objects.bulk_update(bulk_update_list,
-                                               ("given_name", "middle_name", "family_name", "full_name", "phone_no"))
+                Individual.objects.bulk_update(
+                    bulk_update_list, ("given_name", "middle_name", "family_name", "full_name", "phone_no")
+                )
                 bulk_update_list = []
                 print(f"individuals {index}")
 
-        Individual.objects.bulk_update(bulk_update_list,
-                                       ("given_name", "middle_name", "family_name", "full_name", "phone_no"))
+        Individual.objects.bulk_update(
+            bulk_update_list, ("given_name", "middle_name", "family_name", "full_name", "phone_no")
+        )
         bulk_update_list = []
 
         index = 0
@@ -89,10 +93,8 @@ class Command(BaseCommand):
             bank_info.bank_account_number = fake.credit_card_number()
             bulk_update_list.append(bank_info)
             if index % 1000 == 0:
-                BankAccountInfo.objects.bulk_update(bulk_update_list,
-                                                    ("bank_account_number", "debit_card_number"))
+                BankAccountInfo.objects.bulk_update(bulk_update_list, ("bank_account_number", "debit_card_number"))
                 bulk_update_list = []
                 print(f"individuals {index}")
-        BankAccountInfo.objects.bulk_update(bulk_update_list,
-                                            ("bank_account_number", "debit_card_number"))
+        BankAccountInfo.objects.bulk_update(bulk_update_list, ("bank_account_number", "debit_card_number"))
         bulk_update_list = []

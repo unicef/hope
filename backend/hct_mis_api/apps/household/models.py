@@ -1,28 +1,29 @@
 import logging
 import re
-from datetime import date, datetime
+from datetime import date
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
+from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
+from django.contrib.postgres.indexes import GinIndex
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import DecimalField, F, JSONField, Sum
+from django.db.models import DecimalField, JSONField
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from django_countries.fields import CountryField
+
+from dateutil.relativedelta import relativedelta
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
+from django.contrib.postgres.search import SearchVectorField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -30,6 +31,7 @@ from hct_mis_api.apps.utils.models import (
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
 )
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 BLANK = ""
 IDP = "IDP"
@@ -192,10 +194,12 @@ UNIQUE = "UNIQUE"
 DUPLICATE = "DUPLICATE"
 NEEDS_ADJUDICATION = "NEEDS_ADJUDICATION"
 NOT_PROCESSED = "NOT_PROCESSED"
+DEDUPLICATION_POSTPONE = "POSTPONE"
 DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE = (
     (DUPLICATE, "Duplicate"),
     (NEEDS_ADJUDICATION, "Needs Adjudication"),
     (NOT_PROCESSED, "Not Processed"),
+    (DEDUPLICATION_POSTPONE, "Postpone"),
     (UNIQUE, "Unique"),
 )
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
@@ -333,17 +337,12 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE)
-    country_origin = CountryField(blank=True, db_index=True)
-    country_origin_new = models.ForeignKey(
-        "geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT
-    )
-    country = CountryField(db_index=True)
-    country_new = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
+    country_origin = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
     size = models.PositiveIntegerField(db_index=True)
     address = CICharField(max_length=1024, blank=True)
     """location contains lowest administrative area info"""
-    admin_area = models.ForeignKey("core.AdminArea", null=True, on_delete=models.SET_NULL, blank=True)
-    admin_area_new = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
+    admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -444,9 +443,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     @property
     def status(self):
-        if self.withdrawn:
-            return STATUS_INACTIVE
-        return STATUS_ACTIVE
+        return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
     def withdraw(self):
         self.withdrawn = True
@@ -465,52 +462,24 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     @property
     def admin_area_title(self):
-        return self.admin_area.title
+        return self.admin_area.name
 
     @property
     def admin1(self):
         if self.admin_area is None:
             return None
-        if self.admin_area.level == 0:
+        if self.admin_area.area_type.area_level == 0:
             return None
         current_admin = self.admin_area
-        while current_admin.level != 1:
-            current_admin = current_admin.parent
-        return current_admin
-
-    @property
-    def admin2(self):
-        if self.admin_area is None:
-            return None
-        if self.admin_area.level == 0:
-            return None
-        if self.admin_area.level == 1:
-            return None
-        current_admin = self.admin_area
-        while current_admin.level != 2:
-            current_admin = current_admin.parent
-        return current_admin
-
-    @property
-    def admin1_new(self):
-        if self.admin_area_new is None:
-            return None
-        if self.admin_area_new.area_type.area_level == 0:
-            return None
-        current_admin = self.admin_area_new
         while current_admin.area_type.area_level != 1:
             current_admin = current_admin.parent
         return current_admin
 
     @property
-    def admin2_new(self):
-        if self.admin_area_new is None:
+    def admin2(self):
+        if not self.admin_area or self.admin_area.area_type.area_level in (0, 1):
             return None
-        if self.admin_area_new.area_type.area_level == 0:
-            return None
-        if self.admin_area_new.area_type.area_level == 1:
-            return None
-        current_admin = self.admin_area_new
+        current_admin = self.admin_area
         while current_admin.area_type.area_level != 2:
             current_admin = current_admin.parent
         return current_admin
@@ -540,192 +509,11 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         )
 
     @property
-    def programs_with_delivered_quantity(self):
-        programs = (
-            self.payment_records.all()
-            .annotate(program=F("cash_plan__program"))
-            .values("program")
-            .annotate(
-                total_delivered_quantity=Sum("delivered_quantity", output_field=DecimalField()),
-                total_delivered_quantity_usd=Sum("delivered_quantity_usd", output_field=DecimalField()),
-                currency=F("currency"),
-                program_name=F("cash_plan__program__name"),
-                program_id=F("cash_plan__program__id"),
-            )
-            .order_by("cash_plan__program__created_at")
-        )
-
-        programs_dict = {}
-
-        for program in programs:
-            if program["program_id"] not in programs_dict.keys():
-                programs_dict[program["program_id"]] = {
-                    "id": program["program_id"],
-                    "name": program["program_name"],
-                    "quantity": [
-                        {
-                            "total_delivered_quantity": program["total_delivered_quantity_usd"],
-                            "currency": "USD",
-                        }
-                    ],
-                }
-            if program["currency"] != "USD":
-                programs_dict[program["program_id"]]["quantity"].append(
-                    {
-                        "total_delivered_quantity": program["total_delivered_quantity"],
-                        "currency": program["currency"],
-                    }
-                )
-        return programs_dict.values()
-
-    @property
     def active_individuals(self):
         return self.individuals.filter(withdrawn=False, duplicate=False)
 
     def __str__(self):
         return f"{self.unicef_id}"
-
-    def recalculate_data(self):
-        if not (self.collect_individual_data == YES):
-            return
-        for individual in self.individuals.all():
-            individual.recalculate_data()
-        date_6_years_ago = datetime.now() - relativedelta(years=+6)
-        date_12_years_ago = datetime.now() - relativedelta(years=+12)
-        date_18_years_ago = datetime.now() - relativedelta(years=+18)
-        date_60_years_ago = datetime.now() - relativedelta(years=+60)
-
-        is_beneficiary = ~Q(relationship=NON_BENEFICIARY)
-        active_beneficiary = Q(withdrawn=False, duplicate=False)
-        female_beneficiary = Q(Q(sex=FEMALE) & active_beneficiary & is_beneficiary)
-        male_beneficiary = Q(Q(sex=MALE) & active_beneficiary & is_beneficiary)
-        disabled_disability = Q(disability=DISABLED)
-        female_disability_beneficiary = Q(disabled_disability & female_beneficiary)
-        male_disability_beneficiary = Q(disabled_disability & male_beneficiary)
-
-        to_6_years = Q(birth_date__gt=date_6_years_ago)
-        from_6_to_12_years = Q(birth_date__lte=date_6_years_ago, birth_date__gt=date_12_years_ago)
-        from_12_to_18_years = Q(birth_date__lte=date_12_years_ago, birth_date__gt=date_18_years_ago)
-        from_18_to_60_years = Q(birth_date__lte=date_18_years_ago, birth_date__gt=date_60_years_ago)
-        from_60_years = Q(birth_date__lte=date_60_years_ago)
-
-        children_count = Q(birth_date__gt=date_18_years_ago)
-        female_children_count = Q(birth_date__gt=date_18_years_ago) & female_beneficiary
-        male_children_count = Q(birth_date__gt=date_18_years_ago) & female_beneficiary
-
-        children_disabled_count = Q(birth_date__gt=date_18_years_ago) & disabled_disability
-        female_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & female_disability_beneficiary
-        male_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & male_disability_beneficiary
-
-        age_groups = self.individuals.aggregate(
-            female_age_group_0_5_count=Count("id", distinct=True, filter=Q(female_beneficiary & to_6_years)),
-            female_age_group_6_11_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_6_to_12_years)),
-            female_age_group_12_17_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_12_to_18_years)),
-            female_age_group_18_59_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_18_to_60_years)),
-            female_age_group_60_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_60_years)),
-            male_age_group_0_5_count=Count("id", distinct=True, filter=Q(male_beneficiary & to_6_years)),
-            male_age_group_6_11_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_6_to_12_years)),
-            male_age_group_12_17_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_12_to_18_years)),
-            male_age_group_18_59_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_18_to_60_years)),
-            male_age_group_60_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_60_years)),
-            female_age_group_0_5_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(female_disability_beneficiary & to_6_years),
-            ),
-            female_age_group_6_11_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(female_disability_beneficiary & from_6_to_12_years),
-            ),
-            female_age_group_12_17_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(female_disability_beneficiary & from_12_to_18_years),
-            ),
-            female_age_group_18_59_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(female_disability_beneficiary & from_18_to_60_years),
-            ),
-            female_age_group_60_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(female_disability_beneficiary & from_60_years),
-            ),
-            male_age_group_0_5_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & to_6_years)
-            ),
-            male_age_group_6_11_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(male_disability_beneficiary & from_6_to_12_years),
-            ),
-            male_age_group_12_17_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(male_disability_beneficiary & from_12_to_18_years),
-            ),
-            male_age_group_18_59_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(male_disability_beneficiary & from_18_to_60_years),
-            ),
-            male_age_group_60_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(male_disability_beneficiary & from_60_years),
-            ),
-            size=Count("id", distinct=True, filter=Q(is_beneficiary & active_beneficiary)),
-            pregnant_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(is_beneficiary & active_beneficiary & Q(pregnant=True)),
-            ),
-            children_count=Count(
-                "id",
-                distinct=True,
-                filter=children_count,
-            ),
-            female_children_count=Count(
-                "id",
-                distinct=True,
-                filter=female_children_count,
-            ),
-            male_children_count=Count(
-                "id",
-                distinct=True,
-                filter=male_children_count,
-            ),
-            children_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=children_disabled_count,
-            ),
-            female_children_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=female_children_disabled_count,
-            ),
-            male_children_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=male_children_disabled_count,
-            ),
-        )
-        updated_fields = ["child_hoh", "fchild_hoh", "updated_at"]
-
-        for key, value in age_groups.items():
-            updated_fields.append(key)
-            setattr(self, key, value)
-
-        self.child_hoh = False
-        self.fchild_hoh = False
-        if self.head_of_household.age < 18:
-            if self.head_of_household.sex == FEMALE:
-                self.fchild_hoh = True
-            self.child_hoh = True
-        self.save(update_fields=updated_fields)
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -734,8 +522,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class DocumentType(TimeStampedUUIDModel):
-    country = CountryField(default="U")
-    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
@@ -781,14 +568,16 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
             )
         ]
 
+    def __str__(self):
+        return f"{self.type} - {self.document_number}"
+
 
 class Agency(models.Model):
     type = models.CharField(max_length=100, choices=AGENCY_TYPE_CHOICES)
     label = models.CharField(
         max_length=100,
     )
-    country = CountryField()
-    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Agencies"
@@ -978,6 +767,16 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
 
+    vector_column = SearchVectorField(null=True)
+
+    @property
+    def phone_no_valid(self):
+        return is_right_phone_number_format(self.phone_no)
+
+    @property
+    def phone_no_alternative_valid(self):
+        return is_right_phone_number_format(self.phone_no_alternative)
+
     @property
     def age(self):
         return relativedelta(date.today(), self.birth_date).years
@@ -985,9 +784,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     @property
     def role(self):
         role = self.households_and_roles.first()
-        if role is not None:
-            return role.role
-        return ROLE_NO_ROLE
+        return role.role if role is not None else ROLE_NO_ROLE
 
     @property
     def get_hash_key(self):
@@ -1019,11 +816,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     @property
     def cash_assist_status(self):
-        if self.withdrawn:
-            return STATUS_INACTIVE
-        if self.duplicate:
-            return STATUS_INACTIVE
-        return STATUS_ACTIVE
+        return STATUS_INACTIVE if self.withdrawn or self.duplicate else STATUS_ACTIVE
 
     @property
     def sanction_list_last_check(self):
@@ -1047,6 +840,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     class Meta:
         verbose_name = "Individual"
+        indexes = (GinIndex(fields=["vector_column"]),)
 
     def set_sys_field(self, key, value):
         if "sys" not in self.user_fields:
@@ -1082,9 +876,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     @cached_property
     def parents(self):
-        if self.household:
-            return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
-        return []
+        return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True)) if self.household else []
 
     def is_golden_record_duplicated(self):
         return self.deduplication_golden_record_status == DUPLICATE

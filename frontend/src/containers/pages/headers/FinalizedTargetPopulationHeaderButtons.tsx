@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import { FileCopy } from '@material-ui/icons';
 import {
@@ -21,10 +21,6 @@ const IconContainer = styled.span`
   }
 `;
 
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
-
 export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
   canDuplicate: boolean;
@@ -41,7 +37,7 @@ export const FinalizedTargetPopulationHeaderButtons = ({
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canDuplicate && (
         <IconContainer>
           <Button onClick={() => setOpenDuplicate(true)}>
@@ -49,7 +45,7 @@ export const FinalizedTargetPopulationHeaderButtons = ({
           </Button>
         </IconContainer>
       )}
-      <ButtonContainer>
+      <Box m={2}>
         <Button
           variant='contained'
           color='primary'
@@ -61,12 +57,12 @@ export const FinalizedTargetPopulationHeaderButtons = ({
         >
           Open in CashAssist
         </Button>
-      </ButtonContainer>
+      </Box>
       <DuplicateTargetPopulation
         open={openDuplicate}
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
-    </div>
+    </Box>
   );
 };

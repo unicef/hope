@@ -1,39 +1,26 @@
-from constance.test import override_config
-
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
-    DUPLICATE,
     FEMALE,
     HEAD,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     MALE,
-    NEEDS_ADJUDICATION,
     SON_DAUGHTER,
-    UNIQUE,
     WIFE_HUSBAND,
     Document,
     DocumentType,
-    Individual,
+    IDENTIFICATION_TYPE_TAX_ID,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    create_imported_household_and_individuals,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    DUPLICATE_IN_BATCH,
-    UNIQUE_IN_BATCH,
-    ImportData,
-    ImportedIndividual,
-)
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):
@@ -115,7 +102,11 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                 },
             ],
         )
-        dt = DocumentType(country="PL", label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country = geo_models.Country.objects.get(iso_code2="PL")
+        dt = DocumentType(country=country, label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        dt_tax_id = DocumentType.objects.create(
+            country=country, label=IDENTIFICATION_TYPE_TAX_ID, type=IDENTIFICATION_TYPE_TAX_ID
+        )
         dt.save()
         cls.document1 = Document(
             type=dt, document_number="ASD123", individual=cls.individuals[0], status=Document.STATUS_VALID
@@ -125,6 +116,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         cls.document4 = Document(type=dt, document_number="ASD123", individual=cls.individuals[3])
         cls.document5 = Document(
             type=dt, document_number="TOTALY UNIQ", individual=cls.individuals[4], status=Document.STATUS_VALID
+        )
+        cls.document6 = Document.objects.create(
+            type=dt_tax_id, document_number="ASD123", individual=cls.individuals[2], status=Document.STATUS_VALID
         )
         cls.document1.save()
         cls.document2.save()
@@ -154,5 +148,5 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(GrievanceTicket.objects.count(), 0)
 
     def test_hard_documents_deduplication_number_of_queries(self):
-        with self.assertNumQueries(12):
+        with self.assertNumQueries(13):
             DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))

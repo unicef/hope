@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils import timezone
 from tempfile import NamedTemporaryFile
 from unittest.mock import patch
 
@@ -6,7 +7,7 @@ from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
-from django.test import Client, RequestFactory, TestCase
+from django.test import Client, RequestFactory
 from django.urls import reverse
 
 import requests
@@ -47,6 +48,8 @@ def raise_as_func(exception):
 
 
 class TestKoboTemplateUpload(APITestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
@@ -147,7 +150,7 @@ class TestKoboErrorHandling(APITestCase):
             empty_template.refresh_from_db()
             self.assertEqual(empty_template.status, XLSXKoboTemplate.CONNECTION_FAILED)
             self.assertNotEqual(empty_template.first_connection_failed_time, None)
-            one_day_earlier_time = datetime.now() - timedelta(days=1)
+            one_day_earlier_time = timezone.now() - timedelta(days=1)
             self.assertTrue(empty_template.first_connection_failed_time > one_day_earlier_time)
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
@@ -176,7 +179,7 @@ class TestKoboErrorHandling(APITestCase):
             empty_template.refresh_from_db()
             self.assertEqual(empty_template.status, XLSXKoboTemplate.CONNECTION_FAILED)
             self.assertNotEqual(empty_template.first_connection_failed_time, None)
-            one_day_earlier_time = datetime.now() - timedelta(days=1)
+            one_day_earlier_time = timezone.now() - timedelta(days=1)
             self.assertTrue(empty_template.first_connection_failed_time > one_day_earlier_time)
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")

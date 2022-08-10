@@ -395,7 +395,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                0048875012932
+                +48875012932
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"

@@ -1,5 +1,3 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -52,6 +50,12 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             household=household,
             status=PaymentRecord.STATUS_SUCCESS,
         )
+        # after .create(...), newly created PaymentRecord does not have `head_of_household` set
+        # logic needs it to check record.head_of_household.phone_no
+        # hence the below
+        assert PaymentRecord.objects.count() == 1
+        PaymentRecord.objects.all().update(head_of_household=household.head_of_household)
+
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
             context={"user": self.user},

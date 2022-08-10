@@ -2,7 +2,6 @@ from decimal import Decimal
 from typing import Optional
 
 from django.contrib.postgres.fields import CICharField
-from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -10,15 +9,13 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Count, Q
-from django.utils.deconstruct import deconstructible
+from django.db.models import Q
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -117,12 +114,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     ca_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
     ca_hash_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
-    admin_areas = models.ManyToManyField(
-        "core.AdminArea",
-        related_name="programs",
-        blank=True,
-    )
-    admin_areas_new = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
+    admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     budget = models.DecimalField(
         decimal_places=2,
@@ -287,7 +279,9 @@ class CashPlan(TimeStampedUUIDModel):
     def can_create_payment_verification_plan(self):
         return self.available_payment_records().count() > 0
 
-    def available_payment_records(self, payment_verification_plan: Optional[CashPlanPaymentVerification] = None):
+    def available_payment_records(
+        self, payment_verification_plan: Optional[CashPlanPaymentVerification] = None, extra_validation=None
+    ):
         params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
@@ -297,7 +291,12 @@ class CashPlan(TimeStampedUUIDModel):
         else:
             params &= Q(verification__isnull=True)
 
-        return self.payment_records.filter(params).distinct()
+        payment_records = self.payment_records.filter(params).distinct()
+
+        if extra_validation:
+            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+
+        return PaymentRecord.objects.filter(pk__in=payment_records)
 
     class Meta:
         verbose_name = "Cash Plan"

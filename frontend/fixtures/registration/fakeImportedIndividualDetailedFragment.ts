@@ -68,6 +68,6 @@ export const fakeImportedIndividualDetailedFragment = {
     __typename: 'ImportedIndividualIdentityNodeConnection',
   },
   household: null,
-  phoneNo: '0048503123555',
+  phoneNo: '+48503123555',
   phoneNoAlternative: '',
 } as ImportedIndividualDetailedFragment;

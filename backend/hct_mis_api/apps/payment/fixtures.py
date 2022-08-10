@@ -112,6 +112,7 @@ class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
     received_count = fuzzy.FuzzyInteger(30, 70)
     not_received_count = fuzzy.FuzzyInteger(0, 10)
     received_with_problems_count = fuzzy.FuzzyInteger(0, 10)
+    rapid_pro_flow_start_uuids = factory.LazyFunction(list)
 
     class Meta:
         model = CashPlanPaymentVerification
@@ -128,7 +129,7 @@ class PaymentVerificationFactory(factory.DjangoModelFactory):
         PaymentVerification.STATUS_CHOICES,
         getter=lambda c: c[0],
     )
-    status_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    status_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
 
     class Meta:
         model = PaymentVerification
@@ -339,7 +340,11 @@ def generate_real_cash_plans_for_households(households):
     cash_plans = RealCashPlanFactory.create_batch(3, program=program, business_area=households[0].business_area)
     for cash_plan in cash_plans:
         for hh in households:
-            RealPaymentRecordFactory(cash_plan=cash_plan, household=hh, business_area=hh.business_area,)
+            RealPaymentRecordFactory(
+                cash_plan=cash_plan,
+                household=hh,
+                business_area=hh.business_area,
+            )
     program.households.set(
         PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
         .filter(cash_plan__in=cash_plans)

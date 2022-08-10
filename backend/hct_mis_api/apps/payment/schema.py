@@ -1,5 +1,4 @@
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
-
 from django.shortcuts import get_object_or_404
 
 import graphene
@@ -28,10 +27,10 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
+    CashPlanPaymentVerificationFilter,
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -50,6 +49,11 @@ from hct_mis_api.apps.utils.schema import (
     ChartDetailedDatasetsNode,
     SectionTotalNode,
     TableTotalCashTransferred,
+)
+
+
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+    does_payment_record_have_right_hoh_phone_number,
 )
 
 
@@ -107,13 +111,20 @@ class AgeFilterObject(graphene.ObjectType):
 
 class CashPlanPaymentVerificationNode(DjangoObjectType):
     excluded_admin_areas_filter = graphene.List(graphene.String)
-
     age_filter = graphene.Field(AgeFilterObject)
+    xlsx_file_was_downloaded = graphene.Boolean()
+    has_xlsx_file = graphene.Boolean()
 
     class Meta:
         model = CashPlanPaymentVerification
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_xlsx_file_was_downloaded(self, info):
+        return self.xlsx_cash_plan_payment_verification_file_was_downloaded
+
+    def resolve_has_xlsx_file(self, info):
+        return self.has_xlsx_cash_plan_payment_verification_file
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -253,6 +264,14 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info, input, **kwargs):
+        def get_payment_records(cash_plan, payment_verification_plan, verification_channel):
+            if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
+                return cash_plan.available_payment_records(
+                    payment_verification_plan=payment_verification_plan,
+                    extra_validation=does_payment_record_have_right_hoh_phone_number,
+                )
+            return cash_plan.available_payment_records(payment_verification_plan=payment_verification_plan)
+
         cash_plan_id = decode_id_string(input.get("cash_plan_id"))
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
 
@@ -260,7 +279,13 @@ class Query(graphene.ObjectType):
         if payment_verification_plan_id := decode_id_string(input.get("cash_plan_payment_verification_id")):
             payment_verification_plan = get_object_or_404(CashPlanPaymentVerification, id=payment_verification_plan_id)
 
-        payment_records = cash_plan.available_payment_records(payment_verification_plan)
+        payment_records = get_payment_records(cash_plan, payment_verification_plan, input.get("verification_channel"))
+        if not payment_records:
+            return {
+                "sample_size": 0,
+                "payment_record_count": 0,
+            }
+
         sampling = Sampling(input, cash_plan, payment_records)
         payment_record_count, payment_records_sample_count = sampling.generate_sampling()
 
@@ -306,7 +331,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="payment_record__cash_plan__program__id",
-                    administrative_area_path="payment_record__household__admin_area_new",
+                    administrative_area_path="payment_record__household__admin_area",
                 )
             },
             year_filter_path="payment_record__delivery_date",
