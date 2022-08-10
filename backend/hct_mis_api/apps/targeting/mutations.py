@@ -502,7 +502,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)
             if (
                 target_population.allowed_steficon_rule is not None
-                and steficon_rule_id != target_population.allowed_steficon_rule.id
+                and steficon_rule_id != str(target_population.allowed_steficon_rule.id)
             ):
                 logger.error(
                     "Another formula was applied to a previous target population for this programme. You can only apply the same formula"

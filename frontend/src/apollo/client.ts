@@ -36,7 +36,6 @@ function findValidationErrors(
   if (!data) {
     return errors;
   }
-  // debugger;
   for (const entry of Object.entries(data)) {
     if (entry[0] === 'validationErrors' && entry[1]) {
       // eslint-disable-next-line no-param-reassign

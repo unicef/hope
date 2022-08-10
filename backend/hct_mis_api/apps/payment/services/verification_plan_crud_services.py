@@ -1,6 +1,6 @@
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
 )
@@ -25,10 +25,10 @@ class VerificationPlanCrudServices:
         payment_records = cash_plan.available_payment_records()
         sampling = Sampling(input_data, cash_plan, payment_records)
         cash_plan_verification, payment_records = sampling.process_sampling(cash_plan_verification)
+        ProcessVerification(input_data, cash_plan_verification).process()
         cash_plan_verification.save()
 
         CreatePaymentVerifications(cash_plan_verification, payment_records).create()
-        ProcessVerification(input_data, cash_plan_verification).process()
 
         return cash_plan_verification
 
@@ -44,10 +44,10 @@ class VerificationPlanCrudServices:
         payment_records = cash_plan_verification.cash_plan.available_payment_records()
         sampling = Sampling(input_data, cash_plan_verification.cash_plan, payment_records)
         cash_plan_verification, payment_records = sampling.process_sampling(cash_plan_verification)
+        ProcessVerification(input_data, cash_plan_verification).process()
         cash_plan_verification.save()
 
         CreatePaymentVerifications(cash_plan_verification, payment_records).create()
-        ProcessVerification(input_data, cash_plan_verification).process()
 
         return cash_plan_verification
 

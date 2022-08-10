@@ -62,7 +62,7 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
     resource_class = QueryResource
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_superuser or obj.owner == request.user
+        return request.user.is_superuser or (obj and obj.owner == request.user)
 
     def status(self, obj):
         return obj.ready and not obj.error
@@ -157,13 +157,13 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
                         "query": obj.query,
                     }
                     output = formatter.render(report_context)
-                    if formatter.content_type == 'xls':
+                    if formatter.content_type == "xls":
                         response = HttpResponse(output, content_type=formatter.content_type)
-                        response['Content-Disposition'] = f'attachment; filename=Dataset Report.xls'
+                        response["Content-Disposition"] = "attachment; filename=Dataset Report.xls"
                         return response
                     return HttpResponse(output)
             else:
-                context["extra_buttons"] = ''
+                context["extra_buttons"] = ""
                 form = ExportForm()
             context["form"] = form
             return render(request, "admin/power_query/dataset/export.html", context)
@@ -216,12 +216,12 @@ class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
                         "dataset": form.cleaned_data["query"].dataset,
                         "report": "None",
                     }
-                    if obj.content_type == 'xls':
+                    if obj.content_type == "xls":
                         output = obj.render(ctx)
                         response = HttpResponse(output, content_type=obj.content_type)
-                        response['Content-Disposition'] = 'attachment; filename=Report.xls'
+                        response["Content-Disposition"] = "attachment; filename=Report.xls"
                         return response
-                    else:    
+                    else:
                         context["results"] = str(obj.render(ctx))
                 else:
                     form = FormatterTestForm()
@@ -252,7 +252,7 @@ class ReportAdmin(ImportExportMixin, ExtraButtonsMixin, AdminFiltersMixin, Model
     change_list_template = None
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_superuser or obj.owner == request.user
+        return request.user.is_superuser or (obj and obj.owner == request.user)
 
     def get_changeform_initial_data(self, request):
         kwargs = {"owner": request.user}

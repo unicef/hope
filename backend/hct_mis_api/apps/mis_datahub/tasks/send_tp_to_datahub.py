@@ -5,7 +5,7 @@ from django.db.models import F, Q
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import CountryCodeMap
-from hct_mis_api.apps.core.utils import nested_getattr, build_arg_dict
+from hct_mis_api.apps.core.utils import build_arg_dict
 from hct_mis_api.apps.household.models import (
     Household,
     Individual,
@@ -14,7 +14,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
 )
 from hct_mis_api.apps.mis_datahub import models as dh_mis_models
-from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+from hct_mis_api.apps.targeting.models import HouseholdSelection
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class SendTPToDatahubTask:
     MAPPING_PROGRAM_DICT = {
         "mis_id": "id",
         "name": "name",
-        "business_area": "business_area.code",
+        "business_area": "business_area.cash_assist_code",
         "scope": "scope",
         "start_date": "start_date",
         "end_date": "end_date",
@@ -96,7 +96,7 @@ class SendTPToDatahubTask:
                     self.dh_session = dh_mis_models.Session(
                         source=dh_mis_models.Session.SOURCE_MIS,
                         status=dh_mis_models.Session.STATUS_READY,
-                        business_area=program.business_area.code,
+                        business_area=program.business_area.cash_assist_code,
                     )
                     self.dh_session.save()
 
@@ -277,4 +277,3 @@ class SendTPToDatahubTask:
         if household.unhcr_id == "":
             return None
         return household.unhcr_id
-

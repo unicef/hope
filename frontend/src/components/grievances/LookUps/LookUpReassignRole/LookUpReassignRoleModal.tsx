@@ -34,7 +34,7 @@ export const LookUpReassignRoleModal = ({
   selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
-  excludedIndividual,
+  individual,
   household,
 }: {
   onValueChange;
@@ -46,7 +46,7 @@ export const LookUpReassignRoleModal = ({
   selectedHousehold;
   setSelectedIndividual;
   setSelectedHousehold;
-  excludedIndividual;
+  individual;
   household?;
 }): React.ReactElement => {
   const { t } = useTranslation();
@@ -81,7 +81,7 @@ export const LookUpReassignRoleModal = ({
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
-    fetchPolicy:'cache-and-network'
+    fetchPolicy: 'cache-and-network',
   });
 
   if (loading) return null;
@@ -99,14 +99,30 @@ export const LookUpReassignRoleModal = ({
         onValueChange('selectedHousehold', values.selectedHousehold);
         onValueChange('selectedIndividual', values.selectedIndividual);
         setLookUpDialogOpen(false);
+
+        const multipleRolesVariables = {
+          grievanceTicketId: id,
+          householdId: household.id,
+          newIndividualId: values.selectedIndividual.id,
+          individualId: individual.id,
+          role: values.role,
+        };
+
+        const singleRoleVariables = {
+          grievanceTicketId: id,
+          householdId: household.id,
+          individualId: values.selectedIndividual.id,
+          role: values.role,
+        };
+
+        const shouldUseMultiple =
+          ticket.needsAdjudicationTicketDetails.selectedIndividuals.length;
+
         try {
           await mutate({
-            variables: {
-              grievanceTicketId: id,
-              householdId: household.id,
-              individualId: values.selectedIndividual.id,
-              role: values.role,
-            },
+            variables: shouldUseMultiple
+              ? multipleRolesVariables
+              : singleRoleVariables,
             refetchQueries: () => [
               {
                 query: GrievanceTicketDocument,
@@ -153,7 +169,7 @@ export const LookUpReassignRoleModal = ({
               selectedIndividual={selectedIndividual}
               setSelectedIndividual={setSelectedIndividual}
               ticket={ticket}
-              excludedId={excludedIndividual.id}
+              excludedId={individual.id}
               withdrawn={false}
             />
           </DialogContent>

@@ -1,5 +1,5 @@
 import csv
-from typing import Dict, List, Union
+from typing import Union
 
 from django.http import HttpResponse
 

@@ -1,6 +1,10 @@
-from django.shortcuts import get_object_or_404
-
+import logging
+import datetime
+from django.utils import timezone
 import graphene
+
+from django.shortcuts import get_object_or_404
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
@@ -15,6 +19,8 @@ from hct_mis_api.apps.reporting.celery_tasks import (
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
 from hct_mis_api.apps.reporting.schema import ReportNode
 from hct_mis_api.apps.reporting.validators import ReportValidator
+
+logger = logging.getLogger(__name__)
 
 
 class CreateReportInput(graphene.InputObjectType):
@@ -76,6 +82,35 @@ class CreateReport(ReportValidator, PermissionMutation):
         return CreateReport(report)
 
 
+class RestartCreateReportInput(graphene.InputObjectType):
+    report_id = graphene.ID(required=True)
+    business_area_slug = graphene.String(required=True)
+
+
+class RestartCreateReport(PermissionMutation):
+    report = graphene.Field(ReportNode)
+
+    class Arguments:
+        report_data = RestartCreateReportInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, report_data):
+        business_area = BusinessArea.objects.get(slug=report_data.get("business_area_slug"))
+        cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
+        report = get_object_or_404(Report, id=decode_id_string(report_data.get("report_id")))
+
+        delta30 = timezone.now() - datetime.timedelta(minutes=30)
+        if report.status is not Report.IN_PROGRESS and report.updated_at > delta30:
+            msg = "Impossible restart now. Status must be 'Processing' and more than 30 mins after last running."
+            logger.error(msg)
+            raise GraphQLError(msg)
+        else:
+            report_export_task.delay(report_id=str(report.id))
+            report.refresh_from_db()
+        return RestartCreateReport(report)
+
+
 class CreateDashboardReportInput(graphene.InputObjectType):
     report_types = graphene.List(graphene.String, required=True)
     business_area_slug = graphene.String(required=True)
@@ -126,4 +161,5 @@ class CreateDashboardReport(PermissionMutation):
 
 class Mutations(graphene.ObjectType):
     create_report = CreateReport.Field()
+    restart_create_report = RestartCreateReport.Field()
     create_dashboard_report = CreateDashboardReport.Field()

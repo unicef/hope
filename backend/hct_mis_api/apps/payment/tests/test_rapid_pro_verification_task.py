@@ -2,7 +2,6 @@ import uuid
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
-from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -30,7 +29,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import is_right_phone_number_format
+from hct_mis_api.apps.utils.phone_number import is_right_phone_number_format
 
 
 class TestRapidProVerificationTask(TestCase):
@@ -151,7 +150,7 @@ class TestRapidProVerificationTask(TestCase):
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
-            mapped_dict = api.get_mapped_flow_runs(uuid.uuid4())
+            mapped_dict = api.get_mapped_flow_runs([uuid.uuid4()])
             self.assertEqual(
                 mapped_dict,
                 [],
@@ -170,7 +169,7 @@ class TestRapidProVerificationTask(TestCase):
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
-            mapped_dict = api.get_mapped_flow_runs(TestRapidProVerificationTask.START_UUID)
+            mapped_dict = api.get_mapped_flow_runs([TestRapidProVerificationTask.START_UUID])
             self.assertEqual(
                 mapped_dict,
                 [
@@ -322,8 +321,13 @@ class TestRapidProVerificationTask(TestCase):
 
 
 class TestPhoneNumberVerification(TestCase):
-    def test_good_phone_number(self):
+    def test_phone_numbers(self):
         assert is_right_phone_number_format("+40032215789")
 
-    def test_bad_phone_number(self):
+        assert is_right_phone_number_format("+48 123 234 345")
+        assert is_right_phone_number_format("0048 123 234 345")
+
+        assert not is_right_phone_number_format("(201) 555-0123")
+        assert is_right_phone_number_format("+1 (201) 555-0123")
+
         assert not is_right_phone_number_format("123-not-really-a-phone-number")

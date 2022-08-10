@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils import timezone
 
 from django.conf import settings
 
@@ -33,7 +34,7 @@ class TestLoadXML(BaseElasticSearchTestCase):
 
         updated_individual = active_individuals.get(reference_number="KPi.033")
         self.assertEqual(updated_individual.third_name, "TEST")
-        self.assertEqual(updated_individual.listed_on, datetime(year=2020, month=11, day=30))
+        self.assertEqual(updated_individual.listed_on, timezone.make_aware(datetime(year=2020, month=11, day=30)))
 
         self.assertEqual(updated_individual.documents.all().count(), 2)
 
@@ -55,4 +56,4 @@ class TestLoadXML(BaseElasticSearchTestCase):
         self.assertEqual(active_individuals.count(), 3)
 
         updated_individual = active_individuals.get(reference_number="KPi.037")
-        self.assertEqual(updated_individual.listed_on, datetime(year=2020, month=11, day=30))
+        self.assertEqual(updated_individual.listed_on, timezone.make_aware(datetime(year=2020, month=11, day=30)))
