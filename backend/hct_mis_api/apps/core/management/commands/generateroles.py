@@ -119,7 +119,6 @@ class Command(BaseCommand):
                     Permissions.USER_MANAGEMENT_VIEW_LIST,
                     Permissions.ACTIVITY_LOG_VIEW,
                     Permissions.ACTIVITY_LOG_DOWNLOAD,
-                    Permissions.PAYMENT_MODULE_VIEW_LIST,
                 ],
             },
             {
