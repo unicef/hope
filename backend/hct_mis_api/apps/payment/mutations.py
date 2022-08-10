@@ -698,6 +698,9 @@ class DeletePaymentPlanMutation(PermissionMutation):
 class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+
     @classmethod
     @is_authenticated
     @transaction.atomic
