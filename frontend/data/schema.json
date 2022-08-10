@@ -8413,18 +8413,6 @@
             "deprecationReason": null
           },
           {
-            "name": "postponeDeduplication",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "linkedTicketsRelated",
             "description": null,
             "args": [

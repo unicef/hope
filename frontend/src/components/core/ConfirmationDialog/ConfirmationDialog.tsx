@@ -17,6 +17,7 @@ export interface ConfirmationDialogOptions {
   content?: string;
   continueText?: string;
   extraContent?: string;
+  warningContent?: string | null;
   disabled?: boolean;
 }
 
@@ -32,6 +33,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   content,
   continueText,
   extraContent,
+  warningContent,
   onSubmit,
   onClose,
   disabled = false,
@@ -51,7 +53,12 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
             {extraContent}
           </Typography>
         ) : null}
-        <Typography variant='body2'>{content}</Typography>
+        <Typography variant='body2' gutterBottom={!!warningContent}>{content}</Typography>
+        {warningContent ? (
+          <Typography color='primary' variant='body2' style={{ paddingBottom: '16px', fontWeight: 'bold' }}>
+            {warningContent}
+          </Typography>
+        ) : null}
       </DialogContent>
       <DialogFooter>
         <DialogActions>
