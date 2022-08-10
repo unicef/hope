@@ -7,7 +7,7 @@ import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
+import { usePaymentPlanStatusChoicesQueryQuery } from '../../../../__generated__/graphql';
 
 export interface FilterProps {
   search: string;
@@ -32,7 +32,7 @@ export function PaymentPlansFilters({
     onFilterChange({ ...filter, [name]: e.target.value });
   const {
     data: statusChoicesData,
-  } = useCashPlanVerificationStatusChoicesQuery();
+  } = usePaymentPlanStatusChoicesQueryQuery();
 
   if (!statusChoicesData) {
     return null;
@@ -70,7 +70,7 @@ export function PaymentPlansFilters({
             multiple
             value={filter.status || []}
           >
-            {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => {
+            {statusChoicesData.paymentPlanStatusChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
