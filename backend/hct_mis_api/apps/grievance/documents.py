@@ -70,6 +70,7 @@ class GrievanceTicketDocument(Document):
     created_at = fields.DateField(similarity="boolean")
     assigned_to = fields.TextField()
     registration_data_import = fields.TextField()
+    household_unicef_id = fields.KeywordField(similarity="boolean")
     status = fields.KeywordField(similarity="boolean")
     issue_type = fields.TextField()
     category = fields.KeywordField(similarity="boolean")

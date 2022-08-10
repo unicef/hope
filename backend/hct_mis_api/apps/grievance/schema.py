@@ -450,6 +450,8 @@ class Query(graphene.ObjectType):
     grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
+        logger.info("****************")
+        logger.info(kwargs)
         return GrievanceTicket.objects.filter(ignored=False).select_related("assigned_to", "created_by")
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
