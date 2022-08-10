@@ -188,8 +188,8 @@ def country_origin_query(comparision_method, args):
 def admin_area1_query(comparision_method, args):
     from django.db.models import Q
 
-    return Q(Q(admin_area_new__p_code=args[0]) & Q(admin_area_new__area_type__area_level=1)) | Q(
-        Q(admin_area_new__parent__p_code=args[0]) & Q(admin_area_new__parent__area_type__area_level=1)
+    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__area_type__area_level=1)) | Q(
+        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__area_type__area_level=1)
     )
 
 
