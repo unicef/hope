@@ -36,8 +36,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
-# from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-
 
 class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
     UPDATE_GRIEVANCE_TICKET_STATUS_CHANGE_MUTATION = """
