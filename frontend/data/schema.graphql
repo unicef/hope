@@ -800,6 +800,10 @@ type EditPaymentVerificationMutation {
   cashPlan: CashPlanNode
 }
 
+type ExportXLSXPaymentPlanPaymentListMutation {
+  paymentPlan: PaymentPlanNode
+}
+
 type ExportXlsxCashPlanVerification {
   cashPlan: CashPlanNode
 }
@@ -1270,6 +1274,11 @@ enum ImportDataStatus {
   FINISHED
   ERROR
   VALIDATION_ERROR
+}
+
+type ImportXLSXPaymentPlanPaymentListMutation {
+  paymentPlan: PaymentPlanNode
+  errors: [XlsxErrorNode]
 }
 
 type ImportXlsxCashPlanVerification {
@@ -2368,6 +2377,9 @@ type Mutations {
   createPaymentPlan(input: CreatePaymentPlanInput!): CreatePaymentPlanMutation
   updatePaymentPlan(input: UpdatePaymentPlanInput!): UpdatePaymentPlanMutation
   deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
+  exportXlsxPaymentPlanPaymentList(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
+  importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
+  setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID): SetSteficonRuleOnPaymentPlanPaymentListMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -2670,12 +2682,16 @@ type PaymentPlanNode implements Node {
   maleAdultsCount: Int!
   totalHouseholdsCount: Int!
   totalIndividualsCount: Int!
+  xlsxFileImportedDate: DateTime
+  steficonRule: RuleCommitNode
+  steficonAppliedDate: DateTime
   payments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   approvalNumberRequired: Int
   authorizationNumberRequired: Int
   financeReviewNumberRequired: Int
   currencyName: String
+  hasPaymentListXlsxFile: Boolean
 }
 
 type PaymentPlanNodeConnection {
@@ -2697,6 +2713,12 @@ enum PaymentPlanStatus {
   IN_AUTHORIZATION
   IN_REVIEW
   ACCEPTED
+  STEFICON_WAIT
+  STEFICON_RUN
+  STEFICON_COMPLETED
+  STEFICON_ERROR
+  XLSX_EXPORTING
+  XLSX_IMPORTING
 }
 
 enum PaymentRecordDeliveryType {
@@ -2957,7 +2979,7 @@ type Query {
   grievanceTicketCategoryChoices: [ChoiceObject]
   grievanceTicketManualCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
-  allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
+  allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean, type: String!): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   financialServiceProviderXlsxTemplate(id: ID!): FinancialServiceProviderXlsxTemplateNode
   allFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdBy: ID, orderBy: String): FinancialServiceProviderXlsxTemplateNodeConnection
@@ -3306,6 +3328,7 @@ type RuleCommitNode implements Node {
   affectedFields: [String!]!
   before: JSONString!
   after: JSONString!
+  paymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], paymentPlanApplicable: Boolean, orderBy: String): TargetPopulationNodeConnection!
 }
 
@@ -3329,6 +3352,11 @@ enum RuleSecurity {
   A_0
   A_2
   A_4
+}
+
+enum RuleType {
+  PAYMENT_PLAN
+  TARGETING
 }
 
 type SanctionListIndividualAliasNameNode implements Node {
@@ -3513,6 +3541,10 @@ type ServiceProviderNodeEdge {
   cursor: String!
 }
 
+type SetSteficonRuleOnPaymentPlanPaymentListMutation {
+  paymentPlan: PaymentPlanNode
+}
+
 input SetSteficonRuleOnTargetPopulationMutationInput {
   targetId: ID!
   steficonRuleId: ID
@@ -3551,6 +3583,7 @@ type SteficonRuleNode implements Node {
   updatedBy: UserNode
   createdAt: DateTime!
   updatedAt: DateTime!
+  type: RuleType!
   flags: JSONString!
   history(offset: Int, before: String, after: String, first: Int, last: Int): RuleCommitNodeConnection!
 }
