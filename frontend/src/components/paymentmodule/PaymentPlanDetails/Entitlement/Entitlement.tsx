@@ -203,7 +203,7 @@ export const Entitlement = ({
                   startIcon={<DownloadIcon />}
                   component='a'
                   download
-                  href={`api/download-payment-plan-payment-list/${paymentPlan.id}`}
+                  href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
                 >
                   {t('DOWNLOAD TEMPLATE')}
                 </Button>
