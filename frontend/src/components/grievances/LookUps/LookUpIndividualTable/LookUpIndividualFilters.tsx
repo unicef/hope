@@ -23,6 +23,7 @@ interface LookUpIndividualFiltersProps {
   setFilterIndividualApplied?;
   individualFilterInitial?;
   household?;
+  addBorder?;
 }
 export function LookUpIndividualFilters({
   onFilterChange,
@@ -31,27 +32,31 @@ export function LookUpIndividualFilters({
   setFilterIndividualApplied,
   individualFilterInitial,
   household,
+  addBorder = true,
 }: LookUpIndividualFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
-  return (
-    <ContainerWithBorder>
+
+  const renderTable = (): React.ReactElement => {
+    return (
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
             data-cy='filters-search'
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item container xs={5}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'programs')}
             label={t('Programme')}
             value={filter.programs || []}
             icon={<FlashOnIcon />}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -63,7 +68,7 @@ export function LookUpIndividualFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -79,7 +84,7 @@ export function LookUpIndividualFilters({
             value={filter.lastRegistrationDate.min}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -94,12 +99,13 @@ export function LookUpIndividualFilters({
             value={filter.lastRegistrationDate.max}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
             multiple
             label={t('Status')}
             value={filter.status || []}
+            fullWidth
           >
             {[
               { value: 'ACTIVE', name: 'Active' },
@@ -114,14 +120,15 @@ export function LookUpIndividualFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={5}>
           <AdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={4}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'sex')}
             value={filter.sex || ''}
@@ -133,6 +140,7 @@ export function LookUpIndividualFilters({
             MenuProps={{
               'data-cy': 'filters-sex-options',
             }}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -161,7 +169,6 @@ export function LookUpIndividualFilters({
             />
           </Grid>
         )}
-
         <Grid container justify='flex-end'>
           <Button
             color='primary'
@@ -181,6 +188,11 @@ export function LookUpIndividualFilters({
           </Button>
         </Grid>
       </Grid>
-    </ContainerWithBorder>
+    );
+  };
+  return addBorder ? (
+    <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
+  ) : (
+    renderTable()
   );
 }
