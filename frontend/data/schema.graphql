@@ -786,7 +786,6 @@ type GrievanceTicketNode implements Node {
   householdUnicefId: String
   priority: Int
   urgency: Int
-  postponeDeduplication: Boolean
   linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode

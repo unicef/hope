@@ -57,6 +57,8 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area.postpone_deduplication = True
+        cls.business_area.save()
 
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
@@ -159,9 +161,6 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
             Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
         ]
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        self.add_individual_grievance_ticket.postpone_deduplication = True
-        self.add_individual_grievance_ticket.save()
 
         response = self.graphql_request(
             request_string=self.UPDATE_GRIEVANCE_TICKET_STATUS_CHANGE_MUTATION,

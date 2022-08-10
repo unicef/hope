@@ -1130,7 +1130,6 @@ export type GrievanceTicketNode = Node & {
   householdUnicefId?: Maybe<Scalars['String']>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
-  postponeDeduplication?: Maybe<Scalars['Boolean']>,
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -8074,8 +8073,11 @@ export type GrievanceTicketQuery = (
   { __typename?: 'Query' }
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
-    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'postponeDeduplication' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency'>
-    & { createdBy: Maybe<(
+    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency'>
+    & { businessArea: (
+      { __typename?: 'UserBusinessAreaNode' }
+      & Pick<UserBusinessAreaNode, 'postponeDeduplication'>
+    ), createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
     )>, admin2: Maybe<(
@@ -14698,7 +14700,9 @@ export const GrievanceTicketDocument = gql`
     category
     subCategory
     consent
-    postponeDeduplication
+    businessArea {
+      postponeDeduplication
+    }
     createdBy {
       id
       firstName
@@ -20792,7 +20796,6 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   householdUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   priority?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   urgency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  postponeDeduplication?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,

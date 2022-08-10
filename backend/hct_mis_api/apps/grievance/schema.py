@@ -77,7 +77,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
     priority = graphene.Int()
     urgency = graphene.Int()
-    postpone_deduplication = graphene.Boolean()
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
