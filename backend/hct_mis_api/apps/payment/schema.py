@@ -264,6 +264,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     start_date = graphene.Date()
     end_date = graphene.Date()
     currency_name = graphene.String()
+    has_payment_list_xlsx_file = graphene.Boolean()
 
     class Meta:
         model = PaymentPlan
@@ -281,6 +282,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_currency_name(self, info):
         return self.get_currency_display()
+
+    def resolve_has_payment_list_xlsx_file(self, info):
+        return self.has_payment_plan_payment_list_xlsx_file
 
 
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
