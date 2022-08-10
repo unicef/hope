@@ -2,10 +2,10 @@ import datetime as dt
 import random
 
 import factory
-from factory import fuzzy
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
 from hct_mis_api.apps.targeting.models import (
@@ -17,7 +17,7 @@ from hct_mis_api.apps.targeting.models import (
 
 
 def comparision_method_resolver(obj):
-    core_fields = CORE_FIELDS_ATTRIBUTES
+    core_fields = FieldFactory.from_scope(Scope.GLOBAL)
     core_field_attrs = [attr for attr in core_fields if attr.get("name") == obj.field_name]
     core_field_attr = core_field_attrs[0]
     if core_field_attr.get("type") == "INTEGER":
@@ -77,7 +77,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
         ext_word_list=None,
     )
     created_by = factory.SubFactory(UserFactory)
-    created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True)
+    created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
     updated_at = factory.LazyAttribute(lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000)))
     status = factory.fuzzy.FuzzyChoice([TargetPopulation.STATUS_DRAFT])
     business_area = None

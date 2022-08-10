@@ -595,5 +595,18 @@
   "Bank name": "Bank name",
   "Linked Tickets": "Linked Tickets",
   "Registration Data Import": "Registration Data Import",
-  "Assigned programme is not ACTIVE": "Assigned programme is not ACTIVE"
+  "Assigned programme is not ACTIVE": "Assigned programme is not ACTIVE",
+  "Linked Grievances": "Linked Grievances",
+  "Payment Channel": "Payment Channel",
+  "Payment channel item": "Payment channel item",
+  "Add Payment Channel": "Add Payment Channel",
+  "Payment channels to be added": "Payment channels to be added",
+  "Re-Generate Report": "Re-Generate Report",
+  "Re-Generating Report": "Re-Generating Report",
+  "Re-Generating Report action failed.": "Re-Generating Report action failed.",
+  "Report is in processing status for over 30 min.": "Report is in processing status for over 30 min.",
+  "Please wait or re-generate report.": "Please wait or re-generate report.",
+  "Exporting...": "Exporting...",
+  "Download Xlsx": "Download Xlsx",
+  "Exporting XLSX started. Please check your email.": "Exporting XLSX started. Please check your email."
 }

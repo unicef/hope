@@ -1,5 +1,5 @@
 import base64
-import datetime
+from django.utils import timezone
 import json
 from pathlib import Path
 
@@ -17,7 +17,7 @@ class TestExtractRecords(TestCase):
     def setUpTestData(cls):
         content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
 
-        storage = {
+        fields = {
             "household": [
                 {
                     "residence_status_h_c": "non_host",
@@ -38,7 +38,6 @@ class TestExtractRecords(TestCase):
                     "relationship_i_c": "head",
                     "disability_i_c": "y",
                     "disabiliyt_recognize_i_c": "y",
-                    "disability_certificate_picture": str(base64.b64encode(content), "utf-8"),
                     "phone_no_i_c": "0636060474",
                     "q1": "",
                     "tax_id_no_i_c": "123123123",
@@ -47,7 +46,6 @@ class TestExtractRecords(TestCase):
                     "drivers_license_no_i_c": "",
                     "birth_certificate_no_i_c": "",
                     "residence_permit_no_i_c": "",
-                    "birth_certificate_picture": str(base64.b64encode(content), "utf-8"),
                     "role_i_c": "y",
                     "bank_account_h_f": "y",
                     "bank_name_h_f": "privatbank",
@@ -59,12 +57,21 @@ class TestExtractRecords(TestCase):
                 }
             ],
         }
+        files = {
+            "individuals": [
+                {
+                    "disability_certificate_picture": str(base64.b64encode(content), "utf-8"),
+                    "birth_certificate_picture": str(base64.b64encode(content), "utf-8"),
+                }
+            ],
+        }
         Record.objects.create(
             registration=1,
-            timestamp=datetime.datetime.now(),
+            timestamp=timezone.now(),
             data=None,
             source_id=1,
-            storage=bytes(json.dumps(storage), "utf-8"),
+            fields=fields,
+            files=json.dumps(files).encode(),
         )
 
     def test_extract_to_data_field(self):

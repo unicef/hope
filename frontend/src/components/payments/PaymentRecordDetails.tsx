@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import {
   formatCurrencyWithSymbol,
+  getPhoneNoLabel,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
@@ -125,13 +126,19 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('PHONE NUMBER')}
-              value={paymentRecord.household.headOfHousehold.phoneNo}
+              value={getPhoneNoLabel(
+                paymentRecord.household.headOfHousehold.phoneNo,
+                paymentRecord.household.headOfHousehold.phoneNoValid,
+              )}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('ALT. PHONE NUMBER')}
-              value={paymentRecord.household.headOfHousehold.phoneNoAlternative}
+              value={getPhoneNoLabel(
+                paymentRecord.household.headOfHousehold.phoneNoAlternative,
+                paymentRecord.household.headOfHousehold.phoneNoAlternativeValid,
+              )}
             />
           </Grid>
         </Grid>

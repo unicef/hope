@@ -1,5 +1,4 @@
 import factory
-from factory import fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.core.models import BusinessArea

@@ -1,4 +1,3 @@
-from django.core.management import call_command
 from django.forms.models import inlineformset_factory
 from django.test import TestCase
 

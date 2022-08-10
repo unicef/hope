@@ -17,8 +17,6 @@ def clean_context(context):
             return context
         elif config.SAFETY_LEVEL == SAFETY_STANDARD:
             return context
-        elif config.SAFETY_LEVEL == SAFETY_MINIMUM:
-            return context
         elif config.SAFETY_LEVEL == SAFETY_HIGH:
             return json.loads(json.dumps(context))
     except Exception as e:

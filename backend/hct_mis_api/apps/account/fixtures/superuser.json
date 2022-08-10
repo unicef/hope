@@ -12,7 +12,7 @@
     "email": "root@root.com",
     "is_staff": true,
     "is_active": true,
-    "date_joined": "2020-05-06T11:57:00.706",
+    "date_joined": "2020-05-06 11:57:00.706-00:00",
     "groups": [],
     "user_permissions": []
   }

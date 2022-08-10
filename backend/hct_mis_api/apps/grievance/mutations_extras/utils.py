@@ -7,12 +7,15 @@ from typing import Optional, Union
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN, BankAccountInfo
 
 logger = logging.getLogger(__name__)
 
@@ -34,14 +37,13 @@ def handle_role(role, household, individual):
 
 
 def handle_add_document(document, individual):
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.household.models import Document, DocumentType
 
     type_name = document.get("type")
     country_code = document.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = document.get("number")
     photo = document.get("photo")
     photoraw = document.get("photoraw")
@@ -59,7 +61,6 @@ def handle_add_document(document, individual):
 def handle_edit_document(document_data: dict):
     from django.shortcuts import get_object_or_404
 
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -69,7 +70,7 @@ def handle_edit_document(document_data: dict):
 
     type_name = updated_document.get("type")
     country_code = updated_document.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = updated_document.get("number")
     photo = updated_document.get("photo")
     photoraw = updated_document.get("photoraw")
@@ -94,15 +95,37 @@ def handle_edit_document(document_data: dict):
     return document
 
 
+def handle_add_payment_channel(payment_channel, individual):
+    payment_channel_type = payment_channel.get("type")
+    if payment_channel_type == "BANK_TRANSFER":
+        bank_name = payment_channel.get("bank_name")
+        bank_account_number = payment_channel.get("bank_account_number")
+        return BankAccountInfo(
+            individual=individual,
+            bank_name=bank_name,
+            bank_account_number=bank_account_number,
+        )
+
+
+def handle_update_payment_channel(payment_channel):
+    payment_channel_type = payment_channel.get("type")
+    payment_channel_id = decode_id_string(payment_channel.get("id"))
+
+    if payment_channel_type == "BANK_TRANSFER":
+        bank_account_info = get_object_or_404(BankAccountInfo, id=payment_channel_id)
+        bank_account_info.bank_name = payment_channel.get("bank_name")
+        bank_account_info.bank_account_number = payment_channel.get("bank_account_number")
+        return bank_account_info
+
+
 def handle_add_identity(identity, individual):
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.household.models import Agency, IndividualIdentity
 
     agency_name = identity.get("agency")
     country_code = identity.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = identity.get("number")
     agency_type, _ = Agency.objects.get_or_create(
         country=country,
@@ -125,7 +148,6 @@ def handle_add_identity(identity, individual):
 def handle_edit_identity(identity_data: dict):
     from django.shortcuts import get_object_or_404
 
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -134,7 +156,7 @@ def handle_edit_identity(identity_data: dict):
     updated_identity = identity_data.get("value", {})
     agency_name = updated_identity.get("agency")
     country_code = updated_identity.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = updated_identity.get("number")
     identity_id = updated_identity.get("id")
 
@@ -178,7 +200,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
             "document_number": document.document_number,
             "individual": encode_id_base64(document.individual.id, "Individual"),
             "type": document.type.type,
-            "country": document.type.country.alpha3,
+            "country": document.type.country.iso_code3,
         }
 
     return previous_documents
@@ -218,7 +240,7 @@ def prepare_edit_documents(documents_to_edit):
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "country": document.type.country.alpha3,
+                    "country": document.type.country.iso_code3,
                     "type": document.type.type,
                     "number": document.document_number,
                     "photo": document.photo.name,
@@ -233,7 +255,7 @@ def prepare_edit_documents(documents_to_edit):
 def prepare_previous_identities(identities_to_remove_with_approve_status):
     from django.shortcuts import get_object_or_404
 
-    from hct_mis_api.apps.core.utils import encode_id_base64, decode_id_string
+    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
     from hct_mis_api.apps.household.models import IndividualIdentity
 
     previous_identities = {}
@@ -245,10 +267,31 @@ def prepare_previous_identities(identities_to_remove_with_approve_status):
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
             "agency": identity.agency.type,
-            "country": identity.agency.country.alpha3,
+            "country": identity.agency.country.iso_code3,
         }
 
     return previous_identities
+
+
+def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status):
+    from django.shortcuts import get_object_or_404
+
+    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+    from hct_mis_api.apps.household.models import BankAccountInfo
+
+    previous_payment_channels = {}
+    for payment_channel_data in payment_channels_to_remove_with_approve_status:
+        payment_channel_id = payment_channel_data.get("value")
+        bank_account_info = get_object_or_404(BankAccountInfo, id=decode_id_string(payment_channel_id))
+        previous_payment_channels[payment_channel_id] = {
+            "id": payment_channel_id,
+            "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
+            "bank_name": bank_account_info.bank_name,
+            "bank_account_number": bank_account_info.bank_account_number,
+            "type": "BANK_TRANSFER",
+        }
+
+    return previous_payment_channels
 
 
 def prepare_edit_identities(identities):
@@ -279,7 +322,7 @@ def prepare_edit_identities(identities):
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "country": identity.agency.country.alpha3,
+                    "country": identity.agency.country.iso_code3,
                     "agency": identity.agency.type,
                     "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": identity.number,
@@ -287,6 +330,49 @@ def prepare_edit_identities(identities):
             }
         )
     return edited_identities
+
+
+def prepare_edit_payment_channel(payment_channels):
+    items = []
+
+    handlers = {
+        "BANK_TRANSFER": handle_bank_transfer_payment_method,
+    }
+
+    for pc in payment_channels:
+        handler = handlers.get(pc.get("type"))
+        items.append(handler(pc))
+    return items
+
+
+def handle_bank_transfer_payment_method(pc):
+    from django.shortcuts import get_object_or_404
+
+    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+    from hct_mis_api.apps.household.models import BankAccountInfo
+
+    bank_account_number = pc.get("bank_account_number")
+    bank_name = pc.get("bank_name")
+    encoded_id = pc.get("id")
+    payment_channel_type = pc.get("type")
+    bank_account_info = get_object_or_404(BankAccountInfo, id=decode_id_string(encoded_id))
+    return {
+        "approve_status": False,
+        "value": {
+            "id": encoded_id,
+            "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
+            "bank_account_number": bank_account_number,
+            "bank_name": bank_name,
+            "type": payment_channel_type,
+        },
+        "previous_value": {
+            "id": encoded_id,
+            "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
+            "bank_account_number": bank_account_info.bank_account_number,
+            "bank_name": bank_account_info.bank_name,
+            "type": payment_channel_type,
+        },
+    }
 
 
 def verify_required_arguments(input_data, field_name, options):
@@ -360,7 +446,12 @@ def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_t
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
+    if ticket_details.is_multiple_duplicates_version:
+        household = reassign_roles_on_disable_individual(
+            individual_to_remove, ticket_details.role_reassign_data, info, is_new_ticket=True
+        )
+    else:
+        household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
     mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
 
 
@@ -382,7 +473,20 @@ def get_data_from_role_data(role_data):
     return role_name, old_individual, new_individual, household
 
 
-def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_data, info=None):
+def get_data_from_role_data_new_ticket(role_data):
+    from django.shortcuts import get_object_or_404
+
+    from hct_mis_api.apps.core.utils import decode_id_string
+    from hct_mis_api.apps.household.models import Individual
+
+    role_name, old_individual, _, household = get_data_from_role_data(role_data)
+    new_individual_id = decode_id_string(role_data.get("new_individual"))
+    new_individual = get_object_or_404(Individual, id=new_individual_id)
+
+    return role_name, old_individual, new_individual, household
+
+
+def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_data, info=None, is_new_ticket=False):
     from django.shortcuts import get_object_or_404
 
     from graphql import GraphQLError
@@ -397,12 +501,20 @@ def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_dat
 
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
-        (
-            role_name,
-            old_new_individual,
-            new_individual,
-            household,
-        ) = get_data_from_role_data(role_data)
+        if is_new_ticket:
+            (
+                role_name,
+                old_new_individual,
+                new_individual,
+                household,
+            ) = get_data_from_role_data_new_ticket(role_data)
+        else:
+            (
+                role_name,
+                old_new_individual,
+                new_individual,
+                household,
+            ) = get_data_from_role_data(role_data)
 
         if role_name == HEAD:
             if household.head_of_household.pk != new_individual.pk:

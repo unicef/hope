@@ -1,14 +1,10 @@
-import unittest
-
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -18,7 +14,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
-
 
 
 class TestApproveTargetPopulationMutation(APITestCase):
@@ -105,7 +100,6 @@ class TestApproveTargetPopulationMutation(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
-
     @parameterized.expand(
         [
             ("with_permission", [Permissions.TARGETING_LOCK]),
@@ -136,7 +130,6 @@ class TestApproveTargetPopulationMutation(APITestCase):
                 )
             },
         )
-
 
 
 class TestUnapproveTargetPopulationMutation(APITestCase):
@@ -253,7 +246,6 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         )
 
 
-
 class TestFinalizeTargetPopulationMutation(APITestCase):
     FINALIZE_TARGET_MUTATION = """
             mutation FinalizeTargetPopulation($id: ID!) {
@@ -364,7 +356,6 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             },
         )
 
-
     @parameterized.expand(
         [
             ("with_permission", [Permissions.TARGETING_SEND]),
@@ -374,6 +365,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
     def test_finalize_target_population(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
+        self.maxDiff = None
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},

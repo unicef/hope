@@ -1,14 +1,13 @@
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
-import { PaymentRecordDetails } from '../../../components/payments/PaymentRecordDetails';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { PaymentRecordDetails } from '../../../components/payments/PaymentRecordDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -18,19 +17,12 @@ import {
   usePaymentRecordQuery,
 } from '../../../__generated__/graphql';
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-`;
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
-
-export function PaymentRecordDetailsPage(): React.ReactElement {
+export const PaymentRecordDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
+  const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
+    fetchPolicy: 'cache-first',
+  });
   const { data, loading } = usePaymentRecordQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -65,12 +57,12 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
   ];
   const paymentRecord = data.paymentRecord as PaymentRecordNode;
   return (
-    <div>
+    <>
       <PageHeader
         title={`Payment ID ${paymentRecord.caId}`}
         breadCrumbs={breadCrumbsItems}
       >
-        <ButtonContainer>
+        <Box m={2}>
           <Button
             variant='contained'
             color='primary'
@@ -82,9 +74,9 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
           >
             {t('Open in CashAssist')}
           </Button>
-        </ButtonContainer>
+        </Box>
       </PageHeader>
-      <Container>
+      <Box display='flex' flexDirection='column'>
         <PaymentRecordDetails
           paymentRecord={paymentRecord}
           canViewActivityLog={hasPermissions(
@@ -92,7 +84,7 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
             permissions,
           )}
         />
-      </Container>
-    </div>
+      </Box>
+    </>
   );
-}
+};

@@ -39,7 +39,6 @@ from .forms import (
     RuleTestForm,
 )
 from .models import MONITORED_FIELDS, Rule, RuleCommit
-from .security import clean_context
 
 logger = logging.getLogger(__name__)
 

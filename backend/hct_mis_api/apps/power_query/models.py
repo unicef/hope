@@ -9,7 +9,6 @@ from django.db.models import JSONField
 from django.template import Context, Template
 from django.utils import timezone
 
-from django_celery_beat.models import CrontabSchedule
 from sentry_sdk import capture_exception
 
 from hct_mis_api.apps.account.models import User
@@ -75,11 +74,13 @@ class Query(models.Model):
         filters = query_args or {}
         _error = None
         try:
-            locals_ = dict()
-            locals_["conn"] = model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
-            locals_["query"] = self
-            locals_["query_filters"] = filters
-            locals_["invoke"] = self._invoke
+            locals_ = {
+                "conn": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS),
+                "query": self,
+                "query_filters": filters,
+                "invoke": self._invoke,
+            }
+
             exec(self.code, globals(), locals_)
             result = locals_.get("result", None)
             debug_info = locals_.get("debug_info", None)

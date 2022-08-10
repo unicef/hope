@@ -1,11 +1,10 @@
 import random
 
 import factory
-from factory import fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -21,10 +20,14 @@ from hct_mis_api.apps.grievance.models import (
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails, TicketPaymentVerificationDetails,
+    TicketSystemFlaggingDetails,
+    TicketPaymentVerificationDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, PaymentVerificationFactory
+from hct_mis_api.apps.payment.fixtures import (
+    PaymentRecordFactory,
+    PaymentVerificationFactory,
+)
 from hct_mis_api.apps.payment.models import PaymentVerification
 
 
@@ -45,9 +48,6 @@ class GrievanceTicketFactory(factory.DjangoModelFactory):
     )
     description = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
     admin2 = factory.LazyAttribute(
-        lambda o: AdminArea.objects.filter(admin_area_level__business_area__slug="afghanistan").first()
-    )
-    admin2_new = factory.LazyAttribute(
         lambda o: Area.objects.filter(area_type__country__name__iexact="afghanistan").first()
     )
     area = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
@@ -282,6 +282,5 @@ class TicketPaymentVerificationDetailsFactory(factory.DjangoModelFactory):
 
     ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION)
     payment_verification = factory.SubFactory(
-        PaymentVerificationFactory,
-        status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        PaymentVerificationFactory, status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
     )

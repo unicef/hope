@@ -214,6 +214,12 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
                 identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
+                paymentChannels:
+                  values.individualDataUpdateFieldsPaymentChannels,
+                paymentChannelsToRemove:
+                  values.individualDataUpdatePaymentChannelsToRemove,
+                paymentChannelsToEdit:
+                  values.individualDataUpdatePaymentChannelsToEdit,
               },
             },
           },

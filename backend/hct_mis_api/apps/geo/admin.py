@@ -6,7 +6,6 @@ from django.contrib.admin import FieldListFilter, ListFilter, RelatedFieldListFi
 from django.contrib.admin.utils import prepare_lookup_value
 from django.forms import TextInput
 
-from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
@@ -88,7 +87,7 @@ class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEM
     )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in ["iso_code2", "iso_code3", "iso_num"]:
+        if db_field.name in ("iso_code2", "iso_code3", "iso_num"):
             kwargs = {"widget": TextInput(attrs={"size": "10"})}
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
@@ -96,11 +95,6 @@ class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEM
     def get_list_display(self, request):
         ret = super().get_list_display(request)
         return ret
-
-    @button()
-    def initialise(self, request):
-        results = initialise_countries()
-        self.message_user(request, str(results))
 
 
 @admin.register(AreaType)
@@ -130,11 +124,6 @@ class AreaTypeAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPE
         # ("GIS", {"classes": ["collapse"], "fields": ("geom", "point")}),
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
-
-    @button()
-    def initialise(self, request):
-        results = initialise_area_types()
-        self.message_user(request, str(results))
 
 
 class AreaTypeFilter(RelatedFieldListFilter):

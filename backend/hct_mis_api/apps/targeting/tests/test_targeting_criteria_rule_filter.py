@@ -24,25 +24,45 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         create_afghanistan()
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household_and_individuals(
-            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {
+                "size": 1,
+                "residence_status": "HOST",
+                "business_area": business_area,
+                "first_registration_date": "1900-01-01",
+            },
             [{"birth_date": "1970-09-29"}],
         )
         households.append(household)
         cls.household_50_yo = household
         (household, individuals) = create_household_and_individuals(
-            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {
+                "size": 1,
+                "residence_status": "HOST",
+                "business_area": business_area,
+                "first_registration_date": "1900-01-01",
+            },
             [{"birth_date": "1991-11-18"}],
         )
         households.append(household)
         (household, individuals) = create_household_and_individuals(
-            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {
+                "size": 1,
+                "residence_status": "HOST",
+                "business_area": business_area,
+                "first_registration_date": "2100-01-01",
+            },
             [{"birth_date": "1991-11-18"}],
         )
 
         households.append(household)
 
         (household, individuals) = create_household_and_individuals(
-            {"size": 2, "residence_status": "REFUGEE", "business_area": business_area},
+            {
+                "size": 2,
+                "residence_status": "REFUGEE",
+                "business_area": business_area,
+                "first_registration_date": "1900-01-01",
+            },
             [{"birth_date": "1991-11-18"}],
         )
 
@@ -249,6 +269,16 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         queryset = self.get_households_queryset().filter(query).distinct()
         self.assertEqual(queryset.count(), 3)
         self.assertTrue(self.household_refugee.pk not in [h.pk for h in queryset])
+
+    def test_rule_filter_registration_date_gte(self):
+        rule_filter = TargetingCriteriaRuleFilter(
+            comparision_method="GREATER_THAN",
+            field_name="first_registration_date",
+            arguments=["2000-01-01"],
+        )
+        query = rule_filter.get_query()
+        queryset = self.get_households_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 1)
 
 
 class TargetingCriteriaFlexRuleFilterTestCase(TestCase):

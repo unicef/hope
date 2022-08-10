@@ -67,13 +67,13 @@ class PostgresTestRunner(TestRunner):
             file_path = os.path.join(output_dir, single_file)
             output = open(file_path, "wb")
 
-        return dict(
-            verbosity=verbosity,
-            descriptions=getattr(settings, "TEST_OUTPUT_DESCRIPTIONS", False),
-            failfast=self.failfast,
-            resultclass=self.get_resultclass(),
-            output=output,
-        )
+        return {
+            "verbosity": verbosity,
+            "descriptions": getattr(settings, "TEST_OUTPUT_DESCRIPTIONS", False),
+            "failfast": self.failfast,
+            "resultclass": self.get_resultclass(),
+            "output": output,
+        }
 
     def run_suite(self, suite, **kwargs):
         runner_kwargs = self.get_test_runner_kwargs()

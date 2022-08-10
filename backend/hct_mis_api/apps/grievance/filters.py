@@ -93,6 +93,7 @@ class GrievanceTicketFilter(FilterSet):
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
     score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
+    household = CharFilter(field_name="household_unicef_id")
 
     class Meta:
         fields = {
@@ -141,7 +142,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def admin_filter(self, qs, name, value):
         if value:
-            return qs.filter(admin2_new__in=[admin.id for admin in value])
+            return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
     def permissions_filter(self, qs, name, value):

@@ -1,8 +1,6 @@
 import io
 import uuid
 
-from django.core.management import call_command
-
 from graphql import GraphQLError
 from openpyxl.writer.excel import save_virtual_workbook
 from parameterized import parameterized
@@ -11,7 +9,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
@@ -35,8 +33,6 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 
 class TestXlsxVerificationImport(APITestCase):
-    # verification = None
-
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
@@ -46,8 +42,7 @@ class TestXlsxVerificationImport(APITestCase):
         cls.user = UserFactory()
 
         program = ProgramFactory(business_area=cls.business_area)
-        program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
-        program.admin_areas_new.set(Area.objects.order_by("?")[:3])
+        program.admin_areas.set(Area.objects.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
 
         target_population = TargetPopulationFactory(
@@ -63,8 +58,7 @@ class TestXlsxVerificationImport(APITestCase):
             household, individuals = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": AdminArea.objects.order_by("?").first(),
-                    "admin_area_new": Area.objects.order_by("?").first(),
+                    "admin_area": Area.objects.order_by("?").first(),
                 },
                 {"registration_data_import": registration_data_import},
             )
@@ -114,7 +108,6 @@ class TestXlsxVerificationImport(APITestCase):
 
         self.assertEqual(import_service.errors, [])
 
-    #
     def test_validation_valid_status_changed(self):
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()

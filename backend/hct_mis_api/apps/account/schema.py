@@ -23,7 +23,7 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     DjangoPermissionFilterConnectionField,
     Permissions,
-    hopeOneOfPermissionClass
+    hopeOneOfPermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
@@ -135,22 +135,12 @@ class Query(graphene.ObjectType):
         permission_classes=(
             hopeOneOfPermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
-        max_limit=1000
+        max_limit=1000,
     )
-    # all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=False))
     user_roles_choices = graphene.List(ChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
-
-    # def resolve_all_log_entries(self, info, **kwargs):
-    #     object_id = kwargs.get('object_id')
-    #     queryset = LogEntry.objects
-    #     if object_id:
-    #         id = decode_id_string(object_id)
-    #         queryset = queryset.filter(~Q(action=0))
-    #         queryset = queryset.filter(object_pk=id)
-    #     return queryset.all()
 
     def resolve_all_users(self, info, **kwargs):
         return User.objects.all().distinct()
@@ -173,10 +163,6 @@ class Query(graphene.ObjectType):
         return (
             get_user_model()
             .objects.prefetch_related("user_roles")
-            .filter(
-                available_for_export=True,
-                is_superuser=False,
-                user_roles__business_area__slug=business_area_slug,
-            )
+            .filter(available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug)
             .exists()
         )

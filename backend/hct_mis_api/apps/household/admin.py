@@ -1,26 +1,21 @@
 import logging
-from functools import wraps
-from inspect import isclass
 from itertools import chain
 
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
-from django.contrib.admin.models import LogEntry
 from django.contrib.messages import DEFAULT_TAGS
 from django.db import transaction
-from django.db.models import Count, JSONField, Q
+from django.db.models import JSONField, Q
 from django.db.transaction import atomic
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils import timezone
-from django.utils.safestring import mark_safe
+from django.shortcuts import redirect
 
-from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
-    AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
     MultiValueFilter,
@@ -34,17 +29,14 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.models import (
-    TicketNeedsAdjudicationDetails,
-    TicketSystemFlaggingDetails,
-)
+from hct_mis_api.apps.household.celery_tasks import update_individuals_iban_from_xlsx_task
 from hct_mis_api.apps.household.forms import (
     UpdateByXlsxStage1Form,
     UpdateByXlsxStage2Form,
+    UpdateIndividualsIBANFromXlsxForm,
 )
-from hct_mis_api.apps.household.household_withdraw import HouseholdWithdraw
-from hct_mis_api.apps.household.individual_xlsx_update import (
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.household.services.individual_xlsx_update import (
     IndividualXlsxUpdate,
     InvalidColumnsError,
 )
@@ -64,8 +56,6 @@ from hct_mis_api.apps.household.models import (
     XlsxUpdateFile,
 )
 from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.steficon.admin import AutocompleteWidget
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -136,16 +126,19 @@ class HouseholdAdmin(
         "country",
         "head_of_household",
         "size",
+        "registration_data_import",
     )
     list_filter = (
         ("unicef_id", MultiValueFilter),
         ("unhcr_id", MultiValueFilter),
         ("id", MultiValueFilter),
+        ("registration_data_import", AutoCompleteFilter),
         # ("country", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("size", MaxMinFilter),
         "org_enumerator",
         "last_registration_date",
+        QueryStringFilter,
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
@@ -339,6 +332,9 @@ class IndividualAdmin(
     AdminAdvancedFiltersMixin,
     HOPEModelAdminBase,
 ):
+    # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
+    advanced_change_list_template = "admin/household/advanced_filters_extra_buttons_change_list.html"
+
     list_display = (
         "unicef_id",
         "given_name",
@@ -437,6 +433,44 @@ class IndividualAdmin(
         context["duplicates"] = Individual.objects.filter(unicef_id=obj.unicef_id)
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
+
+    @button(label="Add/Update Individual IBAN by xlsx")
+    def update_individual_iban_from_xlsx(self, request):
+        if request.method == "GET":
+            form = UpdateIndividualsIBANFromXlsxForm()
+            context = self.get_common_context(request, title="Add/Update Individual IBAN by xlsx", form=form)
+            return TemplateResponse(request, "admin/household/individual/individuals_iban_xlsx_update.html", context)
+        else:
+            form = UpdateIndividualsIBANFromXlsxForm(request.POST, request.FILES)
+            if form.is_valid():
+                try:
+                    with transaction.atomic():
+                        xlsx_update_file = XlsxUpdateFile(
+                            file=form.cleaned_data["file"],
+                            business_area=form.cleaned_data["business_area"],
+                            uploaded_by=request.user,
+                        )
+                        xlsx_update_file.save()
+
+                        transaction.on_commit(
+                            lambda: update_individuals_iban_from_xlsx_task.delay(xlsx_update_file.id, request.user.id)
+                        )
+
+                        self.message_user(
+                            request,
+                            f"Started IBAN update for {form.cleaned_data['business_area']}, results will be send to {request.user.email}",
+                            messages.SUCCESS,
+                        )
+                        return redirect(reverse("admin:household_individual_changelist"))
+
+                except Exception as e:
+                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+
+            else:
+                context = self.get_common_context(request, title="Add/Update Individual IBAN by xlsx", form=form)
+                return TemplateResponse(
+                    request, "admin/household/individual/individuals_iban_xlsx_update.html", context
+                )
 
 
 @admin.register(IndividualRoleInHousehold)
