@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { useDebounce } from '../../../hooks/useDebounce';
 import TextField from '../../../shared/TextField';
 import { renderUserName } from '../../../utils/utils';
@@ -39,6 +40,8 @@ export const AssignedToDropdown = ({
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
+
+  const { t } = useTranslation();
 
   const onChangeMiddleware = (e, selectedValue): void => {
     e.preventDefault();
@@ -81,7 +84,7 @@ export const AssignedToDropdown = ({
           margin='dense'
           value={inputValue}
           variant={label ? 'outlined' : 'standard'}
-          label={label}
+          label={value ? label : t('Not assigned')}
           onChange={(e) => onInputTextChange(e.target.value)}
           InputProps={{
             ...params.InputProps,
