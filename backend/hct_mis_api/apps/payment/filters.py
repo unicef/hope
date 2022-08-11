@@ -6,6 +6,7 @@ from django_filters import (
     DateFilter,
     FilterSet,
     MultipleChoiceFilter,
+    NumberFilter,
     OrderingFilter,
     UUIDFilter,
 )
@@ -233,7 +234,8 @@ class PaymentPlanFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=PaymentPlan.Status.choices)
-    total_entitled_quantity = DecimalRangeFilter(field_name="total_entitled_quantity")
+    total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
+    total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
     dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
 
