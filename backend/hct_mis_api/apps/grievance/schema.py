@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db.models import Q
 
@@ -55,6 +56,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
+from hct_mis_api.apps.grievance.es_query import search_es
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
@@ -450,8 +452,13 @@ class Query(graphene.ObjectType):
     grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
-        logger.info("****************")
-        logger.info(kwargs)
+        if settings.ELASTICSEARCH_GRIEVANCE_TURN_ON:
+            grievance_ids = search_es(kwargs)
+            return (
+                GrievanceTicket.objects
+                .filter(id__in=grievance_ids)
+                .select_related("assigned_to", "created_by")
+            )
         return GrievanceTicket.objects.filter(ignored=False).select_related("assigned_to", "created_by")
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):

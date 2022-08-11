@@ -1,21 +1,40 @@
+import logging
+
 import ast
 
+from .documents import GrievanceTicketDocument
 
-def create_grievance_es_query(kwargs):
+logger = logging.getLogger(__name__)
+
+
+TERM_FIELDS = ("category", "assigned_to", "issue_type", "priority", "urgency", "grievance_type")
+TERMS_FIELDS = ("status", "admin")
+
+
+def execute_query(query_dict):
+    es_response = (
+        GrievanceTicketDocument
+        .search()
+        .params(search_type="dfs_query_then_fetch")
+        .from_dict(query_dict)
+        .execute()
+    )
+
+    es_ids = [x.meta["id"] for x in es_response]
+    return es_ids
+
+
+def search_es(options):
     all_queries = []
     query_search = []
     query_term_fields = []
     query_terms_fields = []
 
-    size = kwargs.pop("first", 10)
-    grievance_status = kwargs.pop("grievance_status")
-    created_at_range = kwargs.pop("created_at_range")
+    size = options.pop("first", 10)
+    grievance_status = options.pop("grievance_status")
+    created_at_range = ast.literal_eval(options.pop("created_at_range"))
 
-    term_fields = ("category", "assigned_to", "issue_type", "priority", "urgency", "grievance_type")
-    terms_fields = ("status", "admin")
-
-    if created_at_range:
-        created_at_range = ast.literal_eval(created_at_range)
+    if created_at_range != "":
         date_range = {
             "range": {
                 "created_at": {}
@@ -32,16 +51,16 @@ def create_grievance_es_query(kwargs):
 
         all_queries.append(date_range)
 
-    search = kwargs.pop("search")
-    if search:
+    search = options.pop("search")
+    if search.strip():
         key, value = tuple(search.split(" ", 1))
         if key == "ticket_id":
-            query_search.append({
+            return execute_query({
+              "query": {
                 "term": {
-                    "_id": {
-                        "value": value
-                    }
+                  "_id": value
                 }
+              }
             })
         elif key == "ticket_hhid":
             query_search.append({
@@ -60,22 +79,24 @@ def create_grievance_es_query(kwargs):
                 }
             })
 
-    order_by = kwargs.pop("order_by", "-created_at")
+    order_by = options.pop("order_by", "-created_at")
     if order_by[0] == "-":
         sort = {
             order_by[1:]: {
-                "order": "desc"
+                "order": "desc",
+                "unmapped_type": "date"
             }
         }
     else:
         sort = {
             order_by: {
-                "order": "asc"
+                "order": "asc",
+                "unmapped_type": "date"
             }
         }
 
-    for k, v in kwargs.items():
-        if k in term_fields and v:
+    for k, v in options.items():
+        if k in TERM_FIELDS and v:
             query_term_fields.append({
                 "term": {
                     k: {
@@ -84,21 +105,17 @@ def create_grievance_es_query(kwargs):
                 }
             })
 
-        if k in terms_fields and v != [""]:
+        if k in TERMS_FIELDS and v not in ([""], [None]):
             query_terms_fields.append({
                 "terms": {
-                    k: {
-                        "value": v
-                    }
+                    k: v
                 }
             })
 
     if grievance_status == "active":
         query_terms_fields.append({
             "terms": {
-                "grievance_status": {
-                    "value": ["New", "Assigned", "In Progress", "On Hold", "For Approval"]
-                }
+                "grievance_status":  ["New", "Assigned", "In Progress", "On Hold", "For Approval"]
             }
         })
 
@@ -106,7 +123,7 @@ def create_grievance_es_query(kwargs):
     all_queries.extend(query_terms_fields)
     all_queries.extend(query_search)
 
-    query = {
+    query_dict = {
         "size": size,
         "query": {
             "bool": {
@@ -117,12 +134,15 @@ def create_grievance_es_query(kwargs):
         "sort": [sort]
     }
 
-    business_area = kwargs.pop("business_area")
+    business_area = options.pop("business_area")
     if business_area:
-        query["query"]["bool"]["filter"] = {
+        query_dict["query"]["bool"]["filter"] = {
             "term": {
                 "business_area": "afghanistan"
             }
         }
 
-    return query
+    first = options.pop("first", 10)
+    after = options.pop("after", 1)
+
+    return execute_query(query_dict)

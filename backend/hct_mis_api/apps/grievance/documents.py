@@ -67,7 +67,7 @@ ISSUE_TYPES_CHOICES = {
 
 @registry.register_document
 class GrievanceTicketDocument(Document):
-    created_at = fields.DateField(similarity="boolean")
+    created_at = fields.DateField()
     assigned_to = fields.TextField()
     registration_data_import = fields.TextField()
     household_unicef_id = fields.KeywordField(similarity="boolean")
