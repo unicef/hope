@@ -10,8 +10,8 @@ export const AllPaymentPlansForTable = gql`
     $businessArea: String!
     $search: String
     $status: [String]
-    $totalEntitledQuantityFrom: String
-    $totalEntitledQuantityTo: String
+    $totalEntitledQuantityFrom: Float
+    $totalEntitledQuantityTo: Float
     $dispersionStartDate: Date
     $dispersionEndDate: Date
   ) {
