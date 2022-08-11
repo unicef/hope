@@ -7,8 +7,6 @@ from hct_mis_api.apps.account.permissions import Permissions
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
     create_afghanistan,
 )
 from hct_mis_api.apps.core.models import BusinessArea
@@ -71,12 +69,12 @@ class TestGrievanceDashboardQuery(APITestCase):
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaLevelFactory(
+        area_type = AreaTypeFactory(
             name="Admin type one",
             admin_level=2,
             business_area=cls.business_area,
         )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
+        cls.admin_area_1 = AreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
 
         country = Country.objects.first()
         area_type_new = AreaTypeFactory(
@@ -155,8 +153,8 @@ class TestGrievanceDashboardQuery(APITestCase):
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             ),
             ("without_permission", []),
         ]
@@ -167,16 +165,14 @@ class TestGrievanceDashboardQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_TYPE_QUERY,
             context={"user": self.user},
-            variables={
-                "businessAreaSlug": "afghanistan"
-            }
+            variables={"businessAreaSlug": "afghanistan"},
         )
 
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             ),
             ("without_permission", []),
         ]
@@ -187,16 +183,14 @@ class TestGrievanceDashboardQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_CATEGORY,
             context={"user": self.user},
-            variables={
-                "businessAreaSlug": "afghanistan"
-            }
+            variables={"businessAreaSlug": "afghanistan"},
         )
 
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             ),
             ("without_permission", []),
         ]
@@ -207,16 +201,14 @@ class TestGrievanceDashboardQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_STATUS,
             context={"user": self.user},
-            variables={
-                "businessAreaSlug": "afghanistan"
-            }
+            variables={"businessAreaSlug": "afghanistan"},
         )
 
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             ),
             ("without_permission", []),
         ]
@@ -227,8 +219,5 @@ class TestGrievanceDashboardQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_LOCATION,
             context={"user": self.user},
-            variables={
-                "businessAreaSlug": "afghanistan"
-            }
+            variables={"businessAreaSlug": "afghanistan"},
         )
-
