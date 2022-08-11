@@ -778,10 +778,6 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         old_payment_plan = copy_model_object(payment_plan)
 
         if steficon_rule_id:
-            # TODO: add steficon validation here
-            # logger.error("formula validation")
-            # raise GraphQLError("formula validation")
-
             steficon_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
             if steficon_rule.latest.id != payment_plan.steficon_rule_id:
                 steficon_rule_commit = steficon_rule.latest
