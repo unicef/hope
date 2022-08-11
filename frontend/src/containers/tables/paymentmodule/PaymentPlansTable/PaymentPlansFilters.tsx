@@ -62,16 +62,18 @@ export function PaymentPlansFilters({
           <DatePickerFilter
             topLabel={t('Dispersion Date Range')}
             label={t('From Date')}
-            onChange={(date) => onFilterChange({ ...filter, dispersionStartDate: date.format('YYYY-MM-DD') })}
+            onChange={(date) => onFilterChange({ ...filter, dispersionStartDate: date ? date.format('YYYY-MM-DD') : null })}
             value={filter.dispersionStartDate || null}
+            clearable
           />
         </Grid>
         <Grid item xs={2}>
           <DatePickerFilter
             label={t('To Date')}
-            onChange={(date) => onFilterChange({ ...filter, dispersionEndDate: date.format('YYYY-MM-DD') })}
+            onChange={(date) => onFilterChange({ ...filter, dispersionEndDate: date ? date.format('YYYY-MM-DD') : null })}
             value={filter.dispersionEndDate || null}
             minDate={filter.dispersionStartDate || undefined}
+            clearable
           />
         </Grid>
         <Grid item xs={2}>
