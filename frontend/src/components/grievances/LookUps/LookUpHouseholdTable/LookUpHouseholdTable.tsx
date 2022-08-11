@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../../utils/utils';
 import {
@@ -19,7 +20,15 @@ interface LookUpHouseholdTableProps {
   selectedHousehold?;
   setSelectedIndividual?;
   setSelectedHousehold?;
+  noTableStyling?;
 }
+
+const NoTableStyling = styled.div`
+  .MuiPaper-elevation1 {
+    box-shadow: none;
+    padding: 0 !important;
+  }
+`;
 
 export const LookUpHouseholdTable = ({
   businessArea,
@@ -29,6 +38,7 @@ export const LookUpHouseholdTable = ({
   selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
+  noTableStyling = false,
 }: LookUpHouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
@@ -53,14 +63,14 @@ export const LookUpHouseholdTable = ({
     setSelectedIndividual(null);
     setFieldValue('identityVerified', false);
   };
-  return (
-    <TableWrapper>
+  const renderTable = (): React.ReactElement => {
+    return (
       <UniversalTable<
         AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
         AllHouseholdsQueryVariables
       >
         headCells={headCells}
-        rowsPerPageOptions={[10, 15, 20]}
+        rowsPerPageOptions={[5, 10, 15, 20]}
         query={useAllHouseholdsQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
@@ -74,6 +84,11 @@ export const LookUpHouseholdTable = ({
           />
         )}
       />
-    </TableWrapper>
+    );
+  };
+  return noTableStyling ? (
+    <NoTableStyling>{renderTable()}</NoTableStyling>
+  ) : (
+    <TableWrapper>{renderTable()}</TableWrapper>
   );
 };

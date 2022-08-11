@@ -22,6 +22,7 @@ interface LookUpHouseholdFiltersProps {
   choicesData: HouseholdChoiceDataQuery;
   setFilterHouseholdApplied?;
   householdFilterInitial?;
+  addBorder?: boolean;
 }
 export function LookUpHouseholdFilters({
   onFilterChange,
@@ -30,27 +31,31 @@ export function LookUpHouseholdFilters({
   choicesData,
   setFilterHouseholdApplied,
   householdFilterInitial,
+  addBorder = true,
 }: LookUpHouseholdFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
-  return (
-    <ContainerWithBorder>
+
+  const renderTable = (): React.ReactElement => {
+    return (
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
             data-cy='filters-search'
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={5}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'programs')}
             label={t('Programme')}
             value={filter.programs || []}
             icon={<FlashOnIcon />}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -62,7 +67,7 @@ export function LookUpHouseholdFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -78,7 +83,7 @@ export function LookUpHouseholdFilters({
             value={filter.lastRegistrationDate.min}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -93,11 +98,12 @@ export function LookUpHouseholdFilters({
             value={filter.lastRegistrationDate.max}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'residenceStatus')}
             label={t('Status')}
             value={filter.residenceStatus || ''}
+            fullWidth
           >
             {choicesData.residenceStatusChoices.map((item) => {
               return (
@@ -108,14 +114,15 @@ export function LookUpHouseholdFilters({
             })}
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={5}>
           <AdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <NumberTextField
             id='minFilter'
             topLabel={t('Household Size')}
@@ -133,7 +140,7 @@ export function LookUpHouseholdFilters({
             }
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <NumberTextField
             id='maxFilter'
             value={filter.size.max || ''}
@@ -169,6 +176,11 @@ export function LookUpHouseholdFilters({
           </Button>
         </Grid>
       </Grid>
-    </ContainerWithBorder>
+    );
+  };
+  return addBorder ? (
+    <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
+  ) : (
+    renderTable()
   );
 }
