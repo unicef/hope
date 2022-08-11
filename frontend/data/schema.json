@@ -3003,7 +3003,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
+                  "name": "Float",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -3013,7 +3013,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "String",
+                  "name": "Float",
                   "ofType": null
                 },
                 "defaultValue": null
