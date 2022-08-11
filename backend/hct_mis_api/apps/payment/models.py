@@ -407,18 +407,14 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         )
 
     def get_payment_plan_payment_list_xlsx_file_obj(self):
-        file_obj = XLSXFileTemp.objects.filter(
+        return XLSXFileTemp.objects.filter(
             object_id=self.pk,
             content_type=get_content_type_for_model(self),
         ).first()
-        return file_obj
 
     @property
     def has_payment_plan_payment_list_xlsx_file(self):
-        if self.get_payment_plan_payment_list_xlsx_file_obj():
-            return True
-        else:
-            return False
+        return bool(self.get_payment_plan_payment_list_xlsx_file_obj())
 
     @property
     def xlsx_payment_plan_payment_list_file_link(self):
