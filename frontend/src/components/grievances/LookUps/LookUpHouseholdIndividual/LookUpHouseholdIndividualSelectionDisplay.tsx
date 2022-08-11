@@ -60,7 +60,6 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
                 <DarkGrey>
                   <Flex>
                     <DeleteIcon
-                      display='flex'
                       color='inherit'
                       fontSize='small'
                       onClick={() => handleRemove(Types.household)}
@@ -89,7 +88,6 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
                 <DarkGrey>
                   <Flex>
                     <DeleteIcon
-                      display='flex'
                       color='inherit'
                       fontSize='small'
                       onClick={() => handleRemove(Types.individual)}
