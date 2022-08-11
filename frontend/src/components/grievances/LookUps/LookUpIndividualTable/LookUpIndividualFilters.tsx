@@ -23,7 +23,7 @@ interface LookUpIndividualFiltersProps {
   setFilterIndividualApplied?;
   individualFilterInitial?;
   household?;
-  addBorder?;
+  addBorder?: boolean;
 }
 export function LookUpIndividualFilters({
   onFilterChange,
@@ -50,7 +50,7 @@ export function LookUpIndividualFilters({
             fullWidth
           />
         </Grid>
-        <Grid item container xs={5}>
+        <Grid item xs={5}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'programs')}
             label={t('Programme')}

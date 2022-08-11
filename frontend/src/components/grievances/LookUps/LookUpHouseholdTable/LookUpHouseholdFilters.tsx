@@ -22,7 +22,7 @@ interface LookUpHouseholdFiltersProps {
   choicesData: HouseholdChoiceDataQuery;
   setFilterHouseholdApplied?;
   householdFilterInitial?;
-  addBorder?;
+  addBorder?: boolean;
 }
 export function LookUpHouseholdFilters({
   onFilterChange,
@@ -49,7 +49,7 @@ export function LookUpHouseholdFilters({
             fullWidth
           />
         </Grid>
-        <Grid item container xs={5}>
+        <Grid item xs={5}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'programs')}
             label={t('Programme')}
