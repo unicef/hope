@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllPaymentPlansForTableQuery,
+  PaymentPlanNode,
   AllPaymentPlansForTableQueryVariables,
   useAllPaymentPlansForTableQuery,
 } from '../../../../__generated__/graphql';
@@ -25,14 +25,15 @@ export function PaymentPlansTable({
     businessArea,
     search: filter.search,
     status: filter.status,
-    totalEntitledQuantity: filter.totalEntitledQuantity,
+    totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom,
+    totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
     dispersionStartDate: filter.dispersionStartDate,
     dispersionEndDate: filter.dispersionEndDate,
   };
 
   return (
     <UniversalTable<
-      AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][number]['node'],
+      PaymentPlanNode,
       AllPaymentPlansForTableQueryVariables
     >
       title={t('Payment Plans')}

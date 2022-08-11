@@ -2999,7 +2999,17 @@
                 "defaultValue": null
               },
               {
-                "name": "totalEntitledQuantity",
+                "name": "totalEntitledQuantityFrom",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "totalEntitledQuantityTo",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
