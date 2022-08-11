@@ -88,7 +88,7 @@ logger = logging.getLogger(__name__)
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
     description = graphene.String(required=True)
-    assigned_to = graphene.GlobalID(node=UserNode, required=True)
+    assigned_to = graphene.GlobalID(node=UserNode, required=False)
     category = graphene.Int(required=True)
     sub_category = graphene.Int()
     issue_type = graphene.Int()
@@ -309,10 +309,12 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "business_area", "assigned_to"))
         admin = input.pop("admin", None)
         admin_object = None
+        assigned_to = None
         if admin:
             admin_object = get_object_or_404(Area, p_code=admin)
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
+        if assigned_to_id is not None:
+            assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
         grievance_ticket = GrievanceTicket.objects.create(
             **input,
             admin2=admin_object,

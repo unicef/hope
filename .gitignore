@@ -112,5 +112,6 @@ venv.bak/
 *.sql
 
 *.DS_Store
+*.devcontainer
 /.vscode/settings.json
 /HCT-MIS.code-workspace

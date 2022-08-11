@@ -627,5 +627,7 @@
   "Please wait or re-generate report.": "Please wait or re-generate report.",
   "Exporting...": "Exporting...",
   "Download Xlsx": "Download Xlsx",
-  "Exporting XLSX started. Please check your email.": "Exporting XLSX started. Please check your email."
+  "Exporting XLSX started. Please check your email.": "Exporting XLSX started. Please check your email.",
+  "Next": "Next",
+  "Back": "Back"
 }

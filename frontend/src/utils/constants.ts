@@ -76,5 +76,12 @@ export const GrievanceSearchTypes = {
 export const REPORTING_STATES = {
   PROCESSING: 1,
   GENERATED: 2,
-  FAILED: 3
+  FAILED: 3,
+};
+
+export const GrievanceSteps = {
+  Selection: 0,
+  Lookup: 1,
+  Verification: 2,
+  Description: 3,
 };
