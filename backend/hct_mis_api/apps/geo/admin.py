@@ -1,6 +1,6 @@
 import csv
 import logging
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.shortcuts import redirect
 from django.contrib.admin import FieldListFilter, ListFilter, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
@@ -166,11 +166,6 @@ class AreaAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEMode
     )
 
     @button()
-    def initialise(self, request):
-        results = initialise_areas()
-        self.message_user(request, str(results))
-
-    @button()
     def import_areas(self, request):
         context = self.get_common_context(request, processed=False)
         if request.method == "POST":
@@ -197,8 +192,8 @@ class AreaAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEMode
                                     area.parent = Area.objects.get(p_code=row[admin_area[ids]], name=row[area_types[ids]])
                                     area.save()
                     except Exception as e:
-                        self.message_user(request, f"Unable to load those areas")
-                        raise 
+                        self.message_user(request, f"Unable to load areas, please check the format", messages.ERROR)
+                        raise
                 
                 self.message_user(request, f"Updated all areas for {country}")
                 return redirect("admin:geo_area_changelist")
