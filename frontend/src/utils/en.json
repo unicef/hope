@@ -147,6 +147,7 @@
   "You did not approve any changes.": "You did not approve any changes.",
   "By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found": "By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found",
   "Are you sure you want to close the ticket?": "Are you sure you want to close the ticket?",
+  "This ticket will be closed without running the deduplication process.": "This ticket will be closed without running the deduplication process.",
   " By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found": " By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found",
   "Close Ticket": "Close Ticket",
   "Duplicate Document Conflict": "Duplicate Document Conflict",
