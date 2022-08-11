@@ -9,6 +9,9 @@ export const GrievanceTicket = gql`
       category
       subCategory
       consent
+      businessArea {
+        postponeDeduplication
+      }
       createdBy {
         id
         firstName

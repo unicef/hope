@@ -198,6 +198,10 @@ export const GrievanceDetailsToolbar = ({
     'Are you sure you want to close the ticket?',
   );
 
+  const closingWarningText = ticket?.businessArea.postponeDeduplication === true ? t(
+    'This ticket will be closed without running the deduplication process.'
+   ) : null;
+
   const changeState = async (status): Promise<void> => {
     try {
       await mutate({
@@ -248,13 +252,14 @@ export const GrievanceDetailsToolbar = ({
       variant='contained'
       onClick={() =>
         confirm({
-          title: 'Close ticket',
+          title: t('Close ticket'),
           extraContent:
             ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
               ? closingConfirmationText
               : getClosingConfirmationExtraText(),
           content: getClosingConfirmationText(),
-          continueText: 'close ticket',
+          warningContent: closingWarningText,
+          continueText: t('close ticket'),
         }).then(() => {
           changeState(GRIEVANCE_TICKET_STATES.CLOSED);
         })
