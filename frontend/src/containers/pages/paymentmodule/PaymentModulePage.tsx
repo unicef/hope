@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -17,10 +17,12 @@ export function PaymentModulePage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const [planfilter, setPlanFilter] = useState<FilterProps>({
-    search: '',
-    dispersionDate: '',
-    status: '',
-    entitlement: { min: null, max: null },
+    search: null,
+    dispersionStartDate: null,
+    dispersionEndDate: null,
+    status: [],
+    totalEntitledQuantityFrom: null,
+    totalEntitledQuantityTo: null,
   });
 
   const debouncedPlanFilter = useDebounce(planfilter, 500);

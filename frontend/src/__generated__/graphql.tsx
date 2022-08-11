@@ -4712,7 +4712,8 @@ export type QueryAllPaymentPlansArgs = {
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
-  totalEntitledQuantity?: Maybe<Scalars['String']>,
+  totalEntitledQuantityFrom?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityTo?: Maybe<Scalars['Float']>,
   dispersionStartDate?: Maybe<Scalars['Date']>,
   dispersionEndDate?: Maybe<Scalars['Date']>,
   orderBy?: Maybe<Scalars['String']>
@@ -9337,7 +9338,8 @@ export type AllPaymentPlansForTableQueryVariables = {
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
-  totalEntitledQuantity?: Maybe<Scalars['String']>,
+  totalEntitledQuantityFrom?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityTo?: Maybe<Scalars['Float']>,
   dispersionStartDate?: Maybe<Scalars['Date']>,
   dispersionEndDate?: Maybe<Scalars['Date']>
 };
@@ -16718,8 +16720,8 @@ export type RelatedGrievanceTicketsQueryHookResult = ReturnType<typeof useRelate
 export type RelatedGrievanceTicketsLazyQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsLazyQuery>;
 export type RelatedGrievanceTicketsQueryResult = ApolloReactCommon.QueryResult<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>;
 export const AllPaymentPlansForTableDocument = gql`
-    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantity: String, $dispersionStartDate: Date, $dispersionEndDate: Date) {
-  allPaymentPlans(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantity: $totalEntitledQuantity, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate) {
+    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date) {
+  allPaymentPlans(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -16805,7 +16807,8 @@ export function withAllPaymentPlansForTable<TProps, TChildProps = {}>(operationO
  *      businessArea: // value for 'businessArea'
  *      search: // value for 'search'
  *      status: // value for 'status'
- *      totalEntitledQuantity: // value for 'totalEntitledQuantity'
+ *      totalEntitledQuantityFrom: // value for 'totalEntitledQuantityFrom'
+ *      totalEntitledQuantityTo: // value for 'totalEntitledQuantityTo'
  *      dispersionStartDate: // value for 'dispersionStartDate'
  *      dispersionEndDate: // value for 'dispersionEndDate'
  *   },
