@@ -709,10 +709,13 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root, info, payment_plan_id, **kwargs):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            logger.error("You can only export Payment List for LOCKED Payment Plan")
+            raise GraphQLError("You can only export Payment List for LOCKED Payment Plan")
 
         old_payment_plan = copy_model_object(payment_plan)
-
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user=info.context.user)
 
@@ -744,8 +747,8 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
-            logger.error("You can only import entitlement for LOCKED Payment Plan")
-            raise GraphQLError("You can only import entitlement for LOCKED Payment Plan")
+            logger.error("You can only import for LOCKED Payment Plan")
+            raise GraphQLError("You can only import for LOCKED Payment Plan")
 
         import_service = XlsxPaymentPlanImportService(payment_plan=payment_plan, file=file)
         import_service.open_workbook()
@@ -774,6 +777,10 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        if payment_plan.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.STEFICON_ERROR]:
+            logger.error("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
+            raise GraphQLError("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
 
         old_payment_plan = copy_model_object(payment_plan)
 
