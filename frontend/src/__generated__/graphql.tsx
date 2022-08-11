@@ -583,11 +583,8 @@ export type CashPlanPaymentVerificationNode = Node & {
   sexFilter?: Maybe<Scalars['String']>,
   activationDate?: Maybe<Scalars['DateTime']>,
   completionDate?: Maybe<Scalars['DateTime']>,
-<<<<<<< HEAD
-=======
   xlsxFileExporting: Scalars['Boolean'],
   xlsxFileImported: Scalars['Boolean'],
->>>>>>> 83ba1c72be62e1305d5244dee0dc6713e6c47704
   paymentRecordVerifications: PaymentVerificationNodeConnection,
   xlsxFileWasDownloaded?: Maybe<Scalars['Boolean']>,
   hasXlsxFile?: Maybe<Scalars['Boolean']>,
@@ -5013,7 +5010,6 @@ export type SectionTotalNode = {
 export type SensitiveGrievanceTicketExtras = {
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
-  paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
 };
 
 export type ServiceProviderNode = Node & {
@@ -20803,11 +20799,8 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-<<<<<<< HEAD
-=======
   xlsxFileExporting?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   xlsxFileImported?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
->>>>>>> 83ba1c72be62e1305d5244dee0dc6713e6c47704
   paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
   xlsxFileWasDownloaded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   hasXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,

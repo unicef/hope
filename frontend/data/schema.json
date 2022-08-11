@@ -30560,8 +30560,6 @@
             "deprecationReason": null
           },
           {
-<<<<<<< HEAD
-=======
             "name": "xlsxFileExporting",
             "description": null,
             "args": [],
@@ -30594,7 +30592,6 @@
             "deprecationReason": null
           },
           {
->>>>>>> 83ba1c72be62e1305d5244dee0dc6713e6c47704
             "name": "paymentRecordVerifications",
             "description": null,
             "args": [
@@ -46015,20 +46012,6 @@
               "kind": "SCALAR",
               "name": "ID",
               "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "paymentRecord",
-            "description": null,
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
             },
             "defaultValue": null
           }

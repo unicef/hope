@@ -301,11 +301,8 @@ type CashPlanPaymentVerificationNode implements Node {
   sexFilter: String
   activationDate: DateTime
   completionDate: DateTime
-<<<<<<< HEAD
-=======
   xlsxFileExporting: Boolean!
   xlsxFileImported: Boolean!
->>>>>>> 83ba1c72be62e1305d5244dee0dc6713e6c47704
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   xlsxFileWasDownloaded: Boolean
   hasXlsxFile: Boolean
@@ -2996,7 +2993,6 @@ type SectionTotalNode {
 input SensitiveGrievanceTicketExtras {
   household: ID
   individual: ID
-  paymentRecord: [ID]
 }
 
 type ServiceProviderNode implements Node {
