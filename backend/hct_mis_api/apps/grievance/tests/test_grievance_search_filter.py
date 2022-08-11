@@ -1,3 +1,5 @@
+from django.core.management import call_command
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -6,7 +8,7 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.geo.models import Country
+import hct_mis_api.apps.geo.models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
@@ -30,31 +32,19 @@ class TestGrievanceQuerySearchFilter(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        call_command("loadcountries")
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        country = Country.objects.first()
+        country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
-            name="Admin type one",
-            admin_level=2,
-            country=country,
-        )
-        cls.admin_area_1 = AreaFactory(title="City Test", area_type=area_type, p_code="123aa123")
-        cls.admin_area_2 = AreaFactory(title="City Example", area_type=area_type, p_code="sadasdasfd222")
-
-        area_type_new = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
             country=country,
-            original_id=area_type.id,
         )
-        cls.admin_area_1_new = AreaFactory(
-            name="City Test", area_type=area_type_new, p_code="123aa123", original_id=cls.admin_area_1.id
-        )
-        cls.admin_area_2_new = AreaFactory(
-            name="City Example", area_type=area_type_new, p_code="sadasdasfd222", original_id=cls.admin_area_2.id
-        )
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
+        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sadasdasfd222")
 
         _, individuals = create_household({"size": 2}, {"family_name": "Kowalski"})
         cls.individual_1 = individuals[0]
@@ -66,7 +56,6 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             **{
                 "business_area": cls.business_area,
                 "admin2": cls.admin_area_1,
-                "admin2_new": cls.admin_area_1_new,
                 "language": "Polish",
                 "consent": True,
                 "description": "ticket_1",
@@ -82,7 +71,6 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             **{
                 "business_area": cls.business_area,
                 "admin2": cls.admin_area_2,
-                "admin2_new": cls.admin_area_2_new,
                 "language": "English",
                 "consent": True,
                 "description": "ticket_2",
@@ -98,7 +86,6 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             **{
                 "business_area": cls.business_area,
                 "admin2": cls.admin_area_2,
-                "admin2_new": cls.admin_area_2_new,
                 "language": "Polish, English",
                 "consent": True,
                 "description": "ticket_3",

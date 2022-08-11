@@ -2,6 +2,8 @@ from datetime import datetime
 
 from parameterized import parameterized
 
+from django.core.management import call_command
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 
@@ -66,26 +68,17 @@ class TestGrievanceDashboardQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        call_command("loadcountries")
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        country = Country.objects.first()
+        country = Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
             country=country,
         )
-        cls.admin_area_1 = AreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
-
-        area_type_new = AreaTypeFactory(
-            name="Admin type one",
-            area_level=2,
-            country=country,
-            original_id=area_type.id,
-        )
-        cls.admin_area_1_new = AreaFactory(
-            name="City Test", area_type=area_type_new, p_code="123aa123", original_id=cls.admin_area_1.id
-        )
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
 
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
@@ -137,7 +130,6 @@ class TestGrievanceDashboardQuery(APITestCase):
             grievance_ticket.assigned_to = cls.user
             grievance_ticket.business_area = cls.business_area
             grievance_ticket.admin2 = cls.admin_area_1
-            grievance_ticket.admin2_new = cls.admin_area_1_new
             grievance_ticket.consent = True
             grievance_ticket.language = "Polish, English"
             grievance_ticket.description = "Just random description"
