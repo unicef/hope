@@ -1,7 +1,6 @@
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
 )
@@ -35,15 +34,15 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        country = Country.objects.first()
         area_type = AreaTypeFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=cls.business_area,
+            country=country,
         )
-        cls.admin_area_1 = AreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
-        cls.admin_area_2 = AreaFactory(title="City Example", admin_area_level=area_type, p_code="sadasdasfd222")
+        cls.admin_area_1 = AreaFactory(title="City Test", area_type=area_type, p_code="123aa123")
+        cls.admin_area_2 = AreaFactory(title="City Example", area_type=area_type, p_code="sadasdasfd222")
 
-        country = Country.objects.first()
         area_type_new = AreaTypeFactory(
             name="Admin type one",
             area_level=2,

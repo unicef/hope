@@ -69,14 +69,14 @@ class TestGrievanceDashboardQuery(APITestCase):
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        country = Country.objects.first()
         area_type = AreaTypeFactory(
             name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
+            area_level=2,
+            country=country,
         )
         cls.admin_area_1 = AreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
 
-        country = Country.objects.first()
         area_type_new = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
