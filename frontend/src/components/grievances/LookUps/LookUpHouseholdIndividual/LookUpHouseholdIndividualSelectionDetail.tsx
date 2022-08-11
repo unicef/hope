@@ -130,7 +130,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
             filter={filterHouseholdApplied}
             businessArea={businessArea}
             choicesData={choicesData}
-            setFieldValue={(key, value) => onSelect(key, value)}
+            setFieldValue={onSelect}
             selectedHousehold={selectedHousehold}
             setSelectedHousehold={setSelectedHousehold}
             setSelectedIndividual={setSelectedIndividual}
@@ -149,7 +149,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
           <LookUpIndividualTable
             filter={filterIndividualApplied}
             businessArea={businessArea}
-            setFieldValue={(key, value) => onSelect(key, value)}
+            setFieldValue={onSelect}
             valuesInner={initialValues}
             selectedHousehold={selectedHousehold}
             setSelectedHousehold={setSelectedHousehold}
