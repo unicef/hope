@@ -1,4 +1,5 @@
 from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -6,6 +7,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -97,6 +99,8 @@ HOUSEHOLD_QUERY = """
 
 
 class TestHouseholdQuery(APITestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     @classmethod
     def setUpTestData(cls):
         cached_business_areas_slug_id_dict.cache_clear()
@@ -114,9 +118,11 @@ class TestHouseholdQuery(APITestCase):
         )
 
         cls.households = []
+        country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
+
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household(
-                {"size": family_size, "address": "Lorem Ipsum", "country_origin": "PL"},
+                {"size": family_size, "address": "Lorem Ipsum", "country_origin": country_origin},
             )
             if index % 2:
                 household.programs.add(cls.program_one)

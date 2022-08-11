@@ -1,6 +1,5 @@
 from datetime import datetime
-
-from django.core.management import call_command
+from django.utils import timezone
 
 from parameterized import parameterized
 
@@ -78,17 +77,21 @@ class TestCashPlanQueries(APITestCase):
                 "coverage_duration": 21,
                 "coverage_unit": "Day(s)",
                 "assistance_measurement": "Syrian pound",
-                "dispersion_date": "2020-04-25",
+                "dispersion_date": "2020-04-25T00:00:00+00:00",
                 "distribution_level": "Registration Group",
-                "end_date": datetime.strptime(
-                    "2064-03-14T22:52:54",
-                    "%Y-%m-%dT%H:%M:%S",
+                "end_date": timezone.make_aware(
+                    datetime.strptime(
+                        "2064-03-14T22:52:54",
+                        "%Y-%m-%dT%H:%M:%S",
+                    )
                 ),
                 "name": "Far yet reveal area bar almost dinner.",
                 "total_persons_covered": 540,
-                "start_date": datetime.strptime(
-                    "2051-11-30T00:02:09",
-                    "%Y-%m-%dT%H:%M:%S",
+                "start_date": timezone.make_aware(
+                    datetime.strptime(
+                        "2051-11-30T00:02:09",
+                        "%Y-%m-%dT%H:%M:%S",
+                    )
                 ),
                 "status": "Transaction Completed",
                 "total_delivered_quantity": 53477453.27,
@@ -103,17 +106,21 @@ class TestCashPlanQueries(APITestCase):
                 "coverage_duration": 19,
                 "coverage_unit": "Week(s)",
                 "assistance_measurement": "Cuban peso",
-                "dispersion_date": "2020-02-22",
+                "dispersion_date": "2020-02-22T00:00:00+00:00",
                 "distribution_level": "Registration Group",
-                "end_date": datetime.strptime(
-                    "2028-03-31T18:44:15",
-                    "%Y-%m-%dT%H:%M:%S",
+                "end_date": timezone.make_aware(
+                    datetime.strptime(
+                        "2028-03-31T18:44:15",
+                        "%Y-%m-%dT%H:%M:%S",
+                    )
                 ),
                 "name": "Despite action TV after.",
                 "total_persons_covered": 100,
-                "start_date": datetime.strptime(
-                    "2041-06-14T10:15:44",
-                    "%Y-%m-%dT%H:%M:%S",
+                "start_date": timezone.make_aware(
+                    datetime.strptime(
+                        "2041-06-14T10:15:44",
+                        "%Y-%m-%dT%H:%M:%S",
+                    )
                 ),
                 "status": "Transaction Completed",
                 "total_delivered_quantity": 41935107.03,

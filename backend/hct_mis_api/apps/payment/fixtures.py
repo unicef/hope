@@ -129,7 +129,7 @@ class PaymentVerificationFactory(factory.DjangoModelFactory):
         PaymentVerification.STATUS_CHOICES,
         getter=lambda c: c[0],
     )
-    status_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    status_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
 
     class Meta:
         model = PaymentVerification

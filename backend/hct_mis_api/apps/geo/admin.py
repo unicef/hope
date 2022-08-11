@@ -1,9 +1,8 @@
 from django.contrib import admin
-from django.contrib.admin import FieldListFilter, ListFilter, RelatedFieldListFilter
+from django.contrib.admin import ListFilter, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
 from django.forms import TextInput
 
-from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
@@ -12,7 +11,6 @@ from smart_admin.mixins import FieldsetMixin
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 from .models import Area, AreaType, Country
-from .utils import initialise_area_types, initialise_areas, initialise_countries
 
 
 class ActiveRecordFilter(ListFilter):
@@ -88,11 +86,6 @@ class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEM
         ret = super().get_list_display(request)
         return ret
 
-    @button()
-    def initialise(self, request):
-        results = initialise_countries()
-        self.message_user(request, str(results))
-
 
 @admin.register(AreaType)
 class AreaTypeAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
@@ -121,11 +114,6 @@ class AreaTypeAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPE
         # ("GIS", {"classes": ["collapse"], "fields": ("geom", "point")}),
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
-
-    @button()
-    def initialise(self, request):
-        results = initialise_area_types()
-        self.message_user(request, str(results))
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
@@ -167,8 +155,3 @@ class AreaAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEMode
         ("GIS", {"classes": ["collapse"], "fields": ("geom", "point")}),
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
-
-    @button()
-    def initialise(self, request):
-        results = initialise_areas()
-        self.message_user(request, str(results))

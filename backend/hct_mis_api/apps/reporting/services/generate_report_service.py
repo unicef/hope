@@ -13,7 +13,6 @@ from django.template.loader import render_to_string
 import openpyxl
 from openpyxl.utils import get_column_letter
 
-from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -157,9 +156,7 @@ class GenerateReportContentHelpers:
         result = []
         for admin_area_id in admin_areas_ids:
             admin_area_id = decode_id_string(admin_area_id)
-            if admin_area := AdminArea.objects.filter(id=admin_area_id).first():
-                result.append(admin_area.title)
-            elif admin_area := Area.objects.filter(id=admin_area_id).first():
+            if admin_area := Area.objects.filter(id=admin_area_id).first():
                 result.append(admin_area.name)
         return ", ".join(result)
 
@@ -400,7 +397,7 @@ class GenerateReportContentHelpers:
             "created_at__lte": report.date_to,
         }
 
-        return GrievanceTicket.objects.filter(**filter_vars).select_related("admin2_new", "created_by", "assigned_to")
+        return GrievanceTicket.objects.filter(**filter_vars).select_related("admin2", "created_by", "assigned_to")
 
     @classmethod
     def format_grievance_tickets_row(cls, grievance_ticket: GrievanceTicket) -> tuple:
@@ -421,8 +418,8 @@ class GenerateReportContentHelpers:
             grievance_ticket.get_status_display(),
             grievance_ticket.get_category_display(),
             grievance_ticket.get_issue_type(),
-            grievance_ticket.admin2_new.name,
-            grievance_ticket.admin2_new.p_code,
+            grievance_ticket.admin2.name,
+            grievance_ticket.admin2.p_code,
             get_username(grievance_ticket.created_by),
             get_full_name(grievance_ticket.created_by),
             get_username(grievance_ticket.assigned_to),

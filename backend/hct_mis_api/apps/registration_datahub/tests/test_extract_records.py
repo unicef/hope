@@ -1,5 +1,5 @@
 import base64
-import datetime
+from django.utils import timezone
 import json
 from pathlib import Path
 
@@ -67,7 +67,7 @@ class TestExtractRecords(TestCase):
         }
         Record.objects.create(
             registration=1,
-            timestamp=datetime.datetime.now(),
+            timestamp=timezone.now(),
             data=None,
             source_id=1,
             fields=fields,

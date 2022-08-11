@@ -72,3 +72,9 @@ export const GrievanceSearchTypes = {
   HouseholdID: 'ticket_hhid',
   LastName: 'last_name',
 };
+
+export const REPORTING_STATES = {
+  PROCESSING: 1,
+  GENERATED: 2,
+  FAILED: 3
+};

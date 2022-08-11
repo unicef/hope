@@ -1,12 +1,10 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
@@ -52,8 +50,6 @@ class TestDiscardVerificationMutation(APITestCase):
         }
         """
 
-    # verification = None
-
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
@@ -62,8 +58,7 @@ class TestDiscardVerificationMutation(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         program = ProgramFactory(business_area=cls.business_area)
-        program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
-        program.admin_areas_new.set(Area.objects.order_by("?")[:3])
+        program.admin_areas.set(Area.objects.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
 
         target_population = TargetPopulationFactory(
@@ -76,7 +71,9 @@ class TestDiscardVerificationMutation(APITestCase):
             program=program,
             business_area=cls.business_area,
         )
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
+        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
+            cash_plan=cash_plan, verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
+        )
         cash_plan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
         cash_plan_payment_verification.save()
         for _ in range(payment_record_amount):
@@ -86,8 +83,7 @@ class TestDiscardVerificationMutation(APITestCase):
             household, individuals = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": AdminArea.objects.order_by("?").first(),
-                    "admin_area_new": Area.objects.order_by("?").first(),
+                    "admin_area": Area.objects.order_by("?").first(),
                 },
                 {"registration_data_import": registration_data_import},
             )
@@ -99,7 +95,6 @@ class TestDiscardVerificationMutation(APITestCase):
                 household=household,
                 target_population=target_population,
             )
-
             PaymentVerificationFactory(
                 cash_plan_payment_verification=cash_plan_payment_verification,
                 payment_record=payment_record,

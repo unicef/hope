@@ -301,7 +301,14 @@ type CashPlanPaymentVerificationNode implements Node {
   sexFilter: String
   activationDate: DateTime
   completionDate: DateTime
+<<<<<<< HEAD
+=======
+  xlsxFileExporting: Boolean!
+  xlsxFileImported: Boolean!
+>>>>>>> 83ba1c72be62e1305d5244dee0dc6713e6c47704
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  xlsxFileWasDownloaded: Boolean
+  hasXlsxFile: Boolean
 }
 
 type CashPlanPaymentVerificationNodeConnection {
@@ -325,6 +332,7 @@ enum CashPlanPaymentVerificationStatus {
   ACTIVE
   FINISHED
   PENDING
+  INVALID
 }
 
 type CashPlanPaymentVerificationSummaryNode implements Node {
@@ -703,6 +711,10 @@ type EditPaymentVerificationMutation {
   cashPlan: CashPlanNode
 }
 
+type ExportXlsxCashPlanVerification {
+  cashPlan: CashPlanNode
+}
+
 type FieldAttributeNode {
   id: String
   type: String
@@ -774,7 +786,6 @@ type GrievanceTicketNode implements Node {
   issueType: Int
   description: String!
   admin2: AreaNode
-  admin2New: AreaNode
   area: String!
   language: String!
   consent: Boolean!
@@ -867,7 +878,6 @@ type HouseholdNode implements Node {
   size: Int!
   address: String!
   adminArea: AreaNode
-  adminAreaNew: AreaNode
   representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   geopoint: GeoJSON
   femaleAgeGroup05Count: Int
@@ -1999,7 +2009,7 @@ input IndividualUpdateDataObjectType {
   phoneNo: String
   phoneNoAlternative: String
   relationship: String
-  disability: Boolean
+  disability: String
   workStatus: String
   enrolledInNutritionProgramme: Boolean
   administrationOfRutf: Boolean
@@ -2024,6 +2034,10 @@ input IndividualUpdateDataObjectType {
   paymentChannelsToEdit: [EditBankTransferObjectType]
   paymentChannelsToRemove: [ID]
   flexFields: Arg
+}
+
+type InvalidCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
 }
 
 input IssueTypeExtrasInput {
@@ -2149,10 +2163,12 @@ type Mutations {
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
+  exportXlsxCashPlanVerification(cashPlanVerificationId: ID!): ExportXlsxCashPlanVerification
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
   activateCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): ActivateCashPlanVerificationMutation
   finishCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): FinishCashPlanVerificationMutation
   discardCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DiscardCashPlanVerificationMutation
+  invalidCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): InvalidCashPlanVerificationMutation
   deleteCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DeleteCashPlanVerificationMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
@@ -2375,7 +2391,7 @@ type ProgramNode implements Node {
   description: String!
   caId: String
   caHashId: String
-  adminAreasNew(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
+  adminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
   businessArea: UserBusinessAreaNode!
   budget: Decimal
   frequencyOfPayments: ProgramFrequencyOfPayments!
@@ -2514,9 +2530,9 @@ type Query {
   finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, excludedIds: String!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
   household(id: ID!): HouseholdNode
-  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, countryOrigin: String, countryOrigin_Startswith: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminAreaNew: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, lastRegistrationDate: String, admin2: [ID], orderBy: String): HouseholdNodeConnection
+  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, lastRegistrationDate: String, admin2: [ID], countryOrigin: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
-  allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, household_AdminAreaNew: ID, withdrawn: Boolean, age: String, programs: [ID], search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
+  allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, programs: [ID], search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
   sectionHouseholdsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
   sectionIndividualsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
   sectionChildReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
@@ -2746,7 +2762,6 @@ type ReportNode implements Node {
   numberOfRecords: Int
   program: ProgramNode
   adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
-  adminAreaNew(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
   fileUrl: String
 }
 

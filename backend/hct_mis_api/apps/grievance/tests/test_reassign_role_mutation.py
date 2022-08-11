@@ -1,16 +1,15 @@
+from django.core.management import call_command
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
-    TicketDeleteIndividualDetailsFactory, TicketNeedsAdjudicationDetailsFactory,
+    TicketDeleteIndividualDetailsFactory,
+    TicketNeedsAdjudicationDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -47,15 +46,9 @@ class TestRoleReassignMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        cls.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sadf3223")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -63,7 +56,7 @@ class TestRoleReassignMutation(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area_new = AreaFactory(name="City Test", area_type=area_type, p_code="sadf3223")
+        cls.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="sadf3223")
 
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
@@ -104,7 +97,6 @@ class TestRoleReassignMutation(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
             admin2=cls.admin_area,
-            admin2_new=cls.admin_area_new,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -142,6 +134,8 @@ class TestRoleReassignMutation(APITestCase):
 
 
 class TestRoleReassignMutationNewTicket(APITestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     REASSIGN_ROLE_MUTATION = """
     mutation ReassignRole(
       $grievanceTicketId: ID!, 
@@ -173,20 +167,13 @@ class TestRoleReassignMutationNewTicket(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        cls.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sadf3223")
-
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
             name="Admin type one",
             country=country,
             area_level=2,
         )
-        cls.admin_area_new = AreaFactory(name="City Test", area_type=area_type, p_code="sadf3223")
+        cls.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="sadf3223")
 
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
@@ -254,7 +241,6 @@ class TestRoleReassignMutationNewTicket(APITestCase):
             id="ba655cec-08d6-4f67-9e08-642997324480",
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
             admin2=cls.admin_area,
-            admin2_new=cls.admin_area_new,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -264,7 +250,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
             golden_records_individual=cls.individual_1,
             possible_duplicate=cls.individual_2,
             is_multiple_duplicates_version=True,
-            selected_individual=None
+            selected_individual=None,
         )
 
     def test_role_reassignment_new_ticket(self):
