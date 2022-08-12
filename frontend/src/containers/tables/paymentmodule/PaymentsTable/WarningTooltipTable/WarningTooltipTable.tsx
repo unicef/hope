@@ -145,7 +145,7 @@ export const WarningTooltipTable = ({
               setDialogOpen(false);
             }}
           >
-            {t('CANCEL')}
+            {t('CLOSE')}
           </Button>
         </DialogActions>
       </DialogFooter>
