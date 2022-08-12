@@ -7,11 +7,22 @@ from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPayme
 
 
 class XlsxPaymentPlanImportService:
+    TYPES_READABLE_MAPPING = {
+        "s": "text",
+        "n": "number",
+        "f": "formula",
+        "b": "bool",
+        "inlineStr": "inlineStr",
+        "e": "error",
+        "str": "text",
+    }
+
     ENTITLEMENT_COLUMN_INDEX = 0
 
-    def __int__(self, payment_plan):
+    def __int__(self, payment_plan, file):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.all_active_payments
+        self.file = file
         self.errors = []
         self.payments_dict = {}
 

@@ -91,7 +91,7 @@ class PaymentPlanService:
         # TODO MB set/unset excluded payments
         self.payment_plan.status_lock()
         self.payment_plan.update_population_count_fields()
-        self.payment_plan.update_money_fields()
+        # self.payment_plan.update_money_fields()
 
         self.payment_plan.save()
 
