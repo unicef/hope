@@ -2,6 +2,7 @@ import logging
 import datetime
 
 from concurrency.api import disable_concurrency
+from django.contrib.admin.options import get_content_type_for_model
 from django.db.transaction import atomic
 from django.utils import timezone
 from sentry_sdk import configure_scope
@@ -121,8 +122,9 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
+def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
     try:
+        from hct_mis_api.apps.core.models import XLSXFileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 
@@ -131,12 +133,18 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
 
-            service = XlsxPaymentPlanImportService(payment_plan)
+            file = XLSXFileTemp.objects.get(pk=file_id)
+
+            service = XlsxPaymentPlanImportService(payment_plan, file)
             service.import_payment_list()
 
             payment_plan.update_money_fields()
             payment_plan.status_lock()
             payment_plan.save()
+
+            # remove template file
+            # TODO: remove file?
+            # file.delete()
 
     except Exception as e:
         logger.exception(e)

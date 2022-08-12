@@ -2692,6 +2692,7 @@ type PaymentPlanNode implements Node {
   financeReviewNumberRequired: Int
   currencyName: String
   hasPaymentListXlsxFile: Boolean
+  importedXlsxFileName: String
 }
 
 type PaymentPlanNodeConnection {
