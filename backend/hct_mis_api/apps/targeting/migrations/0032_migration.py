@@ -8,9 +8,9 @@ def did_remove_some_duplicates(HouseholdSelectionModel):
     for household_selection in current_selections:
         possible_duplicates = HouseholdSelectionModel.objects.filter(
             household=household_selection.household, target_population=household_selection.target_population
-        )
-        if possible_duplicates.count() > 1:
-            possible_duplicates.exclude(id=household_selection.id).delete()
+        ).exclude(id=household_selection.id)
+        if possible_duplicates.count() > 0:
+            possible_duplicates.delete()
             return True
     return False
 
