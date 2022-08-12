@@ -1,3 +1,5 @@
+import json
+
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
 from django.shortcuts import get_object_or_404
 
@@ -28,31 +30,31 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
-    CashPlanPaymentVerificationFilter,
-    FinancialServiceProviderFilter,
-    FinancialServiceProviderXlsxReportFilter,
-    FinancialServiceProviderXlsxTemplateFilter,
-    PaymentFilter,
-    PaymentPlanFilter,
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
+    CashPlanPaymentVerificationFilter,
+    FinancialServiceProviderXlsxTemplateFilter,
+    FinancialServiceProviderXlsxReportFilter,
+    FinancialServiceProviderFilter,
+    PaymentPlanFilter,
+    PaymentFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
-    Approval,
-    ApprovalProcess,
     CashPlan,
     CashPlanPaymentVerification,
     CashPlanPaymentVerificationSummary,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxReport,
-    FinancialServiceProviderXlsxTemplate,
-    Payment,
-    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    FinancialServiceProviderXlsxReport,
+    FinancialServiceProvider,
+    ApprovalProcess,
+    Approval,
+    PaymentPlan,
+    Payment,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -254,6 +256,38 @@ class ApprovalProcessNode(DjangoObjectType):
         return resp
 
 
+class PaymentConflictDataNode(graphene.ObjectType):
+    payment_plan_id = graphene.String()
+    payment_plan_start_date = graphene.String()
+    payment_plan_end_date = graphene.String()
+    payment_plan_status = graphene.String()
+    payment_id = graphene.String()
+
+
+class PaymentNode(DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    payment_plan_hard_conflicted = graphene.Boolean()
+    payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
+    payment_plan_soft_conflicted = graphene.Boolean()
+    payment_plan_soft_conflicted_data = graphene.List(PaymentConflictDataNode)
+
+    class Meta:
+        model = Payment
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    def resolve_payment_plan_hard_conflicted_data(self, info):
+        return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_hard_conflicted_data", []))
+
+    def resolve_payment_plan_soft_conflicted_data(self, info):
+        return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
+
+    @classmethod
+    def _parse_pp_conflict_data(cls, conflicts_data):
+        """parse list of conflicted payment plans data from Payment model json annotations"""
+        return [json.loads(conflict) for conflict in conflicts_data]
+
+
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
     approval_number_required = graphene.Int()
@@ -264,6 +298,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     start_date = graphene.Date()
     end_date = graphene.Date()
     currency_name = graphene.String()
+    payments_conflicts_count = graphene.Int()
 
     class Meta:
         model = PaymentPlan
@@ -279,17 +314,11 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_finance_review_number_required(self, info):
         return self.business_area.finance_review_number_required
 
+    def resolve_payments_conflicts_count(self, info):
+        return self.payments.filter(payment_plan_hard_conflicted=True).count()
+
     def resolve_currency_name(self, info):
         return self.get_currency_display()
-
-
-class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
-
-    class Meta:
-        model = Payment
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):
@@ -398,9 +427,7 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
     payment_plan_status_choices = graphene.List(ChoiceObject)
-
     currency_choices = graphene.List(ChoiceObject)
-
     payment = relay.Node.Field(PaymentNode)
     all_payments = DjangoPermissionFilterConnectionField(
         PaymentNode,

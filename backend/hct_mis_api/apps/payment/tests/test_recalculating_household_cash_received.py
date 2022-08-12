@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase

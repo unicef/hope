@@ -3,17 +3,18 @@ from django.db.models.functions import Lower
 
 from django_filters import (
     CharFilter,
-    DateFilter,
     FilterSet,
-    MultipleChoiceFilter,
-    NumberFilter,
     OrderingFilter,
+    NumberFilter,
     UUIDFilter,
+    MultipleChoiceFilter,
+    DateFilter,
 )
+from django.shortcuts import get_object_or_404
+
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
-from hct_mis_api.apps.core.filters import DecimalRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid, decode_id_string
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.models import (
     CashPlan,
@@ -21,11 +22,11 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
-    GenericPayment,
-    Payment,
-    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
+    PaymentPlan,
+    GenericPayment,
+    Payment,
 )
 
 
@@ -267,7 +268,12 @@ class PaymentFilter(FilterSet):
     payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
 
     def payment_plan_id_filter(self, qs, name, value):
-        return qs
+        payment_plan_id = decode_id_string(value)
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        q = Q(payment_plan=payment_plan)
+        if payment_plan.status != PaymentPlan.Status.OPEN:
+            q &= ~Q(excluded=True)
+        return qs.filter(q)
 
     class Meta:
         fields = tuple()
