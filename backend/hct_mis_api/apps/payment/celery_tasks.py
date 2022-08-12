@@ -121,6 +121,31 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
 @app.task
 @log_start_and_end
 @sentry_tags
+def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
+    try:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+
+        with configure_scope() as scope:
+            scope.set_tag("business_area", payment_plan.business_area)
+
+            service = XlsxPaymentPlanImportService(payment_plan)
+            service.import_payment_list()
+
+            payment_plan.update_money_fields()
+            payment_plan.status_lock()
+            payment_plan.save()
+
+    except Exception as e:
+        logger.exception(e)
+        raise
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
 def payment_plan_apply_steficon(payment_plan_id):
     from hct_mis_api.apps.steficon.models import RuleCommit
     from hct_mis_api.apps.payment.models import PaymentPlan, Payment
@@ -143,17 +168,17 @@ def payment_plan_apply_steficon(payment_plan_id):
         updates = []
         with atomic():
             entry: Payment
-            for entry in payment_plan.payments.all_active_payments:
-                pass
+            for entry in payment_plan.all_active_payments:
                 # TODO: not sure how will work steficon function
                 # result = rule.execute({"household": entry.household, "payment_plan": payment_plan})
-                # entry.entitlement_quantity = result.entitlement_quantity
-                # updates.append(entry)
-            Payment.objects.bulk_update(updates, ["entitlement_quantity", "entitlement_quantity_usd"])
-        payment_plan.status = PaymentPlan.Status.STEFICON_COMPLETED
+                entry.entitlement_quantity = 99  # added for test only
+                updates.append(entry)
+            Payment.objects.bulk_update(updates, ["entitlement_quantity"])
+        payment_plan.status = PaymentPlan.Status.LOCKED
         payment_plan.steficon_applied_date = timezone.now()
         with disable_concurrency(payment_plan):
             payment_plan.save()
+            payment_plan.update_money_fields()
     except Exception as e:
         logger.exception(e)
         payment_plan.steficon_applied_date = timezone.now()
