@@ -85,7 +85,6 @@ class TestSendTpToDatahub(TestCase):
         admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR")
-        test_agency = Agency.objects.create(type="test", label="test")
 
         cls.program_individual_data_needed_true = ProgramFactory(
             individual_data_needed=True,
