@@ -36,8 +36,6 @@ export const PaymentsTable = ({
     paymentPlanId: paymentPlan.id,
   };
 
-  // TODO: set payment to state to pass to warning popup modal
-
   return (
     <>
       <TableWrapper>

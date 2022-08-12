@@ -16,7 +16,11 @@ import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { decodeIdString, grievanceTicketStatusToColor } from '../../../../../utils/utils';
+import {
+  decodeIdString,
+  grievanceTicketStatusToColor,
+  paymentPlanStatusToColor,
+} from '../../../../../utils/utils';
 import { BlackLink } from '../../../../../components/core/BlackLink';
 import { Missing } from '../../../../../components/core/Missing';
 import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
@@ -24,7 +28,14 @@ import { WarningTooltip } from '../../../../../components/core/WarningTooltip';
 import { LabelizedField } from '../../../../../components/core/LabelizedField';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
-import { PaymentPlanQuery, PaymentQuery } from '../../../../../__generated__/graphql';
+import {
+  AllPaymentPlansForTableQuery,
+  AllPaymentsForTableQuery,
+  PaymentPlanQuery,
+  PaymentQuery,
+} from '../../../../../__generated__/graphql';
+import { UniversalMoment } from '../../../../../components/core/UniversalMoment';
+import { StatusBox } from '../../../../../components/core/StatusBox';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -47,7 +58,7 @@ const GreyBox = styled(Box)`
 
 interface WarningTooltipTableProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
-  payment: PaymentQuery['payment'];
+  payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
   setDialogOpen: (dialogOpen: boolean) => void;
 }
 
@@ -57,7 +68,42 @@ export const WarningTooltipTable = ({
   setDialogOpen,
 }: WarningTooltipTableProps): React.ReactElement => {
   const { t } = useTranslation();
+  if (!payment) return null;
+  const mappedPaymentPlanRows = (): React.ReactElement[] => {
+    const {
+      paymentPlanSoftConflicted,
+      paymentPlanHardConflicted,
+      paymentPlanHardConflictedData,
+      paymentPlanSoftConflictedData,
+    } = payment;
 
+    const renderRow = (row): React.ReactElement => (
+      <ClickableTableRow hover onClick={undefined}>
+        <TableCell align='left'>{row.paymentPlanId}</TableCell>
+        <TableCell align='left'>
+          <UniversalMoment>{row.paymentPlanStartDate}</UniversalMoment>
+        </TableCell>
+        <TableCell align='left'>
+          <UniversalMoment>{row.paymentPlanEndDate}</UniversalMoment>
+        </TableCell>
+        <TableCell align='left'>
+          <StatusBox
+            status={row.paymentPlanStatus}
+            statusToColor={paymentPlanStatusToColor}
+          />
+        </TableCell>
+        <TableCell align='left'>{row.paymentId}</TableCell>
+      </ClickableTableRow>
+    );
+
+    if (paymentPlanHardConflicted) {
+      return paymentPlanHardConflictedData.map((el) => renderRow(el));
+    }
+    if (paymentPlanSoftConflicted) {
+      return paymentPlanSoftConflictedData.map((el) => renderRow(el));
+    }
+    return [];
+  };
   return (
     <Dialog
       open={!!payment}
@@ -71,20 +117,25 @@ export const WarningTooltipTable = ({
       </DialogTitleWrapper>
       <DialogContent>
         <Box mt={4} mb={2} display='flex'>
-          {t('Payment Plan ID')} <Bold>{decodeIdString(paymentPlan.id)}</Bold> {t('details')}:
+          {t('Payment Plan ID')} <Bold>{decodeIdString(paymentPlan.id)}</Bold>{' '}
+          {t('details')}:
         </Box>
         <GreyBox p={3}>
           <Grid container>
             <Grid item xs={6}>
-              <LabelizedField label={t('Start Date')} value={new Date(paymentPlan.startDate).toLocaleDateString()} />
+              <LabelizedField label={t('Start Date')}>
+                <UniversalMoment>{paymentPlan.startDate}</UniversalMoment>
+              </LabelizedField>
             </Grid>
             <Grid item xs={6}>
-              <LabelizedField label={t('End Date')} value={new Date(paymentPlan.endDate).toLocaleDateString()} />
+              <LabelizedField label={t('End Date')}>
+                <UniversalMoment>{paymentPlan.endDate}</UniversalMoment>
+              </LabelizedField>
             </Grid>
           </Grid>
         </GreyBox>
         <Box mt={10} mb={10} display='flex'>
-          {t('Household ID')} <Bold>Some ID 2222</Bold>{' '}
+          {t('Household ID')} <Bold>{payment?.household?.unicefId}</Bold>{' '}
           {t('is also included in the following Payment Plans')}:
         </Box>
         <StyledTable>
@@ -97,31 +148,7 @@ export const WarningTooltipTable = ({
               <TableCell align='left'>{t('Payment ID')}</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
-            <ClickableTableRow hover onClick={undefined}>
-              <TableCell align='left'>
-                <Missing />
-              </TableCell>
-              <TableCell align='left'>
-                <Missing />
-              </TableCell>
-              <TableCell align='left'>
-                <Missing />
-              </TableCell>
-              <TableCell align='left'>
-                <Missing />
-                {/* <StatusContainer>
-                    <StatusBox
-                      status={plan.status}
-                      statusToColor={planStatusToColor}
-                    />
-                  </StatusContainer> */}
-              </TableCell>
-              <TableCell align='left'>
-                <Missing />
-              </TableCell>
-            </ClickableTableRow>
-          </TableBody>
+          <TableBody>{mappedPaymentPlanRows()}</TableBody>
         </StyledTable>
       </DialogContent>
       <DialogFooter>
