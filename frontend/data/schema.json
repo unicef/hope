@@ -4371,26 +4371,6 @@
                 "defaultValue": null
               },
               {
-                "name": "countryOrigin",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "countryOrigin_Startswith",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "address",
                 "description": null,
                 "type": {
@@ -4465,7 +4445,7 @@
                 "defaultValue": null
               },
               {
-                "name": "adminAreaNew",
+                "name": "adminArea",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -4563,6 +4543,16 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "countryOrigin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -4732,16 +4722,6 @@
               },
               {
                 "name": "household_AdminArea",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "household_AdminAreaNew",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -8179,18 +8159,6 @@
           },
           {
             "name": "admin2",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "AreaNode",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "admin2New",
             "description": null,
             "args": [],
             "type": {
@@ -13994,7 +13962,7 @@
             "deprecationReason": null
           },
           {
-            "name": "adminAreasNew",
+            "name": "adminAreas",
             "description": null,
             "args": [
               {
@@ -15257,18 +15225,6 @@
           },
           {
             "name": "adminArea",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "AreaNode",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "adminAreaNew",
             "description": null,
             "args": [],
             "type": {
@@ -29854,83 +29810,6 @@
             "deprecationReason": null
           },
           {
-            "name": "adminAreaNew",
-            "description": null,
-            "args": [
-              {
-                "name": "offset",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "before",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "after",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "first",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "last",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "name",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "AreaNodeConnection",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "fileUrl",
             "description": null,
             "args": [],
@@ -30681,6 +30560,38 @@
             "deprecationReason": null
           },
           {
+            "name": "xlsxFileExporting",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "xlsxFileImported",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "paymentRecordVerifications",
             "description": null,
             "args": [
@@ -30746,6 +30657,30 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "xlsxFileWasDownloaded",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hasXlsxFile",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -30781,6 +30716,12 @@
           },
           {
             "name": "PENDING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "INVALID",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -44459,6 +44400,33 @@
             "deprecationReason": null
           },
           {
+            "name": "exportXlsxCashPlanVerification",
+            "description": null,
+            "args": [
+              {
+                "name": "cashPlanVerificationId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ExportXlsxCashPlanVerification",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "importXlsxCashPlanVerification",
             "description": null,
             "args": [
@@ -44605,6 +44573,43 @@
             "type": {
               "kind": "OBJECT",
               "name": "DiscardCashPlanVerificationMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "invalidCashPlanPaymentVerification",
+            "description": null,
+            "args": [
+              {
+                "name": "cashPlanVerificationId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "version",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "BigInt",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "InvalidCashPlanVerificationMutation",
               "ofType": null
             },
             "isDeprecated": false,
@@ -46009,20 +46014,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "paymentRecord",
-            "description": null,
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -46892,7 +46883,7 @@
             "description": null,
             "type": {
               "kind": "SCALAR",
-              "name": "Boolean",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null
@@ -48901,6 +48892,29 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "ExportXlsxCashPlanVerification",
+        "description": null,
+        "fields": [
+          {
+            "name": "cashPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CashPlanNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "SCALAR",
         "name": "Upload",
         "description": null,
@@ -49057,6 +49071,29 @@
       {
         "kind": "OBJECT",
         "name": "DiscardCashPlanVerificationMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "cashPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CashPlanNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InvalidCashPlanVerificationMutation",
         "description": null,
         "fields": [
           {

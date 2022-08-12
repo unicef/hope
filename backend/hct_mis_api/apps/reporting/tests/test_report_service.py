@@ -3,11 +3,7 @@ from django.test import TestCase
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -23,6 +19,8 @@ from hct_mis_api.apps.reporting.models import Report
 
 
 class TestGenerateReportService(TestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     @classmethod
     def setUpTestData(self):
         create_afghanistan()
@@ -37,37 +35,28 @@ class TestGenerateReportService(TestCase):
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         last_registration_dates = ("2020-01-01", "2021-01-01")
 
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=self.business_area,
-        )
-        self.admin_area_1 = AdminAreaFactory(
-            title="Adminarea Test", admin_area_level=area_type, p_code="asdfgfhghkjltr"
-        )
-
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
             name="Admin type one",
             country=country,
             area_level=2,
         )
-        self.admin_area_1_new = AreaFactory(name="Adminarea Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        self.admin_area_1 = AreaFactory(name="Adminarea Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         self.program_1 = ProgramFactory(business_area=self.business_area, end_date="2020-01-01")
         self.program_2 = ProgramFactory(business_area=self.business_area, end_date="2022-01-01")
         self.households = []
         self.individuals = []
+        country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household_and_individuals(
                 {
                     "size": family_size,
                     "address": "Lorem Ipsum",
-                    "country_origin": "PL",
+                    "country_origin": country_origin,
                     "business_area": self.business_area,
                     "last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1],
                     "admin_area": None if index % 2 else self.admin_area_1,
-                    "admin_area_new": None if index % 2 else self.admin_area_1_new,
                 },
                 [
                     {"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]},
@@ -141,7 +130,6 @@ class TestGenerateReportService(TestCase):
             report.date_to = "2022-01-01"
             report.save()
             report.admin_area.set([self.admin_area_1])
-            report.admin_area_new.set([self.admin_area_1_new])
 
         if should_set_program:
             report.program = self.program_1
