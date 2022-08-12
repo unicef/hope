@@ -12,38 +12,24 @@ import {
   TableHead,
   TableRow,
 } from '@material-ui/core';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { LabelizedField } from '../../../../../components/core/LabelizedField';
+import { StatusBox } from '../../../../../components/core/StatusBox';
+import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../../components/core/UniversalMoment';
 import {
   decodeIdString,
-  grievanceTicketStatusToColor,
   paymentPlanStatusToColor,
 } from '../../../../../utils/utils';
-import { BlackLink } from '../../../../../components/core/BlackLink';
-import { Missing } from '../../../../../components/core/Missing';
-import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
-import { WarningTooltip } from '../../../../../components/core/WarningTooltip';
-import { LabelizedField } from '../../../../../components/core/LabelizedField';
-import { DialogFooter } from '../../../../dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import {
-  AllPaymentPlansForTableQuery,
   AllPaymentsForTableQuery,
   PaymentPlanQuery,
-  PaymentQuery,
 } from '../../../../../__generated__/graphql';
-import { UniversalMoment } from '../../../../../components/core/UniversalMoment';
-import { StatusBox } from '../../../../../components/core/StatusBox';
+import { DialogFooter } from '../../../../dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 
-export const StyledLink = styled.div`
-  color: #000;
-  text-decoration: underline;
-  cursor: pointer;
-  display: flex;
-  align-content: center;
-`;
 const StyledTable = styled(Table)`
   min-width: 100px;
 `;
