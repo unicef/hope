@@ -1,8 +1,9 @@
-import datetime
+from django.utils import timezone
 import logging
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField, IntegerRangeField
+from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
     RangeMinValueValidator,
@@ -42,7 +43,6 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
-    Document,
     Household,
     Individual,
 )
@@ -319,7 +319,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         else:
             households_ids = self.vulnerability_score_filtered_households.values_list("id")
         delta18 = relativedelta(years=+18)
-        date18ago = datetime.datetime.now() - delta18
+        date18ago = timezone.now() - delta18
         targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
             child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
             child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
@@ -362,7 +362,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         else:
             households_ids = self.final_list.values_list("id").distinct()
         delta18 = relativedelta(years=+18)
-        date18ago = datetime.datetime.now() - delta18
+        date18ago = timezone.now() - delta18
 
         targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
             child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
@@ -386,14 +386,15 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             TargetPopulation.objects.filter(
                 program=self.program,
                 steficon_rule__isnull=False,
-                status=TargetPopulation.STATUS_PROCESSING,
             )
+            .filter(status__in=(TargetPopulation.STATUS_PROCESSING, TargetPopulation.STATUS_READY_FOR_CASH_ASSIST))
             .order_by("-created_at")
+            .distinct()
             .first()
         )
         if tp is None:
             return None
-        return tp.steficon_rule
+        return tp.steficon_rule.rule
 
     def set_to_ready_for_cash_assist(self):
         self.status = self.STATUS_READY_FOR_CASH_ASSIST
@@ -592,15 +593,28 @@ class TargetingIndividualRuleFilterBlockMixin:
             else self.individual_block_filters.all()
         )
         filtered = False
+        search_query = SearchQuery("")
+
         for ruleFilter in filters:
             filtered = True
-            individuals_query &= ruleFilter.get_query()
+            if ruleFilter.field_name in ("observed_disability", "full_name"):
+                for arg in ruleFilter.arguments:
+                    search_query &= SearchQuery(arg)
+            else:
+                individuals_query &= ruleFilter.get_query()
         if not filtered:
             return Q()
         if self.target_only_hoh:
             # only filtering against heads of household
             individuals_query &= Q(heading_household__isnull=False)
-        households_id = Individual.objects.filter(individuals_query).values_list("household_id", flat=True)
+
+        individual_query = Individual.objects
+        if isinstance(search_query, CombinedSearchQuery):
+            q = individual_query.filter(vector_column=search_query).filter(individuals_query)
+        else:
+            q = individual_query.filter(individuals_query)
+
+        households_id = q.values_list("household_id", flat=True)
         return Q(id__in=households_id)
 
 
@@ -659,13 +673,13 @@ class TargetingCriteriaFilterMixin:
             "arguments": 1,
             "lookup": "__gte",
             "negative": False,
-            "supported_types": ["INTEGER", "DECIMAL"],
+            "supported_types": ["INTEGER", "DECIMAL", "DATE"],
         },
         "LESS_THAN": {
             "arguments": 1,
             "lookup": "__lte",
             "negative": False,
-            "supported_types": ["INTEGER", "DECIMAL"],
+            "supported_types": ["INTEGER", "DECIMAL", "DATE"],
         },
     }
 
@@ -733,7 +747,7 @@ class TargetingCriteriaFilterMixin:
                 query = Q()
                 for arg in argument:
                     # This regular expression can found the only exact word
-                    query &= Q(**{f"{lookup}__iregex": f"{arg}\\y"})
+                    query &= Q(**{f"{lookup}__icontains": arg})
             else:
                 query = Q(**{f"{lookup}__contains": argument})
         else:
@@ -797,7 +811,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
     """
 
     def get_core_fields(self):
-        return FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.TARGETING]).associated_with_household()
+        return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
 
     comparision_method = models.CharField(
         max_length=20,
@@ -826,7 +840,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     """
 
     def get_core_fields(self):
-        return FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.TARGETING]).associated_with_individual()
+        return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
     comparision_method = models.CharField(
         max_length=20,

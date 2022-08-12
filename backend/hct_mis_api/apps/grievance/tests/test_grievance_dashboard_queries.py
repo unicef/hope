@@ -2,13 +2,13 @@ from datetime import datetime
 
 from parameterized import parameterized
 
+from django.core.management import call_command
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
     create_afghanistan,
 )
 from hct_mis_api.apps.core.models import BusinessArea
@@ -68,26 +68,17 @@ class TestGrievanceDashboardQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        call_command("loadcountries")
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
-
-        country = Country.objects.first()
-        area_type_new = AreaTypeFactory(
+        country = Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
             country=country,
-            original_id=area_type.id,
         )
-        cls.admin_area_1_new = AreaFactory(
-            name="City Test", area_type=area_type_new, p_code="123aa123", original_id=cls.admin_area_1.id
-        )
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
 
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
@@ -139,7 +130,6 @@ class TestGrievanceDashboardQuery(APITestCase):
             grievance_ticket.assigned_to = cls.user
             grievance_ticket.business_area = cls.business_area
             grievance_ticket.admin2 = cls.admin_area_1
-            grievance_ticket.admin2_new = cls.admin_area_1_new
             grievance_ticket.consent = True
             grievance_ticket.language = "Polish, English"
             grievance_ticket.description = "Just random description"
@@ -155,8 +145,8 @@ class TestGrievanceDashboardQuery(APITestCase):
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             ),
             ("without_permission", []),
         ]
@@ -167,16 +157,14 @@ class TestGrievanceDashboardQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_TYPE_QUERY,
             context={"user": self.user},
-            variables={
-                "businessAreaSlug": "afghanistan"
-            }
+            variables={"businessAreaSlug": "afghanistan"},
         )
 
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             ),
             ("without_permission", []),
         ]
@@ -187,16 +175,14 @@ class TestGrievanceDashboardQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_CATEGORY,
             context={"user": self.user},
-            variables={
-                "businessAreaSlug": "afghanistan"
-            }
+            variables={"businessAreaSlug": "afghanistan"},
         )
 
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             ),
             ("without_permission", []),
         ]
@@ -207,16 +193,14 @@ class TestGrievanceDashboardQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_STATUS,
             context={"user": self.user},
-            variables={
-                "businessAreaSlug": "afghanistan"
-            }
+            variables={"businessAreaSlug": "afghanistan"},
         )
 
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             ),
             ("without_permission", []),
         ]
@@ -227,8 +211,5 @@ class TestGrievanceDashboardQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.TICKETS_BY_LOCATION,
             context={"user": self.user},
-            variables={
-                "businessAreaSlug": "afghanistan"
-            }
+            variables={"businessAreaSlug": "afghanistan"},
         )
-

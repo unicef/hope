@@ -10,12 +10,12 @@ import adminactions.actions as actions
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.apps.account.views
+import hct_mis_api.apps.household.views
 import hct_mis_api.apps.payment.views
 import hct_mis_api.apps.registration_datahub.views
 import hct_mis_api.apps.sanction_list.views
 import hct_mis_api.apps.targeting.views
 from hct_mis_api.apps.core.views import (
-    call_command_view,
     homepage,
     hope_redirect,
     logout_view,
@@ -28,55 +28,62 @@ from hct_mis_api.apps.core.rest_api import all_fields_attributes
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])
 
-urlpatterns = [
-    path("api/explorer/", include("explorer.urls")),
-    path(f"api/{settings.ADMIN_PANEL_URL}/hijack/", include("hijack.urls")),
-    path(f"api/{settings.ADMIN_PANEL_URL}/adminactions/", include("adminactions.urls")),
-    path(
-        f"api/{settings.ADMIN_PANEL_URL}/advanced_filters/",
-        include("advanced_filters.urls"),
-    ),
-    path(
-        f"api/{settings.ADMIN_PANEL_URL}/reports/",
-        include("hct_mis_api.apps.power_query.urls"),
-    ),
-    path("", homepage),
+api_patterns = [
+    path("", include("social_django.urls", namespace="social")),
+    path("fields_attributes/", all_fields_attributes, name="fields_attributes"),
     path("_health", homepage),
-    path("api/hope-redirect", hope_redirect),
-    path("api/_health", homepage),
-    path("api/graphql/schema.graphql", schema),
-    path("api/graphql", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))),
-    path("api/", include("social_django.urls", namespace="social")),
-    path("api/logout", logout_view),
-    path("api/sentry-debug/", trigger_error),
+    path("explorer/", include("explorer.urls")),
+    path("hope-redirect", hope_redirect),
+    path("graphql", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))),
+    path("graphql/schema.graphql", schema),
+    path("logout", logout_view),
+    path("sentry-debug/", trigger_error),
     path(
-        "api/download-template",
+        "download-template",
         hct_mis_api.apps.registration_datahub.views.download_template,
     ),
     path(
-        "api/download-exported-users/<str:business_area_slug>",
+        "download-exported-users/<str:business_area_slug>",
         hct_mis_api.apps.account.views.download_exported_users,
     ),
     path(
-        "api/download-cash-plan-payment-verification/<str:verification_id>",
+        "download-cash-plan-payment-verification/<str:verification_id>",
         hct_mis_api.apps.payment.views.download_cash_plan_payment_verification,
+        name="download-cash-plan-payment-verification",
     ),
     path(
-        "api/download-sanction-template",
+        "download-sanction-template",
         hct_mis_api.apps.sanction_list.views.download_sanction_template,
     ),
     path(
-        f"api/{settings.ADMIN_PANEL_URL}/download-target-population-xlsx/<uuid:target_population_id>/",
-        hct_mis_api.apps.targeting.views.download_xlsx_households,
-        name="admin-download-target-population",
-    ),
-    path(
-        "api/dashboard-report/<uuid:report_id>",
+        "dashboard-report/<uuid:report_id>",
         hct_mis_api.apps.core.views.download_dashboard_report,
         name="dashboard_report",
     ),
-    path(f"api/{settings.ADMIN_PANEL_URL}/", admin.site.urls),
-    path("api/fields_attributes/", all_fields_attributes, name="fields_attributes"),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path(
+        f"{settings.ADMIN_PANEL_URL}/download-target-population-xlsx/<uuid:target_population_id>/",
+        hct_mis_api.apps.targeting.views.download_xlsx_households,
+        name="admin-download-target-population",
+    ),
+    path(f"{settings.ADMIN_PANEL_URL}/hijack/", include("hijack.urls")),
+    path(f"{settings.ADMIN_PANEL_URL}/adminactions/", include("adminactions.urls")),
+    path(
+        f"{settings.ADMIN_PANEL_URL}/advanced_filters/",
+        include("advanced_filters.urls"),
+    ),
+    path(
+        f"{settings.ADMIN_PANEL_URL}/reports/",
+        include("hct_mis_api.apps.power_query.urls"),
+    ),
+    path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
+    path("hh-status", hct_mis_api.apps.household.views.HouseholdStatusView.as_view()),
+]
 
-urlpatterns += staticfiles_urlpatterns()
+if settings.PROFILING:
+    api_patterns.append(path("silk/", include("silk.urls", namespace="silk")))
+
+urlpatterns = (
+    [path("", homepage), path("_health", homepage), path("api/", include(api_patterns))]
+    + staticfiles_urlpatterns()
+    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+)

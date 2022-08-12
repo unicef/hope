@@ -126,11 +126,11 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_admin(grievance_ticket: GrievanceTicket, info):
-        return getattr(grievance_ticket.admin2_new, "name", None)
+        return getattr(grievance_ticket.admin2, "name", None)
 
     @staticmethod
     def resolve_admin2(grievance_ticket: GrievanceTicket, info):
-        return grievance_ticket.admin2_new
+        return grievance_ticket.admin2
 
     @staticmethod
     def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
@@ -518,7 +518,7 @@ class Query(graphene.ObjectType):
         if filters.get("administrative_area") is not None:
             try:
                 grievance_tickets = grievance_tickets.filter(
-                    admin2_new=Area.objects.get(id=filters.get("administrative_area"))
+                    admin2=Area.objects.get(id=filters.get("administrative_area"))
                 )
             except Area.DoesNotExist:
                 pass
