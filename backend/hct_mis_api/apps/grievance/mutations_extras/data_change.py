@@ -705,7 +705,12 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
         recalculate_data(individual.household)
     else:
         individual.recalculate_data()
+
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
+
+    if grievance_ticket.business_area.postpone_deduplication:
+        return
+
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
             should_populate_index=True,
@@ -836,7 +841,12 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         recalculate_data(new_individual.household)
     else:
         new_individual.recalculate_data()
+
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
+
+    if grievance_ticket.business_area.postpone_deduplication:
+        return
+
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
             should_populate_index=True,

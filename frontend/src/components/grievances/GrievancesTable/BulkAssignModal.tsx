@@ -29,7 +29,8 @@ export const StyledLink = styled.div`
   align-content: center;
 `;
 const StyledTable = styled(Table)`
-  max-width: 400px;
+  min-width: 400px;
+  max-width: 800px;
 `;
 const StyledDialog = styled(Dialog)`
   max-height: 800px;
@@ -95,7 +96,7 @@ export const BulkAssignModal = ({
       } catch (e) {
         e.graphQLErrors.map((x) => showMessage(x.message));
       } finally {
-        setSelected([])
+        setSelected([]);
       }
     }
   };
@@ -114,7 +115,6 @@ export const BulkAssignModal = ({
         onClose={() => setDialogOpen(false)}
         scroll='paper'
         aria-labelledby='form-dialog-title'
-        maxWidth='lg'
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
