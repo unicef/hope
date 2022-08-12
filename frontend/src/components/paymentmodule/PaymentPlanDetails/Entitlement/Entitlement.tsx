@@ -28,6 +28,7 @@ import { LoadingButton } from '../../../core/LoadingButton';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { Missing } from '../../../core/Missing';
 import { Title } from '../../../core/Title';
+import { UniversalMoment } from '../../../core/UniversalMoment';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 
@@ -254,7 +255,16 @@ export const Entitlement = ({
                   <SpinaczIconContainer>
                     <AttachFileIcon fontSize='inherit' />
                   </SpinaczIconContainer>
-                  <GreyTextSmall>{file?.name || null}</GreyTextSmall>
+                  <Box mr={1}>
+                    <GreyTextSmall>{file?.name || null}</GreyTextSmall>
+                  </Box>
+                  <GreyTextSmall>
+                    {paymentPlan?.xlsxFileImportedDate ? (
+                      <UniversalMoment>
+                        {paymentPlan?.xlsxFileImportedDate}
+                      </UniversalMoment>
+                    ) : null}
+                  </GreyTextSmall>
                 </Box>
               )}
             </Box>
