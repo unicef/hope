@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from django.core.management import call_command
 from django.test import TestCase
 
@@ -378,12 +379,14 @@ class TestSendTpToDatahub(TestCase):
             candidate_list_targeting_criteria=targeting_criteria,
         )
 
-        for _ in range(2):
-            HouseholdSelectionFactory(
-                household=self.household,
-                target_population=target_population,
-                final=True,
-            )
-
-        task = SendTPToDatahubTask()
-        task.send_target_population(target_population)
+        try:
+            for _ in range(2):
+                HouseholdSelectionFactory(
+                    household=self.household,
+                    target_population=target_population,
+                    final=True,
+                )
+        except IntegrityError:
+            pass
+        else:
+            self.fail("Should raise IntegrityError")
