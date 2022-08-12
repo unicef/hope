@@ -7,7 +7,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, RealProgramFactory
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, RealProgramFactory, PaymentFactory
 
 
 class TestActionPaymentPlanMutation(APITestCase):
@@ -66,6 +66,9 @@ class TestActionPaymentPlanMutation(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         cls.payment_plan = PaymentPlanFactory.create(business_area=cls.business_area, program=RealProgramFactory())
+        cls.payment = PaymentFactory(
+            payment_plan=cls.payment_plan,
+        )
 
     @parameterized.expand(
         [
