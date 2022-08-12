@@ -3,16 +3,18 @@ from django.db.models.functions import Lower
 
 from django_filters import (
     CharFilter,
-    DateFilter,
     FilterSet,
-    MultipleChoiceFilter,
     OrderingFilter,
+    NumberFilter,
     UUIDFilter,
+    MultipleChoiceFilter,
+    DateFilter,
 )
+from django.shortcuts import get_object_or_404
+
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
-from hct_mis_api.apps.core.filters import DecimalRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid, decode_id_string
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.models import (
     CashPlan,
@@ -20,11 +22,11 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
-    GenericPayment,
-    Payment,
-    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
+    PaymentPlan,
+    GenericPayment,
+    Payment,
 )
 
 
@@ -233,7 +235,8 @@ class PaymentPlanFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=PaymentPlan.Status.choices)
-    total_entitled_quantity = DecimalRangeFilter(field_name="total_entitled_quantity")
+    total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
+    total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
     dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
 
@@ -265,7 +268,12 @@ class PaymentFilter(FilterSet):
     payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
 
     def payment_plan_id_filter(self, qs, name, value):
-        return qs
+        payment_plan_id = decode_id_string(value)
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        q = Q(payment_plan=payment_plan)
+        if payment_plan.status != PaymentPlan.Status.OPEN:
+            q &= ~Q(excluded=True)
+        return qs.filter(q)
 
     class Meta:
         fields = tuple()

@@ -10,7 +10,7 @@ from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, ProgramFactory
 
 
 class TestXlsxVerificationExport(APITestCase):
