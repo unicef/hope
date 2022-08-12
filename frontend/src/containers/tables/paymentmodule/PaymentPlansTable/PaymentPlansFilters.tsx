@@ -22,9 +22,7 @@ export function PaymentPlansFilters({
   const { t } = useTranslation();
   const handleFilterChange = (e, name: string): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
-  const {
-    data: statusChoicesData,
-  } = usePaymentPlanStatusChoicesQueryQuery();
+  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
 
   if (!statusChoicesData) {
     return null;
@@ -32,67 +30,80 @@ export function PaymentPlansFilters({
 
   return (
     <ContainerWithBorder>
-      <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={2}>
-          <SearchTextField
-            label={t('Search')}
-            value={filter.search}
-            onChange={(e) => handleFilterChange(e, 'search')}
-          />
+      <Grid container spacing={4}>
+        <Grid item container spacing={4} xs={6} alignItems='flex-end'>
+          <Grid item xs={8}>
+            <SearchTextField
+              label={t('Search')}
+              value={filter.search}
+              fullWidth
+              onChange={(e) => handleFilterChange(e, 'search')}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <SelectFilter
+              onChange={(e: unknown) => handleFilterChange(e, 'status')}
+              variant='outlined'
+              label={t('Status')}
+              multiple
+              value={filter.status || []}
+              fullWidth
+              autoWidth
+            >
+              {statusChoicesData.paymentPlanStatusChoices.map((item) => {
+                return (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                );
+              })}
+            </SelectFilter>
+          </Grid>
         </Grid>
-        <Grid item xs={2}>
-          <SelectFilter
-            onChange={(e: unknown) => handleFilterChange(e, 'status')}
-            variant='outlined'
-            label={t('Status')}
-            multiple
-            value={filter.status || []}
-            fullWidth
-          >
-            {statusChoicesData.paymentPlanStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
-          </SelectFilter>
+        <Grid item container spacing={2} xs={3} alignItems='flex-end'>
+          <Grid item xs={6}>
+            <NumberTextField
+              id='totalEntitledQuantityFromFilter'
+              topLabel={t('Entitled Quantity')}
+              value={filter.totalEntitledQuantityFrom}
+              placeholder={t('From')}
+              onChange={(e) => onFilterChange({ ...filter, totalEntitledQuantityFrom: e.target.value || undefined })}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <NumberTextField
+              id='totalEntitledQuantityToFilter'
+              value={filter.totalEntitledQuantityTo}
+              placeholder={t('To')}
+              onChange={(e) => onFilterChange({ ...filter, totalEntitledQuantityTo: e.target.value || undefined })}
+              error={filter.totalEntitledQuantityFrom && filter.totalEntitledQuantityTo && filter.totalEntitledQuantityFrom > filter.totalEntitledQuantityTo}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={2}>
-          <DatePickerFilter
-            topLabel={t('Dispersion Date Range')}
-            label={t('From Date')}
-            onChange={(date) => onFilterChange({ ...filter, dispersionStartDate: date ? date.format('YYYY-MM-DD') : null })}
-            value={filter.dispersionStartDate || null}
-            clearable
-          />
-        </Grid>
-        <Grid item xs={2}>
-          <DatePickerFilter
-            label={t('To Date')}
-            onChange={(date) => onFilterChange({ ...filter, dispersionEndDate: date ? date.format('YYYY-MM-DD') : null })}
-            value={filter.dispersionEndDate || null}
-            minDate={filter.dispersionStartDate || undefined}
-            clearable
-          />
-        </Grid>
-        <Grid item xs={2}>
-          <NumberTextField
-            id='totalEntitledQuantityFromFilter'
-            topLabel={t('Entitled Quantity')}
-            value={filter.totalEntitledQuantityFrom}
-            placeholder={t('From')}
-            onChange={(e) => onFilterChange({ ...filter, totalEntitledQuantityFrom: e.target.value || undefined })}
-          />
-        </Grid>
-        <Grid item xs={2}>
-          <NumberTextField
-            id='totalEntitledQuantityToFilter'
-            value={filter.totalEntitledQuantityTo}
-            placeholder={t('To')}
-            onChange={(e) => onFilterChange({ ...filter, totalEntitledQuantityTo: e.target.value || undefined })}
-            error={filter.totalEntitledQuantityFrom && filter.totalEntitledQuantityTo && filter.totalEntitledQuantityFrom > filter.totalEntitledQuantityTo}
-          />
+        <Grid item container spacing={2} xs={3} alignItems='flex-end'>
+          <Grid item xs={6}>
+            <DatePickerFilter
+              topLabel={t('Dispersion Date')}
+              label={t('From')}
+              onChange={(date, _value) => {
+                if (filter.dispersionEndDate && date.isAfter(filter.dispersionEndDate)) {
+                  onFilterChange({ ...filter, dispersionStartDate: date ? date.format('YYYY-MM-DD') : undefined, dispersionEndDate: undefined })
+                } else {
+                  onFilterChange({ ...filter, dispersionStartDate: date ? date.format('YYYY-MM-DD') : undefined })
+                }
+              }}
+              value={filter.dispersionStartDate || undefined}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <DatePickerFilter
+              label={t('To')}
+              onChange={(date, _value) => onFilterChange({ ...filter, dispersionEndDate: date ? date.format('YYYY-MM-DD') : undefined })}
+              value={filter.dispersionEndDate || undefined}
+              minDate={filter.dispersionStartDate || undefined}
+              minDateMessage={<span />}
+            />
+          </Grid>
         </Grid>
       </Grid>
     </ContainerWithBorder>
