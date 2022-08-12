@@ -3,6 +3,7 @@ import logging
 import ast
 
 from .documents import GrievanceTicketDocument
+from hct_mis_api.apps.core.utils import decode_id_string
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +42,11 @@ def search_es(options):
             }
         }
 
-        min_date = created_at_range.pop("min")
+        min_date = created_at_range.pop("min", None)
         if min_date:
             date_range["range"]["created_at"]["gte"] = min_date
 
-        max_date = created_at_range.pop("max")
+        max_date = created_at_range.pop("max", None)
         if max_date:
             date_range["range"]["created_at"]["lte"] = max_date
 
@@ -55,12 +56,10 @@ def search_es(options):
     if search.strip():
         key, value = tuple(search.split(" ", 1))
         if key == "ticket_id":
-            return execute_query({
-              "query": {
+            query_search.append({
                 "term": {
                   "_id": value
                 }
-              }
             })
         elif key == "ticket_hhid":
             query_search.append({
@@ -97,6 +96,8 @@ def search_es(options):
 
     for k, v in options.items():
         if k in TERM_FIELDS and v:
+            if k == "assigned_to":
+                v = decode_id_string(v)
             query_term_fields.append({
                 "term": {
                     k: {
@@ -115,7 +116,7 @@ def search_es(options):
     if grievance_status == "active":
         query_terms_fields.append({
             "terms": {
-                "grievance_status":  ["New", "Assigned", "In Progress", "On Hold", "For Approval"]
+                "status":  ["New", "Assigned", "In Progress", "On Hold", "For Approval"]
             }
         })
 
@@ -127,8 +128,7 @@ def search_es(options):
         "size": size,
         "query": {
             "bool": {
-                "minimum_should_match": 1,
-                "should": all_queries,
+                "must": all_queries,
             }
         },
         "sort": [sort]

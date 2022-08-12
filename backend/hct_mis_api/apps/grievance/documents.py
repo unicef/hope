@@ -60,7 +60,6 @@ ISSUE_TYPES_CHOICES = {
         10: "Personal disputes",
         11: "Sexual harassment and sexual exploitation",
         12: "Miscellaneous",
-
     },
 }
 
@@ -68,7 +67,7 @@ ISSUE_TYPES_CHOICES = {
 @registry.register_document
 class GrievanceTicketDocument(Document):
     created_at = fields.DateField()
-    assigned_to = fields.TextField()
+    assigned_to = fields.KeywordField(similarity="boolean")
     registration_data_import = fields.TextField()
     household_unicef_id = fields.KeywordField(similarity="boolean")
     status = fields.KeywordField(similarity="boolean")
