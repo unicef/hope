@@ -1,9 +1,9 @@
 import logging
 import math
+import graphene
 
 from decimal import Decimal
 
-import graphene
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -21,7 +21,11 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
-from hct_mis_api.apps.payment.celery_tasks import fsp_generate_xlsx_report_task, payment_plan_apply_steficon
+from hct_mis_api.apps.payment.celery_tasks import (
+    fsp_generate_xlsx_report_task,
+    payment_plan_apply_steficon,
+    import_payment_plan_payment_list_from_xlsx
+)
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
@@ -47,7 +51,6 @@ from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
 from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.steficon.schema import SteficonRuleNode
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 logger = logging.getLogger(__name__)
@@ -706,10 +709,13 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root, info, payment_plan_id, **kwargs):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            logger.error("You can only export Payment List for LOCKED Payment Plan")
+            raise GraphQLError("You can only export Payment List for LOCKED Payment Plan")
 
         old_payment_plan = copy_model_object(payment_plan)
-
-        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user=info.context.user)
 
@@ -741,20 +747,19 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
-            logger.error("You can only import entitlement for LOCKED Payment Plan")
-            raise GraphQLError("You can only import entitlement for LOCKED Payment Plan")
+            logger.error("You can only import for LOCKED Payment Plan")
+            raise GraphQLError("You can only import for LOCKED Payment Plan")
 
-        import_service = XlsxPaymentPlanImportService(payment_plan, file)
+        import_service = XlsxPaymentPlanImportService(payment_plan=payment_plan, file=file)
         import_service.open_workbook()
         import_service.validate()
         if len(import_service.errors):
-            return ImportXlsxCashPlanVerification(None, import_service.errors)
+            return cls(None, import_service.errors)
 
-        # TODO: celery task?
-        import_service.import_payment_entitlement()
-        # TODO: some calculation here??
-        # payment_plan.status = PaymentPlan.Status.LOCKED
-        # payment_plan.save()
+        payment_plan.status_importing()
+        payment_plan.save()
+
+        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id)
 
         return cls(payment_plan, import_service.errors)
 
@@ -773,23 +778,27 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
+        if payment_plan.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.STEFICON_ERROR]:
+            logger.error("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
+            raise GraphQLError("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
+
         old_payment_plan = copy_model_object(payment_plan)
 
         if steficon_rule_id:
-            # TODO: add steficon validation here
-            # logger.error("formula validation")
-            # raise GraphQLError("formula validation")
-
             steficon_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
-            steficon_rule_commit = steficon_rule.latest
-            if not steficon_rule.enabled or steficon_rule.deprecated:
-                logger.error("This steficon rule is not enabled or is deprecated.")
-                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
+            if steficon_rule.latest.id != payment_plan.steficon_rule_id:
+                steficon_rule_commit = steficon_rule.latest
+                if not steficon_rule.enabled or steficon_rule.deprecated:
+                    logger.error("This steficon rule is not enabled or is deprecated.")
+                    raise GraphQLError("This steficon rule is not enabled or is deprecated.")
 
-            payment_plan.steficon_rule = steficon_rule_commit
-            payment_plan.status = PaymentPlan.Status.STEFICON_WAIT
-            payment_plan.save()
-            payment_plan_apply_steficon.delay(payment_plan.pk)
+                payment_plan.steficon_rule = steficon_rule_commit
+                payment_plan.status = PaymentPlan.Status.STEFICON_WAIT
+                payment_plan.status_date = timezone.now()
+                payment_plan.save()
+                payment_plan_apply_steficon.delay(payment_plan.pk)
+            else:
+                return cls(payment_plan=payment_plan)
         else:
             payment_plan.steficon_rule = None
             payment_plan.save()

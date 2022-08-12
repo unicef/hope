@@ -1,14 +1,40 @@
+from decimal import Decimal
+
+import openpyxl
+
+from hct_mis_api.apps.payment.utils import float_to_decimal
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
 
 
 class XlsxPaymentPlanImportService:
     ENTITLEMENT_COLUMN_INDEX = 0
 
-    def __int__(self, payment_plan, file):
+    def __int__(self, payment_plan):
         self.payment_plan = payment_plan
+        self.payment_list = payment_plan.all_active_payments
+        self.errors = []
+        self.payments_dict = {}
+
+        self.payments_to_save = []
+        self.was_validation_run = False
+
+    def open_workbook(self) -> openpyxl.Workbook:
+        file = ""
+        wb = openpyxl.load_workbook(file, data_only=True)
+        self.wb = wb
+        self.ws_payments = wb[XlsxPaymentPlanExportService.TITLE]
+        return wb
+
+    def validate(self):
+        self._validate_headers()
+        self._validate_rows()
+        self.was_validation_run = True
+
+    def import_payment_list(self):
+        pass
 
     def _validate_headers(self):
-        headers_row = self.ws_payment_list[1]
+        headers_row = self.ws_payments[1]
         accepted_headers = XlsxPaymentPlanExportService.HEADERS
         if len(headers_row) != len(accepted_headers):
             self.errors.append(
@@ -38,7 +64,6 @@ class XlsxPaymentPlanImportService:
                 )
             column += 1
 
-
     def _validate_row_types(self, row):
         column = 0
         for cell in row:
@@ -59,10 +84,9 @@ class XlsxPaymentPlanImportService:
                 )
             column += 1
 
-
     def _validate_payment_record_id(self, row):
         cell = row[0]
-        if cell.value not in self.payment_ids:
+        if cell.value not in self.ws_payments:
             self.errors.append(
                 (
                     "Payment Plan",
@@ -71,26 +95,18 @@ class XlsxPaymentPlanImportService:
                 )
             )
 
-
-    def _validate_entitlement_and_usd_entitlement(self, row):
+    def _validate_entitlement_and_payment_chanel(self, row):
         payment_id = row[0].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
         entitlement_amount = row[XlsxPaymentPlanImportService.ENTITLEMENT_COLUMN_INDEX].value
-        usd_entitlement = row[XlsxPaymentPlanImportService.USD_ENTITLEMENT_COLUMN_INDEX].value
         if entitlement_amount is not None:
             if not isinstance(entitlement_amount, float) and not isinstance(entitlement_amount, int):
                 return
             entitlement_amount = Decimal(format(round(entitlement_amount, 2), ".2f"))
 
-        if usd_entitlement is not None:
-            if not isinstance(usd_entitlement, float) and not isinstance(usd_entitlement, int):
-                return
-            usd_entitlement_amount = Decimal(format(round(usd_entitlement, 2), ".2f"))
-
         # TODO: add validation if wrong value
-
 
     def _validate_rows(self):
         for row in self.ws_payment_list.iter_rows(min_row=2):
@@ -99,7 +115,6 @@ class XlsxPaymentPlanImportService:
             self._validate_row_types(row)
             self._validate_payment_record_id(row)
             self._validate_entitlement_and_usd_entitlement(row)
-
 
     def _import_row(self, row):
         payment_id = row[XlsxPaymentPlanImportService.ID_COLUMN_INDEX].value
