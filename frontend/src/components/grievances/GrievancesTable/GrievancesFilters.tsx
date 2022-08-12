@@ -11,7 +11,7 @@ import {
   GrievanceTypes,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
-  GRIEVANCE_TICKET_STATES,
+  ISSUE_TYPE_CATEGORIES,
 } from '../../../utils/constants';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
@@ -38,8 +38,12 @@ export function GrievancesFilters({
       ...filter,
       [name]: e.target.value,
       ...(name === 'status' &&
-        +e.target.value === GRIEVANCE_TICKET_STATES.CLOSED && {
+        e.target.value === GrievanceStatuses.Closed && {
           grievanceStatus: GrievanceStatuses.All,
+        }),
+      ...(name === 'grievanceStatus' &&
+        e.target.value === GrievanceStatuses.Active && {
+          status: '',
         }),
     });
   };
@@ -99,7 +103,7 @@ export function GrievancesFilters({
               <em>None</em>
             </MenuItem>
             {choicesData.grievanceTicketStatusChoices.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
+              <MenuItem key={item.value} value={item.name}>
                 {item.name}
               </MenuItem>
             ))}
@@ -167,34 +171,38 @@ export function GrievancesFilters({
             </MenuItem>
             {categoryChoices.map((item) => {
               return (
-                <MenuItem key={item.value} value={item.value}>
+                <MenuItem key={item.value} value={item.name}>
                   {item.name}
                 </MenuItem>
               );
             })}
           </SelectFilter>
         </Grid>
-        {filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-          (filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE && (
-            <Grid item>
-              <SelectFilter
-                onChange={(e) => handleFilterChange(e, 'issueType')}
-                label='Issue Type'
-                value={filter.issueType || ''}
-              >
-                <MenuItem value=''>
-                  <em>None</em>
-                </MenuItem>
-                {issueTypeDict[filter.category].subCategories.map((item) => {
-                  return (
-                    <MenuItem key={item.value} value={item.value}>
-                      {item.name}
-                    </MenuItem>
-                  );
-                })}
-              </SelectFilter>
-            </Grid>
-          ))}
+        {(filter.category === ISSUE_TYPE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+          filter.category === ISSUE_TYPE_CATEGORIES.DATA_CHANGE) && (
+          <Grid item>
+            <SelectFilter
+              onChange={(e) => handleFilterChange(e, 'issueType')}
+              label='Issue Type'
+              value={filter.issueType || ''}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {issueTypeDict[
+                GRIEVANCE_CATEGORIES[
+                  filter.category.replace(/\s/g, '_').toUpperCase()
+                ]
+              ].subCategories.map((item) => {
+                return (
+                  <MenuItem key={item.value} value={item.name}>
+                    {item.name}
+                  </MenuItem>
+                );
+              })}
+            </SelectFilter>
+          </Grid>
+        )}
         <Grid item>
           <AssigneeAutocomplete
             onFilterChange={onFilterChange}
@@ -245,7 +253,7 @@ export function GrievancesFilters({
             </MenuItem>
             {choicesData.grievanceTicketPriorityChoices.map((item) => {
               return (
-                <MenuItem key={item.value} value={item.value}>
+                <MenuItem key={item.value} value={item.name}>
                   {item.name}
                 </MenuItem>
               );
@@ -263,7 +271,7 @@ export function GrievancesFilters({
             </MenuItem>
             {choicesData.grievanceTicketUrgencyChoices.map((item) => {
               return (
-                <MenuItem key={item.value} value={item.value}>
+                <MenuItem key={item.value} value={item.name}>
                   {item.name}
                 </MenuItem>
               );

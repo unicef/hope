@@ -65,10 +65,16 @@ export const GrievanceTypes = {
 export const GrievanceStatuses = {
   All: 'all',
   Active: 'active',
+  Closed: 'Closed',
 };
 
 export const GrievanceSearchTypes = {
   TicketID: 'ticket_id',
   HouseholdID: 'ticket_hhid',
   LastName: 'last_name',
+};
+
+export const ISSUE_TYPE_CATEGORIES = {
+  DATA_CHANGE: 'Data Change',
+  SENSITIVE_GRIEVANCE: 'Sensitive Grievance',
 };
