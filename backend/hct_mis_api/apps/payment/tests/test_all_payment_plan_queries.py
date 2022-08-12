@@ -69,8 +69,8 @@ class TestPaymentPlanQueries(APITestCase):
     """
 
     ALL_PAYMENT_PLANS_FILTER_QUERY = """
-    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantity: String, $dispersionStartDate: Date, $dispersionEndDate: Date) {
-        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantity: $totalEntitledQuantity, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate) {
+    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date) {
+        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate) {
         edges {
           node {
             status
@@ -229,12 +229,8 @@ class TestPaymentPlanQueries(APITestCase):
             {"search": self.pp.unicef_id},
             {"status": self.pp.status},
             {
-                "totalEntitledQuantity": json.dumps(
-                    {
-                        "min": str(self.pp_conflicted.total_entitled_quantity - 10),
-                        "max": str(self.pp_conflicted.total_entitled_quantity + 10),
-                    }
-                )
+                "totalEntitledQuantityFrom": float(self.pp_conflicted.total_entitled_quantity - 10),
+                "totalEntitledQuantityTo": float(self.pp_conflicted.total_entitled_quantity + 10),
             },
             {
                 "dispersionStartDate": self.pp_conflicted.dispersion_start_date,

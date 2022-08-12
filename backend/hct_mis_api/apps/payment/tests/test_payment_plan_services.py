@@ -174,7 +174,7 @@ class TestPaymentPlanServices(APITestCase):
     @freeze_time("2020-10-10")
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update(self, get_exchange_rate_mock):
-        pp = PaymentPlanFactory()
+        pp = PaymentPlanFactory(total_households_count=1)
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         p1 = PaymentFactory(payment_plan=pp, excluded=False, household=hh1)
@@ -203,19 +203,21 @@ class TestPaymentPlanServices(APITestCase):
             updated_pp_1.refresh_from_db()
             self.assertNotEqual(old_pp_updated_at, updated_pp_1.updated_at)
             self.assertEqual(updated_pp_1.payments.count(), 1)
+            self.assertEqual(updated_pp_1.total_households_count, 1)
             self.assertNotEqual(old_pp_start_date, updated_pp_1.start_date)
 
             # test targeting update, payments recreation triggered
             old_pp_targeting = updated_pp_1.target_population
             old_pp_exchange_rate = updated_pp_1.exchange_rate
             old_pp_total_households_count = updated_pp_1.total_households_count
+            print(f"old_pp_total_households_count {old_pp_total_households_count}")
 
             updated_pp_2 = PaymentPlanService(payment_plan=pp).update(
                 input_data=dict(targeting_id=self.id_to_base64(new_targeting.id, "Targeting"))
             )
             updated_pp_2.refresh_from_db()
             self.assertNotEqual(old_pp_exchange_rate, updated_pp_2.exchange_rate)
-            self.assertNotEqual(old_pp_total_households_count, updated_pp_2.total_households_count)
+            self.assertEqual(updated_pp_2.total_households_count, 2)
             self.assertEqual(updated_pp_2.payments.count(), 2)
             self.assertEqual(updated_pp_2.target_population, new_targeting)
             self.assertEqual(updated_pp_2.target_population.status, TargetPopulation.STATUS_ASSIGNED)
