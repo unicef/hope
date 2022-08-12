@@ -410,6 +410,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         return XLSXFileTemp.objects.filter(
             object_id=self.pk,
             content_type=get_content_type_for_model(self),
+            type=XLSXFileTemp.EXPORT
         ).first()
 
     @property
@@ -422,6 +423,13 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         if file_obj:
             return file_obj.file.url
         return None
+
+    def get_payment_plan_payment_list_import_xlsx_file_obj(self):
+        return XLSXFileTemp.objects.filter(
+            object_id=self.pk,
+            content_type=get_content_type_for_model(self),
+            type=XLSXFileTemp.IMPORT
+        ).first()
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):

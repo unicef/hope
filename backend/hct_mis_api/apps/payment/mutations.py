@@ -4,12 +4,14 @@ import graphene
 
 from decimal import Decimal
 
+from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
+from hct_mis_api.apps.core.models import XLSXFileTemp
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -750,7 +752,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error("You can only import for LOCKED Payment Plan")
             raise GraphQLError("You can only import for LOCKED Payment Plan")
 
-        import_service = XlsxPaymentPlanImportService(payment_plan=payment_plan, file=file)
+        import_service = XlsxPaymentPlanImportService(payment_plan, file)
         import_service.open_workbook()
         import_service.validate()
         if len(import_service.errors):
@@ -759,7 +761,15 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         payment_plan.status_importing()
         payment_plan.save()
 
-        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id)
+        # save import xlsx file
+        xlsx_file = XLSXFileTemp.objects.create(
+            object_id=payment_plan.pk,
+            content_type=get_content_type_for_model(payment_plan),
+            created_by=info.context.user,
+            type=XLSXFileTemp.IMPORT,
+            file=file,
+        )
+        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id, xlsx_file.id)
 
         return cls(payment_plan, import_service.errors)
 
