@@ -1,7 +1,7 @@
 import { gql } from 'apollo-boost';
 
 export const AllPaymentsForTable = gql`
-  query AllPaymentsForTable (
+  query AllPaymentsForTable(
     $after: String
     $before: String
     $first: Int
@@ -10,7 +10,7 @@ export const AllPaymentsForTable = gql`
     $businessArea: String!
     $paymentPlanId: String!
   ) {
-    allPayments (
+    allPayments(
       after: $after
       before: $before
       first: $first
@@ -40,6 +40,22 @@ export const AllPaymentsForTable = gql`
             }
           }
           entitlementQuantityUsd
+          paymentPlanHardConflicted
+          paymentPlanSoftConflicted
+          paymentPlanHardConflictedData {
+            paymentPlanId
+            paymentPlanStartDate
+            paymentPlanEndDate
+            paymentPlanStatus
+            paymentId
+          }
+          paymentPlanSoftConflictedData {
+            paymentPlanId
+            paymentPlanStartDate
+            paymentPlanEndDate
+            paymentPlanStatus
+            paymentId
+          }
         }
       }
     }

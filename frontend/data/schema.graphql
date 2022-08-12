@@ -2115,6 +2115,7 @@ type IndividualNode implements Node {
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   bankAccountInfo: BankAccountInfoNode
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
+  collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -2417,6 +2418,14 @@ type PartnerType {
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
 }
 
+type PaymentConflictDataNode {
+  paymentPlanId: String
+  paymentPlanStartDate: String
+  paymentPlanEndDate: String
+  paymentPlanStatus: String
+  paymentId: String
+}
+
 enum PaymentDeliveryType {
   CARDLESS_CASH_WITHDRAWAL
   CASH
@@ -2455,10 +2464,15 @@ type PaymentNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
-  paymentPlan: PaymentPlanNode
+  paymentPlan: PaymentPlanNode!
   excluded: Boolean!
   entitlementDate: DateTime
   financialServiceProvider: FinancialServiceProviderNode
+  collector: IndividualNode!
+  paymentPlanHardConflicted: Boolean
+  paymentPlanHardConflictedData: [PaymentConflictDataNode]
+  paymentPlanSoftConflicted: Boolean
+  paymentPlanSoftConflictedData: [PaymentConflictDataNode]
 }
 
 type PaymentNodeConnection {
@@ -2676,6 +2690,7 @@ type PaymentPlanNode implements Node {
   authorizationNumberRequired: Int
   financeReviewNumberRequired: Int
   currencyName: String
+  paymentsConflictsCount: Int
 }
 
 type PaymentPlanNodeConnection {
