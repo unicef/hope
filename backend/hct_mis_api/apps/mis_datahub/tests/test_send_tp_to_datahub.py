@@ -29,6 +29,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
     TargetPopulationFactory,
+    HouseholdSelectionFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -360,3 +361,29 @@ class TestSendTpToDatahub(TestCase):
 
         self.assertEqual(len(dh_target_population.targeting_criteria), 194)
         self.assertFalse("..." in dh_target_population.targeting_criteria)
+
+    def test_not_creating_duplicate_households(self):
+        business_area = BusinessArea.objects.first()
+
+        program = ProgramFactory(
+            individual_data_needed=True,
+            business_area=business_area,
+        )
+
+        targeting_criteria = TargetingCriteriaFactory()
+        TargetingCriteriaRuleFactory.create_batch(50, targeting_criteria=targeting_criteria)
+        target_population = TargetPopulationFactory(
+            program=program,
+            status=TargetPopulation.STATUS_PROCESSING,
+            candidate_list_targeting_criteria=targeting_criteria,
+        )
+
+        for _ in range(2):
+            HouseholdSelectionFactory(
+                household=self.household,
+                target_population=target_population,
+                final=True,
+            )
+
+        task = SendTPToDatahubTask()
+        task.send_target_population(target_population)

@@ -123,6 +123,7 @@ class SendTPToDatahubTask:
                 dh_document = self._prepare_datahub_object_document(document)
                 documents_to_bulk_create.append(dh_document)
 
+            print("target_population_selections", target_population_selections)
             for selection in target_population_selections:
                 dh_target_population_selection = self._prepare_datahub_object_target_entry(selection)
                 tp_entries_to_bulk_create.append(dh_target_population_selection)
@@ -131,6 +132,7 @@ class SendTPToDatahubTask:
             dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
             dh_mis_models.IndividualRoleInHousehold.objects.bulk_create(roles_to_bulk_create)
             dh_mis_models.Document.objects.bulk_create(documents_to_bulk_create)
+            print("tp_entries_to_bulk_create", tp_entries_to_bulk_create)
             dh_mis_models.TargetPopulationEntry.objects.bulk_create(tp_entries_to_bulk_create)
             target_population.set_to_ready_for_cash_assist()
             target_population.save()
@@ -151,6 +153,7 @@ class SendTPToDatahubTask:
             raise
 
     def _prepare_data_to_send(self, program, target_population):
+        print("_prepare_data_to_send")
         (
             all_targeted_households_ids,
             households_to_sync,
@@ -168,6 +171,7 @@ class SendTPToDatahubTask:
             .select_related("household")
             .distinct()
         )
+        print("target_population_selections", target_population_selections)
         roles_to_sync = IndividualRoleInHousehold.objects.filter(
             Q(household__last_sync_at__isnull=True) | Q(household__last_sync_at__lte=F("household__updated_at")),
             household_id__in=all_targeted_households_ids,
