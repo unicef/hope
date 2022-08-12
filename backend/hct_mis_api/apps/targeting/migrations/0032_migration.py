@@ -3,16 +3,24 @@
 from django.db import migrations
 
 
-def remove_duplicate_household_selections(apps, schema_editor):
-    HouseholdSelection = apps.get_model("targeting", "HouseholdSelection")
-    for household_selection in HouseholdSelection.objects.only("household", "target_population"):
-        duplicates = HouseholdSelection.objects.filter(
+def did_remove_some_duplicates(HouseholdSelectionModel):
+    current_selections = HouseholdSelectionModel.objects.only("household", "target_population")
+    for household_selection in current_selections:
+        possible_duplicates = HouseholdSelectionModel.objects.filter(
             household=household_selection.household, target_population=household_selection.target_population
         )
-        if duplicates.count() > 1:
-            to_remove = duplicates[1:]
+        if possible_duplicates.count() > 1:
+            to_remove = [duplicate for duplicate in possible_duplicates if duplicate.id != household_selection.id]
             for duplicate in to_remove:
                 duplicate.delete()
+            return True
+    return False
+
+
+def remove_duplicate_household_selections(apps, schema_editor):
+    HouseholdSelectionModel = apps.get_model("targeting", "HouseholdSelection")
+    while did_remove_some_duplicates(HouseholdSelectionModel):
+        pass
 
 
 class Migration(migrations.Migration):
