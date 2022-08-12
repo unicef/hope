@@ -29,7 +29,7 @@ def remove_duplicate_household_selections(apps, schema_editor):
 
     for ids in groups.values():
         for id in ids[1:]:
-            HouseholdSelectionModel.objects.filter(id=id).delete()
+            HouseholdSelectionModel.objects.get(id=id).delete()
 
 
 class Migration(migrations.Migration):
