@@ -412,6 +412,11 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'previous_value': '1943-07-30',
                                 'value': '1980-02-01'
                             },
+                            'disability': {
+                                'approve_status': False,
+                                'previous_value': 'not disabled',
+                                'value': "disabled"
+                            },
                             'documents': [
                                 {
                                     'approve_status': False,

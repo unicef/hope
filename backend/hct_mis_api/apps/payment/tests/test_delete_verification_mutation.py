@@ -4,7 +4,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
@@ -49,8 +49,7 @@ class TestDeleteVerificationMutation(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         cls.program = ProgramFactory(business_area=cls.business_area)
-        cls.program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
-        cls.program.admin_areas_new.set(Area.objects.order_by("?")[:3])
+        cls.program.admin_areas.set(Area.objects.order_by("?")[:3])
         cls.target_population = TargetPopulationFactory(
             created_by=cls.user,
             candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
@@ -122,8 +121,7 @@ class TestDeleteVerificationMutation(APITestCase):
             household, _ = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": AdminArea.objects.order_by("?").first(),
-                    "admin_area_new": Area.objects.order_by("?").first(),
+                    "admin_area": Area.objects.order_by("?").first(),
                 },
                 {"registration_data_import": registration_data_import},
             )

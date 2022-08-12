@@ -1,8 +1,7 @@
 from django.core.management import BaseCommand
 from django.db import transaction
 
-from django_countries import countries
-
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     Agency,
@@ -28,17 +27,17 @@ class Command(BaseCommand):
         rdh_document_types = []
         agencies = []
         rdh_agencies = []
-        for alpha2, _ in countries:
+        for country in Country.objects.all():
             for doc_type, label in identification_type_choice:
-                document_types.append(DocumentType(country=alpha2, label=label, type=doc_type))
-                rdh_document_types.append(RDHDocumentType(country=alpha2, label=label, type=doc_type))
+                document_types.append(DocumentType(country=country, label=label, type=doc_type))
+                rdh_document_types.append(RDHDocumentType(country=country.iso_code2, label=label, type=doc_type))
             agencies_types = {
                 "UNHCR",
                 "WFP",
             }
             for agency in agencies_types:
-                agencies.append(Agency(type=agency, label=agency, country=alpha2))
-                rdh_agencies.append(ImportedAgency(type=agency, label=agency, country=alpha2))
+                agencies.append(Agency(type=agency, label=agency, country=country))
+                rdh_agencies.append(ImportedAgency(type=agency, label=agency, country=country.iso_code2))
 
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
         RDHDocumentType.objects.bulk_create(rdh_document_types, ignore_conflicts=True)

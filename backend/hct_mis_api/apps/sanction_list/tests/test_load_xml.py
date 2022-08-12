@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils import timezone
 
 from django.conf import settings
 
@@ -9,6 +10,7 @@ from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTas
 
 class TestLoadXML(BaseElasticSearchTestCase):
     databases = ("default", "registration_datahub")
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     def test_execute(self):
         main_test_files_path = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
@@ -33,7 +35,7 @@ class TestLoadXML(BaseElasticSearchTestCase):
 
         updated_individual = active_individuals.get(reference_number="KPi.033")
         self.assertEqual(updated_individual.third_name, "TEST")
-        self.assertEqual(updated_individual.listed_on, datetime(year=2020, month=11, day=30))
+        self.assertEqual(updated_individual.listed_on, timezone.make_aware(datetime(year=2020, month=11, day=30)))
 
         self.assertEqual(updated_individual.documents.all().count(), 2)
 
@@ -42,7 +44,7 @@ class TestLoadXML(BaseElasticSearchTestCase):
 
         self.assertIn(
             "KP",
-            updated_individual.nationalities.values_list("nationality", flat=True),
+            updated_individual.nationalities.values_list("nationality__iso_code2", flat=True),
         )
 
         task = LoadSanctionListXMLTask(file_path=f"{main_test_files_path}/updated2-consolidated.xml")
@@ -55,4 +57,4 @@ class TestLoadXML(BaseElasticSearchTestCase):
         self.assertEqual(active_individuals.count(), 3)
 
         updated_individual = active_individuals.get(reference_number="KPi.037")
-        self.assertEqual(updated_individual.listed_on, datetime(year=2020, month=11, day=30))
+        self.assertEqual(updated_individual.listed_on, timezone.make_aware(datetime(year=2020, month=11, day=30)))

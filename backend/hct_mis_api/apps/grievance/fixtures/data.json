@@ -1,11 +1,12 @@
 [
 {
   "model": "grievance.grievanceticket",
-  "pk": "bb62b92a-7cf0-4b40-a358-5a880d82862f",
+  "pk": "630332e9-a1fd-44cc-9f44-3977659485d7",
   "fields": {
-    "created_at": "2022-03-30T09:54:07.827",
-    "updated_at": "2022-03-30T09:54:07.827",
-    "version": 1648633101142787,
+    "created_at": "2022-08-10T14:30:11.729Z",
+    "updated_at": "2022-08-10T14:30:11.729Z",
+    "version": 1660140865044971,
+    "unicef_id": "GRV-0000001",
     "user_modified": null,
     "last_notification_sent": null,
     "created_by": null,
@@ -14,50 +15,57 @@
     "category": 8,
     "issue_type": null,
     "description": "",
-    "admin2": "4e76f0b2-ce78-4cb9-ba89-f3f5e94cdfa2",
-    "admin2_new": "5f06eb31-3b5d-4bd5-b293-a89ba7981bfc",
+    "admin2": "dec7c2eb-d488-484e-ad5b-56765c994aed",
     "area": "",
     "language": "",
     "consent": true,
     "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
-    "registration_data_import": "04992dce-154b-4938-8e47-74341541ebcf",
-    "unicef_id": "GRV-000001",
-    "extras": {}
+    "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
+    "extras": {},
+    "ignored": false,
+    "household_unicef_id": "HH-20-0000.0014"
   }
 },
 {
   "model": "grievance.ticketneedsadjudicationdetails",
-  "pk": "f1e1a58a-dba8-4311-b03f-8ea4b83d2f83",
+  "pk": "113f2c87-ceb1-4486-9a4b-05f4fe1d1839",
   "fields": {
-    "created_at": "2022-03-30T09:54:07.830",
-    "updated_at": "2022-03-30T09:54:07.830",
-    "ticket": "bb62b92a-7cf0-4b40-a358-5a880d82862f",
-    "golden_records_individual": "cedd4b49-54e0-4408-8fd2-1030f05a7a6a",
-    "possible_duplicate": "a94e76d8-ecc2-479e-ae14-db8f49017546",
+    "created_at": "2022-08-10T14:30:11.731Z",
+    "updated_at": "2022-08-10T14:30:11.731Z",
+    "ticket": "630332e9-a1fd-44cc-9f44-3977659485d7",
+    "golden_records_individual": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
+    "is_multiple_duplicates_version": true,
+    "possible_duplicate": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
     "selected_individual": null,
     "role_reassign_data": {},
     "extra_data": {
       "golden_records": [
         {
-          "dob": "1901-01-10",
+          "dob": "1923-01-01",
           "score": 9.0,
-          "hit_id": "a94e76d8-ecc2-479e-ae14-db8f49017546",
-          "location": null,
+          "hit_id": "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
+          "location": "Abband",
           "full_name": "Jan Romaniak",
           "proximity_to_score": 3.0
         }
       ],
       "possible_duplicate": [
         {
-          "dob": "1991-11-18",
+          "dob": "1923-01-01",
           "score": 9.0,
-          "hit_id": "cedd4b49-54e0-4408-8fd2-1030f05a7a6a",
-          "location": null,
+          "hit_id": "efaad4e3-f8d9-481b-a902-f5f23deb52f9",
+          "location": "Abband",
           "full_name": "Jan Romaniak",
           "proximity_to_score": 3.0
         }
       ]
-    }
+    },
+    "score_min": 9.0,
+    "score_max": 9.0,
+    "possible_duplicates": [
+      "efaad4e3-f8d9-481b-a902-f5f23deb52f9"
+    ],
+    "selected_individuals": []
   }
 }
 ]

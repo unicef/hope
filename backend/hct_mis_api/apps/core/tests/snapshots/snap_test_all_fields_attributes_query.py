@@ -11560,6 +11560,696 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
+                    {
+                        'labelEn': 'Avtonomna Respublika Krym-UA01',
+                        'labels': [
+                            {
+                                'label': 'Avtonomna Respublika Krym-UA01',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA01'
+                    },
+                    {
+                        'labelEn': 'Badakhshan-AF15',
+                        'labels': [
+                            {
+                                'label': 'Badakhshan-AF15',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF15'
+                    },
+                    {
+                        'labelEn': 'Badghis-AF29',
+                        'labels': [
+                            {
+                                'label': 'Badghis-AF29',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF29'
+                    },
+                    {
+                        'labelEn': 'Baghlan-AF09',
+                        'labels': [
+                            {
+                                'label': 'Baghlan-AF09',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF09'
+                    },
+                    {
+                        'labelEn': 'Balkh-AF18',
+                        'labels': [
+                            {
+                                'label': 'Balkh-AF18',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF18'
+                    },
+                    {
+                        'labelEn': 'Bamyan-AF10',
+                        'labels': [
+                            {
+                                'label': 'Bamyan-AF10',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF10'
+                    },
+                    {
+                        'labelEn': 'Barbuda - AG07-AG07',
+                        'labels': [
+                            {
+                                'label': 'Barbuda - AG07-AG07',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG07'
+                    },
+                    {
+                        'labelEn': 'Cherkaska-UA71',
+                        'labels': [
+                            {
+                                'label': 'Cherkaska-UA71',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA71'
+                    },
+                    {
+                        'labelEn': 'Chernihivska-UA74',
+                        'labels': [
+                            {
+                                'label': 'Chernihivska-UA74',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA74'
+                    },
+                    {
+                        'labelEn': 'Chernivetska-UA73',
+                        'labels': [
+                            {
+                                'label': 'Chernivetska-UA73',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA73'
+                    },
+                    {
+                        'labelEn': 'Daykundi-AF22',
+                        'labels': [
+                            {
+                                'label': 'Daykundi-AF22',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF22'
+                    },
+                    {
+                        'labelEn': 'Dnipropetrovska-UA12',
+                        'labels': [
+                            {
+                                'label': 'Dnipropetrovska-UA12',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA12'
+                    },
+                    {
+                        'labelEn': 'Donetska-UA14',
+                        'labels': [
+                            {
+                                'label': 'Donetska-UA14',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA14'
+                    },
+                    {
+                        'labelEn': 'Farah-AF31',
+                        'labels': [
+                            {
+                                'label': 'Farah-AF31',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF31'
+                    },
+                    {
+                        'labelEn': 'Faryab-AF28',
+                        'labels': [
+                            {
+                                'label': 'Faryab-AF28',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF28'
+                    },
+                    {
+                        'labelEn': 'Ghazni-AF11',
+                        'labels': [
+                            {
+                                'label': 'Ghazni-AF11',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF11'
+                    },
+                    {
+                        'labelEn': 'Ghor-AF21',
+                        'labels': [
+                            {
+                                'label': 'Ghor-AF21',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF21'
+                    },
+                    {
+                        'labelEn': 'Hilmand-AF32',
+                        'labels': [
+                            {
+                                'label': 'Hilmand-AF32',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF32'
+                    },
+                    {
+                        'labelEn': 'Hirat-AF30',
+                        'labels': [
+                            {
+                                'label': 'Hirat-AF30',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF30'
+                    },
+                    {
+                        'labelEn': 'Ivano-Frankivska-UA26',
+                        'labels': [
+                            {
+                                'label': 'Ivano-Frankivska-UA26',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA26'
+                    },
+                    {
+                        'labelEn': 'Jawzjan-AF27',
+                        'labels': [
+                            {
+                                'label': 'Jawzjan-AF27',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF27'
+                    },
+                    {
+                        'labelEn': 'Kabul-AF01',
+                        'labels': [
+                            {
+                                'label': 'Kabul-AF01',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF01'
+                    },
+                    {
+                        'labelEn': 'Kandahar-AF33',
+                        'labels': [
+                            {
+                                'label': 'Kandahar-AF33',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF33'
+                    },
+                    {
+                        'labelEn': 'Kapisa-AF02',
+                        'labels': [
+                            {
+                                'label': 'Kapisa-AF02',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF02'
+                    },
+                    {
+                        'labelEn': 'Kharkivska-UA63',
+                        'labels': [
+                            {
+                                'label': 'Kharkivska-UA63',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA63'
+                    },
+                    {
+                        'labelEn': 'Khersonska-UA65',
+                        'labels': [
+                            {
+                                'label': 'Khersonska-UA65',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA65'
+                    },
+                    {
+                        'labelEn': 'Khmelnytska-UA68',
+                        'labels': [
+                            {
+                                'label': 'Khmelnytska-UA68',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA68'
+                    },
+                    {
+                        'labelEn': 'Khost-AF26',
+                        'labels': [
+                            {
+                                'label': 'Khost-AF26',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF26'
+                    },
+                    {
+                        'labelEn': 'Kirovohradska-UA35',
+                        'labels': [
+                            {
+                                'label': 'Kirovohradska-UA35',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA35'
+                    },
+                    {
+                        'labelEn': 'Kunar-AF13',
+                        'labels': [
+                            {
+                                'label': 'Kunar-AF13',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF13'
+                    },
+                    {
+                        'labelEn': 'Kunduz-AF17',
+                        'labels': [
+                            {
+                                'label': 'Kunduz-AF17',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF17'
+                    },
+                    {
+                        'labelEn': 'Kyivska-UA32',
+                        'labels': [
+                            {
+                                'label': 'Kyivska-UA32',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA32'
+                    },
+                    {
+                        'labelEn': 'Kyivska-UA80',
+                        'labels': [
+                            {
+                                'label': 'Kyivska-UA80',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA80'
+                    },
+                    {
+                        'labelEn': 'Laghman-AF07',
+                        'labels': [
+                            {
+                                'label': 'Laghman-AF07',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF07'
+                    },
+                    {
+                        'labelEn': 'Logar-AF05',
+                        'labels': [
+                            {
+                                'label': 'Logar-AF05',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF05'
+                    },
+                    {
+                        'labelEn': 'Luhanska-UA44',
+                        'labels': [
+                            {
+                                'label': 'Luhanska-UA44',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA44'
+                    },
+                    {
+                        'labelEn': 'Lvivska-UA46',
+                        'labels': [
+                            {
+                                'label': 'Lvivska-UA46',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA46'
+                    },
+                    {
+                        'labelEn': 'Mykolaivska-UA48',
+                        'labels': [
+                            {
+                                'label': 'Mykolaivska-UA48',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA48'
+                    },
+                    {
+                        'labelEn': 'Nangarhar-AF06',
+                        'labels': [
+                            {
+                                'label': 'Nangarhar-AF06',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF06'
+                    },
+                    {
+                        'labelEn': 'Nimroz-AF34',
+                        'labels': [
+                            {
+                                'label': 'Nimroz-AF34',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF34'
+                    },
+                    {
+                        'labelEn': 'Nuristan-AF14',
+                        'labels': [
+                            {
+                                'label': 'Nuristan-AF14',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF14'
+                    },
+                    {
+                        'labelEn': 'Odeska-UA51',
+                        'labels': [
+                            {
+                                'label': 'Odeska-UA51',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA51'
+                    },
+                    {
+                        'labelEn': 'Paktika-AF25',
+                        'labels': [
+                            {
+                                'label': 'Paktika-AF25',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF25'
+                    },
+                    {
+                        'labelEn': 'Paktya-AF12',
+                        'labels': [
+                            {
+                                'label': 'Paktya-AF12',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF12'
+                    },
+                    {
+                        'labelEn': 'Panjsher-AF08',
+                        'labels': [
+                            {
+                                'label': 'Panjsher-AF08',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF08'
+                    },
+                    {
+                        'labelEn': 'Parwan-AF03',
+                        'labels': [
+                            {
+                                'label': 'Parwan-AF03',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF03'
+                    },
+                    {
+                        'labelEn': 'Poltavska-UA53',
+                        'labels': [
+                            {
+                                'label': 'Poltavska-UA53',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA53'
+                    },
+                    {
+                        'labelEn': 'Redonda - AG08-AG08',
+                        'labels': [
+                            {
+                                'label': 'Redonda - AG08-AG08',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG08'
+                    },
+                    {
+                        'labelEn': 'Rivnenska-UA56',
+                        'labels': [
+                            {
+                                'label': 'Rivnenska-UA56',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA56'
+                    },
+                    {
+                        'labelEn': 'Saint George - AG01-AG01',
+                        'labels': [
+                            {
+                                'label': 'Saint George - AG01-AG01',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG01'
+                    },
+                    {
+                        'labelEn': 'Saint John - AG02-AG02',
+                        'labels': [
+                            {
+                                'label': 'Saint John - AG02-AG02',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG02'
+                    },
+                    {
+                        'labelEn': 'Saint Mary - AG03-AG03',
+                        'labels': [
+                            {
+                                'label': 'Saint Mary - AG03-AG03',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG03'
+                    },
+                    {
+                        'labelEn': 'Saint Paul - AG04-AG04',
+                        'labels': [
+                            {
+                                'label': 'Saint Paul - AG04-AG04',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG04'
+                    },
+                    {
+                        'labelEn': 'Saint Peter - AG05-AG05',
+                        'labels': [
+                            {
+                                'label': 'Saint Peter - AG05-AG05',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG05'
+                    },
+                    {
+                        'labelEn': 'Saint Philip - AG05-AG06',
+                        'labels': [
+                            {
+                                'label': 'Saint Philip - AG05-AG06',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG06'
+                    },
+                    {
+                        'labelEn': 'Samangan-AF19',
+                        'labels': [
+                            {
+                                'label': 'Samangan-AF19',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF19'
+                    },
+                    {
+                        'labelEn': 'Sar-e-Pul-AF20',
+                        'labels': [
+                            {
+                                'label': 'Sar-e-Pul-AF20',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF20'
+                    },
+                    {
+                        'labelEn': 'Sevastopilska-UA85',
+                        'labels': [
+                            {
+                                'label': 'Sevastopilska-UA85',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA85'
+                    },
+                    {
+                        'labelEn': 'Sumska-UA59',
+                        'labels': [
+                            {
+                                'label': 'Sumska-UA59',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA59'
+                    },
+                    {
+                        'labelEn': 'Takhar-AF16',
+                        'labels': [
+                            {
+                                'label': 'Takhar-AF16',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF16'
+                    },
+                    {
+                        'labelEn': 'Ternopilska-UA61',
+                        'labels': [
+                            {
+                                'label': 'Ternopilska-UA61',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA61'
+                    },
+                    {
+                        'labelEn': 'Uruzgan-AF23',
+                        'labels': [
+                            {
+                                'label': 'Uruzgan-AF23',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF23'
+                    },
+                    {
+                        'labelEn': 'Vinnytska-UA05',
+                        'labels': [
+                            {
+                                'label': 'Vinnytska-UA05',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA05'
+                    },
+                    {
+                        'labelEn': 'Volynska-UA07',
+                        'labels': [
+                            {
+                                'label': 'Volynska-UA07',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA07'
+                    },
+                    {
+                        'labelEn': 'Wardak-AF04',
+                        'labels': [
+                            {
+                                'label': 'Wardak-AF04',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF04'
+                    },
+                    {
+                        'labelEn': 'Zabul-AF24',
+                        'labels': [
+                            {
+                                'label': 'Zabul-AF24',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF24'
+                    },
+                    {
+                        'labelEn': 'Zakarpatska-UA21',
+                        'labels': [
+                            {
+                                'label': 'Zakarpatska-UA21',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA21'
+                    },
+                    {
+                        'labelEn': 'Zaporizka-UA23',
+                        'labels': [
+                            {
+                                'label': 'Zaporizka-UA23',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA23'
+                    },
+                    {
+                        'labelEn': 'Zhytomyrska-UA18',
+                        'labels': [
+                            {
+                                'label': 'Zhytomyrska-UA18',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA18'
+                    }
                 ],
                 'hint': '',
                 'isFlexField': False,
@@ -11577,6 +12267,6266 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
+                    {
+                        'labelEn': 'Abband-AF1115',
+                        'labels': [
+                            {
+                                'label': 'Abband-AF1115',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1115'
+                    },
+                    {
+                        'labelEn': 'Aberdeen - AG0201-AG0201',
+                        'labels': [
+                            {
+                                'label': 'Aberdeen - AG0201-AG0201',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0201'
+                    },
+                    {
+                        'labelEn': 'Abkamari-AF2903',
+                        'labels': [
+                            {
+                                'label': 'Abkamari-AF2903',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2903'
+                    },
+                    {
+                        'labelEn': 'Achin-AF0617',
+                        'labels': [
+                            {
+                                'label': 'Achin-AF0617',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0617'
+                    },
+                    {
+                        'labelEn': 'Adraskan-AF3010',
+                        'labels': [
+                            {
+                                'label': 'Adraskan-AF3010',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3010'
+                    },
+                    {
+                        'labelEn': 'Ahmadaba-AF1203',
+                        'labels': [
+                            {
+                                'label': 'Ahmadaba-AF1203',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1203'
+                    },
+                    {
+                        'labelEn': 'Ajrestan-AF1116',
+                        'labels': [
+                            {
+                                'label': 'Ajrestan-AF1116',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1116'
+                    },
+                    {
+                        'labelEn': 'Alasay-AF0206',
+                        'labels': [
+                            {
+                                'label': 'Alasay-AF0206',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0206'
+                    },
+                    {
+                        'labelEn': 'Alchevskyi-UA4402',
+                        'labels': [
+                            {
+                                'label': 'Alchevskyi-UA4402',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4402'
+                    },
+                    {
+                        'labelEn': 'Aliabad-AF1705',
+                        'labels': [
+                            {
+                                'label': 'Aliabad-AF1705',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1705'
+                    },
+                    {
+                        'labelEn': 'Alikhel (Jaji)-AF1208',
+                        'labels': [
+                            {
+                                'label': 'Alikhel (Jaji)-AF1208',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1208'
+                    },
+                    {
+                        'labelEn': 'Alingar-AF0704',
+                        'labels': [
+                            {
+                                'label': 'Alingar-AF0704',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0704'
+                    },
+                    {
+                        'labelEn': 'Alishang-AF0702',
+                        'labels': [
+                            {
+                                'label': 'Alishang-AF0702',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0702'
+                    },
+                    {
+                        'labelEn': 'Almar-AF2805',
+                        'labels': [
+                            {
+                                'label': 'Almar-AF2805',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2805'
+                    },
+                    {
+                        'labelEn': 'Anardara-AF3111',
+                        'labels': [
+                            {
+                                'label': 'Anardara-AF3111',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3111'
+                    },
+                    {
+                        'labelEn': 'Andar-AF1105',
+                        'labels': [
+                            {
+                                'label': 'Andar-AF1105',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1105'
+                    },
+                    {
+                        'labelEn': 'Andarab-AF0908',
+                        'labels': [
+                            {
+                                'label': 'Andarab-AF0908',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0908'
+                    },
+                    {
+                        'labelEn': 'Andkhoy-AF2811',
+                        'labels': [
+                            {
+                                'label': 'Andkhoy-AF2811',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2811'
+                    },
+                    {
+                        'labelEn': 'Aqcha-AF2707',
+                        'labels': [
+                            {
+                                'label': 'Aqcha-AF2707',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2707'
+                    },
+                    {
+                        'labelEn': 'Arghandab-AF2402',
+                        'labels': [
+                            {
+                                'label': 'Arghandab-AF2402',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2402'
+                    },
+                    {
+                        'labelEn': 'Arghandab-AF3302',
+                        'labels': [
+                            {
+                                'label': 'Arghandab-AF3302',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3302'
+                    },
+                    {
+                        'labelEn': 'Arghanjkhwa-AF1504',
+                        'labels': [
+                            {
+                                'label': 'Arghanjkhwa-AF1504',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1504'
+                    },
+                    {
+                        'labelEn': 'Arghestan-AF3312',
+                        'labels': [
+                            {
+                                'label': 'Arghestan-AF3312',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3312'
+                    },
+                    {
+                        'labelEn': 'Argo-AF1503',
+                        'labels': [
+                            {
+                                'label': 'Argo-AF1503',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1503'
+                    },
+                    {
+                        'labelEn': 'Asadabad-AF1301',
+                        'labels': [
+                            {
+                                'label': 'Asadabad-AF1301',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1301'
+                    },
+                    {
+                        'labelEn': 'Ashtarlay-AF2202',
+                        'labels': [
+                            {
+                                'label': 'Ashtarlay-AF2202',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2202'
+                    },
+                    {
+                        'labelEn': 'Atghar-AF2409',
+                        'labels': [
+                            {
+                                'label': 'Atghar-AF2409',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2409'
+                    },
+                    {
+                        'labelEn': 'Aybak-AF1901',
+                        'labels': [
+                            {
+                                'label': 'Aybak-AF1901',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1901'
+                    },
+                    {
+                        'labelEn': 'Azra-AF0507',
+                        'labels': [
+                            {
+                                'label': 'Azra-AF0507',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0507'
+                    },
+                    {
+                        'labelEn': 'Baghlan-e-Jadid-AF0902',
+                        'labels': [
+                            {
+                                'label': 'Baghlan-e-Jadid-AF0902',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0902'
+                    },
+                    {
+                        'labelEn': 'Baghran-AF3211',
+                        'labels': [
+                            {
+                                'label': 'Baghran-AF3211',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3211'
+                    },
+                    {
+                        'labelEn': 'Bagram-AF0304',
+                        'labels': [
+                            {
+                                'label': 'Bagram-AF0304',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0304'
+                    },
+                    {
+                        'labelEn': 'Bagrami-AF0107',
+                        'labels': [
+                            {
+                                'label': 'Bagrami-AF0107',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0107'
+                    },
+                    {
+                        'labelEn': 'Baharak-AF1512',
+                        'labels': [
+                            {
+                                'label': 'Baharak-AF1512',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1512'
+                    },
+                    {
+                        'labelEn': 'Baharak-AF1603',
+                        'labels': [
+                            {
+                                'label': 'Baharak-AF1603',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1603'
+                    },
+                    {
+                        'labelEn': 'Bak-AF2612',
+                        'labels': [
+                            {
+                                'label': 'Bak-AF2612',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2612'
+                    },
+                    {
+                        'labelEn': 'Bakhchysaraiskyi-UA0102',
+                        'labels': [
+                            {
+                                'label': 'Bakhchysaraiskyi-UA0102',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0102'
+                    },
+                    {
+                        'labelEn': 'Bakhmutskyi-UA1402',
+                        'labels': [
+                            {
+                                'label': 'Bakhmutskyi-UA1402',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1402'
+                    },
+                    {
+                        'labelEn': 'Bakwa-AF3102',
+                        'labels': [
+                            {
+                                'label': 'Bakwa-AF3102',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3102'
+                    },
+                    {
+                        'labelEn': 'Balabuluk-AF3103',
+                        'labels': [
+                            {
+                                'label': 'Balabuluk-AF3103',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3103'
+                    },
+                    {
+                        'labelEn': 'Balamurghab-AF2906',
+                        'labels': [
+                            {
+                                'label': 'Balamurghab-AF2906',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2906'
+                    },
+                    {
+                        'labelEn': 'Balkh-AF1805',
+                        'labels': [
+                            {
+                                'label': 'Balkh-AF1805',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1805'
+                    },
+                    {
+                        'labelEn': 'Balkhab-AF2006',
+                        'labels': [
+                            {
+                                'label': 'Balkhab-AF2006',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2006'
+                    },
+                    {
+                        'labelEn': 'Bamyan-AF1001',
+                        'labels': [
+                            {
+                                'label': 'Bamyan-AF1001',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1001'
+                    },
+                    {
+                        'labelEn': 'Bangi-AF1604',
+                        'labels': [
+                            {
+                                'label': 'Bangi-AF1604',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1604'
+                    },
+                    {
+                        'labelEn': 'Barakibarak-AF0504',
+                        'labels': [
+                            {
+                                'label': 'Barakibarak-AF0504',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0504'
+                    },
+                    {
+                        'labelEn': 'Barg-e-Matal-AF1408',
+                        'labels': [
+                            {
+                                'label': 'Barg-e-Matal-AF1408',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1408'
+                    },
+                    {
+                        'labelEn': 'Barkunar-AF1311',
+                        'labels': [
+                            {
+                                'label': 'Barkunar-AF1311',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1311'
+                    },
+                    {
+                        'labelEn': 'Barnes Hill - AG0101-AG0101',
+                        'labels': [
+                            {
+                                'label': 'Barnes Hill - AG0101-AG0101',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0101'
+                    },
+                    {
+                        'labelEn': 'Bashtanskyi-UA4802',
+                        'labels': [
+                            {
+                                'label': 'Bashtanskyi-UA4802',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4802'
+                    },
+                    {
+                        'labelEn': 'Batikot-AF0615',
+                        'labels': [
+                            {
+                                'label': 'Batikot-AF0615',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0615'
+                    },
+                    {
+                        'labelEn': 'Bazarak-AF0801',
+                        'labels': [
+                            {
+                                'label': 'Bazarak-AF0801',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0801'
+                    },
+                    {
+                        'labelEn': 'Behsud-AF0602',
+                        'labels': [
+                            {
+                                'label': 'Behsud-AF0602',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0602'
+                    },
+                    {
+                        'labelEn': 'Bendals - AG0202-AG0202',
+                        'labels': [
+                            {
+                                'label': 'Bendals - AG0202-AG0202',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0202'
+                    },
+                    {
+                        'labelEn': 'Berdianskyi-UA2302',
+                        'labels': [
+                            {
+                                'label': 'Berdianskyi-UA2302',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2302'
+                    },
+                    {
+                        'labelEn': 'Berdychivskyi-UA1802',
+                        'labels': [
+                            {
+                                'label': 'Berdychivskyi-UA1802',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1802'
+                    },
+                    {
+                        'labelEn': 'Berehivskyi-UA2102',
+                        'labels': [
+                            {
+                                'label': 'Berehivskyi-UA2102',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2102'
+                    },
+                    {
+                        'labelEn': 'Berezivskyi-UA5102',
+                        'labels': [
+                            {
+                                'label': 'Berezivskyi-UA5102',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5102'
+                    },
+                    {
+                        'labelEn': 'Bermel-AF2515',
+                        'labels': [
+                            {
+                                'label': 'Bermel-AF2515',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2515'
+                    },
+                    {
+                        'labelEn': 'Beryslavskyi-UA6502',
+                        'labels': [
+                            {
+                                'label': 'Beryslavskyi-UA6502',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6502'
+                    },
+                    {
+                        'labelEn': 'Bethesda - AG0401-AG0401',
+                        'labels': [
+                            {
+                                'label': 'Bethesda - AG0401-AG0401',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0401'
+                    },
+                    {
+                        'labelEn': 'Big Duers - AG0501-AG0501',
+                        'labels': [
+                            {
+                                'label': 'Big Duers - AG0501-AG0501',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0501'
+                    },
+                    {
+                        'labelEn': 'Bilcheragh-AF2809',
+                        'labels': [
+                            {
+                                'label': 'Bilcheragh-AF2809',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2809'
+                    },
+                    {
+                        'labelEn': 'Bilhorod-Dnistrovskyi-UA5104',
+                        'labels': [
+                            {
+                                'label': 'Bilhorod-Dnistrovskyi-UA5104',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5104'
+                    },
+                    {
+                        'labelEn': 'Bilohirskyi-UA0104',
+                        'labels': [
+                            {
+                                'label': 'Bilohirskyi-UA0104',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0104'
+                    },
+                    {
+                        'labelEn': 'Bilotserkivskyi-UA3202',
+                        'labels': [
+                            {
+                                'label': 'Bilotserkivskyi-UA3202',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3202'
+                    },
+                    {
+                        'labelEn': 'Bishops - AG0301-AG0301',
+                        'labels': [
+                            {
+                                'label': 'Bishops - AG0301-AG0301',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0301'
+                    },
+                    {
+                        'labelEn': 'Blubber Valley - AG0302-AG0302',
+                        'labels': [
+                            {
+                                'label': 'Blubber Valley - AG0302-AG0302',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0302'
+                    },
+                    {
+                        'labelEn': 'Bohodukhivskyi-UA6302',
+                        'labels': [
+                            {
+                                'label': 'Bohodukhivskyi-UA6302',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6302'
+                    },
+                    {
+                        'labelEn': 'Bolans - AG0303-AG0303',
+                        'labels': [
+                            {
+                                'label': 'Bolans - AG0303-AG0303',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0303'
+                    },
+                    {
+                        'labelEn': 'Bolhradskyi-UA5106',
+                        'labels': [
+                            {
+                                'label': 'Bolhradskyi-UA5106',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5106'
+                    },
+                    {
+                        'labelEn': 'Boryspilskyi-UA3204',
+                        'labels': [
+                            {
+                                'label': 'Boryspilskyi-UA3204',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3204'
+                    },
+                    {
+                        'labelEn': 'Branns Hamlet - AG0203-AG0203',
+                        'labels': [
+                            {
+                                'label': 'Branns Hamlet - AG0203-AG0203',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0203'
+                    },
+                    {
+                        'labelEn': 'Brovarskyi-UA3206',
+                        'labels': [
+                            {
+                                'label': 'Brovarskyi-UA3206',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3206'
+                    },
+                    {
+                        'labelEn': 'Buchanskyi-UA3208',
+                        'labels': [
+                            {
+                                'label': 'Buchanskyi-UA3208',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3208'
+                    },
+                    {
+                        'labelEn': 'Buckleys - AG0204-AG0204',
+                        'labels': [
+                            {
+                                'label': 'Buckleys - AG0204-AG0204',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0204'
+                    },
+                    {
+                        'labelEn': 'Burka-AF0910',
+                        'labels': [
+                            {
+                                'label': 'Burka-AF0910',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0910'
+                    },
+                    {
+                        'labelEn': 'Burkes - AG0402-AG0402',
+                        'labels': [
+                            {
+                                'label': 'Burkes - AG0402-AG0402',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0402'
+                    },
+                    {
+                        'labelEn': 'Cades Bay - AG0304-AG0304',
+                        'labels': [
+                            {
+                                'label': 'Cades Bay - AG0304-AG0304',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0304'
+                    },
+                    {
+                        'labelEn': 'Carlisle - AG0102-AG0102',
+                        'labels': [
+                            {
+                                'label': 'Carlisle - AG0102-AG0102',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0102'
+                    },
+                    {
+                        'labelEn': 'Cedar Grove - AG0205-AG0205',
+                        'labels': [
+                            {
+                                'label': 'Cedar Grove - AG0205-AG0205',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0205'
+                    },
+                    {
+                        'labelEn': 'Cedar Hall - AG0305-AG0305',
+                        'labels': [
+                            {
+                                'label': 'Cedar Hall - AG0305-AG0305',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0305'
+                    },
+                    {
+                        'labelEn': 'Chaghcharan-AF2101',
+                        'labels': [
+                            {
+                                'label': 'Chaghcharan-AF2101',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2101'
+                    },
+                    {
+                        'labelEn': 'Chahab-AF1610',
+                        'labels': [
+                            {
+                                'label': 'Chahab-AF1610',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1610'
+                    },
+                    {
+                        'labelEn': 'Chaharasyab-AF0105',
+                        'labels': [
+                            {
+                                'label': 'Chaharasyab-AF0105',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0105'
+                    },
+                    {
+                        'labelEn': 'Chak-AF0406',
+                        'labels': [
+                            {
+                                'label': 'Chak-AF0406',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0406'
+                    },
+                    {
+                        'labelEn': 'Chakhansur-AF3404',
+                        'labels': [
+                            {
+                                'label': 'Chakhansur-AF3404',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3404'
+                    },
+                    {
+                        'labelEn': 'Chal-AF1605',
+                        'labels': [
+                            {
+                                'label': 'Chal-AF1605',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1605'
+                    },
+                    {
+                        'labelEn': 'Chamkani-AF1210',
+                        'labels': [
+                            {
+                                'label': 'Chamkani-AF1210',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1210'
+                    },
+                    {
+                        'labelEn': 'Chapadara-AF1313',
+                        'labels': [
+                            {
+                                'label': 'Chapadara-AF1313',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1313'
+                    },
+                    {
+                        'labelEn': 'Chaparhar-AF0605',
+                        'labels': [
+                            {
+                                'label': 'Chaparhar-AF0605',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0605'
+                    },
+                    {
+                        'labelEn': 'Charbulak-AF1812',
+                        'labels': [
+                            {
+                                'label': 'Charbulak-AF1812',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1812'
+                    },
+                    {
+                        'labelEn': 'Charburjak-AF3403',
+                        'labels': [
+                            {
+                                'label': 'Charburjak-AF3403',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3403'
+                    },
+                    {
+                        'labelEn': 'Chardarah-AF1704',
+                        'labels': [
+                            {
+                                'label': 'Chardarah-AF1704',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1704'
+                    },
+                    {
+                        'labelEn': 'Charikar-AF0301',
+                        'labels': [
+                            {
+                                'label': 'Charikar-AF0301',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0301'
+                    },
+                    {
+                        'labelEn': 'Charkent-AF1807',
+                        'labels': [
+                            {
+                                'label': 'Charkent-AF1807',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1807'
+                    },
+                    {
+                        'labelEn': 'Charkh-AF0505',
+                        'labels': [
+                            {
+                                'label': 'Charkh-AF0505',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0505'
+                    },
+                    {
+                        'labelEn': 'Charsadra-AF2102',
+                        'labels': [
+                            {
+                                'label': 'Charsadra-AF2102',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2102'
+                    },
+                    {
+                        'labelEn': 'Chawkay-AF1308',
+                        'labels': [
+                            {
+                                'label': 'Chawkay-AF1308',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1308'
+                    },
+                    {
+                        'labelEn': 'Chemtal-AF1813',
+                        'labels': [
+                            {
+                                'label': 'Chemtal-AF1813',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1813'
+                    },
+                    {
+                        'labelEn': 'Cherkaskyi-UA7108',
+                        'labels': [
+                            {
+                                'label': 'Cherkaskyi-UA7108',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7108'
+                    },
+                    {
+                        'labelEn': 'Chernihivskyi-UA7410',
+                        'labels': [
+                            {
+                                'label': 'Chernihivskyi-UA7410',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7410'
+                    },
+                    {
+                        'labelEn': 'Chervonohradskyi-UA4612',
+                        'labels': [
+                            {
+                                'label': 'Chervonohradskyi-UA4612',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4612'
+                    },
+                    {
+                        'labelEn': 'Chisht-e-Sharif-AF3016',
+                        'labels': [
+                            {
+                                'label': 'Chisht-e-Sharif-AF3016',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3016'
+                    },
+                    {
+                        'labelEn': 'Chora / Chinarto-AF2302',
+                        'labels': [
+                            {
+                                'label': 'Chora / Chinarto-AF2302',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2302'
+                    },
+                    {
+                        'labelEn': 'Chornobylska zona vidchuzhennia-UA3200',
+                        'labels': [
+                            {
+                                'label': 'Chornobylska zona vidchuzhennia-UA3200',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3200'
+                    },
+                    {
+                        'labelEn': 'Chortkivskyi-UA6106',
+                        'labels': [
+                            {
+                                'label': 'Chortkivskyi-UA6106',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6106'
+                    },
+                    {
+                        'labelEn': 'Christian Hill - AG0403-AG0403',
+                        'labels': [
+                            {
+                                'label': 'Christian Hill - AG0403-AG0403',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0403'
+                    },
+                    {
+                        'labelEn': 'Chuhuivskyi-UA6314',
+                        'labels': [
+                            {
+                                'label': 'Chuhuivskyi-UA6314',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6314'
+                    },
+                    {
+                        'labelEn': 'Claremont - AG0306-AG0306',
+                        'labels': [
+                            {
+                                'label': 'Claremont - AG0306-AG0306',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0306'
+                    },
+                    {
+                        'labelEn': 'Cnernivetskyi-UA7306',
+                        'labels': [
+                            {
+                                'label': 'Cnernivetskyi-UA7306',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7306'
+                    },
+                    {
+                        'labelEn': 'Cocoa Hall - AG0502-AG0502',
+                        'labels': [
+                            {
+                                'label': 'Cocoa Hall - AG0502-AG0502',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0502'
+                    },
+                    {
+                        'labelEn': 'Codrington - AG0701-AG0701',
+                        'labels': [
+                            {
+                                'label': 'Codrington - AG0701-AG0701',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0701'
+                    },
+                    {
+                        'labelEn': 'Collins - AG0601-AG0601',
+                        'labels': [
+                            {
+                                'label': 'Collins - AG0601-AG0601',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0601'
+                    },
+                    {
+                        'labelEn': 'Cooks Hill - AG0206-AG0206',
+                        'labels': [
+                            {
+                                'label': 'Cooks Hill - AG0206-AG0206',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0206'
+                    },
+                    {
+                        'labelEn': 'Cooks New Extension - AG0207-AG0207',
+                        'labels': [
+                            {
+                                'label': 'Cooks New Extension - AG0207-AG0207',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0207'
+                    },
+                    {
+                        'labelEn': 'Coolidge - AG0103-AG0103',
+                        'labels': [
+                            {
+                                'label': 'Coolidge - AG0103-AG0103',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0103'
+                    },
+                    {
+                        'labelEn': 'Crabs Hill - AG0307-AG0307',
+                        'labels': [
+                            {
+                                'label': 'Crabs Hill - AG0307-AG0307',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0307'
+                    },
+                    {
+                        'labelEn': 'Crosbies - AG0104-AG0104',
+                        'labels': [
+                            {
+                                'label': 'Crosbies - AG0104-AG0104',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0104'
+                    },
+                    {
+                        'labelEn': 'Dahana-e-Ghori-AF0903',
+                        'labels': [
+                            {
+                                'label': 'Dahana-e-Ghori-AF0903',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0903'
+                    },
+                    {
+                        'labelEn': 'Daman-AF3305',
+                        'labels': [
+                            {
+                                'label': 'Daman-AF3305',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3305'
+                    },
+                    {
+                        'labelEn': 'Dand Wa Patan-AF1211',
+                        'labels': [
+                            {
+                                'label': 'Dand Wa Patan-AF1211',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1211'
+                    },
+                    {
+                        'labelEn': 'Dangam-AF1310',
+                        'labels': [
+                            {
+                                'label': 'Dangam-AF1310',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1310'
+                    },
+                    {
+                        'labelEn': 'Dara / Ab Shar-AF0804',
+                        'labels': [
+                            {
+                                'label': 'Dara / Ab Shar-AF0804',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0804'
+                    },
+                    {
+                        'labelEn': 'Dara-e Suf-e-Bala-AF1905',
+                        'labels': [
+                            {
+                                'label': 'Dara-e Suf-e-Bala-AF1905',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1905'
+                    },
+                    {
+                        'labelEn': 'Dara-e-Nur-AF0609',
+                        'labels': [
+                            {
+                                'label': 'Dara-e-Nur-AF0609',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0609'
+                    },
+                    {
+                        'labelEn': 'Dara-e-Pech-AF1307',
+                        'labels': [
+                            {
+                                'label': 'Dara-e-Pech-AF1307',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1307'
+                    },
+                    {
+                        'labelEn': 'Dara-e-Suf-e-Payin-AF1904',
+                        'labels': [
+                            {
+                                'label': 'Dara-e-Suf-e-Payin-AF1904',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1904'
+                    },
+                    {
+                        'labelEn': 'Darayem-AF1510',
+                        'labels': [
+                            {
+                                'label': 'Darayem-AF1510',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1510'
+                    },
+                    {
+                        'labelEn': 'Darqad-AF1617',
+                        'labels': [
+                            {
+                                'label': 'Darqad-AF1617',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1617'
+                    },
+                    {
+                        'labelEn': 'Darwaz-AF1524',
+                        'labels': [
+                            {
+                                'label': 'Darwaz-AF1524',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1524'
+                    },
+                    {
+                        'labelEn': 'Darwaz-e-Balla-AF1515',
+                        'labels': [
+                            {
+                                'label': 'Darwaz-e-Balla-AF1515',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1515'
+                    },
+                    {
+                        'labelEn': 'Darzab-AF2711',
+                        'labels': [
+                            {
+                                'label': 'Darzab-AF2711',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2711'
+                    },
+                    {
+                        'labelEn': 'Dasht-e-Archi-AF1707',
+                        'labels': [
+                            {
+                                'label': 'Dasht-e-Archi-AF1707',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1707'
+                    },
+                    {
+                        'labelEn': 'Dasht-e-Qala-AF1613',
+                        'labels': [
+                            {
+                                'label': 'Dasht-e-Qala-AF1613',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1613'
+                    },
+                    {
+                        'labelEn': 'Dawlatabad-AF1804',
+                        'labels': [
+                            {
+                                'label': 'Dawlatabad-AF1804',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1804'
+                    },
+                    {
+                        'labelEn': 'Dawlatabad-AF2810',
+                        'labels': [
+                            {
+                                'label': 'Dawlatabad-AF2810',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2810'
+                    },
+                    {
+                        'labelEn': 'Dawlatshah-AF0705',
+                        'labels': [
+                            {
+                                'label': 'Dawlatshah-AF0705',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0705'
+                    },
+                    {
+                        'labelEn': 'Dawlatyar-AF2104',
+                        'labels': [
+                            {
+                                'label': 'Dawlatyar-AF2104',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2104'
+                    },
+                    {
+                        'labelEn': 'Daychopan-AF2408',
+                        'labels': [
+                            {
+                                'label': 'Daychopan-AF2408',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2408'
+                    },
+                    {
+                        'labelEn': 'Daymirdad-AF0405',
+                        'labels': [
+                            {
+                                'label': 'Daymirdad-AF0405',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0405'
+                    },
+                    {
+                        'labelEn': 'Deh-e-Shu-AF3213',
+                        'labels': [
+                            {
+                                'label': 'Deh-e-Shu-AF3213',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3213'
+                    },
+                    {
+                        'labelEn': 'Dehbala-AF0613',
+                        'labels': [
+                            {
+                                'label': 'Dehbala-AF0613',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0613'
+                    },
+                    {
+                        'labelEn': 'Dehdadi-AF1806',
+                        'labels': [
+                            {
+                                'label': 'Dehdadi-AF1806',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1806'
+                    },
+                    {
+                        'labelEn': 'Dehrawud-AF2304',
+                        'labels': [
+                            {
+                                'label': 'Dehrawud-AF2304',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2304'
+                    },
+                    {
+                        'labelEn': 'Dehsabz-AF0102',
+                        'labels': [
+                            {
+                                'label': 'Dehsabz-AF0102',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0102'
+                    },
+                    {
+                        'labelEn': 'Dehsalah-AF0912',
+                        'labels': [
+                            {
+                                'label': 'Dehsalah-AF0912',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0912'
+                    },
+                    {
+                        'labelEn': 'Dehyak-AF1106',
+                        'labels': [
+                            {
+                                'label': 'Dehyak-AF1106',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1106'
+                    },
+                    {
+                        'labelEn': 'Delaps - AG0404-AG0404',
+                        'labels': [
+                            {
+                                'label': 'Delaps - AG0404-AG0404',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0404'
+                    },
+                    {
+                        'labelEn': 'Dila-AF2518',
+                        'labels': [
+                            {
+                                'label': 'Dila-AF2518',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2518'
+                    },
+                    {
+                        'labelEn': 'Dniprovskyi-UA1202',
+                        'labels': [
+                            {
+                                'label': 'Dniprovskyi-UA1202',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1202'
+                    },
+                    {
+                        'labelEn': 'Dnistrovskyi-UA7304',
+                        'labels': [
+                            {
+                                'label': 'Dnistrovskyi-UA7304',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7304'
+                    },
+                    {
+                        'labelEn': 'DoLayna-AF2103',
+                        'labels': [
+                            {
+                                'label': 'DoLayna-AF2103',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2103'
+                    },
+                    {
+                        'labelEn': 'Donetskyi-UA1408',
+                        'labels': [
+                            {
+                                'label': 'Donetskyi-UA1408',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1408'
+                    },
+                    {
+                        'labelEn': 'Doshi-AF0904',
+                        'labels': [
+                            {
+                                'label': 'Doshi-AF0904',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0904'
+                    },
+                    {
+                        'labelEn': 'Dovzhanskyi-UA4404',
+                        'labels': [
+                            {
+                                'label': 'Dovzhanskyi-UA4404',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4404'
+                    },
+                    {
+                        'labelEn': 'Drohobytskyi-UA4602',
+                        'labels': [
+                            {
+                                'label': 'Drohobytskyi-UA4602',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4602'
+                    },
+                    {
+                        'labelEn': 'Duab-AF1403',
+                        'labels': [
+                            {
+                                'label': 'Duab-AF1403',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1403'
+                    },
+                    {
+                        'labelEn': 'Dubenskyi-UA5604',
+                        'labels': [
+                            {
+                                'label': 'Dubenskyi-UA5604',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5604'
+                    },
+                    {
+                        'labelEn': 'Durbaba-AF0622',
+                        'labels': [
+                            {
+                                'label': 'Durbaba-AF0622',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0622'
+                    },
+                    {
+                        'labelEn': 'Dzhankoiskyi-UA0106',
+                        'labels': [
+                            {
+                                'label': 'Dzhankoiskyi-UA0106',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0106'
+                    },
+                    {
+                        'labelEn': 'Ebenezer - AG0308-AG0308',
+                        'labels': [
+                            {
+                                'label': 'Ebenezer - AG0308-AG0308',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0308'
+                    },
+                    {
+                        'labelEn': 'Emamsaheb-AF1702',
+                        'labels': [
+                            {
+                                'label': 'Emamsaheb-AF1702',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1702'
+                    },
+                    {
+                        'labelEn': 'Emanuel - AG0208-AG0208',
+                        'labels': [
+                            {
+                                'label': 'Emanuel - AG0208-AG0208',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0208'
+                    },
+                    {
+                        'labelEn': 'English Harbour - AG0405-AG0405',
+                        'labels': [
+                            {
+                                'label': 'English Harbour - AG0405-AG0405',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0405'
+                    },
+                    {
+                        'labelEn': 'Eshkashem-AF1523',
+                        'labels': [
+                            {
+                                'label': 'Eshkashem-AF1523',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1523'
+                    },
+                    {
+                        'labelEn': 'Eshkmesh-AF1615',
+                        'labels': [
+                            {
+                                'label': 'Eshkmesh-AF1615',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1615'
+                    },
+                    {
+                        'labelEn': 'Estalef-AF0114',
+                        'labels': [
+                            {
+                                'label': 'Estalef-AF0114',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0114'
+                    },
+                    {
+                        'labelEn': 'Falmouth - AG0406-AG0406',
+                        'labels': [
+                            {
+                                'label': 'Falmouth - AG0406-AG0406',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0406'
+                    },
+                    {
+                        'labelEn': 'Farah-AF3101',
+                        'labels': [
+                            {
+                                'label': 'Farah-AF3101',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3101'
+                    },
+                    {
+                        'labelEn': 'Farkhar-AF1607',
+                        'labels': [
+                            {
+                                'label': 'Farkhar-AF1607',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1607'
+                    },
+                    {
+                        'labelEn': 'Farsi-AF3011',
+                        'labels': [
+                            {
+                                'label': 'Farsi-AF3011',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3011'
+                    },
+                    {
+                        'labelEn': 'Farza-AF0115',
+                        'labels': [
+                            {
+                                'label': 'Farza-AF0115',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0115'
+                    },
+                    {
+                        'labelEn': 'Fastivskyi-UA3214',
+                        'labels': [
+                            {
+                                'label': 'Fastivskyi-UA3214',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3214'
+                    },
+                    {
+                        'labelEn': 'Fayzabad-AF1501',
+                        'labels': [
+                            {
+                                'label': 'Fayzabad-AF1501',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1501'
+                    },
+                    {
+                        'labelEn': 'Fayzabad-AF2705',
+                        'labels': [
+                            {
+                                'label': 'Fayzabad-AF2705',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2705'
+                    },
+                    {
+                        'labelEn': 'Feodosiiskyi-UA0118',
+                        'labels': [
+                            {
+                                'label': 'Feodosiiskyi-UA0118',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0118'
+                    },
+                    {
+                        'labelEn': 'Fereng Wa Gharu-AF0915',
+                        'labels': [
+                            {
+                                'label': 'Fereng Wa Gharu-AF0915',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0915'
+                    },
+                    {
+                        'labelEn': 'Feroznakhchir-AF1903',
+                        'labels': [
+                            {
+                                'label': 'Feroznakhchir-AF1903',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1903'
+                    },
+                    {
+                        'labelEn': 'Ffryes - AG0602-AG0602',
+                        'labels': [
+                            {
+                                'label': 'Ffryes - AG0602-AG0602',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0602'
+                    },
+                    {
+                        'labelEn': 'Fitches Creek - AG0105-AG0105',
+                        'labels': [
+                            {
+                                'label': 'Fitches Creek - AG0105-AG0105',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0105'
+                    },
+                    {
+                        'labelEn': 'Five Islands - AG0209-AG0209',
+                        'labels': [
+                            {
+                                'label': 'Five Islands - AG0209-AG0209',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0209'
+                    },
+                    {
+                        'labelEn': 'Freemans - AG0503-AG0503',
+                        'labels': [
+                            {
+                                'label': 'Freemans - AG0503-AG0503',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0503'
+                    },
+                    {
+                        'labelEn': 'Freetown - AG0603-AG0603',
+                        'labels': [
+                            {
+                                'label': 'Freetown - AG0603-AG0603',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0603'
+                    },
+                    {
+                        'labelEn': "Gamble's Terrace - AG0210-AG0210",
+                        'labels': [
+                            {
+                                'label': "Gamble's Terrace - AG0210-AG0210",
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0210'
+                    },
+                    {
+                        'labelEn': 'Gardez-AF1201',
+                        'labels': [
+                            {
+                                'label': 'Gardez-AF1201',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1201'
+                    },
+                    {
+                        'labelEn': 'Garmser-AF3209',
+                        'labels': [
+                            {
+                                'label': 'Garmser-AF3209',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3209'
+                    },
+                    {
+                        'labelEn': 'Garziwan-AF2808',
+                        'labels': [
+                            {
+                                'label': 'Garziwan-AF2808',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2808'
+                    },
+                    {
+                        'labelEn': 'Gelan-AF1118',
+                        'labels': [
+                            {
+                                'label': 'Gelan-AF1118',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1118'
+                    },
+                    {
+                        'labelEn': 'Ghaziabad-AF1312',
+                        'labels': [
+                            {
+                                'label': 'Ghaziabad-AF1312',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1312'
+                    },
+                    {
+                        'labelEn': 'Ghazni-AF1101',
+                        'labels': [
+                            {
+                                'label': 'Ghazni-AF1101',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1101'
+                    },
+                    {
+                        'labelEn': 'Ghorak-AF3315',
+                        'labels': [
+                            {
+                                'label': 'Ghorak-AF3315',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3315'
+                    },
+                    {
+                        'labelEn': 'Ghorband-AF0307',
+                        'labels': [
+                            {
+                                'label': 'Ghorband-AF0307',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0307'
+                    },
+                    {
+                        'labelEn': 'Ghormach-AF2907',
+                        'labels': [
+                            {
+                                'label': 'Ghormach-AF2907',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2907'
+                    },
+                    {
+                        'labelEn': 'Ghoryan-AF3009',
+                        'labels': [
+                            {
+                                'label': 'Ghoryan-AF3009',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3009'
+                    },
+                    {
+                        'labelEn': 'Gilberts - AG0504-AG0504',
+                        'labels': [
+                            {
+                                'label': 'Gilberts - AG0504-AG0504',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0504'
+                    },
+                    {
+                        'labelEn': 'Giro-AF1111',
+                        'labels': [
+                            {
+                                'label': 'Giro-AF1111',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1111'
+                    },
+                    {
+                        'labelEn': 'Gizab / Patoo-AF2205',
+                        'labels': [
+                            {
+                                'label': 'Gizab / Patoo-AF2205',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2205'
+                    },
+                    {
+                        'labelEn': 'Glanvilles - AG0604-AG0604',
+                        'labels': [
+                            {
+                                'label': 'Glanvilles - AG0604-AG0604',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0604'
+                    },
+                    {
+                        'labelEn': 'Glebe - AG0309-AG0309',
+                        'labels': [
+                            {
+                                'label': 'Glebe - AG0309-AG0309',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0309'
+                    },
+                    {
+                        'labelEn': 'Golden Grove - AG0211-AG0211',
+                        'labels': [
+                            {
+                                'label': 'Golden Grove - AG0211-AG0211',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0211'
+                    },
+                    {
+                        'labelEn': 'Gomal-AF2508',
+                        'labels': [
+                            {
+                                'label': 'Gomal-AF2508',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2508'
+                    },
+                    {
+                        'labelEn': 'Gosfandi-AF2005',
+                        'labels': [
+                            {
+                                'label': 'Gosfandi-AF2005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2005'
+                    },
+                    {
+                        'labelEn': 'Goshta-AF0616',
+                        'labels': [
+                            {
+                                'label': 'Goshta-AF0616',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0616'
+                    },
+                    {
+                        'labelEn': 'Gray Hill - AG0212-AG0212',
+                        'labels': [
+                            {
+                                'label': 'Gray Hill - AG0212-AG0212',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0212'
+                    },
+                    {
+                        'labelEn': 'Grays Farm - AG0213-AG0213',
+                        'labels': [
+                            {
+                                'label': 'Grays Farm - AG0213-AG0213',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0213'
+                    },
+                    {
+                        'labelEn': 'Green Bay - AG0214-AG0214',
+                        'labels': [
+                            {
+                                'label': 'Green Bay - AG0214-AG0214',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0214'
+                    },
+                    {
+                        'labelEn': 'Guldara-AF0111',
+                        'labels': [
+                            {
+                                'label': 'Guldara-AF0111',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0111'
+                    },
+                    {
+                        'labelEn': 'Gulestan-AF3109',
+                        'labels': [
+                            {
+                                'label': 'Gulestan-AF3109',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3109'
+                    },
+                    {
+                        'labelEn': 'Gulran-AF3008',
+                        'labels': [
+                            {
+                                'label': 'Gulran-AF3008',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3008'
+                    },
+                    {
+                        'labelEn': 'Gunthorpes - AG0106-AG0106',
+                        'labels': [
+                            {
+                                'label': 'Gunthorpes - AG0106-AG0106',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0106'
+                    },
+                    {
+                        'labelEn': 'Gurbuz-AF2607',
+                        'labels': [
+                            {
+                                'label': 'Gurbuz-AF2607',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2607'
+                    },
+                    {
+                        'labelEn': 'Guzara-AF3005',
+                        'labels': [
+                            {
+                                'label': 'Guzara-AF3005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3005'
+                    },
+                    {
+                        'labelEn': 'Guzargah-e-Nur-AF0914',
+                        'labels': [
+                            {
+                                'label': 'Guzargah-e-Nur-AF0914',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0914'
+                    },
+                    {
+                        'labelEn': 'Gyan-AF2516',
+                        'labels': [
+                            {
+                                'label': 'Gyan-AF2516',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2516'
+                    },
+                    {
+                        'labelEn': 'Haisynskyi-UA0504',
+                        'labels': [
+                            {
+                                'label': 'Haisynskyi-UA0504',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0504'
+                    },
+                    {
+                        'labelEn': 'Hazarsumuch-AF1602',
+                        'labels': [
+                            {
+                                'label': 'Hazarsumuch-AF1602',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1602'
+                    },
+                    {
+                        'labelEn': 'Hazrat-e-Sultan-AF1902',
+                        'labels': [
+                            {
+                                'label': 'Hazrat-e-Sultan-AF1902',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1902'
+                    },
+                    {
+                        'labelEn': 'Henicheskyi-UA6504',
+                        'labels': [
+                            {
+                                'label': 'Henicheskyi-UA6504',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6504'
+                    },
+                    {
+                        'labelEn': 'Hesa-e-Awal-e-Behsud-AF0404',
+                        'labels': [
+                            {
+                                'label': 'Hesa-e-Awal-e-Behsud-AF0404',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0404'
+                    },
+                    {
+                        'labelEn': 'Hesarak-AF0610',
+                        'labels': [
+                            {
+                                'label': 'Hesarak-AF0610',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0610'
+                    },
+                    {
+                        'labelEn': 'Hirat-AF3001',
+                        'labels': [
+                            {
+                                'label': 'Hirat-AF3001',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3001'
+                    },
+                    {
+                        'labelEn': 'Hisa-e-Awal-e-Kohestan-AF0207',
+                        'labels': [
+                            {
+                                'label': 'Hisa-e-Awal-e-Kohestan-AF0207',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0207'
+                    },
+                    {
+                        'labelEn': 'Hisa-e-Duwum-e-Kohestan-AF0204',
+                        'labels': [
+                            {
+                                'label': 'Hisa-e-Duwum-e-Kohestan-AF0204',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0204'
+                    },
+                    {
+                        'labelEn': 'Hodges Bay - AG0107-AG0107',
+                        'labels': [
+                            {
+                                'label': 'Hodges Bay - AG0107-AG0107',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0107'
+                    },
+                    {
+                        'labelEn': 'Holovanivskyi-UA3502',
+                        'labels': [
+                            {
+                                'label': 'Holovanivskyi-UA3502',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3502'
+                    },
+                    {
+                        'labelEn': 'Horlivskyi-UA1406',
+                        'labels': [
+                            {
+                                'label': 'Horlivskyi-UA1406',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1406'
+                    },
+                    {
+                        'labelEn': 'Injil-AF3002',
+                        'labels': [
+                            {
+                                'label': 'Injil-AF3002',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3002'
+                    },
+                    {
+                        'labelEn': 'Ivano-Frankivskyi-UA2604',
+                        'labels': [
+                            {
+                                'label': 'Ivano-Frankivskyi-UA2604',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2604'
+                    },
+                    {
+                        'labelEn': 'Iziumskyi-UA6304',
+                        'labels': [
+                            {
+                                'label': 'Iziumskyi-UA6304',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6304'
+                    },
+                    {
+                        'labelEn': 'Izmailskyi-UA5108',
+                        'labels': [
+                            {
+                                'label': 'Izmailskyi-UA5108',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5108'
+                    },
+                    {
+                        'labelEn': 'Jabalussaraj-AF0302',
+                        'labels': [
+                            {
+                                'label': 'Jabalussaraj-AF0302',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0302'
+                    },
+                    {
+                        'labelEn': 'Jaghatu-AF0409',
+                        'labels': [
+                            {
+                                'label': 'Jaghatu-AF0409',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0409'
+                    },
+                    {
+                        'labelEn': 'Jaghatu-AF1109',
+                        'labels': [
+                            {
+                                'label': 'Jaghatu-AF1109',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1109'
+                    },
+                    {
+                        'labelEn': 'Jaghuri-AF1113',
+                        'labels': [
+                            {
+                                'label': 'Jaghuri-AF1113',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1113'
+                    },
+                    {
+                        'labelEn': 'Jajimaydan-AF2613',
+                        'labels': [
+                            {
+                                'label': 'Jajimaydan-AF2613',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2613'
+                    },
+                    {
+                        'labelEn': 'Jalalabad-AF0601',
+                        'labels': [
+                            {
+                                'label': 'Jalalabad-AF0601',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0601'
+                    },
+                    {
+                        'labelEn': 'Jalrez-AF0402',
+                        'labels': [
+                            {
+                                'label': 'Jalrez-AF0402',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0402'
+                    },
+                    {
+                        'labelEn': 'Janikhel-AF1209',
+                        'labels': [
+                            {
+                                'label': 'Janikhel-AF1209',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1209'
+                    },
+                    {
+                        'labelEn': 'Janikhel-AF2512',
+                        'labels': [
+                            {
+                                'label': 'Janikhel-AF2512',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2512'
+                    },
+                    {
+                        'labelEn': 'Jawand-AF2905',
+                        'labels': [
+                            {
+                                'label': 'Jawand-AF2905',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2905'
+                    },
+                    {
+                        'labelEn': 'Jennings - AG0310-AG0310',
+                        'labels': [
+                            {
+                                'label': 'Jennings - AG0310-AG0310',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0310'
+                    },
+                    {
+                        'labelEn': 'John Hughes - AG0311-AG0311',
+                        'labels': [
+                            {
+                                'label': 'John Hughes - AG0311-AG0311',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0311'
+                    },
+                    {
+                        'labelEn': 'Johnsons Point - AG0312-AG0312',
+                        'labels': [
+                            {
+                                'label': 'Johnsons Point - AG0312-AG0312',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0312'
+                    },
+                    {
+                        'labelEn': 'Jorm-AF1521',
+                        'labels': [
+                            {
+                                'label': 'Jorm-AF1521',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1521'
+                    },
+                    {
+                        'labelEn': 'Kabul-AF0101',
+                        'labels': [
+                            {
+                                'label': 'Kabul-AF0101',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0101'
+                    },
+                    {
+                        'labelEn': 'Kahmard-AF1006',
+                        'labels': [
+                            {
+                                'label': 'Kahmard-AF1006',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1006'
+                    },
+                    {
+                        'labelEn': 'Kajaki-AF3210',
+                        'labels': [
+                            {
+                                'label': 'Kajaki-AF3210',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3210'
+                    },
+                    {
+                        'labelEn': 'Kajran-AF2208',
+                        'labels': [
+                            {
+                                'label': 'Kajran-AF2208',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2208'
+                    },
+                    {
+                        'labelEn': 'Kakar-AF2407',
+                        'labels': [
+                            {
+                                'label': 'Kakar-AF2407',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2407'
+                    },
+                    {
+                        'labelEn': 'Kakhovskyi-UA6506',
+                        'labels': [
+                            {
+                                'label': 'Kakhovskyi-UA6506',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6506'
+                    },
+                    {
+                        'labelEn': 'Kalafgan-AF1608',
+                        'labels': [
+                            {
+                                'label': 'Kalafgan-AF1608',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1608'
+                    },
+                    {
+                        'labelEn': 'Kalakan-AF0109',
+                        'labels': [
+                            {
+                                'label': 'Kalakan-AF0109',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0109'
+                    },
+                    {
+                        'labelEn': 'Kaldar-AF1810',
+                        'labels': [
+                            {
+                                'label': 'Kaldar-AF1810',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1810'
+                    },
+                    {
+                        'labelEn': 'Kalmiuskyi-UA1410',
+                        'labels': [
+                            {
+                                'label': 'Kalmiuskyi-UA1410',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1410'
+                    },
+                    {
+                        'labelEn': 'Kaluskyi-UA2606',
+                        'labels': [
+                            {
+                                'label': 'Kaluskyi-UA2606',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2606'
+                    },
+                    {
+                        'labelEn': 'Kama-AF0607',
+                        'labels': [
+                            {
+                                'label': 'Kama-AF0607',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0607'
+                    },
+                    {
+                        'labelEn': 'Kamdesh-AF1407',
+                        'labels': [
+                            {
+                                'label': 'Kamdesh-AF1407',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1407'
+                    },
+                    {
+                        'labelEn': 'Kamianets-Podilskyi-UA6802',
+                        'labels': [
+                            {
+                                'label': 'Kamianets-Podilskyi-UA6802',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6802'
+                    },
+                    {
+                        'labelEn': 'Kamianskyi-UA1204',
+                        'labels': [
+                            {
+                                'label': 'Kamianskyi-UA1204',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1204'
+                    },
+                    {
+                        'labelEn': 'Kamin-Kashyrskyi-UA0704',
+                        'labels': [
+                            {
+                                'label': 'Kamin-Kashyrskyi-UA0704',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0704'
+                    },
+                    {
+                        'labelEn': 'Kandahar / Dand-AF3301',
+                        'labels': [
+                            {
+                                'label': 'Kandahar / Dand-AF3301',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3301'
+                    },
+                    {
+                        'labelEn': 'Kang-AF3402',
+                        'labels': [
+                            {
+                                'label': 'Kang-AF3402',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3402'
+                    },
+                    {
+                        'labelEn': 'Karukh-AF3007',
+                        'labels': [
+                            {
+                                'label': 'Karukh-AF3007',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3007'
+                    },
+                    {
+                        'labelEn': 'Kerchynskyi-UA0110',
+                        'labels': [
+                            {
+                                'label': 'Kerchynskyi-UA0110',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0110'
+                    },
+                    {
+                        'labelEn': 'Keshem-AF1518',
+                        'labels': [
+                            {
+                                'label': 'Keshem-AF1518',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1518'
+                    },
+                    {
+                        'labelEn': 'Keshendeh-AF1815',
+                        'labels': [
+                            {
+                                'label': 'Keshendeh-AF1815',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1815'
+                    },
+                    {
+                        'labelEn': 'Khadir-AF2203',
+                        'labels': [
+                            {
+                                'label': 'Khadir-AF2203',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2203'
+                    },
+                    {
+                        'labelEn': 'Khak-e-Jabbar-AF0112',
+                        'labels': [
+                            {
+                                'label': 'Khak-e-Jabbar-AF0112',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0112'
+                    },
+                    {
+                        'labelEn': 'Khak-e-Safed-AF3104',
+                        'labels': [
+                            {
+                                'label': 'Khak-e-Safed-AF3104',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3104'
+                    },
+                    {
+                        'labelEn': 'Khakrez-AF3307',
+                        'labels': [
+                            {
+                                'label': 'Khakrez-AF3307',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3307'
+                    },
+                    {
+                        'labelEn': 'Khamyab-AF2710',
+                        'labels': [
+                            {
+                                'label': 'Khamyab-AF2710',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2710'
+                    },
+                    {
+                        'labelEn': 'Khan-e-Char Bagh-AF2813',
+                        'labels': [
+                            {
+                                'label': 'Khan-e-Char Bagh-AF2813',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2813'
+                    },
+                    {
+                        'labelEn': 'Khanabad-AF1706',
+                        'labels': [
+                            {
+                                'label': 'Khanabad-AF1706',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1706'
+                    },
+                    {
+                        'labelEn': 'Khanaqa-AF2706',
+                        'labels': [
+                            {
+                                'label': 'Khanaqa-AF2706',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2706'
+                    },
+                    {
+                        'labelEn': 'Kharkivskyi-UA6312',
+                        'labels': [
+                            {
+                                'label': 'Kharkivskyi-UA6312',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6312'
+                    },
+                    {
+                        'labelEn': 'Kharwar-AF0506',
+                        'labels': [
+                            {
+                                'label': 'Kharwar-AF0506',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0506'
+                    },
+                    {
+                        'labelEn': 'Khash-AF1511',
+                        'labels': [
+                            {
+                                'label': 'Khash-AF1511',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1511'
+                    },
+                    {
+                        'labelEn': 'Khashrod / Dularam-AF3405',
+                        'labels': [
+                            {
+                                'label': 'Khashrod / Dularam-AF3405',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3405'
+                    },
+                    {
+                        'labelEn': 'Khaskunar-AF1309',
+                        'labels': [
+                            {
+                                'label': 'Khaskunar-AF1309',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1309'
+                    },
+                    {
+                        'labelEn': 'Khasuruzgan-AF2305',
+                        'labels': [
+                            {
+                                'label': 'Khasuruzgan-AF2305',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2305'
+                    },
+                    {
+                        'labelEn': 'Khenj (Hes-e-Awal)-AF0805',
+                        'labels': [
+                            {
+                                'label': 'Khenj (Hes-e-Awal)-AF0805',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0805'
+                    },
+                    {
+                        'labelEn': 'Khenjan-AF0907',
+                        'labels': [
+                            {
+                                'label': 'Khenjan-AF0907',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0907'
+                    },
+                    {
+                        'labelEn': 'Khersonskyi-UA6510',
+                        'labels': [
+                            {
+                                'label': 'Khersonskyi-UA6510',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6510'
+                    },
+                    {
+                        'labelEn': 'Khmelnytskyi-UA6804',
+                        'labels': [
+                            {
+                                'label': 'Khmelnytskyi-UA6804',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6804'
+                    },
+                    {
+                        'labelEn': 'Khmilnytskyi-UA0512',
+                        'labels': [
+                            {
+                                'label': 'Khmilnytskyi-UA0512',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0512'
+                    },
+                    {
+                        'labelEn': 'Khogyani-AF0604',
+                        'labels': [
+                            {
+                                'label': 'Khogyani-AF0604',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0604'
+                    },
+                    {
+                        'labelEn': 'Khoshi-AF0502',
+                        'labels': [
+                            {
+                                'label': 'Khoshi-AF0502',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0502'
+                    },
+                    {
+                        'labelEn': 'Khost (Matun)-AF2601',
+                        'labels': [
+                            {
+                                'label': 'Khost (Matun)-AF2601',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2601'
+                    },
+                    {
+                        'labelEn': 'Khost Wa Fereng-AF0913',
+                        'labels': [
+                            {
+                                'label': 'Khost Wa Fereng-AF0913',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0913'
+                    },
+                    {
+                        'labelEn': 'Khulm-AF1809',
+                        'labels': [
+                            {
+                                'label': 'Khulm-AF1809',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1809'
+                    },
+                    {
+                        'labelEn': 'Khuram Wa Sarbagh-AF1906',
+                        'labels': [
+                            {
+                                'label': 'Khuram Wa Sarbagh-AF1906',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1906'
+                    },
+                    {
+                        'labelEn': 'Khustskyi-UA2112',
+                        'labels': [
+                            {
+                                'label': 'Khustskyi-UA2112',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2112'
+                    },
+                    {
+                        'labelEn': 'Khwahan-AF1517',
+                        'labels': [
+                            {
+                                'label': 'Khwahan-AF1517',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1517'
+                    },
+                    {
+                        'labelEn': 'Khwajabahawuddin-AF1612',
+                        'labels': [
+                            {
+                                'label': 'Khwajabahawuddin-AF1612',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1612'
+                    },
+                    {
+                        'labelEn': 'Khwajadukoh-AF2703',
+                        'labels': [
+                            {
+                                'label': 'Khwajadukoh-AF2703',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2703'
+                    },
+                    {
+                        'labelEn': 'Khwajaghar-AF1614',
+                        'labels': [
+                            {
+                                'label': 'Khwajaghar-AF1614',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1614'
+                    },
+                    {
+                        'labelEn': 'Khwajahejran-AF0909',
+                        'labels': [
+                            {
+                                'label': 'Khwajahejran-AF0909',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0909'
+                    },
+                    {
+                        'labelEn': 'Khwajasabzposh-AF2802',
+                        'labels': [
+                            {
+                                'label': 'Khwajasabzposh-AF2802',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2802'
+                    },
+                    {
+                        'labelEn': 'Khwajaumari-AF1102',
+                        'labels': [
+                            {
+                                'label': 'Khwajaumari-AF1102',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1102'
+                    },
+                    {
+                        'labelEn': 'Kiti-AF2204',
+                        'labels': [
+                            {
+                                'label': 'Kiti-AF2204',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2204'
+                    },
+                    {
+                        'labelEn': 'Kofab-AF1516',
+                        'labels': [
+                            {
+                                'label': 'Kofab-AF1516',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1516'
+                    },
+                    {
+                        'labelEn': 'Koh-e-Safi-AF0308',
+                        'labels': [
+                            {
+                                'label': 'Koh-e-Safi-AF0308',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0308'
+                    },
+                    {
+                        'labelEn': 'Kohband-AF0203',
+                        'labels': [
+                            {
+                                'label': 'Kohband-AF0203',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0203'
+                    },
+                    {
+                        'labelEn': 'Kohestan-AF1505',
+                        'labels': [
+                            {
+                                'label': 'Kohestan-AF1505',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1505'
+                    },
+                    {
+                        'labelEn': 'Kohestan-AF2807',
+                        'labels': [
+                            {
+                                'label': 'Kohestan-AF2807',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2807'
+                    },
+                    {
+                        'labelEn': 'Kohestanat-AF2003',
+                        'labels': [
+                            {
+                                'label': 'Kohestanat-AF2003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2003'
+                    },
+                    {
+                        'labelEn': 'Kohsan-AF3014',
+                        'labels': [
+                            {
+                                'label': 'Kohsan-AF3014',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3014'
+                    },
+                    {
+                        'labelEn': 'Kolomyiskyi-UA2608',
+                        'labels': [
+                            {
+                                'label': 'Kolomyiskyi-UA2608',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2608'
+                    },
+                    {
+                        'labelEn': 'Konotopskyi-UA5902',
+                        'labels': [
+                            {
+                                'label': 'Konotopskyi-UA5902',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5902'
+                    },
+                    {
+                        'labelEn': 'Koran Wa Monjan-AF1526',
+                        'labels': [
+                            {
+                                'label': 'Koran Wa Monjan-AF1526',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1526'
+                    },
+                    {
+                        'labelEn': 'Koriukivskyi-UA7402',
+                        'labels': [
+                            {
+                                'label': 'Koriukivskyi-UA7402',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7402'
+                    },
+                    {
+                        'labelEn': 'Korostenskyi-UA1806',
+                        'labels': [
+                            {
+                                'label': 'Korostenskyi-UA1806',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1806'
+                    },
+                    {
+                        'labelEn': 'Kosivskyi-UA2610',
+                        'labels': [
+                            {
+                                'label': 'Kosivskyi-UA2610',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2610'
+                    },
+                    {
+                        'labelEn': 'Kot-AF0614',
+                        'labels': [
+                            {
+                                'label': 'Kot-AF0614',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0614'
+                    },
+                    {
+                        'labelEn': 'Kovelskyi-UA0706',
+                        'labels': [
+                            {
+                                'label': 'Kovelskyi-UA0706',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0706'
+                    },
+                    {
+                        'labelEn': 'Kramatorskyi-UA1412',
+                        'labels': [
+                            {
+                                'label': 'Kramatorskyi-UA1412',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1412'
+                    },
+                    {
+                        'labelEn': 'Krasnohradskyi-UA6306',
+                        'labels': [
+                            {
+                                'label': 'Krasnohradskyi-UA6306',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6306'
+                    },
+                    {
+                        'labelEn': 'Kremenchutskyi-UA5302',
+                        'labels': [
+                            {
+                                'label': 'Kremenchutskyi-UA5302',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5302'
+                    },
+                    {
+                        'labelEn': 'Kremenetskyi-UA6102',
+                        'labels': [
+                            {
+                                'label': 'Kremenetskyi-UA6102',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6102'
+                    },
+                    {
+                        'labelEn': 'Kropyvnytskyi-UA3504',
+                        'labels': [
+                            {
+                                'label': 'Kropyvnytskyi-UA3504',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3504'
+                    },
+                    {
+                        'labelEn': 'Kryvorizkyi-UA1206',
+                        'labels': [
+                            {
+                                'label': 'Kryvorizkyi-UA1206',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1206'
+                    },
+                    {
+                        'labelEn': 'Kunduz-AF1701',
+                        'labels': [
+                            {
+                                'label': 'Kunduz-AF1701',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1701'
+                    },
+                    {
+                        'labelEn': 'Kupianskyi-UA6308',
+                        'labels': [
+                            {
+                                'label': 'Kupianskyi-UA6308',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6308'
+                    },
+                    {
+                        'labelEn': 'Kurmanskyi-UA0112',
+                        'labels': [
+                            {
+                                'label': 'Kurmanskyi-UA0112',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0112'
+                    },
+                    {
+                        'labelEn': 'Kushk-AF3003',
+                        'labels': [
+                            {
+                                'label': 'Kushk-AF3003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3003'
+                    },
+                    {
+                        'labelEn': 'Kushk-e-Kohna-AF3013',
+                        'labels': [
+                            {
+                                'label': 'Kushk-e-Kohna-AF3013',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3013'
+                    },
+                    {
+                        'labelEn': 'Kuzkunar-AF0608',
+                        'labels': [
+                            {
+                                'label': 'Kuzkunar-AF0608',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0608'
+                    },
+                    {
+                        'labelEn': 'Kyivska-UA8000',
+                        'labels': [
+                            {
+                                'label': 'Kyivska-UA8000',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA8000'
+                    },
+                    {
+                        'labelEn': 'Lal Wa Sarjangal-AF2108',
+                        'labels': [
+                            {
+                                'label': 'Lal Wa Sarjangal-AF2108',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2108'
+                    },
+                    {
+                        'labelEn': 'Lalpur-AF0620',
+                        'labels': [
+                            {
+                                'label': 'Lalpur-AF0620',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0620'
+                    },
+                    {
+                        'labelEn': 'Lash-e-Juwayn-AF3108',
+                        'labels': [
+                            {
+                                'label': 'Lash-e-Juwayn-AF3108',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3108'
+                    },
+                    {
+                        'labelEn': 'Lashkargah-AF3201',
+                        'labels': [
+                            {
+                                'label': 'Lashkargah-AF3201',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3201'
+                    },
+                    {
+                        'labelEn': 'Lavingtons - AG0605-AG0605',
+                        'labels': [
+                            {
+                                'label': 'Lavingtons - AG0605-AG0605',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0605'
+                    },
+                    {
+                        'labelEn': 'Liberta - AG0407-AG0407',
+                        'labels': [
+                            {
+                                'label': 'Liberta - AG0407-AG0407',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0407'
+                    },
+                    {
+                        'labelEn': 'Lija Ahmad Khel / Laja Mangel-AF1207',
+                        'labels': [
+                            {
+                                'label': 'Lija Ahmad Khel / Laja Mangel-AF1207',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1207'
+                    },
+                    {
+                        'labelEn': 'Lozivskyi-UA6310',
+                        'labels': [
+                            {
+                                'label': 'Lozivskyi-UA6310',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6310'
+                    },
+                    {
+                        'labelEn': 'Lubenskyi-UA5304',
+                        'labels': [
+                            {
+                                'label': 'Lubenskyi-UA5304',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5304'
+                    },
+                    {
+                        'labelEn': 'Luhanskyi-UA4406',
+                        'labels': [
+                            {
+                                'label': 'Luhanskyi-UA4406',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4406'
+                    },
+                    {
+                        'labelEn': 'Lutskyi-UA0708',
+                        'labels': [
+                            {
+                                'label': 'Lutskyi-UA0708',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0708'
+                    },
+                    {
+                        'labelEn': 'Lvivskyi-UA4606',
+                        'labels': [
+                            {
+                                'label': 'Lvivskyi-UA4606',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4606'
+                    },
+                    {
+                        'labelEn': 'Lyons - AG0606-AG0606',
+                        'labels': [
+                            {
+                                'label': 'Lyons - AG0606-AG0606',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0606'
+                    },
+                    {
+                        'labelEn': 'Mahmud-e-Raqi-AF0201',
+                        'labels': [
+                            {
+                                'label': 'Mahmud-e-Raqi-AF0201',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0201'
+                    },
+                    {
+                        'labelEn': 'Malestan-AF1117',
+                        'labels': [
+                            {
+                                'label': 'Malestan-AF1117',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1117'
+                    },
+                    {
+                        'labelEn': 'Mandol-AF1402',
+                        'labels': [
+                            {
+                                'label': 'Mandol-AF1402',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1402'
+                    },
+                    {
+                        'labelEn': 'Mandozayi-AF2605',
+                        'labels': [
+                            {
+                                'label': 'Mandozayi-AF2605',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2605'
+                    },
+                    {
+                        'labelEn': 'Marawara-AF1305',
+                        'labels': [
+                            {
+                                'label': 'Marawara-AF1305',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1305'
+                    },
+                    {
+                        'labelEn': 'Marble Hill - AG0108-AG0108',
+                        'labels': [
+                            {
+                                'label': 'Marble Hill - AG0108-AG0108',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0108'
+                    },
+                    {
+                        'labelEn': 'Mardyan-AF2708',
+                        'labels': [
+                            {
+                                'label': 'Mardyan-AF2708',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2708'
+                    },
+                    {
+                        'labelEn': 'Mariupolskyi-UA1414',
+                        'labels': [
+                            {
+                                'label': 'Mariupolskyi-UA1414',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1414'
+                    },
+                    {
+                        'labelEn': 'Markaz-e-Behsud-AF0408',
+                        'labels': [
+                            {
+                                'label': 'Markaz-e-Behsud-AF0408',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0408'
+                    },
+                    {
+                        'labelEn': 'Marmul-AF1808',
+                        'labels': [
+                            {
+                                'label': 'Marmul-AF1808',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1808'
+                    },
+                    {
+                        'labelEn': 'Maruf-AF3316',
+                        'labels': [
+                            {
+                                'label': 'Maruf-AF3316',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3316'
+                    },
+                    {
+                        'labelEn': 'Matakhan-AF2502',
+                        'labels': [
+                            {
+                                'label': 'Matakhan-AF2502',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2502'
+                    },
+                    {
+                        'labelEn': 'Mathews - AG0408-AG0408',
+                        'labels': [
+                            {
+                                'label': 'Mathews - AG0408-AG0408',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0408'
+                    },
+                    {
+                        'labelEn': 'Maydanshahr-AF0401',
+                        'labels': [
+                            {
+                                'label': 'Maydanshahr-AF0401',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0401'
+                    },
+                    {
+                        'labelEn': 'Maymana-AF2801',
+                        'labels': [
+                            {
+                                'label': 'Maymana-AF2801',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2801'
+                    },
+                    {
+                        'labelEn': 'Maywand-AF3308',
+                        'labels': [
+                            {
+                                'label': 'Maywand-AF3308',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3308'
+                    },
+                    {
+                        'labelEn': 'Mazar-e-Sharif-AF1801',
+                        'labels': [
+                            {
+                                'label': 'Mazar-e-Sharif-AF1801',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1801'
+                    },
+                    {
+                        'labelEn': 'Mehtarlam / Bad Pash-AF0701',
+                        'labels': [
+                            {
+                                'label': 'Mehtarlam / Bad Pash-AF0701',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0701'
+                    },
+                    {
+                        'labelEn': 'Melitopolskyi-UA2308',
+                        'labels': [
+                            {
+                                'label': 'Melitopolskyi-UA2308',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2308'
+                    },
+                    {
+                        'labelEn': 'Mercers Creek - AG0505-AG0505',
+                        'labels': [
+                            {
+                                'label': 'Mercers Creek - AG0505-AG0505',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0505'
+                    },
+                    {
+                        'labelEn': 'Mingajik-AF2702',
+                        'labels': [
+                            {
+                                'label': 'Mingajik-AF2702',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2702'
+                    },
+                    {
+                        'labelEn': 'Miramor-AF2209',
+                        'labels': [
+                            {
+                                'label': 'Miramor-AF2209',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2209'
+                    },
+                    {
+                        'labelEn': 'Mirbachakot-AF0110',
+                        'labels': [
+                            {
+                                'label': 'Mirbachakot-AF0110',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0110'
+                    },
+                    {
+                        'labelEn': 'Miyanshin-AF3313',
+                        'labels': [
+                            {
+                                'label': 'Miyanshin-AF3313',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3313'
+                    },
+                    {
+                        'labelEn': 'Mizan-AF2403',
+                        'labels': [
+                            {
+                                'label': 'Mizan-AF2403',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2403'
+                    },
+                    {
+                        'labelEn': 'Mohammadagha-AF0503',
+                        'labels': [
+                            {
+                                'label': 'Mohammadagha-AF0503',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0503'
+                    },
+                    {
+                        'labelEn': 'Mohyliv-Podilskyi-UA0508',
+                        'labels': [
+                            {
+                                'label': 'Mohyliv-Podilskyi-UA0508',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0508'
+                    },
+                    {
+                        'labelEn': 'Montpelier - AG0607-AG0607',
+                        'labels': [
+                            {
+                                'label': 'Montpelier - AG0607-AG0607',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0607'
+                    },
+                    {
+                        'labelEn': 'Muhmand Dara-AF0619',
+                        'labels': [
+                            {
+                                'label': 'Muhmand Dara-AF0619',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0619'
+                    },
+                    {
+                        'labelEn': 'Mukachivskyi-UA2104',
+                        'labels': [
+                            {
+                                'label': 'Mukachivskyi-UA2104',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2104'
+                    },
+                    {
+                        'labelEn': 'Muqur-AF1114',
+                        'labels': [
+                            {
+                                'label': 'Muqur-AF1114',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1114'
+                    },
+                    {
+                        'labelEn': 'Muqur-AF2902',
+                        'labels': [
+                            {
+                                'label': 'Muqur-AF2902',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2902'
+                    },
+                    {
+                        'labelEn': 'Musakhel-AF2603',
+                        'labels': [
+                            {
+                                'label': 'Musakhel-AF2603',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2603'
+                    },
+                    {
+                        'labelEn': 'Musaqalah-AF3206',
+                        'labels': [
+                            {
+                                'label': 'Musaqalah-AF3206',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3206'
+                    },
+                    {
+                        'labelEn': 'Musayi-AF0106',
+                        'labels': [
+                            {
+                                'label': 'Musayi-AF0106',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0106'
+                    },
+                    {
+                        'labelEn': 'Mykolaivskyi-UA4806',
+                        'labels': [
+                            {
+                                'label': 'Mykolaivskyi-UA4806',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4806'
+                    },
+                    {
+                        'labelEn': 'Myrhorodskyi-UA5306',
+                        'labels': [
+                            {
+                                'label': 'Myrhorodskyi-UA5306',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5306'
+                    },
+                    {
+                        'labelEn': 'Nad-e-Ali / Marja-AF3203',
+                        'labels': [
+                            {
+                                'label': 'Nad-e-Ali / Marja-AF3203',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3203'
+                    },
+                    {
+                        'labelEn': 'Nadirshahkot-AF2604',
+                        'labels': [
+                            {
+                                'label': 'Nadirshahkot-AF2604',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2604'
+                    },
+                    {
+                        'labelEn': 'Nadvirnianskyi-UA2612',
+                        'labels': [
+                            {
+                                'label': 'Nadvirnianskyi-UA2612',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2612'
+                    },
+                    {
+                        'labelEn': 'Nahr-e-Saraj-AF3202',
+                        'labels': [
+                            {
+                                'label': 'Nahr-e-Saraj-AF3202',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3202'
+                    },
+                    {
+                        'labelEn': 'Nahr-e-Shahi-AF1802',
+                        'labels': [
+                            {
+                                'label': 'Nahr-e-Shahi-AF1802',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1802'
+                    },
+                    {
+                        'labelEn': 'Nahrin-AF0905',
+                        'labels': [
+                            {
+                                'label': 'Nahrin-AF0905',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0905'
+                    },
+                    {
+                        'labelEn': 'Naka-AF2511',
+                        'labels': [
+                            {
+                                'label': 'Naka-AF2511',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2511'
+                    },
+                    {
+                        'labelEn': 'Namakab-AF1606',
+                        'labels': [
+                            {
+                                'label': 'Namakab-AF1606',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1606'
+                    },
+                    {
+                        'labelEn': 'Narang-AF1303',
+                        'labels': [
+                            {
+                                'label': 'Narang-AF1303',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1303'
+                    },
+                    {
+                        'labelEn': 'Nari-AF1315',
+                        'labels': [
+                            {
+                                'label': 'Nari-AF1315',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1315'
+                    },
+                    {
+                        'labelEn': 'Nawa-AF1119',
+                        'labels': [
+                            {
+                                'label': 'Nawa-AF1119',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1119'
+                    },
+                    {
+                        'labelEn': 'Nawa-e-Barakzaiy-AF3204',
+                        'labels': [
+                            {
+                                'label': 'Nawa-e-Barakzaiy-AF3204',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3204'
+                    },
+                    {
+                        'labelEn': 'Nawbahar-AF2411',
+                        'labels': [
+                            {
+                                'label': 'Nawbahar-AF2411',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2411'
+                    },
+                    {
+                        'labelEn': 'Nawur-AF1112',
+                        'labels': [
+                            {
+                                'label': 'Nawur-AF1112',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1112'
+                    },
+                    {
+                        'labelEn': 'Nawzad-AF3207',
+                        'labels': [
+                            {
+                                'label': 'Nawzad-AF3207',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3207'
+                    },
+                    {
+                        'labelEn': 'Nazyan-AF0621',
+                        'labels': [
+                            {
+                                'label': 'Nazyan-AF0621',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0621'
+                    },
+                    {
+                        'labelEn': 'Nejrab-AF0202',
+                        'labels': [
+                            {
+                                'label': 'Nejrab-AF0202',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0202'
+                    },
+                    {
+                        'labelEn': 'Nerkh-AF0403',
+                        'labels': [
+                            {
+                                'label': 'Nerkh-AF0403',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0403'
+                    },
+                    {
+                        'labelEn': 'Nesh-AF3314',
+                        'labels': [
+                            {
+                                'label': 'Nesh-AF3314',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3314'
+                    },
+                    {
+                        'labelEn': 'New Division - AG0313-AG0313',
+                        'labels': [
+                            {
+                                'label': 'New Division - AG0313-AG0313',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0313'
+                    },
+                    {
+                        'labelEn': 'New Winthorpes - AG0109-AG0109',
+                        'labels': [
+                            {
+                                'label': 'New Winthorpes - AG0109-AG0109',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0109'
+                    },
+                    {
+                        'labelEn': 'Newfield - AG0608-AG0608',
+                        'labels': [
+                            {
+                                'label': 'Newfield - AG0608-AG0608',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0608'
+                    },
+                    {
+                        'labelEn': 'Nikopolskyi-UA1208',
+                        'labels': [
+                            {
+                                'label': 'Nikopolskyi-UA1208',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1208'
+                    },
+                    {
+                        'labelEn': 'Nili-AF2201',
+                        'labels': [
+                            {
+                                'label': 'Nili-AF2201',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2201'
+                    },
+                    {
+                        'labelEn': 'Nizhynskyi-UA7404',
+                        'labels': [
+                            {
+                                'label': 'Nizhynskyi-UA7404',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7404'
+                    },
+                    {
+                        'labelEn': 'Novhorod-Siverskyi-UA7406',
+                        'labels': [
+                            {
+                                'label': 'Novhorod-Siverskyi-UA7406',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7406'
+                    },
+                    {
+                        'labelEn': 'Novohrad-Volynskyi-UA1808',
+                        'labels': [
+                            {
+                                'label': 'Novohrad-Volynskyi-UA1808',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1808'
+                    },
+                    {
+                        'labelEn': 'Novomoskovskyi-UA1210',
+                        'labels': [
+                            {
+                                'label': 'Novomoskovskyi-UA1210',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1210'
+                    },
+                    {
+                        'labelEn': 'Novoukrainskyi-UA3506',
+                        'labels': [
+                            {
+                                'label': 'Novoukrainskyi-UA3506',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3506'
+                    },
+                    {
+                        'labelEn': 'Nurgal-AF1314',
+                        'labels': [
+                            {
+                                'label': 'Nurgal-AF1314',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1314'
+                    },
+                    {
+                        'labelEn': 'Nurgeram-AF1404',
+                        'labels': [
+                            {
+                                'label': 'Nurgeram-AF1404',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1404'
+                    },
+                    {
+                        'labelEn': 'Nut Grove - AG0215-AG0215',
+                        'labels': [
+                            {
+                                'label': 'Nut Grove - AG0215-AG0215',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0215'
+                    },
+                    {
+                        'labelEn': 'Obe-AF3012',
+                        'labels': [
+                            {
+                                'label': 'Obe-AF3012',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3012'
+                    },
+                    {
+                        'labelEn': 'Obukhivskyi-UA3212',
+                        'labels': [
+                            {
+                                'label': 'Obukhivskyi-UA3212',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3212'
+                    },
+                    {
+                        'labelEn': 'Odeskyi-UA5110',
+                        'labels': [
+                            {
+                                'label': 'Odeskyi-UA5110',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5110'
+                    },
+                    {
+                        'labelEn': 'Okhtyrskyi-UA5904',
+                        'labels': [
+                            {
+                                'label': 'Okhtyrskyi-UA5904',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5904'
+                    },
+                    {
+                        'labelEn': 'Old Road - AG0314-AG0314',
+                        'labels': [
+                            {
+                                'label': 'Old Road - AG0314-AG0314',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0314'
+                    },
+                    {
+                        'labelEn': 'Oleksandriiskyi-UA3508',
+                        'labels': [
+                            {
+                                'label': 'Oleksandriiskyi-UA3508',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3508'
+                    },
+                    {
+                        'labelEn': 'Omna-AF2507',
+                        'labels': [
+                            {
+                                'label': 'Omna-AF2507',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2507'
+                    },
+                    {
+                        'labelEn': 'Onaba (Anawa)-AF0806',
+                        'labels': [
+                            {
+                                'label': 'Onaba (Anawa)-AF0806',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0806'
+                    },
+                    {
+                        'labelEn': 'Orange Valley Mill - AG0315-AG0315',
+                        'labels': [
+                            {
+                                'label': 'Orange Valley Mill - AG0315-AG0315',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0315'
+                    },
+                    {
+                        'labelEn': 'Osbourn - AG0110-AG0110',
+                        'labels': [
+                            {
+                                'label': 'Osbourn - AG0110-AG0110',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0110'
+                    },
+                    {
+                        'labelEn': 'Pachieragam-AF0612',
+                        'labels': [
+                            {
+                                'label': 'Pachieragam-AF0612',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0612'
+                    },
+                    {
+                        'labelEn': 'Paghman-AF0104',
+                        'labels': [
+                            {
+                                'label': 'Paghman-AF0104',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0104'
+                    },
+                    {
+                        'labelEn': 'Panjab-AF1004',
+                        'labels': [
+                            {
+                                'label': 'Panjab-AF1004',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1004'
+                    },
+                    {
+                        'labelEn': 'Panjwayi-AF3304',
+                        'labels': [
+                            {
+                                'label': 'Panjwayi-AF3304',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3304'
+                    },
+                    {
+                        'labelEn': 'Paradise View - AG0111-AG0111',
+                        'labels': [
+                            {
+                                'label': 'Paradise View - AG0111-AG0111',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0111'
+                    },
+                    {
+                        'labelEn': 'Parham - AG0506-AG0506',
+                        'labels': [
+                            {
+                                'label': 'Parham - AG0506-AG0506',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0506'
+                    },
+                    {
+                        'labelEn': 'Parrys - AG0507-AG0507',
+                        'labels': [
+                            {
+                                'label': 'Parrys - AG0507-AG0507',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0507'
+                    },
+                    {
+                        'labelEn': 'Paryan-AF0807',
+                        'labels': [
+                            {
+                                'label': 'Paryan-AF0807',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0807'
+                    },
+                    {
+                        'labelEn': 'Pasaband-AF2107',
+                        'labels': [
+                            {
+                                'label': 'Pasaband-AF2107',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2107'
+                    },
+                    {
+                        'labelEn': 'Pashtunkot-AF2803',
+                        'labels': [
+                            {
+                                'label': 'Pashtunkot-AF2803',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2803'
+                    },
+                    {
+                        'labelEn': 'Pashtunzarghun-AF3006',
+                        'labels': [
+                            {
+                                'label': 'Pashtunzarghun-AF3006',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3006'
+                    },
+                    {
+                        'labelEn': 'Pattersons - AG0409-AG0409',
+                        'labels': [
+                            {
+                                'label': 'Pattersons - AG0409-AG0409',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0409'
+                    },
+                    {
+                        'labelEn': 'Pavlohradskyi-UA1212',
+                        'labels': [
+                            {
+                                'label': 'Pavlohradskyi-UA1212',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1212'
+                    },
+                    {
+                        'labelEn': 'Paynters - AG0112-AG0112',
+                        'labels': [
+                            {
+                                'label': 'Paynters - AG0112-AG0112',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0112'
+                    },
+                    {
+                        'labelEn': 'Perekopskyi-UA0114',
+                        'labels': [
+                            {
+                                'label': 'Perekopskyi-UA0114',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0114'
+                    },
+                    {
+                        'labelEn': 'Pervomaiskyi-UA4808',
+                        'labels': [
+                            {
+                                'label': 'Pervomaiskyi-UA4808',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4808'
+                    },
+                    {
+                        'labelEn': 'Piggotts - AG0113-AG0113',
+                        'labels': [
+                            {
+                                'label': 'Piggotts - AG0113-AG0113',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0113'
+                    },
+                    {
+                        'labelEn': 'Podilskyi-UA5112',
+                        'labels': [
+                            {
+                                'label': 'Podilskyi-UA5112',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5112'
+                    },
+                    {
+                        'labelEn': 'Pokrovskyi-UA1416',
+                        'labels': [
+                            {
+                                'label': 'Pokrovskyi-UA1416',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1416'
+                    },
+                    {
+                        'labelEn': 'Polohivskyi-UA2310',
+                        'labels': [
+                            {
+                                'label': 'Polohivskyi-UA2310',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2310'
+                    },
+                    {
+                        'labelEn': 'Poltavskyi-UA5308',
+                        'labels': [
+                            {
+                                'label': 'Poltavskyi-UA5308',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5308'
+                    },
+                    {
+                        'labelEn': 'Poruns-AF1401',
+                        'labels': [
+                            {
+                                'label': 'Poruns-AF1401',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1401'
+                    },
+                    {
+                        'labelEn': 'Prylutskyi-UA7408',
+                        'labels': [
+                            {
+                                'label': 'Prylutskyi-UA7408',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7408'
+                    },
+                    {
+                        'labelEn': 'Pul-e-Alam-AF0501',
+                        'labels': [
+                            {
+                                'label': 'Pul-e-Alam-AF0501',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0501'
+                    },
+                    {
+                        'labelEn': 'Pul-e-Hesar-AF0911',
+                        'labels': [
+                            {
+                                'label': 'Pul-e-Hesar-AF0911',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0911'
+                    },
+                    {
+                        'labelEn': 'Pul-e-Khumri-AF0901',
+                        'labels': [
+                            {
+                                'label': 'Pul-e-Khumri-AF0901',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0901'
+                    },
+                    {
+                        'labelEn': 'Purchaman-AF3110',
+                        'labels': [
+                            {
+                                'label': 'Purchaman-AF3110',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3110'
+                    },
+                    {
+                        'labelEn': 'Pushtrod-AF3105',
+                        'labels': [
+                            {
+                                'label': 'Pushtrod-AF3105',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3105'
+                    },
+                    {
+                        'labelEn': 'Qadis-AF2904',
+                        'labels': [
+                            {
+                                'label': 'Qadis-AF2904',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2904'
+                    },
+                    {
+                        'labelEn': 'Qala-e-Kah-AF3106',
+                        'labels': [
+                            {
+                                'label': 'Qala-e-Kah-AF3106',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3106'
+                    },
+                    {
+                        'labelEn': 'Qala-e-Naw-AF2901',
+                        'labels': [
+                            {
+                                'label': 'Qala-e-Naw-AF2901',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2901'
+                    },
+                    {
+                        'labelEn': 'Qala-e-Zal-AF1703',
+                        'labels': [
+                            {
+                                'label': 'Qala-e-Zal-AF1703',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1703'
+                    },
+                    {
+                        'labelEn': 'Qalandar-AF2609',
+                        'labels': [
+                            {
+                                'label': 'Qalandar-AF2609',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2609'
+                    },
+                    {
+                        'labelEn': 'Qalat-AF2401',
+                        'labels': [
+                            {
+                                'label': 'Qalat-AF2401',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2401'
+                    },
+                    {
+                        'labelEn': 'Qarabagh-AF0108',
+                        'labels': [
+                            {
+                                'label': 'Qarabagh-AF0108',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0108'
+                    },
+                    {
+                        'labelEn': 'Qarabagh-AF1110',
+                        'labels': [
+                            {
+                                'label': 'Qarabagh-AF1110',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1110'
+                    },
+                    {
+                        'labelEn': 'Qaramqol-AF2812',
+                        'labels': [
+                            {
+                                'label': 'Qaramqol-AF2812',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2812'
+                    },
+                    {
+                        'labelEn': 'Qarghayi-AF0703',
+                        'labels': [
+                            {
+                                'label': 'Qarghayi-AF0703',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0703'
+                    },
+                    {
+                        'labelEn': 'Qarqin-AF2709',
+                        'labels': [
+                            {
+                                'label': 'Qarqin-AF2709',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2709'
+                    },
+                    {
+                        'labelEn': 'Qaysar-AF2806',
+                        'labels': [
+                            {
+                                'label': 'Qaysar-AF2806',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2806'
+                    },
+                    {
+                        'labelEn': 'Qorghan-AF2814',
+                        'labels': [
+                            {
+                                'label': 'Qorghan-AF2814',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2814'
+                    },
+                    {
+                        'labelEn': 'Qushtepa-AF2704',
+                        'labels': [
+                            {
+                                'label': 'Qushtepa-AF2704',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2704'
+                    },
+                    {
+                        'labelEn': 'Raghestan-AF1506',
+                        'labels': [
+                            {
+                                'label': 'Raghestan-AF1506',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1506'
+                    },
+                    {
+                        'labelEn': 'Rakhivskyi-UA2106',
+                        'labels': [
+                            {
+                                'label': 'Rakhivskyi-UA2106',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2106'
+                    },
+                    {
+                        'labelEn': 'Rashidan-AF1108',
+                        'labels': [
+                            {
+                                'label': 'Rashidan-AF1108',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1108'
+                    },
+                    {
+                        'labelEn': 'Redonda - AG0801-AG0801',
+                        'labels': [
+                            {
+                                'label': 'Redonda - AG0801-AG0801',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0801'
+                    },
+                    {
+                        'labelEn': 'Reg-AF3212',
+                        'labels': [
+                            {
+                                'label': 'Reg-AF3212',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3212'
+                    },
+                    {
+                        'labelEn': 'Reg-AF3309',
+                        'labels': [
+                            {
+                                'label': 'Reg-AF3309',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3309'
+                    },
+                    {
+                        'labelEn': 'Renfrew - AG0216-AG0216',
+                        'labels': [
+                            {
+                                'label': 'Renfrew - AG0216-AG0216',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0216'
+                    },
+                    {
+                        'labelEn': 'Rivnenskyi-UA5606',
+                        'labels': [
+                            {
+                                'label': 'Rivnenskyi-UA5606',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5606'
+                    },
+                    {
+                        'labelEn': 'Rodat-AF0606',
+                        'labels': [
+                            {
+                                'label': 'Rodat-AF0606',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0606'
+                    },
+                    {
+                        'labelEn': 'Romenskyi-UA5906',
+                        'labels': [
+                            {
+                                'label': 'Romenskyi-UA5906',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5906'
+                    },
+                    {
+                        'labelEn': 'Rostaq-AF1609',
+                        'labels': [
+                            {
+                                'label': 'Rostaq-AF1609',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1609'
+                    },
+                    {
+                        'labelEn': 'Rovenkivskyi-UA4408',
+                        'labels': [
+                            {
+                                'label': 'Rovenkivskyi-UA4408',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4408'
+                    },
+                    {
+                        'labelEn': 'Rozdilnianskyi-UA5114',
+                        'labels': [
+                            {
+                                'label': 'Rozdilnianskyi-UA5114',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5114'
+                    },
+                    {
+                        'labelEn': 'Rukha-AF0803',
+                        'labels': [
+                            {
+                                'label': 'Rukha-AF0803',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0803'
+                    },
+                    {
+                        'labelEn': 'Ruy-e-Duab-AF1907',
+                        'labels': [
+                            {
+                                'label': 'Ruy-e-Duab-AF1907',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1907'
+                    },
+                    {
+                        'labelEn': 'Sabari-AF2602',
+                        'labels': [
+                            {
+                                'label': 'Sabari-AF2602',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2602'
+                    },
+                    {
+                        'labelEn': 'Saghar-AF2110',
+                        'labels': [
+                            {
+                                'label': 'Saghar-AF2110',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2110'
+                    },
+                    {
+                        'labelEn': "Saint John's - AG0217-AG0217",
+                        'labels': [
+                            {
+                                'label': "Saint John's - AG0217-AG0217",
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0217'
+                    },
+                    {
+                        'labelEn': 'Saint Philips - AG0612-AG0612',
+                        'labels': [
+                            {
+                                'label': 'Saint Philips - AG0612-AG0612',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0612'
+                    },
+                    {
+                        'labelEn': 'Salang-AF0306',
+                        'labels': [
+                            {
+                                'label': 'Salang-AF0306',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0306'
+                    },
+                    {
+                        'labelEn': 'Sambirskyi-UA4608',
+                        'labels': [
+                            {
+                                'label': 'Sambirskyi-UA4608',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4608'
+                    },
+                    {
+                        'labelEn': 'Sancharak-AF2007',
+                        'labels': [
+                            {
+                                'label': 'Sancharak-AF2007',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2007'
+                    },
+                    {
+                        'labelEn': 'Sang-e-Takht-AF2207',
+                        'labels': [
+                            {
+                                'label': 'Sang-e-Takht-AF2207',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2207'
+                    },
+                    {
+                        'labelEn': 'Sangin-AF3205',
+                        'labels': [
+                            {
+                                'label': 'Sangin-AF3205',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3205'
+                    },
+                    {
+                        'labelEn': 'Sar-e-Pul-AF2001',
+                        'labels': [
+                            {
+                                'label': 'Sar-e-Pul-AF2001',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2001'
+                    },
+                    {
+                        'labelEn': 'Sarkani-AF1304',
+                        'labels': [
+                            {
+                                'label': 'Sarkani-AF1304',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1304'
+                    },
+                    {
+                        'labelEn': 'Sarnenskyi-UA5608',
+                        'labels': [
+                            {
+                                'label': 'Sarnenskyi-UA5608',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5608'
+                    },
+                    {
+                        'labelEn': 'Sarobi-AF2509',
+                        'labels': [
+                            {
+                                'label': 'Sarobi-AF2509',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2509'
+                    },
+                    {
+                        'labelEn': 'Sarrawzah-AF2504',
+                        'labels': [
+                            {
+                                'label': 'Sarrawzah-AF2504',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2504'
+                    },
+                    {
+                        'labelEn': 'Sawcolts - AG0316-AG0316',
+                        'labels': [
+                            {
+                                'label': 'Sawcolts - AG0316-AG0316',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0316'
+                    },
+                    {
+                        'labelEn': 'Sayad-AF2002',
+                        'labels': [
+                            {
+                                'label': 'Sayad-AF2002',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2002'
+                    },
+                    {
+                        'labelEn': 'Saydabad-AF0407',
+                        'labels': [
+                            {
+                                'label': 'Saydabad-AF0407',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0407'
+                    },
+                    {
+                        'labelEn': 'Saydkhel-AF0305',
+                        'labels': [
+                            {
+                                'label': 'Saydkhel-AF0305',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0305'
+                    },
+                    {
+                        'labelEn': 'Sayedkaram / Mirzaka-AF1202',
+                        'labels': [
+                            {
+                                'label': 'Sayedkaram / Mirzaka-AF1202',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1202'
+                    },
+                    {
+                        'labelEn': 'Sayghan-AF1002',
+                        'labels': [
+                            {
+                                'label': 'Sayghan-AF1002',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1002'
+                    },
+                    {
+                        'labelEn': 'Sea View Farm - AG0114-AG0114',
+                        'labels': [
+                            {
+                                'label': 'Sea View Farm - AG0114-AG0114',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0114'
+                    },
+                    {
+                        'labelEn': 'Seaforths - AG0317-AG0317',
+                        'labels': [
+                            {
+                                'label': 'Seaforths - AG0317-AG0317',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0317'
+                    },
+                    {
+                        'labelEn': 'Seatons - AG0609-AG0609',
+                        'labels': [
+                            {
+                                'label': 'Seatons - AG0609-AG0609',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0609'
+                    },
+                    {
+                        'labelEn': 'Sevastopilska-UA8500',
+                        'labels': [
+                            {
+                                'label': 'Sevastopilska-UA8500',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA8500'
+                    },
+                    {
+                        'labelEn': 'Shahid-e-Hassas-AF2303',
+                        'labels': [
+                            {
+                                'label': 'Shahid-e-Hassas-AF2303',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2303'
+                    },
+                    {
+                        'labelEn': 'Shahjoy-AF2406',
+                        'labels': [
+                            {
+                                'label': 'Shahjoy-AF2406',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2406'
+                    },
+                    {
+                        'labelEn': 'Shahr-e-Buzorg-AF1508',
+                        'labels': [
+                            {
+                                'label': 'Shahr-e-Buzorg-AF1508',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1508'
+                    },
+                    {
+                        'labelEn': 'Shahrak-AF2105',
+                        'labels': [
+                            {
+                                'label': 'Shahrak-AF2105',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2105'
+                    },
+                    {
+                        'labelEn': 'Shahrestan-AF2206',
+                        'labels': [
+                            {
+                                'label': 'Shahrestan-AF2206',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2206'
+                    },
+                    {
+                        'labelEn': 'Shahwalikot-AF3306',
+                        'labels': [
+                            {
+                                'label': 'Shahwalikot-AF3306',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3306'
+                    },
+                    {
+                        'labelEn': 'Shakardara-AF0103',
+                        'labels': [
+                            {
+                                'label': 'Shakardara-AF0103',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0103'
+                    },
+                    {
+                        'labelEn': 'Shaki-AF1525',
+                        'labels': [
+                            {
+                                'label': 'Shaki-AF1525',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1525'
+                    },
+                    {
+                        'labelEn': 'Shamal-AF2610',
+                        'labels': [
+                            {
+                                'label': 'Shamal-AF2610',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2610'
+                    },
+                    {
+                        'labelEn': 'Sharak-e-Hayratan-AF1811',
+                        'labels': [
+                            {
+                                'label': 'Sharak-e-Hayratan-AF1811',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1811'
+                    },
+                    {
+                        'labelEn': 'Sharan-AF2501',
+                        'labels': [
+                            {
+                                'label': 'Sharan-AF2501',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2501'
+                    },
+                    {
+                        'labelEn': 'Shawak-AF1205',
+                        'labels': [
+                            {
+                                'label': 'Shawak-AF1205',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1205'
+                    },
+                    {
+                        'labelEn': 'Shchastynskyi-UA4416',
+                        'labels': [
+                            {
+                                'label': 'Shchastynskyi-UA4416',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4416'
+                    },
+                    {
+                        'labelEn': 'Shekhali-AF0309',
+                        'labels': [
+                            {
+                                'label': 'Shekhali-AF0309',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0309'
+                    },
+                    {
+                        'labelEn': 'Shepetivskyi-UA6806',
+                        'labels': [
+                            {
+                                'label': 'Shepetivskyi-UA6806',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6806'
+                    },
+                    {
+                        'labelEn': 'Sherzad-AF0611',
+                        'labels': [
+                            {
+                                'label': 'Sherzad-AF0611',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0611'
+                    },
+                    {
+                        'labelEn': 'Shibar-AF1005',
+                        'labels': [
+                            {
+                                'label': 'Shibar-AF1005',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1005'
+                    },
+                    {
+                        'labelEn': 'Shiberghan-AF2701',
+                        'labels': [
+                            {
+                                'label': 'Shiberghan-AF2701',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2701'
+                    },
+                    {
+                        'labelEn': 'Shibkoh-AF3107',
+                        'labels': [
+                            {
+                                'label': 'Shibkoh-AF3107',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3107'
+                    },
+                    {
+                        'labelEn': 'Shigal Wa Sheltan-AF1306',
+                        'labels': [
+                            {
+                                'label': 'Shigal Wa Sheltan-AF1306',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1306'
+                    },
+                    {
+                        'labelEn': 'Shighnan-AF1514',
+                        'labels': [
+                            {
+                                'label': 'Shighnan-AF1514',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1514'
+                    },
+                    {
+                        'labelEn': 'Shindand-AF3015',
+                        'labels': [
+                            {
+                                'label': 'Shindand-AF3015',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3015'
+                    },
+                    {
+                        'labelEn': 'Shinkay-AF2405',
+                        'labels': [
+                            {
+                                'label': 'Shinkay-AF2405',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2405'
+                    },
+                    {
+                        'labelEn': 'Shinwar-AF0618',
+                        'labels': [
+                            {
+                                'label': 'Shinwar-AF0618',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0618'
+                    },
+                    {
+                        'labelEn': 'Shinwari-AF0303',
+                        'labels': [
+                            {
+                                'label': 'Shinwari-AF0303',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0303'
+                    },
+                    {
+                        'labelEn': 'Shirintagab-AF2804',
+                        'labels': [
+                            {
+                                'label': 'Shirintagab-AF2804',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2804'
+                    },
+                    {
+                        'labelEn': 'Sholgareh-AF1814',
+                        'labels': [
+                            {
+                                'label': 'Sholgareh-AF1814',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1814'
+                    },
+                    {
+                        'labelEn': 'Shomulzay-AF2410',
+                        'labels': [
+                            {
+                                'label': 'Shomulzay-AF2410',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2410'
+                    },
+                    {
+                        'labelEn': 'Shorabak-AF3310',
+                        'labels': [
+                            {
+                                'label': 'Shorabak-AF3310',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3310'
+                    },
+                    {
+                        'labelEn': 'Shortepa-AF1803',
+                        'labels': [
+                            {
+                                'label': 'Shortepa-AF1803',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1803'
+                    },
+                    {
+                        'labelEn': 'Shostkynskyi-UA5910',
+                        'labels': [
+                            {
+                                'label': 'Shostkynskyi-UA5910',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5910'
+                    },
+                    {
+                        'labelEn': 'Shuhada-AF1513',
+                        'labels': [
+                            {
+                                'label': 'Shuhada-AF1513',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1513'
+                    },
+                    {
+                        'labelEn': 'Shutul-AF0802',
+                        'labels': [
+                            {
+                                'label': 'Shutul-AF0802',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0802'
+                    },
+                    {
+                        'labelEn': 'Sievierodonetskyi-UA4412',
+                        'labels': [
+                            {
+                                'label': 'Sievierodonetskyi-UA4412',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4412'
+                    },
+                    {
+                        'labelEn': 'Sign - AG0610-AG0610',
+                        'labels': [
+                            {
+                                'label': 'Sign - AG0610-AG0610',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0610'
+                    },
+                    {
+                        'labelEn': 'Simferopolskyi-UA0116',
+                        'labels': [
+                            {
+                                'label': 'Simferopolskyi-UA0116',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0116'
+                    },
+                    {
+                        'labelEn': 'Simpson - AG0611-AG0611',
+                        'labels': [
+                            {
+                                'label': 'Simpson - AG0611-AG0611',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0611'
+                    },
+                    {
+                        'labelEn': 'Skadovskyi-UA6508',
+                        'labels': [
+                            {
+                                'label': 'Skadovskyi-UA6508',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6508'
+                    },
+                    {
+                        'labelEn': 'Sozmaqala-AF2004',
+                        'labels': [
+                            {
+                                'label': 'Sozmaqala-AF2004',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2004'
+                    },
+                    {
+                        'labelEn': 'Spera-AF2611',
+                        'labels': [
+                            {
+                                'label': 'Spera-AF2611',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2611'
+                    },
+                    {
+                        'labelEn': 'Spinboldak-AF3311',
+                        'labels': [
+                            {
+                                'label': 'Spinboldak-AF3311',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3311'
+                    },
+                    {
+                        'labelEn': 'Starobilskyi-UA4414',
+                        'labels': [
+                            {
+                                'label': 'Starobilskyi-UA4414',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4414'
+                    },
+                    {
+                        'labelEn': 'Stryiskyi-UA4610',
+                        'labels': [
+                            {
+                                'label': 'Stryiskyi-UA4610',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4610'
+                    },
+                    {
+                        'labelEn': 'Sumskyi-UA5908',
+                        'labels': [
+                            {
+                                'label': 'Sumskyi-UA5908',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5908'
+                    },
+                    {
+                        'labelEn': 'Surkh-e-Parsa-AF0310',
+                        'labels': [
+                            {
+                                'label': 'Surkh-e-Parsa-AF0310',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0310'
+                    },
+                    {
+                        'labelEn': 'Surkhrod-AF0603',
+                        'labels': [
+                            {
+                                'label': 'Surkhrod-AF0603',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0603'
+                    },
+                    {
+                        'labelEn': 'Surobi-AF0113',
+                        'labels': [
+                            {
+                                'label': 'Surobi-AF0113',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0113'
+                    },
+                    {
+                        'labelEn': 'Svativskyi-UA4410',
+                        'labels': [
+                            {
+                                'label': 'Svativskyi-UA4410',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4410'
+                    },
+                    {
+                        'labelEn': 'Swetes - AG0410-AG0410',
+                        'labels': [
+                            {
+                                'label': 'Swetes - AG0410-AG0410',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0410'
+                    },
+                    {
+                        'labelEn': 'Synelnykivskyi-UA1214',
+                        'labels': [
+                            {
+                                'label': 'Synelnykivskyi-UA1214',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1214'
+                    },
+                    {
+                        'labelEn': 'Tagab-AF0205',
+                        'labels': [
+                            {
+                                'label': 'Tagab-AF0205',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0205'
+                    },
+                    {
+                        'labelEn': 'Tagab-AF1519',
+                        'labels': [
+                            {
+                                'label': 'Tagab-AF1519',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1519'
+                    },
+                    {
+                        'labelEn': 'Tala Wa barfak-AF0906',
+                        'labels': [
+                            {
+                                'label': 'Tala Wa barfak-AF0906',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF0906'
+                    },
+                    {
+                        'labelEn': 'Taloqan-AF1601',
+                        'labels': [
+                            {
+                                'label': 'Taloqan-AF1601',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1601'
+                    },
+                    {
+                        'labelEn': 'Tani-AF2606',
+                        'labels': [
+                            {
+                                'label': 'Tani-AF2606',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2606'
+                    },
+                    {
+                        'labelEn': 'Tarnak Wa Jaldak-AF2404',
+                        'labels': [
+                            {
+                                'label': 'Tarnak Wa Jaldak-AF2404',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2404'
+                    },
+                    {
+                        'labelEn': 'Taywarah-AF2106',
+                        'labels': [
+                            {
+                                'label': 'Taywarah-AF2106',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2106'
+                    },
+                    {
+                        'labelEn': 'Terezayi-AF2608',
+                        'labels': [
+                            {
+                                'label': 'Terezayi-AF2608',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2608'
+                    },
+                    {
+                        'labelEn': 'Ternopilskyi-UA6104',
+                        'labels': [
+                            {
+                                'label': 'Ternopilskyi-UA6104',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA6104'
+                    },
+                    {
+                        'labelEn': 'Teshkan-AF1509',
+                        'labels': [
+                            {
+                                'label': 'Teshkan-AF1509',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1509'
+                    },
+                    {
+                        'labelEn': 'Tiachivskyi-UA2108',
+                        'labels': [
+                            {
+                                'label': 'Tiachivskyi-UA2108',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2108'
+                    },
+                    {
+                        'labelEn': 'Tirinkot-AF2301',
+                        'labels': [
+                            {
+                                'label': 'Tirinkot-AF2301',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2301'
+                    },
+                    {
+                        'labelEn': 'Tolak-AF2109',
+                        'labels': [
+                            {
+                                'label': 'Tolak-AF2109',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2109'
+                    },
+                    {
+                        'labelEn': 'Tomlinson - AG0218-AG0218',
+                        'labels': [
+                            {
+                                'label': 'Tomlinson - AG0218-AG0218',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0218'
+                    },
+                    {
+                        'labelEn': 'Tulchynskyi-UA0510',
+                        'labels': [
+                            {
+                                'label': 'Tulchynskyi-UA0510',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0510'
+                    },
+                    {
+                        'labelEn': 'Turwo-AF2519',
+                        'labels': [
+                            {
+                                'label': 'Turwo-AF2519',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2519'
+                    },
+                    {
+                        'labelEn': 'Umanskyi-UA7106',
+                        'labels': [
+                            {
+                                'label': 'Umanskyi-UA7106',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7106'
+                    },
+                    {
+                        'labelEn': "Upper Gamble's - AG0219-AG0219",
+                        'labels': [
+                            {
+                                'label': "Upper Gamble's - AG0219-AG0219",
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0219'
+                    },
+                    {
+                        'labelEn': 'Urgun-AF2510',
+                        'labels': [
+                            {
+                                'label': 'Urgun-AF2510',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2510'
+                    },
+                    {
+                        'labelEn': 'Urlings - AG0318-AG0318',
+                        'labels': [
+                            {
+                                'label': 'Urlings - AG0318-AG0318',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0318'
+                    },
+                    {
+                        'labelEn': 'Uzhhorodskyi-UA2110',
+                        'labels': [
+                            {
+                                'label': 'Uzhhorodskyi-UA2110',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2110'
+                    },
+                    {
+                        'labelEn': 'Varaskyi-UA5602',
+                        'labels': [
+                            {
+                                'label': 'Varaskyi-UA5602',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA5602'
+                    },
+                    {
+                        'labelEn': 'Vasylivskyi-UA2304',
+                        'labels': [
+                            {
+                                'label': 'Vasylivskyi-UA2304',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2304'
+                    },
+                    {
+                        'labelEn': 'Verkhovynskyi-UA2602',
+                        'labels': [
+                            {
+                                'label': 'Verkhovynskyi-UA2602',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2602'
+                    },
+                    {
+                        'labelEn': 'Vernons - AG0508-AG0508',
+                        'labels': [
+                            {
+                                'label': 'Vernons - AG0508-AG0508',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0508'
+                    },
+                    {
+                        'labelEn': 'Villa - AG0220-AG0220',
+                        'labels': [
+                            {
+                                'label': 'Villa - AG0220-AG0220',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0220'
+                    },
+                    {
+                        'labelEn': 'Vinnytskyi-UA0502',
+                        'labels': [
+                            {
+                                'label': 'Vinnytskyi-UA0502',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0502'
+                    },
+                    {
+                        'labelEn': 'Volnovaskyi-UA1404',
+                        'labels': [
+                            {
+                                'label': 'Volnovaskyi-UA1404',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1404'
+                    },
+                    {
+                        'labelEn': 'Volodymyr-Volynskyi-UA0702',
+                        'labels': [
+                            {
+                                'label': 'Volodymyr-Volynskyi-UA0702',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0702'
+                    },
+                    {
+                        'labelEn': 'Voznesenskyi-UA4804',
+                        'labels': [
+                            {
+                                'label': 'Voznesenskyi-UA4804',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4804'
+                    },
+                    {
+                        'labelEn': 'Vyshhorodskyi-UA3210',
+                        'labels': [
+                            {
+                                'label': 'Vyshhorodskyi-UA3210',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA3210'
+                    },
+                    {
+                        'labelEn': 'Vyzhnytskyi-UA7302',
+                        'labels': [
+                            {
+                                'label': 'Vyzhnytskyi-UA7302',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7302'
+                    },
+                    {
+                        'labelEn': 'Waghaz-AF1104',
+                        'labels': [
+                            {
+                                'label': 'Waghaz-AF1104',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1104'
+                    },
+                    {
+                        'labelEn': 'Wakhan-AF1528',
+                        'labels': [
+                            {
+                                'label': 'Wakhan-AF1528',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1528'
+                    },
+                    {
+                        'labelEn': 'Walimuhammad-e-Shahid-AF1103',
+                        'labels': [
+                            {
+                                'label': 'Walimuhammad-e-Shahid-AF1103',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1103'
+                    },
+                    {
+                        'labelEn': 'Wama-AF1405',
+                        'labels': [
+                            {
+                                'label': 'Wama-AF1405',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1405'
+                    },
+                    {
+                        'labelEn': 'Waras-AF1007',
+                        'labels': [
+                            {
+                                'label': 'Waras-AF1007',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1007'
+                    },
+                    {
+                        'labelEn': 'Warduj-AF1522',
+                        'labels': [
+                            {
+                                'label': 'Warduj-AF1522',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1522'
+                    },
+                    {
+                        'labelEn': 'Warsaj-AF1616',
+                        'labels': [
+                            {
+                                'label': 'Warsaj-AF1616',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1616'
+                    },
+                    {
+                        'labelEn': 'Washer-AF3208',
+                        'labels': [
+                            {
+                                'label': 'Washer-AF3208',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3208'
+                    },
+                    {
+                        'labelEn': 'Watapur-AF1302',
+                        'labels': [
+                            {
+                                'label': 'Watapur-AF1302',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1302'
+                    },
+                    {
+                        'labelEn': 'Waygal-AF1406',
+                        'labels': [
+                            {
+                                'label': 'Waygal-AF1406',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1406'
+                    },
+                    {
+                        'labelEn': 'Wazakhah-AF2513',
+                        'labels': [
+                            {
+                                'label': 'Wazakhah-AF2513',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2513'
+                    },
+                    {
+                        'labelEn': 'Weatherhills - AG0221-AG0221',
+                        'labels': [
+                            {
+                                'label': 'Weatherhills - AG0221-AG0221',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0221'
+                    },
+                    {
+                        'labelEn': 'Willikies - AG0613-AG0613',
+                        'labels': [
+                            {
+                                'label': 'Willikies - AG0613-AG0613',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0613'
+                    },
+                    {
+                        'labelEn': 'Willoughby - AG0614-AG0614',
+                        'labels': [
+                            {
+                                'label': 'Willoughby - AG0614-AG0614',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0614'
+                    },
+                    {
+                        'labelEn': 'Wormamay-AF2514',
+                        'labels': [
+                            {
+                                'label': 'Wormamay-AF2514',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2514'
+                    },
+                    {
+                        'labelEn': 'Yaftal-e-Sufla-AF1502',
+                        'labels': [
+                            {
+                                'label': 'Yaftal-e-Sufla-AF1502',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1502'
+                    },
+                    {
+                        'labelEn': 'Yahyakhel-AF2506',
+                        'labels': [
+                            {
+                                'label': 'Yahyakhel-AF2506',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2506'
+                    },
+                    {
+                        'labelEn': 'Yakawlang-AF1003',
+                        'labels': [
+                            {
+                                'label': 'Yakawlang-AF1003',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1003'
+                    },
+                    {
+                        'labelEn': 'Yaltynskyi-UA0120',
+                        'labels': [
+                            {
+                                'label': 'Yaltynskyi-UA0120',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0120'
+                    },
+                    {
+                        'labelEn': 'Yamgan-AF1520',
+                        'labels': [
+                            {
+                                'label': 'Yamgan-AF1520',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1520'
+                    },
+                    {
+                        'labelEn': 'Yang-e-Qala-AF1611',
+                        'labels': [
+                            {
+                                'label': 'Yang-e-Qala-AF1611',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1611'
+                    },
+                    {
+                        'labelEn': 'Yavorivskyi-UA4614',
+                        'labels': [
+                            {
+                                'label': 'Yavorivskyi-UA4614',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4614'
+                    },
+                    {
+                        'labelEn': 'Yawan-AF1507',
+                        'labels': [
+                            {
+                                'label': 'Yawan-AF1507',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1507'
+                    },
+                    {
+                        'labelEn': 'Yevpatoriiskyi-UA0108',
+                        'labels': [
+                            {
+                                'label': 'Yevpatoriiskyi-UA0108',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0108'
+                    },
+                    {
+                        'labelEn': 'Yorks - AG0319-AG0319',
+                        'labels': [
+                            {
+                                'label': 'Yorks - AG0319-AG0319',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AG0319'
+                    },
+                    {
+                        'labelEn': 'Yosufkhel-AF2503',
+                        'labels': [
+                            {
+                                'label': 'Yosufkhel-AF2503',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2503'
+                    },
+                    {
+                        'labelEn': 'Zadran-AF1206',
+                        'labels': [
+                            {
+                                'label': 'Zadran-AF1206',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1206'
+                    },
+                    {
+                        'labelEn': 'Zanakhan-AF1107',
+                        'labels': [
+                            {
+                                'label': 'Zanakhan-AF1107',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1107'
+                    },
+                    {
+                        'labelEn': 'Zaporizkyi-UA2306',
+                        'labels': [
+                            {
+                                'label': 'Zaporizkyi-UA2306',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA2306'
+                    },
+                    {
+                        'labelEn': 'Zaranj-AF3401',
+                        'labels': [
+                            {
+                                'label': 'Zaranj-AF3401',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3401'
+                    },
+                    {
+                        'labelEn': 'Zarghunshahr-AF2505',
+                        'labels': [
+                            {
+                                'label': 'Zarghunshahr-AF2505',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2505'
+                    },
+                    {
+                        'labelEn': 'Zari-AF1816',
+                        'labels': [
+                            {
+                                'label': 'Zari-AF1816',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1816'
+                    },
+                    {
+                        'labelEn': 'Zebak-AF1527',
+                        'labels': [
+                            {
+                                'label': 'Zebak-AF1527',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1527'
+                    },
+                    {
+                        'labelEn': 'Zheray-AF3303',
+                        'labels': [
+                            {
+                                'label': 'Zheray-AF3303',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3303'
+                    },
+                    {
+                        'labelEn': 'Zhmerynskyi-UA0506',
+                        'labels': [
+                            {
+                                'label': 'Zhmerynskyi-UA0506',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA0506'
+                    },
+                    {
+                        'labelEn': 'Zhytomyrskyi-UA1804',
+                        'labels': [
+                            {
+                                'label': 'Zhytomyrskyi-UA1804',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA1804'
+                    },
+                    {
+                        'labelEn': 'Zindajan-AF3004',
+                        'labels': [
+                            {
+                                'label': 'Zindajan-AF3004',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF3004'
+                    },
+                    {
+                        'labelEn': 'Ziruk-AF2517',
+                        'labels': [
+                            {
+                                'label': 'Ziruk-AF2517',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF2517'
+                    },
+                    {
+                        'labelEn': 'Zolochivskyi-UA4604',
+                        'labels': [
+                            {
+                                'label': 'Zolochivskyi-UA4604',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA4604'
+                    },
+                    {
+                        'labelEn': 'Zolotoniskyi-UA7104',
+                        'labels': [
+                            {
+                                'label': 'Zolotoniskyi-UA7104',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7104'
+                    },
+                    {
+                        'labelEn': 'Zurmat-AF1204',
+                        'labels': [
+                            {
+                                'label': 'Zurmat-AF1204',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AF1204'
+                    },
+                    {
+                        'labelEn': 'Zvenyhorodskyi-UA7102',
+                        'labels': [
+                            {
+                                'label': 'Zvenyhorodskyi-UA7102',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA7102'
+                    }
                 ],
                 'hint': '',
                 'isFlexField': False,

@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 
 from django.core.management import BaseCommand
 
-from hct_mis_api.apps.core.models import AdminAreaLevel, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Country
 
 logger = logging.getLogger(__name__)
@@ -54,12 +54,8 @@ class Command(BaseCommand):
                 ),
             )
 
-            country = AdminAreaLevel.objects.filter(admin_level=0, country_name=business_area.name).first()
-            country_new = Country.objects.filter(name=business_area.name).first()
-            if country:
+            if country := Country.objects.filter(name=business_area.name).first():
                 business_area.countries.add(country)
-            if country_new:
-                business_area.countries_new.add(country_new)
         BusinessArea.objects.get_or_create(
             code="GLOBAL",
             defaults=dict(

@@ -327,8 +327,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         blank=True,
         help_text=_("The content of the customers query."),
     )
-    admin2 = models.ForeignKey("core.AdminArea", null=True, blank=True, on_delete=models.SET_NULL)
-    admin2_new = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
+    admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
     area = models.CharField(max_length=250, blank=True)
     language = models.TextField(blank=True)
     consent = models.BooleanField(default=True)
@@ -417,6 +416,8 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     def save(self, *args, **kwargs):
         self.full_clean()
+        if self.ticket_details and self.ticket_details.household:
+            self.household_unicef_id = self.ticket_details.household.unicef_id
         return super().save(*args, **kwargs)
 
     def __str__(self):

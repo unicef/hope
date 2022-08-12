@@ -18,7 +18,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household
@@ -197,7 +197,7 @@ class GenerateDashboardReportContentHelpers:
             "created_at__year": report.year,
         }
         if report.admin_area:
-            filter_vars["admin2_new"] = report.admin_area_new
+            filter_vars["admin2"] = report.admin_area
 
         if not cls._is_report_global(report):
             filter_vars["business_area"] = report.business_area

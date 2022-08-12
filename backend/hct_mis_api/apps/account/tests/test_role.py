@@ -1,13 +1,9 @@
-from django.core.management import call_command
-from django.test import TestCase
 from django.urls import reverse
 
 from django_webtest import WebTest
 
-from hct_mis_api.apps.account.fixtures import UserFactory, UserRoleFactory
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Role, User
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
 
 
 class RoleTest(WebTest):

@@ -14,7 +14,7 @@ from graphql import GraphQLError
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.account.schema import UserNode
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.schema import BusinessAreaNode
@@ -309,18 +309,15 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "business_area", "assigned_to"))
         admin = input.pop("admin", None)
         admin_object = None
-        admin_object_new = None
         assigned_to = None
         if admin:
-            admin_object = get_object_or_404(AdminArea, p_code=admin)
-            admin_object_new = get_object_or_404(Area, p_code=admin)
+            admin_object = get_object_or_404(Area, p_code=admin)
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         if assigned_to_id is not None:
             assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
         grievance_ticket = GrievanceTicket.objects.create(
             **input,
             admin2=admin_object,
-            admin2_new=admin_object_new,
             business_area=business_area,
             created_by=user,
             user_modified=timezone.now(),
@@ -524,8 +521,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 
         admin = input.pop("admin", None)
         if admin:
-            grievance_ticket.admin2 = get_object_or_404(AdminArea, p_code=admin)
-            grievance_ticket.admin2_new = get_object_or_404(Area, p_code=admin)
+            grievance_ticket.admin2 = get_object_or_404(Area, p_code=admin)
         grievance_ticket.user_modified = timezone.now()
         grievance_ticket.save()
 

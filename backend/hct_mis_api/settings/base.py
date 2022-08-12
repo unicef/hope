@@ -8,15 +8,17 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from smart_admin.utils import match, regex
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 
+from .config import env
+
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
-from .config import env
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
@@ -37,6 +39,7 @@ SITE_ID = 1
 TIME_ZONE = "UTC"
 LANGUAGE_CODE = "en-us"
 USE_I18N = True
+USE_TZ = True
 SECRET_KEY = env("SECRET_KEY")
 DEFAULT_CHARSET = "utf-8"
 ROOT_URLCONF = "hct_mis_api.urls"
@@ -157,6 +160,7 @@ DATABASES = {
     "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
     "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
 }
+DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
@@ -246,6 +250,7 @@ DJANGO_APPS = [
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
     "django.contrib.gis",
+    "django.contrib.postgres",
 ]
 
 OTHER_APPS = [
@@ -634,8 +639,6 @@ CELERY_TASK_TIME_LIMIT = 360 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
 
-from smart_admin.utils import match, regex
-
 SMART_ADMIN_SECTIONS = {
     "HOPE": [
         "program",
@@ -786,3 +789,15 @@ IMPERSONATE = {
 POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
 
 CONCURRENCY_ENABLED = False
+
+# import warnings
+# warnings.filterwarnings(
+#     'error', r"DateTimeField .* received a naive datetime",
+#     RuntimeWarning, r'django\.db\.models\.fields',
+# )
+
+PROFILING = env("PROFILING", default="off") == "on"
+if PROFILING:
+    INSTALLED_APPS.append("silk")
+    MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
+    SILKY_PYTHON_PROFILER = True
