@@ -122,4 +122,10 @@ class Migration(migrations.Migration):
                 fields=("payment_plan", "delivery_mechanism_order"), name="unique payment_plan_delivery_mechanism_order"
             ),
         ),
+        migrations.AddField(
+            model_name='payment',
+            name='assigned_payment_channel',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    to='payment.paymentchannel'),
+        ),
     ]

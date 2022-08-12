@@ -9,8 +9,8 @@ from pytz import utc
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
-from hct_mis_api.apps.household.fixtures import HouseholdFactory
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
+from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     FinancialServiceProvider,
@@ -496,22 +496,22 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
         tzinfo=utc,
     )
     end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
-    program = factory.LazyAttribute(lambda o: o.target_population.program)
     exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)
 
     total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
-    total_entitled_quantity_revised = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_entitled_quantity_revised = 0.0
     total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
     total_entitled_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
-    total_entitled_quantity_revised_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+    total_entitled_quantity_revised_usd = 0.0
     total_delivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_undelivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
     created_by = factory.SubFactory(UserFactory)
     unicef_id = factory.Faker("uuid4")
     target_population = factory.SubFactory(TargetPopulationFactory)
+    program = factory.SubFactory(RealProgramFactory)
     currency = factory.Faker("currency_code")
 
     dispersion_start_date = factory.Faker(
@@ -533,6 +533,7 @@ class PaymentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Payment
 
+    payment_plan = factory.SubFactory(PaymentPlanFactory)
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     status = fuzzy.FuzzyChoice(
         PaymentRecord.STATUS_CHOICE,
@@ -544,8 +545,19 @@ class PaymentFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    household = factory.LazyAttribute(lambda o: Household.objects.order_by("?").first())
+    household = factory.LazyAttribute(lambda o: HouseholdFactory(head_of_household=IndividualFactory(household=None)))
     head_of_household = factory.LazyAttribute(lambda o: o.household.head_of_household)
+    collector = factory.LazyAttribute(
+        lambda o: (
+            o.household.individuals_and_roles.filter(role=ROLE_PRIMARY).first()
+            or
+            IndividualRoleInHouseholdFactory(
+                household=o.household,
+                individual=o.household.head_of_household,
+                role=ROLE_PRIMARY
+            )
+        ).individual
+    )
     delivery_type = fuzzy.FuzzyChoice(
         PaymentRecord.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],
@@ -579,11 +591,7 @@ def generate_real_payment_plans():
     payment_plans = PaymentPlanFactory.create_batch(
         3, program=program, business_area=BusinessArea.objects.get(slug="afghanistan")
     )
+    program.households.set(Household.objects.all().values_list("id", flat=True))
     for payment_plan in payment_plans:
-        PaymentFactory.create_batch(
-            5,
-            payment_plan=payment_plan,
-        )
-    program.households.set(
-        Payment.objects.filter(payment_plan__in=payment_plans).values_list("household__id", flat=True)
-    )
+        for household in program.households.all():
+            PaymentFactory(payment_plan=payment_plan, household=household)

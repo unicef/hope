@@ -836,7 +836,6 @@ class Migration(migrations.Migration):
                 (
                     "payment_plan",
                     models.ForeignKey(
-                        null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="payments",
                         to="payment.paymentplan",
@@ -848,10 +847,22 @@ class Migration(migrations.Migration):
                         null=True, on_delete=django.db.models.deletion.CASCADE, to="payment.financialserviceprovider"
                     ),
                 ),
+                (
+                    "collector",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="household.individual",
+                        related_name="collector_payments",
+                    ),
+                ),
             ],
             options={
                 "abstract": False,
             },
+        ),
+        migrations.AddConstraint(
+            model_name="payment",
+            constraint=models.UniqueConstraint(fields=("payment_plan", "household"), name="payment_plan_and_household"),
         ),
         migrations.CreateModel(
             name="FinancialServiceProviderXlsxTemplate",

@@ -9,8 +9,9 @@ from django.contrib.postgres.fields import CICharField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Count, JSONField, Q, Sum
+from django.db.models import JSONField, Q, Count, Sum, UniqueConstraint
 from django.db.models.signals import post_delete, post_save
+from django.db.models.functions import Coalesce
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -30,6 +31,7 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hct_mis_api.apps.payment.managers import PaymentManager
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
@@ -166,7 +168,7 @@ class GenericPayment(TimeStampedUUIDModel):
     )
     status_date = models.DateTimeField()
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
-    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)  # collector
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
     delivery_type = models.CharField(choices=DELIVERY_TYPE_CHOICE, max_length=24, null=True)
     currency = models.CharField(
         max_length=4,
@@ -234,15 +236,15 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         related_name="created_payment_plans",
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)  # TODO MB remove?
+    unicef_id = CICharField(max_length=250, blank=True, db_index=True)  # TODO MB populate?
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
         related_name="payment_plans",
     )
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
-    dispersion_start_date = models.DateTimeField()
-    dispersion_end_date = models.DateTimeField()
+    dispersion_start_date = models.DateField()
+    dispersion_end_date = models.DateField()
     female_children_count = models.PositiveSmallIntegerField(default=0)
     male_children_count = models.PositiveSmallIntegerField(default=0)
     female_adults_count = models.PositiveSmallIntegerField(default=0)
@@ -341,7 +343,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @property
     def all_active_payments(self):
-        return self.payments.all().exclude(excluded=True)
+        return self.payments.exclude(excluded=True)
+
+    @property
+    def can_be_locked(self) -> bool:
+        return self.payments.filter(payment_plan_hard_conflicted=False).exists()
 
     def update_population_count_fields(self):
         households_ids = self.all_active_payments.values_list("household_id", flat=True)
@@ -378,18 +384,17 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     def update_money_fields(self):
         self.exchange_rate = self.get_exchange_rate()
-
         payments = self.all_active_payments.aggregate(
-            total_entitled_quantity=Sum("entitlement_quantity"),
-            entitlement_quantity_usd=Sum("entitlement_quantity_usd"),
-            delivered_quantity=Sum("delivered_quantity"),
-            delivered_quantity_usd=Sum("delivered_quantity_usd"),
+            total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
+            total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
+            total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
+            total_delivered_quantity_usd=Coalesce(Sum("delivered_quantity_usd"), Decimal(0.0)),
         )
 
-        self.total_entitled_quantity = payments.get("total_entitled_quantity__sum", 0.00)
-        self.total_entitled_quantity_usd = payments.get("entitlement_quantity_usd__sum", 0.00)
-        self.total_delivered_quantity = payments.get("delivered_quantity__sum", 0.00)
-        self.total_delivered_quantity_usd = payments.get("delivered_quantity_usd__sum", 0.00)
+        self.total_entitled_quantity = payments.get("total_entitled_quantity", 0.00)
+        self.total_entitled_quantity_usd = payments.get("total_entitled_quantity_usd", 0.00)
+        self.total_delivered_quantity = payments.get("total_delivered_quantity", 0.00)
+        self.total_delivered_quantity_usd = payments.get("total_delivered_quantity_usd", 0.00)
 
         self.total_undelivered_quantity = self.total_entitled_quantity - self.total_delivered_quantity
         self.total_undelivered_quantity_usd = self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
@@ -766,13 +771,24 @@ class Payment(SoftDeletableModel, GenericPayment):
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
         related_name="payments",
-        null=True,
     )
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
     )
+    collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
+    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
+
+    objects = PaymentManager()
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["payment_plan", "household"],
+                name="payment_plan_and_household",
+            )
+        ]
 
 
 class ServiceProvider(TimeStampedUUIDModel):
