@@ -1,4 +1,3 @@
-import random
 import factory
 
 from datetime import timedelta
@@ -25,6 +24,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     Payment,
     GenericPayment,
+    PaymentChannel,
 )
 from hct_mis_api.apps.program.fixtures import (
     ProgramFactory,
@@ -514,7 +514,7 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     unicef_id = factory.Faker("uuid4")
     target_population = factory.SubFactory(TargetPopulationFactory)
     program = factory.SubFactory(RealProgramFactory)
-    currency = random.choice(CURRENCY_CHOICES)[0]
+    currency = fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
     dispersion_start_date = factory.Faker(
         "date_time_this_decade",
@@ -529,6 +529,17 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     male_adults_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_households_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
+
+
+class PaymentChannelFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = PaymentChannel
+
+    individual = factory.SubFactory(IndividualFactory)
+    delivery_mechanism = fuzzy.FuzzyChoice(
+        GenericPayment.DELIVERY_TYPE_CHOICE,
+        getter=lambda c: c[0],
+    )
 
 
 class PaymentFactory(factory.DjangoModelFactory):
@@ -584,6 +595,9 @@ class PaymentFactory(factory.DjangoModelFactory):
     )
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = fuzzy.FuzzyChoice((True, False))
+    assigned_payment_channel = factory.LazyAttribute(
+        lambda o: PaymentChannelFactory(individual=o.collector)
+    )
 
 
 def generate_real_payment_plans():
