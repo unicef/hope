@@ -1,12 +1,14 @@
+import random
+import factory
+
 from datetime import timedelta
 from decimal import Decimal
 from random import randint
-
-import factory
 from factory import fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
@@ -512,7 +514,7 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     unicef_id = factory.Faker("uuid4")
     target_population = factory.SubFactory(TargetPopulationFactory)
     program = factory.SubFactory(RealProgramFactory)
-    currency = factory.Faker("currency_code")
+    currency = random.choice(CURRENCY_CHOICES)[0]
 
     dispersion_start_date = factory.Faker(
         "date_time_this_decade",
