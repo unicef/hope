@@ -70,7 +70,7 @@ export const GrievanceStatuses = {
 
 export const GrievanceSearchTypes = {
   TicketID: 'ticket_id',
-  HouseholdID: 'ticket_hhid',
+  HouseholdID: 'ticket_hh_id',
   LastName: 'last_name',
 };
 

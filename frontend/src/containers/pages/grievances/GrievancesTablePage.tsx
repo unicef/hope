@@ -90,6 +90,7 @@ export function GrievancesTablePage(): React.ReactElement {
         choicesData={choicesData}
         filter={filter}
         onFilterChange={setFilter}
+        selectedTab={selectedTab}
       />
       <GrievancesTable
         filter={debouncedFilter}

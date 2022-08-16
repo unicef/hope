@@ -26,11 +26,13 @@ interface GrievancesFiltersProps {
   onFilterChange;
   filter;
   choicesData: GrievancesChoiceDataQuery;
+  selectedTab: number;
 }
 export function GrievancesFilters({
   onFilterChange,
   filter,
   choicesData,
+  selectedTab,
 }: GrievancesFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void => {
@@ -209,33 +211,35 @@ export function GrievancesFilters({
             name='assignedTo'
           />
         </Grid>
-        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
-          <Grid item xs={6}>
-            <Box display='flex' flexDirection='column'>
-              <FieldLabel>{t('Similarity Score')}</FieldLabel>
-              <TextField
-                value={filter.scoreMin || null}
-                variant='outlined'
-                margin='dense'
-                placeholder='From'
-                onChange={(e) => handleFilterChange(e, 'scoreMin')}
-                type='number'
-              />
-            </Box>
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
+          <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+            <Grid item xs={6}>
+              <Box display='flex' flexDirection='column'>
+                <FieldLabel>{t('Similarity Score')}</FieldLabel>
+                <TextField
+                  value={filter.scoreMin || null}
+                  variant='outlined'
+                  margin='dense'
+                  placeholder='From'
+                  onChange={(e) => handleFilterChange(e, 'scoreMin')}
+                  type='number'
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box display='flex' flexDirection='column'>
+                <TextField
+                  value={filter.scoreMax || null}
+                  variant='outlined'
+                  margin='dense'
+                  placeholder='To'
+                  onChange={(e) => handleFilterChange(e, 'scoreMax')}
+                  type='number'
+                />
+              </Box>
+            </Grid>
           </Grid>
-          <Grid item xs={6}>
-            <Box display='flex' flexDirection='column'>
-              <TextField
-                value={filter.scoreMax || null}
-                variant='outlined'
-                margin='dense'
-                placeholder='To'
-                onChange={(e) => handleFilterChange(e, 'scoreMax')}
-                type='number'
-              />
-            </Box>
-          </Grid>
-        </Grid>
+        )}
         <Grid item>
           <RdiAutocomplete
             onFilterChange={onFilterChange}
