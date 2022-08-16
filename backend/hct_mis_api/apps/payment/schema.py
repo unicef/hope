@@ -251,7 +251,7 @@ class ApprovalProcessNode(DjangoObjectType):
             approval=self.approvals.filter(type=Approval.APPROVAL),
             authorization=self.approvals.filter(type=Approval.AUTHORIZATION),
             finance_review=self.approvals.filter(type=Approval.FINANCE_REVIEW),
-            reject=self.approvals.filter(type=Approval.REJECT)
+            reject=self.approvals.filter(type=Approval.REJECT),
         )
         return resp
 
@@ -299,6 +299,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     end_date = graphene.Date()
     currency_name = graphene.String()
     payments_conflicts_count = graphene.Int()
+    delivery_mechanisms = graphene.List(graphene.String)
 
     class Meta:
         model = PaymentPlan
@@ -319,6 +320,10 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_currency_name(self, info):
         return self.get_currency_display()
+
+    def resolve_delivery_mechanisms(self, info):
+        # TODO
+        return []
 
 
 class Query(graphene.ObjectType):
