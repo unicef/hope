@@ -12,7 +12,6 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { handleValidationErrors } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
   useCreatePpMutation,
@@ -93,7 +92,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       ),
   });
 
-  const handleSubmit = async (values, { setFieldError }): Promise<void> => {
+  const handleSubmit = async (values): Promise<void> => {
     try {
       const res = await mutate({
         variables: {
