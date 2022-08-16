@@ -1160,6 +1160,7 @@ export type GrievanceTicketNode = Node & {
   relatedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
   admin?: Maybe<Scalars['String']>,
   existingTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
+  totalDays?: Maybe<Scalars['String']>,
 };
 
 
@@ -3859,6 +3860,7 @@ export type QueryAllGrievanceTicketArgs = {
   urgency?: Maybe<Scalars['String']>,
   grievanceType?: Maybe<Scalars['String']>,
   grievanceStatus?: Maybe<Scalars['String']>,
+  totalDays?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8093,7 +8095,7 @@ export type AllGrievanceTicketQuery = (
       & Pick<GrievanceTicketNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'GrievanceTicketNode' }
-        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'createdAt' | 'userModified' | 'admin' | 'unicefId' | 'priority' | 'urgency' | 'updatedAt'>
+        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'createdAt' | 'userModified' | 'admin' | 'unicefId' | 'priority' | 'urgency' | 'updatedAt' | 'totalDays'>
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -14820,6 +14822,7 @@ export const AllGrievanceTicketDocument = gql`
         priority
         urgency
         updatedAt
+        totalDays
       }
     }
   }
@@ -21124,6 +21127,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   relatedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
   admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   existingTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
+  totalDays?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type GrievanceTicketNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']> = {

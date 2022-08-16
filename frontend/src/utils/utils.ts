@@ -615,31 +615,3 @@ export async function clearCache(apolloClient = null): Promise<void> {
 export const round = (value: number, decimals = 2): number => {
   return Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
 };
-
-const ONE_MINUTE = 60;
-const ONE_HOUR: number = ONE_MINUTE * 60;
-const ONE_DAY: number = ONE_HOUR * 24;
-
-export const getTimeDifferenceInDays = (
-  createdDateString: string,
-  currentDateString: string,
-  decimals = true,
-): string => {
-  const today = new Date();
-  const currentDateInUTC = new Date(
-    today.getTime() + today.getTimezoneOffset() * 60000,
-  );
-  const currentDate: Date =
-    (currentDateString && new Date(currentDateString)) || currentDateInUTC;
-  const createdDate: Date = new Date(createdDateString);
-
-  const seconds: number = Math.floor(
-    (currentDate.getTime() - createdDate.getTime()) / 1000,
-  );
-
-  if (decimals) {
-    return `${round(seconds / ONE_DAY)}`;
-  }
-
-  return `${Math.floor(seconds / ONE_DAY)}`;
-};
