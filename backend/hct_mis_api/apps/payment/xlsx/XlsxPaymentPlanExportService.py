@@ -5,24 +5,28 @@ from django.core.files import File
 from django.urls import reverse
 
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxBaseExportService
+from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
 from hct_mis_api.apps.core.models import XLSXFileTemp
 from hct_mis_api.apps.core.utils import encode_id_base64
 
 
-class XlsxPaymentPlanExportService(XlsxBaseExportService):
+class XlsxPaymentPlanExportService(XlsxExportBaseService):
     TITLE = "Payment Plan - Payment List"
     HEADERS = (
-        "payment_id",  # 0
+        "payment_id",
         "household_id",
         "household_size",
         "admin2",
         "collector",
-        "payment_channel",  # 5
+        "payment_channel",
         "fsp",
         "currency",
-        "entitlement",  # 8
+        "entitlement",
+        "entitlement_usd",
     )
+    ID_COLUMN_INDEX = 0
+    PAYMENT_CHANNEL_COLUMN_INDEX = 5
+    ENTITLEMENT_COLUMN_INDEX = 8
 
     def __init__(self, payment_plan):
         self.payment_plan = payment_plan
@@ -32,13 +36,14 @@ class XlsxPaymentPlanExportService(XlsxBaseExportService):
         household = payment.household
 
         payment_row = (
-            str(getattr(payment, "unicef_id", payment.id)),
+            str(payment.id),
             str(getattr(household, "unicef_id", "")),
             household.size,
             str(household.admin2.title) if household.admin2 else "",
-            str(payment.head_of_household.full_name) if payment.head_of_household else "",
-            "TODO payment_channel",  # str(collector.payment_channel)
+            str(payment.collector.full_name) if payment.collector else "",
+            str(payment.assigned_payment_channel.delivery_mechanism) if payment.assigned_payment_channel else "",
             str(payment.financial_service_provider.name) if payment.financial_service_provider else "",
+            str(payment.currency),
             payment.entitlement_quantity,
             payment.entitlement_quantity_usd,
         )
@@ -52,11 +57,12 @@ class XlsxPaymentPlanExportService(XlsxBaseExportService):
         self._create_workbook()
         self._add_headers()
         self._add_payment_list()
-        self._adjust_column_width_from_col(self.ws_export_list, 2, 1, 0)
+        self._adjust_column_width_from_col(self.ws_export_list, 0, 1, 7)
+        self._add_col_bgcolor([6, 9])
         return self.wb
 
     def save_xlsx_file(self, user):
-        filename = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.xlsx"
+        filename = f"payment_plan_payment_list_{self.payment_plan.unicef_id or self.payment_plan.id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
             xlsx_obj = XLSXFileTemp(

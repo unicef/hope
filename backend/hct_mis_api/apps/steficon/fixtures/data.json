@@ -5,7 +5,7 @@
     "fields": {
       "version": 1,
       "name": "Test Formula for Targeting 011",
-      "definition": "result.value=1",
+      "definition": "result.value=11",
       "description": "",
       "enabled": true,
       "deprecated": false,
@@ -29,7 +29,7 @@
       "version": 1,
       "rule": 1,
       "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
-      "definition": "result.value=1",
+      "definition": "result.value=22",
       "is_release": true,
       "enabled": true,
       "deprecated": false,
@@ -40,7 +40,7 @@
         "name": "Test Formula for Targeting 011",
         "enabled": true,
         "language": "python",
-        "definition": "result.value=1",
+        "definition": "result.value=22",
         "deprecated": false
       }
     }
@@ -51,7 +51,7 @@
     "fields": {
       "version": 1,
       "name": "Test Formula for Targeting 022",
-      "definition": "result.value=1",
+      "definition": "result.value=33",
       "description": "",
       "enabled": true,
       "deprecated": false,
@@ -75,7 +75,7 @@
       "version": 1,
       "rule": 3,
       "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
-      "definition": "result.value=1",
+      "definition": "result.value=44",
       "is_release": true,
       "enabled": true,
       "deprecated": false,
@@ -86,7 +86,7 @@
         "name": "Test Formula for Targeting 022",
         "enabled": true,
         "language": "python",
-        "definition": "result.value=1",
+        "definition": "result.value=55",
         "deprecated": false
       }
     }
@@ -97,7 +97,7 @@
     "fields": {
       "version": 1,
       "name": "Test Formula for Payment Plan 033",
-      "definition": "result.value=1",
+      "definition": "result.value=10",
       "description": "",
       "enabled": true,
       "deprecated": false,
@@ -121,7 +121,7 @@
       "version": 1,
       "rule": 5,
       "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
-      "definition": "result.value=1",
+      "definition": "result.value=12",
       "is_release": true,
       "enabled": true,
       "deprecated": false,
@@ -132,7 +132,7 @@
         "name": "Test Formula for Payment Plan 033",
         "enabled": true,
         "language": "python",
-        "definition": "result.value=1",
+        "definition": "result.value=12",
         "deprecated": false
       }
     }
@@ -143,7 +143,7 @@
     "fields": {
       "version": 1,
       "name": "Test Formula for Payment Plan 044",
-      "definition": "result.value=1",
+      "definition": "result.value=44",
       "description": "",
       "enabled": true,
       "deprecated": false,
@@ -167,7 +167,7 @@
       "version": 1,
       "rule": 7,
       "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
-      "definition": "result.value=1",
+      "definition": "result.value=44",
       "is_release": true,
       "enabled": true,
       "deprecated": false,
@@ -178,7 +178,7 @@
         "name": "Test Formula for Payment Plan 044",
         "enabled": true,
         "language": "python",
-        "definition": "result.value=1",
+        "definition": "result.value=44",
         "deprecated": false
       }
     }

@@ -7,7 +7,7 @@ from django.core.files import File
 from django.urls import reverse
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxBaseExportService
+from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import PaymentVerification, XlsxCashPlanPaymentVerificationFile
 
@@ -15,7 +15,7 @@ from hct_mis_api.apps.payment.models import PaymentVerification, XlsxCashPlanPay
 logger = logging.getLogger(__name__)
 
 
-class XlsxVerificationExportService(XlsxBaseExportService):
+class XlsxVerificationExportService(XlsxExportBaseService):
     HEADERS = (
         "payment_record_id",
         "payment_record_ca_id",
