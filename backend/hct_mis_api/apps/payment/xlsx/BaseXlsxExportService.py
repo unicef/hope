@@ -1,29 +1,29 @@
 import logging
 import openpyxl
 
-from openpyxl.utils import get_column_letter
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.template.loader import render_to_string
+
+from openpyxl.styles import PatternFill, Side, Border
+from openpyxl.utils import get_column_letter
 
 
 logger = logging.getLogger(__name__)
 
 
-class XlsxBaseExportService:
-    TITLE = "Xlsx Export"
-    HEADERS = tuple()
+class XlsxExportBaseService:
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws_active = wb.active
-        ws_active.title = XlsxBaseExportService.TITLE
+        ws_active.title = self.TITLE
         self.wb = wb
         self.ws_export_list = ws_active
         return wb
 
     def _add_headers(self):
-        self.ws_export_list.append(XlsxBaseExportService.HEADERS)
+        self.ws_export_list.append(self.HEADERS)
 
     def generate_workbook(self):
         self._create_workbook()
@@ -57,6 +57,15 @@ class XlsxBaseExportService:
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             ws.column_dimensions[col_name].width = value
+
+    def _add_col_bgcolor(self, col=None, hex_code="A0FDB0"):
+        for row_index in col or []:
+            fill = PatternFill(bgColor=hex_code, fgColor=hex_code, fill_type="lightUp")
+            bd = Side(style='thin', color="999999")
+            for y in range(1, self.ws_export_list.max_column + 1):
+                cell = self.ws_export_list.cell(row=y, column=row_index)
+                cell.fill = fill
+                cell.border = Border(left=bd, top=bd, right=bd, bottom=bd)
 
     @staticmethod
     def get_link(api_url=None) -> str:
