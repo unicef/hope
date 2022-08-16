@@ -77,3 +77,8 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
             json.loads(payment_plan_with_delivery_mechanisms["deliveryMechanisms"][1]),
             {"name": GenericPayment.DELIVERY_TYPE_VOUCHER, "order": 2},
         )
+
+
+# TODO:
+# test validation of applied delivery mechanisms
+# test assigning fsp to delivery mechanisms
