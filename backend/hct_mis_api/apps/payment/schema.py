@@ -55,6 +55,7 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     PaymentPlan,
     Payment,
+    DeliveryMechanismPerPaymentPlan,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -322,8 +323,17 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_currency_display()
 
     def resolve_delivery_mechanisms(self, info):
-        # TODO
-        return []
+        return [
+            json.dumps(
+                {
+                    "name": mechanism.delivery_mechanism,
+                    "order": mechanism.delivery_mechanism_order,
+                }
+            )
+            for mechanism in DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by(
+                "delivery_mechanism_order"
+            )
+        ]
 
 
 class Query(graphene.ObjectType):

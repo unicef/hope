@@ -29,7 +29,7 @@ from hct_mis_api.apps.payment.inputs import (
     CreatePaymentPlanInput,
     UpdatePaymentPlanInput,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentPlan, DeliveryMechanismPerPaymentPlan
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode, PaymentPlanNode
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
@@ -709,6 +709,16 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     def mutate(cls, root, info, input, **kwargs):
         payment_plan_id = input.get("payment_plan_id")
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        delivery_mechanisms_in_order = input.get("delivery_mechanisms")
+        current_time = timezone.now()
+        for index, delivery_mechanism in enumerate(delivery_mechanisms_in_order):
+            DeliveryMechanismPerPaymentPlan.objects.update_or_create(
+                payment_plan=payment_plan,
+                delivery_mechanism=delivery_mechanism,
+                sent_date=current_time,
+                delivery_mechanism_order=index + 1,
+                created_by=info.context.user,
+            )
         return cls(payment_plan=payment_plan)
 
 

@@ -503,6 +503,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         "payment.FinancialServiceProvider",
         on_delete=models.PROTECT,
         related_name="delivery_mechanisms_per_payment_plan",
+        null=True,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -514,6 +515,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="sent_delivery_mechanisms",
+        null=True,
     )
     status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
     delivery_mechanism = models.CharField(
