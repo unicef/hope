@@ -114,7 +114,6 @@ export const Entitlement = ({
     { loading: loadingSetSteficonRule },
   ] = useSetSteficonRuleOnPpListMutation(options);
 
-  const [file, setFile] = useState(null);
   const { data: steficonData, loading } = useAllSteficonRulesQuery({
     variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
   });
@@ -250,13 +249,15 @@ export const Entitlement = ({
               <Box>
                 <ImportXlsxPaymentPlanPaymentList paymentPlan={paymentPlan} />
               </Box>
-              {file?.name && (
+              {paymentPlan?.importedXlsxFileName && (
                 <Box alignItems='center' display='flex'>
                   <SpinaczIconContainer>
                     <AttachFileIcon fontSize='inherit' />
                   </SpinaczIconContainer>
                   <Box mr={1}>
-                    <GreyTextSmall>{file?.name || null}</GreyTextSmall>
+                    <GreyTextSmall>
+                      {paymentPlan?.importedXlsxFileName}
+                    </GreyTextSmall>
                   </Box>
                   <GreyTextSmall>
                     {paymentPlan?.xlsxFileImportedDate ? (

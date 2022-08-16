@@ -2123,7 +2123,9 @@ type IndividualNode implements Node {
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   bankAccountInfo: BankAccountInfoNode
+  paymentchannelSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentChannelNodeConnection!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
+  collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -2429,6 +2431,51 @@ type PartnerType {
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
 }
 
+enum PaymentChannelDeliveryMechanism {
+  CARDLESS_CASH_WITHDRAWAL
+  CASH
+  CASH_BY_FSP
+  CHEQUE
+  DEPOSIT_TO_CARD
+  IN_KIND
+  MOBILE_MONEY
+  OTHER
+  PRE_PAID_CARD
+  REFERRAL
+  TRANSFER
+  TRANSFER_TO_ACCOUNT
+  VOUCHER
+}
+
+type PaymentChannelNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode!
+  deliveryMechanism: PaymentChannelDeliveryMechanism
+  paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+}
+
+type PaymentChannelNodeConnection {
+  pageInfo: PageInfo!
+  edges: [PaymentChannelNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type PaymentChannelNodeEdge {
+  node: PaymentChannelNode
+  cursor: String!
+}
+
+type PaymentConflictDataNode {
+  paymentPlanId: String
+  paymentPlanStartDate: String
+  paymentPlanEndDate: String
+  paymentPlanStatus: String
+  paymentId: String
+}
+
 enum PaymentDeliveryType {
   CARDLESS_CASH_WITHDRAWAL
   CASH
@@ -2467,10 +2514,16 @@ type PaymentNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
-  paymentPlan: PaymentPlanNode
+  paymentPlan: PaymentPlanNode!
   excluded: Boolean!
   entitlementDate: DateTime
   financialServiceProvider: FinancialServiceProviderNode
+  collector: IndividualNode!
+  assignedPaymentChannel: PaymentChannelNode
+  paymentPlanHardConflicted: Boolean
+  paymentPlanHardConflictedData: [PaymentConflictDataNode]
+  paymentPlanSoftConflicted: Boolean
+  paymentPlanSoftConflictedData: [PaymentConflictDataNode]
 }
 
 type PaymentNodeConnection {
@@ -2693,6 +2746,7 @@ type PaymentPlanNode implements Node {
   currencyName: String
   hasPaymentListXlsxFile: Boolean
   importedXlsxFileName: String
+  paymentsConflictsCount: Int
 }
 
 type PaymentPlanNodeConnection {
