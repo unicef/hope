@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from django.core.management import call_command
 from django.test import TestCase
 
@@ -29,6 +30,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
     TargetPopulationFactory,
+    HouseholdSelectionFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -85,7 +87,6 @@ class TestSendTpToDatahub(TestCase):
         admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR")
-        test_agency = Agency.objects.create(type="test", label="test")
 
         cls.program_individual_data_needed_true = ProgramFactory(
             individual_data_needed=True,
@@ -361,3 +362,31 @@ class TestSendTpToDatahub(TestCase):
 
         self.assertEqual(len(dh_target_population.targeting_criteria), 194)
         self.assertFalse("..." in dh_target_population.targeting_criteria)
+
+    def test_not_creating_duplicate_households(self):
+        business_area = BusinessArea.objects.first()
+
+        program = ProgramFactory(
+            individual_data_needed=True,
+            business_area=business_area,
+        )
+
+        targeting_criteria = TargetingCriteriaFactory()
+        TargetingCriteriaRuleFactory.create_batch(50, targeting_criteria=targeting_criteria)
+        target_population = TargetPopulationFactory(
+            program=program,
+            status=TargetPopulation.STATUS_PROCESSING,
+            candidate_list_targeting_criteria=targeting_criteria,
+        )
+
+        try:
+            for _ in range(2):
+                HouseholdSelectionFactory(
+                    household=self.household,
+                    target_population=target_population,
+                    final=True,
+                )
+        except IntegrityError:
+            pass
+        else:
+            self.fail("Should raise IntegrityError")
