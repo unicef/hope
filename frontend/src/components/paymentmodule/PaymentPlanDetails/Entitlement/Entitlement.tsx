@@ -271,12 +271,14 @@ export const Entitlement = ({
             </Box>
           </Box>
         </Box>
-        <Divider />
-        <LabelizedField label={t('Total Cash Received')}>
-          <BigValue>
-            USD <Missing />
-          </BigValue>
-        </LabelizedField>
+        {paymentPlan.totalEntitledQuantityUsd && (
+          <>
+            <Divider />
+            <LabelizedField label={t('Total Cash Received')}>
+              <BigValue>USD {paymentPlan.totalEntitledQuantityUsd}</BigValue>
+            </LabelizedField>
+          </>
+        )}
       </ContainerColumnWithBorder>
     </Box>
   );
