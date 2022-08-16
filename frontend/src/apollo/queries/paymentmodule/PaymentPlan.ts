@@ -125,6 +125,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       hasPaymentListXlsxFile
       xlsxFileImportedDate
       importedXlsxFileName
+      totalEntitledQuantityUsd
     }
   }
 `;
