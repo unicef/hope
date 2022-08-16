@@ -18,7 +18,7 @@ def remove_duplicate_household_selections(apps, schema_editor):
     duplicates = (
         HouseholdSelectionModel.objects.annotate(duplicates_count=models.Subquery(subquery.values("duplicates_count")))
         .values("household", "target_population", "duplicates_count", "id")
-        .filter(duplicates_count__gt=1)
+        .filter(duplicates_count__gt=1, target_population__status="LOCKED")
     )
 
     groups = defaultdict(list)
