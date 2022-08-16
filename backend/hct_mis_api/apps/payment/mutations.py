@@ -755,21 +755,14 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         import_service = XlsxPaymentPlanImportService(payment_plan, file)
         import_service.open_workbook()
         import_service.validate()
-        if len(import_service.errors):
+        if import_service.errors:
             return cls(None, import_service.errors)
 
         payment_plan.status_importing()
         payment_plan.save()
 
-        # save import xlsx file
-        xlsx_file = XLSXFileTemp.objects.create(
-            object_id=payment_plan.pk,
-            content_type=get_content_type_for_model(payment_plan),
-            created_by=info.context.user,
-            type=XLSXFileTemp.IMPORT,
-            file=file,
-        )
-        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id, xlsx_file.id)
+        new_xlsx_file = import_service.remove_old_and_create_new_import_xlsx(info.context.user)
+        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id, new_xlsx_file.id)
 
         return cls(payment_plan, import_service.errors)
 
@@ -788,7 +781,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
-        if payment_plan.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.STEFICON_ERROR]:
+        if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.STEFICON_ERROR):
             logger.error("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
             raise GraphQLError("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
 
@@ -796,21 +789,21 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
         if steficon_rule_id:
             steficon_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
-            if steficon_rule.latest.id != payment_plan.steficon_rule_id:
-                steficon_rule_commit = steficon_rule.latest
-                if not steficon_rule.enabled or steficon_rule.deprecated:
-                    logger.error("This steficon rule is not enabled or is deprecated.")
-                    raise GraphQLError("This steficon rule is not enabled or is deprecated.")
+            if not steficon_rule.enabled or steficon_rule.deprecated:
+                logger.error("This steficon rule is not enabled or is deprecated.")
+                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
 
-                payment_plan.steficon_rule = steficon_rule_commit
-                payment_plan.status = PaymentPlan.Status.STEFICON_WAIT
-                payment_plan.status_date = timezone.now()
-                payment_plan.save()
-                payment_plan_apply_steficon.delay(payment_plan.pk)
-            else:
-                return cls(payment_plan=payment_plan)
+            payment_plan.status = PaymentPlan.Status.STEFICON_WAIT
+            payment_plan.status_date = timezone.now()
+            if steficon_rule.latest.id != payment_plan.steficon_rule_id:
+                payment_plan.steficon_rule = steficon_rule.latest
+
+            payment_plan.save()
+            payment_plan_apply_steficon.delay(payment_plan.pk)
         else:
             payment_plan.steficon_rule = None
+            if payment_plan.status == PaymentPlan.Status.STEFICON_ERROR:
+                payment_plan.status_lock()
             payment_plan.save()
 
         log_create(

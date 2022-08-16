@@ -55,6 +55,7 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     PaymentPlan,
     Payment,
+    PaymentChannel,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -226,7 +227,8 @@ class FilteredActionsListNode(graphene.ObjectType):
     reject = graphene.List(ApprovalNode)
 
 
-class ApprovalProcessNode(DjangoObjectType):
+class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
     rejected_on = graphene.String()
     actions = graphene.Field(FilteredActionsListNode)
 
@@ -264,7 +266,7 @@ class PaymentConflictDataNode(graphene.ObjectType):
     payment_id = graphene.String()
 
 
-class PaymentNode(DjangoObjectType):
+class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
     payment_plan_hard_conflicted = graphene.Boolean()
     payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
@@ -328,6 +330,16 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_imported_xlsx_file_name(self, info):
         import_file_obj = self.get_payment_plan_payment_list_import_xlsx_file_obj()
         return import_file_obj.file.name if import_file_obj else ""
+
+
+class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+
+    class Meta:
+        model = PaymentChannel
+        exclude = ("delivery_data",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):

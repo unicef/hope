@@ -267,7 +267,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
-        source=[Status.OPEN, Status.XLSX_EXPORTING, Status.XLSX_IMPORTING],
+        source=[Status.OPEN, Status.XLSX_EXPORTING, Status.XLSX_IMPORTING, Status.STEFICON_ERROR, Status.STEFICON_RUN],
         target=Status.LOCKED,
     )
     def status_lock(self):
