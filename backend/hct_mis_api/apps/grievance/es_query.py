@@ -30,7 +30,6 @@ def search_es(options):
     query_term_fields = []
     query_terms_fields = []
 
-    size = options.pop("first", 10)
     grievance_status = options.pop("grievance_status")
     created_at_range = ast.literal_eval(options.pop("created_at_range"))
 
@@ -60,7 +59,7 @@ def search_es(options):
                   "unicef_id": value
                 }
             })
-        elif key == "ticket_hhid":
+        elif key == "ticket_hh_id":
             query_search.append({
                 "term": {
                     "household_unicef_id": {
@@ -124,7 +123,6 @@ def search_es(options):
     all_queries.extend(query_search)
 
     query_dict = {
-        "size": 10000,
         "query": {
             "bool": {
                 "must": all_queries,
@@ -140,8 +138,5 @@ def search_es(options):
                 "business_area": "afghanistan"
             }
         }
-
-    first = options.pop("first", 10)
-    after = options.pop("after", 1)
 
     return execute_query(query_dict)

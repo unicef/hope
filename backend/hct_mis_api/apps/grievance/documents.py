@@ -130,7 +130,6 @@ class GrievanceTicketDocument(Document):
 
     class Django:
         model = GrievanceTicket
-        fields = []
 
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
