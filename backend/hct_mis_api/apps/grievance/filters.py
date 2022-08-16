@@ -133,7 +133,7 @@ class GrievanceTicketFilter(FilterSet):
         label, value = tuple(value.split(" ", 1))
         if label == "ticket_id":
             q = Q(unicef_id=value)
-        elif label == "ticket_hh_id":
+        elif label == "ticket_hhid":
             q = Q(household_unicef_id=value)
         else:
             ids = (

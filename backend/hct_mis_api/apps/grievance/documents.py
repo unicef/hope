@@ -2,7 +2,7 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from django.conf import settings
 
-from .models import GrievanceTicket
+from .models import GrievanceTicket, TicketComplaintDetails, TicketSensitiveDetails
 from ..household.models import Household
 
 
@@ -66,6 +66,7 @@ ISSUE_TYPES_CHOICES = {
 
 @registry.register_document
 class GrievanceTicketDocument(Document):
+    unicef_id = fields.KeywordField(similarity="boolean")
     created_at = fields.DateField()
     assigned_to = fields.KeywordField(similarity="boolean")
     registration_data_import = fields.TextField()
@@ -79,6 +80,7 @@ class GrievanceTicketDocument(Document):
     grievance_type = fields.KeywordField(similarity="boolean")
     head_of_household_last_name = fields.KeywordField(similarity="boolean")
     business_area = fields.KeywordField(similarity="boolean")
+    fsp = fields.KeywordField(similarity="boolean")
 
     def prepare_assigned_to(self, instance):
         if instance.assigned_to:
@@ -119,6 +121,12 @@ class GrievanceTicketDocument(Document):
 
     def prepare_business_area(self, instance):
         return instance.business_area.slug
+
+    def prepare_fsp(self, instance):
+        if instance.ticket_details:
+            if isinstance(instance.ticket_details, (TicketComplaintDetails, TicketSensitiveDetails)):
+                if instance.ticket_details.payment_record:
+                    return instance.ticket_details.payment_record.service_provider.full_name
 
     class Django:
         model = GrievanceTicket

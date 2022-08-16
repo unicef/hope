@@ -58,7 +58,7 @@ def search_es(options):
         if key == "ticket_id":
             query_search.append({
                 "term": {
-                  "_id": value
+                  "unicef_id": value
                 }
             })
         elif key == "ticket_hhid":
