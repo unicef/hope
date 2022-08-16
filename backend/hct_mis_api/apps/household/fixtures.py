@@ -2,8 +2,8 @@ import random
 
 import factory
 from factory import enums, fuzzy
-from pytz import utc
 from faker import Faker
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.geo import models as geo_models
@@ -169,20 +169,21 @@ class BankAccountInfoFactory(factory.DjangoModelFactory):
     bank_account_number = random.randint(10**26, 10**27 - 1)
 
 
-class DocumentFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Document
-
-    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
-    type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by("?").first())
-    individual = factory.SubFactory(IndividualFactory)
-
-
 class DocumentTypeFactory(factory.DjangoModelFactory):
     class Meta:
         model = DocumentType
 
     type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
+
+
+class DocumentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Document
+        django_get_or_create = ("type",)
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.SubFactory(DocumentTypeFactory)
+    individual = factory.SubFactory(IndividualFactory)
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
