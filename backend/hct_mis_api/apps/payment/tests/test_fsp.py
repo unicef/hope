@@ -1,3 +1,4 @@
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
@@ -8,6 +9,17 @@ from hct_mis_api.apps.account.permissions import Permissions
 
 
 class TestFSPSetup(APITestCase):
+    CHOOSE_DELIVERY_MECHANISMS_MUTATION = """
+mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanismsForPaymentPlanInput!) {
+  chooseDeliveryMechanismsForPaymentPlan(input: $input) {
+    paymentPlan {
+      id
+      deliveryMechanisms
+    }
+  }
+}
+"""
+
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
@@ -18,11 +30,21 @@ class TestFSPSetup(APITestCase):
         )
 
     def test_choosing_delivery_mechanism_order(self):
-        # choose some mechanisms
-        # see info that selected are not sufficient
-        # add remaining
-        # approve
-        # assign FSPs
-
         payment_plan = PaymentPlanFactory(total_households_count=1)
-        targeting = TargetPopulationFactory()
+
+        encoded_payment_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        create_program_mutation_variables = dict(
+            input=dict(
+                paymentPlanId=encoded_payment_id,
+                deliveryMechanisms=[],
+            )
+        )
+
+        response = self.graphql_request(
+            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=create_program_mutation_variables,
+        )
+        payment_plan = response["data"]["chooseDeliveryMechanismsForPaymentPlan"]["paymentPlan"]
+        self.assertEqual(payment_plan["id"], encoded_payment_id)
+        self.assertEqual(payment_plan["deliveryMechanisms"], [])

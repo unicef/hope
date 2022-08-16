@@ -692,6 +692,26 @@ class DeletePaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class ChooseDeliveryMechanismsForPaymentPlanInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    delivery_mechanisms = graphene.List(graphene.String, required=True)
+
+
+class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = ChooseDeliveryMechanismsForPaymentPlanInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        payment_plan_id = input.get("payment_plan_id")
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        return cls(payment_plan=payment_plan)
+
+
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
     create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
@@ -704,6 +724,7 @@ class Mutations(graphene.ObjectType):
     discard_cash_plan_payment_verification = DiscardCashPlanVerificationMutation.Field()
     invalid_cash_plan_payment_verification = InvalidCashPlanVerificationMutation.Field()
     delete_cash_plan_payment_verification = DeleteCashPlanVerificationMutation.Field()
+    choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
