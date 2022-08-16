@@ -16,12 +16,11 @@ def execute_query(query_dict):
     es_response = (
         GrievanceTicketDocument
         .search()
-        .params(search_type="dfs_query_then_fetch")
+        .params(search_type="dfs_query_then_fetch", preserve_order=True)
         .from_dict(query_dict)
-        .execute()
     )
 
-    es_ids = [x.meta["id"] for x in es_response]
+    es_ids = [hit.meta.id for hit in es_response.scan()]
     return es_ids
 
 
@@ -125,7 +124,7 @@ def search_es(options):
     all_queries.extend(query_search)
 
     query_dict = {
-        "size": size,
+        "size": 10000,
         "query": {
             "bool": {
                 "must": all_queries,
