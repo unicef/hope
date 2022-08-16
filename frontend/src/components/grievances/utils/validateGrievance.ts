@@ -372,7 +372,8 @@ export function validateUsingSteps(
 
   if (
     category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+    issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
+    activeStep === GrievanceSteps.Description
   ) {
     const individualDataErrors = {};
     const individualData = values.individualData || {};

@@ -555,10 +555,12 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           </Box>
                         </BoxPadding>
                       )}
-                      <DatachangeComponent
-                        values={values}
-                        setFieldValue={setFieldValue}
-                      />
+                      {activeStep === steps.length - 1 && (
+                        <DatachangeComponent
+                          values={values}
+                          setFieldValue={setFieldValue}
+                        />
+                      )}
                       {dataChangeErrors(errors, touched)}
                       <Box pt={3} display='flex' flexDirection='row'>
                         <Box mr={3}>
