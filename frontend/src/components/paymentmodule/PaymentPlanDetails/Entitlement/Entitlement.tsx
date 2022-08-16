@@ -269,14 +269,14 @@ export const Entitlement = ({
             </Box>
           </Box>
         </Box>
-        {paymentPlan.totalEntitledQuantityUsd && (
+        {paymentPlan.totalEntitledQuantityUsd ? (
           <>
             <Divider />
             <LabelizedField label={t('Total Cash Received')}>
               <BigValue>USD {paymentPlan.totalEntitledQuantityUsd}</BigValue>
             </LabelizedField>
           </>
-        )}
+        ) : null}
       </ContainerColumnWithBorder>
     </Box>
   );
