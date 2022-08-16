@@ -96,6 +96,9 @@
             "name": "FinancialServiceProviderXlsxReportNode"
           },
           {
+            "name": "PaymentChannelNode"
+          },
+          {
             "name": "ApprovalProcessNode"
           },
           {
