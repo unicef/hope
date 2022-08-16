@@ -52,10 +52,6 @@ const ChartContainer = styled.div`
   margin: 0 auto;
 `;
 
-const Label = styled.p`
-  color: #b1b1b5;
-`;
-
 interface PaymentPlanDetailsResultsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
