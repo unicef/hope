@@ -45,24 +45,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER
     )
 
-    ALL_GRIEVANCE_QUERY = """
-    query AllGrievanceTickets {
-      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at") {
-        edges {
-          node {
-            status
-            category
-            admin
-            language
-            description
-            consent
-            createdAt
-          }
-        }
-      }
-    }
-    """
-
     FILTER_BY_SEARCH = """
         query AllGrievanceTickets($search: String) {
           allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", search: $search) {
@@ -79,6 +61,8 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 description
                 consent
                 createdAt
+                urgency
+                priority
               }
             }
           }
@@ -90,13 +74,19 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", admin: $admin) {
         edges {
           node {
-            status
+            id
+            unicefId
+            householdUnicefId
             category
+            status
+            issueType
             admin
             language
             description
             consent
             createdAt
+            urgency
+            priority
           }
         }
       }
@@ -119,6 +109,8 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             description
             consent
             createdAt
+            urgency
+            priority
           }
         }
       }
@@ -141,22 +133,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             description
             consent
             createdAt
+            urgency
+            priority
           }
         }
-      }
-    }
-    """
-
-    GRIEVANCE_QUERY = """
-    query GrievanceTicket($id: ID!) {
-      grievanceTicket(id: $id) {
-        status
-        category
-        admin
-        language
-        description
-        consent
-        createdAt
       }
     }
     """
@@ -177,6 +157,8 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             description
             consent
             createdAt
+            urgency
+            priority
           }
         }
       }
@@ -188,13 +170,115 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", assignedTo: $assignedTo) {
         edges {
           node {
-            status
+            id
+            unicefId
+            householdUnicefId
             category
+            status
+            issueType
             admin
             language
             description
             consent
             createdAt
+            urgency
+            priority
+          }
+        }
+      }
+    }
+    """
+
+    FILTER_BY_ISSUE_TYPE = """
+        query AllGrievanceTickets($issueType: String) {
+          allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", issueType: $issueType) {
+            edges {
+              node {
+                id
+                unicefId
+                householdUnicefId
+                category
+                status
+                issueType
+                admin
+                language
+                description
+                consent
+                createdAt
+                urgency
+                priority
+              }
+            }
+          }
+        }
+        """
+
+    FILTER_BY_PRIORITY = """
+        query AllGrievanceTickets($priority: String) {
+          allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", priority: $priority) {
+            edges {
+              node {
+                id
+                unicefId
+                householdUnicefId
+                category
+                status
+                issueType
+                admin
+                language
+                description
+                consent
+                createdAt
+                urgency
+                priority
+              }
+            }
+          }
+        }
+        """
+
+    FILTER_BY_URGENCY = """
+    query AllGrievanceTickets($urgency: String) {
+      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", urgency: $urgency) {
+        edges {
+          node {
+            id
+            unicefId
+            householdUnicefId
+            category
+            status
+            issueType
+            admin
+            language
+            description
+            consent
+            createdAt
+            urgency
+            priority
+          }
+        }
+      }
+    }
+    """
+
+    FILTER_BY_REGISTRATION_DATA_IMPORT = """
+    query AllGrievanceTickets($registrationDataImport: String) {
+      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", registrationDataImport: $registrationDataImport) {
+        edges {
+          node {
+            id
+            unicefId
+            householdUnicefId
+            category
+            status
+            issueType
+            admin
+            language
+            description
+            consent
+            createdAt
+            urgency
+            priority
           }
         }
       }
@@ -248,10 +332,16 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             original_id=area_type.id,
         )
         cls.admin_area_1_new = AreaFactory(
-            name="City Test", area_type=area_type_new, p_code="123aa123", original_id=cls.admin_area_1.id
+            name="City Test",
+            area_type=area_type_new,
+            p_code="123aa123",
+            original_id=cls.admin_area_1.id
         )
         cls.admin_area_2_new = AreaFactory(
-            name="City Example", area_type=area_type_new, p_code="sadasdasfd222", original_id=cls.admin_area_2.id
+            name="City Example",
+            area_type=area_type_new,
+            p_code="sadasdasfd222",
+            original_id=cls.admin_area_2.id
         )
 
         cls.grievance_ticket_1 = GrievanceTicket.objects.create(
@@ -498,9 +588,9 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
-            request_string=self.FILTER_BY_CREATED_AT,
+            request_string=self.FILTER_BY_ADMIN_AREA,
             context={"user": self.user},
-            variables={"admin": self.grievance_ticket_1.admin2_new.id},
+            variables={"admin": [self.grievance_ticket_1.admin2_new.id]},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
@@ -508,7 +598,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
-            request_string=self.FILTER_BY_CREATED_AT,
+            request_string=self.FILTER_BY_ISSUE_TYPE,
             context={"user": self.user},
             variables={"issue_type": "Fraud and forgery"},
         )
@@ -518,7 +608,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
-            request_string=self.FILTER_BY_CREATED_AT,
+            request_string=self.FILTER_BY_PRIORITY,
             context={"user": self.user},
             variables={"priority": "Low"},
         )
@@ -528,7 +618,27 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
-            request_string=self.FILTER_BY_CREATED_AT,
+            request_string=self.FILTER_BY_URGENCY,
             context={"user": self.user},
             variables={"urgency": "Very urgent"},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_by_assigned_to(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_ASSIGNED_TO,
+            context={"user": self.user},
+            variables={"assigned_to": self.user2.id},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_by_registration_data_import(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_REGISTRATION_DATA_IMPORT,
+            context={"user": self.user},
+            variables={"registration_data_import": "04992dce-154b-4938-8e47-74341541ebcf"},
         )
