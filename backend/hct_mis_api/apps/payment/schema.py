@@ -344,7 +344,12 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class FspChoices(graphene.ObjectType):
-    pass
+    class FspChoice(graphene.ObjectType):
+        id = graphene.String()
+        name = graphene.String()
+
+    delivery_mechanism = graphene.String()
+    fsps = graphene.List(FspChoice)
 
 
 class Query(graphene.ObjectType):
@@ -461,7 +466,19 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
     all_delivery_mechanisms = graphene.List(ChoiceObject)
-    available_fsps_for_delivery_mechanisms = graphene.List(FspChoices)
+    available_fsps_for_delivery_mechanisms = graphene.List(
+        FspChoices, delivery_mechanisms=graphene.List(graphene.String)
+    )
+
+    def resolve_available_fsps_for_delivery_mechanisms(self, info, delivery_mechanisms):
+        def get_fsps_for_delivery_mechanism(mechanism):
+            fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
+            return [{"id": fsp.id, "name": fsp.name} for fsp in fsps] if fsps else []
+
+        return [
+            {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
+            for mechanism in delivery_mechanisms
+        ]
 
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (

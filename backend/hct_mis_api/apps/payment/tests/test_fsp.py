@@ -1,5 +1,6 @@
 import json
 
+from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.household.fixtures import IndividualRoleInHouseholdFactory
@@ -270,6 +271,19 @@ query AllDeliveryMechanisms {
         )
         assert "errors" not in response
 
+        FinancialServiceProviderFactory(
+            name="Santander",
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
+        )
+        FinancialServiceProviderFactory(
+            name="Bank of America",
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
+        )
+        FinancialServiceProviderFactory(
+            name="Bank of Europe",
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
+        )
+
         query = """
 query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
     availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
@@ -284,5 +298,15 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         query_response = self.graphql_request(
             request_string=query,
             context={"user": self.user},
+            variables={
+                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER]
+            },
         )
-        print("QR", query_response)
+        data = query_response["data"]["availableFspsForDeliveryMechanisms"]
+        assert len(data) == 2
+        assert data[0]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_TRANSFER
+        assert data[0]["fsps"][0]["name"] == "Santander"
+        assert data[1]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_VOUCHER
+        voucher_fsp_names = [f["name"] for f in data[1]["fsps"]]
+        assert "Bank of America" in voucher_fsp_names
+        assert "Bank of Europe" in voucher_fsp_names
