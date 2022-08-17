@@ -2520,6 +2520,7 @@ type PaymentNode implements Node {
   financialServiceProvider: FinancialServiceProviderNode
   collector: IndividualNode!
   assignedPaymentChannel: PaymentChannelNode
+  unicefId: String!
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
   paymentPlanSoftConflicted: Boolean
