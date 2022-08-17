@@ -8,7 +8,7 @@ from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
 logger = logging.getLogger(__name__)
 
 
-TERM_FIELDS = ("category", "assigned_to", "issue_type", "priority", "urgency", "grievance_type")
+TERM_FIELDS = ("category", "assigned_to", "issue_type", "priority", "urgency", "grievance_type", "fsp")
 TERMS_FIELDS = ("status", "admin")
 
 
