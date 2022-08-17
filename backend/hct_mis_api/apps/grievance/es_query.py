@@ -51,8 +51,8 @@ def create_es_query(options):
 
         all_queries.append(date_range)
 
-    search = options.pop("search")
-    if search.strip():
+    search = options.pop("search", None)
+    if search and search.strip():
         key, value = tuple(search.split(" ", 1))
         if key == "ticket_id":
             query_search.append({

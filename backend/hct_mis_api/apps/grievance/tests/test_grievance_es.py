@@ -36,6 +36,15 @@ def execute_test_es_query(query_dict):
 
 
 class TestGrievanceQueryElasticSearch(APITestCase):
+    PERMISSION = (
+        Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+        Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+        Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+        Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+        Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+        Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER
+    )
+
     ALL_GRIEVANCE_QUERY = """
     query AllGrievanceTickets {
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at") {
@@ -117,8 +126,12 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", status: $status) {
         edges {
           node {
-            status
+            id
+            unicefId
+            householdUnicefId
             category
+            status
+            issueType
             admin
             language
             description
@@ -149,8 +162,12 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", category: $category) {
         edges {
           node {
-            status
+            id
+            unicefId
+            householdUnicefId
             category
+            status
+            issueType
             admin
             language
             description
@@ -378,19 +395,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_unicef_id(self, mock_execute_test_es_query):
-
-        self.create_user_role_with_permissions(
-            self.user,
-            [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER
-            ],
-            self.business_area
-        )
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
@@ -400,18 +405,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_household_unicef_id(self, mock_execute_test_es_query):
-        self.create_user_role_with_permissions(
-            self.user,
-            [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER
-            ],
-            self.business_area
-        )
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
@@ -421,21 +415,30 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_head_of_household_last_name(self, mock_execute_test_es_query):
-        self.create_user_role_with_permissions(
-            self.user,
-            [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER
-            ],
-            self.business_area
-        )
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
             context={"user": self.user},
             variables={"search": "last_name Kowalska_1"},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_category(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_CATEGORY,
+            context={"user": self.user},
+            variables={"category": "Positive Feedback"},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_status(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_STATUS,
+            context={"user": self.user},
+            variables={"status": ["On Hold"]},
         )
