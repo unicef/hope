@@ -1,4 +1,7 @@
 from datetime import datetime
+from django.utils import timezone
+
+from django.core.management import call_command
 
 from parameterized import parameterized
 from django.conf import settings
@@ -6,15 +9,14 @@ from django.conf import settings
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
 from hct_mis_api.apps.household.fixtures import create_household
 
 
@@ -168,39 +170,28 @@ class TestGrievanceQuery(APITestCase):
         settings.ELASTICSEARCH_GRIEVANCE_TURN_ON = False
 
         create_afghanistan()
+        call_command("loadcountries")
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
-        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sadasdasfd222")
 
         country = Country.objects.first()
         area_type_new = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
             country=country,
-            original_id=area_type.id,
         )
-        cls.admin_area_1_new = AreaFactory(
-            name="City Test", area_type=area_type_new, p_code="123aa123", original_id=cls.admin_area_1.id
-        )
-        cls.admin_area_2_new = AreaFactory(
-            name="City Example", area_type=area_type_new, p_code="sadasdasfd222", original_id=cls.admin_area_2.id
-        )
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type_new, p_code="123aa123")
+        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type_new, p_code="sadasdasfd222")
 
         _, individuals = create_household({"size": 2})
         cls.individual_1 = individuals[0]
         cls.individual_2 = individuals[1]
 
         created_at_dates_to_set = {
-            GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
-            GrievanceTicket.STATUS_ON_HOLD: datetime(year=2020, month=7, day=12),
-            GrievanceTicket.STATUS_IN_PROGRESS: datetime(year=2020, month=8, day=22),
+            GrievanceTicket.STATUS_NEW: timezone.make_aware(datetime(year=2020, month=3, day=12)),
+            GrievanceTicket.STATUS_ON_HOLD: timezone.make_aware(datetime(year=2020, month=7, day=12)),
+            GrievanceTicket.STATUS_IN_PROGRESS: timezone.make_aware(datetime(year=2020, month=8, day=22)),
         }
 
         grievances_to_create = (
@@ -208,7 +199,6 @@ class TestGrievanceQuery(APITestCase):
                 **{
                     "business_area": cls.business_area,
                     "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1_new,
                     "language": "Polish",
                     "consent": True,
                     "description": "Just random description",
@@ -222,7 +212,6 @@ class TestGrievanceQuery(APITestCase):
                 **{
                     "business_area": cls.business_area,
                     "admin2": cls.admin_area_2,
-                    "admin2_new": cls.admin_area_2_new,
                     "language": "English",
                     "consent": True,
                     "description": "Just random description",
@@ -236,7 +225,6 @@ class TestGrievanceQuery(APITestCase):
                 **{
                     "business_area": cls.business_area,
                     "admin2": cls.admin_area_2,
-                    "admin2_new": cls.admin_area_2_new,
                     "language": "Polish, English",
                     "consent": True,
                     "description": "Just random description",
@@ -259,9 +247,8 @@ class TestGrievanceQuery(APITestCase):
             golden_records_individual=cls.individual_1,
             possible_duplicate=cls.individual_2,
             score_min=100,
-            score_max=150
+            score_max=150,
         )
-
 
     @parameterized.expand(
         [
@@ -306,7 +293,7 @@ class TestGrievanceQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ADMIN_AREA,
             context={"user": self.user},
-            variables={"admin": self.admin_area_1_new.id},
+            variables={"admin": self.admin_area_1.id},
         )
 
     def test_grievance_list_filtered_by_created_at(self):

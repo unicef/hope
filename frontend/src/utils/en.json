@@ -147,6 +147,7 @@
   "You did not approve any changes.": "You did not approve any changes.",
   "By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found": "By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found",
   "Are you sure you want to close the ticket?": "Are you sure you want to close the ticket?",
+  "This ticket will be closed without running the deduplication process.": "This ticket will be closed without running the deduplication process.",
   " By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found": " By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found",
   "Close Ticket": "Close Ticket",
   "Duplicate Document Conflict": "Duplicate Document Conflict",
@@ -619,5 +620,16 @@
   "All Tickets": "All Tickets",
   "Tickets ID": "Tickets ID",
   "Export Report": "Export Report",
-  "Upload Tickets": "Upload Tickets"
+  "Upload Tickets": "Upload Tickets",
+  "Re-Generate Report": "Re-Generate Report",
+  "Re-Generating Report": "Re-Generating Report",
+  "Re-Generating Report action failed.": "Re-Generating Report action failed.",
+  "Report is in processing status for over 30 min.": "Report is in processing status for over 30 min.",
+  "Please wait or re-generate report.": "Please wait or re-generate report.",
+  "Exporting...": "Exporting...",
+  "Download Xlsx": "Download Xlsx",
+  "Exporting XLSX started. Please check your email.": "Exporting XLSX started. Please check your email.",
+  "Next": "Next",
+  "Back": "Back",
+  "Not assigned": "Not assigned"
 }

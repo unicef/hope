@@ -162,6 +162,7 @@ export function GrievancesTableRow({
       <TableCell align='left'>
         <UniversalMoment>{ticket.userModified}</UniversalMoment>
       </TableCell>
+      <TableCell align='left'>{ticket.totalDays}</TableCell>
     </ClickableTableRow>
   );
 }

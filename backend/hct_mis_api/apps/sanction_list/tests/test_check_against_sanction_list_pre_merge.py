@@ -1,17 +1,15 @@
 from django.conf import settings
-from django.core.management import call_command
 
 from constance.test import override_config
-from django_countries.fields import Country
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     DocumentType,
     Individual,
@@ -26,14 +24,13 @@ from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTas
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 class TestSanctionListPreMerge(BaseElasticSearchTestCase):
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     TEST_FILES_PATH = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-
-        call_command("loadcountries")
 
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
         task = LoadSanctionListXMLTask(full_sanction_list_path)
@@ -117,8 +114,9 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
         )
 
         ind = Individual.objects.get(full_name="Abdul Afghanistan")
+        country = geo_models.Country.objects.get(iso_code3="AFG")
         doc_type = DocumentType.objects.create(
-            country=Country("AFG"),
+            country=country,
             label="National ID",
             type=IDENTIFICATION_TYPE_NATIONAL_ID,
         )

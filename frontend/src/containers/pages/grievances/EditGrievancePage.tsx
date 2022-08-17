@@ -259,7 +259,7 @@ export const EditGrievancePage = (): React.ReactElement => {
       validationSchema={validationSchema}
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
-        const DatachangeComponent = thingForSpecificGrievanceType(
+        const DataChangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
           EmptyComponent,
@@ -460,7 +460,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                       permissions,
                     ) && (
                       <BoxPadding>
-                        <DatachangeComponent
+                        <DataChangeComponent
                           values={values}
                           setFieldValue={setFieldValue}
                         />

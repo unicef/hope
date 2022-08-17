@@ -1,8 +1,6 @@
 from django.contrib import admin
-from django.contrib.admin import ChoicesFieldListFilter, RelatedFieldListFilter
 
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import RelatedFieldComboFilter
 from adminfilters.mixin import AdminFiltersMixin
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 

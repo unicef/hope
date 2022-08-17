@@ -1,9 +1,16 @@
-import datetime
 import logging
 
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.db.models import Q
+from django.db.models import (
+    Case,
+    DateField,
+    Q,
+    When,
+    F,
+)
+
+from django.utils import timezone
 
 import graphene
 from graphene import relay
@@ -16,11 +23,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.core_fields_attributes import (
-    TYPE_IMAGE,
-    FieldFactory,
-    Scope,
-)
+from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
@@ -83,6 +86,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
     priority = graphene.Int()
     urgency = graphene.Int()
+    total_days = graphene.String()
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -132,11 +136,11 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_admin(grievance_ticket: GrievanceTicket, info):
-        return getattr(grievance_ticket.admin2_new, "name", None)
+        return getattr(grievance_ticket.admin2, "name", None)
 
     @staticmethod
     def resolve_admin2(grievance_ticket: GrievanceTicket, info):
-        return grievance_ticket.admin2_new
+        return grievance_ticket.admin2
 
     @staticmethod
     def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
@@ -460,8 +464,33 @@ class Query(graphene.ObjectType):
                 GrievanceTicket.objects
                 .filter(id__in=grievance_ids)
                 .select_related("assigned_to", "created_by")
+                .annotate(
+                    total=Case(
+                        When(
+                            status=GrievanceTicket.STATUS_CLOSED,
+                            then=F("updated_at") - F("created_at"),
+                        ),
+                        default=timezone.now() - F("created_at"),
+                        output_field=DateField(),
+                    )
+                )
+                .annotate(total_days=F("total__day"))
             )
-        return GrievanceTicket.objects.filter(ignored=False).select_related("assigned_to", "created_by")
+        return (
+            GrievanceTicket.objects
+            .filter(ignored=False).select_related("assigned_to", "created_by")
+            .annotate(
+                total=Case(
+                    When(
+                        status=GrievanceTicket.STATUS_CLOSED,
+                        then=F("updated_at") - F("created_at"),
+                    ),
+                    default=timezone.now() - F("created_at"),
+                    output_field=DateField(),
+                )
+            )
+            .annotate(total_days=F("total__day"))
+        )
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
@@ -533,7 +562,7 @@ class Query(graphene.ObjectType):
         if filters.get("administrative_area") is not None:
             try:
                 grievance_tickets = grievance_tickets.filter(
-                    admin2_new=Area.objects.get(id=filters.get("administrative_area"))
+                    admin2=Area.objects.get(id=filters.get("administrative_area"))
                 )
             except Area.DoesNotExist:
                 pass

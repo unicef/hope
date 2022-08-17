@@ -7,4 +7,4 @@ from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
 
 class Command(makemigrations.Command):
     def handle(self, *args, **options):
-        PullFromDatahubTask().execute()
+        print(PullFromDatahubTask().execute())

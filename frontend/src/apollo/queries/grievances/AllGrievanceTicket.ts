@@ -94,6 +94,8 @@ export const AllGrievanceTicket = gql`
           }
           priority
           urgency
+          updatedAt
+          totalDays
         }
       }
     }

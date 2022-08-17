@@ -15,7 +15,7 @@ from django_filters import (
 )
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.filters import DateTimeRangeFilter
+from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import Household, Individual
@@ -100,6 +100,7 @@ class GrievanceTicketFilter(FilterSet):
     urgency = ChoiceFilter(field_name="urgency", choices=GrievanceTicket.URGENCY_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
+    total_days = IntegerFilter(field_name="total_days")
 
     class Meta:
         fields = {
@@ -123,6 +124,7 @@ class GrievanceTicketFilter(FilterSet):
             "household_unicef_id",
             "issue_type",
             "priority",
+            "total_days",
         )
     )
 
@@ -155,7 +157,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def admin_filter(self, qs, name, value):
         if value:
-            return qs.filter(admin2_new__in=[admin.id for admin in value])
+            return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
     def permissions_filter(self, qs, name, value):
