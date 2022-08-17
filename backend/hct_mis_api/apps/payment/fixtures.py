@@ -547,7 +547,7 @@ class PaymentFactory(factory.DjangoModelFactory):
         model = Payment
 
     payment_plan = factory.SubFactory(PaymentPlanFactory)
-    business_area = BusinessArea.objects.get(slug="afghanistan")
+    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     status = fuzzy.FuzzyChoice(
         PaymentRecord.STATUS_CHOICE,
         getter=lambda c: c[0],
@@ -601,13 +601,15 @@ class PaymentFactory(factory.DjangoModelFactory):
 
 
 def generate_real_payment_plans():
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3)
     program = RealProgramFactory()
     payment_plans = PaymentPlanFactory.create_batch(
-        3, program=program, business_area=BusinessArea.objects.get(slug="afghanistan")
+        3, program=program, business_area=afghanistan
     )
     program.households.set(Household.objects.all().values_list("id", flat=True))
     for payment_plan in payment_plans:
         for household in program.households.all():
-            PaymentFactory(payment_plan=payment_plan, household=household)
+            PaymentFactory(payment_plan=payment_plan, household=household, business_area=afghanistan)
