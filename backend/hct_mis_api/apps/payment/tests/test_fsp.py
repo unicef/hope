@@ -192,7 +192,3 @@ query AllDeliveryMechanisms {
             variables=create_program_mutation_variables,
         )
         assert response["errors"][0]["message"] == "Delivery mechanisms must be unique"
-
-
-# TODO:
-# test getting delivery mechanisms on FE by query
