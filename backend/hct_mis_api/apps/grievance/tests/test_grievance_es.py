@@ -108,8 +108,12 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", createdAtRange: $createdAtRange) {
         edges {
           node {
-            status
+            id
+            unicefId
+            householdUnicefId
             category
+            status
+            issueType
             admin
             language
             description
@@ -222,23 +226,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
     @classmethod
     def setUpTestData(cls):
         settings.ELASTICSEARCH_GRIEVANCE_TURN_ON = True
-        grievance_es_index = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "tests", "grievance_es_index.json"
-        )
-
-        with open(grievance_es_index) as f:
-            cls.es = Elasticsearch("http://elasticsearch:9200")
-            cls.es.indices.create(
-                index="test_es_db",
-                body={
-                    "settings": {
-                        "number_of_shards": 1,
-                        "number_of_replicas": 1,
-                        "index.store.type": "mmapfs",
-                    },
-                    "mappings": json.load(f)
-                }
-            )
+        cls.es = cls.create_es_db()
 
         create_afghanistan()
         cls.user = UserFactory.create()
@@ -321,7 +309,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "issue_type": 12,
                 "created_by": cls.user2,
                 "assigned_to": cls.user2,
-                "created_at": "2022-04-30T09:54:07.827000",
+                "created_at": "2022-05-12T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0001",
                 "priority": 2,
                 "urgency": 3
@@ -345,7 +333,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "household_unicef_id": "HH-20-0000.0002",
                 "priority": PRIORITY_CHOICES.get(cls.grievance_ticket_2.priority),
                 "urgency": URGENCY_CHOICES.get(cls.grievance_ticket_2.urgency),
-                "grievance_type": "system",
+                "grievance_type": "user",
                 "head_of_household_last_name": "Kowalska_2",
                 "fsp": "Goldman Sachs"
             }
@@ -363,7 +351,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "status": GrievanceTicket.STATUS_ON_HOLD,
                 "created_by": cls.user,
                 "assigned_to": cls.user,
-                "created_at": "2022-05-11T11:54:11.827000",
+                "created_at": "2022-05-05T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0003",
                 "priority": 3,
                 "urgency": 1
@@ -383,18 +371,40 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "status": STATUS_CHOICES.get(cls.grievance_ticket_3.status),
                 "issue_type": None,
                 "assigned_to": cls.user.id,
-                "created_at": "2022-05-12T09:12:07.857000",
+                "created_at": "2022-05-05T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0003",
                 "priority": PRIORITY_CHOICES.get(cls.grievance_ticket_3.priority),
                 "urgency": URGENCY_CHOICES.get(cls.grievance_ticket_3.urgency),
-                "grievance_type": "system",
+                "grievance_type": "user",
                 "head_of_household_last_name": "Kowalska_3",
                 "fsp": None
             }
         )
 
+    @staticmethod
+    def create_es_db():
+        grievance_es_index = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "tests", "grievance_es_index.json"
+        )
+
+        with open(grievance_es_index) as f:
+            es = Elasticsearch("http://elasticsearch:9200")
+            es.indices.create(
+                index="test_es_db",
+                body={
+                    "settings": {
+                        "number_of_shards": 1,
+                        "number_of_replicas": 1,
+                        "index.store.type": "mmapfs",
+                    },
+                    "mappings": json.load(f)
+                }
+            )
+
+        return es
+
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
-    def test_grievance_query_es_search_unicef_id(self, mock_execute_test_es_query):
+    def test_grievance_query_es_search_by_unicef_id(self, mock_execute_test_es_query):
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
@@ -404,7 +414,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
-    def test_grievance_query_es_search_household_unicef_id(self, mock_execute_test_es_query):
+    def test_grievance_query_es_search_by_household_unicef_id(self, mock_execute_test_es_query):
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
@@ -414,7 +424,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
-    def test_grievance_query_es_search_head_of_household_last_name(self, mock_execute_test_es_query):
+    def test_grievance_query_es_search_by_head_of_household_last_name(self, mock_execute_test_es_query):
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
@@ -424,7 +434,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
-    def test_grievance_query_es_search_category(self, mock_execute_test_es_query):
+    def test_grievance_query_es_search_by_category(self, mock_execute_test_es_query):
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
@@ -434,11 +444,91 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
-    def test_grievance_query_es_search_status(self, mock_execute_test_es_query):
+    def test_grievance_query_es_search_by_status(self, mock_execute_test_es_query):
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_STATUS,
             context={"user": self.user},
             variables={"status": ["On Hold"]},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_by_min_date_range(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_CREATED_AT,
+            context={"user": self.user},
+            variables={"created_at": '{"max": "2022-05-01"}'},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_by_max_date_range(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_CREATED_AT,
+            context={"user": self.user},
+            variables={"created_at": '{"min": "2022-05-10"}'},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_by_min_and_max_date_range(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_CREATED_AT,
+            context={"user": self.user},
+            variables={"created_at": '{"min": "2022-05-01", "max": "2022-05-10"}'},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_by_admin(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_CREATED_AT,
+            context={"user": self.user},
+            variables={"admin": self.grievance_ticket_1.admin2_new.id},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_by_admin(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_CREATED_AT,
+            context={"user": self.user},
+            variables={"admin": self.grievance_ticket_1.admin2_new.id},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_by_issue_type(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_CREATED_AT,
+            context={"user": self.user},
+            variables={"issue_type": "Fraud and forgery"},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_by_priority(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_CREATED_AT,
+            context={"user": self.user},
+            variables={"priority": "Low"},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_by_urgency(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_CREATED_AT,
+            context={"user": self.user},
+            variables={"urgency": "Very urgent"},
         )
