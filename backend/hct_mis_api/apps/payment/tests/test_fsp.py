@@ -85,6 +85,20 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
             {"name": GenericPayment.DELIVERY_TYPE_VOUCHER, "order": 2},
         )
 
+    def test_being_able_to_get_possible_delivery_mechanisms(self):
+        query = """
+query AllDeliveryMechanisms {
+    allDeliveryMechanisms {
+        name
+        value
+    }
+}
+"""
+        response = self.graphql_request(request_string=query, context={"user": self.user})
+        assert response is not None and "data" in response
+        all_delivery_mechanisms = response["data"]["allDeliveryMechanisms"]
+        assert all(key in entry for entry in all_delivery_mechanisms for key in ["name", "value"])
+
     def test_lacking_delivery_mechanisms(self):
         registration_data_import = RegistrationDataImportFactory(business_area=self.business_area)
 

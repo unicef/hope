@@ -56,6 +56,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     Payment,
     DeliveryMechanismPerPaymentPlan,
+    GenericPayment,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -456,6 +457,7 @@ class Query(graphene.ObjectType):
         filterset_class=PaymentFilter,
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
+    all_delivery_mechanisms = graphene.List(ChoiceObject)
 
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (
@@ -520,6 +522,9 @@ class Query(graphene.ObjectType):
 
     def resolve_payment_verification_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
+
+    def resolve_all_delivery_mechanisms(self, info, **kwargs):
+        return to_choice_object(GenericPayment.DELIVERY_TYPE_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
