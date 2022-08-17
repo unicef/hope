@@ -60,8 +60,11 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             edges {
               node {
                 id
-                status
+                unicefId
+                householdUnicefId
                 category
+                status
+                issueType
                 admin
                 language
                 description
@@ -393,4 +396,46 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             request_string=self.FILTER_BY_SEARCH,
             context={"user": self.user},
             variables={"search": "ticket_id GRV-000001"},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_household_unicef_id(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER
+            ],
+            self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_SEARCH,
+            context={"user": self.user},
+            variables={"search": "ticket_hh_id HH-20-0000.0003"},
+        )
+
+    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
+    def test_grievance_query_es_search_head_of_household_last_name(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER
+            ],
+            self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_SEARCH,
+            context={"user": self.user},
+            variables={"search": "last_name Kowalska_1"},
         )
