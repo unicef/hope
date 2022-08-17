@@ -547,7 +547,7 @@ class PaymentFactory(factory.DjangoModelFactory):
         model = Payment
 
     payment_plan = factory.SubFactory(PaymentPlanFactory)
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    business_area = BusinessArea.objects.get(slug="afghanistan")
     status = fuzzy.FuzzyChoice(
         PaymentRecord.STATUS_CHOICE,
         getter=lambda c: c[0],
