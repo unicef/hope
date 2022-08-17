@@ -2,8 +2,8 @@ import logging
 
 import ast
 
-from .documents import GrievanceTicketDocument
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +12,7 @@ TERM_FIELDS = ("category", "assigned_to", "issue_type", "priority", "urgency", "
 TERMS_FIELDS = ("status", "admin")
 
 
-def execute_query(query_dict):
+def execute_es_query(query_dict):
     es_response = (
         GrievanceTicketDocument
         .search()
@@ -24,16 +24,17 @@ def execute_query(query_dict):
     return es_ids
 
 
-def search_es(options):
+def create_es_query(options):
     all_queries = []
     query_search = []
     query_term_fields = []
     query_terms_fields = []
 
-    grievance_status = options.pop("grievance_status")
-    created_at_range = ast.literal_eval(options.pop("created_at_range"))
+    grievance_status = options.pop("grievance_status", "active")
+    created_at_range = options.pop("created_at_range", None)
 
-    if created_at_range != "":
+    if created_at_range and created_at_range != "\"\"":
+        created_at_range = ast.literal_eval(options.pop("created_at_range"))
         date_range = {
             "range": {
                 "created_at": {}
@@ -139,4 +140,4 @@ def search_es(options):
             }
         }
 
-    return execute_query(query_dict)
+    return query_dict

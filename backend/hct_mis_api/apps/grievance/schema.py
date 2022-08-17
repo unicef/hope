@@ -56,7 +56,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.grievance.es_query import search_es
+from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
@@ -453,7 +453,9 @@ class Query(graphene.ObjectType):
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         if settings.ELASTICSEARCH_GRIEVANCE_TURN_ON:
-            grievance_ids = search_es(kwargs)
+            grievance_es_query_dict = create_es_query(kwargs)
+            grievance_ids = execute_es_query(grievance_es_query_dict)
+
             return (
                 GrievanceTicket.objects
                 .filter(id__in=grievance_ids)

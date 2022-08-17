@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from parameterized import parameterized
+from django.conf import settings
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -164,6 +165,8 @@ class TestGrievanceQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        settings.ELASTICSEARCH_GRIEVANCE_TURN_ON = False
+
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()

@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -9,7 +11,7 @@ from hct_mis_api.apps.core.fixtures import (
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 
@@ -32,6 +34,8 @@ class TestGrievanceQuerySearchFilter(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        settings.ELASTICSEARCH_GRIEVANCE_TURN_ON = False
+
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()
