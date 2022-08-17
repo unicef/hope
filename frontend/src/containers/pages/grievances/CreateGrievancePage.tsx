@@ -301,7 +301,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
       validationSchema={validationSchemaWithSteps(activeStep)}
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
-        const DatachangeComponent = thingForSpecificGrievanceType(
+        const DataChangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
           EmptyComponent,
@@ -555,10 +555,12 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           </Box>
                         </BoxPadding>
                       )}
-                      <DatachangeComponent
-                        values={values}
-                        setFieldValue={setFieldValue}
-                      />
+                      {activeStep === steps.length - 1 && (
+                        <DataChangeComponent
+                          values={values}
+                          setFieldValue={setFieldValue}
+                        />
+                      )}
                       {dataChangeErrors(errors, touched)}
                       <Box pt={3} display='flex' flexDirection='row'>
                         <Box mr={3}>
