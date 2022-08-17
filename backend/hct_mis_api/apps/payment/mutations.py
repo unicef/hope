@@ -721,17 +721,22 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         if len(list(set(delivery_mechanisms_in_order))) != len(list(delivery_mechanisms_in_order)):
             raise GraphQLError("Delivery mechanisms must be unique")
 
-        collectors = payment_plan.target_population.households.filter(
+        collectors_in_target_population = payment_plan.target_population.households.filter(
             individuals_and_roles__role=ROLE_PRIMARY,
         ).values_list("individuals_and_roles__individual", flat=True)
 
         collectors_that_can_be_paid = PaymentChannel.objects.filter(
-            individual__in=collectors,
+            individual__in=collectors_in_target_population,
             delivery_mechanism__in=delivery_mechanisms_in_order,
         ).values_list("individual", flat=True)
-        collectors_that_cant_be_paid = collectors.exclude(id__in=collectors_that_can_be_paid)
 
-        if collectors_that_cant_be_paid.exists():
+        # TODO: use exclude
+        collectors_that_cant_be_paid = [
+            c for c in collectors_in_target_population if c not in collectors_that_can_be_paid
+        ]
+
+        # if collectors_that_cant_be_paid.exists():
+        if collectors_that_cant_be_paid:
             raise GraphQLError(
                 "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
                 # "Please add TODO to move to next step."

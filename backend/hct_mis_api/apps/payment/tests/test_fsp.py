@@ -16,6 +16,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import HEAD, MALE
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestFSPSetup(APITestCase):
@@ -158,6 +159,7 @@ query AllDeliveryMechanisms {
             created_by=self.user,
             candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
             business_area=self.business_area,
+            status=TargetPopulation.STATUS_LOCKED,
         )
         target_population.apply_criteria_query()  # simulate having TP households calculated
         payment_plan = PaymentPlanFactory(
@@ -201,8 +203,86 @@ query AllDeliveryMechanisms {
         assert response["errors"][0]["message"] == "Delivery mechanisms must be unique"
 
     def test_assigning_fsp_per_delivery_mechanism(self):
-        pass
         # make a query with a list of delivery mechanisms
         # like query: A, B, C
         # in response, have a list/dict, like this:
         # A - Bank1, Bank2, B - Bank2, Bank3, C - Bank1, Bank3, etc.
+
+        registration_data_import = RegistrationDataImportFactory(business_area=self.business_area)
+
+        self.household_1, self.individuals_1 = create_household_and_individuals(
+            household_data={
+                "registration_data_import": registration_data_import,
+                "business_area": self.business_area,
+            },
+            individuals_data=[{}],
+        )
+        PaymentChannelFactory(
+            individual=self.individuals_1[0],
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
+        )
+        IndividualRoleInHouseholdFactory(
+            individual=self.individuals_1[0],
+            household=self.household_1,
+            role=ROLE_PRIMARY,
+        )
+
+        self.household_2, self.individuals_2 = create_household_and_individuals(
+            household_data={
+                "registration_data_import": registration_data_import,
+                "business_area": self.business_area,
+            },
+            individuals_data=[{}],
+        )
+        PaymentChannelFactory(
+            individual=self.individuals_2[0],
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+        )
+        IndividualRoleInHouseholdFactory(
+            individual=self.individuals_2[0],
+            household=self.household_2,
+            role=ROLE_PRIMARY,
+        )
+
+        target_population = TargetPopulationFactory(
+            id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
+            created_by=self.user,
+            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+            business_area=self.business_area,
+            status=TargetPopulation.STATUS_LOCKED,
+        )
+        target_population.apply_criteria_query()  # simulate having TP households calculated
+        payment_plan = PaymentPlanFactory(
+            total_households_count=3, target_population=target_population, status=PaymentPlan.Status.LOCKED
+        )
+
+        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        create_program_mutation_variables = dict(
+            input=dict(
+                paymentPlanId=encoded_payment_plan_id,
+                deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
+            )
+        )
+        response = self.graphql_request(
+            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=create_program_mutation_variables,
+        )
+        assert "errors" not in response
+
+        query = """
+query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
+    availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
+        deliveryMechanism
+        fsps {
+            id
+            name
+        }
+    }
+}
+"""
+        query_response = self.graphql_request(
+            request_string=query,
+            context={"user": self.user},
+        )
+        print("QR", query_response)

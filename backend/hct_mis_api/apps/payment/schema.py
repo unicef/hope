@@ -343,6 +343,10 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
 
+class FspChoices(graphene.ObjectType):
+    pass
+
+
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
@@ -457,6 +461,7 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
     all_delivery_mechanisms = graphene.List(ChoiceObject)
+    available_fsps_for_delivery_mechanisms = graphene.List(FspChoices)
 
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (
