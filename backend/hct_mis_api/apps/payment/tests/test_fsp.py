@@ -1,5 +1,6 @@
 import json
 
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.household.fixtures import IndividualRoleInHouseholdFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory, TargetingCriteriaFactory
@@ -39,7 +40,7 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
         )
 
     def test_choosing_delivery_mechanism_order(self):
-        payment_plan = PaymentPlanFactory(total_households_count=1)
+        payment_plan = PaymentPlanFactory(total_households_count=1, status=PaymentPlan.Status.LOCKED)
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         create_program_mutation_variables_without_delivery_mechanisms = dict(
             input=dict(
@@ -157,7 +158,9 @@ query AllDeliveryMechanisms {
             business_area=self.business_area,
         )
         target_population.apply_criteria_query()  # simulate having TP households calculated
-        payment_plan = PaymentPlanFactory(total_households_count=3, target_population=target_population)
+        payment_plan = PaymentPlanFactory(
+            total_households_count=3, target_population=target_population, status=PaymentPlan.Status.LOCKED
+        )
 
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         create_program_mutation_variables = dict(
@@ -178,7 +181,7 @@ query AllDeliveryMechanisms {
         )
 
     def test_providing_non_unique_delivery_mechanisms(self):
-        payment_plan = PaymentPlanFactory(total_households_count=1)
+        payment_plan = PaymentPlanFactory(total_households_count=1, status=PaymentPlan.Status.LOCKED)
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         create_program_mutation_variables = dict(
             input=dict(

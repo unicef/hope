@@ -715,7 +715,8 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     def mutate(cls, root, info, input, **kwargs):
         payment_plan_id = input.get("payment_plan_id")
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
-        # TODO: should there be a check for payment plan status (LOCKED) here?
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
         delivery_mechanisms_in_order = input.get("delivery_mechanisms")
         if len(list(set(delivery_mechanisms_in_order))) != len(list(delivery_mechanisms_in_order)):
             raise GraphQLError("Delivery mechanisms must be unique")
@@ -733,7 +734,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         if collectors_that_cant_be_paid.exists():
             raise GraphQLError(
                 "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
-                "Please add #TODO to move to next step."
+                "Please add TODO to move to next step."
             )
 
         current_time = timezone.now()
