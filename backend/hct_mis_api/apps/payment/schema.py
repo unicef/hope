@@ -290,10 +290,20 @@ class PaymentNode(DjangoObjectType):
         return [json.loads(conflict) for conflict in conflicts_data]
 
 
-# TODO?
-# class DeliveryMechanismNode(DjangoObjectType):
-#     name = graphene.String()
-#     order = graphene.Int()
+class DeliveryMechanismNode(DjangoObjectType):
+    name = graphene.String()
+    order = graphene.Int()
+
+    def resolve_name(self, info):
+        return self.delivery_mechanism
+
+    def resolve_order(self, info):
+        return self.delivery_mechanism_order
+
+    class Meta:
+        model = DeliveryMechanismPerPaymentPlan
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -307,8 +317,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     end_date = graphene.Date()
     currency_name = graphene.String()
     payments_conflicts_count = graphene.Int()
-    delivery_mechanisms = graphene.List(graphene.JSONString)
-    # delivery_mechanisms = graphene.List(DeliveryMechanismNode)
+    delivery_mechanisms = graphene.List(DeliveryMechanismNode)
 
     class Meta:
         model = PaymentPlan
@@ -331,17 +340,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_currency_display()
 
     def resolve_delivery_mechanisms(self, info):
-        return [
-            (
-                {
-                    "name": mechanism.delivery_mechanism,
-                    "order": mechanism.delivery_mechanism_order,
-                }
-            )
-            for mechanism in DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by(
-                "delivery_mechanism_order"
-            )
-        ]
+        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
 
 class Query(graphene.ObjectType):

@@ -24,7 +24,10 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
   chooseDeliveryMechanismsForPaymentPlan(input: $input) {
     paymentPlan {
       id
-      deliveryMechanisms
+      deliveryMechanisms {
+        order
+        name
+      }
     }
   }
 }
@@ -76,13 +79,12 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
             "chooseDeliveryMechanismsForPaymentPlan"
         ]["paymentPlan"]
         self.assertEqual(payment_plan_with_delivery_mechanisms["id"], encoded_payment_plan_id)
-        # TODO: make it not play with stringified jsons
         self.assertEqual(
-            json.loads(payment_plan_with_delivery_mechanisms["deliveryMechanisms"][0]),
+            payment_plan_with_delivery_mechanisms["deliveryMechanisms"][0],
             {"name": GenericPayment.DELIVERY_TYPE_TRANSFER, "order": 1},
         )
         self.assertEqual(
-            json.loads(payment_plan_with_delivery_mechanisms["deliveryMechanisms"][1]),
+            payment_plan_with_delivery_mechanisms["deliveryMechanisms"][1],
             {"name": GenericPayment.DELIVERY_TYPE_VOUCHER, "order": 2},
         )
 
