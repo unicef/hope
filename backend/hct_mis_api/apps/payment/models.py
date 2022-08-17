@@ -236,7 +236,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         related_name="created_payment_plans",
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)  # TODO MB populate?
+    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
@@ -779,6 +779,7 @@ class Payment(SoftDeletableModel, GenericPayment):
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
     assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
+    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
 
     objects = PaymentManager()
 
