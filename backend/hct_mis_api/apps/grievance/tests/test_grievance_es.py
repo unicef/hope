@@ -575,7 +575,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"created_at": '{"max": "2022-05-01"}'},
+            variables={"createdAt": '{"max": "2022-05-01"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
@@ -585,7 +585,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"created_at": '{"min": "2022-05-10"}'},
+            variables={"createdAt": '{"min": "2022-05-10"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
@@ -595,7 +595,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"created_at": '{"min": "2022-05-01", "max": "2022-05-10"}'},
+            variables={"createdAt": '{"min": "2022-05-01", "max": "2022-05-10"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
@@ -605,17 +605,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"admin": self.grievance_ticket_1.admin2_new.id},
-        )
-
-    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
-    def test_grievance_query_es_search_by_admin(self, mock_execute_test_es_query):
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
-
-        self.snapshot_graphql_request(
-            request_string=self.FILTER_BY_ADMIN_AREA,
-            context={"user": self.user},
-            variables={"admin": [self.grievance_ticket_1.admin2_new.id]},
+            variables={"admin": self.admin_area_1_new.id},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
@@ -625,7 +615,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ISSUE_TYPE,
             context={"user": self.user},
-            variables={"issue_type": "Fraud and forgery"},
+            variables={"issueType": "Fraud and forgery"},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
@@ -655,7 +645,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ASSIGNED_TO,
             context={"user": self.user},
-            variables={"assigned_to": self.user2.id},
+            variables={"assignedTo": self.id_to_base64(self.user2.id, "UserNode")},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
@@ -665,7 +655,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_REGISTRATION_DATA_IMPORT,
             context={"user": self.user},
-            variables={"registration_data_import": "04992dce-154b-4938-8e47-74341541ebcf"},
+            variables={"registrationDataImport": "04992dce-154b-4938-8e47-74341541ebcf"},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
