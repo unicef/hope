@@ -710,6 +710,9 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         payment_plan_id = input.get("payment_plan_id")
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         delivery_mechanisms_in_order = input.get("delivery_mechanisms")
+        if list(set(delivery_mechanisms_in_order)) != list(delivery_mechanisms_in_order):
+            raise GraphQLError("Delivery mechanisms must be unique")
+
         current_time = timezone.now()
         for index, delivery_mechanism in enumerate(delivery_mechanisms_in_order):
             DeliveryMechanismPerPaymentPlan.objects.update_or_create(

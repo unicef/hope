@@ -34,10 +34,10 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
 
     def test_choosing_delivery_mechanism_order(self):
         payment_plan = PaymentPlanFactory(total_households_count=1)
-        encoded_payment_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         create_program_mutation_variables_without_delivery_mechanisms = dict(
             input=dict(
-                paymentPlanId=encoded_payment_id,
+                paymentPlanId=encoded_payment_plan_id,
                 deliveryMechanisms=[],
             )
         )
@@ -49,12 +49,12 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
         payment_plan_without_delivery_mechanisms = response_without_mechanisms["data"][
             "chooseDeliveryMechanismsForPaymentPlan"
         ]["paymentPlan"]
-        self.assertEqual(payment_plan_without_delivery_mechanisms["id"], encoded_payment_id)
+        self.assertEqual(payment_plan_without_delivery_mechanisms["id"], encoded_payment_plan_id)
         self.assertEqual(payment_plan_without_delivery_mechanisms["deliveryMechanisms"], [])
 
         create_program_mutation_variables_with_delivery_mechanisms = dict(
             input=dict(
-                paymentPlanId=encoded_payment_id,
+                paymentPlanId=encoded_payment_plan_id,
                 deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
             )
         )
@@ -66,7 +66,7 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
         payment_plan_with_delivery_mechanisms = response_with_mechanisms["data"][
             "chooseDeliveryMechanismsForPaymentPlan"
         ]["paymentPlan"]
-        self.assertEqual(payment_plan_with_delivery_mechanisms["id"], encoded_payment_id)
+        self.assertEqual(payment_plan_with_delivery_mechanisms["id"], encoded_payment_plan_id)
         # TODO: make it not play with stringified jsons
         self.assertEqual(
             json.loads(payment_plan_with_delivery_mechanisms["deliveryMechanisms"][0]),
@@ -76,6 +76,41 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
             json.loads(payment_plan_with_delivery_mechanisms["deliveryMechanisms"][1]),
             {"name": GenericPayment.DELIVERY_TYPE_VOUCHER, "order": 2},
         )
+
+    def test_lacking_delivery_mechanisms(self):
+        payment_plan = PaymentPlanFactory(total_households_count=1)
+        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        create_program_mutation_variables = dict(
+            input=dict(
+                paymentPlanId=encoded_payment_plan_id,
+                deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
+            )
+        )
+        response = self.graphql_request(
+            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=create_program_mutation_variables,
+        )
+        assert (
+            "Selected delivery mechanisms are not sufficient to serve all beneficiaries"
+            in response["errors"][0]["message"]
+        )
+
+    def test_providing_non_unique_delivery_mechanisms(self):
+        payment_plan = PaymentPlanFactory(total_households_count=1)
+        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        create_program_mutation_variables = dict(
+            input=dict(
+                paymentPlanId=encoded_payment_plan_id,
+                deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_TRANSFER],
+            )
+        )
+        response = self.graphql_request(
+            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=create_program_mutation_variables,
+        )
+        assert response["errors"][0]["message"] == "Delivery mechanisms must be unique"
 
 
 # TODO:
