@@ -723,16 +723,18 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         collectors = payment_plan.target_population.households.filter(
             individuals_and_roles__role=ROLE_PRIMARY,
         ).values_list("individuals_and_roles__individual", flat=True)
-        print(collectors)
 
-        # for collector in collectors:
-        #     if not PaymentChannel.objects.filter(
-        #         individual=collector, delivery_mechanism__in=delivery_mechanisms_in_order
-        #     ).exists():
-        #         raise GraphQLError(
-        #             f"Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
-        #             f"Please add {needed_mechanisms} to move to next step."
-        #         )
+        collectors_that_can_be_paid = PaymentChannel.objects.filter(
+            individual__in=collectors,
+            delivery_mechanism__in=delivery_mechanisms_in_order,
+        ).values_list("individual", flat=True)
+        collectors_that_cant_be_paid = collectors.exclude(id__in=collectors_that_can_be_paid)
+
+        if collectors_that_cant_be_paid.exists():
+            raise GraphQLError(
+                "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
+                "Please add #TODO to move to next step."
+            )
 
         current_time = timezone.now()
         for index, delivery_mechanism in enumerate(delivery_mechanisms_in_order):
