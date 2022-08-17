@@ -36,7 +36,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         household = payment.household
 
         payment_row = (
-            str(payment.id),
+            str(payment.unicef_id),
             str(getattr(household, "unicef_id", "")),
             household.size,
             str(household.admin2.title) if household.admin2 else "",

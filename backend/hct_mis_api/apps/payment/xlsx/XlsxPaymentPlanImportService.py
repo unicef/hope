@@ -20,9 +20,9 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         self.errors = []
         self.updates = None
         self.payments_dict = {
-            str(x.id): x for x in self.payment_list
+            str(x.unicef_id): x for x in self.payment_list
         }
-        self.payment_ids = [str(x.id) for x in self.payment_list]
+        self.payment_ids = [str(x.unicef_id) for x in self.payment_list]
 
         self.payments_to_save = []
         self.payment_channel_update = False
