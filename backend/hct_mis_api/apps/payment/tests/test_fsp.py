@@ -181,6 +181,8 @@ query AllDeliveryMechanisms {
             "Selected delivery mechanisms are not sufficient to serve all beneficiaries"
             in response["errors"][0]["message"]
         )
+        # TODO: once it's clear what info to show here, add assertions like
+        # "Please add X, Y and Z to move to next step"
 
     def test_providing_non_unique_delivery_mechanisms(self):
         payment_plan = PaymentPlanFactory(total_households_count=1, status=PaymentPlan.Status.LOCKED)
