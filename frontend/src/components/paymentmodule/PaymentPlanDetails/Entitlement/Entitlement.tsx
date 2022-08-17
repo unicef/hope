@@ -21,12 +21,10 @@ import {
   useExportXlsxPpListMutation,
   useSetSteficonRuleOnPpListMutation,
 } from '../../../../__generated__/graphql';
-
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { LoadingComponent } from '../../../core/LoadingComponent';
-import { Missing } from '../../../core/Missing';
 import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
@@ -271,14 +269,14 @@ export const Entitlement = ({
             </Box>
           </Box>
         </Box>
-        {paymentPlan.totalEntitledQuantityUsd && (
+        {paymentPlan.totalEntitledQuantityUsd ? (
           <>
             <Divider />
             <LabelizedField label={t('Total Cash Received')}>
               <BigValue>USD {paymentPlan.totalEntitledQuantityUsd}</BigValue>
             </LabelizedField>
           </>
-        )}
+        ) : null}
       </ContainerColumnWithBorder>
     </Box>
   );

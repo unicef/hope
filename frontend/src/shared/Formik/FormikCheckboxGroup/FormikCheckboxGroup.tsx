@@ -5,7 +5,6 @@ import { FieldLabel } from '../../../components/core/FieldLabel';
 
 export const FormikCheckboxGroup = ({
   field,
-  form,
   ...otherProps
 }): React.ReactElement => {
   return (

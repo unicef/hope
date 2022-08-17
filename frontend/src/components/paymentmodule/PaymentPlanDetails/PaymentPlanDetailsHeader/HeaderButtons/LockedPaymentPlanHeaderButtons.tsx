@@ -1,5 +1,5 @@
 import { Box } from '@material-ui/core';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';

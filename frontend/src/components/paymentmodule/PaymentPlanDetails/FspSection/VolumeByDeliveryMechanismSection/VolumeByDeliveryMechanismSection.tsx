@@ -3,7 +3,6 @@ import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { MiśTheme } from '../../../../../theme';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../core/LabelizedField';
 import { Missing } from '../../../../core/Missing';
@@ -30,30 +29,10 @@ const FieldBorder = styled.div`
   border-left-style: solid;
 `;
 
-const SummaryBorder = styled.div`
-  padding: ${({ theme }) => theme.spacing(4)}px;
-  border-color: #b1b1b5;
-  border-left-width: 1px;
-  border-left-style: solid;
-`;
-
-const SummaryValue = styled.div`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
-  color: #253b46;
-  font-size: 36px;
-  line-height: 32px;
-  margin-top: ${({ theme }) => theme.spacing(2)}px;
-`;
-
 const ChartContainer = styled.div`
   width: 100px;
   height: 100px;
   margin: 0 auto;
-`;
-
-const Label = styled.p`
-  color: #b1b1b5;
 `;
 
 interface VolumeByDeliveryMechanismSectionProps {
@@ -69,8 +48,6 @@ export const VolumeByDeliveryMechanismSection = ({
     maleChildrenCount,
     femaleAdultsCount,
     maleAdultsCount,
-    totalHouseholdsCount,
-    totalIndividualsCount,
   } = paymentPlan;
 
   return (
