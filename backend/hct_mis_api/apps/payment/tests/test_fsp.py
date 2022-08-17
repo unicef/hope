@@ -197,3 +197,10 @@ query AllDeliveryMechanisms {
             variables=create_program_mutation_variables,
         )
         assert response["errors"][0]["message"] == "Delivery mechanisms must be unique"
+
+    def test_assigning_fsp_per_delivery_mechanism(self):
+        pass
+        # make a query with a list of delivery mechanisms
+        # like query: A, B, C
+        # in response, have a list/dict, like this:
+        # A - Bank1, Bank2, B - Bank2, Bank3, C - Bank1, Bank3, etc.
