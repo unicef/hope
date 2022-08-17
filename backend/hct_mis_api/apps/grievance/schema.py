@@ -1,8 +1,15 @@
-import datetime
 import logging
 
 from django.core.files.storage import default_storage
-from django.db.models import Q
+from django.db.models import (
+    Case,
+    DateField,
+    Q,
+    When,
+    F,
+)
+
+from django.utils import timezone
 
 import graphene
 from graphene import relay
@@ -77,6 +84,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
     priority = graphene.Int()
     urgency = graphene.Int()
+    total_days = graphene.String()
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -446,7 +454,21 @@ class Query(graphene.ObjectType):
     grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
-        return GrievanceTicket.objects.filter(ignored=False).select_related("assigned_to", "created_by")
+        return (
+            GrievanceTicket.objects.filter(ignored=False)
+            .select_related("assigned_to", "created_by")
+            .annotate(
+                total=Case(
+                    When(
+                        status=GrievanceTicket.STATUS_CLOSED,
+                        then=F("updated_at") - F("created_at"),
+                    ),
+                    default=timezone.now() - F("created_at"),
+                    output_field=DateField(),
+                )
+            )
+            .annotate(total_days=F("total__day"))
+        )
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)

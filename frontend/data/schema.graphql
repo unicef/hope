@@ -815,6 +815,7 @@ type GrievanceTicketNode implements Node {
   relatedTickets: [GrievanceTicketNode]
   admin: String
   existingTickets: [GrievanceTicketNode]
+  totalDays: String
 }
 
 type GrievanceTicketNodeConnection {
@@ -2465,7 +2466,7 @@ type Query {
   ticketsByStatus(businessAreaSlug: String!): ChartDatasetNode
   ticketsByLocationAndCategory(businessAreaSlug: String!): ChartDetailedDatasetsNode
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, priority: String, urgency: String, grievanceType: String, grievanceStatus: String, orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, priority: String, urgency: String, grievanceType: String, grievanceStatus: String, totalDays: Int, orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
