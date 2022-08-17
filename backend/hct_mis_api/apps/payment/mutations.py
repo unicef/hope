@@ -10,6 +10,7 @@ from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -29,7 +30,12 @@ from hct_mis_api.apps.payment.inputs import (
     CreatePaymentPlanInput,
     UpdatePaymentPlanInput,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentPlan, DeliveryMechanismPerPaymentPlan
+from hct_mis_api.apps.payment.models import (
+    PaymentVerification,
+    PaymentPlan,
+    DeliveryMechanismPerPaymentPlan,
+    PaymentChannel,
+)
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode, PaymentPlanNode
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
@@ -709,9 +715,24 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     def mutate(cls, root, info, input, **kwargs):
         payment_plan_id = input.get("payment_plan_id")
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        # TODO: should there be a check for payment plan status (LOCKED) here?
         delivery_mechanisms_in_order = input.get("delivery_mechanisms")
-        if list(set(delivery_mechanisms_in_order)) != list(delivery_mechanisms_in_order):
+        if len(list(set(delivery_mechanisms_in_order))) != len(list(delivery_mechanisms_in_order)):
             raise GraphQLError("Delivery mechanisms must be unique")
+
+        collectors = payment_plan.target_population.households.filter(
+            individuals_and_roles__role=ROLE_PRIMARY,
+        ).values_list("individuals_and_roles__individual", flat=True)
+        print(collectors)
+
+        # for collector in collectors:
+        #     if not PaymentChannel.objects.filter(
+        #         individual=collector, delivery_mechanism__in=delivery_mechanisms_in_order
+        #     ).exists():
+        #         raise GraphQLError(
+        #             f"Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
+        #             f"Please add {needed_mechanisms} to move to next step."
+        #         )
 
         current_time = timezone.now()
         for index, delivery_mechanism in enumerate(delivery_mechanisms_in_order):

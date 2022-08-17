@@ -23,6 +23,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     Payment,
     GenericPayment,
+    PaymentChannel,
 )
 from hct_mis_api.apps.program.fixtures import (
     ProgramFactory,
@@ -153,6 +154,15 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
     )
     data_transfer_configuration = factory.Faker("json")
     fsp_xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
+
+
+class PaymentChannelFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = PaymentChannel
+
+    individual = factory.SubFactory(IndividualFactory)
+    delivery_mechanism = fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE)
+    delivery_data = factory.Faker("json")
 
 
 class FinancialServiceProviderXlsxReportFactory(factory.DjangoModelFactory):
@@ -550,11 +560,8 @@ class PaymentFactory(factory.DjangoModelFactory):
     collector = factory.LazyAttribute(
         lambda o: (
             o.household.individuals_and_roles.filter(role=ROLE_PRIMARY).first()
-            or
-            IndividualRoleInHouseholdFactory(
-                household=o.household,
-                individual=o.household.head_of_household,
-                role=ROLE_PRIMARY
+            or IndividualRoleInHouseholdFactory(
+                household=o.household, individual=o.household.head_of_household, role=ROLE_PRIMARY
             )
         ).individual
     )
