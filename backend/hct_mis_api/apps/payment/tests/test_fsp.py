@@ -34,8 +34,6 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
 
     def test_choosing_delivery_mechanism_order(self):
         payment_plan = PaymentPlanFactory(total_households_count=1)
-        # FinancialServiceProviderFactory.create()
-
         encoded_payment_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         create_program_mutation_variables_without_delivery_mechanisms = dict(
             input=dict(
@@ -69,6 +67,7 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
             "chooseDeliveryMechanismsForPaymentPlan"
         ]["paymentPlan"]
         self.assertEqual(payment_plan_with_delivery_mechanisms["id"], encoded_payment_id)
+        # TODO: make it not play with stringified jsons
         self.assertEqual(
             json.loads(payment_plan_with_delivery_mechanisms["deliveryMechanisms"][0]),
             {"name": GenericPayment.DELIVERY_TYPE_TRANSFER, "order": 1},

@@ -289,6 +289,12 @@ class PaymentNode(DjangoObjectType):
         return [json.loads(conflict) for conflict in conflicts_data]
 
 
+# TODO?
+# class DeliveryMechanismNode(DjangoObjectType):
+#     name = graphene.String()
+#     order = graphene.Int()
+
+
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
     approval_number_required = graphene.Int()
@@ -300,7 +306,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     end_date = graphene.Date()
     currency_name = graphene.String()
     payments_conflicts_count = graphene.Int()
-    delivery_mechanisms = graphene.List(graphene.String)
+    delivery_mechanisms = graphene.List(graphene.JSONString)
+    # delivery_mechanisms = graphene.List(DeliveryMechanismNode)
 
     class Meta:
         model = PaymentPlan
@@ -324,7 +331,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_delivery_mechanisms(self, info):
         return [
-            json.dumps(
+            (
                 {
                     "name": mechanism.delivery_mechanism,
                     "order": mechanism.delivery_mechanism_order,
