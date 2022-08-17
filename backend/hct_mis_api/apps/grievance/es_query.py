@@ -34,7 +34,7 @@ def create_es_query(options):
     created_at_range = options.pop("created_at_range", None)
 
     if created_at_range and created_at_range != "\"\"":
-        created_at_range = ast.literal_eval(options.pop("created_at_range"))
+        created_at_range = ast.literal_eval(created_at_range)
         date_range = {
             "range": {
                 "created_at": {}

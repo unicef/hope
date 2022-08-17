@@ -3,7 +3,6 @@ import os
 from unittest.mock import patch
 
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search
 from django.conf import settings
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -24,14 +23,11 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 def execute_test_es_query(query_dict):
     es = Elasticsearch("http://elasticsearch:9200")
     es.indices.refresh("test_es_db")
-
-    es_response = (
-        Search(using=es, index="test_es_db")
-        .params(search_type="dfs_query_then_fetch", preserve_order=True)
-        .from_dict(query_dict)
-    )
-    es_ids = [hit.meta.id for hit in es_response.scan()]
-
+    resp = es.search(index="test_es_db", body=query_dict)
+    es_ids = []
+    for hit in resp["hits"]["hits"]:
+        es_ids.append(hit["_id"])
+    es.indices.refresh("test_es_db")
     return es_ids
 
 
@@ -279,31 +275,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             createdAt
             urgency
             priority
-          }
-        }
-      }
-    }
-    """
-
-    FILTER_BY_FSP = """
-    query AllGrievanceTickets($fsp: String) {
-      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", fsp: $fsp) {
-        edges {
-          node {
-            id
-            unicefId
-            householdUnicefId
-            category
-            status
-            issueType
-            admin
-            language
-            description
-            consent
-            createdAt
-            urgency
-            priority
-            fsp
           }
         }
       }
@@ -575,7 +546,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"createdAt": '{"max": "2022-05-01"}'},
+            variables={"createdAtRange": '{\"max\":\"2022-05-01\"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
@@ -585,7 +556,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"createdAt": '{"min": "2022-05-10"}'},
+            variables={"createdAtRange": '{\"min\":\"2022-05-10\"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
@@ -595,7 +566,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"createdAt": '{"min": "2022-05-01", "max": "2022-05-10"}'},
+            variables={"createdAtRange": '{\"min\":\"2022-05-01\",\"max\":\"2022-05-10\"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
@@ -656,14 +627,4 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             request_string=self.FILTER_BY_REGISTRATION_DATA_IMPORT,
             context={"user": self.user},
             variables={"registrationDataImport": "04992dce-154b-4938-8e47-74341541ebcf"},
-        )
-
-    @patch("hct_mis_api.apps.grievance.schema.execute_es_query", side_effect=execute_test_es_query)
-    def test_grievance_query_es_search_by_fsp(self, mock_execute_test_es_query):
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
-
-        self.snapshot_graphql_request(
-            request_string=self.FILTER_BY_FSP,
-            context={"user": self.user},
-            variables={"fsp": "Goldman Sachs"},
         )
