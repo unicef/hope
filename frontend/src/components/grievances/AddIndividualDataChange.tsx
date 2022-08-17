@@ -87,7 +87,7 @@ export const AddIndividualDataChangeField = ({
   }
   return (
     <>
-      <Grid item xs={6}>
+      <Grid item xs={8}>
         <Field
           name={`individualData${flexField ? '.flexFields' : ''}.${camelCase(
             field.name,
@@ -99,7 +99,7 @@ export const AddIndividualDataChangeField = ({
           {...fieldProps}
         />
       </Grid>
-      <Grid item xs={6} />
+      <Grid item xs={4} />
     </>
   );
 };
