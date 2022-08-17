@@ -6,18 +6,15 @@ import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { DividerLine } from '../../../core/DividerLine';
 import { LabelizedField } from '../../../core/LabelizedField';
-import { Missing } from '../../../core/Missing';
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
 
 interface FspSectionProps {
   businessArea: string;
-  permissions: string[];
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const FspSection = ({
   businessArea,
-  permissions,
   paymentPlan,
 }: FspSectionProps): React.ReactElement => {
   const { t } = useTranslation();
