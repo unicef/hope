@@ -734,7 +734,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         if collectors_that_cant_be_paid.exists():
             raise GraphQLError(
                 "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
-                "Please add TODO to move to next step."
+                # "Please add TODO to move to next step."
             )
 
         current_time = timezone.now()
