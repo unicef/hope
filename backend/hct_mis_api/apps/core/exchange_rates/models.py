@@ -62,7 +62,7 @@ class SingleExchangeRate:
         if dispersion_date_is_not_provided:
             return self.x_rate * self.ratio
 
-        dispersion_date = datetime.combine(dispersion_date.date(), datetime.min.time())
+        dispersion_date = datetime.combine(dispersion_date, datetime.min.time())
         dispersion_date_is_in_current_date_range = (
             self.valid_from <= dispersion_date <= (today if self.valid_to is None else self.valid_to)
         )

@@ -30,6 +30,7 @@ export const AllPaymentsForTable = gql`
         cursor
         node {
           id
+          unicefId
           household {
             id
             unicefId

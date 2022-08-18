@@ -16,8 +16,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
 }: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const [openApprove, setOpenApprove] = useState(false);
-  const [openDuplicate, setOpenDuplicate] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
+
   return (
     <Box display='flex' alignItems='center'>
       {canDownloadXlsx && (

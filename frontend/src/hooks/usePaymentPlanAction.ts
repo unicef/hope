@@ -17,7 +17,7 @@ export const usePaymentPlanAction = (
   onClose?: () => void,
 ): PaymentPlanAction => {
   const [mutate, { loading }] = useActionPpMutation();
-  const mutatePaymentPlanAction = async (comment?: string) => {
+  const mutatePaymentPlanAction = async (comment?: string): Promise<void> => {
     try {
       await mutate({
         variables: {

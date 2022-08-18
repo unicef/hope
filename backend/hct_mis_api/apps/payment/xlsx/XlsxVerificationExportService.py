@@ -4,13 +4,10 @@ import openpyxl
 from tempfile import NamedTemporaryFile
 from django.core.files import File
 
-from django.core.mail import EmailMultiAlternatives
-from django.conf import settings
-from django.template.loader import render_to_string
 from django.urls import reverse
-from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 
+from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import PaymentVerification, XlsxCashPlanPaymentVerificationFile
 
@@ -18,7 +15,7 @@ from hct_mis_api.apps.payment.models import PaymentVerification, XlsxCashPlanPay
 logger = logging.getLogger(__name__)
 
 
-class XlsxVerificationExportService:
+class XlsxVerificationExportService(XlsxExportBaseService):
     HEADERS = (
         "payment_record_id",
         "payment_record_ca_id",
@@ -56,7 +53,7 @@ class XlsxVerificationExportService:
         ws_verifications = wb.active
         ws_verifications.title = XlsxVerificationExportService.VERIFICATION_SHEET
         self.wb = wb
-        self.ws_verifications = ws_verifications
+        self.ws_export_list = ws_verifications
         self.ws_meta = wb.create_sheet(XlsxVerificationExportService.META_SHEET)
         return wb
 
@@ -65,10 +62,6 @@ class XlsxVerificationExportService:
             XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES
         ] = XlsxVerificationExportService.VERSION_CELL_NAME
         self.ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES] = XlsxVerificationExportService.VERSION
-
-    def _add_headers(self):
-        headers_row = XlsxVerificationExportService.HEADERS
-        self.ws_verifications.append(headers_row)
 
     def _to_received_column(self, payment_record_verification):
         status = payment_record_verification.status
@@ -96,7 +89,7 @@ class XlsxVerificationExportService:
             payment_record_verification.payment_record.delivered_quantity,
             payment_record_verification.received_amount,
         )
-        self.ws_verifications.append(payment_record_verification_row)
+        self.ws_export_list.append(payment_record_verification_row)
 
     def _add_payment_record_verifications(self):
         for payment_record_verification in self.payment_record_verifications:
@@ -104,9 +97,9 @@ class XlsxVerificationExportService:
 
     def _add_data_validation(self):
         self.dv_received = DataValidation(type="list", formula1='"YES,NO"', allow_blank=False)
-        self.dv_received.add(f"B2:B{len(self.ws_verifications['B'])}")
-        self.ws_verifications.add_data_validation(self.dv_received)
-        self.ws_verifications["B2":f"B{len(self.ws_verifications['B'])}"]
+        self.dv_received.add(f"B2:B{len(self.ws_export_list['B'])}")
+        self.ws_export_list.add_data_validation(self.dv_received)
+        self.ws_export_list["B2":f"B{len(self.ws_export_list['B'])}"]
 
     def generate_workbook(self):
         self._create_workbook()
@@ -114,53 +107,24 @@ class XlsxVerificationExportService:
         self._add_headers()
         self._add_payment_record_verifications()
         self._add_data_validation()
-        self._adjust_column_width_from_col(self.ws_verifications, 0, 1, 8)
+        self._adjust_column_width_from_col(self.ws_export_list, 0, 1, 8)  # min_row, min_col, max_col
         return self.wb
-
-    def generate_file(self, filename):
-        self.generate_workbook()
-        self.wb.save(filename=filename)
 
     def save_xlsx_file(self, user):
         filename = f"payment_verification_{self.cashplan_payment_verification.unicef_id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
             xlsx_obj = XlsxCashPlanPaymentVerificationFile(
-                created_by=user, cash_plan_payment_verification=self.cashplan_payment_verification
+                created_by=user,
+                cash_plan_payment_verification=self.cashplan_payment_verification
             )
             self.wb.save(tmp.name)
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
 
-    def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col):
-
-        column_widths = []
-
-        for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
-
-            for cell in col:
-                value = cell.value
-                if value is not None:
-
-                    if isinstance(value, str) is False:
-                        value = str(value)
-
-                    try:
-                        column_widths[i] = max(column_widths[i], len(value))
-                    except IndexError:
-                        column_widths.append(len(value))
-
-        for i, width in enumerate(column_widths):
-            col_name = get_column_letter(min_col + i)
-            value = column_widths[i] + 2
-            ws.column_dimensions[col_name].width = value
-
-    @staticmethod
-    def send_email(user, cash_plan_payment_verification_id):
-        protocol = "http" if settings.IS_DEV else "https"
-        payment_verification_id = encode_id_base64(cash_plan_payment_verification_id, "CashPlanPaymentVerification")
-        api = reverse("download-cash-plan-payment-verification", args=[payment_verification_id])
-        link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
+    def get_context(self, user) -> dict:
+        payment_verification_id = encode_id_base64(self.cashplan_payment_verification.pk, "CashPlanPaymentVerification")
+        link = self.get_link(reverse("download-cash-plan-payment-verification", args=[payment_verification_id]))
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
         context = {
@@ -169,17 +133,7 @@ class XlsxVerificationExportService:
             "email": user.email,
             "message": msg,
             "link": link,
+            "title": "Verification Plan XLSX file generated",
         }
-        text_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.txt", context=context)
-        html_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.html", context=context)
 
-        email = EmailMultiAlternatives(
-            subject="Verification Plan XLSX file generated",
-            from_email=settings.EMAIL_HOST_USER,
-            to=[context["email"]],
-            body=text_body,
-        )
-        email.attach_alternative(html_body, "text/html")
-        result = email.send()
-        if not result:
-            logger.error(f"Email couldn't be send to {context['email']}")
+        return context
