@@ -1,0 +1,186 @@
+[
+  {
+    "model": "steficon.rule",
+    "pk": 1,
+    "fields": {
+      "version": 1,
+      "name": "Test Formula for Targeting 011",
+      "definition": "result.value=11",
+      "description": "",
+      "enabled": true,
+      "deprecated": false,
+      "language": "python",
+      "security": 2,
+      "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "created_at": "2022-08-10T11:14:36.882Z",
+      "updated_at": "2022-08-10T11:14:36.882Z",
+      "type": "TARGETING",
+      "flags": {
+        "individual_data_needed": false
+      }
+    }
+  },
+  {
+    "model": "steficon.rulecommit",
+    "pk": 2,
+    "fields": {
+      "timestamp": "2022-08-10T11:20:23.462Z",
+      "version": 1,
+      "rule": 1,
+      "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "definition": "result.value=22",
+      "is_release": true,
+      "enabled": true,
+      "deprecated": false,
+      "language": "python",
+      "affected_fields": "[\"name\", \"language\", \"definition\", \"enabled\", \"deprecated\"]",
+      "before": {},
+      "after": {
+        "name": "Test Formula for Targeting 011",
+        "enabled": true,
+        "language": "python",
+        "definition": "result.value=22",
+        "deprecated": false
+      }
+    }
+  },
+  {
+    "model": "steficon.rule",
+    "pk": 3,
+    "fields": {
+      "version": 1,
+      "name": "Test Formula for Targeting 022",
+      "definition": "result.value=33",
+      "description": "",
+      "enabled": true,
+      "deprecated": false,
+      "language": "python",
+      "security": 2,
+      "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "created_at": "2022-08-10T11:14:36.882Z",
+      "updated_at": "2022-08-10T11:14:36.882Z",
+      "type": "TARGETING",
+      "flags": {
+        "individual_data_needed": false
+      }
+    }
+  },
+  {
+    "model": "steficon.rulecommit",
+    "pk": 4,
+    "fields": {
+      "timestamp": "2022-08-10T11:20:23.462Z",
+      "version": 1,
+      "rule": 3,
+      "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "definition": "result.value=44",
+      "is_release": true,
+      "enabled": true,
+      "deprecated": false,
+      "language": "python",
+      "affected_fields": "[\"name\", \"language\", \"definition\", \"enabled\", \"deprecated\"]",
+      "before": {},
+      "after": {
+        "name": "Test Formula for Targeting 022",
+        "enabled": true,
+        "language": "python",
+        "definition": "result.value=55",
+        "deprecated": false
+      }
+    }
+  },
+  {
+    "model": "steficon.rule",
+    "pk": 5,
+    "fields": {
+      "version": 1,
+      "name": "Test Formula for Payment Plan 033",
+      "definition": "result.value=10",
+      "description": "",
+      "enabled": true,
+      "deprecated": false,
+      "language": "python",
+      "security": 2,
+      "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "created_at": "2022-08-10T11:14:36.882Z",
+      "updated_at": "2022-08-10T11:14:36.882Z",
+      "type": "PAYMENT_PLAN",
+      "flags": {
+        "individual_data_needed": false
+      }
+    }
+  },
+  {
+    "model": "steficon.rulecommit",
+    "pk": 6,
+    "fields": {
+      "timestamp": "2022-08-10T11:20:23.462Z",
+      "version": 1,
+      "rule": 5,
+      "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "definition": "result.value=12",
+      "is_release": true,
+      "enabled": true,
+      "deprecated": false,
+      "language": "python",
+      "affected_fields": "[\"name\", \"language\", \"definition\", \"enabled\", \"deprecated\"]",
+      "before": {},
+      "after": {
+        "name": "Test Formula for Payment Plan 033",
+        "enabled": true,
+        "language": "python",
+        "definition": "result.value=12",
+        "deprecated": false
+      }
+    }
+  },
+  {
+    "model": "steficon.rule",
+    "pk": 7,
+    "fields": {
+      "version": 1,
+      "name": "Test Formula for Payment Plan 044",
+      "definition": "result.value=44",
+      "description": "",
+      "enabled": true,
+      "deprecated": false,
+      "language": "python",
+      "security": 2,
+      "created_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "created_at": "2022-08-10T11:14:36.882Z",
+      "updated_at": "2022-08-10T11:14:36.882Z",
+      "type": "PAYMENT_PLAN",
+      "flags": {
+        "individual_data_needed": false
+      }
+    }
+  },
+  {
+    "model": "steficon.rulecommit",
+    "pk": 8,
+    "fields": {
+      "timestamp": "2022-08-10T11:20:23.462Z",
+      "version": 1,
+      "rule": 7,
+      "updated_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+      "definition": "result.value=44",
+      "is_release": true,
+      "enabled": true,
+      "deprecated": false,
+      "language": "python",
+      "affected_fields": "[\"name\", \"language\", \"definition\", \"enabled\", \"deprecated\"]",
+      "before": {},
+      "after": {
+        "name": "Test Formula for Payment Plan 044",
+        "enabled": true,
+        "language": "python",
+        "definition": "result.value=44",
+        "deprecated": false
+      }
+    }
+  }
+]

@@ -33,7 +33,7 @@ interface LogRowProps {
   logEntry: LogEntryNode;
 }
 
-const formatted = (value) => {
+const formatted = (value): string => {
   const timeWithTimeZoneRegex = /(\d{2}:\d{2}:\d{2})([+-])(\d{2}):(\d{2})$/;
   if (timeWithTimeZoneRegex.test(value)) {
     return value.replace(timeWithTimeZoneRegex, '');

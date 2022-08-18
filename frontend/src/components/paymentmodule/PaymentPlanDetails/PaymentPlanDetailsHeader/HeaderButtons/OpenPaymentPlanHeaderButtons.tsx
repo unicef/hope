@@ -43,7 +43,7 @@ export const OpenPaymentPlanHeaderButtons = ({
       )}
       {canLock && (
         <Box m={2}>
-          <LockPaymentPlan paymentPlanId={id} />
+          <LockPaymentPlan paymentPlan={paymentPlan} />
         </Box>
       )}
     </Box>

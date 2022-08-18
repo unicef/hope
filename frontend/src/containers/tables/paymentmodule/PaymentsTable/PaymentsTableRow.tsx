@@ -9,7 +9,7 @@ import { Missing } from '../../../../components/core/Missing';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { decodeIdString, formatCurrency } from '../../../../utils/utils';
+import { formatCurrency } from '../../../../utils/utils';
 import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
 
 const ErrorText = styled.div`
@@ -40,11 +40,11 @@ interface PaymentsTableRowProps {
   ) => void;
 }
 
-export function PaymentsTableRow({
+export const PaymentsTableRow = ({
   payment,
   canViewDetails,
   onWarningClick,
-}: PaymentsTableRowProps): React.ReactElement {
+}: PaymentsTableRowProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -79,10 +79,7 @@ export function PaymentsTableRow({
             confirmed={payment.paymentPlanHardConflicted}
           />
         </TableCell>
-        <TableCell align='left'>
-          {/* TODO: replace with unicefId */}
-          {decodeIdString(payment.id)}
-        </TableCell>
+        <TableCell align='left'>{payment.unicefId}</TableCell>
         <TableCell align='left'>
           {canViewDetails ? (
             <BlackLink to={householdDetailsPath}>
@@ -109,4 +106,4 @@ export function PaymentsTableRow({
       </ClickableTableRow>
     </>
   );
-}
+};

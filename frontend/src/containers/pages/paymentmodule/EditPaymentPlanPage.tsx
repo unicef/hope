@@ -15,7 +15,6 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { handleValidationErrors } from '../../../utils/utils';
 import {
   useAllTargetPopulationsQuery,
-  useCreatePpMutation,
   useCurrencyChoicesQuery,
   usePaymentPlanQuery,
   useUpdatePpMutation,
