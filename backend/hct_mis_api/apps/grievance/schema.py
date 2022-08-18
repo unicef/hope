@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db.models import (
     Case,
@@ -58,6 +59,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
+from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
@@ -454,9 +456,29 @@ class Query(graphene.ObjectType):
     grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
+        if settings.ELASTICSEARCH_GRIEVANCE_TURN_ON:
+            grievance_es_query_dict = create_es_query(kwargs)
+            grievance_ids = execute_es_query(grievance_es_query_dict)
+
+            return (
+                GrievanceTicket.objects
+                .filter(id__in=grievance_ids)
+                .select_related("assigned_to", "created_by")
+                .annotate(
+                    total=Case(
+                        When(
+                            status=GrievanceTicket.STATUS_CLOSED,
+                            then=F("updated_at") - F("created_at"),
+                        ),
+                        default=timezone.now() - F("created_at"),
+                        output_field=DateField(),
+                    )
+                )
+                .annotate(total_days=F("total__day"))
+            )
         return (
-            GrievanceTicket.objects.filter(ignored=False)
-            .select_related("assigned_to", "created_by")
+            GrievanceTicket.objects
+            .filter(ignored=False).select_related("assigned_to", "created_by")
             .annotate(
                 total=Case(
                     When(

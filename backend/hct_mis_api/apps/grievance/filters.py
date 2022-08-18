@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
@@ -128,6 +129,9 @@ class GrievanceTicketFilter(FilterSet):
     )
 
     def search_filter(self, qs, name, value):
+        if settings.ELASTICSEARCH_GRIEVANCE_TURN_ON:
+            return qs
+
         label, value = tuple(value.split(" ", 1))
         if label == "ticket_id":
             q = Q(unicef_id=value)
