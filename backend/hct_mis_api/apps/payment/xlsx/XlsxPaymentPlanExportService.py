@@ -1,13 +1,20 @@
+import logging
+import openpyxl
+
 from tempfile import NamedTemporaryFile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.urls import reverse
+from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.payment.models import Payment, FinancialServiceProvider, FinancialServiceProviderXlsxTemplate
 from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
 from hct_mis_api.apps.core.models import XLSXFileTemp
 from hct_mis_api.apps.core.utils import encode_id_base64
+
+
+logger = logging.getLogger(__name__)
 
 
 class XlsxPaymentPlanExportService(XlsxExportBaseService):
@@ -30,7 +37,9 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
 
     def __init__(self, payment_plan):
         self.payment_plan = payment_plan
-        self.payment_list = payment_plan.all_active_payments
+        # self.payment_list = payment_plan.all_active_payments
+        # TODO:
+        self.payment_list = self.payment_plan.payments.all()
 
     def _add_payment_row(self, payment: Payment):
         household = payment.household
@@ -91,3 +100,72 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         }
 
         return context
+
+    def export_per_fsp(self) -> openpyxl.Workbook:
+        # after updating this list
+        # please update 'map_obj_name_column' as well
+        possible_exported_column = [
+            "payment_id",
+            "household_id",
+            "admin_leve_2",
+            "collector_name",
+            "payment_channel",
+            "fsp_name",
+            "entitlement_quantity",
+        ]
+        fsp_ids = self.payment_list.filter(
+            # TODO: comment only for test
+            # financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        ).distinct().values_list("financial_service_provider_id", flat=True)
+        fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids)
+
+        wb = openpyxl.Workbook()
+        if fsp_qs:
+            wb.remove(wb.active)  # remove default created empty Sheet if no FSP to export
+
+        for fsp in fsp_qs:
+            # crete new sheet per fsp
+            wb.create_sheet(fsp.name)
+            ws_fsp = wb[fsp.name]
+
+            payment_qs = self.payment_list.filter(financial_service_provider=fsp)
+
+            # get headers
+            col_list = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
+            if fsp.fsp_xlsx_template and fsp.fsp_xlsx_template.columns:
+                col_list = fsp.fsp_xlsx_template.columns
+
+            diff_columns = list(set(col_list).difference(set(possible_exported_column)))
+            if diff_columns:
+                msg = f"Please contact admin because we can't export columns: {diff_columns}"
+                logger.error(msg)
+                raise GraphQLError(msg)
+
+            # add headers
+            ws_fsp.append(col_list)
+
+            # add rows
+            for payment in payment_qs:
+                self._add_rows(col_list, fsp, payment, ws_fsp)
+
+            self._adjust_column_width_from_col(ws_fsp, 0, 1, 7)
+        return wb
+
+    @staticmethod
+    def _add_rows(col_list, fsp, payment, ws_fsp):
+        map_obj_name_column = {
+            "payment_id": {payment: "unicef_id"},
+            "household_id": {payment.household: "unicef_id"},
+            "admin_leve_2": {payment.household: "size"},
+            "collector_name": {payment.collector: "full_name"},
+            "fsp_name": {fsp: "name"},
+            "payment_channel": {payment.assigned_payment_channel: "delivery_mechanism"},
+            "entitlement_quantity": {payment: "entitlement_quantity"},
+        }
+
+        payment_row = tuple()
+        for col in col_list:
+            for obj, col_name in map_obj_name_column.get(col, {None: "wrong_column_name"}).items():
+                value = getattr(obj, col_name, "wrong_column_name")
+                payment_row = (*payment_row, value)
+        ws_fsp.append(payment_row)
