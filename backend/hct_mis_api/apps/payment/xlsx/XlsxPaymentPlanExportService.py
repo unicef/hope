@@ -121,7 +121,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
 
         wb = openpyxl.Workbook()
         if fsp_qs:
-            wb.remove(wb.active)  # remove default created empty Sheet if no FSP to export
+            wb.remove(wb.active)  # remove default created empty Sheet if there are FSPs to export
 
         for fsp in fsp_qs:
             # crete new sheet per fsp
