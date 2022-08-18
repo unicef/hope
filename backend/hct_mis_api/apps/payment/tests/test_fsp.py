@@ -299,12 +299,12 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
                 "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER]
             },
         )
-        data = query_response["data"]["availableFspsForDeliveryMechanisms"]
-        assert len(data) == 2
-        assert data[0]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_TRANSFER
-        assert data[0]["fsps"][0]["name"] == "Santander"
-        assert data[1]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_VOUCHER
-        voucher_fsp_names = [f["name"] for f in data[1]["fsps"]]
+        available_mechs_data = query_response["data"]["availableFspsForDeliveryMechanisms"]
+        assert len(available_mechs_data) == 2
+        assert available_mechs_data[0]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_TRANSFER
+        assert available_mechs_data[0]["fsps"][0]["name"] == "Santander"
+        assert available_mechs_data[1]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_VOUCHER
+        voucher_fsp_names = [f["name"] for f in available_mechs_data[1]["fsps"]]
         assert "Bank of America" in voucher_fsp_names
         assert "Bank of Europe" in voucher_fsp_names
 
@@ -418,7 +418,7 @@ query PaymentPlan($id: ID!) {
             context={"user": self.user},
             variables={"id": encoded_payment_plan_id},
         )
-        data = new_payment_plan_response["data"]["paymentPlan"]
-        assert len(data["deliveryMechanisms"]) == 2
-        assert data["deliveryMechanisms"][0]["fsp"] is not None
-        assert data["deliveryMechanisms"][1]["fsp"] is not None
+        new_data = new_payment_plan_response["data"]["paymentPlan"]
+        assert len(new_data["deliveryMechanisms"]) == 2
+        assert new_data["deliveryMechanisms"][0]["fsp"] is not None
+        assert new_data["deliveryMechanisms"][1]["fsp"] is not None

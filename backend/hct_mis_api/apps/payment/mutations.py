@@ -12,7 +12,6 @@ from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.core.models import XLSXFileTemp
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -780,7 +779,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         if collectors_that_cant_be_paid:
             raise GraphQLError(
                 "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
-                # "Please add TODO to move to next step."
+                # TODO: "Please add X, Y and Z to move to next step."
             )
 
         current_time = timezone.now()
