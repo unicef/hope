@@ -245,6 +245,20 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
 }
 """
 
+    UPDATE_CHOOSE_DELIVERY_MECHANISMS_MUTATION = """
+mutation UpdateChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanismsForPaymentPlanInput!) {
+  updateChooseDeliveryMechanismsForPaymentPlan(input: $input) {
+    paymentPlan {
+      id
+      deliveryMechanisms {
+        order
+        name
+      }
+    }
+  }
+}
+"""
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -464,7 +478,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
             )
         )
         new_response = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=self.UPDATE_CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=new_program_mutation_variables,
         )
