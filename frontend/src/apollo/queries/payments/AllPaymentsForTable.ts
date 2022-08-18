@@ -41,6 +41,22 @@ export const AllPaymentsForTable = gql`
             }
           }
           entitlementQuantityUsd
+          paymentPlanHardConflicted
+          paymentPlanSoftConflicted
+          paymentPlanHardConflictedData {
+            paymentPlanId
+            paymentPlanStartDate
+            paymentPlanEndDate
+            paymentPlanStatus
+            paymentId
+          }
+          paymentPlanSoftConflictedData {
+            paymentPlanId
+            paymentPlanStartDate
+            paymentPlanEndDate
+            paymentPlanStatus
+            paymentId
+          }
         }
       }
     }
