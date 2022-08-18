@@ -58,11 +58,13 @@ import { prepareVariables } from '../../../components/grievances/utils/createGri
 import { validateUsingSteps } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '../../../components/grievances/utils/validationSchema';
 import { LoadingButton } from '../../../components/core/LoadingButton';
-import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { LabelizedField } from '../../../components/core/LabelizedField';
 import { OverviewContainer } from '../../../components/core/OverviewContainer';
 import { ContentLink } from '../../../components/core/ContentLink';
 import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
+import {
+  LookUpHouseholdIndividualSelection
+} from "../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection";
 
 const steps = [
   'Category Selection',
