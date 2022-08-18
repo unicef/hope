@@ -43,8 +43,8 @@ import { EditFspPage } from './pages/paymentmodule/EditFspPage';
 import { CreateSetUpFspPage } from './pages/paymentmodule/CreateSetUpFspPage';
 import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
 import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
-import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
 import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
+import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
 
 const Root = styled.div`
   display: flex;

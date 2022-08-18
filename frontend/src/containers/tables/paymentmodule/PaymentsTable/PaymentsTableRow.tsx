@@ -35,7 +35,9 @@ export const StyledLink = styled.div`
 interface PaymentsTableRowProps {
   payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
   canViewDetails: boolean;
-  onWarningClick?: (payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node']) => void;
+  onWarningClick?: (
+    payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
+  ) => void;
 }
 
 export function PaymentsTableRow({
@@ -53,7 +55,9 @@ export function PaymentsTableRow({
     history.push(detailsPath);
   };
 
-  const handleDialogWarningOpen = (e: React.SyntheticEvent<HTMLDivElement>): void => {
+  const handleDialogWarningOpen = (
+    e: React.SyntheticEvent<HTMLDivElement>,
+  ): void => {
     e.stopPropagation();
     onWarningClick(payment);
   };
@@ -72,6 +76,7 @@ export function PaymentsTableRow({
             message={t(
               'This household is also included in other Payment Plans. Click this icon to view details.',
             )}
+            confirmed={payment.paymentPlanHardConflicted}
           />
         </TableCell>
         <TableCell align='left'>
@@ -80,17 +85,15 @@ export function PaymentsTableRow({
         </TableCell>
         <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink to={householdDetailsPath}>{payment.household.unicefId}</BlackLink>
+            <BlackLink to={householdDetailsPath}>
+              {payment.household.unicefId}
+            </BlackLink>
           ) : (
             payment.household.unicefId
           )}
         </TableCell>
-        <TableCell align='left'>
-          {payment.household.size}
-        </TableCell>
-        <TableCell align='left'>
-          {payment.household.admin2.name}
-        </TableCell>
+        <TableCell align='left'>{payment.household.size}</TableCell>
+        <TableCell align='left'>{payment.household.admin2.name}</TableCell>
         <TableCell align='left'>
           <Missing />
         </TableCell>
