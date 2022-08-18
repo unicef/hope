@@ -411,8 +411,8 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         )
         new_data = new_payment_plan_response["data"]["paymentPlan"]
         assert len(new_data["deliveryMechanisms"]) == 2
-        assert new_data["deliveryMechanisms"][0]["fsp"] is not None
-        assert new_data["deliveryMechanisms"][1]["fsp"] is not None
+        assert new_data["deliveryMechanisms"][0]["fsp"]["id"] == self.encoded_santander_fsp_id
+        assert new_data["deliveryMechanisms"][1]["fsp"]["id"] == self.encoded_bank_of_america_fsp_id
 
     def test_editing_fsps_assignments(self):
         create_program_mutation_variables = dict(

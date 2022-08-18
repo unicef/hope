@@ -26,6 +26,7 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     decode_id_string,
     to_choice_object,
+    encode_id_base64,
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
@@ -362,6 +363,9 @@ class FspChoices(graphene.ObjectType):
     class FspChoice(graphene.ObjectType):
         id = graphene.String()
         name = graphene.String()
+
+        def resolve_id(self, info):
+            return encode_id_base64(self["id"], "FinancialServiceProvider")
 
     delivery_mechanism = graphene.String()
     fsps = graphene.List(FspChoice)
