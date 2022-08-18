@@ -435,7 +435,7 @@ class IndividualAdmin(
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
     @button(label="Add/Update Individual IBAN by xlsx")
-    def update_individual_iban_from_xlsx(self, request):
+    def add_update_individual_iban_from_xlsx(self, request):
         if request.method == "GET":
             form = UpdateIndividualsIBANFromXlsxForm()
             context = self.get_common_context(request, title="Add/Update Individual IBAN by xlsx", form=form)
