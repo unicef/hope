@@ -248,7 +248,7 @@ class Query(graphene.ObjectType):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
         if target_population_model.status == target_models.TargetPopulation.STATUS_DRAFT:
-            household_queryset = Household.objects
+            household_queryset = Household.objects.filter(business_area=target_population_model.business_area)
             return prefetch_selections(
                 household_queryset.filter(target_population_model.candidate_list_targeting_criteria.get_query()),
             ).distinct()

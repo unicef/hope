@@ -23,7 +23,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
   });
   const [isEdit, setEditState] = useState(false);
 
-  if (loading) return <LoadingComponent />;
+  if (loading&&!data) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
