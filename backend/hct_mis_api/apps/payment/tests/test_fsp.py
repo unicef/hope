@@ -206,6 +206,42 @@ query AllDeliveryMechanisms {
 
 
 class TestFSPAssignment(TestFSPSetup):
+
+    CURRENT_PAYMENT_PLAN_QUERY = """
+query PaymentPlan($id: ID!) {
+    paymentPlan(id: $id) {
+        id
+        deliveryMechanisms {
+            name
+            order
+            fsp {
+                id
+            }
+        }
+    }
+}
+"""
+
+    ASSIGN_FSPS_MUTATION = """
+mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeliveryMechanismMappingInput!]!) {
+    assignFspToDeliveryMechanism(input: {
+        paymentPlanId: $paymentPlanId,
+        mappings: $mappings
+    }) {
+        paymentPlan {
+            id
+            deliveryMechanisms {
+                name
+                order
+                fsp {
+                    id
+                }
+            }
+        }
+    }
+}
+"""
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -257,12 +293,29 @@ class TestFSPAssignment(TestFSPSetup):
         cls.payment_plan = PaymentPlanFactory(
             total_households_count=3, target_population=target_population, status=PaymentPlan.Status.LOCKED
         )
+        cls.encoded_payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
+
+        cls.santander_fsp = FinancialServiceProviderFactory(
+            name="Santander",
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
+        )
+        cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
+
+        cls.bank_of_america_fsp = FinancialServiceProviderFactory(
+            name="Bank of America",
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
+        )
+        cls.encoded_bank_of_america_fsp_id = encode_id_base64(cls.bank_of_america_fsp.id, "FinancialServiceProvider")
+
+        FinancialServiceProviderFactory(
+            name="Bank of Europe",
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
+        )
 
     def test_assigning_fsps_to_delivery_mechanism(self):
-        encoded_payment_plan_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
         create_program_mutation_variables = dict(
             input=dict(
-                paymentPlanId=encoded_payment_plan_id,
+                paymentPlanId=self.encoded_payment_plan_id,
                 deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
             )
         )
@@ -272,19 +325,6 @@ class TestFSPAssignment(TestFSPSetup):
             variables=create_program_mutation_variables,
         )
         assert "errors" not in response
-
-        santander_fsp = FinancialServiceProviderFactory(
-            name="Santander",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
-        )
-        bank_of_america_fsp = FinancialServiceProviderFactory(
-            name="Bank of America",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
-        )
-        FinancialServiceProviderFactory(
-            name="Bank of Europe",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
-        )
 
         available_mechanisms_query = """
 query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
@@ -313,35 +353,15 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert "Bank of America" in voucher_fsp_names
         assert "Bank of Europe" in voucher_fsp_names
 
-        mutation = """
-mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeliveryMechanismMappingInput!]!) {
-    assignFspToDeliveryMechanism(input: {
-        paymentPlanId: $paymentPlanId,
-        mappings: $mappings
-    }) {
-        paymentPlan {
-            id
-            deliveryMechanisms {
-                name
-                order
-                fsp {
-                    id
-                }
-            }
-        }
-    }
-}
-"""
-        encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
         bad_mutation_response = self.graphql_request(
-            request_string=mutation,
+            request_string=self.ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
             variables={
-                "paymentPlanId": encoded_payment_plan_id,
+                "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
-                        "fspId": encoded_santander_fsp_id,
+                        "fspId": self.encoded_santander_fsp_id,
                     }
                 ],
             },
@@ -353,14 +373,14 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
         )
 
         another_bad_mutation_response = self.graphql_request(
-            request_string=mutation,
+            request_string=self.ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
             variables={
-                "paymentPlanId": encoded_payment_plan_id,
+                "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
-                        "fspId": encoded_santander_fsp_id,
+                        "fspId": self.encoded_santander_fsp_id,
                     }
                 ],
             },
@@ -371,57 +391,75 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
             "Delivery mechanism 'Voucher' is not supported by FSP 'Santander'",
         )
 
-        current_payment_plan_query = """
-query PaymentPlan($id: ID!) {
-    paymentPlan(id: $id) {
-        id
-        deliveryMechanisms {
-            name
-            order
-            fsp {
-                id
-            }
-        }
-    }
-}
-"""
         current_payment_plan_response = self.graphql_request(
-            request_string=current_payment_plan_query,
+            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
             context={"user": self.user},
-            variables={"id": encoded_payment_plan_id},
+            variables={"id": self.encoded_payment_plan_id},
         )
         data = current_payment_plan_response["data"]["paymentPlan"]
         assert len(data["deliveryMechanisms"]) == 2
         assert data["deliveryMechanisms"][0]["fsp"] is None
         assert data["deliveryMechanisms"][1]["fsp"] is None
 
-        encoded_bank_of_america_fsp_id = encode_id_base64(bank_of_america_fsp.id, "FinancialServiceProvider")
         complete_mutation_response = self.graphql_request(
-            request_string=mutation,
+            request_string=self.ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
             variables={
-                "paymentPlanId": encoded_payment_plan_id,
+                "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
-                        "fspId": encoded_santander_fsp_id,
+                        "fspId": self.encoded_santander_fsp_id,
                     },
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
-                        "fspId": encoded_bank_of_america_fsp_id,
+                        "fspId": self.encoded_bank_of_america_fsp_id,
                     },
                 ],
             },
         )
         assert "errors" not in complete_mutation_response, complete_mutation_response
         complete_payment_plan_data = complete_mutation_response["data"]["assignFspToDeliveryMechanism"]["paymentPlan"]
-        assert complete_payment_plan_data["deliveryMechanisms"][0]["fsp"]["id"] == encoded_santander_fsp_id
-        assert complete_payment_plan_data["deliveryMechanisms"][1]["fsp"]["id"] == encoded_bank_of_america_fsp_id
+        assert complete_payment_plan_data["deliveryMechanisms"][0]["fsp"]["id"] == self.encoded_santander_fsp_id
+        assert complete_payment_plan_data["deliveryMechanisms"][1]["fsp"]["id"] == self.encoded_bank_of_america_fsp_id
 
         new_payment_plan_response = self.graphql_request(
-            request_string=current_payment_plan_query,
+            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
             context={"user": self.user},
-            variables={"id": encoded_payment_plan_id},
+            variables={"id": self.encoded_payment_plan_id},
+        )
+        new_data = new_payment_plan_response["data"]["paymentPlan"]
+        assert len(new_data["deliveryMechanisms"]) == 2
+        assert new_data["deliveryMechanisms"][0]["fsp"] is not None
+        assert new_data["deliveryMechanisms"][1]["fsp"] is not None
+
+    def test_editing_fsps_assignments(self):
+        complete_mutation_response = self.graphql_request(
+            request_string=self.ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_santander_fsp_id,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": self.encoded_bank_of_america_fsp_id,
+                    },
+                ],
+            },
+        )
+        assert "errors" not in complete_mutation_response, complete_mutation_response
+        complete_payment_plan_data = complete_mutation_response["data"]["assignFspToDeliveryMechanism"]["paymentPlan"]
+        assert complete_payment_plan_data["deliveryMechanisms"][0]["fsp"]["id"] == self.encoded_santander_fsp_id
+        assert complete_payment_plan_data["deliveryMechanisms"][1]["fsp"]["id"] == self.encoded_bank_of_america_fsp_id
+
+        new_payment_plan_response = self.graphql_request(
+            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            context={"user": self.user},
+            variables={"id": self.encoded_payment_plan_id},
         )
         new_data = new_payment_plan_response["data"]["paymentPlan"]
         assert len(new_data["deliveryMechanisms"]) == 2
