@@ -90,10 +90,7 @@ export const CreateSetUpFspPage = (): React.ReactElement => {
                     return (
                       <>
                         {values.deliveryMechanisms.map((item, index) => (
-                          <DeliveryMechanismRow
-                            baseName='mobileMoney'
-                            index={index}
-                          />
+                          <DeliveryMechanismRow index={index} />
                         ))}
                         <Grid container>
                           <Grid item xs={12}>

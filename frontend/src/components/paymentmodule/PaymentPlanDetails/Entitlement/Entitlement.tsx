@@ -3,30 +3,32 @@ import {
   Button,
   FormControl,
   Grid,
-  IconButton,
   InputLabel,
   MenuItem,
   Select,
   Typography,
 } from '@material-ui/core';
+import { GetApp } from '@material-ui/icons';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
-import Delete from '@material-ui/icons/Delete';
-import GetApp from '@material-ui/icons/GetApp';
-import Publish from '@material-ui/icons/Publish';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { PAYMENT_PLAN_STATES } from '../../../../utils/constants';
+import { PAYMENT_PLAN_QUERY } from '../../../../apollo/queries/paymentmodule/PaymentPlan';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   PaymentPlanQuery,
-  PaymentPlanStatus,
+  useAllSteficonRulesQuery,
+  useExportXlsxPpListMutation,
+  useSetSteficonRuleOnPpListMutation,
 } from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../../core/LabelizedField';
-import { Missing } from '../../../core/Missing';
+import { LoadingButton } from '../../../core/LoadingButton';
+import { LoadingComponent } from '../../../core/LoadingComponent';
 import { Title } from '../../../core/Title';
+import { UniversalMoment } from '../../../core/UniversalMoment';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
+import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -67,10 +69,6 @@ const DividerLabel = styled.div`
   margin-top: 20px;
 `;
 
-const UploadIcon = styled(Publish)`
-  color: #043f91;
-`;
-
 const DownloadIcon = styled(GetApp)`
   color: #043f91;
 `;
@@ -94,15 +92,40 @@ export const Entitlement = ({
   paymentPlan,
 }: EntitlementProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { id } = useParams();
-  const [entitlement, setEntitlement] = useState<string>('');
-  const [file, setFile] = useState(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { showMessage } = useSnackbar();
+  const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
+    paymentPlan?.steficonRule?.rule.id || '',
+  );
+  const options = {
+    refetchQueries: () => [
+      {
+        query: PAYMENT_PLAN_QUERY,
+        variables: {
+          id: paymentPlan.id,
+        },
+      },
+    ],
+  };
 
-  const entitlementChoices = [
-    { name: 'USD', value: 'USD' },
-    { name: 'PLN', value: 'PLN' },
-  ];
+  const [
+    setSteficonRule,
+    { loading: loadingSetSteficonRule },
+  ] = useSetSteficonRuleOnPpListMutation(options);
+
+  const { data: steficonData, loading } = useAllSteficonRulesQuery({
+    variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
+  });
+  const [
+    mutateExport,
+    { loading: loadingExport },
+  ] = useExportXlsxPpListMutation();
+
+  if (!steficonData) {
+    return null;
+  }
+  if (loading) {
+    return <LoadingComponent />;
+  }
 
   return (
     <Box m={5}>
@@ -117,15 +140,15 @@ export const Entitlement = ({
               <FormControl variant='outlined' margin='dense' fullWidth>
                 <InputLabel>{t('Entitlement Formula')}</InputLabel>
                 <Select
-                  value={entitlement}
+                  value={steficonRuleValue}
                   labelWidth={180}
                   onChange={(event) =>
-                    setEntitlement(event.target.value as string)
+                    setSteficonRuleValue(event.target.value as string)
                   }
                 >
-                  {entitlementChoices.map((each) => (
-                    <MenuItem key={each.value} value={each.value}>
-                      {each.name}
+                  {steficonData.allSteficonRules.edges.map((each) => (
+                    <MenuItem key={each.node.id} value={each.node.id}>
+                      {each.node.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -134,9 +157,24 @@ export const Entitlement = ({
             <Grid item>
               <Box ml={2}>
                 <Button
-                  onClick={() => console.log('Apply')}
                   variant='contained'
                   color='primary'
+                  disabled={loadingSetSteficonRule || !steficonRuleValue}
+                  onClick={async () => {
+                    try {
+                      await setSteficonRule({
+                        variables: {
+                          paymentPlanId: paymentPlan.id,
+                          steficonRuleId: steficonRuleValue,
+                        },
+                      });
+                      showMessage(
+                        t('Formula is executing, please wait until completed'),
+                      );
+                    } catch (e) {
+                      e.graphQLErrors.map((x) => showMessage(x.message));
+                    }
+                  }}
                 >
                   {t('Apply')}
                 </Button>
@@ -157,13 +195,41 @@ export const Entitlement = ({
               alignItems='center'
               flexDirection='column'
             >
-              <Button
-                color='primary'
-                startIcon={<DownloadIcon />}
-                onClick={() => console.log('download')}
-              >
-                {t('Download Template')}
-              </Button>
+              {paymentPlan.hasPaymentListXlsxFile ? (
+                <Button
+                  color='primary'
+                  startIcon={<DownloadIcon />}
+                  component='a'
+                  download
+                  href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
+                >
+                  {t('DOWNLOAD TEMPLATE')}
+                </Button>
+              ) : (
+                <LoadingButton
+                  loading={loadingExport}
+                  disabled={loadingExport}
+                  color='primary'
+                  startIcon={<GetApp />}
+                  onClick={async () => {
+                    try {
+                      await mutateExport({
+                        variables: {
+                          paymentPlanId: paymentPlan.id,
+                        },
+                      });
+                      showMessage(
+                        t('Exporting XLSX started. Please check your email.'),
+                      );
+                    } catch (e) {
+                      e.graphQLErrors.map((x) => showMessage(x.message));
+                    }
+                  }}
+                >
+                  {t('Export Xlsx')}
+                </LoadingButton>
+              )}
+
               <GreyTextSmall>
                 {t(
                   'Template contains payment list with all targeted households',
@@ -179,47 +245,38 @@ export const Entitlement = ({
               flexDirection='column'
             >
               <Box>
-                <Button
-                  color='primary'
-                  startIcon={<UploadIcon />}
-                  onClick={() => inputRef.current.click()}
-                >
-                  {t('Upload File')}
-                </Button>
-                <input
-                  ref={inputRef}
-                  accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                  type='file'
-                  style={{ display: 'none' }}
-                  onChange={(e) => setFile(e.currentTarget.files[0])}
-                />
+                <ImportXlsxPaymentPlanPaymentList paymentPlan={paymentPlan} />
               </Box>
-              {file?.name && (
+              {paymentPlan?.importedXlsxFileName && (
                 <Box alignItems='center' display='flex'>
                   <SpinaczIconContainer>
                     <AttachFileIcon fontSize='inherit' />
                   </SpinaczIconContainer>
-                  <GreyTextSmall>{file?.name || null}</GreyTextSmall>
-                  <Box ml={2}>
-                    <IconButton
-                      onClick={() => {
-                        setFile(null);
-                      }}
-                    >
-                      <Delete />
-                    </IconButton>
+                  <Box mr={1}>
+                    <GreyTextSmall>
+                      {paymentPlan?.importedXlsxFileName}
+                    </GreyTextSmall>
                   </Box>
+                  <GreyTextSmall>
+                    {paymentPlan?.xlsxFileImportedDate ? (
+                      <UniversalMoment>
+                        {paymentPlan?.xlsxFileImportedDate}
+                      </UniversalMoment>
+                    ) : null}
+                  </GreyTextSmall>
                 </Box>
               )}
             </Box>
           </Box>
         </Box>
-        <Divider />
-        <LabelizedField label={t('Total Cash Received')}>
-          <BigValue>
-            USD <Missing />
-          </BigValue>
-        </LabelizedField>
+        {paymentPlan.totalEntitledQuantityUsd ? (
+          <>
+            <Divider />
+            <LabelizedField label={t('Total Cash Received')}>
+              <BigValue>USD {paymentPlan.totalEntitledQuantityUsd}</BigValue>
+            </LabelizedField>
+          </>
+        ) : null}
       </ContainerColumnWithBorder>
     </Box>
   );

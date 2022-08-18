@@ -1,9 +1,10 @@
 import logging
 import math
+import graphene
 
 from decimal import Decimal
 
-import graphene
+from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -11,6 +12,8 @@ from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.core.models import XLSXFileTemp
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -21,7 +24,11 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
-from hct_mis_api.apps.payment.celery_tasks import fsp_generate_xlsx_report_task
+from hct_mis_api.apps.payment.celery_tasks import (
+    fsp_generate_xlsx_report_task,
+    payment_plan_apply_steficon,
+    import_payment_plan_payment_list_from_xlsx,
+)
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
@@ -52,6 +59,7 @@ from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
 )
 from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
+from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 logger = logging.getLogger(__name__)
@@ -704,6 +712,35 @@ class ChooseDeliveryMechanismsForPaymentPlanInput(graphene.InputObjectType):
     delivery_mechanisms = graphene.List(graphene.String, required=True)
 
 
+class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+
+    def mutate(cls, root, info, payment_plan_id, **kwargs):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            logger.error("You can only export Payment List for LOCKED Payment Plan")
+            raise GraphQLError("You can only export Payment List for LOCKED Payment Plan")
+
+        old_payment_plan = copy_model_object(payment_plan)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user=info.context.user)
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+
+        return cls(payment_plan=payment_plan)
+
+
 class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -767,9 +804,6 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
     class Arguments:
         input = AssignFspToDeliveryMechanismInput(required=True)
 
-    @classmethod
-    @is_authenticated
-    @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
         if payment_plan.status != PaymentPlan.Status.LOCKED:
@@ -783,6 +817,89 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
         )
         delivery_mechanism_per_payment_plan.fsp = fsp
         delivery_mechanism_per_payment_plan.save()
+
+
+class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+    errors = graphene.List(XlsxErrorNode)
+
+    class Arguments:
+        file = Upload(required=True)
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, file, payment_plan_id):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            logger.error("You can only import for LOCKED Payment Plan")
+            raise GraphQLError("You can only import for LOCKED Payment Plan")
+
+        import_service = XlsxPaymentPlanImportService(payment_plan, file)
+        import_service.open_workbook()
+        import_service.validate()
+        if import_service.errors:
+            return cls(None, import_service.errors)
+
+        payment_plan.status_importing()
+        payment_plan.save()
+
+        new_xlsx_file = import_service.remove_old_and_create_new_import_xlsx(info.context.user)
+        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id, new_xlsx_file.id)
+
+        return cls(payment_plan, import_service.errors)
+
+
+class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Input:
+        payment_plan_id = graphene.ID(required=True)
+        steficon_rule_id = graphene.ID(required=False)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, payment_plan_id, steficon_rule_id):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.STEFICON_ERROR):
+            logger.error("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
+            raise GraphQLError("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
+
+        old_payment_plan = copy_model_object(payment_plan)
+
+        if steficon_rule_id:
+            steficon_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
+            if not steficon_rule.enabled or steficon_rule.deprecated:
+                logger.error("This steficon rule is not enabled or is deprecated.")
+                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
+
+            payment_plan.status = PaymentPlan.Status.STEFICON_WAIT
+            payment_plan.status_date = timezone.now()
+            if steficon_rule.latest.id != payment_plan.steficon_rule_id:
+                payment_plan.steficon_rule = steficon_rule.latest
+
+            payment_plan.save()
+            payment_plan_apply_steficon.delay(payment_plan.pk)
+        else:
+            payment_plan.steficon_rule = None
+            if payment_plan.status == PaymentPlan.Status.STEFICON_ERROR:
+                payment_plan.status_lock()
+            payment_plan.save()
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
         return cls(payment_plan=payment_plan)
 
 
@@ -808,3 +925,7 @@ class Mutations(graphene.ObjectType):
     create_payment_plan = CreatePaymentPlanMutation.Field()
     update_payment_plan = UpdatePaymentPlanMutation.Field()
     delete_payment_plan = DeletePaymentPlanMutation.Field()
+
+    export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()
+    import_xlsx_payment_plan_payment_list = ImportXLSXPaymentPlanPaymentListMutation.Field()
+    set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
