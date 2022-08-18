@@ -41,7 +41,9 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.PAYMENT_MODULE_CREATE], BusinessArea.objects.get(slug="afghanistan")
+            cls.user,
+            [Permissions.PAYMENT_MODULE_CREATE, Permissions.PAYMENT_MODULE_VIEW_DETAILS],
+            BusinessArea.objects.get(slug="afghanistan"),
         )
 
     def test_choosing_delivery_mechanism_order(self):
@@ -345,11 +347,7 @@ query PaymentPlan($id: ID!) {
     paymentPlan(id: $id) {
         id
         deliveryMechanisms {
-            deliveryMechanism
-            fsp {
-                id
-                name
-            }
+            name
         }
     }
 }
@@ -362,4 +360,3 @@ query PaymentPlan($id: ID!) {
         print("C", current_payment_plan_response)
         data = current_payment_plan_response["data"]["paymentPlan"]
         assert len(data["deliveryMechanisms"]) == 2
-        # assert data["deliveryMechanisms"][0]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_TRANSFER
