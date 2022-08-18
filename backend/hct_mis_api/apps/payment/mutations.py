@@ -755,6 +755,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
         payment_plan_id = input.get("payment_plan_id")
+        # TODO: permissions
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
@@ -812,6 +813,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
+        # TODO: permissions
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to assign FSP to delivery mechanism")
         fsp = get_object_or_404(FinancialServiceProvider, id=decode_id_string(input.get("fsp_id")))
@@ -821,7 +823,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
             payment_plan=payment_plan,
             delivery_mechanism=delivery_mechanism,
         )
-        delivery_mechanism_per_payment_plan.fsp = fsp
+        delivery_mechanism_per_payment_plan.financial_service_provider = fsp
         delivery_mechanism_per_payment_plan.save()
         return cls(payment_plan=payment_plan)
 
