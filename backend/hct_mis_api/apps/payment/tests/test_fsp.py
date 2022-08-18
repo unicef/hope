@@ -271,7 +271,7 @@ query AllDeliveryMechanisms {
         )
         assert "errors" not in response
 
-        FinancialServiceProviderFactory(
+        santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
         )
@@ -284,7 +284,7 @@ query AllDeliveryMechanisms {
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
         )
 
-        query = """
+        available_mechanisms_query = """
 query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
     availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
         deliveryMechanism
@@ -296,7 +296,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
 }
 """
         query_response = self.graphql_request(
-            request_string=query,
+            request_string=available_mechanisms_query,
             context={"user": self.user},
             variables={
                 "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER]
@@ -310,3 +310,56 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         voucher_fsp_names = [f["name"] for f in data[1]["fsps"]]
         assert "Bank of America" in voucher_fsp_names
         assert "Bank of Europe" in voucher_fsp_names
+
+        # match fsp to delivery mechanism one after another
+        # try to save - fail (not all matched)
+        # match all
+        # try to save - success
+
+        mutation = """
+mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $deliveryMechanism: String!, $fspId: ID!) {
+    assignFspToDeliveryMechanism(input: {
+        paymentPlanId: $paymentPlanId,
+        deliveryMechanism: $deliveryMechanism,
+        fspId: $fspId
+    }) {
+        paymentPlan {
+            id
+        }
+    }
+}
+"""
+        mutation_response = self.graphql_request(
+            request_string=mutation,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encoded_payment_plan_id,
+                "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                "fspId": encode_id_base64(santander_fsp.id, "FinancialServiceProvider"),
+            },
+        )
+        assert "errors" not in mutation_response
+
+        current_payment_plan_query = """
+query PaymentPlan($id: ID!) {
+    paymentPlan(id: $id) {
+        id
+        deliveryMechanisms {
+            deliveryMechanism
+            fsp {
+                id
+                name
+            }
+        }
+    }
+}
+"""
+        current_payment_plan_response = self.graphql_request(
+            request_string=current_payment_plan_query,
+            context={"user": self.user},
+            variables={"id": encoded_payment_plan_id},
+        )
+        print(current_payment_plan_response)
+        data = current_payment_plan_response["data"]["paymentPlan"]
+        assert len(data["deliveryMechanisms"]) == 2
+        # assert data["deliveryMechanisms"][0]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_TRANSFER

@@ -35,6 +35,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     DeliveryMechanismPerPaymentPlan,
     PaymentChannel,
+    FinancialServiceProvider,
 )
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode, PaymentPlanNode
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
@@ -754,6 +755,37 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class AssignFspToDeliveryMechanismInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    delivery_mechanism = graphene.String(required=True)
+    fsp_id = graphene.ID(required=True)
+
+
+class AssignFspToDeliveryMechanismMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = AssignFspToDeliveryMechanismInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise GraphQLError("Payment plan must be locked to assign FSP to delivery mechanism")
+        fsp = get_object_or_404(FinancialServiceProvider, id=decode_id_string(input.get("fsp_id")))
+        delivery_mechanism = input.get("delivery_mechanism")
+        delivery_mechanism_per_payment_plan = get_object_or_404(
+            DeliveryMechanismPerPaymentPlan,
+            payment_plan=payment_plan,
+            delivery_mechanism=delivery_mechanism,
+        )
+        delivery_mechanism_per_payment_plan.fsp = fsp
+        delivery_mechanism_per_payment_plan.save()
+        return cls(payment_plan=payment_plan)
+
+
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
     create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
@@ -767,6 +799,7 @@ class Mutations(graphene.ObjectType):
     invalid_cash_plan_payment_verification = InvalidCashPlanVerificationMutation.Field()
     delete_cash_plan_payment_verification = DeleteCashPlanVerificationMutation.Field()
     choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
+    assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
