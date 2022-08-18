@@ -439,6 +439,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     # TODO: add/remove fields after finalizing the fields
+    # after updating COLUMNS_TO_CHOOSE please update XlsxPaymentPlanExportService.export_per_fsp as well
     COLUMNS_TO_CHOOSE = (
         ("payment_id", _("Payment ID")),
         ("household_id", _("Household ID")),
