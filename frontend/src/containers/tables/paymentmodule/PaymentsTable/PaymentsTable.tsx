@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { UniversalTable } from '../../UniversalTable';
 import {
   AllPaymentsForTableQuery,
@@ -11,10 +10,7 @@ import {
 import { headCells } from './PaymentsTableHeadCells';
 import { PaymentsTableRow } from './PaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 
 interface PaymentsTableProps {
   businessArea: string;
@@ -35,8 +31,6 @@ export const PaymentsTable = ({
     businessArea,
     paymentPlanId: paymentPlan.id,
   };
-
-  // TODO: set payment to state to pass to warning popup modal
 
   return (
     <>
