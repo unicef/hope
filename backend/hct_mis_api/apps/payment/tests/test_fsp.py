@@ -434,6 +434,19 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert new_data["deliveryMechanisms"][1]["fsp"] is not None
 
     def test_editing_fsps_assignments(self):
+        create_program_mutation_variables = dict(
+            input=dict(
+                paymentPlanId=self.encoded_payment_plan_id,
+                deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
+            )
+        )
+        response = self.graphql_request(
+            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=create_program_mutation_variables,
+        )
+        assert "errors" not in response
+
         complete_mutation_response = self.graphql_request(
             request_string=self.ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
@@ -456,12 +469,14 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert complete_payment_plan_data["deliveryMechanisms"][0]["fsp"]["id"] == self.encoded_santander_fsp_id
         assert complete_payment_plan_data["deliveryMechanisms"][1]["fsp"]["id"] == self.encoded_bank_of_america_fsp_id
 
-        new_payment_plan_response = self.graphql_request(
+        payment_plan_response = self.graphql_request(
             request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
             context={"user": self.user},
             variables={"id": self.encoded_payment_plan_id},
         )
-        new_data = new_payment_plan_response["data"]["paymentPlan"]
+        new_data = payment_plan_response["data"]["paymentPlan"]
         assert len(new_data["deliveryMechanisms"]) == 2
         assert new_data["deliveryMechanisms"][0]["fsp"] is not None
         assert new_data["deliveryMechanisms"][1]["fsp"] is not None
+
+        # TODO: edit
