@@ -124,6 +124,7 @@ services:
 
   elasticsearch:
     image: unicef/hct-elasticsearch
+    container_name: elasticsearch
     build:
       context: elasticsearch
       dockerfile: Dockerfile
@@ -133,6 +134,7 @@ services:
       - cluster.initial_master_nodes=es01
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
     ulimits:
       memlock:
         soft: -1
@@ -141,3 +143,15 @@ services:
       - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:7.4.0
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+

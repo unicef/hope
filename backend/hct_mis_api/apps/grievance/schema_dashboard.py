@@ -1,7 +1,7 @@
 import itertools
 
 import graphene
-from django.db.models import Case, CharField, Count, When, Value, Q, Avg, F, Func, FloatField
+from django.db.models import Case, CharField, Count, When, Value, Q, Avg, F
 from django.utils.encoding import force_str
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket

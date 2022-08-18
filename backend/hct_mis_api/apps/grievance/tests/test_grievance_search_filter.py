@@ -1,14 +1,16 @@
-from django.core.management import call_command
+from django.conf import settings
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
     create_afghanistan,
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-import hct_mis_api.apps.geo.models as geo_models
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
@@ -32,19 +34,33 @@ class TestGrievanceQuerySearchFilter(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadcountries")
+        settings.ELASTICSEARCH_GRIEVANCE_TURN_ON = False
+
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        country = geo_models.Country.objects.get(name="Afghanistan")
-        area_type = AreaTypeFactory(
+        area_type = AdminAreaLevelFactory(
+            name="Admin type one",
+            admin_level=2,
+            business_area=cls.business_area,
+        )
+        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
+        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sadasdasfd222")
+
+        country = Country.objects.first()
+        area_type_new = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
             country=country,
+            original_id=area_type.id,
         )
-        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
-        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sadasdasfd222")
+        cls.admin_area_1_new = AreaFactory(
+            name="City Test", area_type=area_type_new, p_code="123aa123", original_id=cls.admin_area_1.id
+        )
+        cls.admin_area_2_new = AreaFactory(
+            name="City Example", area_type=area_type_new, p_code="sadasdasfd222", original_id=cls.admin_area_2.id
+        )
 
         _, individuals = create_household({"size": 2}, {"family_name": "Kowalski"})
         cls.individual_1 = individuals[0]
@@ -56,6 +72,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             **{
                 "business_area": cls.business_area,
                 "admin2": cls.admin_area_1,
+                "admin2_new": cls.admin_area_1_new,
                 "language": "Polish",
                 "consent": True,
                 "description": "ticket_1",
@@ -63,7 +80,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
                 "status": GrievanceTicket.STATUS_NEW,
                 "created_by": cls.user,
                 "assigned_to": cls.user,
-                "household_unicef_id": "HH-22-0059.7223",
+                "household_unicef_id": "HH-22-0059.7223"
             }
         )
 
@@ -71,6 +88,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             **{
                 "business_area": cls.business_area,
                 "admin2": cls.admin_area_2,
+                "admin2_new": cls.admin_area_2_new,
                 "language": "English",
                 "consent": True,
                 "description": "ticket_2",
@@ -78,7 +96,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
                 "status": GrievanceTicket.STATUS_ON_HOLD,
                 "created_by": cls.user,
                 "assigned_to": cls.user,
-                "household_unicef_id": "HH-22-0059.7224",
+                "household_unicef_id": "HH-22-0059.7224"
             }
         )
 
@@ -86,6 +104,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             **{
                 "business_area": cls.business_area,
                 "admin2": cls.admin_area_2,
+                "admin2_new": cls.admin_area_2_new,
                 "language": "Polish, English",
                 "consent": True,
                 "description": "ticket_3",
@@ -93,11 +112,15 @@ class TestGrievanceQuerySearchFilter(APITestCase):
                 "status": GrievanceTicket.STATUS_IN_PROGRESS,
                 "created_by": cls.user,
                 "assigned_to": cls.user,
-                "household_unicef_id": "HH-22-0059.7225",
+                "household_unicef_id": "HH-22-0059.7225"
             }
         )
 
-        GrievanceTicket.objects.bulk_create((grievance_ticket_1, grievance_ticket_2, grievance_ticket_3))
+        GrievanceTicket.objects.bulk_create((
+            grievance_ticket_1,
+            grievance_ticket_2,
+            grievance_ticket_3
+        ))
 
         cls.grievance_ticket_1 = GrievanceTicket.objects.get(household_unicef_id="HH-22-0059.7223")
         cls.grievance_ticket_2 = GrievanceTicket.objects.get(household_unicef_id="HH-22-0059.7224")

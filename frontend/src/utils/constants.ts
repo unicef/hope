@@ -65,11 +65,12 @@ export const GrievanceTypes = {
 export const GrievanceStatuses = {
   All: 'all',
   Active: 'active',
+  Closed: 'Closed',
 };
 
 export const GrievanceSearchTypes = {
   TicketID: 'ticket_id',
-  HouseholdID: 'ticket_hhid',
+  HouseholdID: 'ticket_hh_id',
   LastName: 'last_name',
 };
 
@@ -84,4 +85,9 @@ export const GrievanceSteps = {
   Lookup: 1,
   Verification: 2,
   Description: 3,
+};
+
+export const ISSUE_TYPE_CATEGORIES = {
+  DATA_CHANGE: 'Data Change',
+  SENSITIVE_GRIEVANCE: 'Sensitive Grievance',
 };
