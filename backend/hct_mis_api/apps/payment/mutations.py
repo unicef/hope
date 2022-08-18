@@ -772,11 +772,14 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
 
         collectors_that_cant_be_paid = collectors_in_target_population.difference(collectors_that_can_be_paid)
         if collectors_that_cant_be_paid.exists():
+            # TODO: "Please add X, Y and Z to move to next step."
             raise GraphQLError(
                 "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
-                # TODO: "Please add X, Y and Z to move to next step."
+                f"Individuals that failed to be processed: "
+                f"{', '.join([str(i) for i in collectors_that_cant_be_paid])}"
             )
 
+        DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
         current_time = timezone.now()
         for index, delivery_mechanism in enumerate(delivery_mechanisms_in_order):
             DeliveryMechanismPerPaymentPlan.objects.update_or_create(

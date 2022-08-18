@@ -46,6 +46,59 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
             BusinessArea.objects.get(slug="afghanistan"),
         )
 
+        registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
+
+        cls.household_1, cls.individuals_1 = create_household_and_individuals(
+            household_data={
+                "registration_data_import": registration_data_import,
+                "business_area": cls.business_area,
+            },
+            individuals_data=[{}],
+        )
+        PaymentChannelFactory(
+            individual=cls.individuals_1[0],
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
+        )
+        IndividualRoleInHouseholdFactory(
+            individual=cls.individuals_1[0],
+            household=cls.household_1,
+            role=ROLE_PRIMARY,
+        )
+
+        cls.household_2, cls.individuals_2 = create_household_and_individuals(
+            household_data={
+                "registration_data_import": registration_data_import,
+                "business_area": cls.business_area,
+            },
+            individuals_data=[{}],
+        )
+        PaymentChannelFactory(
+            individual=cls.individuals_2[0],
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+        )
+        IndividualRoleInHouseholdFactory(
+            individual=cls.individuals_2[0],
+            household=cls.household_2,
+            role=ROLE_PRIMARY,
+        )
+
+        cls.household_3, cls.individuals_3 = create_household_and_individuals(
+            household_data={
+                "registration_data_import": registration_data_import,
+                "business_area": cls.business_area,
+            },
+            individuals_data=[{}],
+        )
+        IndividualRoleInHouseholdFactory(
+            individual=cls.individuals_3[0],
+            household=cls.household_3,
+            role=ROLE_PRIMARY,
+        )
+        PaymentChannelFactory(
+            individual=cls.individuals_3[0],
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+        )
+
     def test_choosing_delivery_mechanism_order(self):
         payment_plan = PaymentPlanFactory(total_households_count=1, status=PaymentPlan.Status.LOCKED)
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
@@ -107,56 +160,6 @@ query AllDeliveryMechanisms {
         assert all(key in entry for entry in all_delivery_mechanisms for key in ["name", "value"])
 
     def test_lacking_delivery_mechanisms(self):
-        registration_data_import = RegistrationDataImportFactory(business_area=self.business_area)
-
-        self.household_1, self.individuals_1 = create_household_and_individuals(
-            household_data={
-                "registration_data_import": registration_data_import,
-                "business_area": self.business_area,
-            },
-            individuals_data=[{}],
-        )
-        PaymentChannelFactory(
-            individual=self.individuals_1[0],
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
-        )
-        IndividualRoleInHouseholdFactory(
-            individual=self.individuals_1[0],
-            household=self.household_1,
-            role=ROLE_PRIMARY,
-        )
-
-        self.household_2, self.individuals_2 = create_household_and_individuals(
-            household_data={
-                "registration_data_import": registration_data_import,
-                "business_area": self.business_area,
-            },
-            individuals_data=[{}],
-        )
-        PaymentChannelFactory(
-            individual=self.individuals_2[0],
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
-        )
-        IndividualRoleInHouseholdFactory(
-            individual=self.individuals_2[0],
-            household=self.household_2,
-            role=ROLE_PRIMARY,
-        )
-
-        self.household_3, self.individuals_3 = create_household_and_individuals(
-            household_data={
-                "registration_data_import": registration_data_import,
-                "business_area": self.business_area,
-            },
-            individuals_data=[{}],
-        )
-        IndividualRoleInHouseholdFactory(
-            individual=self.individuals_3[0],
-            household=self.household_3,
-            role=ROLE_PRIMARY,
-        )
-        # no payment channel for 3rd household
-
         target_population = TargetPopulationFactory(
             created_by=self.user,
             candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
@@ -246,42 +249,6 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
     def setUpTestData(cls):
         super().setUpTestData()
 
-        registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
-
-        cls.household_1, cls.individuals_1 = create_household_and_individuals(
-            household_data={
-                "registration_data_import": registration_data_import,
-                "business_area": cls.business_area,
-            },
-            individuals_data=[{}],
-        )
-        PaymentChannelFactory(
-            individual=cls.individuals_1[0],
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
-        )
-        IndividualRoleInHouseholdFactory(
-            individual=cls.individuals_1[0],
-            household=cls.household_1,
-            role=ROLE_PRIMARY,
-        )
-
-        cls.household_2, cls.individuals_2 = create_household_and_individuals(
-            household_data={
-                "registration_data_import": registration_data_import,
-                "business_area": cls.business_area,
-            },
-            individuals_data=[{}],
-        )
-        PaymentChannelFactory(
-            individual=cls.individuals_2[0],
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
-        )
-        IndividualRoleInHouseholdFactory(
-            individual=cls.individuals_2[0],
-            household=cls.household_2,
-            role=ROLE_PRIMARY,
-        )
-
         target_population = TargetPopulationFactory(
             id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
             created_by=cls.user,
@@ -307,7 +274,7 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
         )
         cls.encoded_bank_of_america_fsp_id = encode_id_base64(cls.bank_of_america_fsp.id, "FinancialServiceProvider")
 
-        FinancialServiceProviderFactory(
+        cls.bank_of_europe_fsp = FinancialServiceProviderFactory(
             name="Bank of Europe",
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
         )
@@ -324,7 +291,7 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
             context={"user": self.user},
             variables=create_program_mutation_variables,
         )
-        assert "errors" not in response
+        assert "errors" not in response, response
 
         available_mechanisms_query = """
 query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
@@ -445,7 +412,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
             context={"user": self.user},
             variables=create_program_mutation_variables,
         )
-        assert "errors" not in response
+        assert "errors" not in response, response
 
         complete_mutation_response = self.graphql_request(
             request_string=self.ASSIGN_FSPS_MUTATION,
@@ -479,4 +446,34 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert new_data["deliveryMechanisms"][0]["fsp"] is not None
         assert new_data["deliveryMechanisms"][1]["fsp"] is not None
 
-        # TODO: edit
+        for fsp in [self.santander_fsp, self.bank_of_america_fsp, self.bank_of_europe_fsp]:
+            fsp.delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_MOBILE_MONEY)
+
+        for individual in [self.individuals_1[0], self.individuals_2[0], self.individuals_3[0]]:
+            PaymentChannelFactory(
+                individual=individual,
+                delivery_mechanism=GenericPayment.DELIVERY_TYPE_MOBILE_MONEY,
+            )
+
+        new_program_mutation_variables = dict(
+            input=dict(
+                paymentPlanId=self.encoded_payment_plan_id,
+                deliveryMechanisms=[
+                    GenericPayment.DELIVERY_TYPE_MOBILE_MONEY,
+                ],
+            )
+        )
+        new_response = self.graphql_request(
+            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=new_program_mutation_variables,
+        )
+        assert "errors" not in new_response
+
+        edited_payment_plan_response = self.graphql_request(
+            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            context={"user": self.user},
+            variables={"id": self.encoded_payment_plan_id},
+        )
+        edited_payment_plan_data = edited_payment_plan_response["data"]["paymentPlan"]
+        assert len(edited_payment_plan_data["deliveryMechanisms"]) == 1
