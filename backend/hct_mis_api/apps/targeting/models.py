@@ -315,8 +315,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     @property
     def candidate_stats(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
-            households_ids = self.candidate_list.values_list("id")
+            households_ids = list( self.candidate_list.values_list("id",flat=True))
         else:
+            #TODO nie lamić
             households_ids = self.vulnerability_score_filtered_households.values_list("id")
         delta18 = relativedelta(years=+18)
         date18ago = timezone.now() - delta18
@@ -331,7 +332,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "child_female": targeted_individuals.get("child_female"),
             "adult_male": targeted_individuals.get("adult_male"),
             "adult_female": targeted_individuals.get("adult_female"),
-            "all_households": households_ids.count(),
+            "all_households": len(households_ids),
             "all_individuals": targeted_individuals.get("child_male")
             + targeted_individuals.get("child_female")
             + targeted_individuals.get("adult_male")
