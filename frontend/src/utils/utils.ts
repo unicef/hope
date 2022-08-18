@@ -199,10 +199,16 @@ export function paymentPlanStatusToColor(
   const colorsMap = {
     [PaymentPlanStatus.Open]: theme.hctPalette.gray,
     [PaymentPlanStatus.Locked]: theme.hctPalette.oragne,
-    [PaymentPlanStatus.InApproval]: theme.hctPalette.blue,
-    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.blue,
+    [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
     [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
     [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
+    [PaymentPlanStatus.SteficonWait]: theme.hctPalette.oragne,
+    [PaymentPlanStatus.SteficonRun]: theme.hctPalette.blue,
+    [PaymentPlanStatus.SteficonCompleted]: theme.hctPalette.green,
+    [PaymentPlanStatus.SteficonError]: theme.palette.error.main,
+    [PaymentPlanStatus.XlsxExporting]: theme.hctPalette.green,
+    [PaymentPlanStatus.XlsxImporting]: theme.hctPalette.blue,
   };
   if (status in colorsMap) {
     return colorsMap[status];

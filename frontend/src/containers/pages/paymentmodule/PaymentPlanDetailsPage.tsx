@@ -49,7 +49,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       {paymentPlan.status !== PaymentPlanStatus.Open && (
         <>
           <Entitlement paymentPlan={paymentPlan} />
-          <FspSection businessArea={businessArea} permissions={permissions} />
+          <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
         </>
       )}
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />

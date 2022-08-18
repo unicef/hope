@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost';
 
-export const PaymentPlan = gql`
+export const PAYMENT_PLAN_QUERY = gql`
   query PaymentPlan($id: ID!) {
     paymentPlan(id: $id) {
       id
@@ -115,6 +115,17 @@ export const PaymentPlan = gql`
       approvalNumberRequired
       authorizationNumberRequired
       financeReviewNumberRequired
+      steficonRule {
+        id
+        rule {
+          id
+          name
+        }
+      }
+      hasPaymentListXlsxFile
+      xlsxFileImportedDate
+      importedXlsxFileName
+      totalEntitledQuantityUsd
     }
   }
 `;

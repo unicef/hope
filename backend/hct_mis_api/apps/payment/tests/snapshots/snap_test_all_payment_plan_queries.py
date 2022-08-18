@@ -212,17 +212,12 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': True,
+                        'excluded': False,
                         'paymentPlan': {
                             'unicefId': 'PP-01'
                         },
-                        'paymentPlanHardConflicted': True,
+                        'paymentPlanHardConflicted': False,
                         'paymentPlanHardConflictedData': [
-                            {
-                                'paymentPlanEndDate': '10-11-2020',
-                                'paymentPlanStartDate': '10-09-2020',
-                                'paymentPlanStatus': 'LOCKED'
-                            }
                         ],
                         'paymentPlanSoftConflicted': False,
                         'paymentPlanSoftConflictedData': [
@@ -235,12 +230,17 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': False,
+                        'excluded': True,
                         'paymentPlan': {
                             'unicefId': 'PP-01'
                         },
-                        'paymentPlanHardConflicted': False,
+                        'paymentPlanHardConflicted': True,
                         'paymentPlanHardConflictedData': [
+                            {
+                                'paymentPlanEndDate': '10-11-2020',
+                                'paymentPlanStartDate': '10-09-2020',
+                                'paymentPlanStatus': 'LOCKED'
+                            }
                         ],
                         'paymentPlanSoftConflicted': False,
                         'paymentPlanSoftConflictedData': [
@@ -279,6 +279,30 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
             {
                 'name': 'Accepted',
                 'value': 'ACCEPTED'
+            },
+            {
+                'name': 'Waiting for Rule Engine',
+                'value': 'STEFICON_WAIT'
+            },
+            {
+                'name': 'Rule Engine Running',
+                'value': 'STEFICON_RUN'
+            },
+            {
+                'name': 'Rule Engine Completed',
+                'value': 'STEFICON_COMPLETED'
+            },
+            {
+                'name': 'Rule Engine Errored',
+                'value': 'STEFICON_ERROR'
+            },
+            {
+                'name': 'Exporting XLSX file',
+                'value': 'XLSX_EXPORTING'
+            },
+            {
+                'name': 'Importing XLSX file',
+                'value': 'XLSX_IMPORTING'
             }
         ]
     }

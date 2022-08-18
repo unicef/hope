@@ -1,12 +1,13 @@
+import factory
+
 from datetime import timedelta
 from decimal import Decimal
 from random import randint
-
-import factory
 from factory import fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
@@ -23,6 +24,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     Payment,
     GenericPayment,
+    PaymentChannel,
 )
 from hct_mis_api.apps.program.fixtures import (
     ProgramFactory,
@@ -512,7 +514,7 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     unicef_id = factory.Faker("uuid4")
     target_population = factory.SubFactory(TargetPopulationFactory)
     program = factory.SubFactory(RealProgramFactory)
-    currency = factory.Faker("currency_code")
+    currency = fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
     dispersion_start_date = factory.Faker(
         "date_time_this_decade",
@@ -527,6 +529,17 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     male_adults_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_households_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
+
+
+class PaymentChannelFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = PaymentChannel
+
+    individual = factory.SubFactory(IndividualFactory)
+    delivery_mechanism = fuzzy.FuzzyChoice(
+        GenericPayment.DELIVERY_TYPE_CHOICE,
+        getter=lambda c: c[0],
+    )
 
 
 class PaymentFactory(factory.DjangoModelFactory):
@@ -582,16 +595,21 @@ class PaymentFactory(factory.DjangoModelFactory):
     )
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = fuzzy.FuzzyChoice((True, False))
+    assigned_payment_channel = factory.LazyAttribute(
+        lambda o: PaymentChannelFactory(individual=o.collector)
+    )
 
 
 def generate_real_payment_plans():
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3)
     program = RealProgramFactory()
     payment_plans = PaymentPlanFactory.create_batch(
-        3, program=program, business_area=BusinessArea.objects.get(slug="afghanistan")
+        3, program=program, business_area=afghanistan
     )
     program.households.set(Household.objects.all().values_list("id", flat=True))
     for payment_plan in payment_plans:
         for household in program.households.all():
-            PaymentFactory(payment_plan=payment_plan, household=household)
+            PaymentFactory(payment_plan=payment_plan, household=household, business_area=afghanistan)

@@ -24,7 +24,14 @@ export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatus.InAuthorization]: 'In Authorization',
   [PaymentPlanStatus.InReview]: 'In Review',
   [PaymentPlanStatus.Accepted]: 'Accepted',
+  [PaymentPlanStatus.SteficonWait]: 'Steficon Wait',
+  [PaymentPlanStatus.SteficonRun]: 'Steficon Run',
+  [PaymentPlanStatus.SteficonCompleted]: 'Steficon Completed',
+  [PaymentPlanStatus.SteficonError]: 'Steficon Error',
+  [PaymentPlanStatus.XlsxExporting]: 'XLSX Exporting',
+  [PaymentPlanStatus.XlsxImporting]: 'XLSX Importing',
 };
+
 export const PAYMENT_PLAN_ACTIONS = {
   LOCK: 'LOCK',
   UNLOCK: 'UNLOCK',
@@ -78,5 +85,5 @@ export const REPORT_TYPES = {
 export const REPORTING_STATES = {
   PROCESSING: 1,
   GENERATED: 2,
-  FAILED: 3
+  FAILED: 3,
 };

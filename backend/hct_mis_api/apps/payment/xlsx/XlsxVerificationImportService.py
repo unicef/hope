@@ -11,18 +11,10 @@ from hct_mis_api.apps.payment.utils import (
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import (
     XlsxVerificationExportService,
 )
+from hct_mis_api.apps.payment.xlsx.BaseXlsxImportService import XlsxImportBaseService
 
 
-class XlsxVerificationImportService:
-    TYPES_READABLE_MAPPING = {
-        "s": "text",
-        "n": "number",
-        "f": "formula",
-        "b": "bool",
-        "inlineStr": "inlineStr",
-        "e": "error",
-        "str": "text",
-    }
+class XlsxVerificationImportService(XlsxImportBaseService):
     COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n")
 
     def __init__(self, cashplan_payment_verification, file):

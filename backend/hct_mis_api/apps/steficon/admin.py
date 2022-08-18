@@ -209,7 +209,7 @@ class RuleResource(ModelResource):
 @register(Rule)
 class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
-    list_filter = ("language", "enabled", "deprecated")
+    list_filter = ("language", "enabled", "deprecated", "type")
     search_fields = ("name",)
     form = RuleForm
     readonly_fields = (
@@ -227,7 +227,7 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
             None,
             {
                 "fields": (
-                    ("name", "version"),
+                    ("name", "type", "version"),
                     ("enabled", "deprecated"),
                 )
             },
