@@ -770,13 +770,8 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             delivery_mechanism__in=delivery_mechanisms_in_order,
         ).values_list("individual", flat=True)
 
-        # TODO: use exclude
-        collectors_that_cant_be_paid = [
-            c for c in collectors_in_target_population if c not in collectors_that_can_be_paid
-        ]
-
-        # if collectors_that_cant_be_paid.exists():
-        if collectors_that_cant_be_paid:
+        collectors_that_cant_be_paid = collectors_in_target_population.difference(collectors_that_can_be_paid)
+        if collectors_that_cant_be_paid.exists():
             raise GraphQLError(
                 "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
                 # TODO: "Please add X, Y and Z to move to next step."
