@@ -121,7 +121,7 @@ export const WarningTooltipTable = ({
           </Grid>
         </GreyBox>
         <Box mt={10} mb={10} display='flex'>
-          {t('Household ID')} <Bold>{payment?.household?.unicefId}</Bold>{' '}
+          {t('Household ID')} <Bold>{payment.household?.unicefId}</Bold>{' '}
           {t('is also included in the following Payment Plans')}:
         </Box>
         <StyledTable>
