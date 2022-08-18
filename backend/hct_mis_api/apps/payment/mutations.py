@@ -718,6 +718,9 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     class Arguments:
         payment_plan_id = graphene.ID(required=True)
 
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
     def mutate(cls, root, info, payment_plan_id, **kwargs):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
@@ -804,6 +807,9 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
     class Arguments:
         input = AssignFspToDeliveryMechanismInput(required=True)
 
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
         if payment_plan.status != PaymentPlan.Status.LOCKED:
