@@ -817,6 +817,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
         )
         delivery_mechanism_per_payment_plan.fsp = fsp
         delivery_mechanism_per_payment_plan.save()
+        return cls(payment_plan=payment_plan)
 
 
 class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):

@@ -338,7 +338,7 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $deliveryMechanism: S
                 "fspId": encode_id_base64(santander_fsp.id, "FinancialServiceProvider"),
             },
         )
-        assert "errors" not in mutation_response
+        assert "errors" not in mutation_response, mutation_response
 
         current_payment_plan_query = """
 query PaymentPlan($id: ID!) {
@@ -359,7 +359,7 @@ query PaymentPlan($id: ID!) {
             context={"user": self.user},
             variables={"id": encoded_payment_plan_id},
         )
-        print(current_payment_plan_response)
+        print("C", current_payment_plan_response)
         data = current_payment_plan_response["data"]["paymentPlan"]
         assert len(data["deliveryMechanisms"]) == 2
         # assert data["deliveryMechanisms"][0]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_TRANSFER
