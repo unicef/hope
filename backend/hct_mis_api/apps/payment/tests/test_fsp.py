@@ -158,7 +158,6 @@ query AllDeliveryMechanisms {
         # no payment channel for 3rd household
 
         target_population = TargetPopulationFactory(
-            id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
             created_by=self.user,
             candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
             business_area=self.business_area,
@@ -205,56 +204,62 @@ query AllDeliveryMechanisms {
         )
         assert response["errors"][0]["message"] == "Delivery mechanisms must be unique"
 
-    def test_assigning_fsps_to_delivery_mechanism(self):
-        registration_data_import = RegistrationDataImportFactory(business_area=self.business_area)
 
-        self.household_1, self.individuals_1 = create_household_and_individuals(
+class TestFSPAssignment(TestFSPSetup):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
+
+        cls.household_1, cls.individuals_1 = create_household_and_individuals(
             household_data={
                 "registration_data_import": registration_data_import,
-                "business_area": self.business_area,
+                "business_area": cls.business_area,
             },
             individuals_data=[{}],
         )
         PaymentChannelFactory(
-            individual=self.individuals_1[0],
+            individual=cls.individuals_1[0],
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
         )
         IndividualRoleInHouseholdFactory(
-            individual=self.individuals_1[0],
-            household=self.household_1,
+            individual=cls.individuals_1[0],
+            household=cls.household_1,
             role=ROLE_PRIMARY,
         )
 
-        self.household_2, self.individuals_2 = create_household_and_individuals(
+        cls.household_2, cls.individuals_2 = create_household_and_individuals(
             household_data={
                 "registration_data_import": registration_data_import,
-                "business_area": self.business_area,
+                "business_area": cls.business_area,
             },
             individuals_data=[{}],
         )
         PaymentChannelFactory(
-            individual=self.individuals_2[0],
+            individual=cls.individuals_2[0],
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
         )
         IndividualRoleInHouseholdFactory(
-            individual=self.individuals_2[0],
-            household=self.household_2,
+            individual=cls.individuals_2[0],
+            household=cls.household_2,
             role=ROLE_PRIMARY,
         )
 
         target_population = TargetPopulationFactory(
             id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
-            created_by=self.user,
+            created_by=cls.user,
             candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
-            business_area=self.business_area,
+            business_area=cls.business_area,
             status=TargetPopulation.STATUS_LOCKED,
         )
         target_population.apply_criteria_query()  # simulate having TP households calculated
-        payment_plan = PaymentPlanFactory(
+        cls.payment_plan = PaymentPlanFactory(
             total_households_count=3, target_population=target_population, status=PaymentPlan.Status.LOCKED
         )
 
-        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+    def test_assigning_fsps_to_delivery_mechanism(self):
+        encoded_payment_plan_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
         create_program_mutation_variables = dict(
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
