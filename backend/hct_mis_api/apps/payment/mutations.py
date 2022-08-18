@@ -754,9 +754,8 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        payment_plan_id = input.get("payment_plan_id")
-        # TODO: permissions
-        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
         delivery_mechanisms_in_order = input.get("delivery_mechanisms")
@@ -796,10 +795,14 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class FSPToDeliveryMechanismMappingInput(graphene.InputObjectType):
+    fsp_id = graphene.ID(required=True)
+    delivery_mechanism = graphene.String(required=True)
+
+
 class AssignFspToDeliveryMechanismInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
-    delivery_mechanism = graphene.String(required=True)
-    fsp_id = graphene.ID(required=True)
+    mappings = graphene.List(FSPToDeliveryMechanismMappingInput, required=True)
 
 
 class AssignFspToDeliveryMechanismMutation(PermissionMutation):
@@ -813,18 +816,37 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
-        # TODO: permissions
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to assign FSP to delivery mechanism")
-        fsp = get_object_or_404(FinancialServiceProvider, id=decode_id_string(input.get("fsp_id")))
-        delivery_mechanism = input.get("delivery_mechanism")
-        delivery_mechanism_per_payment_plan = get_object_or_404(
-            DeliveryMechanismPerPaymentPlan,
-            payment_plan=payment_plan,
-            delivery_mechanism=delivery_mechanism,
-        )
-        delivery_mechanism_per_payment_plan.financial_service_provider = fsp
-        delivery_mechanism_per_payment_plan.save()
+
+        mappings = [
+            {
+                "fsp": get_object_or_404(FinancialServiceProvider, id=decode_id_string(mapping.get("fsp_id"))),
+                "delivery_mechanism_per_payment_plan": get_object_or_404(
+                    DeliveryMechanismPerPaymentPlan,
+                    payment_plan=payment_plan,
+                    delivery_mechanism=mapping.get("delivery_mechanism"),
+                ),
+            }
+            for mapping in input.get("mappings")
+        ]
+
+        for mapping in mappings:
+            delivery_mechanism_per_payment_plan = mapping.get("delivery_mechanism_per_payment_plan")
+            fsp = mapping.get("fsp")
+            if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms:
+                raise GraphQLError(
+                    f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
+                    f"by FSP '{fsp.name}'"
+                )
+            delivery_mechanism_per_payment_plan.financial_service_provider = fsp
+            delivery_mechanism_per_payment_plan.save()
+
+        for delivery_mechanism_per_payment_plan in payment_plan.delivery_mechanisms.all():
+            if not delivery_mechanism_per_payment_plan.financial_service_provider:
+                raise GraphQLError("Please assign FSP to all delivery mechanisms before moving to next step")
+
         return cls(payment_plan=payment_plan)
 
 

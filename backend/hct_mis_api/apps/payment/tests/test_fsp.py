@@ -205,12 +205,7 @@ query AllDeliveryMechanisms {
         )
         assert response["errors"][0]["message"] == "Delivery mechanisms must be unique"
 
-    def test_assigning_fsp_per_delivery_mechanism(self):
-        # make a query with a list of delivery mechanisms
-        # like query: A, B, C
-        # in response, have a list/dict, like this:
-        # A - Bank1, Bank2, B - Bank2, Bank3, C - Bank1, Bank3, etc.
-
+    def test_assigning_fsps_to_delivery_mechanism(self):
         registration_data_import = RegistrationDataImportFactory(business_area=self.business_area)
 
         self.household_1, self.individuals_1 = create_household_and_individuals(
@@ -314,11 +309,10 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert "Bank of Europe" in voucher_fsp_names
 
         mutation = """
-mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $deliveryMechanism: String!, $fspId: ID!) {
+mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeliveryMechanismMappingInput!]!) {
     assignFspToDeliveryMechanism(input: {
         paymentPlanId: $paymentPlanId,
-        deliveryMechanism: $deliveryMechanism,
-        fspId: $fspId
+        mappings: $mappings
     }) {
         paymentPlan {
             id
@@ -334,18 +328,43 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $deliveryMechanism: S
 }
 """
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
-        mutation_response = self.graphql_request(
+        bad_mutation_response = self.graphql_request(
             request_string=mutation,
             context={"user": self.user},
             variables={
                 "paymentPlanId": encoded_payment_plan_id,
-                "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
-                "fspId": encoded_santander_fsp_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": encoded_santander_fsp_id,
+                    }
+                ],
             },
         )
-        assert "errors" not in mutation_response, mutation_response
-        payment_plan_data = mutation_response["data"]["assignFspToDeliveryMechanism"]["paymentPlan"]
-        assert payment_plan_data["deliveryMechanisms"][0]["fsp"]["id"] == encoded_santander_fsp_id
+        assert "errors" in bad_mutation_response, bad_mutation_response
+        assert (
+            bad_mutation_response["errors"][0]["message"]
+            == "Please assign FSP to all delivery mechanisms before moving to next step"
+        )
+
+        another_bad_mutation_response = self.graphql_request(
+            request_string=mutation,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": encoded_santander_fsp_id,
+                    }
+                ],
+            },
+        )
+        assert "errors" in another_bad_mutation_response, another_bad_mutation_response
+        self.assertEqual(
+            another_bad_mutation_response["errors"][0]["message"],
+            "Delivery mechanism 'Voucher' is not supported by FSP 'Santander'",
+        )
 
         current_payment_plan_query = """
 query PaymentPlan($id: ID!) {
@@ -368,23 +387,38 @@ query PaymentPlan($id: ID!) {
         )
         data = current_payment_plan_response["data"]["paymentPlan"]
         assert len(data["deliveryMechanisms"]) == 2
-        assert data["deliveryMechanisms"][0]["fsp"]["id"] == encoded_santander_fsp_id
+        assert data["deliveryMechanisms"][0]["fsp"] is None
         assert data["deliveryMechanisms"][1]["fsp"] is None
 
-        # can't save right now
-
         encoded_bank_of_america_fsp_id = encode_id_base64(bank_of_america_fsp.id, "FinancialServiceProvider")
-        next_mutation_response = self.graphql_request(
+        complete_mutation_response = self.graphql_request(
             request_string=mutation,
             context={"user": self.user},
             variables={
                 "paymentPlanId": encoded_payment_plan_id,
-                "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
-                "fspId": encoded_bank_of_america_fsp_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": encoded_santander_fsp_id,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": encoded_bank_of_america_fsp_id,
+                    },
+                ],
             },
         )
-        new_payment_plan_data = next_mutation_response["data"]["assignFspToDeliveryMechanism"]["paymentPlan"]
-        assert new_payment_plan_data["deliveryMechanisms"][0]["fsp"]["id"] == encoded_santander_fsp_id
-        assert new_payment_plan_data["deliveryMechanisms"][1]["fsp"]["id"] == encoded_bank_of_america_fsp_id
+        assert "errors" not in complete_mutation_response, complete_mutation_response
+        complete_payment_plan_data = complete_mutation_response["data"]["assignFspToDeliveryMechanism"]["paymentPlan"]
+        assert complete_payment_plan_data["deliveryMechanisms"][0]["fsp"]["id"] == encoded_santander_fsp_id
+        assert complete_payment_plan_data["deliveryMechanisms"][1]["fsp"]["id"] == encoded_bank_of_america_fsp_id
 
-        # can save now
+        new_payment_plan_response = self.graphql_request(
+            request_string=current_payment_plan_query,
+            context={"user": self.user},
+            variables={"id": encoded_payment_plan_id},
+        )
+        data = new_payment_plan_response["data"]["paymentPlan"]
+        assert len(data["deliveryMechanisms"]) == 2
+        assert data["deliveryMechanisms"][0]["fsp"] is not None
+        assert data["deliveryMechanisms"][1]["fsp"] is not None
