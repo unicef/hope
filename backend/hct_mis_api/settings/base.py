@@ -622,12 +622,12 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         "urgency_choices",
     ),
     "SYSTEM_FLAGGING_PRIORITY": (
-        2,
+        1,
         "Default value of system flagging priority",
         "priority_choices",
     ),
     "SYSTEM_FLAGGING_URGENCY": (
-        1,
+        2,
         "Default value of system flagging urgency",
         "urgency_choices",
     ),
