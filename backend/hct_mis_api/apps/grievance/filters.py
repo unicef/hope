@@ -16,14 +16,56 @@ from django_filters import (
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
-from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.models import Area, ValidityQuerySet
+from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.core.utils import choices_to_dict
 
 
-class GrievanceTicketFilter(FilterSet):
+class ElasticSearchFilterSet(FilterSet):
+    USE_ALL_FIELDS_AS_ELASTIC_SEARCH = True
+    USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH = tuple()
+
+    def elasticsearch_filter_queryset(self):
+        raise NotImplementedError
+
+    def filter_queryset(self, queryset):
+        import logging
+        logger = logging.getLogger(__name__)
+
+        if self.USE_ALL_FIELDS_AS_ELASTIC_SEARCH or not self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH:
+            if isinstance(self.form.cleaned_data["admin"], ValidityQuerySet):
+                self.form.cleaned_data["admin"] = []
+            if self.form.cleaned_data["admin"]:
+                admin_ids = []
+                for item in self.form.cleaned_data["admin"]:
+                    admin_ids.append(str(item.id))
+                self.form.cleaned_data["admin"] = admin_ids
+
+            if not self.form.cleaned_data["status"]:
+                self.form.cleaned_data.pop("status")
+
+            logger.info(self.form.cleaned_data)
+            grievance_es_query_dict = create_es_query(self.form.cleaned_data)
+
+            grievance_ids = execute_es_query(grievance_es_query_dict)
+            queryset = queryset.filter(id__in=grievance_ids)
+        if self.USE_ALL_FIELDS_AS_ELASTIC_SEARCH:
+            return queryset
+
+        for name, value in self.form.cleaned_data.items():
+            if name in self.USE_SPECIFIC_AS_ELASTIC_SEARCH:
+                continue
+            queryset = self.filters[name].filter(queryset, value)
+            assert isinstance(queryset, models.QuerySet), \
+                "Expected '%s.%s' to return a QuerySet, but got a %s instead." \
+                % (type(self).__name__, name, type(queryset).__name__)
+        return queryset
+
+
+class GrievanceTicketFilter(ElasticSearchFilterSet):
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
             "individual": (
@@ -90,7 +132,7 @@ class GrievanceTicketFilter(FilterSet):
         field_name="payment_verification_ticket_details",
         lookup_expr="payment_verifications__cash_plan_payment_verification__cash_plan",
     )
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_at_range = DateTimeRangeFilter(field_name="created_at", method="some_method")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
@@ -127,6 +169,13 @@ class GrievanceTicketFilter(FilterSet):
             "total_days",
         )
     )
+
+    def some_method(self, qs, name, value):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("Jestem w date filter")
+        logger.info(qs)
+        return qs
 
     def search_filter(self, qs, name, value):
         if settings.ELASTICSEARCH_GRIEVANCE_TURN_ON:

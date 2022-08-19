@@ -74,7 +74,7 @@ class GrievanceTicketDocument(Document):
     status = fields.KeywordField(similarity="boolean")
     issue_type = fields.TextField()
     category = fields.KeywordField(similarity="boolean")
-    admin = fields.TextField()
+    admin = fields.KeywordField(similarity="boolean")
     priority = fields.KeywordField(similarity="boolean")
     urgency = fields.KeywordField(similarity="boolean")
     grievance_type = fields.KeywordField(similarity="boolean")

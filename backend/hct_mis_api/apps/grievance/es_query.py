@@ -33,8 +33,7 @@ def create_es_query(options):
     grievance_status = options.pop("grievance_status", "active")
     created_at_range = options.pop("created_at_range", None)
 
-    if created_at_range and created_at_range != "\"\"":
-        created_at_range = ast.literal_eval(created_at_range)
+    if created_at_range:
         date_range = {
             "range": {
                 "created_at": {}
@@ -43,12 +42,11 @@ def create_es_query(options):
 
         min_date = created_at_range.pop("min", None)
         if min_date:
-            date_range["range"]["created_at"]["gte"] = min_date
+            date_range["range"]["created_at"]["gte"] = min_date.strftime("%Y-%m-%d")
 
         max_date = created_at_range.pop("max", None)
         if max_date:
-            date_range["range"]["created_at"]["lte"] = max_date
-
+            date_range["range"]["created_at"]["lte"] = max_date.strftime("%Y-%m-%d")
         all_queries.append(date_range)
 
     search = options.pop("search", None)
@@ -77,7 +75,8 @@ def create_es_query(options):
                 }
             })
 
-    order_by = options.pop("order_by", "-created_at")
+    order_by = options.pop("order_by", ["-created_at"])
+    order_by = order_by[0]
     if order_by[0] == "-":
         sort = {
             order_by[1:]: {
