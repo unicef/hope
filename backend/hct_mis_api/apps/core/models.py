@@ -11,6 +11,7 @@ from model_utils.models import SoftDeletableModel
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
@@ -326,3 +327,9 @@ class CustomModelEntry(ModelEntry):
 
 class CustomDatabaseScheduler(DatabaseScheduler):
     Entry = CustomModelEntry
+
+
+class TicketPriorityByBusinessArea(models.Model):
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, related_name="tickets_priority")
+    priority = models.IntegerField(verbose_name=_("Priority"), choices=GrievanceTicket.PRIORITY_CHOICES, default="")
+    urgency = models.IntegerField(verbose_name=_("Urgency"), choices=GrievanceTicket.URGENCY_CHOICES, default="")
