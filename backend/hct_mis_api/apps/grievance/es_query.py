@@ -1,14 +1,20 @@
 import logging
 
-import ast
-
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
 
 logger = logging.getLogger(__name__)
 
 
-TERM_FIELDS = ("category", "assigned_to", "issue_type", "priority", "urgency", "grievance_type", "fsp")
+TERM_FIELDS = (
+    "category",
+    "assigned_to",
+    "issue_type",
+    "priority",
+    "urgency",
+    "grievance_type",
+    "registration_data_import"
+)
 TERMS_FIELDS = ("status", "admin")
 
 

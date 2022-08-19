@@ -36,14 +36,16 @@
       "similarity" : "boolean"
     },
     "issue_type" : {
-      "type" : "text"
+      "type" : "keyword",
+      "similarity" : "boolean"
     },
     "priority" : {
       "type" : "keyword",
       "similarity" : "boolean"
     },
     "registration_data_import" : {
-      "type" : "text"
+      "type" : "keyword",
+      "similarity" : "boolean"
     },
     "status" : {
       "type" : "keyword",

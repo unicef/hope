@@ -32,22 +32,25 @@ class ElasticSearchFilterSet(FilterSet):
         raise NotImplementedError
 
     def filter_queryset(self, queryset):
-        import logging
-        logger = logging.getLogger(__name__)
-
         if self.USE_ALL_FIELDS_AS_ELASTIC_SEARCH or not self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH:
+            for field in self.form.data:
+                if field in (
+                    "category",
+                    "status",
+                    "issue_type",
+                    "priority",
+                    "urgency",
+                    "admin",
+                    "registration_data_import",
+                ):
+                    self.form.cleaned_data[field] = self.form.data[field]
+
             if isinstance(self.form.cleaned_data["admin"], ValidityQuerySet):
-                self.form.cleaned_data["admin"] = []
-            if self.form.cleaned_data["admin"]:
-                admin_ids = []
-                for item in self.form.cleaned_data["admin"]:
-                    admin_ids.append(str(item.id))
-                self.form.cleaned_data["admin"] = admin_ids
+                self.form.cleaned_data.pop("admin")
 
             if not self.form.cleaned_data["status"]:
                 self.form.cleaned_data.pop("status")
 
-            logger.info(self.form.cleaned_data)
             grievance_es_query_dict = create_es_query(self.form.cleaned_data)
 
             grievance_ids = execute_es_query(grievance_es_query_dict)
@@ -59,9 +62,13 @@ class ElasticSearchFilterSet(FilterSet):
             if name in self.USE_SPECIFIC_AS_ELASTIC_SEARCH:
                 continue
             queryset = self.filters[name].filter(queryset, value)
-            assert isinstance(queryset, models.QuerySet), \
-                "Expected '%s.%s' to return a QuerySet, but got a %s instead." \
-                % (type(self).__name__, name, type(queryset).__name__)
+            assert isinstance(
+                queryset, models.QuerySet
+            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
+                type(self).__name__,
+                name,
+                type(queryset).__name__,
+            )
         return queryset
 
 
@@ -121,6 +128,7 @@ class GrievanceTicketFilter(ElasticSearchFilterSet):
     )
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
+
     status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
     fsp = CharFilter(method="fsp_filter")
     admin = ModelMultipleChoiceFilter(
@@ -172,6 +180,7 @@ class GrievanceTicketFilter(ElasticSearchFilterSet):
 
     def some_method(self, qs, name, value):
         import logging
+
         logger = logging.getLogger(__name__)
         logger.info("Jestem w date filter")
         logger.info(qs)

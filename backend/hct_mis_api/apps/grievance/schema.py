@@ -457,23 +457,21 @@ class Query(graphene.ObjectType):
     grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
-        logger.info(kwargs)
-        return GrievanceTicket.objects.all()
-        # return (
-        #     GrievanceTicket.objects
-        #     .filter(ignored=False).select_related("assigned_to", "created_by")
-        #     .annotate(
-        #         total=Case(
-        #             When(
-        #                 status=GrievanceTicket.STATUS_CLOSED,
-        #                 then=F("updated_at") - F("created_at"),
-        #             ),
-        #             default=timezone.now() - F("created_at"),
-        #             output_field=DateField(),
-        #         )
-        #     )
-        #     .annotate(total_days=F("total__day"))
-        # )
+        return (
+            GrievanceTicket.objects
+            .filter(ignored=False).select_related("assigned_to", "created_by")
+            .annotate(
+                total=Case(
+                    When(
+                        status=GrievanceTicket.STATUS_CLOSED,
+                        then=F("updated_at") - F("created_at"),
+                    ),
+                    default=timezone.now() - F("created_at"),
+                    output_field=DateField(),
+                )
+            )
+            .annotate(total_days=F("total__day"))
+        )
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
