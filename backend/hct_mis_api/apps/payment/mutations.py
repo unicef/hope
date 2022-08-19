@@ -743,36 +743,6 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
-def process_choose_delivery_mechanisms_input(klass, info, input):
-    payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
-    klass.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
-    if payment_plan.status != PaymentPlan.Status.LOCKED:
-        raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
-    delivery_mechanisms_in_order = input.get("delivery_mechanisms")
-    if len(list(set(delivery_mechanisms_in_order))) != len(list(delivery_mechanisms_in_order)):
-        raise GraphQLError("Delivery mechanisms must be unique")
-
-    collectors_in_target_population = payment_plan.target_population.households.filter(
-        individuals_and_roles__role=ROLE_PRIMARY,
-    ).values_list("individuals_and_roles__individual", flat=True)
-
-    collectors_that_can_be_paid = PaymentChannel.objects.filter(
-        individual__in=collectors_in_target_population,
-        delivery_mechanism__in=delivery_mechanisms_in_order,
-    ).values_list("individual", flat=True)
-
-    collectors_that_cant_be_paid = collectors_in_target_population.difference(collectors_that_can_be_paid)
-    if collectors_that_cant_be_paid.exists():
-        # TODO: "Please add X, Y and Z to move to next step."
-        raise GraphQLError(
-            "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
-            f"Individuals that failed to be processed: "
-            f"{', '.join([str(i) for i in collectors_that_cant_be_paid])}"
-        )
-
-    return payment_plan, delivery_mechanisms_in_order
-
-
 class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -783,31 +753,31 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        payment_plan, delivery_mechanisms_in_order = process_choose_delivery_mechanisms_input(cls, info, input)
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
+        delivery_mechanisms_in_order = input.get("delivery_mechanisms")
+        if len(list(set(delivery_mechanisms_in_order))) != len(list(delivery_mechanisms_in_order)):
+            raise GraphQLError("Delivery mechanisms must be unique")
 
-        current_time = timezone.now()
-        for index, delivery_mechanism in enumerate(delivery_mechanisms_in_order):
-            DeliveryMechanismPerPaymentPlan.objects.update_or_create(
-                payment_plan=payment_plan,
-                delivery_mechanism=delivery_mechanism,
-                sent_date=current_time,
-                delivery_mechanism_order=index + 1,
-                created_by=info.context.user,
+        collectors_in_target_population = payment_plan.target_population.households.filter(
+            individuals_and_roles__role=ROLE_PRIMARY,
+        ).values_list("individuals_and_roles__individual", flat=True)
+
+        collectors_that_can_be_paid = PaymentChannel.objects.filter(
+            individual__in=collectors_in_target_population,
+            delivery_mechanism__in=delivery_mechanisms_in_order,
+        ).values_list("individual", flat=True)
+
+        collectors_that_cant_be_paid = collectors_in_target_population.difference(collectors_that_can_be_paid)
+        if collectors_that_cant_be_paid.exists():
+            # TODO: "Please add X, Y and Z to move to next step."
+            raise GraphQLError(
+                "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
+                f"Individuals that failed to be processed: "
+                f"{', '.join([str(i) for i in collectors_that_cant_be_paid])}"
             )
-        return cls(payment_plan=payment_plan)
-
-
-class UpdateChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
-    payment_plan = graphene.Field(PaymentPlanNode)
-
-    class Arguments:
-        input = ChooseDeliveryMechanismsForPaymentPlanInput(required=True)
-
-    @classmethod
-    @is_authenticated
-    @transaction.atomic
-    def mutate(cls, root, info, input, **kwargs):
-        payment_plan, delivery_mechanisms_in_order = process_choose_delivery_mechanisms_input(cls, info, input)
 
         DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
         current_time = timezone.now()
@@ -974,7 +944,6 @@ class Mutations(graphene.ObjectType):
     invalid_cash_plan_payment_verification = InvalidCashPlanVerificationMutation.Field()
     delete_cash_plan_payment_verification = DeleteCashPlanVerificationMutation.Field()
     choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
-    update_choose_delivery_mechanisms_for_payment_plan = UpdateChooseDeliveryMechanismsForPaymentPlanMutation.Field()
     assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     update_payment_verification_received_and_received_amount = (
