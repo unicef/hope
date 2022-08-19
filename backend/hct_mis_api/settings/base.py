@@ -8,9 +8,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from smart_admin.utils import match, regex
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
+from smart_admin.utils import match, regex
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 
@@ -478,6 +478,28 @@ CONSTANCE_ADDITIONAL_FIELDS = {
             "validators": [MinValueValidator(0)],
         },
     ),
+    "priority_choices": (
+        "django.forms.fields.ChoiceField",
+        {
+            "widget": "django.forms.Select",
+            "choices": (
+                (1, _("High")),
+                (2, _("Medium")),
+                (3, _("Low")),
+            ),
+        },
+    ),
+    "urgency_choices": (
+        "django.forms.fields.ChoiceField",
+        {
+            "widget": "django.forms.Select",
+            "choices": (
+                (1, _("Very urgent")),
+                (2, _("Urgent")),
+                (3, _("Not urgent")),
+            ),
+        },
+    ),
 }
 
 CONSTANCE_CONFIG = {
@@ -578,6 +600,36 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         False,
         "Automatically merge the population after server-triggered RDI import",
         bool,
+    ),
+    "NEEDS_ADJUDICATION_PRIORITY": (
+        1,
+        "Default value of needs adjudication priority",
+        "priority_choices",
+    ),
+    "NEEDS_ADJUDICATION_URGENCY": (
+        2,
+        "Default value of needs adjudication urgency",
+        "urgency_choices",
+    ),
+    "PAYMENT_VERIFICATION_PRIORITY": (
+        1,
+        "Default value of payment verification priority",
+        "priority_choices",
+    ),
+    "PAYMENT_VERIFICATION_URGENCY": (
+        1,
+        "Default value of payment verification urgency",
+        "urgency_choices",
+    ),
+    "SYSTEM_FLAGGING_PRIORITY": (
+        2,
+        "Default value of system flagging priority",
+        "priority_choices",
+    ),
+    "SYSTEM_FLAGGING_URGENCY": (
+        1,
+        "Default value of system flagging urgency",
+        "urgency_choices",
     ),
 }
 
