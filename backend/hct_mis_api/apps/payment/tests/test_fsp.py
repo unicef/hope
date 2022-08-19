@@ -479,10 +479,68 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert len(edited_payment_plan_data["deliveryMechanisms"]) == 1
 
     def test_editing_fsps_assignments_when_fsp_was_already_set_up(self):
-        # scenario:
-        # set up DMs
-        # set up FSPs
-        # edit DMs
-        # expect FSPs to be null
+        choose_dms_response = self.graphql_request(
+            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=self.encoded_payment_plan_id,
+                    deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
+                )
+            ),
+        )
+        assert "errors" not in choose_dms_response, choose_dms_response
 
-        pass
+        assign_fsps_mutation_response = self.graphql_request(
+            request_string=self.ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_santander_fsp_id,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": self.encoded_bank_of_america_fsp_id,
+                    },
+                ],
+            },
+        )
+        assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
+
+        current_payment_plan_response = self.graphql_request(
+            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            context={"user": self.user},
+            variables={"id": self.encoded_payment_plan_id},
+        )
+        current_data = current_payment_plan_response["data"]["paymentPlan"]
+        assert len(current_data["deliveryMechanisms"]) == 2
+        assert current_data["deliveryMechanisms"][0]["fsp"] is not None
+        assert current_data["deliveryMechanisms"][1]["fsp"] is not None
+
+        new_choose_dms_response = self.graphql_request(
+            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=self.encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                    ],  # different order
+                )
+            ),
+        )
+        assert "errors" not in new_choose_dms_response, new_choose_dms_response
+
+        new_payment_plan_response = self.graphql_request(
+            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            context={"user": self.user},
+            variables={"id": self.encoded_payment_plan_id},
+        )
+        new_data = new_payment_plan_response["data"]["paymentPlan"]
+        assert len(new_data["deliveryMechanisms"]) == 2
+        assert new_data["deliveryMechanisms"][0]["fsp"] is None
+        assert new_data["deliveryMechanisms"][1]["fsp"] is None
