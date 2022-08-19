@@ -102,7 +102,7 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
     def test_choosing_delivery_mechanism_order(self):
         payment_plan = PaymentPlanFactory(total_households_count=1, status=PaymentPlan.Status.LOCKED)
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
-        create_program_mutation_variables_without_delivery_mechanisms = dict(
+        choose_dms_mutation_variables_mutation_variables_without_delivery_mechanisms = dict(
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
                 deliveryMechanisms=[],
@@ -111,7 +111,7 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
         response_without_mechanisms = self.graphql_request(
             request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
-            variables=create_program_mutation_variables_without_delivery_mechanisms,
+            variables=choose_dms_mutation_variables_mutation_variables_without_delivery_mechanisms,
         )
         assert response_without_mechanisms is not None and "data" in response_without_mechanisms
         payment_plan_without_delivery_mechanisms = response_without_mechanisms["data"][
@@ -120,7 +120,7 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
         self.assertEqual(payment_plan_without_delivery_mechanisms["id"], encoded_payment_plan_id)
         self.assertEqual(payment_plan_without_delivery_mechanisms["deliveryMechanisms"], [])
 
-        create_program_mutation_variables_with_delivery_mechanisms = dict(
+        choose_dms_mutation_variables_mutation_variables_with_delivery_mechanisms = dict(
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
                 deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
@@ -129,7 +129,7 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
         response_with_mechanisms = self.graphql_request(
             request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
-            variables=create_program_mutation_variables_with_delivery_mechanisms,
+            variables=choose_dms_mutation_variables_mutation_variables_with_delivery_mechanisms,
         )
         assert response_with_mechanisms is not None and "data" in response_with_mechanisms
         payment_plan_with_delivery_mechanisms = response_with_mechanisms["data"][
@@ -172,7 +172,7 @@ query AllDeliveryMechanisms {
         )
 
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
-        create_program_mutation_variables = dict(
+        choose_dms_mutation_variables_mutation_variables = dict(
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
                 deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
@@ -181,7 +181,7 @@ query AllDeliveryMechanisms {
         response = self.graphql_request(
             request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
-            variables=create_program_mutation_variables,
+            variables=choose_dms_mutation_variables_mutation_variables,
         )
         assert "errors" in response
         assert (
@@ -194,7 +194,7 @@ query AllDeliveryMechanisms {
     def test_providing_non_unique_delivery_mechanisms(self):
         payment_plan = PaymentPlanFactory(total_households_count=1, status=PaymentPlan.Status.LOCKED)
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
-        create_program_mutation_variables = dict(
+        choose_dms_mutation_variables_mutation_variables = dict(
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
                 deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_TRANSFER],
@@ -203,7 +203,7 @@ query AllDeliveryMechanisms {
         response = self.graphql_request(
             request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
-            variables=create_program_mutation_variables,
+            variables=choose_dms_mutation_variables_mutation_variables,
         )
         assert response["errors"][0]["message"] == "Delivery mechanisms must be unique"
 
@@ -280,7 +280,7 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
         )
 
     def test_assigning_fsps_to_delivery_mechanism(self):
-        create_program_mutation_variables = dict(
+        choose_dms_mutation_variables_mutation_variables = dict(
             input=dict(
                 paymentPlanId=self.encoded_payment_plan_id,
                 deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
@@ -289,7 +289,7 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
         response = self.graphql_request(
             request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
-            variables=create_program_mutation_variables,
+            variables=choose_dms_mutation_variables_mutation_variables,
         )
         assert "errors" not in response, response
 
@@ -401,7 +401,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert new_data["deliveryMechanisms"][1]["fsp"]["id"] == self.encoded_bank_of_america_fsp_id
 
     def test_editing_fsps_assignments(self):
-        create_program_mutation_variables = dict(
+        choose_dms_mutation_variables = dict(
             input=dict(
                 paymentPlanId=self.encoded_payment_plan_id,
                 deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
@@ -410,7 +410,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         response = self.graphql_request(
             request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
-            variables=create_program_mutation_variables,
+            variables=choose_dms_mutation_variables,
         )
         assert "errors" not in response, response
 
@@ -477,3 +477,12 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         )
         edited_payment_plan_data = edited_payment_plan_response["data"]["paymentPlan"]
         assert len(edited_payment_plan_data["deliveryMechanisms"]) == 1
+
+    def test_editing_fsps_assignments_when_fsp_was_already_set_up(self):
+        # scenario:
+        # set up DMs
+        # set up FSPs
+        # edit DMs
+        # expect FSPs to be null
+
+        pass
