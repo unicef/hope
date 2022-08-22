@@ -20,8 +20,91 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
-class TestFSPSetup(APITestCase):
-    CHOOSE_DELIVERY_MECHANISMS_MUTATION = """
+def base_setup(cls):
+    create_afghanistan()
+    cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+    cls.user = UserFactory.create()
+    cls.create_user_role_with_permissions(
+        cls.user,
+        [Permissions.PAYMENT_MODULE_CREATE, Permissions.PAYMENT_MODULE_VIEW_DETAILS],
+        BusinessArea.objects.get(slug="afghanistan"),
+    )
+
+    registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
+
+    cls.household_1, cls.individuals_1 = create_household_and_individuals(
+        household_data={
+            "registration_data_import": registration_data_import,
+            "business_area": cls.business_area,
+        },
+        individuals_data=[{}],
+    )
+    PaymentChannelFactory(
+        individual=cls.individuals_1[0],
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
+    )
+    IndividualRoleInHouseholdFactory(
+        individual=cls.individuals_1[0],
+        household=cls.household_1,
+        role=ROLE_PRIMARY,
+    )
+
+    cls.household_2, cls.individuals_2 = create_household_and_individuals(
+        household_data={
+            "registration_data_import": registration_data_import,
+            "business_area": cls.business_area,
+        },
+        individuals_data=[{}],
+    )
+    PaymentChannelFactory(
+        individual=cls.individuals_2[0],
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+    )
+    IndividualRoleInHouseholdFactory(
+        individual=cls.individuals_2[0],
+        household=cls.household_2,
+        role=ROLE_PRIMARY,
+    )
+
+    cls.household_3, cls.individuals_3 = create_household_and_individuals(
+        household_data={
+            "registration_data_import": registration_data_import,
+            "business_area": cls.business_area,
+        },
+        individuals_data=[{}],
+    )
+    IndividualRoleInHouseholdFactory(
+        individual=cls.individuals_3[0],
+        household=cls.household_3,
+        role=ROLE_PRIMARY,
+    )
+    PaymentChannelFactory(
+        individual=cls.individuals_3[0],
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+    )
+
+
+ASSIGN_FSPS_MUTATION = """
+mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeliveryMechanismMappingInput!]!) {
+    assignFspToDeliveryMechanism(input: {
+        paymentPlanId: $paymentPlanId,
+        mappings: $mappings
+    }) {
+        paymentPlan {
+            id
+            deliveryMechanisms {
+                name
+                order
+                fsp {
+                    id
+                }
+            }
+        }
+    }
+}
+"""
+
+CHOOSE_DELIVERY_MECHANISMS_MUTATION = """
 mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanismsForPaymentPlanInput!) {
   chooseDeliveryMechanismsForPaymentPlan(input: $input) {
     paymentPlan {
@@ -35,7 +118,7 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
 }
 """
 
-    CURRENT_PAYMENT_PLAN_QUERY = """
+CURRENT_PAYMENT_PLAN_QUERY = """
 query PaymentPlan($id: ID!) {
     paymentPlan(id: $id) {
         id
@@ -50,69 +133,11 @@ query PaymentPlan($id: ID!) {
 }
 """
 
+
+class TestFSPSetup(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        create_afghanistan()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.user = UserFactory.create()
-        cls.create_user_role_with_permissions(
-            cls.user,
-            [Permissions.PAYMENT_MODULE_CREATE, Permissions.PAYMENT_MODULE_VIEW_DETAILS],
-            BusinessArea.objects.get(slug="afghanistan"),
-        )
-
-        registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
-
-        cls.household_1, cls.individuals_1 = create_household_and_individuals(
-            household_data={
-                "registration_data_import": registration_data_import,
-                "business_area": cls.business_area,
-            },
-            individuals_data=[{}],
-        )
-        PaymentChannelFactory(
-            individual=cls.individuals_1[0],
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
-        )
-        IndividualRoleInHouseholdFactory(
-            individual=cls.individuals_1[0],
-            household=cls.household_1,
-            role=ROLE_PRIMARY,
-        )
-
-        cls.household_2, cls.individuals_2 = create_household_and_individuals(
-            household_data={
-                "registration_data_import": registration_data_import,
-                "business_area": cls.business_area,
-            },
-            individuals_data=[{}],
-        )
-        PaymentChannelFactory(
-            individual=cls.individuals_2[0],
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
-        )
-        IndividualRoleInHouseholdFactory(
-            individual=cls.individuals_2[0],
-            household=cls.household_2,
-            role=ROLE_PRIMARY,
-        )
-
-        cls.household_3, cls.individuals_3 = create_household_and_individuals(
-            household_data={
-                "registration_data_import": registration_data_import,
-                "business_area": cls.business_area,
-            },
-            individuals_data=[{}],
-        )
-        IndividualRoleInHouseholdFactory(
-            individual=cls.individuals_3[0],
-            household=cls.household_3,
-            role=ROLE_PRIMARY,
-        )
-        PaymentChannelFactory(
-            individual=cls.individuals_3[0],
-            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
-        )
+        base_setup(cls)
 
     def test_choosing_delivery_mechanism_order(self):
         payment_plan = PaymentPlanFactory(total_households_count=1, status=PaymentPlan.Status.LOCKED)
@@ -124,7 +149,7 @@ query PaymentPlan($id: ID!) {
             )
         )
         response_without_mechanisms = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=choose_dms_mutation_variables_mutation_variables_without_delivery_mechanisms,
         )
@@ -135,6 +160,22 @@ query PaymentPlan($id: ID!) {
         self.assertEqual(payment_plan_without_delivery_mechanisms["id"], encoded_payment_plan_id)
         self.assertEqual(payment_plan_without_delivery_mechanisms["deliveryMechanisms"], [])
 
+        response_with_wrong_mechanism = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=encoded_payment_plan_id,
+                    deliveryMechanisms=[""],  # empty string is invalid
+                )
+            ),
+        )
+        assert "errors" in response_with_wrong_mechanism, response_with_wrong_mechanism
+        self.assertEqual(
+            response_with_wrong_mechanism["errors"][0]["message"],
+            "Delivery mechanism '' is not valid.",
+        )
+
         choose_dms_mutation_variables_mutation_variables_with_delivery_mechanisms = dict(
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
@@ -142,7 +183,7 @@ query PaymentPlan($id: ID!) {
             )
         )
         response_with_mechanisms = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=choose_dms_mutation_variables_mutation_variables_with_delivery_mechanisms,
         )
@@ -190,15 +231,15 @@ query AllDeliveryMechanisms {
         choose_dms_mutation_variables_mutation_variables = dict(
             input=dict(
                 paymentPlanId=encoded_payment_plan_id,
-                deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
+                deliveryMechanisms=[GenericPayment.DELIVERY_TYPE_CHEQUE],
             )
         )
         response = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=choose_dms_mutation_variables_mutation_variables,
         )
-        assert "errors" in response
+        assert "errors" in response, response
         assert (
             "Selected delivery mechanisms are not sufficient to serve all beneficiaries"
             in response["errors"][0]["message"]
@@ -216,14 +257,14 @@ query AllDeliveryMechanisms {
             )
         )
         response = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=choose_dms_mutation_variables_mutation_variables,
         )
         assert "errors" not in response, response
 
         current_payment_plan_response = self.graphql_request(
-            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            request_string=CURRENT_PAYMENT_PLAN_QUERY,
             context={"user": self.user},
             variables={"id": encoded_payment_plan_id},
         )
@@ -234,30 +275,10 @@ query AllDeliveryMechanisms {
         assert data["deliveryMechanisms"][1]["name"] == GenericPayment.DELIVERY_TYPE_TRANSFER
 
 
-class TestFSPAssignment(TestFSPSetup):
-    ASSIGN_FSPS_MUTATION = """
-mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeliveryMechanismMappingInput!]!) {
-    assignFspToDeliveryMechanism(input: {
-        paymentPlanId: $paymentPlanId,
-        mappings: $mappings
-    }) {
-        paymentPlan {
-            id
-            deliveryMechanisms {
-                name
-                order
-                fsp {
-                    id
-                }
-            }
-        }
-    }
-}
-"""
-
+class TestFSPAssignment(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        super().setUpTestData()
+        base_setup(cls)
 
         target_population = TargetPopulationFactory(
             id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
@@ -298,7 +319,7 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
             )
         )
         response = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=choose_dms_mutation_variables_mutation_variables,
         )
@@ -333,7 +354,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert "Bank of Europe" in voucher_fsp_names
 
         bad_mutation_response = self.graphql_request(
-            request_string=self.ASSIGN_FSPS_MUTATION,
+            request_string=ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
@@ -353,7 +374,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         )
 
         current_payment_plan_response = self.graphql_request(
-            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            request_string=CURRENT_PAYMENT_PLAN_QUERY,
             context={"user": self.user},
             variables={"id": self.encoded_payment_plan_id},
         )
@@ -363,7 +384,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert data["deliveryMechanisms"][1]["fsp"] is None
 
         complete_mutation_response = self.graphql_request(
-            request_string=self.ASSIGN_FSPS_MUTATION,
+            request_string=ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
@@ -387,7 +408,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert complete_payment_plan_data["deliveryMechanisms"][1]["fsp"]["id"] == self.encoded_bank_of_america_fsp_id
 
         new_payment_plan_response = self.graphql_request(
-            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            request_string=CURRENT_PAYMENT_PLAN_QUERY,
             context={"user": self.user},
             variables={"id": self.encoded_payment_plan_id},
         )
@@ -404,14 +425,14 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
             )
         )
         response = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=choose_dms_mutation_variables,
         )
         assert "errors" not in response, response
 
         complete_mutation_response = self.graphql_request(
-            request_string=self.ASSIGN_FSPS_MUTATION,
+            request_string=ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
@@ -435,7 +456,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert complete_payment_plan_data["deliveryMechanisms"][1]["fsp"]["id"] == self.encoded_bank_of_america_fsp_id
 
         payment_plan_response = self.graphql_request(
-            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            request_string=CURRENT_PAYMENT_PLAN_QUERY,
             context={"user": self.user},
             variables={"id": self.encoded_payment_plan_id},
         )
@@ -462,14 +483,14 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
             )
         )
         new_response = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=new_program_mutation_variables,
         )
         assert "errors" not in new_response
 
         edited_payment_plan_response = self.graphql_request(
-            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            request_string=CURRENT_PAYMENT_PLAN_QUERY,
             context={"user": self.user},
             variables={"id": self.encoded_payment_plan_id},
         )
@@ -478,7 +499,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
 
     def test_editing_fsps_assignments_when_fsp_was_already_set_up(self):
         choose_dms_response = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=dict(
                 input=dict(
@@ -490,7 +511,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert "errors" not in choose_dms_response, choose_dms_response
 
         assign_fsps_mutation_response = self.graphql_request(
-            request_string=self.ASSIGN_FSPS_MUTATION,
+            request_string=ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
@@ -511,7 +532,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
 
         current_payment_plan_response = self.graphql_request(
-            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            request_string=CURRENT_PAYMENT_PLAN_QUERY,
             context={"user": self.user},
             variables={"id": self.encoded_payment_plan_id},
         )
@@ -521,7 +542,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert current_data["deliveryMechanisms"][1]["fsp"] is not None
 
         new_choose_dms_response = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=dict(
                 input=dict(
@@ -536,7 +557,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert "errors" not in new_choose_dms_response, new_choose_dms_response
 
         new_payment_plan_response = self.graphql_request(
-            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            request_string=CURRENT_PAYMENT_PLAN_QUERY,
             context={"user": self.user},
             variables={"id": self.encoded_payment_plan_id},
         )
@@ -547,7 +568,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
 
     def test_choosing_different_fsps_for_the_same_delivery_mechanism(self):
         choose_dms_response = self.graphql_request(
-            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=dict(
                 input=dict(
@@ -563,7 +584,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert "errors" not in choose_dms_response, choose_dms_response
 
         bad_assign_fsps_mutation_response = self.graphql_request(
-            request_string=self.ASSIGN_FSPS_MUTATION,
+            request_string=ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
@@ -589,7 +610,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert "errors" in bad_assign_fsps_mutation_response, bad_assign_fsps_mutation_response
 
         another_bad_assign_fsps_mutation_response = self.graphql_request(
-            request_string=self.ASSIGN_FSPS_MUTATION,
+            request_string=ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
@@ -619,7 +640,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         )
 
         assign_fsps_mutation_response = self.graphql_request(
-            request_string=self.ASSIGN_FSPS_MUTATION,
+            request_string=ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,

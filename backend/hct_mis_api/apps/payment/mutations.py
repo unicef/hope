@@ -14,6 +14,7 @@ from graphql import GraphQLError
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -758,10 +759,11 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
         delivery_mechanisms_in_order = input.get("delivery_mechanisms")
+        for delivery_mechanism in delivery_mechanisms_in_order:
+            if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
+                raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
 
-        collectors_in_target_population = payment_plan.target_population.households.filter(
-            individuals_and_roles__role=ROLE_PRIMARY,
-        ).values_list("individuals_and_roles__individual", flat=True)
+        collectors_in_target_population = payment_plan.payments.values_list("collector", flat=True)
 
         collectors_that_can_be_paid = PaymentChannel.objects.filter(
             individual__in=collectors_in_target_population,
