@@ -692,16 +692,64 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
             },
             individuals_data=[{}],
         )
+
+    def test_treating_collector_without_payment_channel_as_a_default_cash_option(self):
         IndividualRoleInHouseholdFactory(
-            individual=cls.individuals_4[0],
-            household=cls.household_4,
+            individual=self.individuals_4[0],
+            household=self.household_4,
             role=ROLE_PRIMARY,
         )
         # no payment channels
 
-        payment_plan_setup(cls)
+        payment_plan_setup(self)
 
-    def test_treating_collector_without_payment_channel_as_a_default_cash_option(self):
+        choose_dms_response = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=self.encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        # lacking cash option for ind #4
+                    ],
+                )
+            ),
+        )
+        assert "errors" in choose_dms_response, choose_dms_response
+        error_msg = choose_dms_response["errors"][0]["message"]
+        assert GenericPayment.DELIVERY_TYPE_CASH in error_msg, error_msg
+
+        choose_dms_with_cash_response = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=self.encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        GenericPayment.DELIVERY_TYPE_CASH,
+                    ],
+                )
+            ),
+        )
+        assert "errors" not in choose_dms_with_cash_response, choose_dms_with_cash_response
+
+    def test_sufficient_delivery_mechanisms_for_collector_with_cash_payment_channel(self):
+        IndividualRoleInHouseholdFactory(
+            individual=self.individuals_4[0],
+            household=self.household_4,
+            role=ROLE_PRIMARY,
+        )
+        PaymentChannelFactory(
+            individual=self.individuals_4[0],
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+        )
+
+        payment_plan_setup(self)
+
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
