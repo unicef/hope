@@ -103,7 +103,7 @@ export function Notes({
   const myName = `${meData.me.firstName || meData.me.email}`;
 
   return (
-    <Grid item xs={9}>
+    <Grid item xs={8}>
       <Box p={3}>
         <Formik
           initialValues={initialValues}

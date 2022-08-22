@@ -1,7 +1,9 @@
 import { Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 import {
+  grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   reduceChoices,
   renderUserName,
@@ -37,6 +39,9 @@ export const GrievancesDetails = ({
   const statusChoices: {
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketStatusChoices);
+
+  const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
+  const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
 
   const categoryChoices: {
     [id: number]: string;
@@ -74,18 +79,48 @@ export const GrievancesDetails = ({
                 size: 3,
               },
               {
+                label: t('Priority'),
+                value: (
+                  <StatusBox
+                    status={
+                      priorityChoicesData[ticket.priority - 1]?.name || '-'
+                    }
+                    statusToColor={grievanceTicketBadgeColors}
+                  />
+                ),
+                size: 3,
+              },
+              {
+                label: t('Urgency'),
+                value: (
+                  <StatusBox
+                    status={
+                      urgencyChoicesData[ticket.priority - 1]?.name || '-'
+                    }
+                    statusToColor={grievanceTicketBadgeColors}
+                  />
+                ),
+                size: 3,
+              },
+              {
+                label: t('ASSIGNED TO'),
+                value: renderUserName(ticket.assignedTo),
+                size: 3,
+              },
+              {
                 label: t('CATEGORY'),
                 value: <span>{categoryChoices[ticket.category]}</span>,
                 size: 3,
               },
-              {
+              ticket.category === +GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT && {
                 label: t('SUB CATEGORY'),
                 value: (
                   <span>{subCategoryChoices[ticket.subCategory] || '-'}</span>
                 ),
                 size: 3,
               },
-              {
+              (ticket.category === +GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+                ticket.category === +GRIEVANCE_CATEGORIES.DATA_CHANGE) && {
                 label: t('Issue Type'),
                 value: <span>{issueType}</span>,
                 size: 3,
@@ -147,12 +182,12 @@ export const GrievancesDetails = ({
                     )}
                   </span>
                 ),
-                size: 6,
+                size: 3,
               },
               {
                 label: t('CONSENT'),
                 value: ticket.consent ? 'Yes' : 'No',
-                size: 3,
+                size: 9,
               },
               {
                 label: t('CREATED BY'),
@@ -167,16 +202,6 @@ export const GrievancesDetails = ({
               {
                 label: t('LAST MODIFIED DATE'),
                 value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
-                size: 3,
-              },
-              {
-                label: t('DESCRIPTION'),
-                value: ticket.description,
-                size: 6,
-              },
-              {
-                label: t('ASSIGNED TO'),
-                value: renderUserName(ticket.assignedTo),
                 size: 6,
               },
               {
@@ -194,11 +219,18 @@ export const GrievancesDetails = ({
                 value: ticket.language,
                 size: 3,
               },
-            ].map((el) => (
-              <Grid key={el.label} item xs={el.size as GridSize}>
-                <LabelizedField label={el.label}>{el.value}</LabelizedField>
-              </Grid>
-            ))}
+              {
+                label: t('DESCRIPTION'),
+                value: ticket.description,
+                size: 6,
+              },
+            ]
+              .filter((el) => el)
+              .map((el) => (
+                <Grid key={el.label} item xs={el.size as GridSize}>
+                  <LabelizedField label={el.label}>{el.value}</LabelizedField>
+                </Grid>
+              ))}
           </Grid>
         </OverviewContainer>
       </ContainerColumnWithBorder>
