@@ -16,11 +16,12 @@ from django_filters import (
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
+from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.core.utils import choices_to_dict
 
 
 class GrievanceTicketFilter(FilterSet):
@@ -96,8 +97,8 @@ class GrievanceTicketFilter(FilterSet):
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
     score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
     household = CharFilter(field_name="household_unicef_id")
-    priority = ChoiceFilter(field_name="priority", choices=GrievanceTicket.PRIORITY_CHOICES)
-    urgency = ChoiceFilter(field_name="urgency", choices=GrievanceTicket.URGENCY_CHOICES)
+    priority = ChoiceFilter(field_name="priority", choices=PRIORITY_CHOICES)
+    urgency = ChoiceFilter(field_name="urgency", choices=URGENCY_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
     total_days = IntegerFilter(field_name="total_days")
