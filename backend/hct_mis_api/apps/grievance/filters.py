@@ -24,42 +24,30 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.core.utils import choices_to_dict
 
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 class ElasticSearchFilterSet(FilterSet):
     USE_ALL_FIELDS_AS_ELASTIC_SEARCH = True
     USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH = tuple()
 
     def elasticsearch_filter_queryset(self):
-        raise NotImplementedError
+        raise NotImplemented
+
+    def prepare_filters(self, allowed_fields):
+        raise NotImplemented
 
     def filter_queryset(self, queryset):
-        if self.USE_ALL_FIELDS_AS_ELASTIC_SEARCH or not self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH:
-            for field in self.form.data:
-                if field in (
-                    "category",
-                    "status",
-                    "issue_type",
-                    "priority",
-                    "urgency",
-                    "admin",
-                    "registration_data_import",
-                ):
-                    self.form.cleaned_data[field] = self.form.data[field]
-
-            if isinstance(self.form.cleaned_data["admin"], ValidityQuerySet):
-                self.form.cleaned_data.pop("admin")
-
-            if not self.form.cleaned_data["status"]:
-                self.form.cleaned_data.pop("status")
-
-            grievance_es_query_dict = create_es_query(self.form.cleaned_data)
-
-            grievance_ids = execute_es_query(grievance_es_query_dict)
+        if self.USE_ALL_FIELDS_AS_ELASTIC_SEARCH or self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH:
+            grievance_ids = self.elasticsearch_filter_queryset()
             queryset = queryset.filter(id__in=grievance_ids)
+
         if self.USE_ALL_FIELDS_AS_ELASTIC_SEARCH:
             return queryset
 
         for name, value in self.form.cleaned_data.items():
-            if name in self.USE_SPECIFIC_AS_ELASTIC_SEARCH:
+            if name in self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH:
                 continue
             queryset = self.filters[name].filter(queryset, value)
             assert isinstance(
@@ -72,7 +60,56 @@ class ElasticSearchFilterSet(FilterSet):
         return queryset
 
 
-class GrievanceTicketFilter(ElasticSearchFilterSet):
+class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
+    USE_ALL_FIELDS_AS_ELASTIC_SEARCH = False
+    USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH = (
+        "search",
+        "created_at_range",
+        "assigned_to",
+        "registration_data_import",
+        "status",
+        "issue_type",
+        "category",
+        "admin",
+        "priority",
+        "urgency",
+        "grievance_type",
+        "business_area",
+    )
+
+    def elasticsearch_filter_queryset(self):
+        grievance_es_query_dict = create_es_query(self.prepare_filters(self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH))
+        grievance_ids = execute_es_query(grievance_es_query_dict)
+        return grievance_ids
+
+    def prepare_filters(self, allowed_fields):
+        filters = {}
+        for field in allowed_fields:
+            logger.info(field)
+            logger.info(self.form.data.get(field))
+            if self.form.data.get(field):
+                if field in (
+                    "category",
+                    "status",
+                    "issue_type",
+                    "priority",
+                    "urgency",
+                    "admin",
+                    "registration_data_import",
+                ):
+                    filters[field] = self.form.data[field]
+                else:
+                    filters[field] = self.form.cleaned_data[field]
+
+        if isinstance(filters.get("admin"), ValidityQuerySet):
+            filters.pop("admin")
+
+        logger.info("*"*10)
+        logger.info(filters)
+        return filters
+
+
+class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
             "individual": (
@@ -178,18 +215,7 @@ class GrievanceTicketFilter(ElasticSearchFilterSet):
         )
     )
 
-    def some_method(self, qs, name, value):
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.info("Jestem w date filter")
-        logger.info(qs)
-        return qs
-
     def search_filter(self, qs, name, value):
-        if settings.ELASTICSEARCH_GRIEVANCE_TURN_ON:
-            return qs
-
         label, value = tuple(value.split(" ", 1))
         if label == "ticket_id":
             q = Q(unicef_id=value)
