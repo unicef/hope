@@ -758,8 +758,6 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
         delivery_mechanisms_in_order = input.get("delivery_mechanisms")
-        if len(list(set(delivery_mechanisms_in_order))) != len(list(delivery_mechanisms_in_order)):
-            raise GraphQLError("Delivery mechanisms must be unique")
 
         collectors_in_target_population = payment_plan.target_population.households.filter(
             individuals_and_roles__role=ROLE_PRIMARY,

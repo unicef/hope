@@ -35,6 +35,21 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
 }
 """
 
+    CURRENT_PAYMENT_PLAN_QUERY = """
+query PaymentPlan($id: ID!) {
+    paymentPlan(id: $id) {
+        id
+        deliveryMechanisms {
+            name
+            order
+            fsp {
+                id
+            }
+        }
+    }
+}
+"""
+
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
@@ -205,26 +220,21 @@ query AllDeliveryMechanisms {
             context={"user": self.user},
             variables=choose_dms_mutation_variables_mutation_variables,
         )
-        assert response["errors"][0]["message"] == "Delivery mechanisms must be unique"
+        assert "errors" not in response, response
+
+        current_payment_plan_response = self.graphql_request(
+            request_string=self.CURRENT_PAYMENT_PLAN_QUERY,
+            context={"user": self.user},
+            variables={"id": encoded_payment_plan_id},
+        )
+        assert "errors" not in current_payment_plan_response, current_payment_plan_response
+        data = current_payment_plan_response["data"]["paymentPlan"]
+        assert len(data["deliveryMechanisms"]) == 2
+        assert data["deliveryMechanisms"][0]["name"] == GenericPayment.DELIVERY_TYPE_TRANSFER
+        assert data["deliveryMechanisms"][1]["name"] == GenericPayment.DELIVERY_TYPE_TRANSFER
 
 
 class TestFSPAssignment(TestFSPSetup):
-
-    CURRENT_PAYMENT_PLAN_QUERY = """
-query PaymentPlan($id: ID!) {
-    paymentPlan(id: $id) {
-        id
-        deliveryMechanisms {
-            name
-            order
-            fsp {
-                id
-            }
-        }
-    }
-}
-"""
-
     ASSIGN_FSPS_MUTATION = """
 mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeliveryMechanismMappingInput!]!) {
     assignFspToDeliveryMechanism(input: {
