@@ -793,6 +793,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
 class FSPToDeliveryMechanismMappingInput(graphene.InputObjectType):
     fsp_id = graphene.ID(required=True)
     delivery_mechanism = graphene.String(required=True)
+    order = graphene.Int(required=True)
 
 
 class AssignFspToDeliveryMechanismInput(graphene.InputObjectType):
@@ -822,6 +823,7 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
                     DeliveryMechanismPerPaymentPlan,
                     payment_plan=payment_plan,
                     delivery_mechanism=mapping.get("delivery_mechanism"),
+                    delivery_mechanism_order=mapping.get("order"),
                 ),
             }
             for mapping in input.get("mappings")

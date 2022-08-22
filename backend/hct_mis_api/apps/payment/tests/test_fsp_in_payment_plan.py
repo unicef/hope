@@ -286,8 +286,9 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
 
         cls.bank_of_europe_fsp = FinancialServiceProviderFactory(
             name="Bank of Europe",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER, GenericPayment.DELIVERY_TYPE_TRANSFER],
         )
+        cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
 
     def test_assigning_fsps_to_delivery_mechanism(self):
         choose_dms_mutation_variables_mutation_variables = dict(
@@ -324,7 +325,8 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         available_mechs_data = query_response["data"]["availableFspsForDeliveryMechanisms"]
         assert len(available_mechs_data) == 2
         assert available_mechs_data[0]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_TRANSFER
-        assert available_mechs_data[0]["fsps"][0]["name"] == "Santander"
+        transfer_fsps_names = [x["name"] for x in available_mechs_data[0]["fsps"]]
+        assert all(name in transfer_fsps_names for name in ["Santander", "Bank of Europe"])
         assert available_mechs_data[1]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_VOUCHER
         voucher_fsp_names = [f["name"] for f in available_mechs_data[1]["fsps"]]
         assert "Bank of America" in voucher_fsp_names
@@ -339,6 +341,7 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
                         "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
                     }
                 ],
             },
@@ -347,25 +350,6 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert (
             bad_mutation_response["errors"][0]["message"]
             == "Please assign FSP to all delivery mechanisms before moving to next step"
-        )
-
-        another_bad_mutation_response = self.graphql_request(
-            request_string=self.ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
-            variables={
-                "paymentPlanId": self.encoded_payment_plan_id,
-                "mappings": [
-                    {
-                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
-                        "fspId": self.encoded_santander_fsp_id,
-                    }
-                ],
-            },
-        )
-        assert "errors" in another_bad_mutation_response, another_bad_mutation_response
-        self.assertEqual(
-            another_bad_mutation_response["errors"][0]["message"],
-            "Delivery mechanism 'Voucher' is not supported by FSP 'Santander'",
         )
 
         current_payment_plan_response = self.graphql_request(
@@ -387,10 +371,12 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
                         "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
                     },
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
                         "fspId": self.encoded_bank_of_america_fsp_id,
+                        "order": 2,
                     },
                 ],
             },
@@ -433,10 +419,12 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
                         "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
                     },
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
                         "fspId": self.encoded_bank_of_america_fsp_id,
+                        "order": 2,
                     },
                 ],
             },
@@ -510,10 +498,12 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
                         "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
                     },
                     {
                         "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
                         "fspId": self.encoded_bank_of_america_fsp_id,
+                        "order": 2,
                     },
                 ],
             },
@@ -554,3 +544,98 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         assert len(new_data["deliveryMechanisms"]) == 2
         assert new_data["deliveryMechanisms"][0]["fsp"] is None
         assert new_data["deliveryMechanisms"][1]["fsp"] is None
+
+    def test_choosing_different_fsps_for_the_same_delivery_mechanism(self):
+        choose_dms_response = self.graphql_request(
+            request_string=self.CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=self.encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                    ],
+                )
+            ),
+        )
+        assert "errors" not in choose_dms_response, choose_dms_response
+
+        bad_assign_fsps_mutation_response = self.graphql_request(
+            request_string=self.ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_bank_of_america_fsp_id,  # doesn't support transfer
+                        "order": 2,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": self.encoded_bank_of_america_fsp_id,
+                        "order": 3,
+                    },
+                ],
+            },
+        )
+        assert "errors" in bad_assign_fsps_mutation_response, bad_assign_fsps_mutation_response
+
+        another_bad_assign_fsps_mutation_response = self.graphql_request(
+            request_string=self.ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_santander_fsp_id,  # already chosen
+                        "order": 2,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": self.encoded_bank_of_america_fsp_id,
+                        "order": 3,
+                    },
+                ],
+            },
+        )
+        assert "errors" in another_bad_assign_fsps_mutation_response, another_bad_assign_fsps_mutation_response
+
+        assign_fsps_mutation_response = self.graphql_request(
+            request_string=self.ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_bank_of_europe_fsp_id,  # supports transfer
+                        "order": 2,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": self.encoded_bank_of_america_fsp_id,
+                        "order": 3,
+                    },
+                ],
+            },
+        )
+        assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response

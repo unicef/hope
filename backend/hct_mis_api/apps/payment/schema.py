@@ -506,7 +506,7 @@ class Query(graphene.ObjectType):
 
         return [
             {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
-            for mechanism in delivery_mechanisms
+            for mechanism in delivery_mechanisms  # keeps the same order as the input
         ]
 
     def resolve_all_payment_verifications(self, info, **kwargs):
