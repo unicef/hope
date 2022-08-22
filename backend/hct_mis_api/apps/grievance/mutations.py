@@ -317,7 +317,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         linked_tickets_encoded_ids = arg("linked_tickets", [])
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
         business_area_slug = arg("business_area")
-        partner = get_partner(input.pop("partner"))
+        partner = get_partner(input.pop("partner", None))
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "business_area", "assigned_to"))
         admin = input.pop("admin", None)
@@ -533,7 +533,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
 
-        partner = get_partner(input.pop("partner"))
+        partner = get_partner(input.pop("partner", None))
         if partner:
             grievance_ticket.partner = partner
 
