@@ -13,6 +13,12 @@ from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
+from hct_mis_api.apps.grievance.constants import (
+    PRIORITY_CHOICES,
+    PRIORITY_LOW,
+    URGENCY_CHOICES,
+    URGENCY_NOT_URGENT,
+)
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -265,26 +271,6 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         CATEGORY_NEEDS_ADJUDICATION: "needs_adjudication_ticket_details",
         CATEGORY_SYSTEM_FLAGGING: "system_flagging_ticket_details",
     }
-
-    PRIORITY_HIGH = 1
-    PRIORITY_MEDIUM = 2
-    PRIORITY_LOW = 3
-
-    PRIORITY_CHOICES = (
-        (PRIORITY_HIGH, _("High")),
-        (PRIORITY_MEDIUM, _("Medium")),
-        (PRIORITY_LOW, _("Low")),
-    )
-
-    URGENCY_VERY_URGENT = 1
-    URGENCY_URGENT = 2
-    URGENCY_NOT_URGENT = 3
-
-    URGENCY_CHOICES = (
-        (URGENCY_VERY_URGENT, _("Very urgent")),
-        (URGENCY_URGENT, _("Urgent")),
-        (URGENCY_NOT_URGENT, _("Not urgent")),
-    )
 
     user_modified = models.DateTimeField(
         verbose_name=_("Modified"),
