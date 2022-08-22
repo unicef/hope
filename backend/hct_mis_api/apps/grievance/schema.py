@@ -1,16 +1,9 @@
-import logging
 import datetime
+import logging
 
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.db.models import (
-    Case,
-    DateField,
-    Q,
-    When,
-    F,
-)
-
+from django.db.models import Case, DateField, F, Q, When
 from django.utils import timezone
 
 import graphene
@@ -38,6 +31,8 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
+from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
+from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.filters import (
     ExistingGrievanceTicketFilter,
     GrievanceTicketFilter,
@@ -60,7 +55,6 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
@@ -462,8 +456,7 @@ class Query(graphene.ObjectType):
             grievance_ids = execute_es_query(grievance_es_query_dict)
 
             return (
-                GrievanceTicket.objects
-                .filter(id__in=grievance_ids)
+                GrievanceTicket.objects.filter(id__in=grievance_ids)
                 .select_related("assigned_to", "created_by")
                 .annotate(
                     total=Case(
@@ -478,8 +471,8 @@ class Query(graphene.ObjectType):
                 .annotate(total_days=F("total__day"))
             )
         return (
-            GrievanceTicket.objects
-            .filter(ignored=False).select_related("assigned_to", "created_by")
+            GrievanceTicket.objects.filter(ignored=False)
+            .select_related("assigned_to", "created_by")
             .annotate(
                 total=Case(
                     When(
@@ -527,10 +520,10 @@ class Query(graphene.ObjectType):
         ]
 
     def resolve_grievance_ticket_priority_choices(self, info, **kwargs):
-        return to_choice_object(GrievanceTicket.PRIORITY_CHOICES)
+        return to_choice_object(PRIORITY_CHOICES)
 
     def resolve_grievance_ticket_urgency_choices(self, info, **kwargs):
-        return to_choice_object(GrievanceTicket.URGENCY_CHOICES)
+        return to_choice_object(URGENCY_CHOICES)
 
     def resolve_all_add_individuals_fields_attributes(self, info, **kwargs):
         fields = FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE).associated_with_individual()
