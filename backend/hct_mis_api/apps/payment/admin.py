@@ -101,8 +101,8 @@ class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HO
                 request,
                 self.execute_sync_rapid_pro,
                 mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                        <h3>Import will only be simulated</h3> 
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                        <h3>Import will only be simulated</h3>
                         """
                 ),
                 "Successfully executed",
@@ -224,8 +224,7 @@ class PaymentChannelAdmin(HOPEModelAdminBase):
     list_display = ("individual", "delivery_mechanism_display_name")
 
     def delivery_mechanism_display_name(self, obj):
-        return obj.delivery_mechanism.display_name
-
+        return obj.delivery_mechanism
 
 @admin.register(FinancialServiceProviderXlsxTemplate)
 class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
