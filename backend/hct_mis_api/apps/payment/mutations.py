@@ -821,7 +821,18 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
 
         payment_plan.delivery_mechanisms.all().update(financial_service_provider=None)
 
-        mappings = [
+        mappings = input.get("mappings")
+        existing_pairs = set()
+        for mapping in mappings:
+            key = (
+                mapping.get("fsp_id"),
+                mapping.get("delivery_mechanism"),
+            )
+            if key in existing_pairs:
+                raise GraphQLError("You can't assign the same FSP to the same delivery mechanism more than once")
+            existing_pairs.add(key)
+
+        fsp_to_dm_mappings = [
             {
                 "fsp": get_object_or_404(FinancialServiceProvider, id=decode_id_string(mapping.get("fsp_id"))),
                 "delivery_mechanism_per_payment_plan": get_object_or_404(
@@ -831,10 +842,10 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
                     delivery_mechanism_order=mapping.get("order"),
                 ),
             }
-            for mapping in input.get("mappings")
+            for mapping in mappings
         ]
 
-        for mapping in mappings:
+        for mapping in fsp_to_dm_mappings:
             delivery_mechanism_per_payment_plan = mapping.get("delivery_mechanism_per_payment_plan")
             fsp = mapping.get("fsp")
             if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms:

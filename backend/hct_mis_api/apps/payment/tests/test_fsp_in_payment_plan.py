@@ -613,6 +613,10 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
             },
         )
         assert "errors" in another_bad_assign_fsps_mutation_response, another_bad_assign_fsps_mutation_response
+        assert (
+            another_bad_assign_fsps_mutation_response["errors"][0]["message"]
+            == "You can't assign the same FSP to the same delivery mechanism more than once"
+        )
 
         assign_fsps_mutation_response = self.graphql_request(
             request_string=self.ASSIGN_FSPS_MUTATION,
