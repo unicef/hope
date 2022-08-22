@@ -6,12 +6,13 @@ from decimal import Decimal
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold, Individual
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.models import GenericPayment
@@ -753,9 +754,9 @@ def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid
         .values_list("delivery_mechanism", flat=True)
         .distinct()
     )
-    # TODO: can this be improved?
-    if any(
-        not PaymentChannel.objects.filter(individual=collector).exists() for collector in collectors_that_cant_be_paid
+    if (
+        GenericPayment.DELIVERY_TYPE_CASH not in delivery_mechanisms_in_order
+        and collectors_that_cant_be_paid.filter(paymentchannel__isnull=True).exists()
     ):
         needed_delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_CASH)
     return f"Delivery mechanisms that may be needed: {','.join(needed_delivery_mechanisms)}."
@@ -780,20 +781,19 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
 
-        collectors_in_target_population = (
-            payment_plan.target_population.households.filter(
-                individuals_and_roles__role=ROLE_PRIMARY,
-            )
-            .prefetch_related("individuals_and_role__individual")
-            .values_list("individuals_and_roles__individual", flat=True)
+        collectors_in_target_population = Individual.objects.filter(
+            id__in=IndividualRoleInHousehold.objects.filter(
+                household__in=payment_plan.target_population.households.only("id"),
+                role=ROLE_PRIMARY,
+            ).values_list("individual", flat=True)
         )
 
-        collectors_that_can_be_paid = PaymentChannel.objects.filter(
-            individual__in=collectors_in_target_population,
-            delivery_mechanism__in=delivery_mechanisms_in_order,
-        ).values_list("individual", flat=True)
+        query = Q(paymentchannel__delivery_mechanism__in=delivery_mechanisms_in_order)
+        if GenericPayment.DELIVERY_TYPE_CASH in delivery_mechanisms_in_order:
+            query |= Q(paymentchannel__isnull=True)
 
-        collectors_that_cant_be_paid = collectors_in_target_population.difference(collectors_that_can_be_paid)
+        collectors_that_can_be_paid = collectors_in_target_population.filter(query).distinct()
+        collectors_that_cant_be_paid = collectors_in_target_population.exclude(id__in=collectors_that_can_be_paid)
 
         if collectors_that_cant_be_paid.exists():
             raise GraphQLError(
