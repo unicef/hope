@@ -313,6 +313,11 @@ class DeliveryMechanismNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class VolumeByDeliveryMechanism(graphene.ObjectType):
+    delivery_mechanism = graphene.Field(DeliveryMechanismNode)
+    volume = graphene.Int()
+
+
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
     approval_number_required = graphene.Int()
@@ -327,6 +332,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     imported_xlsx_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
+    volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanism)
 
     class Meta:
         model = PaymentPlan
@@ -357,6 +363,16 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_imported_xlsx_file_name(self, info):
         import_file_obj = self.get_payment_plan_payment_list_import_xlsx_file_obj()
         return import_file_obj.file.name if import_file_obj else ""
+
+    def resolve_volume_by_delivery_mechanism(self, info):
+        print(self, info)
+        return {
+            "delivery_mechanism": {
+                "name": "test",
+                "order": 1,
+            },
+            "volume": 0,
+        }
 
 
 class FspChoices(graphene.ObjectType):

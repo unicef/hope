@@ -112,19 +112,23 @@ def payment_plan_setup(cls):
 
     cls.santander_fsp = FinancialServiceProviderFactory(
         name="Santander",
-        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
+        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_CASH],
     )
     cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_america_fsp = FinancialServiceProviderFactory(
         name="Bank of America",
-        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
+        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER, GenericPayment.DELIVERY_TYPE_CASH],
     )
     cls.encoded_bank_of_america_fsp_id = encode_id_base64(cls.bank_of_america_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_europe_fsp = FinancialServiceProviderFactory(
         name="Bank of Europe",
-        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER, GenericPayment.DELIVERY_TYPE_TRANSFER],
+        delivery_mechanisms=[
+            GenericPayment.DELIVERY_TYPE_VOUCHER,
+            GenericPayment.DELIVERY_TYPE_TRANSFER,
+            GenericPayment.DELIVERY_TYPE_CASH,
+        ],
     )
     cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
 
@@ -783,3 +787,89 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
             ),
         )
         assert "errors" not in choose_dms_with_cash_response, choose_dms_with_cash_response
+
+
+class TestVolumeByDeliveryMechanism(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        base_setup(cls)
+        payment_plan_setup(cls)
+
+    def test_getting_volume_by_delivery_mechanism(self):
+        choose_dms_response = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=self.encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        GenericPayment.DELIVERY_TYPE_CASH,
+                    ],
+                )
+            ),
+        )
+        assert "errors" not in choose_dms_response, choose_dms_response
+
+        assign_fsps_mutation_response = self.graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_santander_fsp_id,
+                        "order": 1,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": self.encoded_bank_of_europe_fsp_id,
+                        "order": 2,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "fspId": self.encoded_bank_of_america_fsp_id,
+                        "order": 3,
+                    },
+                ],
+            },
+        )
+        assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
+
+        GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY = """
+query PaymentPlan($paymentPlanId: ID!) {
+    paymentPlan(id: $paymentPlanId) {
+        volumeByDeliveryMechanism {
+            deliveryMechanism {
+                name
+                order
+            }
+            volume
+        }
+    }
+}
+
+"""
+
+        get_volume_by_delivery_mechanism_response = self.graphql_request(
+            request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+            },
+        )
+        assert "errors" not in get_volume_by_delivery_mechanism_response, get_volume_by_delivery_mechanism_response
+
+        data = get_volume_by_delivery_mechanism_response["data"]["paymentPlan"]["volumeByDeliveryMechanism"]
+        assert len(data) == 3
+        assert data[0]["deliveryMechanism"]["name"] == GenericPayment.DELIVERY_TYPE_TRANSFER
+        assert data[0]["deliveryMechanism"]["order"] == 1
+        assert data[0]["value"] == 0
+        assert data[1]["deliveryMechanism"]["name"] == GenericPayment.DELIVERY_TYPE_VOUCHER
+        assert data[1]["deliveryMechanism"]["order"] == 2
+        assert data[1]["value"] == 0
+        assert data[2]["deliveryMechanism"]["name"] == GenericPayment.DELIVERY_TYPE_CASH
+        assert data[2]["deliveryMechanism"]["order"] == 3
+        assert data[2]["value"] == 0
