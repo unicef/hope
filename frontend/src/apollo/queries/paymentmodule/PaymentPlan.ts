@@ -126,6 +126,14 @@ export const PAYMENT_PLAN_QUERY = gql`
       xlsxFileImportedDate
       importedXlsxFileName
       totalEntitledQuantityUsd
+      deliveryMechanisms {
+        id
+        name
+        fsp {
+          id
+          name
+        }
+      }
     }
   }
 `;
