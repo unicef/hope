@@ -413,9 +413,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     def get_payment_plan_payment_list_xlsx_file_obj(self):
         return XLSXFileTemp.objects.filter(
-            object_id=self.pk,
-            content_type=get_content_type_for_model(self),
-            type=XLSXFileTemp.EXPORT
+            object_id=self.pk, content_type=get_content_type_for_model(self), type=XLSXFileTemp.EXPORT
         ).first()
 
     @property
@@ -431,9 +429,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     def get_payment_plan_payment_list_import_xlsx_file_obj(self):
         return XLSXFileTemp.objects.filter(
-            object_id=self.pk,
-            content_type=get_content_type_for_model(self),
-            type=XLSXFileTemp.IMPORT
+            object_id=self.pk, content_type=get_content_type_for_model(self), type=XLSXFileTemp.IMPORT
         ).first()
 
 
@@ -562,6 +558,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         "payment.FinancialServiceProvider",
         on_delete=models.PROTECT,
         related_name="delivery_mechanisms_per_payment_plan",
+        null=True,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -573,6 +570,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="sent_delivery_mechanisms",
+        null=True,
     )
     status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
     delivery_mechanism = models.CharField(
@@ -593,10 +591,8 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["payment_plan", "delivery_mechanism"], name="unique payment_plan_delivery_mechanism"
-            ),
-            models.UniqueConstraint(
-                fields=["payment_plan", "delivery_mechanism_order"], name="unique payment_plan_delivery_mechanism_order"
+                fields=["payment_plan", "delivery_mechanism", "delivery_mechanism_order"],
+                name="unique payment_plan_delivery_mechanism",
             ),
         ]
 
