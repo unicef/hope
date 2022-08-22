@@ -744,6 +744,18 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid, delivery_mechanisms_in_order):
+    needed_delivery_mechanisms = (
+        PaymentChannel.objects.filter(
+            individual__in=collectors_that_cant_be_paid,
+        )
+        .exclude(delivery_mechanism__in=delivery_mechanisms_in_order)
+        .values_list("delivery_mechanism", flat=True)
+        .distinct()
+    )
+    return f"Delivery mechanisms that may be needed: {','.join(needed_delivery_mechanisms)}."
+
+
 class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -763,7 +775,13 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
 
-        collectors_in_target_population = payment_plan.payments.values_list("collector", flat=True)
+        collectors_in_target_population = (
+            payment_plan.target_population.households.filter(
+                individuals_and_roles__role=ROLE_PRIMARY,
+            )
+            .prefetch_related("individuals_and_role__individual")
+            .values_list("individuals_and_roles__individual", flat=True)
+        )
 
         collectors_that_can_be_paid = PaymentChannel.objects.filter(
             individual__in=collectors_in_target_population,
@@ -772,11 +790,9 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
 
         collectors_that_cant_be_paid = collectors_in_target_population.difference(collectors_that_can_be_paid)
         if collectors_that_cant_be_paid.exists():
-            # TODO: "Please add X, Y and Z to move to next step."
             raise GraphQLError(
                 "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
-                f"Individuals that failed to be processed: "
-                f"{', '.join([str(i) for i in collectors_that_cant_be_paid])}"
+                f"{create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid, delivery_mechanisms_in_order)}"
             )
 
         DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()

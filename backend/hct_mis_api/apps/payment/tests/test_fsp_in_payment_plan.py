@@ -240,12 +240,11 @@ query AllDeliveryMechanisms {
             variables=choose_dms_mutation_variables_mutation_variables,
         )
         assert "errors" in response, response
-        assert (
-            "Selected delivery mechanisms are not sufficient to serve all beneficiaries"
-            in response["errors"][0]["message"]
-        )
-        # TODO: once it's clear what info to show here, add assertions like
-        # "Please add X, Y and Z to move to next step"
+        error_message = response["errors"][0]["message"]
+        assert "Selected delivery mechanisms are not sufficient to serve all beneficiaries" in error_message
+        assert "Delivery mechanisms that may be needed: " in error_message
+        assert GenericPayment.DELIVERY_TYPE_TRANSFER in error_message
+        assert GenericPayment.DELIVERY_TYPE_VOUCHER in error_message
 
     def test_providing_non_unique_delivery_mechanisms(self):
         payment_plan = PaymentPlanFactory(total_households_count=1, status=PaymentPlan.Status.LOCKED)
