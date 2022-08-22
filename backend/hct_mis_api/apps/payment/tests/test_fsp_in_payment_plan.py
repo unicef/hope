@@ -30,11 +30,11 @@ def base_setup(cls):
         BusinessArea.objects.get(slug="afghanistan"),
     )
 
-    registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
+    cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
 
     cls.household_1, cls.individuals_1 = create_household_and_individuals(
         household_data={
-            "registration_data_import": registration_data_import,
+            "registration_data_import": cls.registration_data_import,
             "business_area": cls.business_area,
         },
         individuals_data=[{}],
@@ -42,6 +42,10 @@ def base_setup(cls):
     PaymentChannelFactory(
         individual=cls.individuals_1[0],
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
+    )
+    PaymentChannelFactory(
+        individual=cls.individuals_1[0],
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
     )
     IndividualRoleInHouseholdFactory(
         individual=cls.individuals_1[0],
@@ -51,7 +55,7 @@ def base_setup(cls):
 
     cls.household_2, cls.individuals_2 = create_household_and_individuals(
         household_data={
-            "registration_data_import": registration_data_import,
+            "registration_data_import": cls.registration_data_import,
             "business_area": cls.business_area,
         },
         individuals_data=[{}],
@@ -59,6 +63,10 @@ def base_setup(cls):
     PaymentChannelFactory(
         individual=cls.individuals_2[0],
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+    )
+    PaymentChannelFactory(
+        individual=cls.individuals_2[0],
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
     )
     IndividualRoleInHouseholdFactory(
         individual=cls.individuals_2[0],
@@ -68,7 +76,7 @@ def base_setup(cls):
 
     cls.household_3, cls.individuals_3 = create_household_and_individuals(
         household_data={
-            "registration_data_import": registration_data_import,
+            "registration_data_import": cls.registration_data_import,
             "business_area": cls.business_area,
         },
         individuals_data=[{}],
@@ -82,6 +90,43 @@ def base_setup(cls):
         individual=cls.individuals_3[0],
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
     )
+    PaymentChannelFactory(
+        individual=cls.individuals_3[0],
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+    )
+
+
+def payment_plan_setup(cls):
+    target_population = TargetPopulationFactory(
+        id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
+        created_by=cls.user,
+        candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+        business_area=cls.business_area,
+        status=TargetPopulation.STATUS_LOCKED,
+    )
+    target_population.apply_criteria_query()  # simulate having TP households calculated
+    cls.payment_plan = PaymentPlanFactory(
+        total_households_count=3, target_population=target_population, status=PaymentPlan.Status.LOCKED
+    )
+    cls.encoded_payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
+
+    cls.santander_fsp = FinancialServiceProviderFactory(
+        name="Santander",
+        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
+    )
+    cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
+
+    cls.bank_of_america_fsp = FinancialServiceProviderFactory(
+        name="Bank of America",
+        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
+    )
+    cls.encoded_bank_of_america_fsp_id = encode_id_base64(cls.bank_of_america_fsp.id, "FinancialServiceProvider")
+
+    cls.bank_of_europe_fsp = FinancialServiceProviderFactory(
+        name="Bank of Europe",
+        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER, GenericPayment.DELIVERY_TYPE_TRANSFER],
+    )
+    cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
 
 
 ASSIGN_FSPS_MUTATION = """
@@ -278,37 +323,7 @@ class TestFSPAssignment(APITestCase):
     @classmethod
     def setUpTestData(cls):
         base_setup(cls)
-
-        target_population = TargetPopulationFactory(
-            id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
-            created_by=cls.user,
-            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
-            business_area=cls.business_area,
-            status=TargetPopulation.STATUS_LOCKED,
-        )
-        target_population.apply_criteria_query()  # simulate having TP households calculated
-        cls.payment_plan = PaymentPlanFactory(
-            total_households_count=3, target_population=target_population, status=PaymentPlan.Status.LOCKED
-        )
-        cls.encoded_payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
-
-        cls.santander_fsp = FinancialServiceProviderFactory(
-            name="Santander",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
-        )
-        cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
-
-        cls.bank_of_america_fsp = FinancialServiceProviderFactory(
-            name="Bank of America",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
-        )
-        cls.encoded_bank_of_america_fsp_id = encode_id_base64(cls.bank_of_america_fsp.id, "FinancialServiceProvider")
-
-        cls.bank_of_europe_fsp = FinancialServiceProviderFactory(
-            name="Bank of Europe",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER, GenericPayment.DELIVERY_TYPE_TRANSFER],
-        )
-        cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
+        payment_plan_setup(cls)
 
     def test_assigning_fsps_to_delivery_mechanism(self):
         choose_dms_mutation_variables_mutation_variables = dict(
@@ -663,3 +678,60 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
             },
         )
         assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
+
+
+class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        base_setup(cls)
+
+        cls.household_4, cls.individuals_4 = create_household_and_individuals(
+            household_data={
+                "registration_data_import": cls.registration_data_import,
+                "business_area": cls.business_area,
+            },
+            individuals_data=[{}],
+        )
+        IndividualRoleInHouseholdFactory(
+            individual=cls.individuals_4[0],
+            household=cls.household_4,
+            role=ROLE_PRIMARY,
+        )
+        # no payment channels
+
+        payment_plan_setup(cls)
+
+    def test_treating_collector_without_payment_channel_as_a_default_cash_option(self):
+        choose_dms_response = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=self.encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        # lacking cash option for ind #4
+                    ],
+                )
+            ),
+        )
+        assert "errors" in choose_dms_response, choose_dms_response
+        error_msg = choose_dms_response["errors"][0]["message"]
+        assert GenericPayment.DELIVERY_TYPE_CASH in error_msg, error_msg
+
+        choose_dms_with_cash_response = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=self.encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        GenericPayment.DELIVERY_TYPE_CASH,
+                    ],
+                )
+            ),
+        )
+        assert "errors" not in choose_dms_with_cash_response, choose_dms_with_cash_response

@@ -745,7 +745,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
 
 def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid, delivery_mechanisms_in_order):
-    needed_delivery_mechanisms = (
+    needed_delivery_mechanisms = list(
         PaymentChannel.objects.filter(
             individual__in=collectors_that_cant_be_paid,
         )
@@ -753,6 +753,11 @@ def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid
         .values_list("delivery_mechanism", flat=True)
         .distinct()
     )
+    # TODO: can this be improved?
+    if any(
+        not PaymentChannel.objects.filter(individual=collector).exists() for collector in collectors_that_cant_be_paid
+    ):
+        needed_delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_CASH)
     return f"Delivery mechanisms that may be needed: {','.join(needed_delivery_mechanisms)}."
 
 
@@ -789,6 +794,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         ).values_list("individual", flat=True)
 
         collectors_that_cant_be_paid = collectors_in_target_population.difference(collectors_that_can_be_paid)
+
         if collectors_that_cant_be_paid.exists():
             raise GraphQLError(
                 "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
