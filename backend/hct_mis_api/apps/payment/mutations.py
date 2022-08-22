@@ -816,6 +816,11 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to assign FSP to delivery mechanism")
 
+        if len(input.get("mappings", [])) != payment_plan.delivery_mechanisms.count():
+            raise GraphQLError("Please assign FSP to all delivery mechanisms before moving to next step")
+
+        payment_plan.delivery_mechanisms.all().update(financial_service_provider=None)
+
         mappings = [
             {
                 "fsp": get_object_or_404(FinancialServiceProvider, id=decode_id_string(mapping.get("fsp_id"))),
@@ -839,10 +844,6 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
                 )
             delivery_mechanism_per_payment_plan.financial_service_provider = fsp
             delivery_mechanism_per_payment_plan.save()
-
-        for delivery_mechanism_per_payment_plan in payment_plan.delivery_mechanisms.all():
-            if not delivery_mechanism_per_payment_plan.financial_service_provider:
-                raise GraphQLError("Please assign FSP to all delivery mechanisms before moving to next step")
 
         return cls(payment_plan=payment_plan)
 
