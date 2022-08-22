@@ -42,6 +42,7 @@ import {
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
+  useUserChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
@@ -154,6 +155,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
     name: priorityChoicesData[i]?.name,
     value: i + 1,
   }));
+
+  const { data: userChoices } = useUserChoiceDataQuery();
 
   const mappedUrgencies = Array.from(Array(3).keys()).map((i) => ({
     name: urgencyChoicesData[i]?.name,
@@ -539,6 +542,16 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 variant='outlined'
                                 label={t('Urgency')}
                                 choices={mappedUrgencies}
+                                component={FormikSelectField}
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Field
+                                name='partner'
+                                fullWidth
+                                variant='outlined'
+                                label={t('Partner')}
+                                choices={userChoices.userPartnerChoices}
                                 component={FormikSelectField}
                               />
                             </Grid>
