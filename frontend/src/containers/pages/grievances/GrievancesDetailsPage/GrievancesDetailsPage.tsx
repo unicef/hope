@@ -91,7 +91,10 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
           canApprovePaymentVerification={canApprovePaymentVerification}
         />
         <Notes notes={ticket.ticketNotes} canAddNote={canAddNote} />
-        <GrievancesSidebar ticket={ticket} />
+        <GrievancesSidebar
+          ticket={ticket}
+          canViewHouseholdDetails={canViewHouseholdDetails}
+        />
       </Grid>
     </>
   );
