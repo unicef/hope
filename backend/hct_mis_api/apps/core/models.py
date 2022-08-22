@@ -15,6 +15,7 @@ from model_utils.models import SoftDeletableModel
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
+from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
@@ -340,24 +341,6 @@ class TicketPriority(models.Model):
         (NEEDS_ADJUDICATION, _("Needs Adjudication")),
         (PAYMENT_VERIFICATION, _("Payment Verification")),
         (SYSTEM_FLAGGING, _("System Flagging")),
-    )
-
-    PRIORITY_HIGH = 1
-    PRIORITY_MEDIUM = 2
-    PRIORITY_LOW = 3
-    PRIORITY_CHOICES = (
-        (PRIORITY_HIGH, _("High")),
-        (PRIORITY_MEDIUM, _("Medium")),
-        (PRIORITY_LOW, _("Low")),
-    )
-
-    URGENCY_VERY_URGENT = 1
-    URGENCY_URGENT = 2
-    URGENCY_NOT_URGENT = 3
-    URGENCY_CHOICES = (
-        (URGENCY_VERY_URGENT, _("Very urgent")),
-        (URGENCY_URGENT, _("Urgent")),
-        (URGENCY_NOT_URGENT, _("Not urgent")),
     )
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, related_name="tickets_priority")
