@@ -297,6 +297,39 @@ class TestGrievanceQueryElasticSearch(APITestCase):
     }
     """
 
+    FILTER_BY_MULTIPLE_FILTERS = """
+        query AllGrievanceTickets(
+          $status: [String], 
+          $priority: String, 
+          $urgency: String, 
+          $grievanceType: String
+        ) {
+          allGrievanceTicket(
+            businessArea: "afghanistan", 
+            orderBy: "created_at", 
+            status: $status,
+            priority: $priority,
+            urgency: $urgency,
+            grievanceType: $grievanceType
+          ) {
+            edges {
+              node {
+                unicefId
+                householdUnicefId
+                category
+                status
+                issueType
+                language
+                description
+                consent
+                urgency
+                priority
+              }
+            }
+          }
+        }
+    """
+
     @classmethod
     def setUpTestData(cls):
         settings.ELASTICSEARCH_GRIEVANCE_TURN_ON = True
@@ -468,7 +501,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_unicef_id(self, mock_execute_test_es_query):
-        self.maxDiff = None
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
@@ -625,4 +657,19 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             request_string=self.FILTER_BY_GRIEVANCE_TYPE,
             context={"user": self.user},
             variables={"grievanceType": "system"},
+        )
+
+    @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
+    def test_multiple_filters_should_return_grievance_1(self, mock_execute_test_es_query):
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_MULTIPLE_FILTERS,
+            context={"user": self.user},
+            variables={
+                "status": ["New"],
+                "priority": "High",
+                "urgency": "Urgent",
+                "grievanceType": "user"
+            },
         )
