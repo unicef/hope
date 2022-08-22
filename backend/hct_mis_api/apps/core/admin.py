@@ -45,6 +45,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
+    TicketPriority,
     XLSXKoboTemplate,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
@@ -114,8 +115,20 @@ class GroupConcat(Aggregate):
         )
 
 
+class TicketPriorityInline(admin.TabularInline):
+    model = TicketPriority
+    fields = (
+        "business_area",
+        "priority",
+        "urgency",
+        "ticket_type",
+    )
+    extra = 0
+
+
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+    inlines = (TicketPriorityInline,)
     list_display = (
         "name",
         "slug",
