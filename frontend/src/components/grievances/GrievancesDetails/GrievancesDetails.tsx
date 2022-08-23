@@ -170,11 +170,6 @@ export const GrievancesDetails = ({
                 size: 3,
               },
               {
-                label: t('PARTNER'),
-                value: ticket.partner.name,
-                size: 6,
-              },
-              {
                 label: t('DESCRIPTION'),
                 value: ticket.description,
                 size: 6,
@@ -197,6 +192,11 @@ export const GrievancesDetails = ({
               {
                 label: t('LANGUAGES SPOKEN'),
                 value: ticket.language,
+                size: 3,
+              },
+              {
+                label: t('PARTNER'),
+                value: ticket.partner.name,
                 size: 3,
               }
             ].map((el) => (
