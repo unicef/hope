@@ -5,9 +5,9 @@ def optimized_household_query():
     from django.db.models import Q
     import time
 
-    households = Household.objects.filter(business_area="7c1becc3-f092-42a9-b235-fc5033c5da1d")
+    households = Household.objects
     start = time.time()
-    households1 = households.filter(withdrawn=False, size__gt=0, is_removed=False).filter(
+    households1 = households.filter(withdrawn=False, size__gt=0).filter(
         children_count__gte=3, first_registration_date__range=("2021-12-01 00:00:00+00:00", "2022-08-31 00:00:00+00:00")
     )
 
@@ -20,12 +20,11 @@ def optimized_household_query():
             households_and_roles__role="PRIMARY",
         )
         .values_list("household_id")
-        .distinct("household_id")
     )
 
     # OR
 
-    households2 = households.filter(withdrawn=False, size__gt=0, is_removed=False).filter(
+    households2 = households.filter(withdrawn=False, size__gt=0).filter(
         first_registration_date__gte="2022-05-10 00:00:00+00:00"
     )
 
@@ -40,13 +39,12 @@ def optimized_household_query():
             disability="disabled",
         )
         .values_list("household_id")
-        .distinct("household_id")
     )
     hhs = (
-        households.filter(Q(id__in=household_ids_first_or) | Q(id__in=household_ids_second_or))
-        .distinct()
+        households.filter(Q(id__in=household_ids_first_or) | Q(id__in=household_ids_second_or)).filter(business_area="7c1becc3-f092-42a9-b235-fc5033c5da1d")
         .values_list("id", flat=True)
     )
+    # print(hhs.query)
     list(hhs)
     print(time.time() - start)
     # print(len(hhs))
@@ -59,6 +57,9 @@ def not_optimized_household_query():
     tp = TargetPopulation.objects.get(name="asd")
     start = time.time()
     hhs = tp.candidate_list.values_list("id", flat=True)
+
+    # print(hhs.query)
+    # print(tp.candidate_list.query)
     list(hhs)
     print(time.time() - start)
     # print(len(hhs))
@@ -67,7 +68,7 @@ def not_optimized_household_query():
 
 def track_time():
     import time
-    iterations = 30
+    iterations = 10
     total_time = 0
     for i in range(iterations):
         start = time.time()
