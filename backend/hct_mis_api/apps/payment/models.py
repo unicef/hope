@@ -501,7 +501,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.00"))],
         null=True,
-        help_text="The maximum amount of money that can be distributed or unlimited if 0",
+        help_text="The maximum amount of money that can be distributed or unlimited if null",
         db_index=True,
     )
     communication_channel = models.CharField(max_length=6, choices=COMMUNICATION_CHANNEL_CHOICES, db_index=True)
