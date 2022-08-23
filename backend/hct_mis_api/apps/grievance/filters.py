@@ -137,7 +137,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         field_name="payment_verification_ticket_details",
         lookup_expr="payment_verifications__cash_plan_payment_verification__cash_plan",
     )
-    created_at_range = DateTimeRangeFilter(field_name="created_at", method="some_method")
+    created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
