@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from constance import config
 
+from hct_mis_api.apps.core.models import TicketPriority
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketSystemFlaggingDetails,
@@ -105,12 +106,21 @@ class CheckAgainstSanctionListPreMergeTask:
                         household = marked_individual.household
                         admin_level_2 = household.admin2 if household else ""
                         area = household.village if household else ""
+                        priority = TicketPriority.priority_by_business_area_and_ticket_type(
+                            marked_individual.business_area.id, TicketPriority.SYSTEM_FLAGGING
+                        )
+                        urgency = TicketPriority.urgency_by_business_area_and_ticket_type(
+                            marked_individual.business_area.id, TicketPriority.SYSTEM_FLAGGING
+                        )
+
                         ticket = GrievanceTicket(
                             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
                             business_area=marked_individual.business_area,
                             admin2=admin_level_2,
                             area=area,
                             registration_data_import=registration_data_import,
+                            priority=priority,
+                            urgency=urgency,
                         )
                         ticket_details = TicketSystemFlaggingDetails(
                             ticket=ticket,
