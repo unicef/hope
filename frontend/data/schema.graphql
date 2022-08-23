@@ -197,6 +197,15 @@ type AreaTypeNodeEdge {
 
 scalar Arg
 
+input AssignFspToDeliveryMechanismInput {
+  paymentPlanId: ID!
+  mappings: [FSPToDeliveryMechanismMappingInput]!
+}
+
+type AssignFspToDeliveryMechanismMutation {
+  paymentPlan: PaymentPlanNode
+}
+
 type BankAccountInfoNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -464,6 +473,15 @@ type ChoiceObject {
   value: String
 }
 
+input ChooseDeliveryMechanismsForPaymentPlanInput {
+  paymentPlanId: ID!
+  deliveryMechanisms: [String]!
+}
+
+type ChooseDeliveryMechanismsForPaymentPlanMutation {
+  paymentPlan: PaymentPlanNode
+}
+
 type ContentTypeObjectType {
   id: ID!
   appLabel: String!
@@ -680,6 +698,53 @@ type DeliveredQuantityNode {
   currency: String
 }
 
+type DeliveryMechanismNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  paymentPlan: PaymentPlanNode!
+  financialServiceProvider: FinancialServiceProviderNode
+  createdBy: UserNode!
+  sentDate: DateTime!
+  sentBy: UserNode
+  status: String!
+  deliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism
+  deliveryMechanismOrder: Int!
+  entitlementQuantity: Float
+  entitlementQuantityUsd: Float
+  name: String
+  order: Int
+  fsp: FinancialServiceProviderNode
+}
+
+type DeliveryMechanismNodeConnection {
+  pageInfo: PageInfo!
+  edges: [DeliveryMechanismNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type DeliveryMechanismNodeEdge {
+  node: DeliveryMechanismNode
+  cursor: String!
+}
+
+enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
+  CARDLESS_CASH_WITHDRAWAL
+  CASH
+  CASH_BY_FSP
+  CHEQUE
+  DEPOSIT_TO_CARD
+  IN_KIND
+  MOBILE_MONEY
+  OTHER
+  PRE_PAID_CARD
+  REFERRAL
+  TRANSFER
+  TRANSFER_TO_ACCOUNT
+  VOUCHER
+}
+
 type DiscardCashPlanVerificationMutation {
   cashPlan: CashPlanNode
 }
@@ -808,6 +873,12 @@ type ExportXlsxCashPlanVerification {
   cashPlan: CashPlanNode
 }
 
+input FSPToDeliveryMechanismMappingInput {
+  fspId: ID!
+  deliveryMechanism: String!
+  order: Int!
+}
+
 type FieldAttributeNode {
   id: String
   type: String
@@ -851,6 +922,7 @@ type FinancialServiceProviderNode implements Node {
   dataTransferConfiguration: JSONString
   fspXlsxTemplate: FinancialServiceProviderXlsxTemplateNode
   financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
+  deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
 }
 
@@ -931,6 +1003,16 @@ type FinishCashPlanVerificationMutation {
 }
 
 scalar FlexFieldsScalar
+
+type FspChoice {
+  id: String
+  name: String
+}
+
+type FspChoices {
+  deliveryMechanism: String
+  fsps: [FspChoice]
+}
 
 input FullListArguments {
   excludedAdminAreas: [String]
@@ -2373,6 +2455,8 @@ type Mutations {
   discardCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DiscardCashPlanVerificationMutation
   invalidCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): InvalidCashPlanVerificationMutation
   deleteCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DeleteCashPlanVerificationMutation
+  chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
+  assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   actionPaymentPlanMutation(input: ActionPaymentPlanInput!): ActionPaymentPlanMutation
@@ -2739,6 +2823,7 @@ type PaymentPlanNode implements Node {
   xlsxFileImportedDate: DateTime
   steficonRule: RuleCommitNode
   steficonAppliedDate: DateTime
+  deliveryMechanisms: [DeliveryMechanismNode]
   payments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   approvalNumberRequired: Int
@@ -3070,6 +3155,8 @@ type Query {
   currencyChoices: [ChoiceObject]
   payment(id: ID!): PaymentNode
   allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, orderBy: String): PaymentNodeConnection
+  allDeliveryMechanisms: [ChoiceObject]
+  availableFspsForDeliveryMechanisms(deliveryMechanisms: [String]): [FspChoices]
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String): [FieldAttributeNode]
@@ -4342,6 +4429,8 @@ type UserNode implements Node {
   createdPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   createdFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   createdFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+  createdDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
+  sentDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   approvalSet: [ApprovalNode!]!
   createdTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
