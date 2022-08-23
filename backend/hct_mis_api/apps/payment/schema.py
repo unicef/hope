@@ -502,6 +502,8 @@ class Query(graphene.ObjectType):
     def resolve_available_fsps_for_delivery_mechanisms(self, info, delivery_mechanisms):
         def get_fsps_for_delivery_mechanism(mechanism):
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
+            # TODO:
+            # check if fsp has an exceeded limit
             return [{"id": fsp.id, "name": fsp.name} for fsp in fsps] if fsps else []
 
         return [

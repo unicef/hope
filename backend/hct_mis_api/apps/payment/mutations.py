@@ -871,6 +871,14 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
             for mapping in mappings
         ]
 
+        # TODO
+        # check if fsp limit is not exceeded
+        # raise error is it is
+        # for mapping in fsp_to_dm_mappings:
+        #     delivery_mechanism_per_payment_plan = mapping.get("delivery_mechanism_per_payment_plan")
+        #     fsp = mapping.get("fsp")
+        #     # if limit, then raise
+
         for mapping in fsp_to_dm_mappings:
             delivery_mechanism_per_payment_plan = mapping.get("delivery_mechanism_per_payment_plan")
             fsp = mapping.get("fsp")

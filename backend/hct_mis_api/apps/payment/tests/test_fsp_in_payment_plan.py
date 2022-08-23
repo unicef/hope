@@ -177,6 +177,19 @@ query PaymentPlan($id: ID!) {
 """
 
 
+AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
+query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
+    availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
+        deliveryMechanism
+        fsps {
+            id
+            name
+        }
+    }
+}
+"""
+
+
 class TestFSPSetup(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -337,19 +350,8 @@ class TestFSPAssignment(APITestCase):
         )
         assert "errors" not in response, response
 
-        available_mechanisms_query = """
-query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
-    availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
-        deliveryMechanism
-        fsps {
-            id
-            name
-        }
-    }
-}
-"""
         query_response = self.graphql_request(
-            request_string=available_mechanisms_query,
+            request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
             variables={
                 "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER]
@@ -885,6 +887,23 @@ class TestFSPLimit(APITestCase):
         )
         assert "errors" not in choose_dms_response, choose_dms_response
 
+        available_fsps_response = self.graphql_request(
+            request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
+            context={"user": self.user},
+            variables={
+                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER]
+            },
+        )
+        assert "errors" not in available_fsps_response, available_fsps_response
+        available_fsps = available_fsps_response["data"]["availableFspsForDeliveryMechanisms"]
+        assert len(available_fsps) == 2
+        transfer_ids = [fsp["id"] for fsp in available_fsps[0]["fsps"]]
+        assert self.encoded_santander_fsp_id in transfer_ids
+        assert self.encoded_bank_of_europe_fsp_id in transfer_ids
+        voucher_ids = [fsp["id"] for fsp in available_fsps[1]["fsps"]]
+        assert self.encoded_santander_fsp_id not in voucher_ids
+        assert self.encoded_bank_of_america_fsp_id in voucher_ids
+
         assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
@@ -933,7 +952,22 @@ class TestFSPLimit(APITestCase):
         )
         assert "errors" not in new_choose_dms_response, new_choose_dms_response
 
-        # in query, america should not be visible for VOUCHER
+        new_available_fsps_response = self.graphql_request(
+            request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
+            context={"user": self.user},
+            variables={
+                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER]
+            },
+        )
+        assert "errors" not in new_available_fsps_response, new_available_fsps_response
+        new_available_fsps = new_available_fsps_response["data"]["availableFspsForDeliveryMechanisms"]
+        assert len(new_available_fsps) == 2
+        new_transfer_ids = [fsp["id"] for fsp in new_available_fsps[0]["fsps"]]
+        assert self.encoded_santander_fsp_id in new_transfer_ids
+        assert self.encoded_bank_of_europe_fsp_id in new_transfer_ids
+        new_voucher_ids = [fsp["id"] for fsp in new_available_fsps[1]["fsps"]]
+        assert self.encoded_santander_fsp_id not in new_voucher_ids
+        assert self.encoded_bank_of_america_fsp_id not in new_voucher_ids  # NOT!
 
         new_assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
@@ -949,5 +983,9 @@ class TestFSPLimit(APITestCase):
                 ],
             },
         )
-        # error because limit is exceeded
-        assert "errors" not in new_assign_fsps_mutation_response, new_assign_fsps_mutation_response
+        assert "errors" in new_assign_fsps_mutation_response
+        # TODO: should see limit exceeded message
+
+
+# scenarios TODO:
+# choose FSP for DM, reload query for available FSPs with current choices and see that FSP that exceeded limit is gone
