@@ -512,6 +512,9 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
+        partner = get_partner(input.pop("partner", None))
+        if partner:
+            grievance_ticket.partner = partner
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "assigned_to"))
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id) if assigned_to_id else None
@@ -532,10 +535,6 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         else:
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-
-        partner = get_partner(input.pop("partner", None))
-        if partner:
-            grievance_ticket.partner = partner
 
         admin = input.pop("admin", None)
         if admin:
