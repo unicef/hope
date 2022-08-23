@@ -779,7 +779,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
         delivery_mechanisms_in_order = input.get("delivery_mechanisms")
         for delivery_mechanism in delivery_mechanisms_in_order:
             if delivery_mechanism == '':
-                raise GraphQLError(f"Delivery mechanism cannot be empty.")
+                raise GraphQLError("Delivery mechanism cannot be empty.")
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
         collectors_in_target_population = Individual.objects.filter(
