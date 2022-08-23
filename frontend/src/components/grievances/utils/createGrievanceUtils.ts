@@ -312,6 +312,7 @@ export function prepareVariables(businessArea, values) {
     area: values.area,
     priority: values.priority,
     urgency: values.urgency,
+    partner: values.partner,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,
