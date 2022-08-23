@@ -111,20 +111,19 @@ def payment_plan_setup(cls):
     cls.encoded_payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
 
     cls.santander_fsp = FinancialServiceProviderFactory(
-        name="Santander",
-        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER],
+        name="Santander", delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER], distribution_limit=None
     )
     cls.encoded_santander_fsp_id = encode_id_base64(cls.santander_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_america_fsp = FinancialServiceProviderFactory(
-        name="Bank of America",
-        delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER],
+        name="Bank of America", delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER], distribution_limit=1000
     )
     cls.encoded_bank_of_america_fsp_id = encode_id_base64(cls.bank_of_america_fsp.id, "FinancialServiceProvider")
 
     cls.bank_of_europe_fsp = FinancialServiceProviderFactory(
         name="Bank of Europe",
         delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_VOUCHER, GenericPayment.DELIVERY_TYPE_TRANSFER],
+        distribution_limit=50000,
     )
     cls.encoded_bank_of_europe_fsp_id = encode_id_base64(cls.bank_of_europe_fsp.id, "FinancialServiceProvider")
 
@@ -783,3 +782,21 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
             ),
         )
         assert "errors" not in choose_dms_with_cash_response, choose_dms_with_cash_response
+
+
+class TestFSPLimit(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        base_setup(cls)
+        payment_plan_setup(cls)
+
+    def test_using_fsp_in_multiple_payment_plans_for_no_limnit(self):
+        pass
+        # scenario:
+        # 1 FSP with no limit
+        # use 1 FSP in 2 payment plans
+        # expect to have both saved, no errors
+
+    def test_using_fsp_in_multiple_payment_plans_while_having_a_limit(self):
+        pass
+        # has to be checked along each DeliveryMechanismPerPaymentPlan

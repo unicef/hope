@@ -501,6 +501,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.00"))],
         null=True,
+        blank=True,
         help_text="The maximum amount of money that can be distributed or unlimited if null",
         db_index=True,
     )
