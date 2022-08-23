@@ -21,6 +21,7 @@ export const TargetPopulationHouseholdTable = ({
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement => {
   const { t } = useTranslation();
+  console.log('variables', variables);
   const initialVariables = {
     ...(id && { targetPopulation: id }),
     ...variables,

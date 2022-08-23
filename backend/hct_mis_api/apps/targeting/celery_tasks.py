@@ -90,9 +90,6 @@ def target_population_full_rebuild(target_population_id):
             with transaction.atomic():
                 household_queryset = Household.objects.filter(business_area=target_population.business_area)
                 household_queryset = household_queryset.filter(target_population.targeting_criteria.get_query())
-                import ipdb
-
-                ipdb.set_trace()
                 target_population.households.set(household_queryset)
                 target_population.refresh_from_db()
                 target_population.refresh_stats()
