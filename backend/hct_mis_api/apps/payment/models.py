@@ -577,6 +577,8 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, db_index=True, null=True
     )
     delivery_mechanism_order = models.PositiveIntegerField()
+    # TODO: can be removed
+    # entitlement_quantity* is calculated dynamically during `_calculate_volume` in schema
     entitlement_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
