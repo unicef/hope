@@ -15,15 +15,19 @@ const ErrorOutline = styled(ErrorOutlineIcon)`
   margin-right: 5px;
 `;
 
-export const DeliveryMechanismWarning = (): React.ReactElement => {
+interface DeliveryMechanismWarningProps {
+  warning: string;
+}
+
+export const DeliveryMechanismWarning = ({
+  warning,
+}: DeliveryMechanismWarningProps): React.ReactElement => {
   const { t } = useTranslation();
 
   return (
     <WarningBox mt={4} mb={4} p={3} display='flex' alignItems='center'>
       <ErrorOutline />
-      {t(
-        'Selected delivery mechanisms are not sufficient to serve all beneficiaries. Please add Cash and Mobile Money to move to the next step.',
-      )}
+      {warning}
     </WarningBox>
   );
 };
