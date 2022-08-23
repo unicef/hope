@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  useTargetPopulationQuery,
-  TargetPopulationNode,
-} from '../../../__generated__/graphql';
-import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
-import { TargetPopulationCore } from '../../../components/targeting/TargetPopulationCore';
-import { TargetPopulationDetails } from '../../../components/targeting/TargetPopulationDetails';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { isPermissionDeniedError } from '../../../utils/utils';
-import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
+import React, {useState} from 'react';
+import {useParams} from 'react-router-dom';
+import {TargetPopulationNode, TargetPopulationStatus, useTargetPopulationQuery,} from '../../../__generated__/graphql';
+import {EditTargetPopulation} from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
+import {TargetPopulationCore} from '../../../components/targeting/TargetPopulationCore';
+import {TargetPopulationDetails} from '../../../components/targeting/TargetPopulationDetails';
+import {usePermissions} from '../../../hooks/usePermissions';
+import {LoadingComponent} from '../../../components/core/LoadingComponent';
+import {hasPermissions, PERMISSIONS} from '../../../config/permissions';
+import {PermissionDenied} from '../../../components/core/PermissionDenied';
+import {isPermissionDeniedError} from '../../../utils/utils';
+import {TargetPopulationPageHeader} from '../headers/TargetPopulationPageHeader';
 
 export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();
@@ -38,7 +35,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
         <EditTargetPopulation
           targetPopulation={targetPopulation}
           targetPopulationCriterias={
-            targetPopulation.candidateListTargetingCriteria
+            targetPopulation.targetingCriteria
           }
           cancelEdit={() => setEditState(false)}
         />
@@ -63,13 +60,13 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
             )}
             canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
           />
-          {status !== 'DRAFT' && (
+          {status !== TargetPopulationStatus.Open && (
             <TargetPopulationDetails targetPopulation={targetPopulation} />
           )}
           <TargetPopulationCore
             id={targetPopulation.id}
             status={status}
-            candidateList={targetPopulation.candidateListTargetingCriteria}
+            candidateList={targetPopulation.targetingCriteria}
             targetPopulation={targetPopulation}
             canViewHouseholdDetails={hasPermissions(
               PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,

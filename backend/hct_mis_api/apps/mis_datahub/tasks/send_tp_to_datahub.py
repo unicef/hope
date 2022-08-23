@@ -164,7 +164,6 @@ class SendTPToDatahubTask:
         target_population_selections = (
             HouseholdSelection.objects.filter(
                 target_population__id=target_population.id,
-                final=True,
                 household_id__in=all_targeted_households_ids,
             )
             .select_related("household")
@@ -183,7 +182,7 @@ class SendTPToDatahubTask:
         self.unhcr_id_dict = {identity.individual_id: identity.number for identity in individual_identities}
 
     def _get_individuals_and_hauseholds(self, program, target_population):
-        all_targeted_households_ids = target_population.final_list.values_list("id", flat=True)
+        all_targeted_households_ids = target_population.household_list.values_list("id", flat=True)
         if program.individual_data_needed:
             # all targeted individuals + collectors (primary_collector,alternate_collector)
             all_individuals = Individual.objects.filter(

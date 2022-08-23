@@ -5,7 +5,7 @@ import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { ApproveCandidateList } from '../../dialogs/targetPopulation/ApproveCandidateList';
+import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
 
 const IconContainer = styled.span`
   button {
@@ -91,7 +91,7 @@ export const InProgressTargetPopulationHeaderButtons = ({
         setOpen={setOpenDelete}
         targetPopulationId={targetPopulation.id}
       />
-      <ApproveCandidateList
+      <LockTargetPopulationDialog
         open={openApprove}
         setOpen={setOpenApprove}
         targetPopulationId={targetPopulation.id}

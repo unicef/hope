@@ -62,7 +62,7 @@ export const TargetPopulationPageHeader = ({
   let buttons;
 
   switch (targetPopulation.status) {
-    case TargetPopulationStatus.Draft:
+    case TargetPopulationStatus.Open:
       buttons = (
         <InProgressTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}

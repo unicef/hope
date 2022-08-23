@@ -139,7 +139,6 @@ export function CreateTargetPopulationPage(): React.ReactElement {
             <TargetingCriteriaDisabled />
           )}
           <Exclusions />
-          <Results />
           {values.criterias.length ? (
             <CreateTable
               variables={{

@@ -191,6 +191,7 @@ function mapFilterToVariable(
 // TODO Marcin make Type to this function
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function getTargetingCriteriaVariables(values) {
+  console.log('getTargetingCriteriaVariables', values);
   return {
     targetingCriteria: {
       rules: values.criterias.map((rule) => {

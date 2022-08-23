@@ -30,39 +30,20 @@ class TargetPopulationFilter(FilterSet):
 
     name = CharFilter(field_name="name", lookup_expr="startswith")
     created_by_name = CharFilter(field_name="created_by", method="filter_created_by_name")
-    number_of_households_min = IntegerFilter(method="filter_number_of_households_min")
-    number_of_households_max = IntegerFilter(method="filter_number_of_households_max")
-    candidate_list_total_households_min = IntegerFilter(
-        field_name="candidate_list_total_households",
+    total_households_count_min = IntegerFilter(
+        field_name="total_households_count",
         lookup_expr="gte",
     )
-    candidate_list_total_households_max = IntegerFilter(
-        field_name="candidate_list_total_households",
+    total_households_count_max = IntegerFilter(
+        field_name="total_households_count",
         lookup_expr="lte",
     )
-    candidate_list_total_individuals_min = IntegerFilter(
-        field_name="candidate_list_total_individuals",
+    total_individuals_count_min = IntegerFilter(
+        field_name="total_individuals_count",
         lookup_expr="gte",
     )
-    candidate_list_total_individuals_max = IntegerFilter(
-        field_name="candidate_list_total_individuals",
-        lookup_expr="lte",
-    )
-
-    final_list_total_households_min = IntegerFilter(
-        field_name="final_list_total_households",
-        lookup_expr="gte",
-    )
-    final_list_total_households_max = IntegerFilter(
-        field_name="final_list_total_households",
-        lookup_expr="lte",
-    )
-    final_list_total_individuals_min = IntegerFilter(
-        field_name="final_list_total_individuals",
-        lookup_expr="gte",
-    )
-    final_list_total_individuals_max = IntegerFilter(
-        field_name="final_list_total_individuals",
+    total_individuals_count_max = IntegerFilter(
+        field_name="total_individuals_count",
         lookup_expr="lte",
     )
     business_area = CharFilter(field_name="business_area__slug")
@@ -75,18 +56,6 @@ class TargetPopulationFilter(FilterSet):
         lname_query_key = f"{model_field}__family_name__icontains"
         for name in value.strip().split():
             queryset = queryset.filter(Q(**{fname_query_key: name}) | Q(**{lname_query_key: name}))
-        return queryset
-
-    def filter_number_of_households_min(self, queryset, model_field, value):
-        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_DRAFT).filter(
-            number_of_households__gte=value
-        )
-        return queryset
-
-    def filter_number_of_households_max(self, queryset, model_field, value):
-        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_DRAFT).filter(
-            number_of_households__lte=value
-        )
         return queryset
 
     class Meta:
@@ -112,10 +81,7 @@ class TargetPopulationFilter(FilterSet):
             "created_by",
             "updated_at",
             "status",
-            "total_households",
             "total_family_size",
             "program__id",
-            "final_list_total_households",
-            "candidate_list_total_households",
         )
     )
