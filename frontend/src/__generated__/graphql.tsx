@@ -9897,7 +9897,7 @@ export type PaymentPlanQuery = (
       & Pick<VolumeByDeliveryMechanismNode, 'volume' | 'volumeUsd'>
       & { deliveryMechanism: Maybe<(
         { __typename?: 'DeliveryMechanismNode' }
-        & Pick<DeliveryMechanismNode, 'name' | 'order'>
+        & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order'>
         & { fsp: Maybe<(
           { __typename?: 'FinancialServiceProviderNode' }
           & Pick<FinancialServiceProviderNode, 'id' | 'name'>
@@ -17817,6 +17817,7 @@ export const PaymentPlanDocument = gql`
     }
     volumeByDeliveryMechanism {
       deliveryMechanism {
+        id
         name
         order
         fsp {
