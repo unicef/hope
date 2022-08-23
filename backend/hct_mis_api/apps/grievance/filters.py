@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
@@ -15,16 +14,63 @@ from django_filters import (
 )
 
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.es_filters import ElasticSearchFilterSet
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
-from hct_mis_api.apps.core.utils import choices_to_dict
-from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.models import Area, ValidityQuerySet
+from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.core.utils import choices_to_dict
 
 
-class GrievanceTicketFilter(FilterSet):
+class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
+    USE_ALL_FIELDS_AS_ELASTIC_SEARCH = False
+    USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH = (
+        "search",
+        "created_at_range",
+        "assigned_to",
+        "registration_data_import",
+        "status",
+        "issue_type",
+        "category",
+        "admin",
+        "priority",
+        "urgency",
+        "grievance_type",
+        "business_area",
+    )
+
+    def elasticsearch_filter_queryset(self):
+        grievance_es_query_dict = create_es_query(self.prepare_filters(self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH))
+        grievance_ids = execute_es_query(grievance_es_query_dict)
+        return grievance_ids
+
+    def prepare_filters(self, allowed_fields):
+        filters = {}
+        for field in allowed_fields:
+            if self.form.data.get(field):
+                if field in (
+                    "category",
+                    "status",
+                    "issue_type",
+                    "priority",
+                    "urgency",
+                    "admin",
+                    "registration_data_import",
+                ):
+                    filters[field] = self.form.data[field]
+                else:
+                    filters[field] = self.form.cleaned_data[field]
+
+        if isinstance(filters.get("admin"), ValidityQuerySet):
+            filters.pop("admin")
+
+        return filters
+
+
+class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
             "individual": (
@@ -80,6 +126,7 @@ class GrievanceTicketFilter(FilterSet):
     )
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
+
     status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
     fsp = CharFilter(method="fsp_filter")
     admin = ModelMultipleChoiceFilter(
@@ -130,9 +177,6 @@ class GrievanceTicketFilter(FilterSet):
     )
 
     def search_filter(self, qs, name, value):
-        if settings.ELASTICSEARCH_GRIEVANCE_TURN_ON:
-            return qs
-
         label, value = tuple(value.split(" ", 1))
         if label == "ticket_id":
             q = Q(unicef_id=value)
