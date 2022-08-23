@@ -147,7 +147,12 @@ export const GrievancesDetails = ({
                     )}
                   </span>
                 ),
-                size: 6,
+                size: 3,
+              },
+              {
+                label: t('PARTNER'),
+                value: ticket.partner?.name || '-',
+                size: 3,
               },
               {
                 label: t('CONSENT'),
