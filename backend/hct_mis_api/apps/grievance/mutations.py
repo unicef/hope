@@ -533,9 +533,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
 
-        partner = get_partner(input.pop("partner", None))
-        if partner:
-            grievance_ticket.partner = partner
+        grievance_ticket.partner = get_partner(input.pop("partner", None))
 
         admin = input.pop("admin", None)
         if admin:

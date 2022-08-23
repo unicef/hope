@@ -486,6 +486,15 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           <BoxWithBorderBottom />
                           <BoxPadding />
                           <Grid container spacing={3}>
+                            <Grid item xs={3}>
+                              <Field
+                                name='partner'
+                                variant='outlined'
+                                label={t('Partner')}
+                                choices={userChoices.userPartnerChoices}
+                                component={FormikSelectField}
+                              />
+                            </Grid>
                             <Grid item xs={12}>
                               <Field
                                 name='description'
@@ -523,7 +532,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 component={FormikTextField}
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={3}>
                               <Field
                                 name='priority'
                                 multiline
@@ -534,7 +543,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 component={FormikSelectField}
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={3}>
                               <Field
                                 name='urgency'
                                 multiline
@@ -542,16 +551,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 variant='outlined'
                                 label={t('Urgency')}
                                 choices={mappedUrgencies}
-                                component={FormikSelectField}
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name='partner'
-                                fullWidth
-                                variant='outlined'
-                                label={t('Partner')}
-                                choices={userChoices.userPartnerChoices}
                                 component={FormikSelectField}
                               />
                             </Grid>
