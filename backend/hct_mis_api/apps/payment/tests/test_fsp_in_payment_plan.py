@@ -925,6 +925,8 @@ class TestFSPLimit(APITestCase):
         )
         assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
 
+        # Simulate applying steficon formula
+
         new_target_population = TargetPopulationFactory(
             created_by=self.user,
             candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
@@ -955,17 +957,12 @@ class TestFSPLimit(APITestCase):
         new_available_fsps_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
-            variables={
-                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER]
-            },
+            variables={"deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_VOUCHER]},
         )
         assert "errors" not in new_available_fsps_response, new_available_fsps_response
         new_available_fsps = new_available_fsps_response["data"]["availableFspsForDeliveryMechanisms"]
-        assert len(new_available_fsps) == 2
-        new_transfer_ids = [fsp["id"] for fsp in new_available_fsps[0]["fsps"]]
-        assert self.encoded_santander_fsp_id in new_transfer_ids
-        assert self.encoded_bank_of_europe_fsp_id in new_transfer_ids
-        new_voucher_ids = [fsp["id"] for fsp in new_available_fsps[1]["fsps"]]
+        assert len(new_available_fsps) == 1
+        new_voucher_ids = [fsp["id"] for fsp in new_available_fsps[0]["fsps"]]
         assert self.encoded_santander_fsp_id not in new_voucher_ids
         assert self.encoded_bank_of_america_fsp_id not in new_voucher_ids  # NOT!
 
