@@ -500,16 +500,6 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
         encoded_steficon_rule_id = kwargs.get("steficon_rule_id")
         if encoded_steficon_rule_id is not None:
             steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)
-            if (
-                target_population.allowed_steficon_rule is not None
-                and steficon_rule_id != str(target_population.allowed_steficon_rule.id)
-            ):
-                logger.error(
-                    "Another formula was applied to a previous target population for this programme. You can only apply the same formula"
-                )
-                raise GraphQLError(
-                    "Another formula was applied to a previous target population for this programme. You can only apply the same formula"
-                )
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             steficon_rule_commit = steficon_rule.latest
             if not steficon_rule.enabled or steficon_rule.deprecated:
