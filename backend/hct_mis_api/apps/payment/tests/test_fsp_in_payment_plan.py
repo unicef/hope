@@ -813,6 +813,36 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         )
         assert "errors" not in choose_dms_response, choose_dms_response
 
+        GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY = """
+query PaymentPlan($paymentPlanId: ID!) {
+    paymentPlan(id: $paymentPlanId) {
+        volumeByDeliveryMechanism {
+            deliveryMechanism {
+                name
+                order
+                fsp {
+                    id
+                }
+            }
+            volume
+            volumeUsd
+        }
+    }
+}
+
+"""
+
+        too_early_get_volume_by_delivery_mechanism_response = self.graphql_request(
+            request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+            },
+        )
+        assert "errors" in too_early_get_volume_by_delivery_mechanism_response
+        error_msg = too_early_get_volume_by_delivery_mechanism_response["errors"][0]["message"]
+        assert "Financial Service Provider is not set" in error_msg, error_msg
+
         assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
             context={"user": self.user},
@@ -838,25 +868,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             },
         )
         assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
-
-        GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY = """
-query PaymentPlan($paymentPlanId: ID!) {
-    paymentPlan(id: $paymentPlanId) {
-        volumeByDeliveryMechanism {
-            deliveryMechanism {
-                name
-                order
-                fsp {
-                    id
-                }
-            }
-            volume
-            volumeUsd
-        }
-    }
-}
-
-"""
 
         get_volume_by_delivery_mechanism_response = self.graphql_request(
             request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,

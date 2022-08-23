@@ -7,6 +7,7 @@ from django.db.models.functions import Coalesce
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -316,6 +317,8 @@ class DeliveryMechanismNode(DjangoObjectType):
 
 
 def _calculate_volume(delivery_mechanism_per_payment_plan, field):
+    if not delivery_mechanism_per_payment_plan.financial_service_provider:
+        raise GraphQLError(f"Financial Service Provider is not set for {delivery_mechanism_per_payment_plan.delivery_mechanism}")
     payments = delivery_mechanism_per_payment_plan.payment_plan.all_active_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
         delivery_type=delivery_mechanism_per_payment_plan.delivery_mechanism,
