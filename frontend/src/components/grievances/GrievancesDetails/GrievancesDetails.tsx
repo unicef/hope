@@ -196,7 +196,7 @@ export const GrievancesDetails = ({
               },
               {
                 label: t('PARTNER'),
-                value: ticket.partner?.name || null,
+                value: ticket.partner?.name,
                 size: 3,
               }
             ].map((el) => (
