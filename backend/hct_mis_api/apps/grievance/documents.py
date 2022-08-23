@@ -1,10 +1,10 @@
-from django_elasticsearch_dsl import Document, fields
-from django_elasticsearch_dsl.registries import registry
 from django.conf import settings
 
-from .models import GrievanceTicket, TicketComplaintDetails, TicketSensitiveDetails
-from ..household.models import Household
+from django_elasticsearch_dsl import Document, fields
+from django_elasticsearch_dsl.registries import registry
 
+from ..household.models import Household
+from .models import GrievanceTicket, TicketComplaintDetails, TicketSensitiveDetails
 
 URGENCY_CHOICES = {
     1: "Very urgent",
@@ -100,9 +100,9 @@ class GrievanceTicketDocument(Document):
     def prepare_category(self, instance):
         return CATEGORY_CHOICES.get(instance.category)
 
-    def prepare_admin2_new(self, instance):
-        if instance.admin2_new:
-            return instance.admin2_new.id
+    def prepare_admin2(self, instance):
+        if instance.admin2:
+            return instance.admin2.id
 
     def prepare_priority(self, instance):
         return PRIORITY_CHOICES.get(instance.priority)
