@@ -19,9 +19,10 @@ export const FspSection = ({
 }: FspSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const fspDisplay = true;
+  const { deliveryMechanisms } = paymentPlan;
+  const showFspDisplay = deliveryMechanisms.length;
 
-  return fspDisplay ? (
+  return showFspDisplay ? (
     <Box m={5}>
       <ContainerColumnWithBorder>
         <Box
@@ -40,16 +41,10 @@ export const FspSection = ({
             {t('Edit FSP')}
           </Button>
         </Box>
-        <Grid container>
-          {[
-            { name: t('Transfer'), value: 'transfer' },
-            { name: t('Mobile Money'), value: 'mobileMoney' },
-            { name: t('Deposit to Card'), value: 'depositToCard' },
-            { name: t('Cash'), value: 'cash' },
-            { name: t('Wallet'), value: 'wallet' },
-          ].map((el) => (
-            <Grid item xs={3}>
-              <LabelizedField label={el.name} value={el.value} />
+        <Grid container spacing={3}>
+          {deliveryMechanisms.map((el) => (
+            <Grid key={el.name} item xs={3}>
+              <LabelizedField label={el.name} value={el.fsp?.name} />
             </Grid>
           ))}
         </Grid>
@@ -70,8 +65,9 @@ export const FspSection = ({
           <Button
             color='primary'
             variant='contained'
+            disabled={!paymentPlan.totalEntitledQuantityUsd}
             component={Link}
-            to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp/edit`}
+            to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp/create`}
           >
             {t('Set up FSP')}
           </Button>
