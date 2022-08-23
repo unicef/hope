@@ -266,10 +266,12 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class PaymentConflictDataNode(graphene.ObjectType):
     payment_plan_id = graphene.String()
+    payment_plan_unicef_id = graphene.String()
     payment_plan_start_date = graphene.String()
     payment_plan_end_date = graphene.String()
     payment_plan_status = graphene.String()
     payment_id = graphene.String()
+    payment_unicef_id = graphene.String()
 
 
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
