@@ -73,9 +73,15 @@ export const LockPaymentPlan = ({
             {paymentPlan.paymentsConflictsCount > 0 && (
               <Box p={5}>
                 <GreyText>
-                  {t('Note:')} {t('There are')}{' '}
+                  {t('Note:')}{' '}
+                  {paymentPlan.paymentsConflictsCount === 1
+                    ? t('There is')
+                    : t('There are')}{' '}
                   {paymentPlan.paymentsConflictsCount}{' '}
-                  {t('households that will be ignored in this Payment Plan.')}
+                  {paymentPlan.paymentsConflictsCount === 1
+                    ? t('household')
+                    : t('households')}{' '}
+                  {t('that will be ignored in this Payment Plan.')}
                 </GreyText>
               </Box>
             )}
