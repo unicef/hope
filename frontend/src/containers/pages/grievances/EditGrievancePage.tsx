@@ -36,6 +36,7 @@ import {
   useGrievanceTicketStatusChangeMutation,
   useMeQuery,
   useUpdateGrievanceMutation,
+  useUserChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
@@ -122,6 +123,9 @@ export const EditGrievancePage = (): React.ReactElement => {
     'name',
     '*',
   );
+
+  const { data: userChoices } = useUserChoiceDataQuery();
+
   if (
     userDataLoading ||
     choicesLoading ||
@@ -446,6 +450,17 @@ export const EditGrievancePage = (): React.ReactElement => {
                             variant='outlined'
                             label={t('Urgency')}
                             choices={mappedUrgencies}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='partner'
+                            fullWidth
+                            disabled={Boolean(ticket.partner)}
+                            variant='outlined'
+                            label={t('Partner')}
+                            choices={userChoices.userPartnerChoices}
                             component={FormikSelectField}
                           />
                         </Grid>
