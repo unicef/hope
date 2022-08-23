@@ -774,7 +774,7 @@ export type CreateGrievanceTicketExtrasInput = {
 
 export type CreateGrievanceTicketInput = {
   description: Scalars['String'],
-  assignedTo: Scalars['ID'],
+  assignedTo?: Maybe<Scalars['ID']>,
   category: Scalars['Int'],
   subCategory?: Maybe<Scalars['Int']>,
   issueType?: Maybe<Scalars['Int']>,
@@ -787,6 +787,7 @@ export type CreateGrievanceTicketInput = {
   extras?: Maybe<CreateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
+  partner?: Maybe<Scalars['Int']>,
 };
 
 export type CreateGrievanceTicketMutation = {
@@ -1139,6 +1140,7 @@ export type GrievanceTicketNode = Node & {
   householdUnicefId?: Maybe<Scalars['String']>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
+  partner?: Maybe<PartnerType>,
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -3244,10 +3246,20 @@ export type PartnerType = {
   name: Scalars['String'],
   isUn: Scalars['Boolean'],
   userSet: UserNodeConnection,
+  grievanceticketSet: GrievanceTicketNodeConnection,
 };
 
 
 export type PartnerTypeUserSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type PartnerTypeGrievanceticketSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -5748,6 +5760,7 @@ export type UpdateGrievanceTicketInput = {
   extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
+  partner?: Maybe<Scalars['Int']>,
 };
 
 export type UpdateGrievanceTicketMutation = {
@@ -8172,7 +8185,10 @@ export type GrievanceTicketQuery = (
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
     & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency'>
-    & { businessArea: (
+    & { partner: Maybe<(
+      { __typename?: 'PartnerType' }
+      & Pick<PartnerType, 'id' | 'name'>
+    )>, businessArea: (
       { __typename?: 'UserBusinessAreaNode' }
       & Pick<UserBusinessAreaNode, 'postponeDeduplication'>
     ), createdBy: Maybe<(
@@ -14995,6 +15011,10 @@ export const GrievanceTicketDocument = gql`
     category
     subCategory
     consent
+    partner {
+      id
+      name
+    }
     businessArea {
       postponeDeduplication
     }
@@ -21106,6 +21126,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   householdUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   priority?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   urgency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  partner?: Resolver<Maybe<ResolversTypes['PartnerType']>, ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
@@ -21794,6 +21815,7 @@ export type PartnerTypeResolvers<ContextType = any, ParentType extends Resolvers
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerTypeUserSetArgs>,
+  grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerTypeGrievanceticketSetArgs>,
 };
 
 export type PaymentDetailsApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentDetailsApproveMutation'] = ResolversParentTypes['PaymentDetailsApproveMutation']> = {
