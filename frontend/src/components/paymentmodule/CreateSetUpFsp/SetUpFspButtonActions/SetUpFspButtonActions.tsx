@@ -26,23 +26,16 @@ export const SetUpFspButtonActions = ({
         {step === 0 && (
           <Button
             component={Link}
-            to={`/${businessArea}/payment-module/payment-plans/${paymentPlanId}`}
+            to={`/${businessArea}/payment-module/payment-plan/${paymentPlanId}`}
           >
             {t('Cancel')}
           </Button>
         )}
         {step === 1 && <Button onClick={handleBackStep}>{t('Back')}</Button>}
       </Box>
-      {step === 0 && (
-        <Button variant='contained' color='primary' onClick={submitForm}>
-          {t('Next')}
-        </Button>
-      )}
-      {step === 1 && (
-        <Button variant='contained' color='primary' onClick={submitForm}>
-          {t('Save')}
-        </Button>
-      )}
+      <Button variant='contained' color='primary' onClick={submitForm}>
+        {t(step === 0 ? 'Next' : 'Save')}
+      </Button>
     </Box>
   );
 };

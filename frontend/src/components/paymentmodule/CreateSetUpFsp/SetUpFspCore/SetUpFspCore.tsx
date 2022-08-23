@@ -7,7 +7,6 @@ import { FieldArray, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   useAllDeliveryMechanismsQuery,
@@ -20,10 +19,6 @@ import { LoadingComponent } from '../../../core/LoadingComponent';
 import { DeliveryMechanismWarning } from '../../EditSetUpFsp/DeliveryMechanismWarning';
 import { DeliveryMechanismRow } from '../DeliveryMechanismRow';
 import { SetUpFspButtonActions } from '../SetUpFspButtonActions/SetUpFspButtonActions';
-
-const StyledBox = styled(Box)`
-  width: 100%;
-`;
 
 interface SetUpFspCoreProps {
   businessArea: string;
@@ -160,7 +155,7 @@ export const SetUpFspCore = ({
           <Form>
             <Box m={5}>
               <ContainerColumnWithBorder>
-                <StyledBox>
+                <Box>
                   <Stepper activeStep={activeStep}>
                     {steps.map((step) => {
                       return (
@@ -170,7 +165,7 @@ export const SetUpFspCore = ({
                       );
                     })}
                   </Stepper>
-                </StyledBox>
+                </Box>
                 {warning && <DeliveryMechanismWarning warning={warning} />}
                 <FieldArray
                   name='deliveryMechanisms'
