@@ -315,6 +315,14 @@ class DeliveryMechanismNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+def _calculate_volume(delivery_mechanism_per_payment_plan, field):
+    payments = delivery_mechanism_per_payment_plan.payment_plan.all_active_payments.filter(
+        financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
+        delivery_type=delivery_mechanism_per_payment_plan.delivery_mechanism,
+    )
+    return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
+
+
 class VolumeByDeliveryMechanismNode(graphene.ObjectType):
     delivery_mechanism = graphene.Field(DeliveryMechanismNode)
     volume = graphene.Float()
@@ -324,15 +332,10 @@ class VolumeByDeliveryMechanismNode(graphene.ObjectType):
         return self  # DeliveryMechanismNode uses the same model
 
     def resolve_volume(self, info):  # non-usd
-        payments = self.payment_plan.all_active_payments.filter(
-            financial_service_provider=self.financial_service_provider, delivery_type=self.delivery_mechanism
-        )
-        return payments.aggregate(entitlement_sum=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))[
-            "entitlement_sum"
-        ]
+        return _calculate_volume(self, "entitlement_quantity")
 
     def resolve_volume_usd(self, info):
-        return 0
+        return _calculate_volume(self, "entitlement_quantity_usd")
 
     class Meta:
         model = DeliveryMechanismPerPaymentPlan
