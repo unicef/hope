@@ -900,6 +900,7 @@ query PaymentPlan($paymentPlanId: ID!) {
         assert data[2]["volume"] == 0
         assert data[2]["volumeUsd"] == 0
 
+        # Simulate applying steficon formula
         PaymentFactory(
             payment_plan=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
@@ -1087,6 +1088,18 @@ class TestFSPLimit(APITestCase):
         assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
 
         # Simulate applying steficon formula
+        PaymentFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.bank_of_america_fsp,
+            collector=self.individuals_1[0],
+            assigned_payment_channel=self.payment_channel_1_voucher,
+            entitlement_quantity=5000,
+            entitlement_quantity_usd=1000,  # max limit
+            delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
+            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
+            household=self.household_1,
+            excluded=False,
+        )
 
         new_target_population = TargetPopulationFactory(
             created_by=self.user,
