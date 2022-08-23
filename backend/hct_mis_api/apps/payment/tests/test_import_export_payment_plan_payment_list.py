@@ -139,7 +139,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
         export_service.save_xlsx_file(self.user)
 
-        self.assertTrue(self.payment_plan.has_payment_plan_payment_list_xlsx_file)
+        self.assertTrue(self.payment_plan.has_payment_list_xlsx_file)
 
         wb = export_service.generate_workbook()
 

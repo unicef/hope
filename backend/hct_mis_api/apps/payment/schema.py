@@ -301,6 +301,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     end_date = graphene.Date()
     currency_name = graphene.String()
     has_payment_list_xlsx_file = graphene.Boolean()
+    has_payment_list_per_fsp_xlsx_file = graphene.Boolean()
     imported_xlsx_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
 
@@ -325,10 +326,13 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_currency_display()
 
     def resolve_has_payment_list_xlsx_file(self, info):
-        return self.has_payment_plan_payment_list_xlsx_file
+        return self.has_payment_list_xlsx_file
+
+    def resolve_has_payment_list_per_fsp_xlsx_file(self):
+        return self.has_payment_list_per_fsp_xlsx_file
 
     def resolve_imported_xlsx_file_name(self, info):
-        import_file_obj = self.get_payment_plan_payment_list_import_xlsx_file_obj()
+        import_file_obj = self.get_payment_list_import_xlsx_file_obj()
         return import_file_obj.file.name if import_file_obj else ""
 
 
