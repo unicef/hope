@@ -194,11 +194,6 @@ export const GrievancesDetails = ({
                 value: ticket.language,
                 size: 3,
               },
-              {
-                label: t('PARTNER'),
-                value: ticket.partner.name,
-                size: 3,
-              }
             ].map((el) => (
               <Grid key={el.label} item xs={el.size as GridSize}>
                 <LabelizedField label={el.label}>{el.value}</LabelizedField>
