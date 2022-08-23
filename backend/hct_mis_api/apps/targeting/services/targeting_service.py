@@ -62,20 +62,11 @@ class TargetingCriteriaQueryingMixin:
         return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.get_excluded_household_ids())
 
     def get_query(self):
-
         rules = self.get_rules()
         query = Q()
         for rule in rules:
-            household_queryset = self.get_household_queryset().filter(
-                self.get_basic_query() & rule.get_household_query()
-            )
-            household_ids_from_individuals = (
-                self.get_individual_queryset()
-                .filter(rule.get_individual_query() & Q(household__in=household_queryset))
-                .values_list("household_id")
-            )
-            query |= Q(id__in=household_ids_from_individuals)
-        return query
+            query |= rule.get_query()
+        return self.get_basic_query() & Q(query)
 
 
 class TargetingCriteriaRuleQueryingMixin:
@@ -108,16 +99,14 @@ class TargetingCriteriaRuleQueryingMixin:
             all_strings.append(f"I({' AND '.join(individuals_filters_blocks_strings).strip()})")
         return " AND ".join(all_strings).strip()
 
-    def get_household_query(self):
+    def get_query(self):
         query = Q()
         filters = self.get_filters()
+        individuals_filters_blocks = self.get_individuals_filters_blocks()
+        # Thats household filters
         for ruleFilter in filters:
             query &= ruleFilter.get_query()
-        return query
-
-    def get_individual_query(self):
-        query = Q()
-        individuals_filters_blocks = self.get_individuals_filters_blocks()
+        # filter individual block
         for individuals_filters_block in individuals_filters_blocks:
             query &= individuals_filters_block.get_query()
         return query
@@ -159,16 +148,16 @@ class TargetingIndividualRuleFilterBlockMixin:
         if self.target_only_hoh:
             # only filtering against heads of household
             individuals_query &= Q(heading_household__isnull=False)
-        return individuals_query
-        individual_query = Individual.objects
 
-        # if isinstance(search_query, CombinedSearchQuery):
-        #     q = individual_query.filter(vector_column=search_query).filter(individuals_query)
-        # else:
-        #     q = individual_query.filter(individuals_query)
-        #
-        # households_id =  .values_list("household_id", flat=True)
-        # return Q(id__in=households_id)
+        individual_query = Individual.objects
+        if isinstance(search_query, CombinedSearchQuery):
+            q = individual_query.filter(vector_column=search_query).filter(individuals_query)
+        else:
+            q = individual_query.filter(individuals_query)
+
+        households_id = q.values_list("household_id", flat=True)
+        return Q(id__in=households_id)
+
 
 
 class TargetingCriteriaFilterMixin:

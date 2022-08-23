@@ -49,7 +49,11 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
-from .celery_tasks import target_population_apply_steficon
+from .celery_tasks import (
+    target_population_apply_steficon,
+    target_population_full_rebuild,
+    target_population_rebuild_stats,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +170,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             excluded_ids=input.get("excluded_ids"),
             exclusion_reason=input.get("exclusion_reason", ""),
         )
-        target_population.candidate_list_targeting_criteria = targeting_criteria
+        target_population.targeting_criteria = targeting_criteria
         target_population.program = program
         target_population.full_clean()
         target_population.save()
@@ -199,50 +203,43 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         vulnerability_score_max = input.get("vulnerability_score_max")
         excluded_ids = input.get("excluded_ids")
         exclusion_reason = input.get("exclusion_reason")
-        if not target_population.is_approved() and (
-            vulnerability_score_min is not None or vulnerability_score_max is not None
-        ):
-            logger.error(
-                "You can only set vulnerability_score_min and vulnerability_score_max on APPROVED Target Population"
-            )
-            raise ValidationError(
-                "You can only set vulnerability_score_min and vulnerability_score_max on APPROVED Target Population"
-            )
-        if vulnerability_score_min is not None:
-            target_population.vulnerability_score_min = vulnerability_score_min
-        if vulnerability_score_max is not None:
-            target_population.vulnerability_score_max = vulnerability_score_max
+        targeting_criteria_input = input.get("targeting_criteria")
 
-        if target_population.is_locked() and name:
-            logger.error("Name can't be changed when Target Population is in APPROVED status")
-            raise ValidationError("Name can't be changed when Target Population is in APPROVED status")
-        if target_population.is_finalized():
-            logger.error("Finalized Target Population can't be changed")
-            raise ValidationError("Finalized Target Population can't be changed")
+        cls.validate_statuses(
+            name, target_population, targeting_criteria_input, vulnerability_score_max, vulnerability_score_min
+        )
+        should_rebuild_list = False
+        should_rebuild_stats = False
         if name:
             target_population.name = name
+        if vulnerability_score_min is not None:
+            should_rebuild_stats = True
+            target_population.vulnerability_score_min = vulnerability_score_min
+        if vulnerability_score_max is not None:
+            should_rebuild_stats = True
+            target_population.vulnerability_score_max = vulnerability_score_max
         if program_id_encoded:
+            should_rebuild_list = True
             program = get_object_or_404(Program, pk=decode_id_string(program_id_encoded))
             target_population.program = program
-        targeting_criteria_input = input.get("targeting_criteria")
-        if targeting_criteria_input is not None:
-            TargetingCriteriaInputValidator.validate(targeting_criteria_input)
+
         if targeting_criteria_input:
+            should_rebuild_list = True
+            TargetingCriteriaInputValidator.validate(targeting_criteria_input)
             targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, target_population.program)
-            if target_population.status == TargetPopulation.STATUS_DRAFT:
-                if target_population.candidate_list_targeting_criteria:
-                    target_population.candidate_list_targeting_criteria.delete()
-                target_population.candidate_list_targeting_criteria = targeting_criteria
-            elif target_population.status == TargetPopulation.STATUS_LOCKED:
-                if target_population.final_list_targeting_criteria:
-                    target_population.final_list_targeting_criteria.delete()
-                target_population.final_list_targeting_criteria = targeting_criteria
+            if target_population.status == TargetPopulation.STATUS_OPEN:
+                if target_population.targeting_criteria:
+                    target_population.targeting_criteria.delete()
+                target_population.targeting_criteria = targeting_criteria
         if excluded_ids is not None:
+            should_rebuild_list = True
             target_population.excluded_ids = excluded_ids
         if exclusion_reason is not None:
+            should_rebuild_list = True
             target_population.exclusion_reason = exclusion_reason
         target_population.full_clean()
         target_population.save()
+        cls.rebuild_tp(should_rebuild_list, should_rebuild_stats, target_population)
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -253,6 +250,38 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         return cls(target_population=target_population)
 
     @classmethod
+    def rebuild_tp(cls, should_rebuild_list, should_rebuild_stats, target_population):
+        if should_rebuild_list or should_rebuild_list:
+            target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
+            target_population.save()
+        if should_rebuild_list:
+            target_population_full_rebuild.delay(target_population.id)
+        if should_rebuild_stats and not should_rebuild_list:
+            target_population_rebuild_stats.delay(target_population.id)
+
+    @classmethod
+    def validate_statuses(
+        cls, name, target_population, targeting_criteria_input, vulnerability_score_max, vulnerability_score_min
+    ):
+        if not target_population.is_locked() and (
+            vulnerability_score_min is not None or vulnerability_score_max is not None
+        ):
+            logger.error(
+                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Target Population"
+            )
+            raise ValidationError(
+                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Target Population"
+            )
+        if target_population.is_locked() and name:
+            logger.error("Name can't be changed when Target Population is in Locked status")
+            raise ValidationError("Name can't be changed when Target Population is in Locked status")
+        if target_population.is_finalized():
+            logger.error("Finalized Target Population can't be changed")
+            raise ValidationError("Finalized Target Population can't be changed")
+        if targeting_criteria_input and not target_population.is_open():
+            raise ValidationError("Locked Target Population can't be changed")
+
+    @classmethod
     def get_object(cls, id):
         if id is None:
             return None
@@ -260,7 +289,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         return object
 
 
-class ApproveTargetPopulationMutation(ValidatedMutation):
+class LockTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [ApproveTargetPopulationValidator]
     model_class = TargetPopulation
@@ -275,21 +304,13 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
     def validated_mutate(cls, root, info, **kwargs):
         user = info.context.user
         target_population = kwargs.get("model_object")
-        if target_population.status != TargetPopulation.STATUS_DRAFT:
+        if target_population.status != TargetPopulation.STATUS_OPEN:
             logger.error("You can only lock open target population")
             raise ValidationError("You can only lock open target population")
         old_target_population = kwargs.get("old_model_object")
         target_population.status = TargetPopulation.STATUS_LOCKED
         target_population.changed_by = user
         target_population.change_date = timezone.now()
-        household_queryset = Household.objects
-        households = (
-            household_queryset.filter(business_area=target_population.business_area)
-            .filter(target_population.candidate_list_targeting_criteria.get_query())
-            .distinct()
-        )
-        HouseholdSelection.objects.filter(target_population=target_population).delete()
-        target_population.households.set(households)
         target_population.save()
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
@@ -301,7 +322,7 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
         return cls(target_population=target_population)
 
 
-class UnapproveTargetPopulationMutation(ValidatedMutation):
+class UnlockTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [UnapproveTargetPopulationValidator]
     model_class = TargetPopulation
@@ -315,7 +336,7 @@ class UnapproveTargetPopulationMutation(ValidatedMutation):
     def validated_mutate(cls, root, info, **kwargs):
         target_population = kwargs.get("model_object")
         old_target_population = kwargs.get("old_model_object")
-        target_population.status = TargetPopulation.STATUS_DRAFT
+        target_population.status = TargetPopulation.STATUS_OPEN
         target_population.save()
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
@@ -328,6 +349,10 @@ class UnapproveTargetPopulationMutation(ValidatedMutation):
 
 
 class FinalizeTargetPopulationMutation(ValidatedMutation):
+    """
+    Set final status and prepare to send to cash assist
+    """
+
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [FinalizeTargetPopulationValidator]
     model_class = TargetPopulation
@@ -346,22 +371,6 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
             target_population.status = TargetPopulation.STATUS_PROCESSING
             target_population.finalized_by = user
             target_population.finalized_at = timezone.now()
-            if target_population.final_list_targeting_criteria:
-                """Gets all households from candidate list which
-                don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)
-                 final=False (final list is candidate list filtered by final=True"""
-                households_ids_queryset = target_population.households.filter(
-                    ~Q(target_population.final_list_targeting_criteria.get_query())
-                ).values_list("id")
-                HouseholdSelection.objects.filter(
-                    household__id__in=households_ids_queryset,
-                    target_population=target_population,
-                ).update(final=False)
-
-            HouseholdSelection.objects.filter(target_population=target_population,).exclude(
-                household__id__in=target_population.vulnerability_score_filtered_households.values_list("id")
-            ).update(final=False)
-
             target_population.save()
         send_target_population_task.delay(target_population.id)
         log_create(
@@ -399,18 +408,22 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
                 name=name,
                 created_by=user,
                 business_area=target_population.business_area,
-                status=TargetPopulation.STATUS_DRAFT,
-                candidate_list_total_households=target_population.candidate_list_total_households,
-                candidate_list_total_individuals=target_population.candidate_list_total_individuals,
+                status=TargetPopulation.STATUS_OPEN,
+                child_male_count=target_population.child_male_count,
+                child_female_count=target_population.child_female_count,
+                adult_male_count=target_population.adult_male_count,
+                adult_female_count=target_population.adult_female_count,
+                total_households_count=target_population.total_households_count,
+                total_individuals_count=target_population.total_individuals_count,
                 steficon_rule=target_population.steficon_rule,
                 steficon_applied_date=target_population.steficon_applied_date,
                 program=target_population.program,
             )
             target_population_copy.full_clean()
             target_population_copy.save()
-            if target_population.candidate_list_targeting_criteria:
-                target_population_copy.candidate_list_targeting_criteria = cls.copy_target_criteria(
-                    target_population.candidate_list_targeting_criteria
+            if target_population.targeting_criteria:
+                target_population_copy.targeting_criteria = cls.copy_target_criteria(
+                    target_population.targeting_criteria
                 )
             target_population_copy.full_clean()
             target_population_copy.save()
@@ -500,9 +513,8 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
         encoded_steficon_rule_id = kwargs.get("steficon_rule_id")
         if encoded_steficon_rule_id is not None:
             steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)
-            if (
-                target_population.allowed_steficon_rule is not None
-                and steficon_rule_id != str(target_population.allowed_steficon_rule.id)
+            if target_population.allowed_steficon_rule is not None and steficon_rule_id != str(
+                target_population.allowed_steficon_rule.id
             ):
                 logger.error(
                     "Another formula was applied to a previous target population for this programme. You can only apply the same formula"
@@ -542,7 +554,7 @@ class Mutations(graphene.ObjectType):
     update_target_population = UpdateTargetPopulationMutation.Field()
     copy_target_population = CopyTargetPopulationMutation.Field()
     delete_target_population = DeleteTargetPopulationMutation.Field()
-    approve_target_population = ApproveTargetPopulationMutation.Field()
-    unapprove_target_population = UnapproveTargetPopulationMutation.Field()
+    lock_target_population = LockTargetPopulationMutation.Field()
+    unlock_target_population = UnlockTargetPopulationMutation.Field()
     finalize_target_population = FinalizeTargetPopulationMutation.Field()
     set_steficon_rule_on_target_population = SetSteficonRuleOnTargetPopulationMutation.Field()

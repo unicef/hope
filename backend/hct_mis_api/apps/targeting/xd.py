@@ -56,7 +56,7 @@ def not_optimized_household_query():
     import time
     tp = TargetPopulation.objects.get(name="asd")
     start = time.time()
-    hhs = tp.candidate_list.values_list("id", flat=True)
+    hhs = tp.open_household_list.values_list("id", flat=True)
 
     # print(hhs.query)
     # print(tp.candidate_list.query)

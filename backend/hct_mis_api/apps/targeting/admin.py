@@ -27,7 +27,7 @@ class TargetPopulationAdmin(
         "program",
         # "candidate_list_total_households",
         # "candidate_list_total_individuals",
-        "final_list_total_households",
+        #"final_list_total_households",
         # "final_list_total_individuals",
     )
     date_hierarchy = "created_at"

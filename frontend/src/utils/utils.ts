@@ -1,3 +1,4 @@
+
 import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
 import localForage from 'localforage';
@@ -170,7 +171,7 @@ export function targetPopulationStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [TargetPopulationStatus.Draft]: theme.hctPalette.gray,
+    [TargetPopulationStatus.Open]: theme.hctPalette.gray,
     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
     [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,

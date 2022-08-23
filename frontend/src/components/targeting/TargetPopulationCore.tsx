@@ -51,11 +51,7 @@ export function TargetPopulationCore({
           </Box>
         </PaperContainer>
       ) : null}
-      <Results
-        resultsData={targetPopulation.candidateStats}
-        totalNumOfHouseholds={targetPopulation.candidateListTotalHouseholds}
-        totalNumOfIndividuals={targetPopulation.candidateListTotalIndividuals}
-      />
+      <Results targetPopulation={targetPopulation} />
 
       {candidateListRules.length ? (
         <TargetingHouseholds

@@ -84,25 +84,6 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class TargetPopulationManager(SoftDeletableManager):
-    def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .annotate(
-                number_of_households=Case(
-                    When(
-                        status=TargetPopulation.STATUS_LOCKED,
-                        then="candidate_list_total_households",
-                    ),
-                    When(
-                        status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
-                        then="final_list_total_households",
-                    ),
-                    default=Value(0),
-                )
-            )
-        )
 
 
 class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel):
@@ -110,7 +91,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     Has N:N association with households.
     """
-
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
@@ -122,11 +102,12 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "finalized_at",
             "finalized_by",
             "status",
-            "candidate_list_total_households",
-            "candidate_list_total_individuals",
-            "final_list_total_households",
-            "final_list_total_individuals",
-            "selection_computation_metadata",
+            "child_male_count",
+            "child_female_count",
+            "adult_male_count",
+            "adult_female_count",
+            "total_households_count",
+            "total_individuals_count",
             "program",
             "targeting_criteria_string",
             "sent_to_datahub",
@@ -142,7 +123,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         },
     )
 
-    STATUS_DRAFT = "DRAFT"
+    STATUS_OPEN = "OPEN"
     STATUS_LOCKED = "LOCKED"
     STATUS_PROCESSING = "PROCESSING"
     STATUS_STEFICON_WAIT = "STEFICON_WAIT"
@@ -152,7 +133,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_READY_FOR_CASH_ASSIST = "READY_FOR_CASH_ASSIST"
 
     STATUS_CHOICES = (
-        (STATUS_DRAFT, _("Open")),
+        (STATUS_OPEN, _("Open")),
         (STATUS_LOCKED, _("Locked")),
         (STATUS_STEFICON_WAIT, _("Waiting for Rule Engine")),
         (STATUS_STEFICON_RUN, _("Rule Engine Running")),
@@ -162,7 +143,17 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         (STATUS_READY_FOR_CASH_ASSIST, _("Ready for cash assist")),
     )
 
-    objects = TargetPopulationManager()
+    BUILD_STATUS_PENDING = "PENDING"
+    BUILD_STATUS_BUILDING = "BUILDING"
+    BUILD_STATUS_FAILED = "FAILED"
+    BUILD_STATUS_OK = "OK"
+
+    BUILD_STATUS_CHOICES = (
+        (BUILD_STATUS_PENDING, _("Pending")),
+        (BUILD_STATUS_BUILDING, _("Building")),
+        (BUILD_STATUS_FAILED, _("Failed")),
+        (BUILD_STATUS_OK, _("Ok")),
+    )
 
     name = CICharField(
         unique=True,
@@ -188,7 +179,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        related_name="locked_target_populations",
+        related_name="changed_target_populations",
         null=True,
         blank=True,
     )
@@ -201,33 +192,15 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         blank=True,
     )
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
-    status = models.CharField(max_length=_MAX_LEN, choices=STATUS_CHOICES, default=STATUS_DRAFT, db_index=True)
+    status = models.CharField(max_length=_MAX_LEN, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True)
+    build_status = models.CharField(
+        max_length=_MAX_LEN, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
+    )
+    built_at = models.DateTimeField(null=True, blank=True)
     households = models.ManyToManyField(
         "household.Household",
         related_name="target_populations",
         through="HouseholdSelection",
-    )
-    candidate_list_total_households = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-    )
-    candidate_list_total_individuals = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-    )
-    final_list_total_households = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-    )
-    final_list_total_individuals = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-    )
-    selection_computation_metadata = models.TextField(
-        blank=True,
-        null=True,
-        help_text="""This would be the metadata written to by say Corticon on how
-        it arrived at the selection it made.""",
     )
     program = models.ForeignKey(
         "program.Program",
@@ -237,19 +210,12 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             candidate list frozen state (approved)""",
         on_delete=models.SET_NULL,
     )
-    candidate_list_targeting_criteria = models.OneToOneField(
+    targeting_criteria = models.OneToOneField(
         "TargetingCriteria",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        related_name="target_population_candidate",
-    )
-    final_list_targeting_criteria = models.OneToOneField(
-        "TargetingCriteria",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name="target_population_final",
+        related_name="target_population",
     )
     sent_to_datahub = models.BooleanField(
         default=False,
@@ -283,14 +249,41 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     excluded_ids = models.TextField(blank=True)
     exclusion_reason = models.TextField(blank=True)
 
+    total_households_count = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    total_individuals_count = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    child_male_count = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    child_female_count = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    adult_male_count = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+    adult_female_count = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+    )
+
     @property
     def excluded_household_ids(self):
         excluded_household_ids_array = map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
         return excluded_household_ids_array
 
     @property
-    def vulnerability_score_filtered_households(self):
+    def household_list(self):
         queryset = self.households
+        if self.status != TargetPopulation.STATUS_OPEN:
+            return queryset
         if self.vulnerability_score_max is not None:
             queryset = queryset.filter(selections__vulnerability_score__lte=self.vulnerability_score_max)
         if self.vulnerability_score_min is not None:
@@ -299,91 +292,37 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         queryset = queryset.filter(~Q(unicef_id__in=self.excluded_household_ids))
         return queryset.distinct()
 
-    @property
-    def candidate_list(self):
-        if self.status != TargetPopulation.STATUS_DRAFT:
-            return []
-        household_queryset = Household.objects
-        return household_queryset.filter(self.candidate_list_targeting_criteria.get_query()).filter(
-            business_area=self.business_area
-        )
-
-    @property
-    def final_list(self):
-        if self.status == TargetPopulation.STATUS_DRAFT:
-            return []
-        return (
-            self.vulnerability_score_filtered_households.filter(selections__final=True)
-            .order_by("created_at")
-            .distinct()
-        )
-
-    @property
-    def candidate_stats(self):
-        if self.status == TargetPopulation.STATUS_DRAFT:
-            households_ids = list(self.candidate_list.values_list("id", flat=True))
-        else:
-            # TODO nie lamić
-            households_ids = self.vulnerability_score_filtered_households.values_list("id")
+    def refresh_stats(self):
+        households_ids = self.household_list.values_list("id")
         delta18 = relativedelta(years=+18)
         date18ago = timezone.now() - delta18
         targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
-            child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+            child_male_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
+            child_female_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
+            adult_male_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
+            adult_female_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
         )
-        return {
-            "child_male": targeted_individuals.get("child_male"),
-            "child_female": targeted_individuals.get("child_female"),
-            "adult_male": targeted_individuals.get("adult_male"),
-            "adult_female": targeted_individuals.get("adult_female"),
-            "all_households": len(households_ids),
-            "all_individuals": targeted_individuals.get("child_male")
-            + targeted_individuals.get("child_female")
-            + targeted_individuals.get("adult_male")
-            + targeted_individuals.get("adult_female"),
-        }
+        self.child_male_count = targeted_individuals.get("child_male_count")
+        self.child_female_count = targeted_individuals.get("child_female_count")
+        self.adult_male_count = targeted_individuals.get("adult_male_count")
+        self.adult_female_count = targeted_individuals.get("adult_female_count")
+        self.total_households_count = len(households_ids)
+        self.total_individuals_count = (
+            targeted_individuals.get("child_male_count")
+            + targeted_individuals.get("child_female_count")
+            + targeted_individuals.get("adult_male_count")
+            + targeted_individuals.get("adult_female_count")
+        )
 
     def get_criteria_string(self):
         try:
-            return self.candidate_list_targeting_criteria.get_criteria_string()
+            return self.targeting_criteria.get_criteria_string()
         except:
             return ""
 
     @property
     def targeting_criteria_string(self):
         return Truncator(self.get_criteria_string()).chars(390, "...")
-
-    @property
-    def final_stats(self):
-        if self.status == TargetPopulation.STATUS_DRAFT:
-            return None
-        elif self.status == TargetPopulation.STATUS_LOCKED:
-            households_ids = (
-                self.vulnerability_score_filtered_households.filter(self.final_list_targeting_criteria.get_query())
-                .filter(business_area=self.business_area)
-                .values_list("id")
-                .distinct()
-            )
-        else:
-            households_ids = self.final_list.values_list("id").distinct()
-        delta18 = relativedelta(years=+18)
-        date18ago = timezone.now() - delta18
-
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
-            child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
-        )
-
-        return {
-            "child_male": targeted_individuals.get("child_male"),
-            "child_female": targeted_individuals.get("child_female"),
-            "adult_male": targeted_individuals.get("adult_male"),
-            "adult_female": targeted_individuals.get("adult_female"),
-        }
 
     @property
     def allowed_steficon_rule(self):
@@ -411,10 +350,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
 
     def is_locked(self):
-        return self.status == self.STATUS_LOCKED
-
-    def is_approved(self):
         return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
+
+    def is_open(self):
+        return self.status in (self.STATUS_OPEN, self.STATUS_BUILDING)
 
     def __str__(self):
         return self.name
@@ -426,13 +365,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
 class HouseholdSelection(TimeStampedUUIDModel):
     """
-    This model contains metadata associated with the relation between a target
-    population and a household. Its understood that once the candidate list of
-    households has been frozen, some external system (eg. Corticon) will run
-    to calculate vulnerability score. The user (may) filter again then against
-    the approved candidate list and mark the households as having been
-    'selected' or not (final=True/False). By default a draft list or frozen
-    candidate list  will have final set to True.
+    M2M table between Households and TargetPopulations
     """
 
     household = models.ForeignKey(
@@ -446,15 +379,7 @@ class HouseholdSelection(TimeStampedUUIDModel):
         null=True,
         decimal_places=3,
         max_digits=6,
-        help_text="Written by a tool such as Corticon.",
-    )
-    final = models.BooleanField(
-        default=True,
-        help_text="""
-            When set to True, this means the household has been selected from
-            the candidate list. Only these households will be sent to
-            CashAssist when a sync is run for the associated target population.
-            """,
+        help_text="Written by Steficon",
     )
 
 
@@ -469,29 +394,17 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
         return self.rules.all()
 
     def get_excluded_household_ids(self):
-        try:
-            return self.target_population_candidate.excluded_household_ids
-        except TargetPopulation.DoesNotExist:
-            pass
-
-        try:
-            return self.target_population_final.excluded_household_ids
-        except TargetPopulation.DoesNotExist:
-            pass
-        return []
+        return self.target_population.excluded_household_ids
 
     def get_query(self):
         query = super().get_query()
-        try:
-            if (
-                self.target_population_final
-                and self.target_population_final.status != TargetPopulation.STATUS_DRAFT
-                and self.target_population_final.program is not None
-                and self.target_population_final.program.individual_data_needed
-            ):
-                query &= Q(size__gt=0)
-        except TargetPopulation.DoesNotExist:
-            pass
+        if (
+            self.target_population
+            and self.target_population.status != TargetPopulation.STATUS_OPEN
+            and self.target_population.program is not None
+            and self.target_population.program.individual_data_needed
+        ):
+            query &= Q(size__gt=0)
         return query
 
 
