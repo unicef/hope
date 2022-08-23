@@ -167,12 +167,19 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
 
             service = XlsxPaymentPlanImportService(payment_plan, file)
             service.open_workbook()
-            service.import_payment_list()
+            try:
+                with atomic():
+                    service.import_payment_list()
 
-            payment_plan.status_lock()
-            payment_plan.xlsx_file_imported_date = timezone.now()
-            payment_plan.save()
-            payment_plan.update_money_fields()
+                payment_plan.xlsx_file_imported_date = timezone.now()
+                payment_plan.status_lock()
+                payment_plan.save()
+                payment_plan.update_money_fields()
+            except Exception as e:
+                logger.exception("Error import from xlsx", e)
+                payment_plan.status_lock()
+                payment_plan.save()
+                payment_plan.update_money_fields()
 
     except Exception as e:
         logger.exception(e)
@@ -208,6 +215,7 @@ def payment_plan_apply_steficon(payment_plan_id):
                 # TODO: not sure how will work steficon function payment_plan or payment need ??
                 result = rule.execute({"household": entry.household, "payment_plan": payment_plan})
                 entry.entitlement_quantity = result.value
+                entry.entitlement_date = timezone.now()
                 updates.append(entry)
             Payment.objects.bulk_update(updates, ["entitlement_quantity"])
         payment_plan.steficon_applied_date = timezone.now()
