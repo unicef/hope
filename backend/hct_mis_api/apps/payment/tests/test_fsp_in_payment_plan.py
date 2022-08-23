@@ -98,7 +98,6 @@ def base_setup(cls):
 
 def payment_plan_setup(cls):
     target_population = TargetPopulationFactory(
-        id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
         created_by=cls.user,
         candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
         business_area=cls.business_area,
@@ -791,12 +790,118 @@ class TestFSPLimit(APITestCase):
         payment_plan_setup(cls)
 
     def test_using_fsp_in_multiple_payment_plans_for_no_limnit(self):
-        pass
-        # scenario:
-        # 1 FSP with no limit
-        # use 1 FSP in 2 payment plans
-        # expect to have both saved, no errors
+        choose_dms_response = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=self.encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                    ],
+                )
+            ),
+        )
+        assert "errors" not in choose_dms_response, choose_dms_response
+
+        assign_fsps_mutation_response = self.graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_santander_fsp_id,  # no limit
+                        "order": 1,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": self.encoded_bank_of_america_fsp_id,  # limit
+                        "order": 2,
+                    },
+                ],
+            },
+        )
+        assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
+
+        new_target_population = TargetPopulationFactory(
+            created_by=self.user,
+            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+            business_area=self.business_area,
+            status=TargetPopulation.STATUS_LOCKED,
+        )
+        new_target_population.households.set([self.household_2])  # instead of applying criteria
+        # household_2 supports transfer & cash
+        new_payment_plan = PaymentPlanFactory(
+            total_households_count=1, target_population=new_target_population, status=PaymentPlan.Status.LOCKED
+        )
+
+        new_encoded_payment_plan_id = encode_id_base64(new_payment_plan.id, "PaymentPlan")
+        new_choose_dms_response = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=new_encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                    ],
+                )
+            ),
+        )
+        assert "errors" not in new_choose_dms_response, new_choose_dms_response
+
+        new_assign_fsps_mutation_response = self.graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": new_encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_santander_fsp_id,  # no limit
+                        "order": 1,
+                    }
+                ],
+            },
+        )
+        assert "errors" not in new_assign_fsps_mutation_response, new_assign_fsps_mutation_response
 
     def test_using_fsp_in_multiple_payment_plans_while_having_a_limit(self):
-        pass
-        # has to be checked along each DeliveryMechanismPerPaymentPlan
+        choose_dms_response = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=self.encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                    ],
+                )
+            ),
+        )
+        assert "errors" not in choose_dms_response, choose_dms_response
+
+        assign_fsps_mutation_response = self.graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_TRANSFER,
+                        "fspId": self.encoded_santander_fsp_id,  # no limit
+                        "order": 1,
+                    },
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": self.encoded_bank_of_america_fsp_id,  # limit
+                        "order": 2,
+                    },
+                ],
+            },
+        )
+        assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
