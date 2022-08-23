@@ -1,9 +1,9 @@
-import { CandidateHouseholdsListByTargetingCriteriaDocument } from '../../src/__generated__/graphql';
+import { TargetPopulationHouseholdsDocument } from '../../src/__generated__/graphql';
 
-export const fakeApolloCandidateHouseholdsListByTargetingCriteria = [
+export const fakeApolloTargetPopulationHouseholds = [
   {
     request: {
-      query: CandidateHouseholdsListByTargetingCriteriaDocument,
+      query: TargetPopulationHouseholdsDocument,
       variables: {
         first: 10,
         orderBy: null,

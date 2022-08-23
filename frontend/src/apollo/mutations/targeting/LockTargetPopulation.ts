@@ -1,7 +1,8 @@
 import { gql } from 'apollo-boost';
-export const ApproveTargetPopulation = gql`
-  mutation ApproveTP($id: ID!) {
-    approveTargetPopulation(id: $id) {
+
+export const LockTargetPopulation = gql`
+  mutation LockTP($id: ID!) {
+    lockTargetPopulation(id: $id) {
       targetPopulation {
         ...targetPopulationDetailed
       }

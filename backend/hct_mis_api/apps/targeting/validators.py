@@ -43,7 +43,7 @@ class UnapproveTargetPopulationValidator:
 class FinalizeTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
-        if not target_population.is_approved():
+        if not target_population.is_locked():
             logger.error("Only Target Population with status APPROVED can be finalized")
             raise ValidationError("Only Target Population with status APPROVED can be finalized")
         if target_population.program.status != "ACTIVE":

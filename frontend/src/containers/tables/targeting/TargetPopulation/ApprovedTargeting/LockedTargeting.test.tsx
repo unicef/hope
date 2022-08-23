@@ -2,7 +2,7 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
-import { ApprovedTargetPopulationTable } from '.';
+import { LockedTargetPopulationTable } from '.';
 import { fakeApolloCandidateHouseholdsListByTargetingCriteria } from '../../../../../../fixtures/targeting/fakeApolloCandidateHouseholdsListByTargetingCriteria';
 import { ApolloLoadingLink, render } from '../../../../../testUtils/testUtils';
 
@@ -13,7 +13,7 @@ describe('containers/tables/targeting/TargetPopulation/ApprovedTargeting', () =>
         addTypename={false}
         mocks={fakeApolloCandidateHouseholdsListByTargetingCriteria}
       >
-        <ApprovedTargetPopulationTable
+        <LockedTargetPopulationTable
           id={
             'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZDYzNWQ0ZDMtNGI1My00MTVkLTkzZWYtNjFlODhjZDg0MWMy'
           }
@@ -33,7 +33,7 @@ describe('containers/tables/targeting/TargetPopulation/ApprovedTargeting', () =>
         addTypename={false}
         mocks={fakeApolloCandidateHouseholdsListByTargetingCriteria}
       >
-        <ApprovedTargetPopulationTable
+        <LockedTargetPopulationTable
           id={
             'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZDYzNWQ0ZDMtNGI1My00MTVkLTkzZWYtNjFlODhjZDg0MWMy'
           }

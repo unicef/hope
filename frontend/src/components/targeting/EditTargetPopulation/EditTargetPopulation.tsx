@@ -43,22 +43,23 @@ export function EditTargetPopulation({
     name: targetPopulation.name || '',
     program: targetPopulation.program?.id || '',
     criterias: targetPopulationCriterias.rules || [],
+    targetingCriteria: targetPopulation.targetingCriteria.rules || [],
     excludedIds: targetPopulation.excludedIds || '',
     exclusionReason: targetPopulation.exclusionReason || '',
-    candidateListCriterias:
-      targetPopulation.candidateListTargetingCriteria?.rules || [],
-    targetPopulationCriterias:
-      targetPopulation.finalListTargetingCriteria?.rules || [],
+    candidateListCriterias: targetPopulationCriterias.rules || [],
   };
+  console.log('initialValues', initialValues);
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
   const businessArea = useBusinessArea();
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsQuery({
-      variables: { businessArea, status: ['ACTIVE'] },
-      fetchPolicy: 'cache-and-network',
-    });
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
+  });
 
   const handleValidate = (values): { candidateListCriterias?: string } => {
     const { candidateListCriterias } = values;
@@ -71,7 +72,9 @@ export function EditTargetPopulation({
     return errors;
   };
   const validationSchema = Yup.object().shape({
-    name: Yup.string().min(2, 'Too short').max(255, 'Too long'),
+    name: Yup.string()
+      .min(2, 'Too short')
+      .max(255, 'Too long'),
     excludedIds: Yup.string().test(
       'testName',
       'ID is not in the correct format',
@@ -174,12 +177,11 @@ export function EditTargetPopulation({
             )}
           />
           <Exclusions initialOpen={Boolean(values.excludedIds)} />
-          <Results />
           {values.candidateListCriterias.length && selectedProgram(values) ? (
             <TargetPopulationHouseholdTable
               variables={{
                 ...getTargetingCriteriaVariables({
-                  criterias: values.candidateListCriterias,
+                  criterias: values.targetingCriteria,
                 }),
                 program: selectedProgram(values).id,
                 excludedIds: values.excludedIds,
