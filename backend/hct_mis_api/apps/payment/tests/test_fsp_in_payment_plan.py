@@ -905,3 +905,49 @@ class TestFSPLimit(APITestCase):
             },
         )
         assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
+
+        new_target_population = TargetPopulationFactory(
+            created_by=self.user,
+            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+            business_area=self.business_area,
+            status=TargetPopulation.STATUS_LOCKED,
+        )
+        new_target_population.households.set([self.household_1])  # instead of applying criteria
+        # household_1 supports cash & voucher
+        new_payment_plan = PaymentPlanFactory(
+            total_households_count=1, target_population=new_target_population, status=PaymentPlan.Status.LOCKED
+        )
+
+        new_encoded_payment_plan_id = encode_id_base64(new_payment_plan.id, "PaymentPlan")
+        new_choose_dms_response = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=new_encoded_payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                    ],
+                )
+            ),
+        )
+        assert "errors" not in new_choose_dms_response, new_choose_dms_response
+
+        # in query, america should not be visible for VOUCHER
+
+        new_assign_fsps_mutation_response = self.graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": new_encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        "fspId": self.encoded_bank_of_america_fsp_id,  # limit
+                        "order": 1,
+                    }
+                ],
+            },
+        )
+        # error because limit is exceeded
+        assert "errors" not in new_assign_fsps_mutation_response, new_assign_fsps_mutation_response
