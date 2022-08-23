@@ -175,7 +175,7 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 @admin.register(PaymentPlan)
 class PaymentPlanAdmin(HOPEModelAdminBase):
-    list_display = ("id", "program", "status", "target_population")
+    list_display = ("unicef_id", "program", "status", "target_population")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
@@ -183,13 +183,14 @@ class PaymentPlanAdmin(HOPEModelAdminBase):
         ("target_population", AutoCompleteFilter),
     )
     raw_id_fields = ("business_area", "program", "target_population")
-    search_fields = ("id",)
+    search_fields = ("id", "unicef_id")
 
 
 @admin.register(Payment)
 class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
-    list_display = ("household", "status", "payment_plan")
+    list_display = ("unicef_id", "household", "status", "payment_plan")
     list_filter = (
+        ("unicef_id", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("payment_plan", AutoCompleteFilter),

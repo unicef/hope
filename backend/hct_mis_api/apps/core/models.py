@@ -503,11 +503,13 @@ class XLSXFileTemp(TimeStampedModel):
     """Use this model for temporary store xlsx files"""
 
     EXPORT = "EXPORT"
+    EXPORT_PER_FSP = "EXPORT_PER_FSP"
     IMPORT = "IMPORT"
     TEMP = "TEMP"
 
     FILE_TYPE_CHOICES = (
         (EXPORT, "Export"),
+        (EXPORT_PER_FSP, "Export per FSP"),
         (IMPORT, "Import"),
         (TEMP, "Temporary"),
     )

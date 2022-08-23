@@ -108,13 +108,41 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
 
-            if not payment_plan.has_payment_plan_payment_list_xlsx_file:
+            if not payment_plan.has_payment_list_xlsx_file:
                 service = XlsxPaymentPlanExportService(payment_plan)
                 service.save_xlsx_file(user)
             payment_plan.status_lock()
             payment_plan.save()
 
             service.send_email(service.get_context(user))
+
+    except Exception as e:
+        logger.exception(e)
+        raise
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
+def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
+    try:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
+
+        user = get_user_model().objects.get(pk=user_id)
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+
+        with configure_scope() as scope:
+            scope.set_tag("business_area", payment_plan.business_area)
+
+            if not payment_plan.has_payment_list_xlsx_file:
+                service = XlsxPaymentPlanExportService(payment_plan)
+                service.export_per_fsp(user)
+            payment_plan.status_date = timezone.now()
+            payment_plan.status = PaymentPlan.Status.ACCEPTED
+            payment_plan.save()
+
+            service.send_email(service.get_context(user, per_fsp=True))
 
     except Exception as e:
         logger.exception(e)

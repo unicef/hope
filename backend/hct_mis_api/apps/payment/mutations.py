@@ -713,9 +713,9 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
-        if payment_plan.status != PaymentPlan.Status.LOCKED:
-            logger.error("You can only export Payment List for LOCKED Payment Plan")
-            raise GraphQLError("You can only export Payment List for LOCKED Payment Plan")
+        if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED):
+            logger.error("You can only export Payment List for LOCKED or ACCEPTED Payment Plan")
+            raise GraphQLError("You can only export Payment List for LOCKED or ACCEPTED Payment Plan")
 
         old_payment_plan = copy_model_object(payment_plan)
 
