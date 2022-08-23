@@ -65,6 +65,7 @@ export const FspSection = ({
           <Button
             color='primary'
             variant='contained'
+            disabled={!paymentPlan.totalEntitledQuantityUsd}
             component={Link}
             to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp/create`}
           >
