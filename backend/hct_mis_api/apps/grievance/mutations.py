@@ -13,7 +13,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
-from hct_mis_api.apps.account.schema import UserNode
+from hct_mis_api.apps.account.schema import PartnerType, UserNode
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
@@ -102,7 +102,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     extras = CreateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
-    partner = graphene.Int(required=False)
+    partner = graphene.Int(node=PartnerType, required=False)
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -119,7 +119,7 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     extras = UpdateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
-    partner = graphene.Int(required=False)
+    partner = graphene.Int(node=PartnerType, required=False)
 
 
 class CreateTicketNoteInput(graphene.InputObjectType):
