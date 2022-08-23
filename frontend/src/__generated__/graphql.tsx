@@ -9808,7 +9808,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -17786,6 +17786,7 @@ export const PaymentPlanDocument = gql`
     xlsxFileImportedDate
     importedXlsxFileName
     totalEntitledQuantityUsd
+    paymentsConflictsCount
     deliveryMechanisms {
       id
       name
