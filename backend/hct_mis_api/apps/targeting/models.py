@@ -50,7 +50,8 @@ from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaQueryingMixin,
     TargetingCriteriaRuleQueryingMixin,
-    TargetingIndividualRuleFilterBlockMixin, TargetingCriteriaFilterMixin,
+    TargetingIndividualRuleFilterBlockMixin,
+    TargetingCriteriaFilterMixin,
 )
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -464,6 +465,21 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
     list).
     """
 
+    def get_rules(self):
+        return self.rules.all()
+
+    def get_excluded_household_ids(self):
+        try:
+            return self.target_population_candidate.excluded_household_ids
+        except TargetPopulation.DoesNotExist:
+            pass
+
+        try:
+            return self.target_population_final.excluded_household_ids
+        except TargetPopulation.DoesNotExist:
+            pass
+        return []
+
     def get_query(self):
         query = super().get_query()
         try:
@@ -490,6 +506,12 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingM
         on_delete=models.CASCADE,
     )
 
+    def get_filters(self):
+        return self.filters.all()
+
+    def get_individuals_filters_blocks(self):
+        return self.individuals_filters_blocks.all()
+
 
 class TargetingIndividualRuleFilterBlock(
     TimeStampedUUIDModel,
@@ -501,6 +523,9 @@ class TargetingIndividualRuleFilterBlock(
         related_name="individuals_filters_blocks",
     )
     target_only_hoh = models.BooleanField(default=False)
+
+    def get_individual_block_filters(self):
+        return self.individual_block_filters.all()
 
 
 class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterMixin):
