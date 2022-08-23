@@ -353,7 +353,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
 
     def is_open(self):
-        return self.status in (self.STATUS_OPEN, self.STATUS_BUILDING)
+        return self.status in (self.STATUS_OPEN,)
 
     def __str__(self):
         return self.name
