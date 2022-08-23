@@ -37,9 +37,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
 
     def __init__(self, payment_plan):
         self.payment_plan = payment_plan
-        # self.payment_list = payment_plan.all_active_payments
-        # TODO:
-        self.payment_list = self.payment_plan.payments.all()
+        self.payment_list = payment_plan.all_active_payments
 
     def _add_payment_row(self, payment: Payment):
         household = payment.household
@@ -84,9 +82,13 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
 
-    def get_context(self, user):
+    def get_context(self, user, per_fsp=False):
         payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
-        link = self.get_link(reverse("download-payment-plan-payment-list", args=[payment_verification_id]))
+        if per_fsp:
+            path_name = "download-payment-plan-payment-list-per-fsp"
+        else:
+            path_name = "download-payment-plan-payment-list"
+        link = self.get_link(reverse(path_name, args=[payment_verification_id]))
 
         msg = "Payment Plan Payment List xlsx file was generated and below You have the link to download this file."
 
@@ -101,7 +103,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
 
         return context
 
-    def export_per_fsp(self) -> openpyxl.Workbook:
+    def export_per_fsp(self, user):
         # after updating this list
         # please update 'map_obj_name_column' as well
         possible_exported_column = [
@@ -113,50 +115,63 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             "fsp_name",
             "entitlement_quantity",
         ]
-        fsp_ids = self.payment_list.filter(
-            # TODO: comment only for test
-            # financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
-        ).distinct().values_list("financial_service_provider_id", flat=True)
-        fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids)
+        fsp_ids = self.payment_list.values_list("financial_service_provider_id", flat=True)
+        fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
 
-        wb = openpyxl.Workbook()
-        if fsp_qs:
-            wb.remove(wb.active)  # remove default created empty Sheet if there are FSPs to export
+        # create temp zip file
+        with NamedTemporaryFile() as tmp_zip:
+            with zipfile.ZipFile(tmp_zip.name, mode="w") as zip_file:
+                for fsp in fsp_qs:
+                    wb = openpyxl.Workbook()
+                    ws_fsp = wb.active
+                    ws_fsp.title = fsp.name
 
-        for fsp in fsp_qs:
-            # crete new sheet per fsp
-            wb.create_sheet(fsp.name)
-            ws_fsp = wb[fsp.name]
+                    payment_qs = self.payment_list.filter(financial_service_provider=fsp)
 
-            payment_qs = self.payment_list.filter(financial_service_provider=fsp)
+                    # get headers
+                    col_list = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
+                    if fsp.fsp_xlsx_template and fsp.fsp_xlsx_template.columns:
+                        col_list = fsp.fsp_xlsx_template.columns
 
-            # get headers
-            col_list = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
-            if fsp.fsp_xlsx_template and fsp.fsp_xlsx_template.columns:
-                col_list = fsp.fsp_xlsx_template.columns
+                    diff_columns = list(set(col_list).difference(set(possible_exported_column)))
+                    if diff_columns:
+                        msg = f"Please contact admin because we can't export columns: {diff_columns}"
+                        logger.error(msg)
+                        raise GraphQLError(msg)
 
-            diff_columns = list(set(col_list).difference(set(possible_exported_column)))
-            if diff_columns:
-                msg = f"Please contact admin because we can't export columns: {diff_columns}"
-                logger.error(msg)
-                raise GraphQLError(msg)
+                    # add headers
+                    ws_fsp.append(col_list)
 
-            # add headers
-            ws_fsp.append(col_list)
+                    # add rows
+                    for payment in payment_qs:
+                        self._add_rows(ws_fsp, col_list, fsp, payment)
 
-            # add rows
-            for payment in payment_qs:
-                self._add_rows(col_list, fsp, payment, ws_fsp)
+                    self._adjust_column_width_from_col(ws_fsp, 0, 1, 7)
 
-            self._adjust_column_width_from_col(ws_fsp, 0, 1, 7)
-        return wb
+                    filename = f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}.xlsx"
+
+                    with NamedTemporaryFile() as tmp:
+                        wb.save(tmp.name)
+                        tmp.seek(0)
+                        # add xlsx to zip
+                        zip_file.writestr(filename, tmp.read())
+
+                zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
+                xlsx_obj = XLSXFileTemp(
+                    object_id=self.payment_plan.pk,
+                    content_type=get_content_type_for_model(self.payment_plan),
+                    created_by=user,
+                    type=XLSXFileTemp.EXPORT_PER_FSP
+                )
+                # tmp.seek(0) ??
+                xlsx_obj.file.save(zip_file_name, File(tmp_zip))
 
     @staticmethod
-    def _add_rows(col_list, fsp, payment, ws_fsp):
+    def _add_rows(ws_fsp, col_list: list, fsp: FinancialServiceProvider, payment: Payment):
         map_obj_name_column = {
             "payment_id": {payment: "unicef_id"},
             "household_id": {payment.household: "unicef_id"},
-            "admin_leve_2": {payment.household: "size"},
+            "admin_leve_2": {payment.household.admin2: "title"},
             "collector_name": {payment.collector: "full_name"},
             "fsp_name": {fsp: "name"},
             "payment_channel": {payment.assigned_payment_channel: "delivery_mechanism"},

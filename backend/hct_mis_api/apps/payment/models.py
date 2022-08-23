@@ -323,7 +323,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
-        source=Status.LOCKED,
+        source=[Status.LOCKED, Status.ACCEPTED],
         target=Status.XLSX_EXPORTING,
     )
     def status_exporting(self):
@@ -411,25 +411,43 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
             ]
         )
 
-    def get_payment_plan_payment_list_xlsx_file_obj(self):
+    def get_payment_list_xlsx_file_obj(self):
         return XLSXFileTemp.objects.filter(
             object_id=self.pk,
             content_type=get_content_type_for_model(self),
             type=XLSXFileTemp.EXPORT
         ).first()
 
-    @property
-    def has_payment_plan_payment_list_xlsx_file(self):
-        return bool(self.get_payment_plan_payment_list_xlsx_file_obj())
+    def get_payment_list_per_fsp_xlsx_file_obj(self):
+        return XLSXFileTemp.objects.filter(
+            object_id=self.pk,
+            content_type=get_content_type_for_model(self),
+            type=XLSXFileTemp.EXPORT_PER_FSP
+        ).first()
 
     @property
-    def xlsx_payment_plan_payment_list_file_link(self):
-        file_obj = self.get_payment_plan_payment_list_xlsx_file_obj()
+    def has_payment_list_xlsx_file(self):
+        return bool(self.get_payment_list_xlsx_file_obj())
+
+    @property
+    def has_payment_list_per_fsp_xlsx_file(self):
+        return bool(self.get_payment_list_per_fsp_xlsx_file_obj())
+
+    @property
+    def xlsx_payment_list_file_link(self):
+        file_obj = self.get_payment_list_xlsx_file_obj()
         if file_obj:
             return file_obj.file.url
         return None
 
-    def get_payment_plan_payment_list_import_xlsx_file_obj(self):
+    @property
+    def xlsx_payment_list_per_fsp_file_link(self):
+        file_obj = self.get_payment_list_per_fsp_xlsx_file_obj()
+        if file_obj:
+            return file_obj.file.url
+        return None
+
+    def get_payment_list_import_xlsx_file_obj(self):
         return XLSXFileTemp.objects.filter(
             object_id=self.pk,
             content_type=get_content_type_for_model(self),
