@@ -1,6 +1,7 @@
 import openpyxl
 
 from django.contrib.admin.options import get_content_type_for_model
+from django.utils import timezone
 
 from hct_mis_api.apps.core.models import XLSXFileTemp
 from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentChannel
@@ -46,7 +47,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             self._import_row(row)
 
         Payment.objects.bulk_update(
-            self.payments_to_save, ("entitlement_quantity", "assigned_payment_channel")
+            self.payments_to_save, ("entitlement_quantity", "entitlement_date", "assigned_payment_channel")
         )
 
         if self.payments_to_save:
@@ -195,6 +196,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             entitlement_amount = float_to_decimal(entitlement_amount)
             if entitlement_amount != payment.entitlement_quantity:
                 payment.entitlement_quantity = entitlement_amount
+                payment.entitlement_date = timezone.now()
                 update = True
         if payment_channel_obj:
             payment.assigned_payment_channel = payment_channel_obj
