@@ -124,6 +124,7 @@ class Query(graphene.ObjectType):
             )
         )
 
+        qs = {k: (0.00 if v is None else v) for k, v in qs.items()}
         qs["user_generated_avg_resolution"] = round(qs["user_generated_avg_resolution"], 2)
         qs["system_generated_avg_resolution"] = round(qs["system_generated_avg_resolution"], 2)
         return qs
@@ -158,12 +159,12 @@ class Query(graphene.ObjectType):
         qs = (
             GrievanceTicket.objects.select_related("admin2")
             .filter(business_area__slug=kwargs.get("business_area_slug"))
-            .values_list("admin2__title", "category")
+            .values_list("admin2__name", "category")
             .annotate(
                 category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
                 count=Count("category")
             )
-            .order_by("admin2__title", "-count")
+            .order_by("admin2__name", "-count")
         )
 
         results = []
