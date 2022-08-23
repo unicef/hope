@@ -759,7 +759,7 @@ def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid
         and collectors_that_cant_be_paid.filter(paymentchannel__isnull=True).exists()
     ):
         needed_delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_CASH)
-    return f"Delivery mechanisms that may be needed: {','.join(needed_delivery_mechanisms)}."
+    return f"Delivery mechanisms that may be needed: {', '.join(needed_delivery_mechanisms)}."
 
 
 class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
@@ -778,9 +778,10 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
         delivery_mechanisms_in_order = input.get("delivery_mechanisms")
         for delivery_mechanism in delivery_mechanisms_in_order:
+            if delivery_mechanism == '':
+                raise GraphQLError("Delivery mechanism cannot be empty.")
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
-
         collectors_in_target_population = Individual.objects.filter(
             # TODO: access that like:
             # id_in=payment_plan.payments.values_list("collector", flat=True)
