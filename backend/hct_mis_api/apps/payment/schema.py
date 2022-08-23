@@ -297,9 +297,9 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class DeliveryMechanismNode(DjangoObjectType):
-    name = graphene.String(required=True)
-    order = graphene.Int(required=True)
-    fsp = graphene.Field(FinancialServiceProviderNode, required=False)
+    name = graphene.String()
+    order = graphene.Int()
+    fsp = graphene.Field(FinancialServiceProviderNode)
 
     def resolve_name(self, info):
         return self.delivery_mechanism
@@ -318,7 +318,9 @@ class DeliveryMechanismNode(DjangoObjectType):
 
 def _calculate_volume(delivery_mechanism_per_payment_plan, field):
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
-        raise GraphQLError(f"Financial Service Provider is not set for {delivery_mechanism_per_payment_plan.delivery_mechanism}")
+        raise GraphQLError(
+            f"Financial Service Provider is not set for {delivery_mechanism_per_payment_plan.delivery_mechanism}"
+        )
     payments = delivery_mechanism_per_payment_plan.payment_plan.all_active_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
         delivery_type=delivery_mechanism_per_payment_plan.delivery_mechanism,
