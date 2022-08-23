@@ -11,6 +11,7 @@ from django.utils import timezone
 import graphene
 from graphql import GraphQLError
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.account.schema import UserNode
 from hct_mis_api.apps.activity_log.models import log_create
@@ -101,6 +102,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     extras = CreateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
+    partner = graphene.Int(required=False)
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -117,11 +119,21 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     extras = UpdateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
+    partner = graphene.Int(required=False)
 
 
 class CreateTicketNoteInput(graphene.InputObjectType):
     description = graphene.String(required=True)
     ticket = graphene.GlobalID(node=GrievanceTicketNode, required=True)
+
+
+def get_partner(id: int):
+    if id:
+        try:
+            return Partner.objects.get(id=id)
+        except Partner.DoesNotExist as dne:
+            logger.error(f"Partner {id} does not exist")
+            raise GraphQLError(f"Partner {id} does not exist") from dne
 
 
 class CreateGrievanceTicketMutation(PermissionMutation):
@@ -305,6 +317,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         linked_tickets_encoded_ids = arg("linked_tickets", [])
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
         business_area_slug = arg("business_area")
+        partner = get_partner(input.pop("partner", None))
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "business_area", "assigned_to"))
         admin = input.pop("admin", None)
@@ -323,6 +336,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             user_modified=timezone.now(),
             assigned_to=assigned_to,
             status=GrievanceTicket.STATUS_ASSIGNED,
+            partner=partner,
         )
         GrievanceNotification.send_all_notifications(
             GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
@@ -518,6 +532,10 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         else:
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+
+        partner = get_partner(input.pop("partner", None))
+        if partner:
+            grievance_ticket.partner = partner
 
         admin = input.pop("admin", None)
         if admin:
