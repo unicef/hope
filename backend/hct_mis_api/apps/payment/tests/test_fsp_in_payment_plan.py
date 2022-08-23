@@ -1,5 +1,5 @@
-import json
-
+from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
@@ -39,11 +39,11 @@ def base_setup(cls):
         },
         individuals_data=[{}],
     )
-    PaymentChannelFactory(
+    cls.payment_channel_1_voucher = PaymentChannelFactory(
         individual=cls.individuals_1[0],
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
     )
-    PaymentChannelFactory(
+    cls.payment_channel_1_cash = PaymentChannelFactory(
         individual=cls.individuals_1[0],
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
     )
@@ -60,11 +60,11 @@ def base_setup(cls):
         },
         individuals_data=[{}],
     )
-    PaymentChannelFactory(
+    cls.payment_channel_2_transfer = PaymentChannelFactory(
         individual=cls.individuals_2[0],
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
     )
-    PaymentChannelFactory(
+    cls.payment_channel_2_cash = PaymentChannelFactory(
         individual=cls.individuals_2[0],
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
     )
@@ -86,11 +86,11 @@ def base_setup(cls):
         household=cls.household_3,
         role=ROLE_PRIMARY,
     )
-    PaymentChannelFactory(
+    cls.payment_channel_3_transfer = PaymentChannelFactory(
         individual=cls.individuals_3[0],
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
     )
-    PaymentChannelFactory(
+    cls.payment_channel_3_cash = PaymentChannelFactory(
         individual=cls.individuals_3[0],
         delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
     )
@@ -262,7 +262,10 @@ query AllDeliveryMechanisms {
         response = self.graphql_request(request_string=query, context={"user": self.user})
         assert response is not None and "data" in response
         all_delivery_mechanisms = response["data"]["allDeliveryMechanisms"]
-        assert all(key in entry for entry in all_delivery_mechanisms for key in ["name", "value"])
+        assert all_delivery_mechanisms is not None, response
+        assert all(
+            key in entry for entry in all_delivery_mechanisms for key in ["name", "value"]
+        ), all_delivery_mechanisms
 
     def test_lacking_delivery_mechanisms(self):
         target_population = TargetPopulationFactory(
@@ -845,6 +848,9 @@ query PaymentPlan($paymentPlanId: ID!) {
             deliveryMechanism {
                 name
                 order
+                fsp {
+                    id
+                }
             }
             volume
         }
@@ -866,10 +872,44 @@ query PaymentPlan($paymentPlanId: ID!) {
         assert len(data) == 3
         assert data[0]["deliveryMechanism"]["name"] == GenericPayment.DELIVERY_TYPE_TRANSFER
         assert data[0]["deliveryMechanism"]["order"] == 1
-        assert data[0]["value"] == 0
+        assert data[0]["volume"] == 0
         assert data[1]["deliveryMechanism"]["name"] == GenericPayment.DELIVERY_TYPE_VOUCHER
         assert data[1]["deliveryMechanism"]["order"] == 2
-        assert data[1]["value"] == 0
+        assert data[1]["volume"] == 0
         assert data[2]["deliveryMechanism"]["name"] == GenericPayment.DELIVERY_TYPE_CASH
         assert data[2]["deliveryMechanism"]["order"] == 3
-        assert data[2]["value"] == 0
+        assert data[2]["volume"] == 0
+
+        PaymentFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.santander_fsp,
+            collector=self.individuals_1[0],
+            assigned_payment_channel=self.payment_channel_1_voucher,
+            entitlement_quantity=100,
+            delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
+        )
+        PaymentFactory(
+            payment_plan=self.payment_plan,
+            financial_service_provider=self.bank_of_europe_fsp,
+            collector=self.individuals_2[0],
+            assigned_payment_channel=self.payment_channel_2_transfer,
+            entitlement_quantity=200,
+            delivery_type=GenericPayment.DELIVERY_TYPE_TRANSFER,
+        )
+
+        new_get_volume_by_delivery_mechanism_response = self.graphql_request(
+            request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": self.encoded_payment_plan_id,
+            },
+        )
+        assert (
+            "errors" not in new_get_volume_by_delivery_mechanism_response
+        ), new_get_volume_by_delivery_mechanism_response
+
+        data = new_get_volume_by_delivery_mechanism_response["data"]["paymentPlan"]["volumeByDeliveryMechanism"]
+        assert len(data) == 3
+        self.assertEqual(data[0]["volume"], 200)
+        self.assertEqual(data[1]["volume"], 100)
+        self.assertEqual(data[2]["volume"], 0)

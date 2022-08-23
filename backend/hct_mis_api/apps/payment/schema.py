@@ -1,7 +1,8 @@
 import json
+from decimal import Decimal
 
-from django.db.models import Case, CharField, Count, Q, Sum, Value, When
-from django.shortcuts import get_object_or_404
+from django.db.models import Q, Sum
+from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import relay
@@ -57,6 +58,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     Payment,
     DeliveryMechanismPerPaymentPlan,
+    PaymentPlan,
     GenericPayment,
     PaymentChannel,
 )
@@ -294,9 +296,9 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class DeliveryMechanismNode(DjangoObjectType):
-    name = graphene.String()
-    order = graphene.Int()
-    fsp = graphene.Field(FinancialServiceProviderNode)
+    name = graphene.String(required=True)
+    order = graphene.Int(required=True)
+    fsp = graphene.Field(FinancialServiceProviderNode, required=False)
 
     def resolve_name(self, info):
         return self.delivery_mechanism
@@ -313,9 +315,29 @@ class DeliveryMechanismNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class VolumeByDeliveryMechanism(graphene.ObjectType):
+class VolumeByDeliveryMechanismNode(graphene.ObjectType):
     delivery_mechanism = graphene.Field(DeliveryMechanismNode)
-    volume = graphene.Int()
+    volume = graphene.Float()
+    volume_usd = graphene.Float()
+
+    def resolve_delivery_mechanism(self, info):
+        return self  # DeliveryMechanismNode uses the same model
+
+    def resolve_volume(self, info):  # non-usd
+        payments = self.payment_plan.all_active_payments.filter(
+            financial_service_provider=self.financial_service_provider, delivery_type=self.delivery_mechanism
+        )
+        return payments.aggregate(entitlement_sum=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))[
+            "entitlement_sum"
+        ]
+
+    def resolve_volume_usd(self, info):
+        return 0
+
+    class Meta:
+        model = DeliveryMechanismPerPaymentPlan
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -332,7 +354,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     imported_xlsx_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
-    volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanism)
+    volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
 
     class Meta:
         model = PaymentPlan
@@ -365,14 +387,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return import_file_obj.file.name if import_file_obj else ""
 
     def resolve_volume_by_delivery_mechanism(self, info):
-        print(self, info)
-        return {
-            "delivery_mechanism": {
-                "name": "test",
-                "order": 1,
-            },
-            "volume": 0,
-        }
+        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
 
 class FspChoices(graphene.ObjectType):
