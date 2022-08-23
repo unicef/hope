@@ -451,28 +451,9 @@ class Query(graphene.ObjectType):
     grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
-        if settings.ELASTICSEARCH_GRIEVANCE_TURN_ON:
-            grievance_es_query_dict = create_es_query(kwargs)
-            grievance_ids = execute_es_query(grievance_es_query_dict)
-
-            return (
-                GrievanceTicket.objects.filter(id__in=grievance_ids)
-                .select_related("assigned_to", "created_by")
-                .annotate(
-                    total=Case(
-                        When(
-                            status=GrievanceTicket.STATUS_CLOSED,
-                            then=F("updated_at") - F("created_at"),
-                        ),
-                        default=timezone.now() - F("created_at"),
-                        output_field=DateField(),
-                    )
-                )
-                .annotate(total_days=F("total__day"))
-            )
         return (
-            GrievanceTicket.objects.filter(ignored=False)
-            .select_related("assigned_to", "created_by")
+            GrievanceTicket.objects
+            .filter(ignored=False).select_related("assigned_to", "created_by")
             .annotate(
                 total=Case(
                     When(
