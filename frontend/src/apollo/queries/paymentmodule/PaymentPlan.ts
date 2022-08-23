@@ -135,6 +135,18 @@ export const PAYMENT_PLAN_QUERY = gql`
           name
         }
       }
+      volumeByDeliveryMechanism {
+        deliveryMechanism {
+          name
+          order
+          fsp {
+            id
+            name
+          }
+        }
+        volume
+        volumeUsd
+      }
     }
   }
 `;

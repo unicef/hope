@@ -6,9 +6,20 @@ import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { NumberTextField } from '../../../../components/core/NumberTextField';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { usePaymentPlanStatusChoicesQueryQuery, AllPaymentPlansForTableQueryVariables } from '../../../../__generated__/graphql';
+import {
+  usePaymentPlanStatusChoicesQueryQuery,
+  AllPaymentPlansForTableQueryVariables,
+} from '../../../../__generated__/graphql';
 
-export type FilterProps = Pick<AllPaymentPlansForTableQueryVariables, 'search' | 'status' | 'totalEntitledQuantityFrom' | 'totalEntitledQuantityTo' | 'dispersionStartDate' | 'dispersionEndDate'>
+export type FilterProps = Pick<
+  AllPaymentPlansForTableQueryVariables,
+  | 'search'
+  | 'status'
+  | 'totalEntitledQuantityFrom'
+  | 'totalEntitledQuantityTo'
+  | 'dispersionStartDate'
+  | 'dispersionEndDate'
+>;
 
 interface PaymentPlansFiltersProps {
   onFilterChange: (filter: FilterProps) => void;
@@ -67,7 +78,12 @@ export function PaymentPlansFilters({
               topLabel={t('Entitled Quantity')}
               value={filter.totalEntitledQuantityFrom}
               placeholder={t('From')}
-              onChange={(e) => onFilterChange({ ...filter, totalEntitledQuantityFrom: e.target.value || undefined })}
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  totalEntitledQuantityFrom: e.target.value || undefined,
+                })
+              }
             />
           </Grid>
           <Grid item xs={6}>
@@ -75,8 +91,18 @@ export function PaymentPlansFilters({
               id='totalEntitledQuantityToFilter'
               value={filter.totalEntitledQuantityTo}
               placeholder={t('To')}
-              onChange={(e) => onFilterChange({ ...filter, totalEntitledQuantityTo: e.target.value || undefined })}
-              error={filter.totalEntitledQuantityFrom && filter.totalEntitledQuantityTo && filter.totalEntitledQuantityFrom > filter.totalEntitledQuantityTo}
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  totalEntitledQuantityTo: e.target.value || undefined,
+                })
+              }
+              error={
+                filter.totalEntitledQuantityFrom &&
+                filter.totalEntitledQuantityTo &&
+                filter.totalEntitledQuantityFrom >
+                  filter.totalEntitledQuantityTo
+              }
             />
           </Grid>
         </Grid>
@@ -85,11 +111,25 @@ export function PaymentPlansFilters({
             <DatePickerFilter
               topLabel={t('Dispersion Date')}
               label={t('From')}
-              onChange={(date, _value) => {
-                if (filter.dispersionEndDate && date.isAfter(filter.dispersionEndDate)) {
-                  onFilterChange({ ...filter, dispersionStartDate: date ? date.format('YYYY-MM-DD') : undefined, dispersionEndDate: undefined })
+              onChange={(date) => {
+                if (
+                  filter.dispersionEndDate &&
+                  date.isAfter(filter.dispersionEndDate)
+                ) {
+                  onFilterChange({
+                    ...filter,
+                    dispersionStartDate: date
+                      ? date.format('YYYY-MM-DD')
+                      : undefined,
+                    dispersionEndDate: undefined,
+                  });
                 } else {
-                  onFilterChange({ ...filter, dispersionStartDate: date ? date.format('YYYY-MM-DD') : undefined })
+                  onFilterChange({
+                    ...filter,
+                    dispersionStartDate: date
+                      ? date.format('YYYY-MM-DD')
+                      : undefined,
+                  });
                 }
               }}
               value={filter.dispersionStartDate || undefined}
@@ -98,7 +138,14 @@ export function PaymentPlansFilters({
           <Grid item xs={6}>
             <DatePickerFilter
               label={t('To')}
-              onChange={(date, _value) => onFilterChange({ ...filter, dispersionEndDate: date ? date.format('YYYY-MM-DD') : undefined })}
+              onChange={(date) =>
+                onFilterChange({
+                  ...filter,
+                  dispersionEndDate: date
+                    ? date.format('YYYY-MM-DD')
+                    : undefined,
+                })
+              }
               value={filter.dispersionEndDate || undefined}
               minDate={filter.dispersionStartDate || undefined}
               minDateMessage={<span />}
