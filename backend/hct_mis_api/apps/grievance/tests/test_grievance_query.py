@@ -1,10 +1,10 @@
 from datetime import datetime
+
+from django.conf import settings
+from django.core.management import call_command
 from django.utils import timezone
 
-from django.core.management import call_command
-
 from parameterized import parameterized
-from django.conf import settings
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -176,13 +176,13 @@ class TestGrievanceQuery(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         country = Country.objects.first()
-        area_type_new = AreaTypeFactory(
+        area_type = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
             country=country,
         )
-        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type_new, p_code="123aa123")
-        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type_new, p_code="sadasdasfd222")
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
+        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sadasdasfd222")
 
         _, individuals = create_household({"size": 2})
         cls.individual_1 = individuals[0]
