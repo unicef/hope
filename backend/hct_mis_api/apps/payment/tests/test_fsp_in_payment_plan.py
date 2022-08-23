@@ -367,6 +367,7 @@ class TestFSPAssignment(APITestCase):
             },
         )
         available_mechs_data = query_response["data"]["availableFspsForDeliveryMechanisms"]
+        assert available_mechs_data is not None, query_response
         assert len(available_mechs_data) == 2
         assert available_mechs_data[0]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_TRANSFER
         transfer_fsps_names = [x["name"] for x in available_mechs_data[0]["fsps"]]

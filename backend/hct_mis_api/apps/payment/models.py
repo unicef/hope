@@ -523,6 +523,12 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
     def __str__(self):
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
 
+    def can_accept_volume(self, volume):
+        if self.distribution_limit is None:
+            return True
+        used_volume = 0  # TODO
+        return self.distribution_limit - used_volume >= volume
+
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
     IN_PROGRESS = 1
