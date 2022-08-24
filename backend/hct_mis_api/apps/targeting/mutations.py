@@ -41,11 +41,11 @@ from hct_mis_api.apps.targeting.schema import (
     TargetPopulationNode,
 )
 from hct_mis_api.apps.targeting.validators import (
-    ApproveTargetPopulationValidator,
+    LockTargetPopulationValidator,
     FinalizeTargetPopulationValidator,
     TargetingCriteriaInputValidator,
     TargetValidator,
-    UnapproveTargetPopulationValidator,
+    UnlockTargetPopulationValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
@@ -252,13 +252,14 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
     @classmethod
     def rebuild_tp(cls, should_rebuild_list, should_rebuild_stats, target_population):
-        #TODO  full rebuild only for open status
-        if should_rebuild_list or should_rebuild_list:
+        rebuild_list = target_population.is_open() and should_rebuild_list
+        rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats
+        if rebuild_list or rebuild_stats:
             target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
             target_population.save()
-        if should_rebuild_list:
+        if rebuild_list:
             target_population_full_rebuild.delay(target_population.id)
-        if should_rebuild_stats and not should_rebuild_list:
+        if rebuild_stats and not rebuild_list:
             target_population_rebuild_stats.delay(target_population.id)
 
     @classmethod
@@ -293,7 +294,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
 class LockTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
-    object_validators = [ApproveTargetPopulationValidator]
+    object_validators = [LockTargetPopulationValidator]
     model_class = TargetPopulation
     permissions = [Permissions.TARGETING_LOCK]
 
@@ -313,7 +314,9 @@ class LockTargetPopulationMutation(ValidatedMutation):
         target_population.status = TargetPopulation.STATUS_LOCKED
         target_population.changed_by = user
         target_population.change_date = timezone.now()
+        target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
         target_population.save()
+        transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -326,7 +329,7 @@ class LockTargetPopulationMutation(ValidatedMutation):
 
 class UnlockTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
-    object_validators = [UnapproveTargetPopulationValidator]
+    object_validators = [UnlockTargetPopulationValidator]
     model_class = TargetPopulation
     permissions = [Permissions.TARGETING_UNLOCK]
 
@@ -339,7 +342,9 @@ class UnlockTargetPopulationMutation(ValidatedMutation):
         target_population = kwargs.get("model_object")
         old_target_population = kwargs.get("old_model_object")
         target_population.status = TargetPopulation.STATUS_OPEN
+        target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
         target_population.save()
+        transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
