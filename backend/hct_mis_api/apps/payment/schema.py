@@ -543,7 +543,10 @@ class Query(graphene.ObjectType):
         def get_fsps_for_delivery_mechanism(mechanism):
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
             for fsp in fsps:
-                volume_needed = 0  # TODO
+                volume_needed = Payment.objects.filter(
+                    # TODO: make this in payment plan context
+                    financial_service_provider=fsp,
+                ).aggregate(money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)))["money"]
                 if not fsp.can_accept_volume(volume_needed):
                     raise GraphQLError(f"{fsp} has exceeded can't be chosen due to volume limitations.")
             return [{"id": fsp.id, "name": fsp.name} for fsp in fsps] if fsps else []
