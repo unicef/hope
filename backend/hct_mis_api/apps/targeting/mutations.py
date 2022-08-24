@@ -239,7 +239,8 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             target_population.exclusion_reason = exclusion_reason
         target_population.full_clean()
         target_population.save()
-        cls.rebuild_tp(should_rebuild_list, should_rebuild_stats, target_population)
+        # prevent race between commit transaction and using in task
+        transaction.on_commit(lambda: cls.rebuild_tp(should_rebuild_list, should_rebuild_stats, target_population))
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -251,6 +252,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
     @classmethod
     def rebuild_tp(cls, should_rebuild_list, should_rebuild_stats, target_population):
+        #TODO  full rebuild only for open status
         if should_rebuild_list or should_rebuild_list:
             target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
             target_population.save()
@@ -558,3 +560,4 @@ class Mutations(graphene.ObjectType):
     unlock_target_population = UnlockTargetPopulationMutation.Field()
     finalize_target_population = FinalizeTargetPopulationMutation.Field()
     set_steficon_rule_on_target_population = SetSteficonRuleOnTargetPopulationMutation.Field()
+    target_population_rebuild = SetSteficonRuleOnTargetPopulationMutation.Field()

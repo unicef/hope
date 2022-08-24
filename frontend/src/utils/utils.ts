@@ -7,7 +7,7 @@ import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
-  ProgramStatus,
+  ProgramStatus, TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
 import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
@@ -185,6 +185,23 @@ export function targetPopulationStatusToColor(
   }
   return theme.palette.error.main;
 }
+
+export function targetPopulationBuildStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [TargetPopulationBuildStatus.Ok]: theme.hctPalette.green,
+    [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
+    [TargetPopulationBuildStatus.Building]: theme.hctPalette.oragne,
+    [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
 
 export function userStatusToColor(
   theme: typeof themeObj,

@@ -7,25 +7,37 @@ import { PaperContainer } from './PaperContainer';
 import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
+import {
+  TargetPopulationBuildStatus,
+  TargetPopulationQuery,
+} from '../../__generated__/graphql';
 
 const Label = styled.p`
   color: #b1b1b5;
 `;
 
+interface TargetPopulationCoreProps {
+  id: string;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  canViewHouseholdDetails: boolean;
+}
+
 export function TargetPopulationCore({
-  candidateList,
   id,
-  status,
   targetPopulation,
   canViewHouseholdDetails,
-}): React.ReactElement {
+}: TargetPopulationCoreProps): React.ReactElement {
   const { t } = useTranslation();
-  if (!candidateList) return null;
-  const { rules: candidateListRules } = candidateList;
+  if (!targetPopulation) return null;
+  const { rules } = targetPopulation.targetingCriteria;
+  // let householdsContainer = null;
+  // if(rules.length){
+  //
+  // }
   return (
     <>
       <TargetingCriteria
-        candidateListRules={candidateListRules}
+        candidateListRules={rules}
         targetPopulation={targetPopulation}
       />
       {targetPopulation?.excludedIds ? (
@@ -53,18 +65,21 @@ export function TargetPopulationCore({
       ) : null}
       <Results targetPopulation={targetPopulation} />
 
-      {candidateListRules.length ? (
+      {targetPopulation.buildStatus === TargetPopulationBuildStatus.Ok ? (
         <TargetingHouseholds
           id={id}
-          status={status}
+          status={targetPopulation.status}
           canViewDetails={canViewHouseholdDetails}
         />
       ) : (
         <PaperContainer>
           <Typography variant='h6'>
-            {t('Target Population Entries (Households)')}
+            {t('Target Population is building')}
           </Typography>
-          <Label>{t('Add targeting criteria to see results.')}</Label>
+          <Label>
+            Target population is processing, list of household will be available
+            when process will be finished
+          </Label>
         </PaperContainer>
       )}
       <UniversalActivityLogTable objectId={targetPopulation.id} />
