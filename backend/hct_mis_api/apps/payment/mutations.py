@@ -6,14 +6,16 @@ from decimal import Decimal
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
-from hct_mis_api.apps.core.models import XLSXFileTemp
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold, Individual
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -26,7 +28,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.payment.celery_tasks import (
     fsp_generate_xlsx_report_task,
     payment_plan_apply_steficon,
-    import_payment_plan_payment_list_from_xlsx
+    import_payment_plan_payment_list_from_xlsx,
 )
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
@@ -36,7 +38,13 @@ from hct_mis_api.apps.payment.inputs import (
     CreatePaymentPlanInput,
     UpdatePaymentPlanInput,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentPlan
+from hct_mis_api.apps.payment.models import (
+    PaymentVerification,
+    PaymentPlan,
+    DeliveryMechanismPerPaymentPlan,
+    PaymentChannel,
+    FinancialServiceProvider,
+)
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode, PaymentPlanNode
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
@@ -700,6 +708,11 @@ class DeletePaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class ChooseDeliveryMechanismsForPaymentPlanInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    delivery_mechanisms = graphene.List(graphene.String, required=True)
+
+
 class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -728,6 +741,147 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
+
+        return cls(payment_plan=payment_plan)
+
+
+def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid, delivery_mechanisms_in_order):
+    needed_delivery_mechanisms = list(
+        PaymentChannel.objects.filter(
+            individual__in=collectors_that_cant_be_paid,
+        )
+        .exclude(delivery_mechanism__in=delivery_mechanisms_in_order)
+        .values_list("delivery_mechanism", flat=True)
+        .distinct()
+    )
+    if (
+        GenericPayment.DELIVERY_TYPE_CASH not in delivery_mechanisms_in_order
+        and collectors_that_cant_be_paid.filter(paymentchannel__isnull=True).exists()
+    ):
+        needed_delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_CASH)
+    return f"Delivery mechanisms that may be needed: {', '.join(needed_delivery_mechanisms)}."
+
+
+class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = ChooseDeliveryMechanismsForPaymentPlanInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
+        delivery_mechanisms_in_order = input.get("delivery_mechanisms")
+        for delivery_mechanism in delivery_mechanisms_in_order:
+            if delivery_mechanism == '':
+                raise GraphQLError("Delivery mechanism cannot be empty.")
+            if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
+                raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
+        collectors_in_target_population = Individual.objects.filter(
+            # TODO: access that like:
+            # id_in=payment_plan.payments.values_list("collector", flat=True)
+            id__in=IndividualRoleInHousehold.objects.filter(
+                household__in=payment_plan.target_population.households.only("id"),
+                role=ROLE_PRIMARY,
+            ).values_list("individual", flat=True)
+        )
+
+        query = Q(paymentchannel__delivery_mechanism__in=delivery_mechanisms_in_order)
+        if GenericPayment.DELIVERY_TYPE_CASH in delivery_mechanisms_in_order:
+            query |= Q(paymentchannel__isnull=True)
+
+        collectors_that_can_be_paid = collectors_in_target_population.filter(query).distinct()
+        collectors_that_cant_be_paid = collectors_in_target_population.exclude(id__in=collectors_that_can_be_paid)
+
+        if collectors_that_cant_be_paid.exists():
+            raise GraphQLError(
+                "Selected delivery mechanisms are not sufficient to serve all beneficiaries. "
+                f"{create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid, delivery_mechanisms_in_order)}"
+            )
+
+        DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).delete()
+        current_time = timezone.now()
+        for index, delivery_mechanism in enumerate(delivery_mechanisms_in_order):
+            DeliveryMechanismPerPaymentPlan.objects.update_or_create(
+                payment_plan=payment_plan,
+                delivery_mechanism=delivery_mechanism,
+                sent_date=current_time,
+                delivery_mechanism_order=index + 1,
+                created_by=info.context.user,
+            )
+        return cls(payment_plan=payment_plan)
+
+
+class FSPToDeliveryMechanismMappingInput(graphene.InputObjectType):
+    fsp_id = graphene.ID(required=True)
+    delivery_mechanism = graphene.String(required=True)
+    order = graphene.Int(required=True)
+
+
+class AssignFspToDeliveryMechanismInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    mappings = graphene.List(FSPToDeliveryMechanismMappingInput, required=True)
+
+
+class AssignFspToDeliveryMechanismMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = AssignFspToDeliveryMechanismInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, payment_plan.business_area)
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            raise GraphQLError("Payment plan must be locked to assign FSP to delivery mechanism")
+
+        if len(input.get("mappings", [])) != payment_plan.delivery_mechanisms.count():
+            raise GraphQLError("Please assign FSP to all delivery mechanisms before moving to next step")
+
+        payment_plan.delivery_mechanisms.all().update(financial_service_provider=None)
+
+        mappings = input.get("mappings")
+        existing_pairs = set()
+        for mapping in mappings:
+            key = (
+                mapping.get("fsp_id"),
+                mapping.get("delivery_mechanism"),
+            )
+            if key in existing_pairs:
+                raise GraphQLError("You can't assign the same FSP to the same delivery mechanism more than once")
+            existing_pairs.add(key)
+
+        fsp_to_dm_mappings = [
+            {
+                "fsp": get_object_or_404(FinancialServiceProvider, id=decode_id_string(mapping.get("fsp_id"))),
+                "delivery_mechanism_per_payment_plan": get_object_or_404(
+                    DeliveryMechanismPerPaymentPlan,
+                    payment_plan=payment_plan,
+                    delivery_mechanism=mapping.get("delivery_mechanism"),
+                    delivery_mechanism_order=mapping.get("order"),
+                ),
+            }
+            for mapping in mappings
+        ]
+
+        for mapping in fsp_to_dm_mappings:
+            delivery_mechanism_per_payment_plan = mapping.get("delivery_mechanism_per_payment_plan")
+            fsp = mapping.get("fsp")
+            if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms:
+                raise GraphQLError(
+                    f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
+                    f"by FSP '{fsp.name}'"
+                )
+            delivery_mechanism_per_payment_plan.financial_service_provider = fsp
+            delivery_mechanism_per_payment_plan.save()
 
         return cls(payment_plan=payment_plan)
 
@@ -828,6 +982,8 @@ class Mutations(graphene.ObjectType):
     discard_cash_plan_payment_verification = DiscardCashPlanVerificationMutation.Field()
     invalid_cash_plan_payment_verification = InvalidCashPlanVerificationMutation.Field()
     delete_cash_plan_payment_verification = DeleteCashPlanVerificationMutation.Field()
+    choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
+    assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()

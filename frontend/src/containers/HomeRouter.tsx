@@ -15,6 +15,12 @@ import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
 import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
+import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
+import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
+import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
+import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
+import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
+import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
 import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsPage';
@@ -36,15 +42,6 @@ import { ReportingPage } from './pages/reporting/ReportingPage';
 import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
-import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
-import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
-import { CreateFspPage } from './pages/paymentmodule/CreateFspPage';
-import { EditFspPage } from './pages/paymentmodule/EditFspPage';
-import { CreateSetUpFspPage } from './pages/paymentmodule/CreateSetUpFspPage';
-import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
-import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
-import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
-import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
 
 const Root = styled.div`
   display: flex;
@@ -115,14 +112,11 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/payment-module/new-plan'>
             <CreatePaymentPlanPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/new-fsp'>
-            <CreateFspPage />
-          </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-module/fsp/:id'>
-            <EditFspPage />
-          </SentryRoute>
           <SentryRoute exact path='/:businessArea/payment-module'>
             <PaymentModulePage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
+            <SetUpFspPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/edit'>
             <EditSetUpFspPage />

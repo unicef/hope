@@ -158,6 +158,15 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
     fsp_xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
 
 
+class PaymentChannelFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = PaymentChannel
+
+    individual = factory.SubFactory(IndividualFactory)
+    delivery_mechanism = fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE)
+    delivery_data = factory.Faker("json")
+
+
 class FinancialServiceProviderXlsxReportFactory(factory.DjangoModelFactory):
     class Meta:
         model = FinancialServiceProviderXlsxReport
@@ -564,11 +573,8 @@ class PaymentFactory(factory.DjangoModelFactory):
     collector = factory.LazyAttribute(
         lambda o: (
             o.household.individuals_and_roles.filter(role=ROLE_PRIMARY).first()
-            or
-            IndividualRoleInHouseholdFactory(
-                household=o.household,
-                individual=o.household.head_of_household,
-                role=ROLE_PRIMARY
+            or IndividualRoleInHouseholdFactory(
+                household=o.household, individual=o.household.head_of_household, role=ROLE_PRIMARY
             )
         ).individual
     )
@@ -596,21 +602,22 @@ class PaymentFactory(factory.DjangoModelFactory):
     )
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = fuzzy.FuzzyChoice((True, False))
-    assigned_payment_channel = factory.LazyAttribute(
-        lambda o: PaymentChannelFactory(individual=o.collector)
-    )
+    assigned_payment_channel = factory.LazyAttribute(lambda o: PaymentChannelFactory(individual=o.collector))
 
 
 def generate_real_payment_plans():
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
-
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3)
     program = RealProgramFactory()
-    payment_plans = PaymentPlanFactory.create_batch(
-        3, program=program, business_area=afghanistan
-    )
+    payment_plans = PaymentPlanFactory.create_batch(3, program=program, business_area=afghanistan)
     program.households.set(Household.objects.all().values_list("id", flat=True))
     for payment_plan in payment_plans:
         for household in program.households.all():
             PaymentFactory(payment_plan=payment_plan, household=household, business_area=afghanistan)
+
+    for delivery_type in PaymentRecord.DELIVERY_TYPE_CHOICE:
+        delivery_mechanism = delivery_type[0]
+        for financial_service_provider in FinancialServiceProvider.objects.all().order_by("?")[:3]:
+            financial_service_provider.delivery_mechanisms.append(delivery_mechanism)
+            financial_service_provider.save()

@@ -70,14 +70,21 @@ export const LockPaymentPlan = ({
                 'After you lock this Payment Plan, you will be able to run entitlement formula for selected target population.',
               )}
             </Box>
-            <Box p={5}>
-              <GreyText>
-                {t('Note:')} {t('There are')}{' '}
-                {/* {paymentPlan.paymentsConflictsCount}{' '} */}
-                <Missing />
-                {t('households that will be ignored in this Payment Plan.')}
-              </GreyText>
-            </Box>
+            {paymentPlan.paymentsConflictsCount > 0 && (
+              <Box p={5}>
+                <GreyText>
+                  {t('Note:')}{' '}
+                  {paymentPlan.paymentsConflictsCount === 1
+                    ? t('There is')
+                    : t('There are')}{' '}
+                  {paymentPlan.paymentsConflictsCount}{' '}
+                  {paymentPlan.paymentsConflictsCount === 1
+                    ? t('household')
+                    : t('households')}{' '}
+                  {t('that will be ignored in this Payment Plan.')}
+                </GreyText>
+              </Box>
+            )}
           </DialogContainer>
         </DialogContent>
         <DialogFooter>

@@ -272,7 +272,7 @@ export const Entitlement = ({
         {paymentPlan.totalEntitledQuantityUsd ? (
           <>
             <Divider />
-            <LabelizedField label={t('Total Cash Received')}>
+            <LabelizedField label={t('Total Entitled Quantity')}>
               <BigValue>USD {paymentPlan.totalEntitledQuantityUsd}</BigValue>
             </LabelizedField>
           </>

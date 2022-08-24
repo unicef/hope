@@ -412,9 +412,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     def get_payment_list_xlsx_file_obj(self):
         return XLSXFileTemp.objects.filter(
-            object_id=self.pk,
-            content_type=get_content_type_for_model(self),
-            type=XLSXFileTemp.EXPORT
+            object_id=self.pk, content_type=get_content_type_for_model(self), type=XLSXFileTemp.EXPORT
         ).first()
 
     def get_payment_list_per_fsp_xlsx_file_obj(self):
@@ -448,9 +446,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     def get_payment_list_import_xlsx_file_obj(self):
         return XLSXFileTemp.objects.filter(
-            object_id=self.pk,
-            content_type=get_content_type_for_model(self),
-            type=XLSXFileTemp.IMPORT
+            object_id=self.pk, content_type=get_content_type_for_model(self), type=XLSXFileTemp.IMPORT
         ).first()
 
 
@@ -580,6 +576,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         "payment.FinancialServiceProvider",
         on_delete=models.PROTECT,
         related_name="delivery_mechanisms_per_payment_plan",
+        null=True,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -591,12 +588,15 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="sent_delivery_mechanisms",
+        null=True,
     )
     status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
     delivery_mechanism = models.CharField(
         max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, db_index=True, null=True
     )
     delivery_mechanism_order = models.PositiveIntegerField()
+    # TODO: can be removed
+    # entitlement_quantity* is calculated dynamically during `_calculate_volume` in schema
     entitlement_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -611,10 +611,8 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["payment_plan", "delivery_mechanism"], name="unique payment_plan_delivery_mechanism"
-            ),
-            models.UniqueConstraint(
-                fields=["payment_plan", "delivery_mechanism_order"], name="unique payment_plan_delivery_mechanism_order"
+                fields=["payment_plan", "delivery_mechanism", "delivery_mechanism_order"],
+                name="unique payment_plan_delivery_mechanism",
             ),
         ]
 

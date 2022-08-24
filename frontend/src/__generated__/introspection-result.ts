@@ -84,7 +84,7 @@
             "name": "ReportNode"
           },
           {
-            "name": "PaymentNode"
+            "name": "DeliveryMechanismNode"
           },
           {
             "name": "FinancialServiceProviderNode"
@@ -94,6 +94,9 @@
           },
           {
             "name": "FinancialServiceProviderXlsxReportNode"
+          },
+          {
+            "name": "PaymentNode"
           },
           {
             "name": "PaymentChannelNode"
