@@ -25,7 +25,7 @@ class TargetValidator(BaseValidator):
             raise ValidationError("Target Population has been finalized. Cannot change.")
 
 
-class ApproveTargetPopulationValidator:
+class LockTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
         if target_population.status != TargetPopulation.STATUS_OPEN:
@@ -33,8 +33,8 @@ class ApproveTargetPopulationValidator:
             logger.error(message)
             raise ValidationError(message)
 
-#TODO Fix messages and classes names
-class UnapproveTargetPopulationValidator:
+
+class UnlockTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
         if not target_population.is_locked():
@@ -47,11 +47,13 @@ class FinalizeTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
         if not target_population.is_locked():
-            logger.error("Only Target Population with status APPROVED can be finalized")
-            raise ValidationError("Only Target Population with status APPROVED can be finalized")
+            message = f"Only locked Target Population with status can be finalized"
+            logger.error(message)
+            raise ValidationError(message)
         if target_population.program.status != Program.ACTIVE:
-            logger.error("Only Target Population assigned to program with status ACTIVE can be send")
-            raise ValidationError("Only Target Population assigned to program with status ACTIVE can be send")
+            message = f"Only Target Population assigned to program with status {Program.ACTIVE} can be send"
+            logger.error(message)
+            raise ValidationError(message)
 
 
 class TargetingCriteriaRuleFilterInputValidator:

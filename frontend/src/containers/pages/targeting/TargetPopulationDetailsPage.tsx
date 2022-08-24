@@ -29,7 +29,6 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
   );
   const buildStatus = data?.targetPopulation?.buildStatus;
   useEffect(() => {
-    console.log(buildStatus,'buildStatus')
     if(buildStatus!== TargetPopulationBuildStatus.Ok){
       startPollingTargetPopulation();
     }else {

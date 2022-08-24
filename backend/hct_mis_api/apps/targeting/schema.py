@@ -94,9 +94,8 @@ class Query(graphene.ObjectType):
     def resolve_target_population_households(parent, info, target_population, **kwargs):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
-        return prefetch_selections(
-            target_population_model.household_list.filter(target_population_model.targeting_criteria.get_query()),
-        )
+        queryset = prefetch_selections(target_population_model.household_list)
+        return queryset
 
     def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
         household_queryset = Household.objects

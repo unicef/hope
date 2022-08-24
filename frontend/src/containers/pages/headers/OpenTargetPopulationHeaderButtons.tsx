@@ -27,7 +27,7 @@ export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   canLock: boolean;
 }
 
-export const InProgressTargetPopulationHeaderButtons = ({
+export const OpenTargetPopulationHeaderButtons = ({
   targetPopulation,
   setEditState,
   canDuplicate,

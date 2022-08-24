@@ -30,7 +30,7 @@ export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   canSend: boolean;
 }
 
-export const ApprovedTargetPopulationHeaderButtons = ({
+export const LockedTargetPopulationHeaderButtons = ({
   targetPopulation,
   canSend,
   canDuplicate,
