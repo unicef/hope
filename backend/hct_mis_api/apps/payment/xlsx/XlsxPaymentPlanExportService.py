@@ -1,14 +1,12 @@
 import logging
 import zipfile
-
 import openpyxl
-
-from tempfile import NamedTemporaryFile
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.urls import reverse
 from graphql import GraphQLError
+from tempfile import NamedTemporaryFile
 
 from hct_mis_api.apps.payment.models import Payment, FinancialServiceProvider, FinancialServiceProviderXlsxTemplate
 from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
@@ -158,15 +156,15 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
                         # add xlsx to zip
                         zip_file.writestr(filename, tmp.read())
 
-                zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
-                xlsx_obj = XLSXFileTemp(
-                    object_id=self.payment_plan.pk,
-                    content_type=get_content_type_for_model(self.payment_plan),
-                    created_by=user,
-                    type=XLSXFileTemp.EXPORT_PER_FSP
-                )
-                # tmp.seek(0) ??
-                xlsx_obj.file.save(zip_file_name, File(tmp_zip))
+            xlsx_obj = XLSXFileTemp(
+                object_id=self.payment_plan.pk,
+                content_type=get_content_type_for_model(self.payment_plan),
+                created_by=user,
+                type=XLSXFileTemp.EXPORT_PER_FSP
+            )
+            tmp_zip.seek(0)
+            zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
+            xlsx_obj.file.save(zip_file_name, File(tmp_zip))
 
     @staticmethod
     def _add_rows(ws_fsp, col_list: list, fsp: FinancialServiceProvider, payment: Payment):
