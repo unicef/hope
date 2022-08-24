@@ -335,6 +335,8 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default=PRIORITY_LOW)
     urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default=URGENCY_NOT_URGENT)
     partner = models.ForeignKey("account.Partner", null=True, blank=True, on_delete=models.SET_NULL)
+    programme = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.SET_NULL)
+    comments = models.TextField(blank=True, null=True)
 
     objects = GrievanceTicketManager()
 

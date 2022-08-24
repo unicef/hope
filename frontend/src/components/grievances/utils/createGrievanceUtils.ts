@@ -313,6 +313,8 @@ export function prepareVariables(businessArea, values) {
     priority: values.priority,
     urgency: values.urgency,
     partner: values.partner,
+    comments: values.comments,
+    programme: values.programme,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,
