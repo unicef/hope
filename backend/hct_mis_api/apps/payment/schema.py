@@ -1,8 +1,10 @@
 import json
 from decimal import Decimal
 
-from django.db.models import Q, Sum
 from django.db.models.functions import Coalesce
+from django.db.models import Case, CharField, Count, Q, Sum, Value, When
+from django.shortcuts import get_object_or_404
+
 
 import graphene
 from graphene import relay
@@ -59,7 +61,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     Payment,
     DeliveryMechanismPerPaymentPlan,
-    PaymentPlan,
     GenericPayment,
     PaymentChannel,
 )
