@@ -261,6 +261,16 @@ export const CreateGrievancePage = (): React.ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
+  const selectedIssueType = (values): string => {
+    return values.issueType
+      ? choicesData.grievanceTicketIssueTypeChoices
+          .filter((el) => el.category === values.category.toString())[0]
+          .subCategories.filter(
+            (el) => el.value === values.issueType.toString(),
+          )[0].name
+      : '-';
+  };
+
   return (
     <Formik
       initialValues={initialValues}
@@ -432,7 +442,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 },
                                 {
                                   label: t('Issue Type'),
-                                  value: <span>{values.issueType || '-'}</span>,
+                                  value: (
+                                    <span>{selectedIssueType(values)}</span>
+                                  ),
                                   size: 9,
                                 },
                                 {
