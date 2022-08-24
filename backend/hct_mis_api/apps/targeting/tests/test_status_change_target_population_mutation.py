@@ -18,11 +18,11 @@ from hct_mis_api.apps.targeting.models import (
 
 class TestApproveTargetPopulationMutation(APITestCase):
     APPROVE_TARGET_MUTATION = """
-            mutation ApproveTargetPopulation($id: ID!) {
-              approveTargetPopulation(id: $id) {
+            mutation LockTargetPopulation($id: ID!) {
+              lockTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  households {
+                  householdList {
                     totalCount
                     edges {
                       node {
@@ -134,8 +134,8 @@ class TestApproveTargetPopulationMutation(APITestCase):
 
 class TestUnapproveTargetPopulationMutation(APITestCase):
     UNAPPROVE_TARGET_MUTATION = """
-            mutation UnapproveTargetPopulation($id: ID!) {
-              unapproveTargetPopulation(id: $id) {
+            mutation UnlockTargetPopulation($id: ID!) {
+              unlockTargetPopulation(id: $id) {
                 targetPopulation {
                   status
                   households {
@@ -252,7 +252,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
               finalizeTargetPopulation(id: $id) {
                 targetPopulation {
                   status
-                  finalList{
+                  householdList{
                     edges{
                       node{
                         size
