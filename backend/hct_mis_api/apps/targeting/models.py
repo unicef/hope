@@ -281,9 +281,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     @property
     def household_list(self):
-        # TODO save only not excluded
         queryset = self.households
-        queryset = queryset.filter(~Q(unicef_id__in=self.excluded_household_ids))
         if self.status == TargetPopulation.STATUS_OPEN:
             return queryset
         if self.vulnerability_score_max is not None:
@@ -380,6 +378,7 @@ class HouseholdSelection(TimeStampedUUIDModel):
         decimal_places=3,
         max_digits=6,
         help_text="Written by Steficon",
+        db_index=True
     )
 
 

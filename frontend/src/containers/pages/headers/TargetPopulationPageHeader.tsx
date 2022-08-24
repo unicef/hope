@@ -14,9 +14,9 @@ import {
   targetPopulationStatusMapping,
   targetPopulationStatusToColor,
 } from '../../../utils/utils';
-import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
+import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
-import { ApprovedTargetPopulationHeaderButtons } from './ApprovedTargetPopulationHeaderButtons';
+import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -67,7 +67,7 @@ export const TargetPopulationPageHeader = ({
   switch (targetPopulation.status) {
     case TargetPopulationStatus.Open:
       buttons = (
-        <InProgressTargetPopulationHeaderButtons
+        <OpenTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           setEditState={setEditState}
           canDuplicate={canDuplicate}
@@ -79,8 +79,10 @@ export const TargetPopulationPageHeader = ({
       break;
     case TargetPopulationStatus.Locked:
     case TargetPopulationStatus.SteficonCompleted:
+    case TargetPopulationStatus.SteficonError:
+    case TargetPopulationStatus.SteficonRun:
       buttons = (
-        <ApprovedTargetPopulationHeaderButtons
+        <LockedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           canDuplicate={canDuplicate}
           canUnlock={canUnlock}
