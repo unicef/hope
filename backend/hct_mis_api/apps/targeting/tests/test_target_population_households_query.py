@@ -15,10 +15,10 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
+class TargetPopulationHouseholdsQueryTestCase(APITestCase):
     QUERY = """
-    query CandidateListByTargetingCriteria($targetPopulation: ID!, $businessArea: String) {
-      candidateHouseholdsListByTargetingCriteria (targetPopulation:$targetPopulation, businessArea: $businessArea){
+    query TargetPopulationHouseholds($targetPopulation: ID!, $businessArea: String) {
+      targetPopulationHouseholds (targetPopulation:$targetPopulation, businessArea: $businessArea){
         totalCount
         edges {
           node {
@@ -30,8 +30,8 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
     }
     """
     QUERY_FIRST_10 = """
-        query CandidateListByTargetingCriteria($targetPopulation: ID!, $businessArea: String) {
-          candidateHouseholdsListByTargetingCriteria (targetPopulation:$targetPopulation, first: 10, businessArea: $businessArea){
+        query TargetPopulationHouseholds($targetPopulation: ID!, $businessArea: String) {
+          targetPopulationHouseholds (targetPopulation:$targetPopulation, first: 10, businessArea: $businessArea){
             totalCount
             edges {
               node {
@@ -120,7 +120,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
-            request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
+            request_string=TargetPopulationHouseholdsQueryTestCase.QUERY,
             context={"user": self.user},
             variables={
                 "targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulationNode"),
@@ -141,7 +141,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
-            request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
+            request_string=TargetPopulationHouseholdsQueryTestCase.QUERY,
             context={"user": self.user},
             variables={
                 "targetPopulation": self.id_to_base64(
@@ -165,7 +165,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
-            request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
+            request_string=TargetPopulationHouseholdsQueryTestCase.QUERY,
             context={"user": self.user},
             variables={
                 "targetPopulation": self.id_to_base64(
@@ -189,7 +189,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
-            request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY_FIRST_10,
+            request_string=TargetPopulationHouseholdsQueryTestCase.QUERY_FIRST_10,
             context={"user": self.user},
             variables={
                 "targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulationNode"),
