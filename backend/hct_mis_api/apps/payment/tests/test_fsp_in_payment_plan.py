@@ -1167,6 +1167,5 @@ class TestFSPLimit(APITestCase):
         error_msg = new_assign_fsps_mutation_response["errors"][0]["message"]
         assert "cannot accept volume" in error_msg, error_msg
 
-
-# scenarios TODO:
-# choose FSP for DM, reload query for available FSPs with current choices and see that FSP that exceeded limit is gone
+    def test_observing_changes_in_fsp_choices_when_assigning_fsps_to_delivery_mechanisms(self):
+        pass
