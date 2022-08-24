@@ -13,7 +13,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
-from hct_mis_api.apps.account.schema import UserNode
+from hct_mis_api.apps.account.schema import PartnerType, UserNode
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
@@ -102,7 +102,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     extras = CreateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
-    partner = graphene.Int(required=False)
+    partner = graphene.Int(node=PartnerType, required=False)
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -119,7 +119,7 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     extras = UpdateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
-    partner = graphene.Int(required=False)
+    partner = graphene.Int(node=PartnerType, required=False)
 
 
 class CreateTicketNoteInput(graphene.InputObjectType):
@@ -512,6 +512,9 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
+        partner = get_partner(input.pop("partner", None))
+        if partner:
+            grievance_ticket.partner = partner
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "assigned_to"))
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id) if assigned_to_id else None
@@ -534,10 +537,6 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
 
         grievance_ticket.partner = get_partner(input.pop("partner", None))
-
-        admin = input.pop("admin", None)
-        if admin:
-            grievance_ticket.admin2 = get_object_or_404(Area, p_code=admin)
         grievance_ticket.user_modified = timezone.now()
         grievance_ticket.save()
 

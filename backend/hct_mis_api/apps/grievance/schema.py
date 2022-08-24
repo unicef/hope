@@ -32,7 +32,6 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
-from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.filters import (
     ExistingGrievanceTicketFilter,
     GrievanceTicketFilter,
@@ -55,6 +54,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
+from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
@@ -82,6 +82,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     priority = graphene.Int()
     urgency = graphene.Int()
     total_days = graphene.String()
+    partner = graphene.Field(PartnerType)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -152,6 +153,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_urgency(grievance_ticket: GrievanceTicket, info):
         return grievance_ticket.urgency
+
+    @staticmethod
+    def resolve_partner(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.partner
 
 
 class TicketNoteNode(DjangoObjectType):
