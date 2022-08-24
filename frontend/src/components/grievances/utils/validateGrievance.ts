@@ -262,6 +262,7 @@ export function validateUsingSteps(
       }
       if (
         values.selectedIndividual &&
+        values.individualDataUpdateFields?.length &&
         !values.individualDataUpdateFields[0]?.fieldName &&
         !values.individualDataUpdateFieldsDocuments?.length &&
         !values.individualDataUpdateDocumentsToRemove?.length &&

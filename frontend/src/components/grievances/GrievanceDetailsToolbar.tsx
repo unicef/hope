@@ -2,7 +2,7 @@ import { Box, Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -10,6 +10,7 @@ import { MiśTheme } from '../../theme';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_SUBCATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import {
@@ -72,6 +73,7 @@ export const GrievanceDetailsToolbar = ({
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const confirm = useConfirmation();
+  const history = useHistory();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
@@ -93,39 +95,38 @@ export const GrievanceDetailsToolbar = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
-  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
-    (): string => {
-      const householdData =
-        ticket.householdDataUpdateTicketDetails?.householdData || {};
-      const individualData =
-        ticket.individualDataUpdateTicketDetails?.individualData || {};
-      const allData = {
-        ...householdData,
-        ...individualData,
-        ...householdData?.flex_fields,
-        ...individualData?.flex_fields,
-      };
-      delete allData.previous_documents;
-      delete allData.previous_identities;
-      delete allData.flex_fields;
-
-      const { approved, notApproved } = countApprovedAndUnapproved(
-        Object.values(allData),
-      );
-      // all changes were approved
-      if (!notApproved) return '';
-
-      // no changes were approved
-      if (!approved)
-        return t(
-          `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
-        );
-
-      // some changes were approved
-      return `You approved ${approved} change${
-        approved > 1 ? 's' : ''
-      }. Remaining change requests (${notApproved}) will be automatically rejected.`;
+  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange = (): string => {
+    const householdData =
+      ticket.householdDataUpdateTicketDetails?.householdData || {};
+    const individualData =
+      ticket.individualDataUpdateTicketDetails?.individualData || {};
+    const allData = {
+      ...householdData,
+      ...individualData,
+      ...householdData?.flex_fields,
+      ...individualData?.flex_fields,
     };
+    delete allData.previous_documents;
+    delete allData.previous_identities;
+    delete allData.flex_fields;
+
+    const { approved, notApproved } = countApprovedAndUnapproved(
+      Object.values(allData),
+    );
+    // all changes were approved
+    if (!notApproved) return '';
+
+    // no changes were approved
+    if (!approved)
+      return t(
+        `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
+      );
+
+    // some changes were approved
+    return `You approved ${approved} change${
+      approved > 1 ? 's' : ''
+    }. Remaining change requests (${notApproved}) will be automatically rejected.`;
+  };
 
   const getClosingConfirmationExtraTextForOtherTypes = (): string => {
     const hasApproveOption =
@@ -198,9 +199,12 @@ export const GrievanceDetailsToolbar = ({
     'Are you sure you want to close the ticket?',
   );
 
-  const closingWarningText = ticket?.businessArea.postponeDeduplication === true ? t(
-    'This ticket will be closed without running the deduplication process.'
-   ) : null;
+  const closingWarningText =
+    ticket?.businessArea.postponeDeduplication === true
+      ? t(
+          'This ticket will be closed without running the deduplication process.',
+        )
+      : null;
 
   const changeState = async (status): Promise<void> => {
     try {
@@ -301,6 +305,15 @@ export const GrievanceDetailsToolbar = ({
       />
     );
   }
+
+  const canCreateDataChange = (): boolean => {
+    return (
+      ticket.subCategory?.toString() ===
+        GRIEVANCE_SUBCATEGORIES.PAYMENT_RELATED_COMPLAINT ||
+      ticket.subCategory?.toString() ===
+        GRIEVANCE_SUBCATEGORIES.FSP_RELATED_COMPLAINT
+    );
+  };
 
   return (
     <PageHeader
@@ -450,6 +463,27 @@ export const GrievanceDetailsToolbar = ({
                 >
                   {t('Send Back')}
                 </LoadingButton>
+              </Box>
+            )}
+            {canCreateDataChange && (
+              <Box mr={3}>
+                <Button
+                  onClick={() =>
+                    history.push({
+                      pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
+                      state: {
+                        category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
+                        selectedIndividual: ticket.individual,
+                        selectedHousehold: ticket.household,
+                        linkedTicketId: ticket.id,
+                      },
+                    })
+                  }
+                  variant='outlined'
+                  color='primary'
+                >
+                  {t('Create a Data Change ticket')}
+                </Button>
               </Box>
             )}
             {canClose && closeButton}
