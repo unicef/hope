@@ -16,7 +16,6 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
-import { Missing } from '../../../core/Missing';
 
 export interface LockPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
