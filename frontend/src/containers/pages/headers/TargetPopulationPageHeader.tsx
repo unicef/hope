@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import {
-  TargetPopulationNode,
+  TargetPopulationNode, TargetPopulationQuery,
   TargetPopulationStatus,
 } from '../../../__generated__/graphql';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -10,6 +10,7 @@ import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/core/StatusBox';
 import {
+  targetPopulationBuildStatusToColor,
   targetPopulationStatusMapping,
   targetPopulationStatusToColor,
 } from '../../../utils/utils';
@@ -27,11 +28,13 @@ const HeaderWrapper = styled.div`
 `;
 const StatusWrapper = styled.div`
   width: 140px;
+  display: flex;
+  flex-direction: row;
 `;
 
 export interface ProgramDetailsPageHeaderPropTypes {
   setEditState: Function;
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
   canEdit: boolean;
   canRemove: boolean;
   canDuplicate: boolean;
@@ -106,6 +109,10 @@ export const TargetPopulationPageHeader = ({
                 status={targetPopulation.status}
                 statusToColor={targetPopulationStatusToColor}
                 statusNameMapping={targetPopulationStatusMapping}
+              />
+              <StatusBox
+                status={targetPopulation.buildStatus}
+                statusToColor={targetPopulationBuildStatusToColor}
               />
             </StatusWrapper>
           </HeaderWrapper>
