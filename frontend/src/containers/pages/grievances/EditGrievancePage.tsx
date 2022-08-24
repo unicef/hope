@@ -3,6 +3,7 @@ import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
+import get from 'lodash/get';
 import styled from 'styled-components';
 import {
   hasCreatorOrOwnerPermissions,
@@ -30,6 +31,7 @@ import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllProgramsQuery,
   useAllUsersQuery,
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
@@ -126,13 +128,28 @@ export const EditGrievancePage = (): React.ReactElement => {
 
   const { data: userChoices } = useUserChoiceDataQuery();
 
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const allProgramsEdges = get(allProgramsData, 'allPrograms.edges', []);
+  const mappedPrograms = allProgramsEdges.map((edge) => ({
+    name: edge.node?.name,
+    value: edge.node.id,
+  }));
+
   if (
     userDataLoading ||
     choicesLoading ||
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
-    currentUserDataLoading
+    currentUserDataLoading ||
+    loadingPrograms
   )
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
@@ -186,16 +203,6 @@ export const EditGrievancePage = (): React.ReactElement => {
   const mappedIndividuals = userData.allUsers.edges.map((edge) => ({
     name: renderUserName(edge.node),
     value: edge.node.id,
-  }));
-
-  const mappedPriorities = Array.from(Array(3).keys()).map((i) => ({
-    name: (i + 1).toString(),
-    value: i + 1,
-  }));
-
-  const mappedUrgencies = Array.from(Array(3).keys()).map((i) => ({
-    name: (i + 1).toString(),
-    value: i + 1,
   }));
 
   const issueTypeDict = choicesData.grievanceTicketIssueTypeChoices.reduce(
@@ -399,6 +406,17 @@ export const EditGrievancePage = (): React.ReactElement => {
                             component={FormikTextField}
                           />
                         </Grid>
+                        <Grid item xs={12}>
+                          <Field
+                            name='comments'
+                            multiline
+                            fullWidth
+                            disabled={Boolean(ticket.comments)}
+                            variant='outlined'
+                            label='Comments'
+                            component={FormikTextField}
+                          />
+                        </Grid>
                         <Grid item xs={6}>
                           <Field
                             name='admin'
@@ -437,7 +455,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                             disabled={Boolean(ticket.priority)}
                             variant='outlined'
                             label={t('Priority')}
-                            choices={mappedPriorities}
+                            choices={choicesData.grievanceTicketPriorityChoices}
                             component={FormikSelectField}
                           />
                         </Grid>
@@ -449,7 +467,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                             disabled={Boolean(ticket.urgency)}
                             variant='outlined'
                             label={t('Urgency')}
-                            choices={mappedUrgencies}
+                            choices={choicesData.grievanceTicketUrgencyChoices}
                             component={FormikSelectField}
                           />
                         </Grid>
@@ -461,6 +479,18 @@ export const EditGrievancePage = (): React.ReactElement => {
                             variant='outlined'
                             label={t('Partner')}
                             choices={userChoices.userPartnerChoices}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='programme'
+                            fullWidth
+                            disabled={Boolean(ticket.programme)}
+                            variant='outlined'
+                            label={t('Programme')}
+                            choices={mappedPrograms}
+                            allProgramsEdges={allProgramsEdges}
                             component={FormikSelectField}
                           />
                         </Grid>

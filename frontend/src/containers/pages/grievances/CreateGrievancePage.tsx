@@ -12,6 +12,7 @@ import { Field, Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
+import get from 'lodash/get';
 import styled from 'styled-components';
 import {
   hasPermissionInModule,
@@ -39,6 +40,7 @@ import {
 import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllProgramsQuery,
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
@@ -134,6 +136,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
     urgency: 3,
     subCategory: null,
     partner: null,
+    programme: null,
+    comments: null,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
@@ -187,11 +191,40 @@ export const CreateGrievancePage = (): React.ReactElement => {
     '*',
   );
 
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const allProgramsEdges = get(allProgramsData, 'allPrograms.edges', []);
+  const mappedPrograms = allProgramsEdges.map((edge) => ({
+    name: edge.node?.name,
+    value: edge.node.id,
+  }));
+
+  const showSubCategory = (values): boolean => {
+    return values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
+  };
+  const showIssueType = (values): boolean => {
+    return (
+      values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+    );
+  };
+
+  const subCategoryChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.grievanceTicketSubCategoryChoices);
+
   if (
     userDataLoading ||
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||
-    householdFieldsLoading
+    householdFieldsLoading ||
+    loadingPrograms
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
@@ -368,10 +401,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               component={FormikSelectField}
                             />
                           </Grid>
-                          {values.category ===
-                            GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-                          values.category ===
-                            GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
+                          {showIssueType(values) && (
                             <Grid item xs={6}>
                               <Field
                                 name='issueType'
@@ -383,9 +413,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 component={FormikSelectField}
                               />
                             </Grid>
-                          ) : null}
-                          {values.category ===
-                            GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT && (
+                          )}
+                          {showSubCategory(values) && (
                             <Grid item xs={6}>
                               <Field
                                 name='subCategory'
@@ -440,10 +469,20 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   ),
                                   size: 3,
                                 },
-                                {
+                                showIssueType(values) && {
                                   label: t('Issue Type'),
                                   value: (
                                     <span>{selectedIssueType(values)}</span>
+                                  ),
+                                  size: 9,
+                                },
+                                showSubCategory(values) && {
+                                  label: t('Sub Category'),
+                                  value: (
+                                    <span>
+                                      {subCategoryChoices[values.subCategory] ||
+                                        '-'}
+                                    </span>
                                   ),
                                   size: 9,
                                 },
@@ -481,22 +520,34 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   ),
                                   size: 3,
                                 },
-                              ].map((el) => (
-                                <Grid
-                                  key={el.label}
-                                  item
-                                  xs={el.size as GridSize}
-                                >
-                                  <LabelizedField label={el.label}>
-                                    {el.value}
-                                  </LabelizedField>
-                                </Grid>
-                              ))}
+                              ]
+                                .filter((el) => el)
+                                .map((el) => (
+                                  <Grid
+                                    key={el.label}
+                                    item
+                                    xs={el.size as GridSize}
+                                  >
+                                    <LabelizedField label={el.label}>
+                                      {el.value}
+                                    </LabelizedField>
+                                  </Grid>
+                                ))}
                             </Grid>
                           </OverviewContainer>
                           <BoxWithBorderBottom />
                           <BoxPadding />
                           <Grid container spacing={3}>
+                            <Grid item xs={3}>
+                              <Field
+                                name='partner'
+                                fullWidth
+                                variant='outlined'
+                                label={t('Partner')}
+                                choices={userChoices.userPartnerChoices}
+                                component={FormikSelectField}
+                              />
+                            </Grid>
                             <Grid item xs={12}>
                               <Field
                                 name='description'
@@ -504,6 +555,16 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 fullWidth
                                 variant='outlined'
                                 label='Description*'
+                                component={FormikTextField}
+                              />
+                            </Grid>
+                            <Grid item xs={12}>
+                              <Field
+                                name='comments'
+                                multiline
+                                fullWidth
+                                variant='outlined'
+                                label='Comments'
                                 component={FormikTextField}
                               />
                             </Grid>
@@ -534,7 +595,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 component={FormikTextField}
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={3}>
                               <Field
                                 name='priority'
                                 multiline
@@ -545,7 +606,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 component={FormikSelectField}
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={3}>
                               <Field
                                 name='urgency'
                                 multiline
@@ -558,11 +619,11 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             </Grid>
                             <Grid item xs={6}>
                               <Field
-                                name='partner'
+                                name='programme'
                                 fullWidth
                                 variant='outlined'
-                                label={t('Partner')}
-                                choices={userChoices.userPartnerChoices}
+                                label={t('Programme')}
+                                choices={mappedPrograms}
                                 component={FormikSelectField}
                               />
                             </Grid>
