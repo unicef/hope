@@ -1,4 +1,6 @@
 import logging
+import zipfile
+
 import openpyxl
 
 from tempfile import NamedTemporaryFile
