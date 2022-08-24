@@ -13,53 +13,16 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ad
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Test',
                         'category': 7,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.052676',
-                        'description': 'Just random description',
+                        'description': 'grievance_ticket_1',
                         'householdUnicefId': 'HH-20-0000.0001',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyMDFkNTBmNy00OWIxLTQzOTYtYTc0OS1hZmRiMDQ3ODg3NTE=',
                         'issueType': None,
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-000001',
+                        'unicefId': 'GRV-0000001',
                         'urgency': 2
-                    }
-                },
-                {
-                    'node': {
-                        'admin': 'City Example',
-                        'category': 3,
-                        'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.063051',
-                        'description': 'Just random description',
-                        'householdUnicefId': 'HH-20-0000.0001',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTplM2M0NjU0NS1hOTUyLTRlY2YtYjQyYy00MjU1NTk1ZTAxNmU=',
-                        'issueType': 12,
-                        'language': 'Polish',
-                        'priority': 2,
-                        'status': 3,
-                        'unicefId': 'GRV-000002',
-                        'urgency': 3
-                    }
-                },
-                {
-                    'node': {
-                        'admin': 'City Example',
-                        'category': 5,
-                        'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.069852',
-                        'description': 'Just random description',
-                        'householdUnicefId': 'HH-20-0000.0003',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTozOGIzNzExMy0wNDNiLTQxMTctYmVlZi1iN2M1NTUzNmMyY2Q=',
-                        'issueType': None,
-                        'language': 'Polish',
-                        'priority': 3,
-                        'status': 4,
-                        'unicefId': 'GRV-000003',
-                        'urgency': 1
                     }
                 }
             ]
@@ -73,18 +36,15 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_as
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Example',
                         'category': 3,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.063051',
-                        'description': 'Just random description',
+                        'description': 'grievance_ticket_2',
                         'householdUnicefId': 'HH-20-0000.0001',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTplM2M0NjU0NS1hOTUyLTRlY2YtYjQyYy00MjU1NTk1ZTAxNmU=',
                         'issueType': 12,
                         'language': 'Polish',
                         'priority': 2,
                         'status': 3,
-                        'unicefId': 'GRV-000002',
+                        'unicefId': 'GRV-0000002',
                         'urgency': 3
                     }
                 }
@@ -99,18 +59,15 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ca
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Test',
                         'category': 7,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.052676',
-                        'description': 'Just random description',
+                        'description': 'grievance_ticket_1',
                         'householdUnicefId': 'HH-20-0000.0001',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyMDFkNTBmNy00OWIxLTQzOTYtYTc0OS1hZmRiMDQ3ODg3NTE=',
                         'issueType': None,
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-000001',
+                        'unicefId': 'GRV-0000001',
                         'urgency': 2
                     }
                 }
@@ -125,18 +82,15 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_he
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Test',
                         'category': 7,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.052676',
-                        'description': 'Just random description',
+                        'description': 'grievance_ticket_1',
                         'householdUnicefId': 'HH-20-0000.0001',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyMDFkNTBmNy00OWIxLTQzOTYtYTc0OS1hZmRiMDQ3ODg3NTE=',
                         'issueType': None,
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-000001',
+                        'unicefId': 'GRV-0000001',
                         'urgency': 2
                     }
                 }
@@ -151,18 +105,15 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ho
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Example',
                         'category': 5,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.069852',
-                        'description': 'Just random description',
+                        'description': 'grievance_ticket_3',
                         'householdUnicefId': 'HH-20-0000.0003',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTozOGIzNzExMy0wNDNiLTQxMTctYmVlZi1iN2M1NTUzNmMyY2Q=',
                         'issueType': None,
                         'language': 'Polish',
                         'priority': 3,
                         'status': 4,
-                        'unicefId': 'GRV-000003',
+                        'unicefId': 'GRV-0000003',
                         'urgency': 1
                     }
                 }
@@ -175,6 +126,20 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_is
     'data': {
         'allGrievanceTicket': {
             'edges': [
+                {
+                    'node': {
+                        'category': 3,
+                        'consent': True,
+                        'description': 'grievance_ticket_2',
+                        'householdUnicefId': 'HH-20-0000.0001',
+                        'issueType': 12,
+                        'language': 'Polish',
+                        'priority': 2,
+                        'status': 3,
+                        'unicefId': 'GRV-0000002',
+                        'urgency': 3
+                    }
+                }
             ]
         }
     }
@@ -186,18 +151,15 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ma
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Example',
                         'category': 3,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.063051',
-                        'description': 'Just random description',
+                        'description': 'grievance_ticket_2',
                         'householdUnicefId': 'HH-20-0000.0001',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTplM2M0NjU0NS1hOTUyLTRlY2YtYjQyYy00MjU1NTk1ZTAxNmU=',
                         'issueType': 12,
                         'language': 'Polish',
                         'priority': 2,
                         'status': 3,
-                        'unicefId': 'GRV-000002',
+                        'unicefId': 'GRV-0000002',
                         'urgency': 3
                     }
                 }
@@ -210,6 +172,20 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_mi
     'data': {
         'allGrievanceTicket': {
             'edges': [
+                {
+                    'node': {
+                        'category': 5,
+                        'consent': True,
+                        'description': 'grievance_ticket_3',
+                        'householdUnicefId': 'HH-20-0000.0003',
+                        'issueType': None,
+                        'language': 'Polish',
+                        'priority': 3,
+                        'status': 4,
+                        'unicefId': 'GRV-0000003',
+                        'urgency': 1
+                    }
+                }
             ]
         }
     }
@@ -219,6 +195,57 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_mi
     'data': {
         'allGrievanceTicket': {
             'edges': [
+                {
+                    'node': {
+                        'category': 7,
+                        'consent': True,
+                        'description': 'grievance_ticket_1',
+                        'householdUnicefId': 'HH-20-0000.0001',
+                        'issueType': None,
+                        'language': 'Polish',
+                        'priority': 1,
+                        'status': 1,
+                        'unicefId': 'GRV-0000001',
+                        'urgency': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_multiple_statuses 1'] = {
+    'data': {
+        'allGrievanceTicket': {
+            'edges': [
+                {
+                    'node': {
+                        'category': 3,
+                        'consent': True,
+                        'description': 'grievance_ticket_2',
+                        'householdUnicefId': 'HH-20-0000.0001',
+                        'issueType': 12,
+                        'language': 'Polish',
+                        'priority': 2,
+                        'status': 3,
+                        'unicefId': 'GRV-0000002',
+                        'urgency': 3
+                    }
+                },
+                {
+                    'node': {
+                        'category': 5,
+                        'consent': True,
+                        'description': 'grievance_ticket_3',
+                        'householdUnicefId': 'HH-20-0000.0003',
+                        'issueType': None,
+                        'language': 'Polish',
+                        'priority': 3,
+                        'status': 4,
+                        'unicefId': 'GRV-0000003',
+                        'urgency': 1
+                    }
+                }
             ]
         }
     }
@@ -230,18 +257,15 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_pr
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Example',
                         'category': 5,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.069852',
-                        'description': 'Just random description',
+                        'description': 'grievance_ticket_3',
                         'householdUnicefId': 'HH-20-0000.0003',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTozOGIzNzExMy0wNDNiLTQxMTctYmVlZi1iN2M1NTUzNmMyY2Q=',
                         'issueType': None,
                         'language': 'Polish',
                         'priority': 3,
                         'status': 4,
-                        'unicefId': 'GRV-000003',
+                        'unicefId': 'GRV-0000003',
                         'urgency': 1
                     }
                 }
@@ -256,53 +280,16 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_re
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Test',
-                        'category': 7,
-                        'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.052676',
-                        'description': 'Just random description',
-                        'householdUnicefId': 'HH-20-0000.0001',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyMDFkNTBmNy00OWIxLTQzOTYtYTc0OS1hZmRiMDQ3ODg3NTE=',
-                        'issueType': None,
-                        'language': 'Polish',
-                        'priority': 1,
-                        'status': 1,
-                        'unicefId': 'GRV-000001',
-                        'urgency': 2
-                    }
-                },
-                {
-                    'node': {
-                        'admin': 'City Example',
                         'category': 3,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.063051',
-                        'description': 'Just random description',
+                        'description': 'grievance_ticket_2',
                         'householdUnicefId': 'HH-20-0000.0001',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTplM2M0NjU0NS1hOTUyLTRlY2YtYjQyYy00MjU1NTk1ZTAxNmU=',
                         'issueType': 12,
                         'language': 'Polish',
                         'priority': 2,
                         'status': 3,
-                        'unicefId': 'GRV-000002',
+                        'unicefId': 'GRV-0000002',
                         'urgency': 3
-                    }
-                },
-                {
-                    'node': {
-                        'admin': 'City Example',
-                        'category': 5,
-                        'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.069852',
-                        'description': 'Just random description',
-                        'householdUnicefId': 'HH-20-0000.0003',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTozOGIzNzExMy0wNDNiLTQxMTctYmVlZi1iN2M1NTUzNmMyY2Q=',
-                        'issueType': None,
-                        'language': 'Polish',
-                        'priority': 3,
-                        'status': 4,
-                        'unicefId': 'GRV-000003',
-                        'urgency': 1
                     }
                 }
             ]
@@ -316,19 +303,16 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_st
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Example',
-                        'category': 5,
+                        'category': 7,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.069852',
-                        'description': 'Just random description',
-                        'householdUnicefId': 'HH-20-0000.0003',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTozOGIzNzExMy0wNDNiLTQxMTctYmVlZi1iN2M1NTUzNmMyY2Q=',
+                        'description': 'grievance_ticket_1',
+                        'householdUnicefId': 'HH-20-0000.0001',
                         'issueType': None,
                         'language': 'Polish',
-                        'priority': 3,
-                        'status': 4,
-                        'unicefId': 'GRV-000003',
-                        'urgency': 1
+                        'priority': 1,
+                        'status': 1,
+                        'unicefId': 'GRV-0000001',
+                        'urgency': 2
                     }
                 }
             ]
@@ -342,18 +326,15 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_un
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Test',
                         'category': 7,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.052676',
-                        'description': 'Just random description',
+                        'description': 'grievance_ticket_1',
                         'householdUnicefId': 'HH-20-0000.0001',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyMDFkNTBmNy00OWIxLTQzOTYtYTc0OS1hZmRiMDQ3ODg3NTE=',
                         'issueType': None,
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-000001',
+                        'unicefId': 'GRV-0000001',
                         'urgency': 2
                     }
                 }
@@ -368,19 +349,62 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ur
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Example',
                         'category': 5,
                         'consent': True,
-                        'createdAt': '2022-08-17T19:28:02.069852',
-                        'description': 'Just random description',
+                        'description': 'grievance_ticket_3',
                         'householdUnicefId': 'HH-20-0000.0003',
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTozOGIzNzExMy0wNDNiLTQxMTctYmVlZi1iN2M1NTUzNmMyY2Q=',
                         'issueType': None,
                         'language': 'Polish',
                         'priority': 3,
                         'status': 4,
-                        'unicefId': 'GRV-000003',
+                        'unicefId': 'GRV-0000003',
                         'urgency': 1
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_grievance_type 1'] = {
+    'data': {
+        'allGrievanceTicket': {
+            'edges': [
+                {
+                    'node': {
+                        'category': 5,
+                        'consent': True,
+                        'description': 'grievance_ticket_3',
+                        'householdUnicefId': 'HH-20-0000.0003',
+                        'issueType': None,
+                        'language': 'Polish',
+                        'priority': 3,
+                        'status': 4,
+                        'unicefId': 'GRV-0000003',
+                        'urgency': 1
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceQueryElasticSearch::test_multiple_filters_should_return_grievance_1 1'] = {
+    'data': {
+        'allGrievanceTicket': {
+            'edges': [
+                {
+                    'node': {
+                        'category': 7,
+                        'consent': True,
+                        'description': 'grievance_ticket_1',
+                        'householdUnicefId': 'HH-20-0000.0001',
+                        'issueType': None,
+                        'language': 'Polish',
+                        'priority': 1,
+                        'status': 1,
+                        'unicefId': 'GRV-0000001',
+                        'urgency': 2
                     }
                 }
             ]

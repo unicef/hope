@@ -4,7 +4,10 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
-import { thingForSpecificGrievanceType, camelizeArrayObjects } from '../../../utils/utils';
+import {
+  thingForSpecificGrievanceType,
+  camelizeArrayObjects,
+} from '../../../utils/utils';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
@@ -28,6 +31,7 @@ interface EditValuesTypes {
   individualData?;
   householdDataUpdateFields?;
   subCategory?;
+  partner?;
 }
 
 function prepareInitialValueAddIndividual(
@@ -181,6 +185,7 @@ export function prepareInitialValues(
   let initialValues: EditValuesTypes = {
     priority: ticket.priority,
     urgency: ticket.urgency,
+    partner: ticket.partner,
     description: ticket.description || '',
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
@@ -465,6 +470,7 @@ export function prepareVariables(businessArea, values, ticket) {
     individual: values.selectedIndividual?.id,
     priority: values.priority,
     urgency: values.urgency,
+    partner: values.partner,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,
