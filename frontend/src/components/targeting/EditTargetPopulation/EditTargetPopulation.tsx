@@ -149,7 +149,6 @@ export function EditTargetPopulation({
       onSubmit={handleSubmit}
     >
       {({ values, submitForm }) => {
-        console.log('values', values);
         return (
           <Form>
             <EditTargetPopulationHeader

@@ -76,6 +76,7 @@ def target_population_rebuild_stats(target_population_id):
     ):
         target_population = TargetPopulation.objects.get(pk=target_population_id)
         target_population.refresh_stats()
+        target_population.save()
 
 
 @app.task(queue="priority")
@@ -91,7 +92,6 @@ def target_population_full_rebuild(target_population_id):
                 household_queryset = Household.objects.filter(business_area=target_population.business_area)
                 household_queryset = household_queryset.filter(target_population.targeting_criteria.get_query())
                 target_population.households.set(household_queryset)
-                target_population.refresh_from_db()
                 target_population.refresh_stats()
                 target_population.build_status = TargetPopulation.BUILD_STATUS_OK
                 target_population.built_at = timezone.now()

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Box, Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
-import { TargetPopulationNode } from '../../../__generated__/graphql';
+import {TargetPopulationNode, TargetPopulationQuery} from '../../../__generated__/graphql';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
@@ -19,7 +19,7 @@ const IconContainer = styled.span`
 `;
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
   setEditState: Function;
   canDuplicate: boolean;
   canRemove: boolean;

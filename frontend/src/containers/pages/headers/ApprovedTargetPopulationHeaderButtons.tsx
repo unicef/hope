@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
-  TargetPopulationNode,
+  TargetPopulationNode, TargetPopulationQuery,
   useUnlockTpMutation,
 } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
@@ -24,7 +24,7 @@ const IconContainer = styled.span`
 `;
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
   canUnlock: boolean;
   canDuplicate: boolean;
   canSend: boolean;

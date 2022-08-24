@@ -6,6 +6,7 @@ from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
@@ -27,17 +28,19 @@ class TargetValidator(BaseValidator):
 class ApproveTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
-        if target_population.status != "DRAFT":
-            logger.error("Only Target Population with status DRAFT can be approved")
-            raise ValidationError("Only Target Population with status DRAFT can be approved")
+        if target_population.status != TargetPopulation.STATUS_OPEN:
+            message = f"Only Target Population with status {TargetPopulation.STATUS_OPEN} can be approved"
+            logger.error(message)
+            raise ValidationError(message)
 
-
+#TODO Fix messages and classes names
 class UnapproveTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
-        if target_population.status != "LOCKED":
-            logger.error("Only Target Population with status APPROVED can be unapproved")
-            raise ValidationError("Only Target Population with status APPROVED can be unapproved")
+        if not target_population.is_locked():
+            message = f"Only locked Target Population with status can be unlocked"
+            logger.error(message)
+            raise ValidationError(message)
 
 
 class FinalizeTargetPopulationValidator:
@@ -46,7 +49,7 @@ class FinalizeTargetPopulationValidator:
         if not target_population.is_locked():
             logger.error("Only Target Population with status APPROVED can be finalized")
             raise ValidationError("Only Target Population with status APPROVED can be finalized")
-        if target_population.program.status != "ACTIVE":
+        if target_population.program.status != Program.ACTIVE:
             logger.error("Only Target Population assigned to program with status ACTIVE can be send")
             raise ValidationError("Only Target Population assigned to program with status ACTIVE can be send")
 
