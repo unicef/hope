@@ -59,6 +59,12 @@ export const GrievancesDetails = ({
         )[0].name
     : '-';
 
+  const showSubCategory =
+    ticket.category === +GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
+  const showIssueType =
+    ticket.category === +GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    ticket.category === +GRIEVANCE_CATEGORIES.DATA_CHANGE;
+
   return (
     <Grid item xs={12}>
       <ContainerColumnWithBorder>
@@ -112,15 +118,14 @@ export const GrievancesDetails = ({
                 value: <span>{categoryChoices[ticket.category]}</span>,
                 size: 3,
               },
-              ticket.category === +GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT && {
+              showSubCategory && {
                 label: t('SUB CATEGORY'),
                 value: (
                   <span>{subCategoryChoices[ticket.subCategory] || '-'}</span>
                 ),
                 size: 3,
               },
-              (ticket.category === +GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-                ticket.category === +GRIEVANCE_CATEGORIES.DATA_CHANGE) && {
+              showIssueType && {
                 label: t('Issue Type'),
                 value: <span>{issueType}</span>,
                 size: 3,
@@ -165,7 +170,7 @@ export const GrievancesDetails = ({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: showSubCategory || showIssueType ? 3 : 6,
               },
               {
                 label: t('PAYMENT ID'),
@@ -187,7 +192,12 @@ export const GrievancesDetails = ({
               {
                 label: t('CONSENT'),
                 value: ticket.consent ? 'Yes' : 'No',
-                size: 9,
+                size: 3,
+              },
+              {
+                label: t('PARTNER'),
+                value: ticket.partner?.name,
+                size: 6,
               },
               {
                 label: t('CREATED BY'),

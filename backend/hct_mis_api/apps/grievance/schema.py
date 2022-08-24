@@ -1,16 +1,9 @@
-import logging
 import datetime
+import logging
 
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.db.models import (
-    Case,
-    DateField,
-    Q,
-    When,
-    F,
-)
-
+from django.db.models import Case, DateField, F, Q, When
 from django.utils import timezone
 
 import graphene
@@ -38,6 +31,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
+from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.filters import (
     ExistingGrievanceTicketFilter,
     GrievanceTicketFilter,
@@ -60,7 +54,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
+from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
@@ -88,6 +82,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     priority = graphene.Int()
     urgency = graphene.Int()
     total_days = graphene.String()
+    partner = graphene.Field(PartnerType)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -158,6 +153,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_urgency(grievance_ticket: GrievanceTicket, info):
         return grievance_ticket.urgency
+
+    @staticmethod
+    def resolve_partner(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.partner
 
 
 class TicketNoteNode(DjangoObjectType):
@@ -457,26 +456,6 @@ class Query(graphene.ObjectType):
     grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
-        if settings.ELASTICSEARCH_GRIEVANCE_TURN_ON:
-            grievance_es_query_dict = create_es_query(kwargs)
-            grievance_ids = execute_es_query(grievance_es_query_dict)
-
-            return (
-                GrievanceTicket.objects
-                .filter(id__in=grievance_ids)
-                .select_related("assigned_to", "created_by")
-                .annotate(
-                    total=Case(
-                        When(
-                            status=GrievanceTicket.STATUS_CLOSED,
-                            then=F("updated_at") - F("created_at"),
-                        ),
-                        default=timezone.now() - F("created_at"),
-                        output_field=DateField(),
-                    )
-                )
-                .annotate(total_days=F("total__day"))
-            )
         return (
             GrievanceTicket.objects
             .filter(ignored=False).select_related("assigned_to", "created_by")
@@ -527,10 +506,10 @@ class Query(graphene.ObjectType):
         ]
 
     def resolve_grievance_ticket_priority_choices(self, info, **kwargs):
-        return to_choice_object(GrievanceTicket.PRIORITY_CHOICES)
+        return to_choice_object(PRIORITY_CHOICES)
 
     def resolve_grievance_ticket_urgency_choices(self, info, **kwargs):
-        return to_choice_object(GrievanceTicket.URGENCY_CHOICES)
+        return to_choice_object(URGENCY_CHOICES)
 
     def resolve_all_add_individuals_fields_attributes(self, info, **kwargs):
         fields = FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE).associated_with_individual()
