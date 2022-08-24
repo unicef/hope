@@ -1,5 +1,6 @@
 import logging
 
+from hct_mis_api.apps.core.models import TicketPriority
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
 logger = logging.getLogger(__name__)
@@ -41,12 +42,21 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
     admin_level_2 = household.admin2 if household else None
     area = household.village if household else ""
 
+    priority = TicketPriority.priority_by_business_area_and_ticket_type(
+        business_area.id, TicketPriority.NEEDS_ADJUDICATION
+    )
+    urgency = TicketPriority.urgency_by_business_area_and_ticket_type(
+        business_area.id, TicketPriority.NEEDS_ADJUDICATION
+    )
+
     ticket = GrievanceTicket.objects.create(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         business_area=business_area,
         admin2=admin_level_2,
         area=area,
         registration_data_import=registration_data_import,
+        priority=priority,
+        urgency=urgency,
     )
     golden_records = main_individual.get_deduplication_golden_record()
     extra_data = {

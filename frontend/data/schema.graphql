@@ -460,7 +460,7 @@ input CreateGrievanceTicketExtrasInput {
 
 input CreateGrievanceTicketInput {
   description: String!
-  assignedTo: ID!
+  assignedTo: ID
   category: Int!
   subCategory: Int
   issueType: Int
@@ -473,6 +473,7 @@ input CreateGrievanceTicketInput {
   extras: CreateGrievanceTicketExtrasInput
   priority: Int
   urgency: Int
+  partner: Int
 }
 
 type CreateGrievanceTicketMutation {
@@ -794,6 +795,7 @@ type GrievanceTicketNode implements Node {
   householdUnicefId: String
   priority: Int
   urgency: Int
+  partner: PartnerType
   linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -2217,6 +2219,7 @@ type PartnerType {
   name: String!
   isUn: Boolean!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
 }
 
 type PaymentDetailsApproveMutation {
@@ -3606,6 +3609,7 @@ input UpdateGrievanceTicketInput {
   extras: UpdateGrievanceTicketExtrasInput
   priority: Int
   urgency: Int
+  partner: Int
 }
 
 type UpdateGrievanceTicketMutation {

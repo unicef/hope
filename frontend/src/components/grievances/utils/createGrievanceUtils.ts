@@ -93,14 +93,14 @@ function prepareSesitiveVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        issueType: values.issueType,
+        issueType: parseInt(values.issueType, 10),
+        partner: parseInt(values.partner, 10),
         linkedTickets: values.selectedRelatedTickets,
         extras: {
           category: {
             sensitiveGrievanceTicketExtras: {
               household: values.selectedHousehold?.id,
               individual: values.selectedIndividual?.id,
-              paymentRecord: values.selectedPaymentRecords,
             },
           },
         },
@@ -312,6 +312,7 @@ export function prepareVariables(businessArea, values) {
     area: values.area,
     priority: values.priority,
     urgency: values.urgency,
+    partner: values.partner,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,

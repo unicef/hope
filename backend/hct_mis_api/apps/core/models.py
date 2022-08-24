@@ -1,9 +1,13 @@
+from functools import lru_cache
+
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator
 from django.db.models import JSONField
 from django.utils.translation import gettext_lazy as _
 
+from constance import config
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
@@ -11,6 +15,7 @@ from model_utils.models import SoftDeletableModel
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
+from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
@@ -326,3 +331,57 @@ class CustomModelEntry(ModelEntry):
 
 class CustomDatabaseScheduler(DatabaseScheduler):
     Entry = CustomModelEntry
+
+
+class TicketPriority(models.Model):
+    NEEDS_ADJUDICATION = 1
+    PAYMENT_VERIFICATION = 2
+    SYSTEM_FLAGGING = 3
+    TICKET_TYPE_CHOICES = (
+        (NEEDS_ADJUDICATION, _("Needs Adjudication")),
+        (PAYMENT_VERIFICATION, _("Payment Verification")),
+        (SYSTEM_FLAGGING, _("System Flagging")),
+    )
+
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, related_name="tickets_priority")
+    priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default="")
+    urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default="")
+    ticket_type = models.IntegerField(verbose_name=_("Ticket type"), choices=TICKET_TYPE_CHOICES, default="")
+
+    class Meta:
+        unique_together = (
+            "business_area",
+            "ticket_type",
+        )
+
+    @classmethod
+    @lru_cache()
+    def priority_by_business_area_and_ticket_type(cls, business_area_id, ticket_type):
+        try:
+            return cls.objects.get(business_area__pk=business_area_id, ticket_type=ticket_type).priority
+        except ObjectDoesNotExist:
+            return cls._get_default_priority_by_ticket_type(ticket_type)
+
+    @classmethod
+    @lru_cache()
+    def urgency_by_business_area_and_ticket_type(cls, business_area_id, ticket_type):
+        try:
+            return cls.objects.get(business_area__pk=business_area_id, ticket_type=ticket_type).urgency
+        except ObjectDoesNotExist:
+            return cls._get_default_urgency_by_ticket_type(ticket_type)
+
+    @classmethod
+    def _get_default_priority_by_ticket_type(cls, ticket_type):
+        return {
+            cls.NEEDS_ADJUDICATION: config.NEEDS_ADJUDICATION_PRIORITY,
+            cls.PAYMENT_VERIFICATION: config.PAYMENT_VERIFICATION_PRIORITY,
+            cls.SYSTEM_FLAGGING: config.SYSTEM_FLAGGING_PRIORITY,
+        }[ticket_type]
+
+    @classmethod
+    def _get_default_urgency_by_ticket_type(cls, ticket_type):
+        return {
+            cls.NEEDS_ADJUDICATION: config.NEEDS_ADJUDICATION_URGENCY,
+            cls.PAYMENT_VERIFICATION: config.PAYMENT_VERIFICATION_URGENCY,
+            cls.SYSTEM_FLAGGING: config.SYSTEM_FLAGGING_URGENCY,
+        }[ticket_type]

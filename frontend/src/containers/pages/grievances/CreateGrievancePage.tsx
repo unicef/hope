@@ -42,6 +42,7 @@ import {
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
+  useUserChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
@@ -62,9 +63,7 @@ import { LabelizedField } from '../../../components/core/LabelizedField';
 import { OverviewContainer } from '../../../components/core/OverviewContainer';
 import { ContentLink } from '../../../components/core/ContentLink';
 import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
-import {
-  LookUpHouseholdIndividualSelection
-} from "../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection";
+import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 
 const steps = [
   'Category Selection',
@@ -134,6 +133,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     priority: 3,
     urgency: 3,
     subCategory: null,
+    partner: null,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
@@ -154,6 +154,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
     name: priorityChoicesData[i]?.name,
     value: i + 1,
   }));
+
+  const { data: userChoices } = useUserChoiceDataQuery();
 
   const mappedUrgencies = Array.from(Array(3).keys()).map((i) => ({
     name: urgencyChoicesData[i]?.name,
@@ -539,6 +541,16 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 variant='outlined'
                                 label={t('Urgency')}
                                 choices={mappedUrgencies}
+                                component={FormikSelectField}
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Field
+                                name='partner'
+                                fullWidth
+                                variant='outlined'
+                                label={t('Partner')}
+                                choices={userChoices.userPartnerChoices}
                                 component={FormikSelectField}
                               />
                             </Grid>
