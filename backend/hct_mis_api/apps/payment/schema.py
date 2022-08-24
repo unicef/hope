@@ -351,6 +351,18 @@ class VolumeByDeliveryMechanismNode(graphene.ObjectType):
         connection_class = ExtendedConnection
 
 
+class FspChoices(graphene.ObjectType):
+    class FspChoice(graphene.ObjectType):
+        id = graphene.String()
+        name = graphene.String()
+
+        def resolve_id(self, info):
+            return encode_id_base64(self["id"], "FinancialServiceProvider")
+
+    delivery_mechanism = graphene.String()
+    fsps = graphene.List(FspChoice)
+
+
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
     approval_number_required = graphene.Int()
@@ -366,6 +378,27 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
+    available_fsps_for_delivery_mechanisms = graphene.List(
+        FspChoices, delivery_mechanisms=graphene.List(graphene.String)
+    )
+
+    def resolve_available_fsps_for_delivery_mechanisms(self, info, delivery_mechanisms):
+        def get_fsps_for_delivery_mechanism(mechanism):
+            fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
+
+            def can_accept_volume(fsp):
+                return fsp.can_accept_volume(
+                    Payment.objects.filter(payment_plan=self, financial_service_provider=fsp).aggregate(
+                        money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
+                    )["money"]
+                )
+
+            return [{"id": fsp.id, "name": fsp.name} for fsp in fsps if can_accept_volume(fsp)] if fsps else []
+
+        return [
+            {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
+            for mechanism in delivery_mechanisms  # keeps the same order as the input
+        ]
 
     class Meta:
         model = PaymentPlan
@@ -399,18 +432,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_volume_by_delivery_mechanism(self, info):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
-
-
-class FspChoices(graphene.ObjectType):
-    class FspChoice(graphene.ObjectType):
-        id = graphene.String()
-        name = graphene.String()
-
-        def resolve_id(self, info):
-            return encode_id_base64(self["id"], "FinancialServiceProvider")
-
-    delivery_mechanism = graphene.String()
-    fsps = graphene.List(FspChoice)
 
 
 class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -537,19 +558,6 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
     all_delivery_mechanisms = graphene.List(ChoiceObject)
-    available_fsps_for_delivery_mechanisms = graphene.List(
-        FspChoices, delivery_mechanisms=graphene.List(graphene.String)
-    )
-
-    def resolve_available_fsps_for_delivery_mechanisms(self, info, delivery_mechanisms):
-        def get_fsps_for_delivery_mechanism(mechanism):
-            fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
-            return [{"id": fsp.id, "name": fsp.name} for fsp in fsps] if fsps else []
-
-        return [
-            {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
-            for mechanism in delivery_mechanisms  # keeps the same order as the input
-        ]
 
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (

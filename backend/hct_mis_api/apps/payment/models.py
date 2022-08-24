@@ -502,7 +502,8 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.00"))],
         null=True,
-        help_text="The maximum amount of money that can be distributed or unlimited if 0",
+        blank=True,
+        help_text="The maximum amount of money that can be distributed or unlimited if null",
         db_index=True,
     )
     communication_channel = models.CharField(max_length=6, choices=COMMUNICATION_CHANNEL_CHOICES, db_index=True)
@@ -522,6 +523,14 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
 
     def __str__(self):
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
+
+    def can_accept_volume(self, volume):
+        if self.distribution_limit is None:
+            return True
+        used_volume = Payment.objects.filter(financial_service_provider=self).aggregate(
+            money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
+        )["money"]
+        return self.distribution_limit - used_volume > volume
 
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
