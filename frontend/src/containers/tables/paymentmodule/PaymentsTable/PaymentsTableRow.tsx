@@ -76,6 +76,7 @@ export const PaymentsTableRow = ({
             message={t(
               'This household is also included in other Payment Plans. Click this icon to view details.',
             )}
+            confirmed={payment.paymentPlanHardConflicted}
           />
         </TableCell>
         <TableCell align='left'>{payment.unicefId}</TableCell>

@@ -1,11 +1,13 @@
 import json
+from decimal import Decimal
 
-from django.db.models import Case, CharField, Count, Q, Sum, Value, When
-from django.shortcuts import get_object_or_404
+from django.db.models import Q, Sum
+from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -26,6 +28,7 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     decode_id_string,
     to_choice_object,
+    encode_id_base64,
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
@@ -55,6 +58,9 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     PaymentPlan,
     Payment,
+    DeliveryMechanismPerPaymentPlan,
+    PaymentPlan,
+    GenericPayment,
     PaymentChannel,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
@@ -253,7 +259,7 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
             approval=self.approvals.filter(type=Approval.APPROVAL),
             authorization=self.approvals.filter(type=Approval.AUTHORIZATION),
             finance_review=self.approvals.filter(type=Approval.FINANCE_REVIEW),
-            reject=self.approvals.filter(type=Approval.REJECT)
+            reject=self.approvals.filter(type=Approval.REJECT),
         )
         return resp
 
@@ -290,6 +296,58 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         return [json.loads(conflict) for conflict in conflicts_data]
 
 
+class DeliveryMechanismNode(DjangoObjectType):
+    name = graphene.String()
+    order = graphene.Int()
+    fsp = graphene.Field(FinancialServiceProviderNode)
+
+    def resolve_name(self, info):
+        return self.delivery_mechanism
+
+    def resolve_order(self, info):
+        return self.delivery_mechanism_order
+
+    def resolve_fsp(self, info):
+        return self.financial_service_provider
+
+    class Meta:
+        model = DeliveryMechanismPerPaymentPlan
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+def _calculate_volume(delivery_mechanism_per_payment_plan, field):
+    if not delivery_mechanism_per_payment_plan.financial_service_provider:
+        raise GraphQLError(
+            f"Financial Service Provider is not set for {delivery_mechanism_per_payment_plan.delivery_mechanism}"
+        )
+    payments = delivery_mechanism_per_payment_plan.payment_plan.all_active_payments.filter(
+        financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
+        delivery_type=delivery_mechanism_per_payment_plan.delivery_mechanism,
+    )
+    return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
+
+
+class VolumeByDeliveryMechanismNode(graphene.ObjectType):
+    delivery_mechanism = graphene.Field(DeliveryMechanismNode)
+    volume = graphene.Float()
+    volume_usd = graphene.Float()
+
+    def resolve_delivery_mechanism(self, info):
+        return self  # DeliveryMechanismNode uses the same model
+
+    def resolve_volume(self, info):  # non-usd
+        return _calculate_volume(self, "entitlement_quantity")
+
+    def resolve_volume_usd(self, info):
+        return _calculate_volume(self, "entitlement_quantity_usd")
+
+    class Meta:
+        model = DeliveryMechanismPerPaymentPlan
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
     approval_number_required = graphene.Int()
@@ -304,6 +362,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     has_payment_list_per_fsp_xlsx_file = graphene.Boolean()
     imported_xlsx_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
+    delivery_mechanisms = graphene.List(DeliveryMechanismNode)
+    volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
 
     class Meta:
         model = PaymentPlan
@@ -325,6 +385,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_currency_name(self, info):
         return self.get_currency_display()
 
+    def resolve_delivery_mechanisms(self, info):
+        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
+
     def resolve_has_payment_list_xlsx_file(self, info):
         return self.has_payment_list_xlsx_file
 
@@ -334,6 +397,21 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_imported_xlsx_file_name(self, info):
         import_file_obj = self.get_payment_list_import_xlsx_file_obj()
         return import_file_obj.file.name if import_file_obj else ""
+
+    def resolve_volume_by_delivery_mechanism(self, info):
+        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
+
+
+class FspChoices(graphene.ObjectType):
+    class FspChoice(graphene.ObjectType):
+        id = graphene.String()
+        name = graphene.String()
+
+        def resolve_id(self, info):
+            return encode_id_base64(self["id"], "FinancialServiceProvider")
+
+    delivery_mechanism = graphene.String()
+    fsps = graphene.List(FspChoice)
 
 
 class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -459,6 +537,20 @@ class Query(graphene.ObjectType):
         filterset_class=PaymentFilter,
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
+    all_delivery_mechanisms = graphene.List(ChoiceObject)
+    available_fsps_for_delivery_mechanisms = graphene.List(
+        FspChoices, delivery_mechanisms=graphene.List(graphene.String)
+    )
+
+    def resolve_available_fsps_for_delivery_mechanisms(self, info, delivery_mechanisms):
+        def get_fsps_for_delivery_mechanism(mechanism):
+            fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
+            return [{"id": fsp.id, "name": fsp.name} for fsp in fsps] if fsps else []
+
+        return [
+            {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
+            for mechanism in delivery_mechanisms  # keeps the same order as the input
+        ]
 
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (
@@ -523,6 +615,9 @@ class Query(graphene.ObjectType):
 
     def resolve_payment_verification_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
+
+    def resolve_all_delivery_mechanisms(self, info, **kwargs):
+        return to_choice_object(GenericPayment.DELIVERY_TYPE_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):

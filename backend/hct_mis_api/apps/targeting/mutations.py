@@ -282,14 +282,7 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
         target_population.status = TargetPopulation.STATUS_LOCKED
         target_population.changed_by = user
         target_population.change_date = timezone.now()
-        household_queryset = Household.objects
-        households = (
-            household_queryset.filter(business_area=target_population.business_area)
-            .filter(target_population.candidate_list_targeting_criteria.get_query())
-            .distinct()
-        )
-        HouseholdSelection.objects.filter(target_population=target_population).delete()
-        target_population.households.set(households)
+        target_population.apply_criteria_query()
         target_population.save()
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
@@ -500,9 +493,8 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
         encoded_steficon_rule_id = kwargs.get("steficon_rule_id")
         if encoded_steficon_rule_id is not None:
             steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)
-            if (
-                target_population.allowed_steficon_rule is not None
-                and steficon_rule_id != str(target_population.allowed_steficon_rule.id)
+            if target_population.allowed_steficon_rule is not None and steficon_rule_id != str(
+                target_population.allowed_steficon_rule.id
             ):
                 logger.error(
                     "Another formula was applied to a previous target population for this programme. You can only apply the same formula"
