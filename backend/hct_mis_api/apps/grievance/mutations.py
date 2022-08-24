@@ -536,9 +536,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
 
-        admin = input.pop("admin", None)
-        if admin:
-            grievance_ticket.admin2 = get_object_or_404(Area, p_code=admin)
+        grievance_ticket.partner = get_partner(input.pop("partner", None))
         grievance_ticket.user_modified = timezone.now()
         grievance_ticket.save()
 
