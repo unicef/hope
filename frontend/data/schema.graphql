@@ -2554,10 +2554,12 @@ type PaymentChannelNodeEdge {
 
 type PaymentConflictDataNode {
   paymentPlanId: String
+  paymentPlanUnicefId: String
   paymentPlanStartDate: String
   paymentPlanEndDate: String
   paymentPlanStatus: String
   paymentId: String
+  paymentUnicefId: String
 }
 
 enum PaymentDeliveryType {
@@ -2834,6 +2836,7 @@ type PaymentPlanNode implements Node {
   importedXlsxFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
+  availableFspsForDeliveryMechanisms(deliveryMechanisms: [String]): [FspChoices]
 }
 
 type PaymentPlanNodeConnection {
@@ -3157,7 +3160,6 @@ type Query {
   payment(id: ID!): PaymentNode
   allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, orderBy: String): PaymentNodeConnection
   allDeliveryMechanisms: [ChoiceObject]
-  availableFspsForDeliveryMechanisms(deliveryMechanisms: [String]): [FspChoices]
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String): [FieldAttributeNode]

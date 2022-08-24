@@ -16,7 +16,7 @@ export const EditSetUpFspPage = (): React.ReactElement => {
     data: paymentPlanData,
     loading: paymentPlanLoading,
   } = usePaymentPlanQuery({
-    variables: { id },
+    variables: { paymentPlanId: id, deliveryMechanisms: [] },
     fetchPolicy: 'cache-and-network',
   });
 

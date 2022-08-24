@@ -11,8 +11,8 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   useAllDeliveryMechanismsQuery,
   useAssignFspToDeliveryMechMutation,
-  useAvailableFspsForDeliveryMechanismsQuery,
   useChooseDeliveryMechForPaymentPlanMutation,
+  usePaymentPlanQuery,
 } from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../core/LoadingComponent';
@@ -46,8 +46,11 @@ export const SetUpFspCore = ({
     fetchPolicy: 'network-only',
   });
 
-  const { data: fspsData } = useAvailableFspsForDeliveryMechanismsQuery({
-    variables: { deliveryMechanisms: deliveryMechanismsForQuery },
+  const { data: paymentPlanData } = usePaymentPlanQuery({
+    variables: {
+      paymentPlanId: id,
+      deliveryMechanisms: deliveryMechanismsForQuery,
+    },
     fetchPolicy: 'network-only',
     skip: !deliveryMechanismsForQuery.length,
   });
@@ -174,7 +177,8 @@ export const SetUpFspCore = ({
                       <>
                         {values.deliveryMechanisms.map((item, index) => {
                           const mapping =
-                            fspsData?.availableFspsForDeliveryMechanisms[index];
+                            paymentPlanData?.paymentPlan
+                              ?.availableFspsForDeliveryMechanisms[index];
                           const mappedFsps = mapping?.fsps.map((el) => ({
                             name: el.name,
                             value: el.id,

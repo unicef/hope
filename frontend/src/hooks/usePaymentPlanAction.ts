@@ -30,7 +30,7 @@ export const usePaymentPlanAction = (
         refetchQueries: () => [
           {
             query: PaymentPlanDocument,
-            variables: { id: paymentPlanId },
+            variables: { paymentPlanId, deliveryMechanisms: [] },
           },
         ],
       });

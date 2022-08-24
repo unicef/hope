@@ -31,7 +31,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
     data: paymentPlanData,
     loading: loadingPaymentPlan,
   } = usePaymentPlanQuery({
-    variables: { id },
+    variables: { paymentPlanId: id, deliveryMechanisms: [] },
     fetchPolicy: 'cache-and-network',
   });
 
