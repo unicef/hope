@@ -184,12 +184,15 @@ query PaymentPlan($id: ID!) {
 
 
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
-    availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
-        deliveryMechanism
-        fsps {
-            id
-            name
+query PaymentPlan($paymentPlanId: ID!, $deliveryMechanisms: [String!]!) {
+    paymentPlan(id: $paymentPlanId) {
+        id
+        availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
+            deliveryMechanism
+            fsps {
+                id
+                name
+            }
         }
     }
 }
@@ -363,10 +366,11 @@ class TestFSPAssignment(APITestCase):
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
             variables={
-                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER]
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
             },
         )
-        available_mechs_data = query_response["data"]["availableFspsForDeliveryMechanisms"]
+        available_mechs_data = query_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
         assert available_mechs_data is not None, query_response
         assert len(available_mechs_data) == 2
         assert available_mechs_data[0]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_TRANSFER
@@ -1054,18 +1058,19 @@ class TestFSPLimit(APITestCase):
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
             variables={
-                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER]
+                "paymentPlanId": self.encoded_payment_plan_id,
+                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
             },
         )
         assert "errors" not in available_fsps_response, available_fsps_response
-        available_fsps = available_fsps_response["data"]["availableFspsForDeliveryMechanisms"]
+        available_fsps = available_fsps_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
         assert len(available_fsps) == 2
         transfer_ids = [fsp["id"] for fsp in available_fsps[0]["fsps"]]
         assert self.encoded_santander_fsp_id in transfer_ids
         assert self.encoded_bank_of_europe_fsp_id in transfer_ids
         voucher_ids = [fsp["id"] for fsp in available_fsps[1]["fsps"]]
-        assert self.encoded_santander_fsp_id not in voucher_ids
         assert self.encoded_bank_of_america_fsp_id in voucher_ids
+        assert self.encoded_bank_of_europe_fsp_id in voucher_ids
 
         assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
@@ -1132,14 +1137,17 @@ class TestFSPLimit(APITestCase):
         new_available_fsps_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
-            variables={"deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_VOUCHER]},
+            variables={
+                "paymentPlanId": new_encoded_payment_plan_id,
+                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_VOUCHER],
+            },
         )
         assert "errors" not in new_available_fsps_response, new_available_fsps_response
-        new_available_fsps = new_available_fsps_response["data"]["availableFspsForDeliveryMechanisms"]
+        new_available_fsps = new_available_fsps_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
         assert len(new_available_fsps) == 1
         new_voucher_ids = [fsp["id"] for fsp in new_available_fsps[0]["fsps"]]
-        assert self.encoded_santander_fsp_id not in new_voucher_ids
-        assert self.encoded_bank_of_america_fsp_id not in new_voucher_ids  # NOT!
+        assert self.encoded_bank_of_america_fsp_id not in new_voucher_ids  # NOT! due to limit
+        assert self.encoded_bank_of_europe_fsp_id in voucher_ids  # limit not exceeded
 
         new_assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
@@ -1156,7 +1164,8 @@ class TestFSPLimit(APITestCase):
             },
         )
         assert "errors" in new_assign_fsps_mutation_response
-        # TODO: should see limit exceeded message
+        error_msg = new_assign_fsps_mutation_response["errors"][0]["message"]
+        assert "cannot accept volume" in error_msg, error_msg
 
 
 # scenarios TODO:

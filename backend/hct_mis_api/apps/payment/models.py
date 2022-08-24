@@ -524,11 +524,12 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
 
     def can_accept_volume(self, volume):
-        print("can_accept_volume", volume, self.distribution_limit)
         if self.distribution_limit is None:
             return True
-        used_volume = 0  # TODO
-        return self.distribution_limit - used_volume >= volume
+        used_volume = Payment.objects.filter(financial_service_provider=self).aggregate(
+            money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
+        )["money"]
+        return self.distribution_limit - used_volume > volume
 
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
