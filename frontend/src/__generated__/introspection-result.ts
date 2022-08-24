@@ -105,6 +105,9 @@
             "name": "ApprovalProcessNode"
           },
           {
+            "name": "VolumeByDeliveryMechanismNode"
+          },
+          {
             "name": "GrievanceTicketNode"
           },
           {
