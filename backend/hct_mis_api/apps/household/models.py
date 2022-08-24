@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
@@ -20,18 +21,17 @@ from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
-from django.contrib.postgres.search import SearchVectorField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
 )
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 BLANK = ""
 IDP = "IDP"
@@ -445,10 +445,19 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     def status(self):
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self):
+    def withdraw(self, save=True):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
-        self.save()
+
+        if save:
+            self.save()
+
+    def unwithdraw(self, save=True):
+        self.withdrawn = False
+        self.withdrawn_date = None
+
+        if save:
+            self.save()
 
     def set_sys_field(self, key, value):
         if "sys" not in self.user_fields:
@@ -570,6 +579,12 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
 
     def __str__(self):
         return f"{self.type} - {self.document_number}"
+
+    def mark_as_need_investigation(self):
+        self.status = self.STATUS_NEED_INVESTIGATION
+
+    def mark_as_valid(self):
+        self.status = self.STATUS_VALID
 
 
 class Agency(models.Model):
@@ -822,10 +837,19 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def sanction_list_last_check(self):
         return cache.get("sanction_list_last_check")
 
-    def withdraw(self):
+    def withdraw(self, save=True):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
-        self.save()
+
+        if save:
+            self.save()
+
+    def unwithdraw(self, save=True):
+        self.withdrawn = False
+        self.withdrawn_date = None
+
+        if save:
+            self.save()
 
     def mark_as_duplicate(self, original_individual=None):
         if original_individual is not None:
