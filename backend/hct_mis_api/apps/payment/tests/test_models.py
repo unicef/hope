@@ -149,6 +149,9 @@ class TestPaymentModel(TestCase):
         p3 = PaymentFactory(payment_plan=pp3, household=p1.household, excluded=False)
         p4 = PaymentFactory(payment_plan=pp4, household=p1.household, excluded=False)
 
+        for _ in [pp1, pp2, pp3, pp4, p1, p2, p3, p4]:
+            _.refresh_from_db()  # update unicef_id from trigger
+
         p1_data = Payment.objects.filter(id=p1.id).values()[0]
         self.assertEqual(p1_data["payment_plan_hard_conflicted"], True)
         self.assertEqual(p1_data["payment_plan_soft_conflicted"], True)
@@ -160,8 +163,10 @@ class TestPaymentModel(TestCase):
                 "payment_id": str(p2.id),
                 "payment_plan_id": str(pp2.id),
                 "payment_plan_status": str(pp2.status),
-                "payment_plan_start_date": pp2.start_date.strftime("%d-%m-%Y"),
-                "payment_plan_end_date": pp2.end_date.strftime("%d-%m-%Y"),
+                "payment_plan_start_date": pp2.start_date.strftime("%m-%d-%Y"),
+                "payment_plan_end_date": pp2.end_date.strftime("%m-%d-%Y"),
+                "payment_plan_unicef_id": str(pp2.unicef_id),
+                "payment_unicef_id": str(p2.unicef_id),
             },
         )
         self.assertEqual(len(p1_data["payment_plan_soft_conflicted_data"]), 2)
@@ -172,22 +177,26 @@ class TestPaymentModel(TestCase):
                     "payment_id": str(p3.id),
                     "payment_plan_id": str(pp3.id),
                     "payment_plan_status": str(pp3.status),
-                    "payment_plan_start_date": pp3.start_date.strftime("%d-%m-%Y"),
-                    "payment_plan_end_date": pp3.end_date.strftime("%d-%m-%Y"),
+                    "payment_plan_start_date": pp3.start_date.strftime("%m-%d-%Y"),
+                    "payment_plan_end_date": pp3.end_date.strftime("%m-%d-%Y"),
+                    "payment_plan_unicef_id": str(pp3.unicef_id),
+                    "payment_unicef_id": str(p3.unicef_id),
                 },
                 {
                     "payment_id": str(p4.id),
                     "payment_plan_id": str(pp4.id),
                     "payment_plan_status": str(pp4.status),
-                    "payment_plan_start_date": pp4.start_date.strftime("%d-%m-%Y"),
-                    "payment_plan_end_date": pp4.end_date.strftime("%d-%m-%Y"),
+                    "payment_plan_start_date": pp4.start_date.strftime("%m-%d-%Y"),
+                    "payment_plan_end_date": pp4.end_date.strftime("%m-%d-%Y"),
+                    "payment_plan_unicef_id": str(pp4.unicef_id),
+                    "payment_unicef_id": str(p4.unicef_id),
                 },
             ],
         )
 
     def test_manager_annotations__payment_channels(self):
         pp1 = PaymentPlanFactory()
-        p1 = PaymentFactory(payment_plan=pp1, excluded=False)
+        p1 = PaymentFactory(payment_plan=pp1, excluded=False, assigned_payment_channel=None)
 
         p1_data = Payment.objects.filter(id=p1.id).values()[0]
         self.assertEqual(p1_data["has_defined_payment_channel"], False)
