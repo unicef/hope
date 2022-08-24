@@ -1,54 +1,40 @@
-import { Box, Button } from '@material-ui/core';
-import { Link, useParams } from 'react-router-dom';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 
 interface EditFspHeaderProps {
-  handleSubmit: () => Promise<void>;
   businessArea: string;
   permissions: string[];
 }
 
-export function EditSetUpFspHeader({
-  handleSubmit,
+export const EditSetUpFspHeader = ({
   businessArea,
   permissions,
-}: EditFspHeaderProps): React.ReactElement {
+}: EditFspHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${businessArea}/payment-module/`,
+      to: `/${businessArea}/payment-module/payment-plans/${id}`,
     },
   ];
 
   return (
     <PageHeader
-      title={t('Set up FSP')}
+      title={t('Edit Set up FSP')}
       breadCrumbs={
-        hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_LIST, permissions)
+        hasPermissions(
+          PERMISSIONS.FINANCIAL_SERVICE_PROVIDER_UPDATE,
+          permissions,
+        )
           ? breadCrumbsItems
           : null
       }
-    >
-      <Box display='flex' mt={2} mb={2}>
-        <Box mr={3}>
-          <Button
-            component={Link}
-            to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp`}
-          >
-            {t('Cancel')}
-          </Button>
-        </Box>
-        <Button variant='contained' color='primary' onClick={handleSubmit}>
-          {t('Save')}
-        </Button>
-      </Box>
-    </PageHeader>
+    />
   );
-}
+};
