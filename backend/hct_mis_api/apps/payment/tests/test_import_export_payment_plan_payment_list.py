@@ -100,7 +100,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_invalid_file)
         wb = service.open_workbook()
         # override imported sheet payment id
-        wb.active["A3"].value = str(self.payment_plan.all_active_payments[1].pk)
+        wb.active["A3"].value = str(self.payment_plan.all_active_payments[1].unicef_id)
 
         service.validate()
         self.assertEqual(service.errors, error_msg)
@@ -108,10 +108,10 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
     def test_import_valid_file(self):
         all_active_payments = self.payment_plan.payments.exclude(excluded=True)
         # override imported payment id
-        payment_id_1 = str(all_active_payments[0].pk)
-        payment_id_2 = str(all_active_payments[1].pk)
-        payment_1 = Payment.objects.get(pk=payment_id_1)
-        payment_2 = Payment.objects.get(pk=payment_id_2)
+        payment_id_1 = str(all_active_payments[0].unicef_id)
+        payment_id_2 = str(all_active_payments[1].unicef_id)
+        payment_1 = Payment.objects.get(unicef_id=payment_id_1)
+        payment_2 = Payment.objects.get(unicef_id=payment_id_2)
 
         payment_2.assigned_payment_channel = None
         payment_2.save()
@@ -143,7 +143,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
         wb = export_service.generate_workbook()
 
-        self.assertEqual(wb.active["A2"].value, str(self.payment_plan.all_active_payments[0].pk))
+        self.assertEqual(wb.active["A2"].value, str(self.payment_plan.all_active_payments[0].unicef_id))
         self.assertEqual(wb.active["I2"].value, self.payment_plan.all_active_payments[0].entitlement_quantity)
         self.assertEqual(wb.active["J2"].value, self.payment_plan.all_active_payments[0].entitlement_quantity_usd)
         self.assertEqual(
