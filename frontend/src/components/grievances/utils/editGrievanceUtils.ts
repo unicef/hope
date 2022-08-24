@@ -32,6 +32,8 @@ interface EditValuesTypes {
   householdDataUpdateFields?;
   subCategory?;
   partner?;
+  comments?;
+  programme?;
 }
 
 function prepareInitialValueAddIndividual(
@@ -185,7 +187,9 @@ export function prepareInitialValues(
   let initialValues: EditValuesTypes = {
     priority: ticket.priority,
     urgency: ticket.urgency,
-    partner: ticket.partner,
+    partner: ticket.partner?.id,
+    comments: ticket.comments,
+    programme: ticket.programme?.id,
     description: ticket.description || '',
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
@@ -471,6 +475,8 @@ export function prepareVariables(businessArea, values, ticket) {
     priority: values.priority,
     urgency: values.urgency,
     partner: values.partner,
+    comments: values.comments,
+    programme: values.programme,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,

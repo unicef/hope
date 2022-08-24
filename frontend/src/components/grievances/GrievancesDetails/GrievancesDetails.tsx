@@ -190,6 +190,11 @@ export const GrievancesDetails = ({
                 size: 3,
               },
               {
+                label: t('Programme'),
+                value: ticket.programme?.name,
+                size: 3,
+              },
+              {
                 label: t('CONSENT'),
                 value: ticket.consent ? 'Yes' : 'No',
                 size: 3,
@@ -197,7 +202,7 @@ export const GrievancesDetails = ({
               {
                 label: t('PARTNER'),
                 value: ticket.partner?.name,
-                size: 6,
+                size: 3,
               },
               {
                 label: t('CREATED BY'),
@@ -232,7 +237,12 @@ export const GrievancesDetails = ({
               {
                 label: t('DESCRIPTION'),
                 value: ticket.description,
-                size: 6,
+                size: 12,
+              },
+              {
+                label: t('Comments'),
+                value: ticket.comments,
+                size: 12,
               },
             ]
               .filter((el) => el)
