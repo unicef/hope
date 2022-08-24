@@ -526,9 +526,14 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
     def can_accept_volume(self, volume):
         if self.distribution_limit is None:
             return True
+        # TODO: get payments from locked payment plans
         used_volume = Payment.objects.filter(financial_service_provider=self).aggregate(
             money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
         )["money"]
+        print(
+            f"{self} | limit ({self.distribution_limit}) - used({used_volume}) > vol({volume})",
+            self.distribution_limit - used_volume > volume,
+        )
         return self.distribution_limit - used_volume > volume
 
 
