@@ -3,14 +3,14 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
-import { PaperContainer } from './PaperContainer';
-import { Results } from './Results';
-import { TargetingCriteria } from './TargetingCriteria';
-import { TargetingHouseholds } from './TargetingHouseholds';
 import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
 } from '../../__generated__/graphql';
+import { PaperContainer } from './PaperContainer';
+import { Results } from './Results';
+import { TargetingCriteria } from './TargetingCriteria';
+import { TargetingHouseholds } from './TargetingHouseholds';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -30,10 +30,6 @@ export function TargetPopulationCore({
   const { t } = useTranslation();
   if (!targetPopulation) return null;
   const { rules } = targetPopulation.targetingCriteria;
-  // let householdsContainer = null;
-  // if(rules.length){
-  //
-  // }
   return (
     <>
       <TargetingCriteria

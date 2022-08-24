@@ -174,6 +174,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         target_population.program = program
         target_population.full_clean()
         target_population.save()
+        transaction.on_commit(lambda: target_population_full_rebuild.delay(target_population.id))
         log_create(TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population)
         return cls(target_population=target_population)
 

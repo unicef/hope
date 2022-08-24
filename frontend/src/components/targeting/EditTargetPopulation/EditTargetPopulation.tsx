@@ -1,12 +1,10 @@
 import { Typography } from '@material-ui/core';
-import { Label } from '@material-ui/icons';
-import { Form, Formik, FieldArray } from 'formik';
+import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import * as Yup from 'yup';
-import { TARGET_POPULATION_QUERY } from '../../../apollo/queries/targeting/TargetPopulation';
-import { TargetPopulationHouseholdTable } from '../../../containers/tables/targeting/TargetPopulationHouseholdTable';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
@@ -17,24 +15,24 @@ import {
 import {
   TargetPopulationDocument,
   useAllProgramsQuery,
-  useGoldenRecordByTargetingCriteriaQuery,
   useUpdateTpMutation,
 } from '../../../__generated__/graphql';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
-import { Results } from '../Results';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { TargetPopulationProgramme } from '../TargetPopulationProgramme';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 
+const Label = styled.p`
+  color: #b1b1b5;
+`;
+
 interface EditTargetPopulationProps {
-  targetPopulationCriterias?;
   cancelEdit?;
   targetPopulation?;
 }
 
 export function EditTargetPopulation({
-  targetPopulationCriterias,
   cancelEdit,
   targetPopulation,
 }: EditTargetPopulationProps): React.ReactElement {
@@ -47,7 +45,6 @@ export function EditTargetPopulation({
     excludedIds: targetPopulation.excludedIds || '',
     exclusionReason: targetPopulation.exclusionReason || '',
   };
-  console.log('initialValues', initialValues);
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
@@ -177,27 +174,14 @@ export function EditTargetPopulation({
               )}
             />
             <Exclusions initialOpen={Boolean(values.excludedIds)} />
-            {values.targetingCriteria.length && selectedProgram(values) ? (
-              <TargetPopulationHouseholdTable
-                variables={{
-                  ...getTargetingCriteriaVariables({
-                    criterias: values.targetingCriteria,
-                  }),
-                  program: selectedProgram(values).id,
-                  excludedIds: values.excludedIds,
-                  businessArea,
-                }}
-                query={useGoldenRecordByTargetingCriteriaQuery}
-                queryObjectName='goldenRecordByTargetingCriteria'
-              />
-            ) : (
-              <PaperContainer>
-                <Typography variant='h6'>
-                  {t('Target Population Entries (Households)')}
-                </Typography>
-                <Label>{t('Add targeting criteria to see results.')}</Label>
-              </PaperContainer>
-            )}
+            <PaperContainer>
+              <Typography variant='h6'>
+                {t('Save to see list of households')}
+              </Typography>
+              <Label>
+                {t('List of household will be available after save.')}
+              </Label>
+            </PaperContainer>
           </Form>
         );
       }}

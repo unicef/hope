@@ -2,12 +2,12 @@ import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import styled from 'styled-components';
+import { Typography } from '@material-ui/core';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { CreateTargetPopulationHeader } from '../../../components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
-import { EmptyTargetingCriteria } from '../../../components/targeting/CreateTargetPopulation/EmptyTargetingCriteria';
 import { Exclusions } from '../../../components/targeting/CreateTargetPopulation/Exclusions';
-import { Results } from '../../../components/targeting/Results';
 import { TargetingCriteria } from '../../../components/targeting/TargetingCriteria';
 import { TargetingCriteriaDisabled } from '../../../components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
 import { TargetPopulationProgramme } from '../../../components/targeting/TargetPopulationProgramme';
@@ -24,7 +24,11 @@ import {
   useAllProgramsForChoicesQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
-import { CreateTable } from '../../tables/targeting/TargetPopulation/Create';
+import { PaperContainer } from '../../../components/targeting/PaperContainer';
+
+const Label = styled.p`
+  color: #b1b1b5;
+`;
 
 export function CreateTargetPopulationPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -40,11 +44,13 @@ export function CreateTargetPopulationPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsForChoicesQuery({
-      variables: { businessArea, status: ['ACTIVE'] },
-      fetchPolicy: 'cache-and-network',
-    });
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsForChoicesQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
+  });
 
   if (loadingPrograms) return <LoadingComponent />;
   if (permissions === null) return null;
@@ -52,7 +58,9 @@ export function CreateTargetPopulationPage(): React.ReactElement {
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string().min(2, t('Too short')).max(255, t('Too long')),
+    name: Yup.string()
+      .min(2, t('Too short'))
+      .max(255, t('Too long')),
     excludedIds: Yup.string().test(
       'testName',
       'ID is not in the correct format',
@@ -139,18 +147,14 @@ export function CreateTargetPopulationPage(): React.ReactElement {
             <TargetingCriteriaDisabled />
           )}
           <Exclusions />
-          {values.criterias.length ? (
-            <CreateTable
-              variables={{
-                ...getTargetingCriteriaVariables(values),
-                excludedIds: values.excludedIds,
-              }}
-              program={values.program}
-              businessArea={businessArea}
-            />
-          ) : (
-            <EmptyTargetingCriteria />
-          )}
+          <PaperContainer>
+            <Typography variant='h6'>
+              {t('Save to see list of households')}
+            </Typography>
+            <Label>
+              {t('List of household will be available after save.')}
+            </Label>
+          </PaperContainer>
         </Form>
       )}
     </Formik>
