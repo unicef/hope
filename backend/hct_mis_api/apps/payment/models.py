@@ -192,7 +192,7 @@ class GenericPayment(TimeStampedUUIDModel):
         abstract = True
 
 
-class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
+class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -236,7 +236,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         related_name="created_payment_plans",
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
@@ -785,7 +784,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
     )
 
 
-class Payment(SoftDeletableModel, GenericPayment):
+class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -798,7 +797,6 @@ class Payment(SoftDeletableModel, GenericPayment):
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
     assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
 
     objects = PaymentManager()
 
