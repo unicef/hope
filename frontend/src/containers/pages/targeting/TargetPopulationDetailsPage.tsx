@@ -53,7 +53,6 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
       {isEdit ? (
         <EditTargetPopulation
           targetPopulation={targetPopulation}
-          targetPopulationCriterias={targetPopulation.targetingCriteria}
           cancelEdit={() => setEditState(false)}
         />
       ) : (
