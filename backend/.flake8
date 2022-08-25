@@ -17,8 +17,16 @@ exclude =
     dist
 ignore =
     # black formatting related
-    E203,
-    E501,
-    W503,
+    E203, # whitespace before ':'
+    E501, # line too long
+    W503, # line break before binary operator
     F405, # may be undefined, or defined from star imports
     E731, # lamda expressions
+    # 
+    W291, # trailing whitespace
+    W293, # blank line contains whitespace
+    E303, # too many blank lines
+    E722, # do not use bare except # TODO: fix this
+    E231, # missing whitespace after ','
+    W292, # no newline at end of file
+    E302, # expected 2 blank lines, found 1
