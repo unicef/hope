@@ -382,6 +382,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     # DMs are known (DeliveryMechanismForPaymentPlan.objects.filter(payment_plan=payment_plan).values_list("delivery_mechanism", flat=True).order_by("delivery_mechanism_order"))
     def resolve_available_fsps_for_delivery_mechanisms(self, info, delivery_mechanisms):
         def get_fsps_for_delivery_mechanism(mechanism):
+            print("get_fsps_for_delivery_mechanism", mechanism)
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
 
             def can_accept_volume(fsp):

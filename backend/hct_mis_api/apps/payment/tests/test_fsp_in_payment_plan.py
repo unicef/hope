@@ -1172,6 +1172,7 @@ class TestFSPLimit(APITestCase):
         assert "cannot accept volume" in error_msg, error_msg
 
     def test_observing_changes_in_fsp_choices_when_assigning_fsps_to_delivery_mechanisms(self):
+        print("test_observing_changes_in_fsp_choices_when_assigning_fsps_to_delivery_mechanisms")
         # self.payment_plan.status = PaymentPlan.Status.OPEN
         # self.payment_plan.save()
 
@@ -1221,13 +1222,24 @@ class TestFSPLimit(APITestCase):
         assert "errors" not in available_fsps_response, available_fsps_response
         available_fsps = available_fsps_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
         assert len(available_fsps) == 3
+
         import pprint
 
         pprint.pprint(available_fsps)
+
+        transfer_ids = [fsp["id"] for fsp in available_fsps[0]["fsps"]]
+        assert self.encoded_bank_of_europe_fsp_id in transfer_ids
+        assert self.encoded_santander_fsp_id in transfer_ids
+
         voucher_ids = [fsp["id"] for fsp in available_fsps[1]["fsps"]]
-        assert self.encoded_bank_of_america_fsp_id in voucher_ids
+        print("voucher_ids", voucher_ids)
+        assert self.encoded_bank_of_america_fsp_id in voucher_ids  # FAILS #####
+        assert self.encoded_bank_of_europe_fsp_id in voucher_ids
+
         cash_ids = [fsp["id"] for fsp in available_fsps[2]["fsps"]]
         assert self.encoded_bank_of_america_fsp_id in cash_ids
+        assert self.encoded_bank_of_europe_fsp_id in cash_ids
+        assert self.encoded_santander_fsp_id in cash_ids
 
         print("NEXT AVAILABLE REQ")
         new_available_fsps_response = self.graphql_request(
