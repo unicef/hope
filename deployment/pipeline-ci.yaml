@@ -228,6 +228,18 @@ stages:
               script: |
                mv deployment/docker-compose.tst.yml docker-compose.tst.yml
                mv $(Agent.TempDirectory)/.env-django-test .env
+
+          - task: DockerCompose@0
+            displayName: "Run linter"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registry)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run backend flake8 .'
+              dockerComposeFileArgs: |
+                backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.SourceVersion)
+
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
