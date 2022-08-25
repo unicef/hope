@@ -31,6 +31,7 @@ import {
   GrievanceSteps,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_SUB_CATEGORIES,
 } from '../../../utils/constants';
 import {
   isInvalid,
@@ -538,16 +539,19 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           <BoxWithBorderBottom />
                           <BoxPadding />
                           <Grid container spacing={3}>
-                            <Grid item xs={3}>
-                              <Field
-                                name='partner'
-                                fullWidth
-                                variant='outlined'
-                                label={t('Partner')}
-                                choices={userChoices.userPartnerChoices}
-                                component={FormikSelectField}
-                              />
-                            </Grid>
+                            {values.subCategory ===
+                              GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT && (
+                              <Grid item xs={3}>
+                                <Field
+                                  name='partner'
+                                  fullWidth
+                                  variant='outlined'
+                                  label={t('Partner')}
+                                  choices={userChoices.userPartnerChoices}
+                                  component={FormikSelectField}
+                                />
+                              </Grid>
+                            )}
                             <Grid item xs={12}>
                               <Field
                                 name='description'
