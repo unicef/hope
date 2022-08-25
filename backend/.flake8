@@ -30,3 +30,7 @@ ignore =
     E231, # missing whitespace after ','
     W292, # no newline at end of file
     E302, # expected 2 blank lines, found 1
+    E225, # missing whitespace around operator
+    W391, # blank line at end of file
+    #
+    C901, # too complex # TODO: fix this

@@ -11,6 +11,7 @@ from hct_mis_api.apps.geo.models import AreaType, Area
 from django.contrib.auth import get_user_model
 from io import BytesIO
 from webtest import Upload
+
 User = get_user_model()
 
 
@@ -28,8 +29,8 @@ class TestGeoApp(WebTest):
     def setUp(self):
         self.site = AdminSite()
         self.admin = AreaAdmin(Area, self.site)
-        self.client.force_login(User.objects.get_or_create(username='testuser')[0])
-        self.file = BytesIO(b'Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\n')
+        self.client.force_login(User.objects.get_or_create(username="testuser")[0])
+        self.file = BytesIO(b"Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\n")
 
     def test_modeladmin_str(self):
         ma = ModelAdmin(Area, self.site)
@@ -45,14 +46,14 @@ class TestGeoApp(WebTest):
     def test_upload(self):
         self.assertEqual(AreaType.objects.count(), 2, "Two area types created")
         self.assertEqual(Area.objects.count(), 5, "Five area created")
-        resp = self.app.get(reverse('admin:geo_area_changelist'), user=self.superuser).click("Import Areas")
+        resp = self.app.get(reverse("admin:geo_area_changelist"), user=self.superuser).click("Import Areas")
         assert "Upload a csv" in resp
         form = resp.form
         form["file"] = Upload(
-            "file.csv", 
-            b'Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\n',
-            "text/csv"
-            )
+            "file.csv",
+            b"Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\n",
+            "text/csv",
+        )
         resp = form.submit("Import")
         assert resp.status_int == 302, "The form is not good"
         self.assertEqual(AreaType.objects.count(), 4, "Two new area types created")
