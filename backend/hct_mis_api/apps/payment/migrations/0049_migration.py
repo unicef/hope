@@ -862,7 +862,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="payment",
-            constraint=models.UniqueConstraint(fields=("payment_plan", "household"), name="payment_plan_and_household"),
+            constraint=models.UniqueConstraint(condition=models.Q(('is_removed', False)), fields=('payment_plan', 'household'), name='payment_plan_and_household'),
         ),
         migrations.CreateModel(
             name="FinancialServiceProviderXlsxTemplate",
