@@ -7,6 +7,7 @@ import { FieldArray, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
+import { PAYMENT_PLAN_QUERY } from '../../../../apollo/queries/paymentmodule/PaymentPlan';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   useAllDeliveryMechanismsQuery,
