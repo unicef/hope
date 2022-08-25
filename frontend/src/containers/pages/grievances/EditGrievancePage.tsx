@@ -14,11 +14,11 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
   GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_SUB_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
@@ -477,18 +477,21 @@ export const EditGrievancePage = (): React.ReactElement => {
                             />
                           </Grid>
                         )}
-                        <Grid item xs={6}>
-                          <Field
-                            name='programme'
-                            fullWidth
-                            disabled={Boolean(ticket.programme)}
-                            variant='outlined'
-                            label={t('Programme')}
-                            choices={mappedPrograms}
-                            allProgramsEdges={allProgramsEdges}
-                            component={FormikSelectField}
-                          />
-                        </Grid>
+                        {+ticket.issueType !==
+                          +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+                          <Grid item xs={6}>
+                            <Field
+                              name='programme'
+                              fullWidth
+                              disabled={Boolean(ticket.programme)}
+                              variant='outlined'
+                              label={t('Programme')}
+                              choices={mappedPrograms}
+                              allProgramsEdges={allProgramsEdges}
+                              component={FormikSelectField}
+                            />
+                          </Grid>
+                        )}
                       </Grid>
                     </BoxPadding>
                     {hasCreatorOrOwnerPermissions(
