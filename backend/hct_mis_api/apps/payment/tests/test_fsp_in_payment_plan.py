@@ -848,9 +848,13 @@ query PaymentPlan($paymentPlanId: ID!) {
                 "paymentPlanId": self.encoded_payment_plan_id,
             },
         )
-        assert "errors" in too_early_get_volume_by_delivery_mechanism_response
-        error_msg = too_early_get_volume_by_delivery_mechanism_response["errors"][0]["message"]
-        assert "Financial Service Provider is not set" in error_msg, error_msg
+        assert "errors" not in too_early_get_volume_by_delivery_mechanism_response
+        assert all(
+            vdm["deliveryMechanism"]["fsp"] is None
+            for vdm in too_early_get_volume_by_delivery_mechanism_response["data"]["paymentPlan"][
+                "volumeByDeliveryMechanism"
+            ]
+        )
 
         assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,

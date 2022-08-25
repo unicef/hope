@@ -319,9 +319,7 @@ class DeliveryMechanismNode(DjangoObjectType):
 
 def _calculate_volume(delivery_mechanism_per_payment_plan, field):
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
-        raise GraphQLError(
-            f"Financial Service Provider is not set for {delivery_mechanism_per_payment_plan.delivery_mechanism}"
-        )
+        return None
     payments = delivery_mechanism_per_payment_plan.payment_plan.all_active_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
         delivery_type=delivery_mechanism_per_payment_plan.delivery_mechanism,
@@ -380,6 +378,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         FspChoices, delivery_mechanisms=graphene.List(graphene.String)
     )
 
+    # TODO: maybe no need to pass delivery mechanisms but only choices?
+    # DMs are known (DeliveryMechanismForPaymentPlan.objects.filter(payment_plan=payment_plan).values_list("delivery_mechanism", flat=True).order_by("delivery_mechanism_order"))
     def resolve_available_fsps_for_delivery_mechanisms(self, info, delivery_mechanisms):
         def get_fsps_for_delivery_mechanism(mechanism):
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
