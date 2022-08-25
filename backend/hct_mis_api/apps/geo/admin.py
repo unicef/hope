@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class ImportCSVForm(Form):
-    file = FileField(widget=FileInput(attrs={'accept':'text/csv'}))
+    file = FileField(widget=FileInput(attrs={"accept": "text/csv"}))
 
 
 class ActiveRecordFilter(ListFilter):
@@ -184,17 +184,23 @@ class AreaAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEMode
                         for idx, x in enumerate(area_types):
                             if idx > 0:
                                 art, created = AreaType.objects.get_or_create(name=x, country=country, area_level=idx)
-                                area, created = Area.objects.get_or_create(name=row[x], p_code=row[admin_area[idx]], area_type=art)
+                                area, created = Area.objects.get_or_create(
+                                    name=row[x], p_code=row[admin_area[idx]], area_type=art
+                                )
                                 ids = idx - 1
                                 if ids > 0:
-                                    art.parent = AreaType.objects.get(country=country, area_level=ids, name=area_types[ids])
+                                    art.parent = AreaType.objects.get(
+                                        country=country, area_level=ids, name=area_types[ids]
+                                    )
                                     art.save()
-                                    area.parent = Area.objects.get(p_code=row[admin_area[ids]], name=row[area_types[ids]])
+                                    area.parent = Area.objects.get(
+                                        p_code=row[admin_area[ids]], name=row[area_types[ids]]
+                                    )
                                     area.save()
-                    except Exception as e:
+                    except Exception:
                         self.message_user(request, f"Unable to load areas, please check the format", messages.ERROR)
                         raise
-                
+
                 self.message_user(request, f"Updated all areas for {country}")
                 return redirect("admin:geo_area_changelist")
         else:

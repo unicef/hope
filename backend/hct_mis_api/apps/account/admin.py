@@ -266,7 +266,7 @@ class DjAdminManager:
         try:
             m = regex.search(self._last_response.content.decode("utf8"))
             return m.groups()[0]
-        except Exception as e:
+        except Exception:
             raise ValueError("Unable to get CSRF token from Kobo")
 
     def delete_user(self, username, pk):
@@ -704,7 +704,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
                                     self._grant_kobo_accesss_to_user(u, sync=False)
 
                                 context["results"].append(user_info)
-                        except Exception as e:
+                        except Exception:
                             raise
                 except Exception as e:
                     logger.exception(e)
