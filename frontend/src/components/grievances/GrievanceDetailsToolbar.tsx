@@ -307,12 +307,10 @@ export const GrievanceDetailsToolbar = ({
   }
 
   const canCreateDataChange = (): boolean => {
-    return (
-      ticket.subCategory?.toString() ===
-        GRIEVANCE_SUBCATEGORIES.PAYMENT_RELATED_COMPLAINT ||
-      ticket.subCategory?.toString() ===
-        GRIEVANCE_SUBCATEGORIES.FSP_RELATED_COMPLAINT
-    );
+    return [
+      GRIEVANCE_SUBCATEGORIES.PAYMENT_RELATED_COMPLAINT,
+      GRIEVANCE_SUBCATEGORIES.FSP_RELATED_COMPLAINT,
+    ].includes(ticket.subCategory?.toString());
   };
 
   return (
