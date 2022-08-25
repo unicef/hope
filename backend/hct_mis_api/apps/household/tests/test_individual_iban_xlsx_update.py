@@ -16,7 +16,6 @@ from hct_mis_api.apps.household.models import (
     MALE,
     WIFE_HUSBAND,
     XlsxUpdateFile,
-    Individual,
 )
 from hct_mis_api.apps.household.fixtures import (
     RegistrationDataImportFactory,

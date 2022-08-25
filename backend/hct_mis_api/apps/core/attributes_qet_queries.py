@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from dateutil.relativedelta import relativedelta
-from prompt_toolkit.validation import ValidationError
+from prompt_toolkit.validation import ValidationError  # noqa: F811 # TODO: bug?
 
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.household.models import (
