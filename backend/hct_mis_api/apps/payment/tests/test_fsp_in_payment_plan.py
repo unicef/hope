@@ -220,7 +220,7 @@ class TestFSPSetup(APITestCase):
         assert "errors" in response_with_wrong_mechanism, response_with_wrong_mechanism
         self.assertEqual(
             response_with_wrong_mechanism["errors"][0]["message"],
-            "Delivery mechanism '' is not valid.",
+            "Delivery mechanism cannot be empty.",
         )
 
         choose_dms_mutation_variables_mutation_variables_with_delivery_mechanisms = dict(
@@ -250,13 +250,13 @@ class TestFSPSetup(APITestCase):
 
     def test_being_able_to_get_possible_delivery_mechanisms(self):
         query = """
-query AllDeliveryMechanisms {
-    allDeliveryMechanisms {
-        name
-        value
-    }
-}
-"""
+            query AllDeliveryMechanisms {
+                allDeliveryMechanisms {
+                    name
+                    value
+                }
+            }
+        """
         response = self.graphql_request(request_string=query, context={"user": self.user})
         assert response is not None and "data" in response
         all_delivery_mechanisms = response["data"]["allDeliveryMechanisms"]
@@ -345,16 +345,16 @@ class TestFSPAssignment(APITestCase):
         assert "errors" not in response, response
 
         available_mechanisms_query = """
-query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
-    availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
-        deliveryMechanism
-        fsps {
-            id
-            name
-        }
-    }
-}
-"""
+            query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
+                availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
+                    deliveryMechanism
+                    fsps {
+                        id
+                        name
+                    }
+                }
+            }
+        """
         query_response = self.graphql_request(
             request_string=available_mechanisms_query,
             context={"user": self.user},
@@ -814,23 +814,23 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         assert "errors" not in choose_dms_response, choose_dms_response
 
         GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY = """
-query PaymentPlan($paymentPlanId: ID!) {
-    paymentPlan(id: $paymentPlanId) {
-        volumeByDeliveryMechanism {
-            deliveryMechanism {
-                name
-                order
-                fsp {
-                    id
+            query PaymentPlan($paymentPlanId: ID!) {
+                paymentPlan(id: $paymentPlanId) {
+                    volumeByDeliveryMechanism {
+                        deliveryMechanism {
+                            name
+                            order
+                            fsp {
+                                id
+                            }
+                        }
+                        volume
+                        volumeUsd
+                    }
                 }
             }
-            volume
-            volumeUsd
-        }
-    }
-}
-
-"""
+            
+        """
 
         too_early_get_volume_by_delivery_mechanism_response = self.graphql_request(
             request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,
