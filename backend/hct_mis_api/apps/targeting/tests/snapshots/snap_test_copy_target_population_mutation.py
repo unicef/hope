@@ -4,20 +4,18 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestCopyTargetPopulationMutation::test_copy_empty_target_1_0_with_permission 1'] = {
     'data': {
         'copyTargetPopulation': {
             'targetPopulation': {
-                'candidateListTargetingCriteria': None,
-                'candidateListTotalHouseholds': 0,
-                'candidateListTotalIndividuals': None,
-                'finalListTargetingCriteria': None,
-                'finalListTotalHouseholds': None,
-                'finalListTotalIndividuals': None,
                 'name': 'test_copy_empty_target_1',
-                'status': 'DRAFT'
+                'status': 'OPEN',
+                'targetingCriteria': None,
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
             }
         }
     }
@@ -47,7 +45,9 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target_0_with_permission 
     'data': {
         'copyTargetPopulation': {
             'targetPopulation': {
-                'candidateListTargetingCriteria': {
+                'name': 'Test New Copy Name',
+                'status': 'OPEN',
+                'targetingCriteria': {
                     'rules': [
                         {
                             'filters': [
@@ -63,13 +63,8 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target_0_with_permission 
                         }
                     ]
                 },
-                'candidateListTotalHouseholds': 1,
-                'candidateListTotalIndividuals': 1,
-                'finalListTargetingCriteria': None,
-                'finalListTotalHouseholds': None,
-                'finalListTotalIndividuals': None,
-                'name': 'Test New Copy Name',
-                'status': 'DRAFT'
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
             }
         }
     }

@@ -91,7 +91,7 @@ class TestRapidProVerificationTask(TestCase):
 
         target_population = TargetPopulationFactory(
             created_by=user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
             business_area=BusinessArea.objects.first(),
         )
         cash_plan = CashPlanFactory(

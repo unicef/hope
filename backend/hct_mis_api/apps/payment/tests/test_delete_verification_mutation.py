@@ -53,7 +53,7 @@ class TestDeleteVerificationMutation(APITestCase):
         cls.program.admin_areas_new.set(Area.objects.order_by("?")[:3])
         cls.target_population = TargetPopulationFactory(
             created_by=cls.user,
-            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+            targeting_criteria=(TargetingCriteriaFactory()),
             business_area=cls.business_area,
         )
         cls.cash_plan = CashPlanFactory(

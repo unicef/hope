@@ -13,6 +13,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
     TargetingIndividualRuleFilterBlockMixin,
+    TargetPopulation,
 )
 
 
@@ -38,8 +39,10 @@ class TestIndividualBlockFilter(TestCase):
         cls.household_2_indiv = household
 
     def test_all_individuals_are_female(self):
-        query = Household.objects.all()
+        queryset = Household.objects.all()
+        tp = TargetPopulation()
         tc = TargetingCriteria()
+        tc.target_population = tp
         tc.save()
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
@@ -62,9 +65,9 @@ class TestIndividualBlockFilter(TestCase):
             arguments=[MALE],
         )
         sex_filter.save()
-        query = query.filter(tc.get_query())
-        self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_1_indiv.id)
+        queryset = queryset.filter(tc.get_query())
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset.first().id, self.household_1_indiv.id)
 
     def test_all_individuals_are_female_on_mixins(self):
         query = Household.objects.all()
