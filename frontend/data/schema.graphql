@@ -2833,6 +2833,7 @@ type PaymentPlanNode implements Node {
   hasPaymentListXlsxFile: Boolean
   importedXlsxFileName: String
   paymentsConflictsCount: Int
+  volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
 }
 
 type PaymentPlanNodeConnection {
@@ -4467,6 +4468,13 @@ enum UserStatus {
   ACTIVE
   INACTIVE
   INVITED
+}
+
+type VolumeByDeliveryMechanismNode implements Node {
+  id: ID!
+  deliveryMechanism: DeliveryMechanismNode
+  volume: Float
+  volumeUsd: Float
 }
 
 type XlsxErrorNode {

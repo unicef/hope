@@ -1,4 +1,3 @@
-import json
 from unittest.mock import patch
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -131,8 +130,10 @@ class TestPaymentPlanQueries(APITestCase):
                 dispersion_end_date=datetime(2020, 12, 10),
                 start_date=datetime(2020, 9, 10),
                 end_date=datetime(2020, 11, 10),
-                unicef_id="PP-01",
             )
+            cls.pp.unicef_id = "PP-01"
+            cls.pp.save()
+
             hoh1 = IndividualFactory(household=None)
             hoh2 = IndividualFactory(household=None)
             hh1 = HouseholdFactory(head_of_household=hoh1)
@@ -165,8 +166,10 @@ class TestPaymentPlanQueries(APITestCase):
                 status=PaymentPlan.Status.LOCKED,
                 dispersion_start_date=cls.pp.dispersion_start_date + relativedelta(months=2),
                 dispersion_end_date=cls.pp.dispersion_end_date - relativedelta(months=2),
-                unicef_id="PP-02",
             )
+            cls.pp_conflicted.unicef_id = "PP-02"
+            cls.pp_conflicted.save()
+
             p_conflicted = PaymentFactory(
                 payment_plan=cls.pp_conflicted,
                 household=p2.household,

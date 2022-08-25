@@ -17,13 +17,13 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             return qs.annotate(
                 formatted_pp_start_date=Func(
                     F("payment_plan__start_date"),
-                    Value("DD-MM-YYYY"),
+                    Value("MM-DD-YYYY"),
                     function="to_char",
                     output_field=models.CharField(),
                 ),
                 formatted_pp_end_date=Func(
                     F("payment_plan__end_date"),
-                    Value("DD-MM-YYYY"),
+                    Value("MM-DD-YYYY"),
                     function="to_char",
                     output_field=models.CharField(),
                 ),
@@ -31,6 +31,8 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 conflict_data=Func(
                     Value("payment_plan_id"),
                     F("payment_plan_id"),
+                    Value("payment_plan_unicef_id"),
+                    F("payment_plan__unicef_id"),
                     Value("payment_plan_start_date"),
                     F("formatted_pp_start_date"),
                     Value("payment_plan_end_date"),
@@ -39,6 +41,8 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                     F("payment_plan__status"),
                     Value("payment_id"),
                     F("id"),
+                    Value("payment_unicef_id"),
+                    F("unicef_id"),
                     function="jsonb_build_object",
                     output_field=JSONField(),
                 ),

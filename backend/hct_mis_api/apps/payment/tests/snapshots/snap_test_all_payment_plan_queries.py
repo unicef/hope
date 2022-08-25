@@ -188,8 +188,8 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_locked_payment_pl
                         'paymentPlanSoftConflicted': True,
                         'paymentPlanSoftConflictedData': [
                             {
-                                'paymentPlanEndDate': '10-11-2020',
-                                'paymentPlanStartDate': '10-09-2020',
+                                'paymentPlanEndDate': '11-10-2020',
+                                'paymentPlanStartDate': '09-10-2020',
                                 'paymentPlanStatus': 'OPEN'
                             }
                         ]
@@ -216,8 +216,13 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'paymentPlan': {
                             'unicefId': 'PP-01'
                         },
-                        'paymentPlanHardConflicted': False,
+                        'paymentPlanHardConflicted': True,
                         'paymentPlanHardConflictedData': [
+                            {
+                                'paymentPlanEndDate': '11-10-2020',
+                                'paymentPlanStartDate': '09-10-2020',
+                                'paymentPlanStatus': 'LOCKED'
+                            }
                         ],
                         'paymentPlanSoftConflicted': False,
                         'paymentPlanSoftConflictedData': [
@@ -234,13 +239,8 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'paymentPlan': {
                             'unicefId': 'PP-01'
                         },
-                        'paymentPlanHardConflicted': True,
+                        'paymentPlanHardConflicted': False,
                         'paymentPlanHardConflictedData': [
-                            {
-                                'paymentPlanEndDate': '10-11-2020',
-                                'paymentPlanStartDate': '10-09-2020',
-                                'paymentPlanStatus': 'LOCKED'
-                            }
                         ],
                         'paymentPlanSoftConflicted': False,
                         'paymentPlanSoftConflictedData': [
