@@ -84,13 +84,12 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-
-
 class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel):
     """Model for target populations.
 
     Has N:N association with households.
     """
+
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
@@ -312,6 +311,12 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             + targeted_individuals.get("adult_female_count")
         )
 
+    def full_rebuild(self):
+        household_queryset = Household.objects.filter(business_area=self.business_area)
+        household_queryset = household_queryset.filter(self.targeting_criteria.get_query())
+        self.households.set(household_queryset)
+        self.refresh_stats()
+
     def get_criteria_string(self):
         try:
             return self.targeting_criteria.get_criteria_string()
@@ -373,12 +378,7 @@ class HouseholdSelection(TimeStampedUUIDModel):
     )
     target_population = models.ForeignKey("TargetPopulation", on_delete=models.CASCADE, related_name="selections")
     vulnerability_score = models.DecimalField(
-        blank=True,
-        null=True,
-        decimal_places=3,
-        max_digits=6,
-        help_text="Written by Steficon",
-        db_index=True
+        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
     )
 
 

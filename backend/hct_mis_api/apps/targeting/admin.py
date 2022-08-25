@@ -45,8 +45,7 @@ class TargetPopulationAdmin(
         "finalized_by",
         "business_area",
         "program",
-        "final_list_targeting_criteria",
-        "candidate_list_targeting_criteria",
+        "targeting_criteria",
     )
 
     @button()

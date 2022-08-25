@@ -68,7 +68,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         cls.target_population_size_2 = TargetPopulation(
             name="target_population_size_2",
             created_by=cls.user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -77,7 +77,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         cls.target_population_residence_status = TargetPopulation(
             name="target_population_residence_status",
             created_by=cls.user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
         cls.target_population_residence_status.save()
 
@@ -87,7 +87,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         cls.target_population_size_1_approved = TargetPopulation(
             name="target_population_size_1_approved",
             created_by=cls.user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
             status="LOCKED",
         )
         cls.target_population_size_1_approved.save()

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestUpdateTargetPopulationMutation::test_fail_update_0_wrong_args_count 1'] = {
@@ -110,7 +111,9 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
     'data': {
         'updateTargetPopulation': {
             'targetPopulation': {
-                'candidateListTargetingCriteria': {
+                'name': 'with_permission_draft updated',
+                'status': 'OPEN',
+                'targetingCriteria': {
                     'rules': [
                         {
                             'filters': [
@@ -126,13 +129,8 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                         }
                     ]
                 },
-                'candidateListTotalHouseholds': 2,
-                'candidateListTotalIndividuals': 6,
-                'finalListTargetingCriteria': None,
-                'finalListTotalHouseholds': None,
-                'finalListTotalIndividuals': None,
-                'name': 'with_permission_draft updated',
-                'status': 'DRAFT'
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
             },
             'validationErrors': None
         }
@@ -171,7 +169,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                     'line': 3
                 }
             ],
-            'message': '["Name can\'t be changed when Target Population is in APPROVED status"]',
+            'message': '["Name can\'t be changed when Target Population is in Locked status"]',
             'path': [
                 'updateTargetPopulation'
             ]

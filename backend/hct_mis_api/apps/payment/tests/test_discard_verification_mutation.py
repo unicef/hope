@@ -64,7 +64,7 @@ class TestDiscardVerificationMutation(APITestCase):
 
         target_population = TargetPopulationFactory(
             created_by=cls.user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
             business_area=cls.business_area,
         )
         cash_plan = CashPlanFactory(

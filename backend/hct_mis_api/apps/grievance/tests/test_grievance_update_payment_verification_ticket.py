@@ -109,7 +109,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         target_population = TargetPopulationFactory(
             id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
             created_by=cls.user,
-            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+            targeting_criteria=(TargetingCriteriaFactory()),
             business_area=cls.business_area,
         )
         payment_record = PaymentRecordFactory(

@@ -22,21 +22,9 @@ mutation UpdateTargetPopulation($updateTargetPopulationInput: UpdateTargetPopula
     targetPopulation{
         name
         status
-        candidateListTotalHouseholds
-        candidateListTotalIndividuals
-        finalListTotalHouseholds
-        finalListTotalIndividuals
-        candidateListTargetingCriteria{
-        rules{
-            filters{
-            comparisionMethod
-            fieldName
-            arguments
-            isFlexField
-            }
-        }
-        }
-        finalListTargetingCriteria{
+        totalHouseholdsCount
+        totalIndividualsCount
+        targetingCriteria{
         rules{
             filters{
             comparisionMethod
@@ -173,7 +161,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
-            candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
+            targeting_criteria=cls.get_targeting_criteria_for_rule(
                 {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
             ),
             created_by=cls.user,
@@ -182,7 +170,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         cls.draft_target_population.save()
         cls.approved_target_population = TargetPopulation(
             name="approved_target_population",
-            candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
+            targeting_criteria=cls.get_targeting_criteria_for_rule(
                 {"field_name": "size", "arguments": [1], "comparision_method": "GREATER_THAN"}
             ),
             status="LOCKED",

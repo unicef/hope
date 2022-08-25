@@ -22,21 +22,9 @@ class TestCopyTargetPopulationMutation(APITestCase):
                 targetPopulation {
                     name
                     status
-                    candidateListTotalHouseholds
-                    candidateListTotalIndividuals
-                    finalListTotalHouseholds
-                    finalListTotalIndividuals
-                    candidateListTargetingCriteria{
-                      rules{
-                        filters{
-                          comparisionMethod
-                          fieldName
-                          isFlexField
-                          arguments
-                        }
-                      }
-                    }
-                    finalListTargetingCriteria{
+                    totalHouseholdsCount
+                    totalIndividualsCount
+                    targetingCriteria{
                       rules{
                         filters{
                           comparisionMethod
@@ -73,9 +61,6 @@ class TestCopyTargetPopulationMutation(APITestCase):
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS"}
-        )
-        tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
         )
         tp.save()
         tp.households.add(cls.household)
