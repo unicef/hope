@@ -621,16 +621,19 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 component={FormikSelectField}
                               />
                             </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name='programme'
-                                fullWidth
-                                variant='outlined'
-                                label={t('Programme')}
-                                choices={mappedPrograms}
-                                component={FormikSelectField}
-                              />
-                            </Grid>
+                            {+values.issueType !==
+                              +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+                              <Grid item xs={6}>
+                                <Field
+                                  name='programme'
+                                  fullWidth
+                                  variant='outlined'
+                                  label={t('Programme')}
+                                  choices={mappedPrograms}
+                                  component={FormikSelectField}
+                                />
+                              </Grid>
+                            )}
                           </Grid>
                           <Box pt={5}>
                             <BoxWithBorders>
