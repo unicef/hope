@@ -44,7 +44,11 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
 
     def elasticsearch_filter_queryset(self):
         grievance_es_query_dict = create_es_query(self.prepare_filters(self.USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH))
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(grievance_es_query_dict)
         grievance_ids = execute_es_query(grievance_es_query_dict)
+        logger.info(grievance_ids)
         return grievance_ids
 
     def prepare_filters(self, allowed_fields):

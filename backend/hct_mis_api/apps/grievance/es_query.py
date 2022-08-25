@@ -23,7 +23,7 @@ def execute_es_query(query_dict):
         GrievanceTicketDocument
         .search()
         .params(search_type="dfs_query_then_fetch", preserve_order=True)
-        .from_dict(query_dict)
+        # .from_dict(query_dict)
     )
 
     es_ids = [hit.meta.id for hit in es_response.scan()]
