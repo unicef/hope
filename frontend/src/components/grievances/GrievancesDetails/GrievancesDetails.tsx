@@ -103,9 +103,7 @@ export const GrievancesDetails = ({
                 label: t('Urgency'),
                 value: (
                   <StatusBox
-                    status={
-                      urgencyChoicesData[ticket.priority - 1]?.name || '-'
-                    }
+                    status={urgencyChoicesData[ticket.urgency - 1]?.name || '-'}
                     statusToColor={grievanceTicketBadgeColors}
                   />
                 ),
@@ -122,7 +120,7 @@ export const GrievancesDetails = ({
                 size: 3,
               },
               showSubCategory && {
-                label: t('SUB CATEGORY'),
+                label: t('Issue Type'),
                 value: (
                   <span>{subCategoryChoices[ticket.subCategory] || '-'}</span>
                 ),
@@ -195,22 +193,17 @@ export const GrievancesDetails = ({
               {
                 label: t('Programme'),
                 value: ticket.programme?.name,
-                size: 3,
-              },
-              {
-                label: t('CONSENT'),
-                value: ticket.consent ? 'Yes' : 'No',
                 size:
                   ticket.subCategory ===
                   +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT
                     ? 3
-                    : 6,
+                    : 9,
               },
               ticket.subCategory ===
                 +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT && {
                 label: t('PARTNER'),
                 value: ticket.partner?.name,
-                size: 3,
+                size: 6,
               },
               {
                 label: t('CREATED BY'),
