@@ -2873,6 +2873,7 @@ export type Mutations = {
   unlockTargetPopulation?: Maybe<UnlockTargetPopulationMutation>,
   finalizeTargetPopulation?: Maybe<FinalizeTargetPopulationMutation>,
   setSteficonRuleOnTargetPopulation?: Maybe<SetSteficonRuleOnTargetPopulationMutationPayload>,
+  targetPopulationRebuild?: Maybe<RebuildTargetPopulationMutation>,
   createProgram?: Maybe<CreateProgram>,
   updateProgram?: Maybe<UpdateProgram>,
   deleteProgram?: Maybe<DeleteProgram>,
@@ -3116,6 +3117,11 @@ export type MutationsFinalizeTargetPopulationArgs = {
 
 export type MutationsSetSteficonRuleOnTargetPopulationArgs = {
   input: SetSteficonRuleOnTargetPopulationMutationInput
+};
+
+
+export type MutationsTargetPopulationRebuildArgs = {
+  id: Scalars['ID']
 };
 
 
@@ -4377,6 +4383,11 @@ export type ReassignRoleMutation = {
    __typename?: 'ReassignRoleMutation',
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
+};
+
+export type RebuildTargetPopulationMutation = {
+   __typename?: 'RebuildTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
 export type ReferralTicketExtras = {
@@ -7348,6 +7359,22 @@ export type LockTpMutation = (
   { __typename?: 'Mutations' }
   & { lockTargetPopulation: Maybe<(
     { __typename?: 'LockTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & TargetPopulationDetailedFragment
+    )> }
+  )> }
+);
+
+export type RebuildTpMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type RebuildTpMutation = (
+  { __typename?: 'Mutations' }
+  & { targetPopulationRebuild: Maybe<(
+    { __typename?: 'RebuildTargetPopulationMutation' }
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & TargetPopulationDetailedFragment
@@ -13008,6 +13035,57 @@ export function useLockTpMutation(baseOptions?: ApolloReactHooks.MutationHookOpt
 export type LockTpMutationHookResult = ReturnType<typeof useLockTpMutation>;
 export type LockTpMutationResult = ApolloReactCommon.MutationResult<LockTpMutation>;
 export type LockTpMutationOptions = ApolloReactCommon.BaseMutationOptions<LockTpMutation, LockTpMutationVariables>;
+export const RebuildTpDocument = gql`
+    mutation RebuildTP($id: ID!) {
+  targetPopulationRebuild(id: $id) {
+    targetPopulation {
+      ...targetPopulationDetailed
+    }
+  }
+}
+    ${TargetPopulationDetailedFragmentDoc}`;
+export type RebuildTpMutationFn = ApolloReactCommon.MutationFunction<RebuildTpMutation, RebuildTpMutationVariables>;
+export type RebuildTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<RebuildTpMutation, RebuildTpMutationVariables>, 'mutation'>;
+
+    export const RebuildTpComponent = (props: RebuildTpComponentProps) => (
+      <ApolloReactComponents.Mutation<RebuildTpMutation, RebuildTpMutationVariables> mutation={RebuildTpDocument} {...props} />
+    );
+    
+export type RebuildTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<RebuildTpMutation, RebuildTpMutationVariables> & TChildProps;
+export function withRebuildTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RebuildTpMutation,
+  RebuildTpMutationVariables,
+  RebuildTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, RebuildTpMutation, RebuildTpMutationVariables, RebuildTpProps<TChildProps>>(RebuildTpDocument, {
+      alias: 'rebuildTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRebuildTpMutation__
+ *
+ * To run a mutation, you first call `useRebuildTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRebuildTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rebuildTpMutation, { data, loading, error }] = useRebuildTpMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRebuildTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RebuildTpMutation, RebuildTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<RebuildTpMutation, RebuildTpMutationVariables>(RebuildTpDocument, baseOptions);
+      }
+export type RebuildTpMutationHookResult = ReturnType<typeof useRebuildTpMutation>;
+export type RebuildTpMutationResult = ApolloReactCommon.MutationResult<RebuildTpMutation>;
+export type RebuildTpMutationOptions = ApolloReactCommon.BaseMutationOptions<RebuildTpMutation, RebuildTpMutationVariables>;
 export const SetSteficonRuleOnTargetPopulationDocument = gql`
     mutation setSteficonRuleOnTargetPopulation($input: SetSteficonRuleOnTargetPopulationMutationInput!) {
   setSteficonRuleOnTargetPopulation(input: $input) {
@@ -19578,6 +19656,7 @@ export type ResolversTypes = {
   FinalizeTargetPopulationMutation: ResolverTypeWrapper<FinalizeTargetPopulationMutation>,
   SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput,
   SetSteficonRuleOnTargetPopulationMutationPayload: ResolverTypeWrapper<SetSteficonRuleOnTargetPopulationMutationPayload>,
+  RebuildTargetPopulationMutation: ResolverTypeWrapper<RebuildTargetPopulationMutation>,
   CreateProgramInput: CreateProgramInput,
   CreateProgram: ResolverTypeWrapper<CreateProgram>,
   UpdateProgramInput: UpdateProgramInput,
@@ -19952,6 +20031,7 @@ export type ResolversParentTypes = {
   FinalizeTargetPopulationMutation: FinalizeTargetPopulationMutation,
   SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput,
   SetSteficonRuleOnTargetPopulationMutationPayload: SetSteficonRuleOnTargetPopulationMutationPayload,
+  RebuildTargetPopulationMutation: RebuildTargetPopulationMutation,
   CreateProgramInput: CreateProgramInput,
   CreateProgram: CreateProgram,
   UpdateProgramInput: UpdateProgramInput,
@@ -21176,6 +21256,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   unlockTargetPopulation?: Resolver<Maybe<ResolversTypes['UnlockTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUnlockTargetPopulationArgs, 'id'>>,
   finalizeTargetPopulation?: Resolver<Maybe<ResolversTypes['FinalizeTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsFinalizeTargetPopulationArgs, 'id'>>,
   setSteficonRuleOnTargetPopulation?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnTargetPopulationArgs, 'input'>>,
+  targetPopulationRebuild?: Resolver<Maybe<ResolversTypes['RebuildTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsTargetPopulationRebuildArgs, 'id'>>,
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
@@ -21514,6 +21595,10 @@ export type RapidProFlowRunResolvers<ContextType = any, ParentType extends Resol
 export type ReassignRoleMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReassignRoleMutation'] = ResolversParentTypes['ReassignRoleMutation']> = {
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+};
+
+export type RebuildTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RebuildTargetPopulationMutation'] = ResolversParentTypes['RebuildTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
 export type RefuseRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RefuseRegistrationDataImportMutation'] = ResolversParentTypes['RefuseRegistrationDataImportMutation']> = {
@@ -22595,6 +22680,7 @@ export type Resolvers<ContextType = any> = {
   RapidProFlowResult?: RapidProFlowResultResolvers<ContextType>,
   RapidProFlowRun?: RapidProFlowRunResolvers<ContextType>,
   ReassignRoleMutation?: ReassignRoleMutationResolvers<ContextType>,
+  RebuildTargetPopulationMutation?: RebuildTargetPopulationMutationResolvers<ContextType>,
   RefuseRegistrationDataImportMutation?: RefuseRegistrationDataImportMutationResolvers<ContextType>,
   RegistrationDataImportDatahubNode?: RegistrationDataImportDatahubNodeResolvers<ContextType>,
   RegistrationDataImportDatahubNodeConnection?: RegistrationDataImportDatahubNodeConnectionResolvers<ContextType>,

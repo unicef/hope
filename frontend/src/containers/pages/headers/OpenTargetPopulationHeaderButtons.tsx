@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Box, Button } from '@material-ui/core';
-import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
-import {TargetPopulationNode, TargetPopulationQuery} from '../../../__generated__/graphql';
+import {
+  EditRounded,
+  Delete,
+  FileCopy,
+  RefreshRounded,
+} from '@material-ui/icons';
+import {
+  TargetPopulationQuery,
+  useRebuildTpMutation,
+} from '../../../__generated__/graphql';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
@@ -38,6 +46,11 @@ export const OpenTargetPopulationHeaderButtons = ({
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+
+  const [
+    rebuildTargetPopulation,
+    { loading: rebuildTargetPopulationLoading },
+  ] = useRebuildTpMutation();
   return (
     <Box display='flex' alignItems='center'>
       {canDuplicate && (
@@ -66,6 +79,23 @@ export const OpenTargetPopulationHeaderButtons = ({
             onClick={() => setEditState(true)}
           >
             Edit
+          </Button>
+        </Box>
+      )}
+      {canEdit && (
+        <Box m={2}>
+          <Button
+            variant='outlined'
+            color='primary'
+            disabled={rebuildTargetPopulationLoading}
+            startIcon={<RefreshRounded />}
+            onClick={() =>
+              rebuildTargetPopulation({
+                variables: { id: targetPopulation.id },
+              })
+            }
+          >
+            Rebuild
           </Button>
         </Box>
       )}
