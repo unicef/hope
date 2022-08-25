@@ -1178,7 +1178,7 @@ class TestFSPLimit(APITestCase):
 
         PaymentFactory(
             payment_plan=self.payment_plan,
-            financial_service_provider=self.bank_of_america_fsp,
+            # financial_service_provider=self.bank_of_america_fsp,
             collector=self.individuals_1[0],
             assigned_payment_channel=self.payment_channel_1_voucher,
             entitlement_quantity=5000,

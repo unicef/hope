@@ -388,10 +388,11 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
 
             def can_accept_volume(fsp):
+                # check payment_plan.has_locked_fsp() -> LOCKED_FSP/IN_APP/IN_REV/IN_AUTH/ACCEPTED
                 return fsp.can_accept_volume(
-                    Payment.objects.filter(payment_plan=self, financial_service_provider=fsp).aggregate(
-                        money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
-                    )["money"]
+                    Payment.objects.filter(
+                        payment_plan=self, assigned_payment_channel__delivery_mechanism=mechanism
+                    ).aggregate(money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)))["money"]
                 )
 
             return [{"id": fsp.id, "name": fsp.name} for fsp in fsps if can_accept_volume(fsp)] if fsps else []

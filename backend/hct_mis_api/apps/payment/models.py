@@ -210,6 +210,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     class Status(models.TextChoices):
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
+        # LOCKED_FSP
         IN_APPROVAL = "IN_APPROVAL", "In Approval"
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
@@ -223,6 +224,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     class Action(models.TextChoices):
         LOCK = "LOCK", "Lock"
+        # LOCK_FSP
         UNLOCK = "UNLOCK", "Unlock"
         SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL", "Send For Approval"
         APPROVE = "APPROVE", "Approve"
@@ -272,6 +274,14 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     )
     def status_lock(self):
         self.status_date = timezone.now()
+
+    # @transition(
+    #     field=status,
+    #     source=Status.LOCKED,
+    #     target=Status.LOCKED_FSP
+    # )
+    # def status_lock_fsp(self);
+    #     self.status_date = timezone.now()
 
     @transition(
         field=status,
