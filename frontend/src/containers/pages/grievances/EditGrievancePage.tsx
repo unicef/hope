@@ -19,6 +19,7 @@ import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
   GRIEVANCE_CATEGORIES,
+  GRIEVANCE_SUB_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import {
@@ -471,17 +472,20 @@ export const EditGrievancePage = (): React.ReactElement => {
                             component={FormikSelectField}
                           />
                         </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='partner'
-                            fullWidth
-                            disabled={Boolean(ticket.partner)}
-                            variant='outlined'
-                            label={t('Partner')}
-                            choices={userChoices.userPartnerChoices}
-                            component={FormikSelectField}
-                          />
-                        </Grid>
+                        {ticket.subCategory ===
+                          +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT && (
+                          <Grid item xs={6}>
+                            <Field
+                              name='partner'
+                              fullWidth
+                              disabled={Boolean(ticket.partner)}
+                              variant='outlined'
+                              label={t('Partner')}
+                              choices={userChoices.userPartnerChoices}
+                              component={FormikSelectField}
+                            />
+                          </Grid>
+                        )}
                         <Grid item xs={6}>
                           <Field
                             name='programme'

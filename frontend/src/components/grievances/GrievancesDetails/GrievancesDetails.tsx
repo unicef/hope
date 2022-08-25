@@ -1,7 +1,10 @@
 import { Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_SUB_CATEGORIES,
+} from '../../../utils/constants';
 import {
   grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
@@ -197,9 +200,14 @@ export const GrievancesDetails = ({
               {
                 label: t('CONSENT'),
                 value: ticket.consent ? 'Yes' : 'No',
-                size: 3,
+                size:
+                  ticket.subCategory ===
+                  +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT
+                    ? 3
+                    : 6,
               },
-              {
+              ticket.subCategory ===
+                +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT && {
                 label: t('PARTNER'),
                 value: ticket.partner?.name,
                 size: 3,
