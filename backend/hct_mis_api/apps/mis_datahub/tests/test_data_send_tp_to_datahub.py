@@ -51,8 +51,7 @@ class TestDataSendTpToDatahub(TestCase):
             "finalized_at": None,
             "finalized_by": None,
             "selection_computation_metadata": None,
-            "candidate_list_targeting_criteria": None,
-            "final_list_targeting_criteria": None,
+            "targeting_criteria": None,
         }
 
         return TargetPopulation.objects.create(

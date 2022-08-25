@@ -338,7 +338,7 @@ class TestSendTpToDatahub(TestCase):
         target_population = TargetPopulationFactory(
             program=program,
             status=TargetPopulation.STATUS_PROCESSING,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
 
         task = SendTPToDatahubTask()
@@ -362,7 +362,7 @@ class TestSendTpToDatahub(TestCase):
         target_population = TargetPopulationFactory(
             program=program,
             status=TargetPopulation.STATUS_PROCESSING,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
 
         task = SendTPToDatahubTask()

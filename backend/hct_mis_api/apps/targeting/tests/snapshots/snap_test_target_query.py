@@ -13,32 +13,26 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_0_with_permi
             'edges': [
                 {
                     'node': {
-                        'candidateListTotalHouseholds': 1,
-                        'candidateListTotalIndividuals': 2,
-                        'finalListTotalHouseholds': None,
-                        'finalListTotalIndividuals': None,
                         'name': 'target_population_size_2',
-                        'status': 'DRAFT'
+                        'status': 'OPEN',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 2
                     }
                 },
                 {
                     'node': {
-                        'candidateListTotalHouseholds': 1,
-                        'candidateListTotalIndividuals': 2,
-                        'finalListTotalHouseholds': None,
-                        'finalListTotalIndividuals': None,
                         'name': 'target_population_residence_status',
-                        'status': 'DRAFT'
+                        'status': 'OPEN',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 2
                     }
                 },
                 {
                     'node': {
-                        'candidateListTotalHouseholds': 1,
-                        'candidateListTotalIndividuals': 1,
-                        'finalListTotalHouseholds': 1,
-                        'finalListTotalIndividuals': 1,
                         'name': 'target_population_size_1_approved',
-                        'status': 'LOCKED'
+                        'status': 'LOCKED',
+                        'totalHouseholdsCount': 2,
+                        'totalIndividualsCount': 2
                     }
                 }
             ]
@@ -66,18 +60,32 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_1_without_pe
     ]
 }
 
-snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_2_with_permission_filter_finalListTotalHouseholdsMin 1'] = {
+snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_2_with_permission_filter_totalHouseholdsCountMin 1'] = {
     'data': {
         'allTargetPopulation': {
             'edges': [
                 {
                     'node': {
-                        'candidateListTotalHouseholds': 1,
-                        'candidateListTotalIndividuals': 1,
-                        'finalListTotalHouseholds': 1,
-                        'finalListTotalIndividuals': 1,
+                        'name': 'target_population_size_2',
+                        'status': 'OPEN',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 2
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'target_population_residence_status',
+                        'status': 'OPEN',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 2
+                    }
+                },
+                {
+                    'node': {
                         'name': 'target_population_size_1_approved',
-                        'status': 'LOCKED'
+                        'status': 'LOCKED',
+                        'totalHouseholdsCount': 2,
+                        'totalIndividualsCount': 2
                     }
                 }
             ]
@@ -88,7 +96,9 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_2_with_permi
 snapshots['TestTargetPopulationQuery::test_simple_target_query_0_with_permission 1'] = {
     'data': {
         'targetPopulation': {
-            'candidateListTargetingCriteria': {
+            'name': 'target_population_size_1_approved',
+            'status': 'LOCKED',
+            'targetingCriteria': {
                 'rules': [
                     {
                         'filters': [
@@ -108,13 +118,8 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_0_with_permission
                     }
                 ]
             },
-            'candidateListTotalHouseholds': 1,
-            'candidateListTotalIndividuals': 1,
-            'finalListTargetingCriteria': None,
-            'finalListTotalHouseholds': 1,
-            'finalListTotalIndividuals': 1,
-            'name': 'target_population_size_1_approved',
-            'status': 'LOCKED'
+            'totalHouseholdsCount': 2,
+            'totalIndividualsCount': 2
         }
     }
 }
@@ -142,7 +147,9 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_1_without_permiss
 snapshots['TestTargetPopulationQuery::test_simple_target_query_2_0_with_permission 1'] = {
     'data': {
         'targetPopulation': {
-            'candidateListTargetingCriteria': {
+            'name': 'target_population_residence_status',
+            'status': 'OPEN',
+            'targetingCriteria': {
                 'rules': [
                     {
                         'filters': [
@@ -162,13 +169,8 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_2_0_with_permissi
                     }
                 ]
             },
-            'candidateListTotalHouseholds': 1,
-            'candidateListTotalIndividuals': 2,
-            'finalListTargetingCriteria': None,
-            'finalListTotalHouseholds': None,
-            'finalListTotalIndividuals': None,
-            'name': 'target_population_residence_status',
-            'status': 'DRAFT'
+            'totalHouseholdsCount': 1,
+            'totalIndividualsCount': 2
         }
     }
 }

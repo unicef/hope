@@ -129,7 +129,7 @@ class Command(BaseCommand):
 
         target_population = TargetPopulationFactory(
             created_by=user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
             business_area=business_area,
         )
         for _ in range(cash_plans_amount):
