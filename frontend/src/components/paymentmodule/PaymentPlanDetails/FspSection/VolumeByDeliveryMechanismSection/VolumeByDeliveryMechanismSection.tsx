@@ -5,14 +5,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../core/LabelizedField';
-import { Missing } from '../../../../core/Missing';
-
-const colors = {
-  femaleChildren: '#5F02CF',
-  maleChildren: '#1D6A64',
-  femaleAdult: '#DFCCF5',
-  maleAdult: '#B1E3E0',
-};
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)}px;
@@ -39,56 +31,72 @@ interface VolumeByDeliveryMechanismSectionProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
+const DeliveryMechanismsColorsMap = new Map([
+  ['Cardless cash withdrawal', '#FC942A'],
+  ['Cash', '#D8E1EE'],
+  ['Cash by FSP', '#D8E1EE'],
+  ['Cheque', '#10CB16'],
+  ['Deposit to Card', '#4E606A'],
+  ['In Kind', ' #d8d8d8'],
+  ['Mobile Money', '#e4e4e4'],
+  ['Other', '#EF4343'],
+  ['Pre-paid card', '#D9D1CE'],
+  ['Referral', '#715247'],
+  ['Transfer', '#003C8F'],
+  ['Transfer to Account', '#003C8F'],
+  ['Voucher', '#00ADEF'],
+]);
+
+export const getDeliveryMechanismColor = (
+  deliveryMechanism: string,
+): string => {
+  if (DeliveryMechanismsColorsMap.has(deliveryMechanism)) {
+    return DeliveryMechanismsColorsMap.get(deliveryMechanism);
+  }
+  return '#CCC';
+};
+
 export const VolumeByDeliveryMechanismSection = ({
   paymentPlan,
 }: VolumeByDeliveryMechanismSectionProps): React.ReactElement => {
   const { t } = useTranslation();
-  const {
-    femaleChildrenCount,
-    maleChildrenCount,
-    femaleAdultsCount,
-    maleAdultsCount,
-  } = paymentPlan;
+  const { volumeByDeliveryMechanism } = paymentPlan;
 
+  const mappedDeliveryMechanism = volumeByDeliveryMechanism.map((el) => (
+    <Grid item xs={6}>
+      <FieldBorder color={getDeliveryMechanismColor(el.deliveryMechanism.name)}>
+        <LabelizedField
+          label={`${el.deliveryMechanism.name} (${el.deliveryMechanism.fsp?.name})`}
+          value={el.volumeUsd}
+        />
+      </FieldBorder>
+    </Grid>
+  ));
+
+  const chartLabels = volumeByDeliveryMechanism.map(
+    (el) => `${el.deliveryMechanism.name} (${el.deliveryMechanism.fsp?.name})`,
+  );
+
+  const chartData = volumeByDeliveryMechanism.map((el) => el.volumeUsd);
+
+  const chartColors = (): string[] => {
+    const defaultColorsArray = volumeByDeliveryMechanism.map((el) =>
+      getDeliveryMechanismColor(el.deliveryMechanism.name),
+    );
+
+    return defaultColorsArray;
+  };
   return (
     <>
       <Box display='flex' flexDirection='column'>
         <Title>
           <Typography variant='h6'>
-            {t('Volume by Delivery Mechanism')} in <Missing />
+            {t('Volume by Delivery Mechanism')} in USD
           </Typography>{' '}
         </Title>
         <ContentWrapper>
           <Grid container spacing={0} justify='flex-start'>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.femaleChildren}>
-                <LabelizedField
-                  label={t('Bank Transfer')}
-                  value={femaleChildrenCount}
-                />
-              </FieldBorder>
-            </Grid>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.femaleAdult}>
-                <LabelizedField
-                  label={t('E-wallet')}
-                  value={femaleAdultsCount}
-                />
-              </FieldBorder>
-            </Grid>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.maleChildren}>
-                <LabelizedField
-                  label={t('Mobile Money')}
-                  value={maleChildrenCount}
-                />
-              </FieldBorder>
-            </Grid>
-            <Grid item xs={6}>
-              <FieldBorder color={colors.maleAdult}>
-                <LabelizedField label={t('Cash')} value={maleAdultsCount} />
-              </FieldBorder>
-            </Grid>
+            {mappedDeliveryMechanism}
           </Grid>
           <Grid container spacing={0} justify='flex-start' alignItems='center'>
             <Grid item xs={4}>
@@ -102,26 +110,11 @@ export const VolumeByDeliveryMechanismSection = ({
                     },
                   }}
                   data={{
-                    labels: [
-                      t('Bank Transfer'),
-                      t('E-wallet'),
-                      t('Mobile Money'),
-                      t('Cash'),
-                    ],
+                    labels: chartLabels,
                     datasets: [
                       {
-                        data: [
-                          femaleChildrenCount,
-                          femaleAdultsCount,
-                          maleChildrenCount,
-                          maleAdultsCount,
-                        ],
-                        backgroundColor: [
-                          colors.femaleChildren,
-                          colors.femaleAdult,
-                          colors.maleChildren,
-                          colors.maleAdult,
-                        ],
+                        data: chartData,
+                        backgroundColor: chartColors,
                       },
                     ],
                   }}

@@ -346,8 +346,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         self.status_date = timezone.now()
 
     @property
-    def currency_exchange_date(self):
-        return self.dispersion_end_date
+    def currency_exchange_date(self) -> datetime.date:
+        now = timezone.now().date()
+        return self.dispersion_end_date if self.dispersion_end_date < now else now
 
     @property
     def all_active_payments(self):
@@ -792,6 +793,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         constraints = [
             UniqueConstraint(
                 fields=["payment_plan", "household"],
+                condition=Q(is_removed=False),
                 name="payment_plan_and_household",
             )
         ]

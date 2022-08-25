@@ -4059,6 +4059,7 @@ export type PaymentPlanNode = Node & {
   hasPaymentListXlsxFile?: Maybe<Scalars['Boolean']>,
   importedXlsxFileName?: Maybe<Scalars['String']>,
   paymentsConflictsCount?: Maybe<Scalars['Int']>,
+  volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>,
 };
 
 
@@ -7295,6 +7296,14 @@ export enum UserStatus {
 }
 
 
+export type VolumeByDeliveryMechanismNode = Node & {
+   __typename?: 'VolumeByDeliveryMechanismNode',
+  id: Scalars['ID'],
+  deliveryMechanism?: Maybe<DeliveryMechanismNode>,
+  volume?: Maybe<Scalars['Float']>,
+  volumeUsd?: Maybe<Scalars['Float']>,
+};
+
 export type XlsxErrorNode = {
    __typename?: 'XlsxErrorNode',
   sheet?: Maybe<Scalars['String']>,
@@ -9882,6 +9891,17 @@ export type PaymentPlanQuery = (
       & { fsp: Maybe<(
         { __typename?: 'FinancialServiceProviderNode' }
         & Pick<FinancialServiceProviderNode, 'id' | 'name'>
+      )> }
+    )>>>, volumeByDeliveryMechanism: Maybe<Array<Maybe<(
+      { __typename?: 'VolumeByDeliveryMechanismNode' }
+      & Pick<VolumeByDeliveryMechanismNode, 'volume' | 'volumeUsd'>
+      & { deliveryMechanism: Maybe<(
+        { __typename?: 'DeliveryMechanismNode' }
+        & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order'>
+        & { fsp: Maybe<(
+          { __typename?: 'FinancialServiceProviderNode' }
+          & Pick<FinancialServiceProviderNode, 'id' | 'name'>
+        )> }
       )> }
     )>>> }
   )> }
@@ -17795,6 +17815,19 @@ export const PaymentPlanDocument = gql`
         name
       }
     }
+    volumeByDeliveryMechanism {
+      deliveryMechanism {
+        id
+        name
+        order
+        fsp {
+          id
+          name
+        }
+      }
+      volume
+      volumeUsd
+    }
   }
 }
     `;
@@ -22343,6 +22376,7 @@ export type ResolversTypes = {
   ApprovalProcessNode: ResolverTypeWrapper<ApprovalProcessNode>,
   FilteredActionsListNode: ResolverTypeWrapper<FilteredActionsListNode>,
   ApprovalNode: ResolverTypeWrapper<ApprovalNode>,
+  VolumeByDeliveryMechanismNode: ResolverTypeWrapper<VolumeByDeliveryMechanismNode>,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
   ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
   GrievanceTicketNodeConnection: ResolverTypeWrapper<GrievanceTicketNodeConnection>,
@@ -22775,6 +22809,7 @@ export type ResolversParentTypes = {
   ApprovalProcessNode: ApprovalProcessNode,
   FilteredActionsListNode: FilteredActionsListNode,
   ApprovalNode: ApprovalNode,
+  VolumeByDeliveryMechanismNode: VolumeByDeliveryMechanismNode,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,
   ServiceProviderNodeEdge: ServiceProviderNodeEdge,
   GrievanceTicketNodeConnection: GrievanceTicketNodeConnection,
@@ -24506,7 +24541,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentVerificationNode' | 'CashPlanPaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'ReportNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'PaymentChannelNode' | 'ApprovalProcessNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'PaymentVerificationLogEntryNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentVerificationNode' | 'CashPlanPaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'ReportNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'PaymentChannelNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'PaymentVerificationLogEntryNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -24645,6 +24680,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   hasPaymentListXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   importedXlsxFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentsConflictsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  volumeByDeliveryMechanism?: Resolver<Maybe<Array<Maybe<ResolversTypes['VolumeByDeliveryMechanismNode']>>>, ParentType, ContextType>,
 };
 
 export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {
@@ -25939,6 +25975,13 @@ export interface UuidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'UUID'
 }
 
+export type VolumeByDeliveryMechanismNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['VolumeByDeliveryMechanismNode'] = ResolversParentTypes['VolumeByDeliveryMechanismNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismNode']>, ParentType, ContextType>,
+  volume?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  volumeUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+};
+
 export type XlsxErrorNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['XlsxErrorNode'] = ResolversParentTypes['XlsxErrorNode']> = {
   sheet?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   coordinates?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -26244,6 +26287,7 @@ export type Resolvers<ContextType = any> = {
   UserNodeEdge?: UserNodeEdgeResolvers<ContextType>,
   UserRoleNode?: UserRoleNodeResolvers<ContextType>,
   UUID?: GraphQLScalarType,
+  VolumeByDeliveryMechanismNode?: VolumeByDeliveryMechanismNodeResolvers<ContextType>,
   XlsxErrorNode?: XlsxErrorNodeResolvers<ContextType>,
   XlsxRowErrorNode?: XlsxRowErrorNodeResolvers<ContextType>,
 };
