@@ -19,7 +19,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory
 )
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea, XLSXFileTemp
+from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 
 
@@ -64,19 +64,17 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             p_ch.delivery_mechanism = "Deposit to Card"
             p_ch.save()
 
-        cls.xlsx_valid_file = XLSXFileTemp.objects.create(
+        cls.xlsx_valid_file = FileTemp.objects.create(
             object_id=cls.payment_plan.pk,
             content_type=get_content_type_for_model(cls.payment_plan),
             created_by=cls.user,
-            type=XLSXFileTemp.IMPORT,
             file=valid_file(),
         ).file
 
-        cls.xlsx_invalid_file = XLSXFileTemp.objects.create(
+        cls.xlsx_invalid_file = FileTemp.objects.create(
             object_id=cls.payment_plan.pk,
             content_type=get_content_type_for_model(cls.payment_plan),
             created_by=cls.user,
-            type=XLSXFileTemp.IMPORT,
             file=invalid_file(),
         ).file
 
