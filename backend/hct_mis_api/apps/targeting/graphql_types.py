@@ -7,6 +7,7 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     Permissions,
     hopePermissionClass,
+    DjangoPermissionFilterConnectionField,
 )
 from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
@@ -124,6 +125,7 @@ class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
 
     total_family_size = graphene.Int(source="total_family_size")
     targeting_criteria = TargetingCriteriaRuleFilterNode()
+    householdList = DjangoConnectionField(HouseholdNode)
 
     class Meta:
         model = target_models.TargetPopulation
