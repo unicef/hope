@@ -3,6 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_SUB_CATEGORIES,
 } from '../../../utils/constants';
 import {
@@ -67,6 +68,10 @@ export const GrievancesDetails = ({
   const showIssueType =
     ticket.category === +GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
     ticket.category === +GRIEVANCE_CATEGORIES.DATA_CHANGE;
+  const showProgramme =
+    ticket.issueType !== +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
+  const showPartner =
+    ticket.subCategory === +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT;
 
   return (
     <Grid item xs={12}>
@@ -188,19 +193,14 @@ export const GrievancesDetails = ({
                     )}
                   </span>
                 ),
-                size: 3,
+                size: showProgramme || showPartner ? 3 : 12,
               },
-              {
+              showProgramme && {
                 label: t('Programme'),
                 value: ticket.programme?.name,
-                size:
-                  ticket.subCategory ===
-                  +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT
-                    ? 3
-                    : 9,
+                size: showPartner ? 3 : 9,
               },
-              ticket.subCategory ===
-                +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT && {
+              showPartner && {
                 label: t('PARTNER'),
                 value: ticket.partner?.name,
                 size: 6,
