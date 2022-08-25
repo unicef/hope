@@ -23,7 +23,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 
-from hct_mis_api.apps.core.models import XLSXFileTemp
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -251,6 +251,15 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     total_households_count = models.PositiveSmallIntegerField(default=0)
     total_individuals_count = models.PositiveSmallIntegerField(default=0)
     xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
+    imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
+    export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
+    export_per_fsp_xlsx_file = models.ForeignKey(
+        FileTemp,
+        null=True,
+        blank=True,
+        related_name="+",
+        on_delete=models.CASCADE
+    )
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
@@ -410,44 +419,25 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             ]
         )
 
-    def get_payment_list_xlsx_file_obj(self):
-        return XLSXFileTemp.objects.filter(
-            object_id=self.pk, content_type=get_content_type_for_model(self), type=XLSXFileTemp.EXPORT
-        ).first()
-
-    def get_payment_list_per_fsp_xlsx_file_obj(self):
-        return XLSXFileTemp.objects.filter(
-            object_id=self.pk,
-            content_type=get_content_type_for_model(self),
-            type=XLSXFileTemp.EXPORT_PER_FSP
-        ).first()
-
     @property
     def has_payment_list_xlsx_file(self):
-        return bool(self.get_payment_list_xlsx_file_obj())
+        return bool(self.export_xlsx_file)
 
     @property
     def has_payment_list_per_fsp_xlsx_file(self):
-        return bool(self.get_payment_list_per_fsp_xlsx_file_obj())
+        return bool(self.export_per_fsp_xlsx_file)
 
     @property
     def xlsx_payment_list_file_link(self):
-        file_obj = self.get_payment_list_xlsx_file_obj()
-        if file_obj:
-            return file_obj.file.url
+        if self.export_xlsx_file:
+            return self.export_xlsx_file.file.url
         return None
 
     @property
     def xlsx_payment_list_per_fsp_file_link(self):
-        file_obj = self.get_payment_list_per_fsp_xlsx_file_obj()
-        if file_obj:
-            return file_obj.file.url
+        if self.export_per_fsp_xlsx_file:
+            return self.export_per_fsp_xlsx_file.file.url
         return None
-
-    def get_payment_list_import_xlsx_file_obj(self):
-        return XLSXFileTemp.objects.filter(
-            object_id=self.pk, content_type=get_content_type_for_model(self), type=XLSXFileTemp.IMPORT
-        ).first()
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
