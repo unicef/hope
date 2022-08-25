@@ -419,7 +419,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             <Grid item xs={6}>
                               <Field
                                 name='subCategory'
-                                label={t('Sub Category')}
+                                label={t('Issue Type')}
                                 onChange={(e) => {
                                   setFieldValue('subCategory', e.target.value);
                                 }}
@@ -478,7 +478,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   size: 9,
                                 },
                                 showSubCategory(values) && {
-                                  label: t('Sub Category'),
+                                  label: t('Issue Type'),
                                   value: (
                                     <span>
                                       {subCategoryChoices[values.subCategory] ||
