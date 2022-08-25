@@ -8,9 +8,14 @@ from django.urls import reverse
 from graphql import GraphQLError
 from tempfile import NamedTemporaryFile
 
-from hct_mis_api.apps.payment.models import Payment, FinancialServiceProvider, FinancialServiceProviderXlsxTemplate
+from hct_mis_api.apps.payment.models import (
+    Payment,
+    PaymentPlan,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+)
 from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
-from hct_mis_api.apps.core.models import XLSXFileTemp
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import encode_id_base64
 
 
@@ -35,7 +40,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
     PAYMENT_CHANNEL_COLUMN_INDEX = 5
     ENTITLEMENT_COLUMN_INDEX = 8
 
-    def __init__(self, payment_plan):
+    def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.all_active_payments
 
@@ -72,15 +77,16 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         filename = f"payment_plan_payment_list_{self.payment_plan.unicef_id or self.payment_plan.id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
-            xlsx_obj = XLSXFileTemp(
+            xlsx_obj = FileTemp(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
-                created_by=user,
-                type=XLSXFileTemp.EXPORT
+                created_by=user
             )
             self.wb.save(tmp.name)
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
+            self.payment_plan.export_xlsx_file = xlsx_obj
+            self.payment_plan.save()
 
     def get_context(self, user, per_fsp=False):
         payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
@@ -156,15 +162,16 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
                         # add xlsx to zip
                         zip_file.writestr(filename, tmp.read())
 
-            xlsx_obj = XLSXFileTemp(
+            xlsx_obj = FileTemp(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
-                created_by=user,
-                type=XLSXFileTemp.EXPORT_PER_FSP
+                created_by=user
             )
             tmp_zip.seek(0)
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
             xlsx_obj.file.save(zip_file_name, File(tmp_zip))
+            self.payment_plan.export_per_fsp_xlsx_file = xlsx_obj
+            self.payment_plan.save()
 
     @staticmethod
     def _add_rows(ws_fsp, col_list: list, fsp: FinancialServiceProvider, payment: Payment):

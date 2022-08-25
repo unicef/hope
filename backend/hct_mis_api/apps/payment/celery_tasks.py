@@ -154,7 +154,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
 @sentry_tags
 def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
     try:
-        from hct_mis_api.apps.core.models import XLSXFileTemp
+        from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 
@@ -163,7 +163,11 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
 
-            file = XLSXFileTemp.objects.get(pk=file_id).file
+            try:
+                file = FileTemp.objects.get(pk=file_id).file
+            except FileTemp.DoesNotExist as e:
+                logger.exception(f"Error import from xlsx, FileTemp object with ID {file_id} not found.", e)
+                raise
 
             service = XlsxPaymentPlanImportService(payment_plan, file)
             service.open_workbook()
@@ -237,11 +241,11 @@ def payment_plan_apply_steficon(payment_plan_id):
 def remove_old_payment_plan_payment_list_xlsx(past_days=30):
     """ Remove old Payment Plan Payment List XLSX files """
     try:
-        from hct_mis_api.apps.core.models import XLSXFileTemp
+        from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
-        file_qs = XLSXFileTemp.objects.filter(
+        file_qs = FileTemp.objects.filter(
             content_type=get_content_type_for_model(PaymentPlan),
             created__lte=days
         )
@@ -250,7 +254,7 @@ def remove_old_payment_plan_payment_list_xlsx(past_days=30):
                 xlsx_obj.file.delete(save=False)
                 xlsx_obj.delete()
 
-            logger.info(f"Removed old XLSXFileTemp: {file_qs.count()}")
+            logger.info(f"Removed old FileTemp: {file_qs.count()}")
 
     except Exception as e:
         logger.exception(e)

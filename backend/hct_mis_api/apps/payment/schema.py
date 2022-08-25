@@ -395,8 +395,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.has_payment_list_per_fsp_xlsx_file
 
     def resolve_imported_xlsx_file_name(self, info):
-        import_file_obj = self.get_payment_list_import_xlsx_file_obj()
-        return import_file_obj.file.name if import_file_obj else ""
+        return self.imported_xlsx_file.file.name if self.imported_xlsx_file else ""
 
     def resolve_volume_by_delivery_mechanism(self, info):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
