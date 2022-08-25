@@ -86,7 +86,7 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_fail_target_popul
                     'line': 3
                 }
             ],
-            'message': "['Only Target Population with status APPROVED can be finalized']",
+            'message': "['Only locked Target Population with status can be finalized']",
             'path': [
                 'finalizeTargetPopulation'
             ]
@@ -98,7 +98,7 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
     'data': {
         'finalizeTargetPopulation': {
             'targetPopulation': {
-                'finalList': {
+                'householdList': {
                     'edges': [
                         {
                             'node': {
@@ -161,7 +161,7 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
     'data': {
         'finalizeTargetPopulation': {
             'targetPopulation': {
-                'finalList': {
+                'householdList': {
                     'edges': [
                         {
                             'node': {
