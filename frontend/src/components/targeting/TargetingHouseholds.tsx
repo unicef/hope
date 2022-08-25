@@ -4,7 +4,6 @@ import { useTargetPopulationHouseholdsQuery } from '../../__generated__/graphql'
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 export function TargetingHouseholds({
-  status,
   id,
   canViewDetails,
 }): React.ReactElement {

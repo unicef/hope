@@ -1,20 +1,20 @@
-import React, {useEffect, useState} from 'react';
-import {useParams} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
   useTargetPopulationQuery,
 } from '../../../__generated__/graphql';
-import {EditTargetPopulation} from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
-import {TargetPopulationCore} from '../../../components/targeting/TargetPopulationCore';
-import {TargetPopulationDetails} from '../../../components/targeting/TargetPopulationDetails';
-import {usePermissions} from '../../../hooks/usePermissions';
-import {LoadingComponent} from '../../../components/core/LoadingComponent';
-import {hasPermissions, PERMISSIONS} from '../../../config/permissions';
-import {PermissionDenied} from '../../../components/core/PermissionDenied';
-import {isPermissionDeniedError} from '../../../utils/utils';
-import {TargetPopulationPageHeader} from '../headers/TargetPopulationPageHeader';
-import {useLazyInterval} from '../../../hooks/useInterval';
+import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
+import { TargetPopulationCore } from '../../../components/targeting/TargetPopulationCore';
+import { TargetPopulationDetails } from '../../../components/targeting/TargetPopulationDetails';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { isPermissionDeniedError } from '../../../utils/utils';
+import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
+import { useLazyInterval } from '../../../hooks/useInterval';
 
 export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();
@@ -23,16 +23,16 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const [startPollingTargetPopulation, stopPollingTargetPopulation] = useLazyInterval(
-    (args) => refetch(),
-    3000,
-  );
+  const [
+    startPollingTargetPopulation,
+    stopPollingTargetPopulation,
+  ] = useLazyInterval(() => refetch(), 3000);
   const buildStatus = data?.targetPopulation?.buildStatus;
   useEffect(() => {
-    if(buildStatus!== TargetPopulationBuildStatus.Ok){
+    if (buildStatus !== TargetPopulationBuildStatus.Ok) {
       startPollingTargetPopulation();
-    }else {
-      stopPollingTargetPopulation()
+    } else {
+      stopPollingTargetPopulation();
     }
     return stopPollingTargetPopulation;
     // eslint-disable-next-line react-hooks/exhaustive-deps

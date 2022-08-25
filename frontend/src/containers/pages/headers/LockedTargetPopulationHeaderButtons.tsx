@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
-  TargetPopulationNode, TargetPopulationQuery,
+  TargetPopulationQuery,
   useUnlockTpMutation,
 } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';

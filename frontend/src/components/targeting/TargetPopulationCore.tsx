@@ -64,7 +64,6 @@ export function TargetPopulationCore({
       {targetPopulation.buildStatus === TargetPopulationBuildStatus.Ok ? (
         <TargetingHouseholds
           id={id}
-          status={targetPopulation.status}
           canViewDetails={canViewHouseholdDetails}
         />
       ) : (
