@@ -45,7 +45,7 @@ from hct_mis_api.apps.targeting.validators import (
     FinalizeTargetPopulationValidator,
     TargetingCriteriaInputValidator,
     TargetValidator,
-    UnlockTargetPopulationValidator,
+    UnlockTargetPopulationValidator, RebuildTargetPopulationValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
@@ -63,6 +63,7 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
 
     id = graphene.ID()
     name = graphene.String()
+
 
 
 class ValidatedMutation(PermissionMutation):
@@ -557,6 +558,32 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
         return SetSteficonRuleOnTargetPopulationMutation(target_population=target_population)
 
 
+class RebuildTargetPopulationMutation(ValidatedMutation):
+    target_population = graphene.Field(TargetPopulationNode)
+
+    object_validators = [RebuildTargetPopulationValidator]
+    model_class = TargetPopulation
+    permissions = [Permissions.TARGETING_UPDATE]
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    @classmethod
+    def validated_mutate(cls, root, info, **kwargs):
+        target_population = kwargs.get("model_object")
+        old_target_population = kwargs.get("old_model_object")
+        target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
+        target_population.save()
+        transaction.on_commit(lambda: target_population_full_rebuild.delay(target_population.id))
+        log_create(
+            TargetPopulation.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_target_population,
+            target_population,
+        )
+        return cls(target_population=target_population)
+
 class Mutations(graphene.ObjectType):
     create_target_population = CreateTargetPopulationMutation.Field()
     update_target_population = UpdateTargetPopulationMutation.Field()
@@ -566,4 +593,4 @@ class Mutations(graphene.ObjectType):
     unlock_target_population = UnlockTargetPopulationMutation.Field()
     finalize_target_population = FinalizeTargetPopulationMutation.Field()
     set_steficon_rule_on_target_population = SetSteficonRuleOnTargetPopulationMutation.Field()
-    target_population_rebuild = SetSteficonRuleOnTargetPopulationMutation.Field()
+    target_population_rebuild = RebuildTargetPopulationMutation.Field()

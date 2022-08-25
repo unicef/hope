@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import {
-  TargetPopulationNode, TargetPopulationQuery,
+  TargetPopulationQuery,
   TargetPopulationStatus,
 } from '../../../__generated__/graphql';
 import { PageHeader } from '../../../components/core/PageHeader';
