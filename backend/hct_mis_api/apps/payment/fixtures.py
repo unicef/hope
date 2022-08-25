@@ -541,17 +541,6 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
 
 
-class PaymentChannelFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = PaymentChannel
-
-    individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = fuzzy.FuzzyChoice(
-        GenericPayment.DELIVERY_TYPE_CHOICE,
-        getter=lambda c: c[0],
-    )
-
-
 class PaymentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Payment

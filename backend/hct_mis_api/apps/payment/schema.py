@@ -1,8 +1,10 @@
 import json
 from decimal import Decimal
 
-from django.db.models import Q, Sum
 from django.db.models.functions import Coalesce
+from django.db.models import Case, CharField, Count, Q, Sum, Value, When
+from django.shortcuts import get_object_or_404
+
 
 import graphene
 from graphene import relay
@@ -59,7 +61,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     Payment,
     DeliveryMechanismPerPaymentPlan,
-    PaymentPlan,
     GenericPayment,
     PaymentChannel,
 )
@@ -266,10 +267,12 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class PaymentConflictDataNode(graphene.ObjectType):
     payment_plan_id = graphene.String()
+    payment_plan_unicef_id = graphene.String()
     payment_plan_start_date = graphene.String()
     payment_plan_end_date = graphene.String()
     payment_plan_status = graphene.String()
     payment_id = graphene.String()
+    payment_unicef_id = graphene.String()
 
 
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
