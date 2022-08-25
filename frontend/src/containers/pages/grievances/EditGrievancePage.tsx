@@ -46,7 +46,6 @@ import { ContainerColumnWithBorder } from '../../../components/core/ContainerCol
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { Consent } from '../../../components/grievances/Consent';
 import { LookUpSection } from '../../../components/grievances/LookUpSection';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
 import {
@@ -326,7 +325,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                         <Grid item xs={6}>
                           <Field
                             name='subCategory'
-                            label={t('Sub Category')}
+                            label={t('Issue Type')}
                             disabled={Boolean(ticket.subCategory)}
                             onChange={(e) => {
                               setFieldValue('subCategory', e.target.value);
@@ -360,14 +359,6 @@ export const EditGrievancePage = (): React.ReactElement => {
                     </Grid>
                     <BoxWithBorders>
                       <Box display='flex' flexDirection='column'>
-                        <Consent />
-                        <Field
-                          name='consent'
-                          label={t('Received Consent*')}
-                          color='primary'
-                          disabled
-                          component={FormikCheckboxField}
-                        />
                         <LookUpSection
                           values={values}
                           disabledHouseholdIndividual={
