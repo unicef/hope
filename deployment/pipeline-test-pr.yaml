@@ -61,6 +61,7 @@ stages:
               curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
               export PATH=$PATH:$HOME/.poetry/bin
               poetry install --no-root
+            workingDirectory: 'backend'
             displayName: 'Install dependencies'
           - script: |
               poetry run flake8 .
