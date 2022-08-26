@@ -44,46 +44,8 @@ stages:
             workingDirectory: 'frontend'
             displayName: "Test"
 
-  - stage: lint
-    dependsOn: []
-    displayName: Lint
-    jobs:
-      - job: flake8
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[FLAKE8]"
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: "3.9.12"
-            displayName: "Install Python"
-          - script: |
-              curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
-              export PATH=$PATH:$HOME/.poetry/bin
-              poetry install --no-root
-            workingDirectory: 'backend'
-            displayName: 'Install dependencies'
-          - script: |
-              mkdir -p ./lint-output
-              export PATH=$PATH:$HOME/.poetry/bin
-              poetry run flake8 --format=junit-xml . > ./lint-output/flake8.xml
-            workingDirectory: 'backend'
-            displayName: 'Run linter'
-
-          - task: PublishTestResults@2
-            displayName: "Publish lint Result"
-            condition: always()
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '*.xml'
-              searchFolder: 'backend/lint-output/'
-              mergeTestResults: true
-              failTaskOnFailedTests: true
-              testRunTitle: 'Lint results'
-
-
   - stage: build_and_push
-    dependsOn: lint
+    dependsOn: []
     displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
@@ -126,8 +88,47 @@ stages:
                 dev-latest
                 $(System.PullRequest.PullRequestId)-latest
 
-  - stage: test_backend
+  - stage: lint_backend
     dependsOn: build_and_push
+    displayName: Lint-Backend
+    jobs:
+      - job: django_lint
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[DJANGO LINT]"
+        variables:
+          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registry)
+
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registry)
+              dockerComposeFile: '**/docker-compose.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run --no-deps backend ./docker-lint-entrypoint.sh'
+              dockerComposeFileArgs: |
+               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+
+          - task: PublishTestResults@2
+            displayName: "Publish lint result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'backend/lint-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'Lint results'
+
+  - stage: test_backend
+    dependsOn: lint_backend
     displayName: Test-Backend
     jobs:
       - job: django_tests
