@@ -2554,10 +2554,13 @@ type PaymentChannelNodeEdge {
 
 type PaymentConflictDataNode {
   paymentPlanId: String
+  paymentPlanEncodedId: String
+  paymentPlanUnicefId: String
   paymentPlanStartDate: String
   paymentPlanEndDate: String
   paymentPlanStatus: String
   paymentId: String
+  paymentUnicefId: String
 }
 
 enum PaymentDeliveryType {
@@ -2609,6 +2612,7 @@ type PaymentNode implements Node {
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
   paymentPlanSoftConflicted: Boolean
   paymentPlanSoftConflictedData: [PaymentConflictDataNode]
+  hasPaymentChannel: Boolean
 }
 
 type PaymentNodeConnection {

@@ -10,9 +10,6 @@ import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { Title } from '../../../core/Title';
 import { CurrencyChoicesQuery } from '../../../../__generated__/graphql';
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
 interface PaymentPlanParametersProps {
   values;
   currencyChoicesData: CurrencyChoicesQuery['currencyChoices'];
@@ -23,6 +20,7 @@ export const PaymentPlanParameters = ({
   currencyChoicesData,
 }: PaymentPlanParametersProps): React.ReactElement => {
   const { t } = useTranslation();
+
   return (
     <PaperContainer>
       <Title>
@@ -30,7 +28,7 @@ export const PaymentPlanParameters = ({
       </Title>
       <OverviewContainer>
         <Grid spacing={3} container>
-          <Grid item xs={3}>
+          <Grid item xs={4}>
             <Field
               name='startDate'
               label={t('Start Date')}
@@ -40,12 +38,13 @@ export const PaymentPlanParameters = ({
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={4}>
             <Field
               name='endDate'
               label={t('End Date')}
               component={FormikDateField}
               required
+              minDate={values.startDate}
               disabled={!values.startDate}
               initialFocusedDate={values.startDate}
               fullWidth
@@ -53,7 +52,7 @@ export const PaymentPlanParameters = ({
             />
           </Grid>
 
-          <Grid item xs={3}>
+          <Grid item xs={4}>
             <Field
               name='currency'
               fullWidth
@@ -64,7 +63,7 @@ export const PaymentPlanParameters = ({
               required
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={4}>
             <Field
               name='dispersionStartDate'
               label={t('Dispersion Start Date')}
@@ -74,17 +73,17 @@ export const PaymentPlanParameters = ({
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={4}>
             <Field
               name='dispersionEndDate'
               label={t('Dispersion End Date')}
               component={FormikDateField}
               required
+              minDate={values.dispersionStartDate}
               disabled={!values.dispersionStartDate}
               initialFocusedDate={values.dispersionStartDate}
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              minDate={today}
             />
           </Grid>
         </Grid>

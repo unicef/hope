@@ -3,10 +3,14 @@ import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
 import { fakeApolloAllPaymentsForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentsForTable';
+import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { PaymentsTable } from './PaymentsTable';
 
-describe('containers/tables/payments/PaymentsTable', () => {
+const paymentPlan = fakeApolloAllPaymentPlansForTable[0].result.data.allPaymentPlans.edges[0].node as PaymentPlanQuery['paymentPlan'];
+
+describe('containers/tables/paymentmodule/PaymentsTable', () => {
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider
@@ -15,8 +19,8 @@ describe('containers/tables/payments/PaymentsTable', () => {
       >
         <PaymentsTable
           canViewDetails={false}
-          filter={{paymentPlanId: ''}}
           businessArea='afghanistan'
+          paymentPlan={paymentPlan}
         />
       </MockedProvider>,
     );
@@ -25,7 +29,7 @@ describe('containers/tables/payments/PaymentsTable', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('should render loading', () => {
+  it('should render loading', async () => {
     const { container } = render(
       <MockedProvider
         link={new ApolloLoadingLink()}
@@ -34,11 +38,12 @@ describe('containers/tables/payments/PaymentsTable', () => {
       >
         <PaymentsTable
           canViewDetails={false}
-          filter={{paymentPlanId:''}}
           businessArea='afghanistan'
+          paymentPlan={paymentPlan}
         />
       </MockedProvider>,
     );
+    await act(() => wait(0)); // wait for response
 
     expect(container).toMatchSnapshot();
   });
