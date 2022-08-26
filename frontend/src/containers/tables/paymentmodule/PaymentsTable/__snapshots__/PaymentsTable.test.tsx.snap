@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers/tables/payments/PaymentsTable should render loading 1`] = `
+exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`] = `
 <div>
   <div
-    class="sc-chPdSV hnUZsy"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
-      class="sc-bdVaJa iMXEqU"
+      class="sc-bwzfXH iIRzZu"
       data-cy="loading-container"
     >
       <div
@@ -33,10 +33,10 @@ exports[`containers/tables/payments/PaymentsTable should render loading 1`] = `
 </div>
 `;
 
-exports[`containers/tables/payments/PaymentsTable should render with data 1`] = `
+exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1`] = `
 <div>
   <div
-    class="sc-chPdSV hnUZsy"
+    class="sc-bdVaJa ksQzqc"
   >
     <div>
       Unexpected error

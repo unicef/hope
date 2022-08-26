@@ -1,10 +1,9 @@
 import json
 from decimal import Decimal
 
-from django.db.models.functions import Coalesce
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
-
 
 import graphene
 from graphene import relay
@@ -29,40 +28,40 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_permission_decorator,
     decode_id_string,
-    to_choice_object,
     encode_id_base64,
+    to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
+    CashPlanPaymentVerificationFilter,
+    FinancialServiceProviderFilter,
+    FinancialServiceProviderXlsxReportFilter,
+    FinancialServiceProviderXlsxTemplateFilter,
+    PaymentFilter,
+    PaymentPlanFilter,
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter,
-    FinancialServiceProviderXlsxTemplateFilter,
-    FinancialServiceProviderXlsxReportFilter,
-    FinancialServiceProviderFilter,
-    PaymentPlanFilter,
-    PaymentFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
+    Approval,
+    ApprovalProcess,
     CashPlan,
     CashPlanPaymentVerification,
     CashPlanPaymentVerificationSummary,
+    DeliveryMechanismPerPaymentPlan,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
+    GenericPayment,
+    Payment,
+    PaymentChannel,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FinancialServiceProviderXlsxReport,
-    FinancialServiceProvider,
-    ApprovalProcess,
-    Approval,
-    PaymentPlan,
-    Payment,
-    DeliveryMechanismPerPaymentPlan,
-    GenericPayment,
-    PaymentChannel,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -267,6 +266,7 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class PaymentConflictDataNode(graphene.ObjectType):
     payment_plan_id = graphene.String()
+    payment_plan_encoded_id = graphene.String()
     payment_plan_unicef_id = graphene.String()
     payment_plan_start_date = graphene.String()
     payment_plan_end_date = graphene.String()
@@ -281,6 +281,7 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
     payment_plan_soft_conflicted = graphene.Boolean()
     payment_plan_soft_conflicted_data = graphene.List(PaymentConflictDataNode)
+    has_payment_channel = graphene.Boolean()
 
     class Meta:
         model = Payment
@@ -293,10 +294,18 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_payment_plan_soft_conflicted_data(self, info):
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
 
+    def resolve_has_payment_channel(self, info):
+        return self.assigned_payment_channel is not None
+
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data):
         """parse list of conflicted payment plans data from Payment model json annotations"""
-        return [json.loads(conflict) for conflict in conflicts_data]
+        response = []
+        for conflict in conflicts_data:
+            json_data = json.loads(conflict)
+            json_data["payment_plan_encoded_id"] = encode_id_base64(json_data.get("payment_plan_id"), "PaymentPlan")
+            response.append(json_data)
+        return response
 
 
 class DeliveryMechanismNode(DjangoObjectType):

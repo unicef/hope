@@ -25,7 +25,7 @@ AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][number]['node']
   {
     disablePadding: false,
     label: 'Currency',
-    id: 'currencySymbol',
+    id: 'currency',
     numeric: false,
   },
   {

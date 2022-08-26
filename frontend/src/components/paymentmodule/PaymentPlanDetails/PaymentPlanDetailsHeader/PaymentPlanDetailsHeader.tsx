@@ -57,73 +57,60 @@ export const PaymentPlanDetailsHeader = ({
   switch (paymentPlan.status) {
     case 'OPEN':
       buttons = (
-        <>
-          <OpenPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canRemove={canRemove}
-            canEdit={canEdit}
-            canLock={canLock}
-          />
-        </>
+        <OpenPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canRemove={canRemove}
+          canEdit={canEdit}
+          canLock={canLock}
+        />
       );
       break;
     case 'LOCKED':
       buttons = (
-        <>
-          <LockedPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canLock={canLock}
-            canSendForApproval={canSendForApproval}
-          />
-        </>
+        <LockedPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canLock={canLock}
+          canSendForApproval={canSendForApproval}
+        />
       );
       break;
     case 'IN_APPROVAL':
       buttons = (
-        <>
-          <InApprovalPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canReject={canReject}
-            canApprove={canApprove}
-          />
-        </>
+        <InApprovalPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canReject={canReject}
+          canApprove={canApprove}
+        />
       );
       break;
     case 'IN_AUTHORIZATION':
       buttons = (
-        <>
-          <InAuthorizationPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canReject={canReject}
-            canAuthorize={canAuthorize}
-          />
-        </>
+        <InAuthorizationPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canReject={canReject}
+          canAuthorize={canAuthorize}
+        />
       );
       break;
     case 'IN_REVIEW':
       buttons = (
-        <>
-          <InReviewPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canReject={canReject}
-            canMarkAsReviewed={canMarkAsReviewed}
-          />
-        </>
+        <InReviewPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canReject={canReject}
+          canMarkAsReviewed={canMarkAsReviewed}
+        />
       );
       break;
     case 'ACCEPTED':
       buttons = (
-        <>
-          <AcceptedPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canDownloadXlsx={canDownloadXlsx}
-            canSendToFsp={canSendToFsp}
-          />
-        </>
+        <AcceptedPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canDownloadXlsx={canDownloadXlsx}
+          canSendToFsp={canSendToFsp}
+        />
       );
       break;
     default:
-      buttons = <></>;
       break;
   }
 
