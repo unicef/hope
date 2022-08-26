@@ -49,13 +49,12 @@ class SingleExchangeRate:
             past_xrates = [past_xrates]
         else:
             past_xrates.reverse()
-
-        self.historical_exchange_rates = [HistoryExchangeRate(**past_xrate) for past_xrate in past_xrates]
+        self.historical_exchange_rates = past_xrates
 
     def __repr__(self):
         return f"SingleExchangeRate(currency_code: {self.currency_code}, ratio: {self.ratio}, x_rate: {self.x_rate})"
 
-    def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime) -> Optional[float]:
+    def get_exchange_rate_by_dispersion_date(self, dispersion_date: Optional[datetime]) -> Optional[float]:
         today = timezone.now()
 
         dispersion_date_is_not_provided = dispersion_date is None
@@ -69,7 +68,8 @@ class SingleExchangeRate:
         if dispersion_date_is_in_current_date_range:
             return self.x_rate * self.ratio
 
-        for historical_exchange_rate in self.historical_exchange_rates:
+        for historical_exchange_rate_raw_data in self.historical_exchange_rates:
+            historical_exchange_rate = HistoryExchangeRate(**historical_exchange_rate_raw_data)
             if historical_exchange_rate.is_valid_for_provided_dispersion_date(dispersion_date):
                 return historical_exchange_rate.past_xrate * historical_exchange_rate.past_ratio
 
