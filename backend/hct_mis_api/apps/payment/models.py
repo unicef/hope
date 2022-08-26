@@ -210,6 +210,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     class Status(models.TextChoices):
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
+        LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
         IN_APPROVAL = "IN_APPROVAL", "In Approval"
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
@@ -283,15 +284,23 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
+        source=[Status.LOCKED],
+        target=Status.LOCKED_FSP,
+    )
+    def status_lock_fsp(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
         source=[Status.IN_APPROVAL, Status.IN_AUTHORIZATION, Status.IN_REVIEW],
-        target=Status.LOCKED,
+        target=Status.LOCKED_FSP,
     )
     def status_reject(self):
         self.status_date = timezone.now()
 
     @transition(
         field=status,
-        source=Status.LOCKED,
+        source=Status.LOCKED_FSP,
         target=Status.IN_APPROVAL,
     )
     def status_send_to_approval(self):
@@ -323,7 +332,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
-        source=Status.LOCKED,
+        source=Status.LOCKED_FSP,
         target=Status.XLSX_EXPORTING,
     )
     def status_exporting(self):
@@ -331,7 +340,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
-        source=Status.LOCKED,
+        source=Status.LOCKED_FSP,
         target=Status.XLSX_IMPORTING,
     )
     def status_importing(self):
