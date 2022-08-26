@@ -120,6 +120,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     SUB_CATEGORY_FSP_COMPLAINT = 2
     SUB_CATEGORY_REGISTRATION_COMPLAINT = 3
     SUB_CATEGORY_OTHER_COMPLAINT = 4
+    SUB_CATEGORY_PARTNER_COMPLAINT = 5
 
     ISSUE_TYPE_DATA_BREACH = 1
     ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK = 2
@@ -189,6 +190,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         (SUB_CATEGORY_FSP_COMPLAINT, _("FSP Related Complaint")),
         (SUB_CATEGORY_REGISTRATION_COMPLAINT, _("Registration Related Complaint")),
         (SUB_CATEGORY_OTHER_COMPLAINT, _("Other Complaint")),
+        (SUB_CATEGORY_PARTNER_COMPLAINT, _("Partner Related Complaint")),
     )
 
     MANUAL_CATEGORIES = (
@@ -335,6 +337,8 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default=PRIORITY_LOW)
     urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default=URGENCY_NOT_URGENT)
     partner = models.ForeignKey("account.Partner", null=True, blank=True, on_delete=models.SET_NULL)
+    programme = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.SET_NULL)
+    comments = models.TextField(blank=True, null=True)
 
     objects = GrievanceTicketManager()
 

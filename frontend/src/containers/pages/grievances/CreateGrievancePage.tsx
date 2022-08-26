@@ -30,6 +30,7 @@ import {
   GrievanceSteps,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_SUB_CATEGORIES,
 } from '../../../utils/constants';
 import {
   isInvalid,
@@ -39,6 +40,7 @@ import {
 import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllProgramsQuery,
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
@@ -137,6 +139,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
     urgency: 3,
     subCategory: null,
     partner: null,
+    programme: null,
+    comments: null,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
@@ -190,11 +194,40 @@ export const CreateGrievancePage = (): React.ReactElement => {
     '*',
   );
 
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const allProgramsEdges = allProgramsData?.allPrograms?.edges || [];
+  const mappedPrograms = allProgramsEdges.map((edge) => ({
+    name: edge.node?.name,
+    value: edge.node.id,
+  }));
+
+  const showSubCategory = (values): boolean => {
+    return values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
+  };
+  const showIssueType = (values): boolean => {
+    return (
+      values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+    );
+  };
+
+  const subCategoryChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.grievanceTicketSubCategoryChoices);
+
   if (
     userDataLoading ||
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||
-    householdFieldsLoading
+    householdFieldsLoading ||
+    loadingPrograms
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
@@ -262,6 +295,16 @@ export const CreateGrievancePage = (): React.ReactElement => {
 
   const handleBack = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const selectedIssueType = (values): string => {
+    return values.issueType
+      ? choicesData.grievanceTicketIssueTypeChoices
+          .filter((el) => el.category === values.category.toString())[0]
+          .subCategories.filter(
+            (el) => el.value === values.issueType.toString(),
+          )[0].name
+      : '-';
   };
 
   return (
@@ -361,10 +404,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               component={FormikSelectField}
                             />
                           </Grid>
-                          {values.category ===
-                            GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-                          values.category ===
-                            GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
+                          {showIssueType(values) && (
                             <Grid item xs={6}>
                               <Field
                                 name='issueType'
@@ -376,13 +416,12 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 component={FormikSelectField}
                               />
                             </Grid>
-                          ) : null}
-                          {values.category ===
-                            GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT && (
+                          )}
+                          {showSubCategory(values) && (
                             <Grid item xs={6}>
                               <Field
                                 name='subCategory'
-                                label={t('Sub Category')}
+                                label={t('Issue Type')}
                                 onChange={(e) => {
                                   setFieldValue('subCategory', e.target.value);
                                 }}
@@ -425,7 +464,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             <Grid container spacing={6}>
                               {[
                                 {
-                                  label: t('CATEGORY'),
+                                  label: t('Category'),
                                   value: (
                                     <span>
                                       {categoryChoices[values.category]}
@@ -433,9 +472,21 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   ),
                                   size: 3,
                                 },
-                                {
+                                showIssueType(values) && {
                                   label: t('Issue Type'),
-                                  value: <span>{values.issueType || '-'}</span>,
+                                  value: (
+                                    <span>{selectedIssueType(values)}</span>
+                                  ),
+                                  size: 9,
+                                },
+                                showSubCategory(values) && {
+                                  label: t('Issue Type'),
+                                  value: (
+                                    <span>
+                                      {subCategoryChoices[values.subCategory] ||
+                                        '-'}
+                                    </span>
+                                  ),
                                   size: 9,
                                 },
                                 {
@@ -472,31 +523,37 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   ),
                                   size: 3,
                                 },
-                              ].map((el) => (
-                                <Grid
-                                  key={el.label}
-                                  item
-                                  xs={el.size as GridSize}
-                                >
-                                  <LabelizedField label={el.label}>
-                                    {el.value}
-                                  </LabelizedField>
-                                </Grid>
-                              ))}
+                              ]
+                                .filter((el) => el)
+                                .map((el) => (
+                                  <Grid
+                                    key={el.label}
+                                    item
+                                    xs={el.size as GridSize}
+                                  >
+                                    <LabelizedField label={el.label}>
+                                      {el.value}
+                                    </LabelizedField>
+                                  </Grid>
+                                ))}
                             </Grid>
                           </OverviewContainer>
                           <BoxWithBorderBottom />
                           <BoxPadding />
                           <Grid container spacing={3}>
-                            <Grid item xs={3}>
-                              <Field
-                                name='partner'
-                                variant='outlined'
-                                label={t('Partner')}
-                                choices={userChoices.userPartnerChoices}
-                                component={FormikSelectField}
-                              />
-                            </Grid>
+                            {values.subCategory ===
+                              GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT && (
+                              <Grid item xs={3}>
+                                <Field
+                                  name='partner'
+                                  fullWidth
+                                  variant='outlined'
+                                  label={t('Partner')}
+                                  choices={userChoices.userPartnerChoices}
+                                  component={FormikSelectField}
+                                />
+                              </Grid>
+                            )}
                             <Grid item xs={12}>
                               <Field
                                 name='description'
@@ -504,6 +561,16 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 fullWidth
                                 variant='outlined'
                                 label='Description*'
+                                component={FormikTextField}
+                              />
+                            </Grid>
+                            <Grid item xs={12}>
+                              <Field
+                                name='comments'
+                                multiline
+                                fullWidth
+                                variant='outlined'
+                                label='Comments'
                                 component={FormikTextField}
                               />
                             </Grid>
@@ -556,6 +623,19 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 component={FormikSelectField}
                               />
                             </Grid>
+                            {+values.issueType !==
+                              +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+                              <Grid item xs={6}>
+                                <Field
+                                  name='programme'
+                                  fullWidth
+                                  variant='outlined'
+                                  label={t('Programme')}
+                                  choices={mappedPrograms}
+                                  component={FormikSelectField}
+                                />
+                              </Grid>
+                            )}
                           </Grid>
                           <Box pt={5}>
                             <BoxWithBorders>
