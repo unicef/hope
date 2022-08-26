@@ -359,6 +359,11 @@ export const GrievanceTicket = gql`
       }
       priority
       urgency
+      programme {
+        name
+        id
+      }
+      comments
     }
   }
 `;
