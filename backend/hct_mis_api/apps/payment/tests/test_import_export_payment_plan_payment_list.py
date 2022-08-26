@@ -1,3 +1,5 @@
+import zipfile
+
 from io import BytesIO
 from pathlib import Path
 
@@ -9,7 +11,13 @@ from hct_mis_api.apps.payment.utils import float_to_decimal
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
-from hct_mis_api.apps.payment.models import PaymentPlan, ServiceProvider, PaymentChannel, Payment
+from hct_mis_api.apps.payment.models import (
+    PaymentPlan,
+    ServiceProvider,
+    PaymentChannel,
+    Payment,
+    FinancialServiceProvider,
+)
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.payment.fixtures import (
@@ -147,3 +155,29 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(
             wb.active["F2"].value, self.payment_plan.all_active_payments[0].assigned_payment_channel.delivery_mechanism
         )
+
+    def test_export_payment_plan_payment_list_per_fsp(self):
+        export_service = XlsxPaymentPlanExportService(self.payment_plan)
+        export_service.export_per_fsp(self.user)
+
+        self.assertTrue(self.payment_plan.has_payment_list_per_fsp_xlsx_file)
+        self.assertIsNotNone(self.payment_plan.xlsx_payment_list_per_fsp_file_link)
+        self.assertTrue(
+            self.payment_plan.export_per_fsp_xlsx_file.file.name.startswith(
+                f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
+            )
+        )
+        fsp_ids = export_service.payment_list.values_list("financial_service_provider_id", flat=True)
+        with zipfile.ZipFile(self.payment_plan.export_per_fsp_xlsx_file.file, mode="r") as zip_file:
+            file_list = zip_file.namelist()
+            self.assertEqual(len(fsp_ids), len(file_list))
+            fsp_names = FinancialServiceProvider.objects.filter(id__in=fsp_ids).values_list("name", flat=True)
+            file_list_fsp = [
+                f.replace(
+                    ".xlsx", ""
+                ).replace(
+                    f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_", ""
+                ) for f in file_list
+            ]
+            for fsp_name in fsp_names:
+                self.assertIn(fsp_name, file_list_fsp)
