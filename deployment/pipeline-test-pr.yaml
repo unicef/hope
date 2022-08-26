@@ -120,7 +120,7 @@ stages:
               azureContainerRegistry: $(Docker.registry)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run --no-deps backend flake8 .'
+              dockerComposeCommand: 'run --no-deps backend flake8 --format junit-xml .'
               dockerComposeFileArgs: |
                 backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
 

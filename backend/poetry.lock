@@ -453,6 +453,7 @@ python-dateutil = "2.6.0"
 [package.source]
 type = "url"
 url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip"
+
 [[package]]
 name = "django-author"
 version = "1.2.0"
@@ -955,6 +956,18 @@ pycodestyle = ">=2.8.0,<2.9.0"
 pyflakes = ">=2.4.0,<2.5.0"
 
 [[package]]
+name = "flake8-formatter-junit-xml"
+version = "0.0.6"
+description = "JUnit XML Formatter for flake8"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+flake8 = ">3.0.0"
+junit-xml = ">=1.8"
+
+[[package]]
 name = "freezegun"
 version = "0.3.14"
 description = "Let your Python tests travel through time"
@@ -1203,6 +1216,17 @@ MarkupSafe = ">=2.0"
 
 [package.extras]
 i18n = ["Babel (>=2.7)"]
+
+[[package]]
+name = "junit-xml"
+version = "1.9"
+description = "Creates JUnit XML test result documents that can be read by tools such as Jenkins"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+six = "*"
 
 [[package]]
 name = "kombu"
@@ -1569,10 +1593,10 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
-docs = ["zope.interface", "sphinx-rtd-theme", "sphinx"]
-dev = ["pre-commit", "mypy", "coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)", "cryptography (>=3.3.1)", "zope.interface", "sphinx-rtd-theme", "sphinx"]
 crypto = ["cryptography (>=3.3.1)"]
+dev = ["sphinx", "sphinx-rtd-theme", "zope.interface", "cryptography (>=3.3.1)", "pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)", "mypy", "pre-commit"]
+docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
+tests = ["pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)"]
 
 [[package]]
 name = "pyparsing"
@@ -2189,7 +2213,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "02199f611812dccbae257e4347a03a26656634c689783a2879aa24c5c7dc9d97"
+content-hash = "44a16fa1f5982a4e904fabf033368b33beb3677e51256663b52ab6ae880fb01f"
 
 [metadata.files]
 amqp = []
@@ -2266,6 +2290,7 @@ factory-boy = []
 faker = []
 fastdiff = []
 flake8 = []
+flake8-formatter-junit-xml = []
 freezegun = []
 gevent = []
 gprof2dot = []
@@ -2282,6 +2307,7 @@ ipython = []
 isodate = []
 jedi = []
 jinja2 = []
+junit-xml = []
 kombu = []
 lxml = []
 markuppy = []
