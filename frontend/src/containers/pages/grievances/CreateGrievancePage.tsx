@@ -119,16 +119,19 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
 
   const linkedTicketId = history.location.state?.linkedTicketId;
+  const selectedHousehold = history.location.state?.selectedHousehold;
+  const selectedIndividual = history.location.state?.selectedIndividual;
+  const category = history.location.state?.category;
 
   const initialValues = {
     description: '',
-    category: null,
+    category: category || null,
     language: '',
     consent: false,
     admin: null,
     area: '',
-    selectedHousehold: null,
-    selectedIndividual: null,
+    selectedHousehold: selectedHousehold || null,
+    selectedIndividual: selectedIndividual || null,
     selectedPaymentRecords: [],
     selectedRelatedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
