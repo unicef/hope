@@ -31,7 +31,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                STATUS
+                Status
               </span>
               <div>
                 <div
@@ -103,7 +103,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                ASSIGNED TO
+                Assigned to
               </span>
               <div>
                 Maciej Szewczyk
@@ -118,7 +118,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                CATEGORY
+                Category
               </span>
               <div>
                 <span>
@@ -152,7 +152,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                HOUSEHOLD ID
+                Household ID
               </span>
               <div>
                 <span>
@@ -174,7 +174,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                INDIVIDUAL ID
+                Individual ID
               </span>
               <div>
                 <span>
@@ -196,7 +196,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                PAYMENT ID
+                Payment ID
               </span>
               <div>
                 <span>
@@ -206,7 +206,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-9"
           >
             <div>
               <span
@@ -228,7 +228,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                CREATED BY
+                Created By
               </span>
               <div>
                 Maciej Szewczyk
@@ -243,7 +243,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                DATE CREATED
+                Date Created
               </span>
               <div>
                 <time
@@ -262,7 +262,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                LAST MODIFIED DATE
+                Last Modified Date
               </span>
               <div>
                 <time
@@ -281,7 +281,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                ADMINISTRATIVE LEVEL 2
+                Administrative Level 2
               </span>
               <div>
                 -
@@ -296,7 +296,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                AREA / VILLAGE / PAY POINT
+                Area / Village / Pay point
               </span>
               <div>
                 -
@@ -311,7 +311,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                LANGUAGES SPOKEN
+                Languages Spoken
               </span>
               <div>
                 -
@@ -326,7 +326,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                DESCRIPTION
+                Description
               </span>
               <div>
                 dwdw

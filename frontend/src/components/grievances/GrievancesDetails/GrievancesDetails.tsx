@@ -83,7 +83,7 @@ export const GrievancesDetails = ({
           <Grid container spacing={6}>
             {[
               {
-                label: t('STATUS'),
+                label: t('Status'),
                 value: (
                   <StatusBox
                     status={statusChoices[ticket.status]}
@@ -115,12 +115,12 @@ export const GrievancesDetails = ({
                 size: 3,
               },
               {
-                label: t('ASSIGNED TO'),
+                label: t('Assigned to'),
                 value: renderUserName(ticket.assignedTo),
                 size: 3,
               },
               {
-                label: t('CATEGORY'),
+                label: t('Category'),
                 value: <span>{categoryChoices[ticket.category]}</span>,
                 size: 3,
               },
@@ -137,7 +137,7 @@ export const GrievancesDetails = ({
                 size: 3,
               },
               {
-                label: t('HOUSEHOLD ID'),
+                label: t('Household ID'),
                 value: (
                   <span>
                     {ticket.household?.id ? (
@@ -158,7 +158,7 @@ export const GrievancesDetails = ({
                 size: 3,
               },
               {
-                label: t('INDIVIDUAL ID'),
+                label: t('Individual ID'),
                 value: (
                   <span>
                     {ticket.individual?.id ? (
@@ -179,7 +179,7 @@ export const GrievancesDetails = ({
                 size: showSubCategory || showIssueType ? 3 : 6,
               },
               {
-                label: t('PAYMENT ID'),
+                label: t('Payment ID'),
                 value: (
                   <span>
                     {ticket.paymentRecord?.caId ? (
@@ -201,42 +201,42 @@ export const GrievancesDetails = ({
                 size: showPartner ? 3 : 9,
               },
               showPartner && {
-                label: t('PARTNER'),
+                label: t('Partner'),
                 value: ticket.partner?.name,
                 size: 6,
               },
               {
-                label: t('CREATED BY'),
+                label: t('Created By'),
                 value: renderUserName(ticket.createdBy),
                 size: 3,
               },
               {
-                label: t('DATE CREATED'),
+                label: t('Date Created'),
                 value: <UniversalMoment>{ticket.createdAt}</UniversalMoment>,
                 size: 3,
               },
               {
-                label: t('LAST MODIFIED DATE'),
+                label: t('Last Modified Date'),
                 value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
                 size: 6,
               },
               {
-                label: t('ADMINISTRATIVE LEVEL 2'),
+                label: t('Administrative Level 2'),
                 value: ticket.admin,
                 size: 3,
               },
               {
-                label: t('AREA / VILLAGE / PAY POINT'),
+                label: t('Area / Village / Pay point'),
                 value: ticket.area,
                 size: 3,
               },
               {
-                label: t('LANGUAGES SPOKEN'),
+                label: t('Languages Spoken'),
                 value: ticket.language,
                 size: 3,
               },
               {
-                label: t('DESCRIPTION'),
+                label: t('Description'),
                 value: ticket.description,
                 size: 12,
               },

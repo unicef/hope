@@ -136,7 +136,7 @@ export const EditGrievancePage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const allProgramsEdges = get(allProgramsData, 'allPrograms.edges', []);
+  const allProgramsEdges = allProgramsData?.allPrograms?.edges || [];
   const mappedPrograms = allProgramsEdges.map((edge) => ({
     name: edge.node?.name,
     value: edge.node.id,
