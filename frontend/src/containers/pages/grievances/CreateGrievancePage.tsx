@@ -12,7 +12,6 @@ import { Field, Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
-import get from 'lodash/get';
 import styled from 'styled-components';
 import {
   hasPermissionInModule,
@@ -203,7 +202,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const allProgramsEdges = get(allProgramsData, 'allPrograms.edges', []);
+  const allProgramsEdges = allProgramsData?.allPrograms?.edges || [];
   const mappedPrograms = allProgramsEdges.map((edge) => ({
     name: edge.node?.name,
     value: edge.node.id,
@@ -465,7 +464,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             <Grid container spacing={6}>
                               {[
                                 {
-                                  label: t('CATEGORY'),
+                                  label: t('Category'),
                                   value: (
                                     <span>
                                       {categoryChoices[values.category]}
