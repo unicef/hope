@@ -66,6 +66,7 @@ stages:
           - script: |
               export PATH=$PATH:$HOME/.poetry/bin
               poetry run flake8 .
+            workingDirectory: 'backend'
             displayName: 'Run linter'
 
   - stage: build_and_push
