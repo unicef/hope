@@ -55,7 +55,7 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: "3.9"
+              versionSpec: "3.9.12"
             displayName: "Install Python"
           - script: |
               curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
