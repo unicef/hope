@@ -7,6 +7,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.schema import ProgramNode
 
 import graphene
 from graphql import GraphQLError
@@ -103,6 +105,8 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
     partner = graphene.Int(node=PartnerType, required=False)
+    programme = graphene.ID(node=ProgramNode)
+    comments = graphene.String()
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -120,6 +124,8 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
     partner = graphene.Int(node=PartnerType, required=False)
+    programme = graphene.ID(node=ProgramNode)
+    comments = graphene.String()
 
 
 class CreateTicketNoteInput(graphene.InputObjectType):
@@ -328,6 +334,9 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         if assigned_to_id is not None:
             assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
+        programme = input.pop("programme", None)
+        if programme:
+            programme = get_object_or_404(Program, pk=decode_id_string(programme))
         grievance_ticket = GrievanceTicket.objects.create(
             **input,
             admin2=admin_object,
@@ -337,6 +346,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             assigned_to=assigned_to,
             status=GrievanceTicket.STATUS_ASSIGNED,
             partner=partner,
+            programme=programme,
         )
         GrievanceNotification.send_all_notifications(
             GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
@@ -515,6 +525,9 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         partner = get_partner(input.pop("partner", None))
         if partner:
             grievance_ticket.partner = partner
+        programme = input.pop("programme", None)
+        if programme:
+            grievance_ticket.programme = get_object_or_404(Program, pk=decode_id_string(programme))
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "assigned_to"))
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id) if assigned_to_id else None

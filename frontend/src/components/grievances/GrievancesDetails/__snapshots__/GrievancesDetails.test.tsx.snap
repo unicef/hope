@@ -31,7 +31,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                STATUS
+                Status
               </span>
               <div>
                 <div
@@ -55,12 +55,19 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                CATEGORY
+                Priority
               </span>
               <div>
-                <span>
-                  Data Change
-                </span>
+                <div
+                  class="sc-EHOje gFjtOh"
+                >
+                  <div
+                    class="sc-bZQynM fNRxvN"
+                    data-cy="status-container"
+                  >
+                    High
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -72,11 +79,50 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                SUB CATEGORY
+                Urgency
+              </span>
+              <div>
+                <div
+                  class="sc-EHOje gFjtOh"
+                >
+                  <div
+                    class="sc-bZQynM fNRxvN"
+                    data-cy="status-container"
+                  >
+                    Very urgent
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Assigned to
+              </span>
+              <div>
+                Maciej Szewczyk
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Category
               </span>
               <div>
                 <span>
-                  -
+                  Data Change
                 </span>
               </div>
             </div>
@@ -106,7 +152,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                HOUSEHOLD ID
+                Household ID
               </span>
               <div>
                 <span>
@@ -128,7 +174,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                INDIVIDUAL ID
+                Individual ID
               </span>
               <div>
                 <span>
@@ -143,14 +189,14 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
           >
             <div>
               <span
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                PAYMENT ID
+                Payment ID
               </span>
               <div>
                 <span>
@@ -160,17 +206,17 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-9"
           >
             <div>
               <span
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                CONSENT
+                Programme
               </span>
               <div>
-                Yes
+                -
               </div>
             </div>
           </div>
@@ -182,7 +228,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                CREATED BY
+                Created By
               </span>
               <div>
                 Maciej Szewczyk
@@ -197,7 +243,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                DATE CREATED
+                Date Created
               </span>
               <div>
                 <time
@@ -209,14 +255,14 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
           >
             <div>
               <span
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                LAST MODIFIED DATE
+                Last Modified Date
               </span>
               <div>
                 <time
@@ -228,14 +274,59 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
           >
             <div>
               <span
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                DESCRIPTION
+                Administrative Level 2
+              </span>
+              <div>
+                -
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Area / Village / Pay point
+              </span>
+              <div>
+                -
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Languages Spoken
+              </span>
+              <div>
+                -
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Description
               </span>
               <div>
                 dwdw
@@ -243,59 +334,14 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
           >
             <div>
               <span
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
-                ASSIGNED TO
-              </span>
-              <div>
-                Maciej Szewczyk
-              </div>
-            </div>
-          </div>
-          <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
-          >
-            <div>
-              <span
-                class="sc-htpNat hcDmtB"
-                color="textSecondary"
-              >
-                ADMINISTRATIVE LEVEL 2
-              </span>
-              <div>
-                -
-              </div>
-            </div>
-          </div>
-          <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
-          >
-            <div>
-              <span
-                class="sc-htpNat hcDmtB"
-                color="textSecondary"
-              >
-                AREA / VILLAGE / PAY POINT
-              </span>
-              <div>
-                -
-              </div>
-            </div>
-          </div>
-          <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
-          >
-            <div>
-              <span
-                class="sc-htpNat hcDmtB"
-                color="textSecondary"
-              >
-                LANGUAGES SPOKEN
+                Comments
               </span>
               <div>
                 -

@@ -77,7 +77,7 @@ export const GrievanceDetailsToolbar = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance-and-feedback/`,
+      to: `/${businessArea}/grievance-and-feedback/tickets`,
     },
   ];
   const [mutate, { loading }] = useGrievanceTicketStatusChangeMutation();
