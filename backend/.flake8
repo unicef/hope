@@ -33,3 +33,4 @@ ignore =
     E225, # missing whitespace around operator
     W391, # blank line at end of file
     #
+    C901, # too complex # TODO: fix this
