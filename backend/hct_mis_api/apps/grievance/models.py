@@ -191,7 +191,6 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         (SUB_CATEGORY_REGISTRATION_COMPLAINT, _("Registration Related Complaint")),
         (SUB_CATEGORY_OTHER_COMPLAINT, _("Other Complaint")),
         (SUB_CATEGORY_PARTNER_COMPLAINT, _("Partner Related Complaint")),
-
     )
 
     MANUAL_CATEGORIES = (
