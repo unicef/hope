@@ -43,8 +43,31 @@ stages:
           - script: yarn test --watchAll=false
             workingDirectory: 'frontend'
             displayName: "Test"
-  - stage: build_and_push
+
+  - stage: lint
     dependsOn: []
+    displayName: Lint
+    jobs:
+      - job: flake8
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[FLAKE8]"
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.9"
+            displayName: "Install Python"
+          - script: |
+              curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+              export PATH=$PATH:$HOME/.poetry/bin
+              poetry install --no-root
+            displayName: 'Install dependencies'
+          - script: |
+              poetry run flake8 .
+            displayName: 'Run linter'
+
+  - stage: build_and_push
+    dependsOn: lint
     displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
@@ -112,17 +135,6 @@ stages:
               script: |
                mv deployment/docker-compose.tst.yml docker-compose.tst.yml
                mv $(Agent.TempDirectory)/.env-django-test .env
-
-          - task: DockerCompose@0
-            displayName: "Run linter"
-            inputs:
-              containerregistrytype: 'Azure Container Registry'
-              azureContainerRegistry: $(Docker.registry)
-              dockerComposeFile: '**/docker-compose.tst.yml'
-              action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run --no-deps backend flake8 --format junit-xml .'
-              dockerComposeFileArgs: |
-                backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
 
           - task: DockerCompose@0
             displayName: "Run tests"
