@@ -57,17 +57,18 @@ stages:
             inputs:
               versionSpec: "3.9.12"
             displayName: "Install Python"
-          - script: |
-              curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
-              export PATH=$PATH:$HOME/.poetry/bin
-              poetry install --no-root
-            workingDirectory: 'backend'
-            displayName: 'Install dependencies'
-          - script: |
-              export PATH=$PATH:$HOME/.poetry/bin
-              poetry run flake8 .
-            workingDirectory: 'backend'
-            displayName: 'Run linter'
+          - script: echo "##[error] TEST" 1>&2
+          # - script: |
+          #     curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+          #     export PATH=$PATH:$HOME/.poetry/bin
+          #     poetry install --no-root
+          #   workingDirectory: 'backend'
+          #   displayName: 'Install dependencies'
+          # - script: |
+          #     export PATH=$PATH:$HOME/.poetry/bin
+          #     poetry run flake8 .
+          #   workingDirectory: 'backend'
+          #   displayName: 'Run linter'
 
   - stage: build_and_push
     dependsOn: lint
