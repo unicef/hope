@@ -57,7 +57,7 @@ stages:
             inputs:
               versionSpec: "3.9.12"
             displayName: "Install Python"
-          - script: echo "##[error] TEST" 1>&2
+          - script: echo "##[error] TEST" 1>&2 ; exit 1
           # - script: |
           #     curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
           #     export PATH=$PATH:$HOME/.poetry/bin
