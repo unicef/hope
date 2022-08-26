@@ -64,6 +64,7 @@ stages:
             workingDirectory: 'backend'
             displayName: 'Install dependencies'
           - script: |
+              export PATH=$PATH:$HOME/.poetry/bin
               poetry run flake8 .
             displayName: 'Run linter'
 
