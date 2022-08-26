@@ -2,7 +2,7 @@ import { Box, Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -10,6 +10,7 @@ import { MiśTheme } from '../../theme';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_SUBCATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import {
@@ -72,6 +73,7 @@ export const GrievanceDetailsToolbar = ({
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const confirm = useConfirmation();
+  const history = useHistory();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
@@ -304,6 +306,13 @@ export const GrievanceDetailsToolbar = ({
     );
   }
 
+  const canCreateDataChange = (): boolean => {
+    return [
+      GRIEVANCE_SUBCATEGORIES.PAYMENT_RELATED_COMPLAINT,
+      GRIEVANCE_SUBCATEGORIES.FSP_RELATED_COMPLAINT,
+    ].includes(ticket.subCategory?.toString());
+  };
+
   return (
     <PageHeader
       title={`Ticket ID: ${ticket.unicefId}`}
@@ -452,6 +461,27 @@ export const GrievanceDetailsToolbar = ({
                 >
                   {t('Send Back')}
                 </LoadingButton>
+              </Box>
+            )}
+            {canCreateDataChange && (
+              <Box mr={3}>
+                <Button
+                  onClick={() =>
+                    history.push({
+                      pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
+                      state: {
+                        category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
+                        selectedIndividual: ticket.individual,
+                        selectedHousehold: ticket.household,
+                        linkedTicketId: ticket.id,
+                      },
+                    })
+                  }
+                  variant='outlined'
+                  color='primary'
+                >
+                  {t('Create a Data Change ticket')}
+                </Button>
               </Box>
             )}
             {canClose && closeButton}
