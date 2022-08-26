@@ -44,19 +44,30 @@ export const AllPaymentsForTable = gql`
           paymentPlanHardConflicted
           paymentPlanSoftConflicted
           paymentPlanHardConflictedData {
+            paymentPlanUnicefId
+            paymentPlanEncodedId
             paymentPlanId
             paymentPlanStartDate
             paymentPlanEndDate
             paymentPlanStatus
             paymentId
+            paymentUnicefId
           }
           paymentPlanSoftConflictedData {
+            paymentPlanUnicefId
+            paymentPlanEncodedId
             paymentPlanId
             paymentPlanStartDate
             paymentPlanEndDate
             paymentPlanStatus
             paymentId
+            paymentUnicefId
           }
+          collector {
+            id
+            fullName
+          }
+          hasPaymentChannel
         }
       }
     }

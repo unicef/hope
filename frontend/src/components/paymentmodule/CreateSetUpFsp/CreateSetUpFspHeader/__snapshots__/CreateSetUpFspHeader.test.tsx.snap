@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/CreateSetUpFspHeader should render 1`] = `
+<div>
+  <div
+    class="sc-bxivhb ixnywI"
+    data-cy="page-header-container"
+  >
+    <div
+      class="sc-ifAKCX dWpFEd"
+    >
+      <div
+        class="sc-EHOje PMFav"
+      >
+        <div>
+          <div
+            class="MuiBox-root MuiBox-root-1"
+          >
+            <h5
+              class="MuiTypography-root MuiTypography-h5"
+            >
+              Set up FSP
+            </h5>
+            <div
+              class="MuiBox-root MuiBox-root-2"
+            />
+          </div>
+        </div>
+        <div
+          class="sc-bZQynM jdkaLI"
+        />
+      </div>
+    </div>
+    <div
+      class="sc-htoDjs hzwHVL"
+    />
+  </div>
+</div>
+`;

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
+exports[`components/paymentmodule/EditFspHeader should render 1`] = `
 <div>
   <div
     class="sc-bxivhb ixnywI"
@@ -47,7 +47,7 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
             <h5
               class="MuiTypography-root MuiTypography-h5"
             >
-              New Payment Plan
+              Edit FSP
             </h5>
             <div
               class="MuiBox-root MuiBox-root-2"
