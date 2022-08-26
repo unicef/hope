@@ -76,7 +76,7 @@ stages:
             inputs:
               testResultsFormat: 'JUnit'
               testResultsFiles: '*.xml'
-              searchFolder: 'backend/lint-results/'
+              searchFolder: 'backend/lint-output/'
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'Lint results'
