@@ -111,8 +111,7 @@ class IndividualDocument(Document):
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals"
         settings = {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
+            **settings.ELASTICSEARCH_BASE_SETTINGS,
             "similarity": {
                 "default": {
                     "type": "scripted",
