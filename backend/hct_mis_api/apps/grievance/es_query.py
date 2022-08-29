@@ -15,6 +15,13 @@ TERM_FIELDS = (
     "grievance_type",
     "registration_data_import"
 )
+
+OBJECT_FIELDS = (
+    "admin",
+    "registration_data_import",
+    "assigned_to",
+)
+
 TERMS_FIELDS = ("status", "admin")
 
 
@@ -23,7 +30,7 @@ def execute_es_query(query_dict):
         GrievanceTicketDocument
         .search()
         .params(search_type="dfs_query_then_fetch", preserve_order=True)
-        # .from_dict(query_dict)
+        .from_dict(query_dict)
     )
 
     es_ids = [hit.meta.id for hit in es_response.scan()]
@@ -38,6 +45,8 @@ def create_es_query(options):
 
     grievance_status = options.pop("grievance_status", "active")
     created_at_range = options.pop("created_at_range", None)
+
+    business_area = options.pop("business_area")
 
     if created_at_range:
         date_range = {
@@ -75,7 +84,7 @@ def create_es_query(options):
         else:
             query_search.append({
                 "term": {
-                    "head_of_household_last_name": {
+                    "ticket_details.household.head_of_household.family_name": {
                         "value": value
                     }
                 }
@@ -100,22 +109,36 @@ def create_es_query(options):
 
     for k, v in options.items():
         if k in TERM_FIELDS and v:
-            if k == "assigned_to":
-                v = decode_id_string(v)
-            query_term_fields.append({
-                "term": {
-                    k: {
-                        "value": v
+            if k in OBJECT_FIELDS:
+                query_term_fields.append({
+                    "term": {
+                        f"{k}.id": {
+                            "value": decode_id_string(v) if k == "assigned_to" else v
+                        }
                     }
-                }
-            })
+                })
+            else:
+                query_term_fields.append({
+                    "term": {
+                        k: {
+                            "value": v
+                        }
+                    }
+                })
 
         if k in TERMS_FIELDS and v not in ([""], [None]):
-            query_terms_fields.append({
-                "terms": {
-                    k: v
-                }
-            })
+            if k == "admin":
+                query_terms_fields.append({
+                    "terms": {
+                        f"{k}.id.keyword": v
+                    }
+                })
+            else:
+                query_terms_fields.append({
+                    "terms": {
+                        k: v
+                    }
+                })
 
     if grievance_status == "active":
         query_terms_fields.append({
@@ -137,11 +160,10 @@ def create_es_query(options):
         "sort": [sort]
     }
 
-    business_area = options.pop("business_area")
     if business_area:
         query_dict["query"]["bool"]["filter"] = {
             "term": {
-                "business_area": "afghanistan"
+                "business_area.slug": "afghanistan"
             }
         }
 
