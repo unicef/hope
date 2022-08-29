@@ -441,10 +441,10 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         country = geo_models.Country.objects.first()
 
         admin1_type = geo_models.AreaType.objects.create(name="Bakool", area_level=1, country=country)
-        admin1_new = geo_models.Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
+        admin1 = geo_models.Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
 
         admin2_type = geo_models.AreaType.objects.create(name="Ceel Barde", area_level=2, country=country)
-        geo_models.Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1_new, area_type=admin2_type)
+        geo_models.Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1, area_type=admin2_type)
 
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=cls.business_area.slug
