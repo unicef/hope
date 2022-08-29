@@ -11,7 +11,10 @@ import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
 
-export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
+export const GrievancesSidebar = ({
+  ticket,
+  canViewHouseholdDetails,
+}): React.ReactElement => {
   const shouldShowReassignBoxDataChange = (): boolean => {
     let { individual, household } = ticket;
     const { category, issueType, status } = ticket;
@@ -86,6 +89,7 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
             <OtherRelatedTickets
               ticket={ticket}
               linkedTickets={ticket.relatedTickets}
+              canViewHouseholdDetails={canViewHouseholdDetails}
             />
           </Box>
         </Box>
@@ -122,6 +126,7 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
           <OtherRelatedTickets
             ticket={ticket}
             linkedTickets={ticket.relatedTickets}
+            canViewHouseholdDetails={canViewHouseholdDetails}
           />
         </Box>
       </Box>
@@ -129,7 +134,7 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
   };
 
   return (
-    <Grid item xs={3}>
+    <Grid item xs={4}>
       {renderRightSection()}
     </Grid>
   );

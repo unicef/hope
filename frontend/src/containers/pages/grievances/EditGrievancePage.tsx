@@ -3,6 +3,7 @@ import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
+import get from 'lodash/get';
 import styled from 'styled-components';
 import {
   hasCreatorOrOwnerPermissions,
@@ -13,11 +14,12 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
   GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_SUB_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import {
@@ -30,6 +32,7 @@ import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllProgramsQuery,
   useAllUsersQuery,
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
@@ -43,7 +46,6 @@ import { ContainerColumnWithBorder } from '../../../components/core/ContainerCol
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { Consent } from '../../../components/grievances/Consent';
 import { LookUpSection } from '../../../components/grievances/LookUpSection';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
 import {
@@ -126,13 +128,28 @@ export const EditGrievancePage = (): React.ReactElement => {
 
   const { data: userChoices } = useUserChoiceDataQuery();
 
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const allProgramsEdges = allProgramsData?.allPrograms?.edges || [];
+  const mappedPrograms = allProgramsEdges.map((edge) => ({
+    name: edge.node?.name,
+    value: edge.node.id,
+  }));
+
   if (
     userDataLoading ||
     choicesLoading ||
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
-    currentUserDataLoading
+    currentUserDataLoading ||
+    loadingPrograms
   )
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
@@ -186,16 +203,6 @@ export const EditGrievancePage = (): React.ReactElement => {
   const mappedIndividuals = userData.allUsers.edges.map((edge) => ({
     name: renderUserName(edge.node),
     value: edge.node.id,
-  }));
-
-  const mappedPriorities = Array.from(Array(3).keys()).map((i) => ({
-    name: (i + 1).toString(),
-    value: i + 1,
-  }));
-
-  const mappedUrgencies = Array.from(Array(3).keys()).map((i) => ({
-    name: (i + 1).toString(),
-    value: i + 1,
   }));
 
   const issueTypeDict = choicesData.grievanceTicketIssueTypeChoices.reduce(
@@ -318,7 +325,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                         <Grid item xs={6}>
                           <Field
                             name='subCategory'
-                            label={t('Sub Category')}
+                            label={t('Issue Type')}
                             disabled={Boolean(ticket.subCategory)}
                             onChange={(e) => {
                               setFieldValue('subCategory', e.target.value);
@@ -352,14 +359,6 @@ export const EditGrievancePage = (): React.ReactElement => {
                     </Grid>
                     <BoxWithBorders>
                       <Box display='flex' flexDirection='column'>
-                        <Consent />
-                        <Field
-                          name='consent'
-                          label={t('Received Consent*')}
-                          color='primary'
-                          disabled
-                          component={FormikCheckboxField}
-                        />
                         <LookUpSection
                           values={values}
                           disabledHouseholdIndividual={
@@ -396,6 +395,17 @@ export const EditGrievancePage = (): React.ReactElement => {
                             disabled={Boolean(ticket.description)}
                             variant='outlined'
                             label='Description*'
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Field
+                            name='comments'
+                            multiline
+                            fullWidth
+                            disabled={Boolean(ticket.comments)}
+                            variant='outlined'
+                            label='Comments'
                             component={FormikTextField}
                           />
                         </Grid>
@@ -437,7 +447,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                             disabled={Boolean(ticket.priority)}
                             variant='outlined'
                             label={t('Priority')}
-                            choices={mappedPriorities}
+                            choices={choicesData.grievanceTicketPriorityChoices}
                             component={FormikSelectField}
                           />
                         </Grid>
@@ -449,21 +459,39 @@ export const EditGrievancePage = (): React.ReactElement => {
                             disabled={Boolean(ticket.urgency)}
                             variant='outlined'
                             label={t('Urgency')}
-                            choices={mappedUrgencies}
+                            choices={choicesData.grievanceTicketUrgencyChoices}
                             component={FormikSelectField}
                           />
                         </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name='partner'
-                            fullWidth
-                            disabled={Boolean(ticket.partner)}
-                            variant='outlined'
-                            label={t('Partner')}
-                            choices={userChoices.userPartnerChoices}
-                            component={FormikSelectField}
-                          />
-                        </Grid>
+                        {ticket.subCategory ===
+                          +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT && (
+                          <Grid item xs={6}>
+                            <Field
+                              name='partner'
+                              fullWidth
+                              disabled={Boolean(ticket.partner)}
+                              variant='outlined'
+                              label={t('Partner')}
+                              choices={userChoices.userPartnerChoices}
+                              component={FormikSelectField}
+                            />
+                          </Grid>
+                        )}
+                        {+ticket.issueType !==
+                          +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+                          <Grid item xs={6}>
+                            <Field
+                              name='programme'
+                              fullWidth
+                              disabled={Boolean(ticket.programme)}
+                              variant='outlined'
+                              label={t('Programme')}
+                              choices={mappedPrograms}
+                              allProgramsEdges={allProgramsEdges}
+                              component={FormikSelectField}
+                            />
+                          </Grid>
+                        )}
                       </Grid>
                     </BoxPadding>
                     {hasCreatorOrOwnerPermissions(
