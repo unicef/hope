@@ -45,7 +45,6 @@ export const AllPaymentsForTable = gql`
           paymentPlanSoftConflicted
           paymentPlanHardConflictedData {
             paymentPlanUnicefId
-            paymentPlanEncodedId
             paymentPlanId
             paymentPlanStartDate
             paymentPlanEndDate
@@ -55,7 +54,6 @@ export const AllPaymentsForTable = gql`
           }
           paymentPlanSoftConflictedData {
             paymentPlanUnicefId
-            paymentPlanEncodedId
             paymentPlanId
             paymentPlanStartDate
             paymentPlanEndDate

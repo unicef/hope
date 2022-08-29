@@ -70,7 +70,7 @@ export const WarningTooltipTable = ({
       <ClickableTableRow hover>
         <TableCell align='left'>
           {canViewDetails ? (
-            <BlackLink to={`/${businessArea}/payment-module/payment-plans/${row.paymentPlanEncodedId}`}>
+            <BlackLink to={`/${businessArea}/payment-module/payment-plans/${row.paymentPlanId}`}>
               {row.paymentPlanUnicefId}
             </BlackLink>
           ) : (
