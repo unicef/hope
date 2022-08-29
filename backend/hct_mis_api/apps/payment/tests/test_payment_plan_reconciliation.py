@@ -23,6 +23,57 @@ from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentPlan, P
 from hct_mis_api.apps.payment.models import GenericPayment
 
 
+CREATE_PROGRAMME_MUTATION = """
+mutation CreateProgram($programData: CreateProgramInput!) {
+  createProgram(programData: $programData) {
+    program {
+      id
+      name
+      status
+      startDate
+      endDate
+      caId
+      budget
+      description
+      frequencyOfPayments
+      sector
+      scope
+      cashPlus
+      populationGoal
+      individualDataNeeded
+      __typename
+    }
+    validationErrors
+    __typename
+  }
+}
+"""
+
+
+CREATE_TARGET_POPULATION_MUTATION = """
+mutation CreateTP($input: CreateTargetPopulationInput!) {
+  createTargetPopulation(input: $input) {
+    targetPopulation {
+      id
+      status
+      candidateListTotalHouseholds
+      candidateListTotalIndividuals
+      finalListTotalHouseholds
+      finalListTotalIndividuals
+      __typename
+    }
+    validationErrors
+    __typename
+  }
+}
+"""
+
+
+CREATE_PAYMENT_PLAN_MUTATION = """
+
+"""
+
+
 class TestPaymentPlanReconciliation(APITestCase):
     @classmethod
     def create_household_and_individual(cls):
@@ -42,7 +93,12 @@ class TestPaymentPlanReconciliation(APITestCase):
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(
             cls.user,
-            [Permissions.PAYMENT_MODULE_CREATE, Permissions.PAYMENT_MODULE_VIEW_DETAILS],
+            [
+                Permissions.PAYMENT_MODULE_CREATE,
+                Permissions.PAYMENT_MODULE_VIEW_DETAILS,
+                Permissions.PROGRAMME_CREATE,
+                Permissions.TARGETING_CREATE,
+            ],
             cls.business_area,
         )
 
@@ -67,56 +123,64 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_receiving_reconciliations_from_fsp(self):
-        target_population = TargetPopulationFactory(
-            created_by=self.user,
-            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
-            business_area=self.business_area,
-            status=TargetPopulation.STATUS_LOCKED,
+        create_programme_response = self.graphql_request(
+            request_string=CREATE_PROGRAMME_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "name": "NName",
+                    "scope": "UNICEF",
+                    "startDate": "2022-08-24",
+                    "endDate": "2022-08-31",
+                    "description": "desc",
+                    "budget": "0.00",
+                    "administrativeAreasOfImplementation": "",
+                    "populationGoal": 0,
+                    "frequencyOfPayments": "REGULAR",
+                    "sector": "MULTI_PURPOSE",
+                    "cashPlus": True,
+                    "individualDataNeeded": False,
+                    "businessAreaSlug": self.business_area.slug,
+                }
+            },
         )
+        print("create_programme_response", create_programme_response)
 
-        # create pp mutation
+        program_id = create_programme_response["data"]["createProgram"]["program"]["id"]
 
-        # self.payment_plan = PaymentPlanFactory(
-        #     total_households_count=4, target_population=target_population, status=PaymentPlan.Status.LOCKED
-        # )
+        create_target_population_response = self.graphql_request(
+            request_string=CREATE_TARGET_POPULATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "programId": program_id,
+                    "name": "TargP",
+                    "excludedIds": "",
+                    "exclusionReason": "",
+                    "businessAreaSlug": self.business_area.slug,
+                    "targetingCriteria": {
+                        "rules": [
+                            {
+                                "filters": [
+                                    {
+                                        "comparisionMethod": "EQUALS",
+                                        "arguments": ["True"],
+                                        "fieldName": "consent",
+                                        "isFlexField": False,
+                                    }
+                                ],
+                                "individualsFiltersBlocks": [],
+                            }
+                        ]
+                    },
+                }
+            },
+        )
+        print("create_target_population_response", create_target_population_response)
 
-        # PaymentFactory(
-        #     payment_plan=self.payment_plan,
-        #     financial_service_provider=None,  # not set yet
-        #     collector=self.individual_1[0],
-        #     assigned_payment_channel=self.payment_channel_1_cash,
-        #     entitlement_quantity=100,
-        #     entitlement_quantity_usd=20,
-        #     delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-        #     status=GenericPayment.STATUS_NOT_DISTRIBUTED,
-        #     household=self.household_1,
-        #     excluded=False,
-        # )
-
-        # PaymentFactory(
-        #     payment_plan=self.payment_plan,
-        #     financial_service_provider=None,  # not set yet
-        #     collector=self.individual_2[0],
-        #     assigned_payment_channel=self.payment_channel_2_cash,
-        #     entitlement_quantity=100,
-        #     entitlement_quantity_usd=20,
-        #     delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-        #     status=GenericPayment.STATUS_NOT_DISTRIBUTED,
-        #     household=self.household_2,
-        #     excluded=False,
-        # )
-
-        # PaymentFactory(
-        #     payment_plan=self.payment_plan,
-        #     financial_service_provider=None,  # not set yet
-        #     collector=self.individual_3[0],
-        #     assigned_payment_channel=self.payment_channel_3_cash,
-        #     entitlement_quantity=100,
-        #     entitlement_quantity_usd=20,
-        #     delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-        #     status=GenericPayment.STATUS_NOT_DISTRIBUTED,
-        #     household=self.household_3,
-        #     excluded=False,
-        # )
-
-        # mutation - lock FSP status
+        create_payment_plan_response = self.graphql_request(
+            request_string=CREATE_PAYMENT_PLAN_MUTATION,
+            context={"user": self.user},
+            variables={},
+        )
+        print("create_payment_plan_response", create_payment_plan_response)
