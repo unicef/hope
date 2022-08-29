@@ -225,7 +225,8 @@ export function validateUsingSteps(
       if (
         //xD
         values.selectedHousehold &&
-        !values.householdDataUpdateFields?.[0]?.fieldName
+        !values.householdDataUpdateFields?.[0]?.fieldName &&
+        activeStep === GrievanceSteps.Description
       ) {
         errors.householdDataUpdateFields = 'Household Data Change is Required';
       }
