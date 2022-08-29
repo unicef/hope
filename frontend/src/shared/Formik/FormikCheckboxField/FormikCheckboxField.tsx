@@ -2,16 +2,23 @@ import React, { useEffect } from 'react';
 import {
   FormControlLabel,
   Checkbox,
-  Box,
   FormHelperText,
+  Grid,
 } from '@material-ui/core';
 import get from 'lodash/get';
+import styled from 'styled-components';
+import { LabelizedField } from '../../../components/core/LabelizedField';
+
+const Width80 = styled.div`
+  width: 80%;
+`;
 
 export const Check = ({
   field,
   form,
   label,
   initValue,
+  displayValue = '',
   ...otherProps
 }): React.ReactElement => {
   const handleChange = (): void => {
@@ -37,7 +44,7 @@ export const Check = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checked]);
   return (
-    <Box flexDirection='column'>
+    <Grid container>
       <FormControlLabel
         control={
           <Checkbox
@@ -47,11 +54,16 @@ export const Check = ({
             onChange={handleChange}
           />
         }
-        label={label}
+        label={displayValue ? '' : label}
       />
+      {displayValue && (
+        <Width80>
+          <LabelizedField label={label}>{displayValue}</LabelizedField>
+        </Width80>
+      )}
       {isInvalid && get(form.errors, field.name) && (
         <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
       )}
-    </Box>
+    </Grid>
   );
 };
