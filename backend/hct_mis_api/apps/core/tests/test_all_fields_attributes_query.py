@@ -1,15 +1,17 @@
 from django.core.management import call_command
-from rest_framework.reverse import reverse
-from rest_framework.test import APIClient
-from rest_framework import status
 
 from parameterized import parameterized
+from rest_framework import status
+from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 
 
 class TestMetaDataFilterType(APITestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     QUERY = """
     query AllFieldsAttributes {
      allFieldsAttributes{

@@ -23,6 +23,7 @@ class TestUkrainianRegistrationService(TestCase):
         "default",
         "registration_datahub",
     )
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUp(self):

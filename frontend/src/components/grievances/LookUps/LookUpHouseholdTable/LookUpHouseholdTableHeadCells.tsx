@@ -35,7 +35,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Admin Level 2',
-    id: 'admin_area_new__name',
+    id: 'admin_area__name',
     numeric: false,
     dataCy: 'household-admin-level-2',
   },

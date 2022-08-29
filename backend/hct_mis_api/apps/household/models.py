@@ -2,11 +2,11 @@ import logging
 import re
 from datetime import date
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
@@ -14,23 +14,24 @@ from django.db.models import DecimalField, JSONField
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from django_countries.fields import CountryField
+
+from dateutil.relativedelta import relativedelta
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
-from django.contrib.postgres.search import SearchVectorField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
 )
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 BLANK = ""
 IDP = "IDP"
@@ -336,17 +337,12 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE)
-    country_origin = CountryField(blank=True, db_index=True)
-    country_origin_new = models.ForeignKey(
-        "geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT
-    )
-    country = CountryField(db_index=True)
-    country_new = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
+    country_origin = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
     size = models.PositiveIntegerField(db_index=True)
     address = CICharField(max_length=1024, blank=True)
     """location contains lowest administrative area info"""
-    admin_area = models.ForeignKey("core.AdminArea", null=True, on_delete=models.SET_NULL, blank=True)
-    admin_area_new = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
+    admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -434,7 +430,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
     def save(self, *args, **kwargs):
-        from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+        from hct_mis_api.apps.targeting.models import (
+            HouseholdSelection,
+            TargetPopulation,
+        )
 
         if self.withdrawn:
             HouseholdSelection.objects.filter(
@@ -446,10 +445,19 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     def status(self):
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self):
+    def withdraw(self, save=True):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
-        self.save()
+
+        if save:
+            self.save()
+
+    def unwithdraw(self, save=True):
+        self.withdrawn = False
+        self.withdrawn_date = None
+
+        if save:
+            self.save()
 
     def set_sys_field(self, key, value):
         if "sys" not in self.user_fields:
@@ -463,44 +471,24 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     @property
     def admin_area_title(self):
-        return self.admin_area.title
+        return self.admin_area.name
 
     @property
     def admin1(self):
         if self.admin_area is None:
             return None
-        if self.admin_area.level == 0:
+        if self.admin_area.area_type.area_level == 0:
             return None
         current_admin = self.admin_area
-        while current_admin.level != 1:
-            current_admin = current_admin.parent
-        return current_admin
-
-    @property
-    def admin2(self):
-        if not self.admin_area or self.admin_area.level in (0, 1):
-            return None
-        current_admin = self.admin_area
-        while current_admin.level != 2:
-            current_admin = current_admin.parent
-        return current_admin
-
-    @property
-    def admin1_new(self):
-        if self.admin_area_new is None:
-            return None
-        if self.admin_area_new.area_type.area_level == 0:
-            return None
-        current_admin = self.admin_area_new
         while current_admin.area_type.area_level != 1:
             current_admin = current_admin.parent
         return current_admin
 
     @property
-    def admin2_new(self):
-        if not self.admin_area_new or self.admin_area_new.area_type.area_level in (0, 1):
+    def admin2(self):
+        if not self.admin_area or self.admin_area.area_type.area_level in (0, 1):
             return None
-        current_admin = self.admin_area_new
+        current_admin = self.admin_area
         while current_admin.area_type.area_level != 2:
             current_admin = current_admin.parent
         return current_admin
@@ -543,8 +531,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class DocumentType(TimeStampedUUIDModel):
-    country = CountryField(default="U")
-    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
@@ -593,14 +580,19 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     def __str__(self):
         return f"{self.type} - {self.document_number}"
 
+    def mark_as_need_investigation(self):
+        self.status = self.STATUS_NEED_INVESTIGATION
+
+    def mark_as_valid(self):
+        self.status = self.STATUS_VALID
+
 
 class Agency(models.Model):
     type = models.CharField(max_length=100, choices=AGENCY_TYPE_CHOICES)
     label = models.CharField(
         max_length=100,
     )
-    country = CountryField()
-    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Agencies"
@@ -845,10 +837,19 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def sanction_list_last_check(self):
         return cache.get("sanction_list_last_check")
 
-    def withdraw(self):
+    def withdraw(self, save=True):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
-        self.save()
+
+        if save:
+            self.save()
+
+    def unwithdraw(self, save=True):
+        self.withdrawn = False
+        self.withdrawn_date = None
+
+        if save:
+            self.save()
 
     def mark_as_duplicate(self, original_individual=None):
         if original_individual is not None:

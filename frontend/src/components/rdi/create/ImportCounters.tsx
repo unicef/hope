@@ -14,10 +14,20 @@ export function ImportCounters({
   return (
     <>
       <div>
-        {numberOfHouseholds} {t('Households available to Import')}
+        {numberOfHouseholds}{' '}
+        {t(
+          'Household'
+            .concat(numberOfHouseholds > 1 ? 's' : '')
+            .concat(' available to import'),
+        )}
       </div>
       <div>
-        {numberOfIndividuals} {t('Individuals available to Import')}
+        {numberOfIndividuals}{' '}
+        {t(
+          'Individual'
+            .concat(numberOfIndividuals > 1 ? 's' : '')
+            .concat(' available to import'),
+        )}
       </div>
     </>
   );

@@ -13,6 +13,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetPopulation,
+    HouseholdSelection,
 )
 
 
@@ -91,3 +92,13 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
         if extracted:
             for household in extracted:
                 self.households.add(household)
+
+
+class HouseholdSelectionFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = HouseholdSelection
+
+    household = factory.SubFactory(HouseholdFactory)
+    target_population = factory.SubFactory(TargetPopulationFactory)
+    vulnerability_score = factory.fuzzy.FuzzyInteger(0, 100)
+    final = factory.fuzzy.FuzzyChoice([True, False])
