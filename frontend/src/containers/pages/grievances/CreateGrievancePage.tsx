@@ -259,14 +259,18 @@ export const CreateGrievancePage = (): React.ReactElement => {
       'individualDataUpdateFields',
       'individualDataUpdateFieldsDocuments',
       'individualDataUpdateFieldsIdentities',
-    ].map(
-      (fieldname) =>
-        isInvalid(fieldname, errors, touched) && (
-          <FormHelperText key={fieldname} error>
-            {errors[fieldname]}
-          </FormHelperText>
-        ),
-    );
+      'verificationRequired',
+    ]
+      .filter(
+        (fieldname) =>
+          isInvalid(fieldname, errors, touched) ||
+          fieldname === 'verificationRequired',
+      )
+      .map((fieldname) => (
+        <FormHelperText key={fieldname} error>
+          {errors[fieldname]}
+        </FormHelperText>
+      ));
 
   const hasCategorySelected = (values): boolean => {
     return !!values.category;
