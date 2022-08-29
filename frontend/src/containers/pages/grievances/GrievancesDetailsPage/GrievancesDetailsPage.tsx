@@ -8,6 +8,7 @@ import { GrievancesApproveSection } from '../../../../components/grievances/Grie
 import { GrievancesDetails } from '../../../../components/grievances/GrievancesDetails/GrievancesDetails';
 import { GrievancesSidebar } from '../../../../components/grievances/GrievancesSidebar/GrievancesSidebar';
 import { Notes } from '../../../../components/grievances/Notes/Notes';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
@@ -16,6 +17,7 @@ import {
   useGrievanceTicketQuery,
   useMeQuery,
 } from '../../../../__generated__/graphql';
+import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { grievancePermissions } from './grievancePermissions';
 
 export const GrievancesDetailsPage = (): React.ReactElement => {
@@ -91,8 +93,14 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
           canApprovePaymentVerification={canApprovePaymentVerification}
         />
         <Notes notes={ticket.ticketNotes} canAddNote={canAddNote} />
-        <GrievancesSidebar ticket={ticket} />
+        <GrievancesSidebar
+          ticket={ticket}
+          canViewHouseholdDetails={canViewHouseholdDetails}
+        />
       </Grid>
+      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+        <UniversalActivityLogTable objectId={ticket.id} />
+      )}
     </>
   );
 };
