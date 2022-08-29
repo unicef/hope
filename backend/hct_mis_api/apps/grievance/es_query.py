@@ -163,7 +163,7 @@ def create_es_query(options):
     if business_area:
         query_dict["query"]["bool"]["filter"] = {
             "term": {
-                "business_area.slug": "afghanistan"
+                "business_area.slug": business_area
             }
         }
 
