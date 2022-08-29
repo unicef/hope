@@ -75,8 +75,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           showMessage(t('Your import was successful!'));
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
+        e.graphQLErrors.map((x) => showMessage(x.message));
       }
     }
   };
