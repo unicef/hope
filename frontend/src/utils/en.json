@@ -633,5 +633,10 @@
   "Back": "Back",
   "Not assigned": "Not assigned",
   "Comments": "Comments",
-  "Create a Data Change ticket": "Create a Data Change ticket"
+  "Create a Data Change ticket": "Create a Data Change ticket",
+  "Select correctly answered questions (minimum 5)": "Select correctly answered questions (minimum 5):",
+  "Household Questionnaire": "Household Questionnaire",
+  "Individual Questionnaire": "Individual Questionnaire",
+  "Birth Date": "Birth Date",
+  "Individual Full Name": "Individual Full Name"
 }
