@@ -23,7 +23,7 @@ class SendTPToDatahubTask:
     MAPPING_TP_DICT = {
         "mis_id": "id",
         "name": "name",
-        "active_households": "final_list_total_households",
+        "active_households": "total_households_count",
         "program_mis_id": "program_id",
         "targeting_criteria": "targeting_criteria_string",
     }
