@@ -82,10 +82,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
           <TargetPopulationCore
             id={targetPopulation.id}
             targetPopulation={targetPopulation}
-            canViewHouseholdDetails={hasPermissions(
-              PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
-              permissions,
-            )}
+            permissions={permissions}
           />
         </>
       )}

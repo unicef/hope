@@ -7,6 +7,7 @@ from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
+from django.utils import timezone
 
 from dateutil.parser import parse
 from django_countries.fields import Country

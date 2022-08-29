@@ -7,12 +7,11 @@ from django.core.management import call_command
 from django.test import TestCase
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
@@ -35,6 +34,7 @@ class TestDataSendTpToDatahub(TestCase):
     def _pre_test_commands():
         create_afghanistan()
         call_command("generatedocumenttypes")
+        call_command("loadcountries")
         call_command("loadcountrycodes")
         business_area_with_data_sharing = BusinessArea.objects.first()
         business_area_with_data_sharing.has_data_sharing_agreement = True
@@ -63,24 +63,22 @@ class TestDataSendTpToDatahub(TestCase):
         cls._pre_test_commands()
 
         business_area_with_data_sharing = BusinessArea.objects.first()
-        country_area_type = AdminAreaLevelFactory(
-            name="Country",
-            business_area=business_area_with_data_sharing,
-            admin_level=0,
-        )
-        state_area_type = AdminAreaLevelFactory(
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        state_area_type = AreaTypeFactory(
             name="State",
-            business_area=business_area_with_data_sharing,
-            admin_level=1,
+            country=country,
+            area_level=1,
         )
-        province_area_type = AdminAreaLevelFactory(
+        province_area_type = AreaTypeFactory(
             name="Province",
-            business_area=business_area_with_data_sharing,
-            admin_level=2,
+            country=country,
+            area_level=2,
         )
-        admin_area0 = AdminAreaFactory(admin_area_level=country_area_type)
-        admin_area1 = AdminAreaFactory(admin_area_level=state_area_type, parent=admin_area0)
-        admin_area2 = AdminAreaFactory(admin_area_level=province_area_type, parent=admin_area1)
+        admin_area1 = AreaFactory(name="City Test", area_type=state_area_type, p_code="asdfgfhghkjltr1")
+        admin_area2 = AreaFactory(
+            name="City Test", area_type=province_area_type, p_code="asdfgfhghkjltr2", parent=admin_area1
+        )
 
         cls.program = ProgramFactory(
             individual_data_needed=True,
@@ -106,8 +104,9 @@ class TestDataSendTpToDatahub(TestCase):
 
     @classmethod
     def create_first_household(cls, admin_area, rdi):
+        country = Country.objects.filter(iso_code2="PL").first()
         cls.household = HouseholdFactory.build(
-            size=1, registration_data_import=rdi, admin_area=admin_area, unhcr_id="UNHCR-1337", country="PL"
+            size=1, registration_data_import=rdi, admin_area=admin_area, unhcr_id="UNHCR-1337", country=country
         )
         unhcr_agency = Agency.objects.create(type=UNHCR)
         cls.individual = IndividualFactory(household=cls.household, relationship="HEAD", registration_data_import=rdi)

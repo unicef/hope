@@ -1,10 +1,12 @@
+from django.conf import settings
+
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from django.conf import settings
+
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 
 from .elasticsearch_utils import DEFAULT_SCRIPT
-from .models import Individual, Household
+from .models import Household, Individual
 
 
 @registry.register_document
@@ -29,10 +31,10 @@ class IndividualDocument(Document):
         properties={
             "unicef_id": fields.TextField(),
             "residence_status": fields.KeywordField(similarity="boolean"),
-            "country_origin": fields.KeywordField(attr="country_origin.alpha3", similarity="boolean"),
+            "country_origin": fields.KeywordField(attr="country_origin.iso_code3", similarity="boolean"),
             "size": fields.IntegerField(),
             "address": fields.TextField(),
-            "country": fields.KeywordField(attr="country.alpha3", similarity="boolean"),
+            "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
             "female_age_group_0_5_count": fields.IntegerField(),
             "female_age_group_6_11_count": fields.IntegerField(),
             "female_age_group_12_17_count": fields.IntegerField(),
@@ -66,7 +68,7 @@ class IndividualDocument(Document):
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
             "type": fields.KeywordField(attr="type.type", similarity="boolean"),
-            "country": fields.KeywordField(attr="type.country.alpha3", similarity="boolean"),
+            "country": fields.KeywordField(attr="type.country.iso_code3", similarity="boolean"),
         }
     )
     identities = fields.ObjectField(
@@ -92,13 +94,13 @@ class IndividualDocument(Document):
         household = instance.household
         if household:
             if household.admin1:
-                return household.admin1.title
+                return household.admin1.name
 
     def prepare_admin2(self, instance):
         household = instance.household
         if household:
             if household.admin2:
-                return household.admin2.title
+                return household.admin2.name
 
     def prepare_hash_key(self, instance):
         return instance.get_hash_key
@@ -151,12 +153,12 @@ class HouseholdDocument(Document):
     def prepare_admin1(self, household):
         if household:
             if household.admin1:
-                return household.admin1.title
+                return household.admin1.name
 
     def prepare_admin2(self, household):
         if household:
             if household.admin2:
-                return household.admin2.title
+                return household.admin2.name
 
     def prepare_business_area(self, instance):
         return instance.business_area.slug

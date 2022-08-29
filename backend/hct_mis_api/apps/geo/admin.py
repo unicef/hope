@@ -1,18 +1,25 @@
-from django.contrib import admin
-from django.contrib.admin import ListFilter, RelatedFieldListFilter
+import csv
+import logging
+from django.contrib import admin, messages
+from django.shortcuts import redirect
+from django.contrib.admin import FieldListFilter, ListFilter, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
-from django.forms import TextInput
-
+from django.forms import TextInput, Form, FileField, FileInput
 from admin_extra_buttons.decorators import button
+
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
 from smart_admin.mixins import FieldsetMixin
-
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from django.template.response import TemplateResponse
 
-from .models import Area, AreaType, Country
-from .utils import initialise_area_types, initialise_areas, initialise_countries
+logger = logging.getLogger(__name__)
+
+
+class ImportCSVForm(Form):
+    file = FileField(widget=FileInput(attrs={'accept':'text/csv'}))
 
 
 class ActiveRecordFilter(ListFilter):
@@ -88,11 +95,6 @@ class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEM
         ret = super().get_list_display(request)
         return ret
 
-    @button()
-    def initialise(self, request):
-        results = initialise_countries()
-        self.message_user(request, str(results))
-
 
 @admin.register(AreaType)
 class AreaTypeAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
@@ -121,11 +123,6 @@ class AreaTypeAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPE
         # ("GIS", {"classes": ["collapse"], "fields": ("geom", "point")}),
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
-
-    @button()
-    def initialise(self, request):
-        results = initialise_area_types()
-        self.message_user(request, str(results))
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
@@ -169,6 +166,39 @@ class AreaAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEMode
     )
 
     @button()
-    def initialise(self, request):
-        results = initialise_areas()
-        self.message_user(request, str(results))
+    def import_areas(self, request):
+        context = self.get_common_context(request, processed=False)
+        if request.method == "POST":
+            form = ImportCSVForm(data=request.POST, files=request.FILES)
+            if form.is_valid():
+                csv_file = form.cleaned_data["file"]
+                data_set = csv_file.read().decode("utf-8-sig").splitlines()
+                reader = csv.DictReader(data_set)
+                country = None
+                for row in reader:
+                    try:
+                        d = len(row) // 2
+                        area_types = [*row][:d]
+                        admin_area = [*row][d:]
+                        country = Country.objects.get(short_name=row["Country"])
+                        for idx, x in enumerate(area_types):
+                            if idx > 0:
+                                art, created = AreaType.objects.get_or_create(name=x, country=country, area_level=idx)
+                                area, created = Area.objects.get_or_create(name=row[x], p_code=row[admin_area[idx]], area_type=art)
+                                ids = idx - 1
+                                if ids > 0:
+                                    art.parent = AreaType.objects.get(country=country, area_level=ids, name=area_types[ids])
+                                    art.save()
+                                    area.parent = Area.objects.get(p_code=row[admin_area[ids]], name=row[area_types[ids]])
+                                    area.save()
+                    except Exception as e:
+                        self.message_user(request, f"Unable to load areas, please check the format", messages.ERROR)
+                        raise
+                
+                self.message_user(request, f"Updated all areas for {country}")
+                return redirect("admin:geo_area_changelist")
+        else:
+            form = ImportCSVForm()
+            context["form"] = form
+        context["form"] = form
+        return TemplateResponse(request, "admin/geo/import_area_csv.html", context)
