@@ -2,21 +2,21 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from django.conf import settings
 
-from .models import GrievanceTicket, TicketComplaintDetails, TicketSensitiveDetails
-from ..household.models import Household
-# from hct_mis_api.apps.account.models import User
-from ..registration_data.models import RegistrationDataImport
-from ..geo.models import Area
-from ..core.models import BusinessArea
+from .models import GrievanceTicket
+from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 @registry.register_document
 class GrievanceTicketDocument(Document):
     registration_data_import = fields.ObjectField(properties={
-        "id": fields.TextField()
+        "id": fields.KeywordField()
     })
     admin2 = fields.ObjectField(properties={
-        "id": fields.TextField()
+        "id": fields.KeywordField()
     })
     business_area = fields.ObjectField(properties={
         "slug": fields.KeywordField()
@@ -26,33 +26,21 @@ class GrievanceTicketDocument(Document):
     issue_type = fields.KeywordField(attr="issue_type_to_string")
     priority = fields.KeywordField(attr="priority_to_string")
     urgency = fields.KeywordField(attr="urgency_to_string")
-    # assigned_to = fields.ObjectField(properties={
-    #     "id": fields.KeywordField(),
-    #     "username": fields.TextField(),
-    # })
-
-    # grievance_type = fields.KeywordField(similarity="boolean")
-    # head_of_household_last_name = fields.KeywordField(similarity="boolean")
-    # fsp = fields.KeywordField(similarity="boolean")
-
-    # def prepare_assigned_to(self, instance):
-    #     if instance.assigned_to:
-    #         return instance.assigned_to.id
-
-    # def prepare_grievance_type(self, instance):
-    #     return "user" if instance.category in range(2, 8) else "system"
-    #
-    # def prepare_head_of_household_last_name(self, instance):
-    #     household_unicef_id = instance.household_unicef_id
-    #     if household_unicef_id:
-    #         household = Household.objects.filter(unicef_id=household_unicef_id).first()
-    #         return household.head_of_household.family_name
-    #
-    # def prepare_fsp(self, instance):
-    #     if instance.ticket_details:
-    #         if isinstance(instance.ticket_details, (TicketComplaintDetails, TicketSensitiveDetails)):
-    #             if instance.ticket_details.payment_record:
-    #                 return instance.ticket_details.payment_record.service_provider.full_name
+    grievance_type = fields.KeywordField(attr="grievance_type_to_string")
+    assigned_to = fields.ObjectField(properties={
+        "id": fields.KeywordField()
+    })
+    ticket_details = fields.ObjectField(
+        properties={
+            "household": fields.ObjectField(
+                properties={
+                    "head_of_household": fields.ObjectField(properties={
+                        "family_name": fields.KeywordField()
+                    })
+                }
+            )
+        }
+    )
 
     class Django:
         model = GrievanceTicket
@@ -61,7 +49,7 @@ class GrievanceTicketDocument(Document):
             "created_at",
             "household_unicef_id",
         ]
-        related_models = [Area, BusinessArea, RegistrationDataImport]
+        related_models = [Area, BusinessArea, Household, Individual, RegistrationDataImport, User]
 
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
