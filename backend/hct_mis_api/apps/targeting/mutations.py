@@ -1,6 +1,6 @@
 import logging
-
 import graphene
+
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -22,7 +22,6 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
@@ -49,7 +48,8 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
-from .celery_tasks import target_population_apply_steficon
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 
 logger = logging.getLogger(__name__)
 
@@ -199,6 +199,8 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         vulnerability_score_max = input.get("vulnerability_score_max")
         excluded_ids = input.get("excluded_ids")
         exclusion_reason = input.get("exclusion_reason")
+        update_payment_tp = False
+        update_payment_tp_program = False
         if not target_population.is_approved() and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
@@ -224,6 +226,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if program_id_encoded:
             program = get_object_or_404(Program, pk=decode_id_string(program_id_encoded))
             target_population.program = program
+            update_payment_tp_program = True
         targeting_criteria_input = input.get("targeting_criteria")
         if targeting_criteria_input is not None:
             TargetingCriteriaInputValidator.validate(targeting_criteria_input)
@@ -233,16 +236,25 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
                 if target_population.candidate_list_targeting_criteria:
                     target_population.candidate_list_targeting_criteria.delete()
                 target_population.candidate_list_targeting_criteria = targeting_criteria
+                update_payment_tp = True
             elif target_population.status == TargetPopulation.STATUS_LOCKED:
                 if target_population.final_list_targeting_criteria:
                     target_population.final_list_targeting_criteria.delete()
                 target_population.final_list_targeting_criteria = targeting_criteria
+                update_payment_tp = True
         if excluded_ids is not None:
             target_population.excluded_ids = excluded_ids
         if exclusion_reason is not None:
             target_population.exclusion_reason = exclusion_reason
         target_population.full_clean()
         target_population.save()
+
+        if update_payment_tp or update_payment_tp_program:
+            PaymentPlanService().update_payment_plan_after_update_target_population(
+                target_population,
+                update_payment_tp_program
+            )
+
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
