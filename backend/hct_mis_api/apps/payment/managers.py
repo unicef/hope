@@ -1,6 +1,18 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import JSONField, Q, Subquery, OuterRef, Exists, F, Value, Func, Case, When
+from django.db.models import (
+    Case,
+    Exists,
+    F,
+    Func,
+    JSONField,
+    OuterRef,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
+
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 
 
@@ -17,22 +29,22 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             return qs.annotate(
                 formatted_pp_start_date=Func(
                     F("payment_plan__start_date"),
-                    Value("MM-DD-YYYY"),
+                    Value("YYYY-MM-DD"),
                     function="to_char",
                     output_field=models.CharField(),
                 ),
                 formatted_pp_end_date=Func(
                     F("payment_plan__end_date"),
-                    Value("MM-DD-YYYY"),
+                    Value("YYYY-MM-DD"),
                     function="to_char",
                     output_field=models.CharField(),
                 ),
             ).annotate(
                 conflict_data=Func(
-                    Value("payment_plan_id"),
-                    F("payment_plan_id"),
                     Value("payment_plan_unicef_id"),
                     F("payment_plan__unicef_id"),
+                    Value("payment_plan_id"),
+                    F("payment_plan_id"),
                     Value("payment_plan_start_date"),
                     F("formatted_pp_start_date"),
                     Value("payment_plan_end_date"),
