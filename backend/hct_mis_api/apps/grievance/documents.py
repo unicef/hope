@@ -2,16 +2,19 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from django.conf import settings
 
-from .models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.core.models import BusinessArea
 
+from .models import GrievanceTicket
+
 
 @registry.register_document
 class GrievanceTicketDocument(Document):
+    unicef_id = fields.KeywordField()
+    household_unicef_id = fields.KeywordField()
     registration_data_import = fields.ObjectField(properties={
         "id": fields.KeywordField()
     })
@@ -45,9 +48,7 @@ class GrievanceTicketDocument(Document):
     class Django:
         model = GrievanceTicket
         fields = [
-            "unicef_id",
             "created_at",
-            "household_unicef_id",
         ]
         related_models = [Area, BusinessArea, Household, Individual, RegistrationDataImport, User]
 
@@ -57,3 +58,7 @@ class GrievanceTicketDocument(Document):
             "number_of_shards": 1,
             "number_of_replicas": 0,
         }
+
+    def get_instances_from_related(self, related_instance):
+        if isinstance(related_instance, BusinessArea):
+            return related_instance.tickets.all()
