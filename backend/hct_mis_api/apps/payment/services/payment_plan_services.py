@@ -190,6 +190,13 @@ class PaymentPlanService:
     def _create_payments(self, payment_plan: PaymentPlan):
         payments_to_create = []
         for household in payment_plan.target_population.households.all():
+            try:
+                collector = household.individuals_and_roles.filter(role=ROLE_PRIMARY).first().individual
+            except AttributeError as exception:
+                msg = f"Couldn't find a primary collector in {household}"
+                logging.exception(msg)
+                raise GraphQLError(msg) from exception
+
             payments_to_create.append(
                 Payment(
                     payment_plan=payment_plan,
@@ -198,19 +205,19 @@ class PaymentPlanService:
                     status_date=timezone.now(),
                     household=household,
                     head_of_household=household.head_of_household,
-                    collector=household.individuals_and_roles.filter(role=ROLE_PRIMARY).first().individual,
+                    collector=collector,
                     currency=payment_plan.currency,
                 )
             )
         try:
             Payment.objects.bulk_create(payments_to_create)
         except IntegrityError:
-            raise GraphQLError(f"Duplicated Households in provided Targeting")
+            raise GraphQLError("Duplicated Households in provided Targeting")
 
     def create(self, input_data: dict, user: User) -> PaymentPlan:
         business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])
         if not business_area.is_payment_plan_applicable:
-            raise GraphQLError(f"PaymentPlan can not be created in provided Business Area")
+            raise GraphQLError("PaymentPlan can not be created in provided Business Area")
 
         targeting_id = decode_id_string(input_data["targeting_id"])
         try:
@@ -218,7 +225,7 @@ class PaymentPlanService:
         except TargetPopulation.DoesNotExist:
             raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
         if not target_population.program:
-            raise GraphQLError(f"TargetPopulation should have related Program defined")
+            raise GraphQLError("TargetPopulation should have related Program defined")
 
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
@@ -249,7 +256,7 @@ class PaymentPlanService:
 
     def update(self, input_data: dict) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
-            raise GraphQLError(f"Only Payment Plan in Open status can be edited")
+            raise GraphQLError("Only Payment Plan in Open status can be edited")
 
         recalculate = False
 

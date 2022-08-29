@@ -11,6 +11,8 @@
 # once this is done, FSP (with limit) may be used in another payment plan
 
 
+from hct_mis_api.apps.household.fixtures import IndividualRoleInHouseholdFactory
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -138,6 +140,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
             individuals_data=[{}],
         )
+        IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
         return household, individuals[0]
 
     @classmethod
@@ -254,17 +257,16 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
 
-        finalize_target_population_response = self.graphql_request(
+        self.graphql_request(
             request_string=FINALIZE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables={
                 "id": target_population_id,
             },
         )
-        print("finalize_target_population_response", finalize_target_population_response)
+        # TODO: check status in response - READY_FOR_PAYMENT_PLAN
 
-        # TOOD: set status to ready here instead of ready for cash assist
-
+        # TODO: naive datetime
         create_payment_plan_response = self.graphql_request(
             request_string=CREATE_PAYMENT_PLAN_MUTATION,
             context={"user": self.user},
@@ -281,8 +283,17 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
         print("create_payment_plan_response", create_payment_plan_response)
+        payment_plan_id = create_payment_plan_response["data"]["createPaymentPlan"]["paymentPlan"]["id"]
 
-        # lock
+        UPDATE_PAYMENT_PLAN_MUTATION = ""  # TODO
+        lock_payment_plan_response = self.graphql_request(
+            request_string=UPDATE_PAYMENT_PLAN_MUTATION,
+            context={"user": self.user},
+            variables={
+                "id": payment_plan_id,
+            },
+        )
+        print("lock_payment_plan_response", lock_payment_plan_response)
 
         # set fsp
 
