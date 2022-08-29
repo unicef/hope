@@ -1,4 +1,5 @@
 import * as Yup from 'yup';
+import { GrievanceSteps } from '../../../utils/constants';
 
 export const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
@@ -36,11 +37,11 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
       .nullable(),
   };
 
-  if (currentStep === 3) {
+  if (currentStep === GrievanceSteps.Description) {
     datum.description = Yup.string().required('Description is required');
   }
 
-  if (currentStep >= 2) {
+  if (currentStep >= GrievanceSteps.Verification) {
     datum.consent = Yup.bool().oneOf([true], 'Consent is required');
   }
 
