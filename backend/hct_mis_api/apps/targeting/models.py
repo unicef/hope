@@ -381,6 +381,10 @@ class HouseholdSelection(TimeStampedUUIDModel):
         blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
     )
 
+    class Meta:
+        unique_together = ("household", "target_population")
+        verbose_name = "Household Selection"
+
 
 class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
     """
