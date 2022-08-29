@@ -22,25 +22,30 @@ export const fakeGrievancesChoices = {
   ],
   grievanceTicketSubCategoryChoices: [
     {
-      name: "Payment Related Complaint",
-      value: "1",
-      __typename: "ChoiceObject"
+      name: 'Payment Related Complaint',
+      value: '1',
+      __typename: 'ChoiceObject',
     },
     {
-      name: "FSP Related Complaint",
-      value: "2",
-      __typename: "ChoiceObject"
+      name: 'FSP Related Complaint',
+      value: '2',
+      __typename: 'ChoiceObject',
     },
     {
-      name: "Registration Related Complaint",
-      value: "3",
-      __typename: "ChoiceObject"
+      name: 'Registration Related Complaint',
+      value: '3',
+      __typename: 'ChoiceObject',
     },
     {
-      name: "Other Complaint",
-      value: "4",
-      __typename: "ChoiceObject"
-    }
+      name: 'Other Complaint',
+      value: '4',
+      __typename: 'ChoiceObject',
+    },
+    {
+      name: 'Partner Related Complaint',
+      value: '5',
+      __typename: 'ChoiceObject',
+    },
   ],
   grievanceTicketManualCategoryChoices: [
     { name: 'Data Change', value: '2', __typename: 'ChoiceObject' },
@@ -120,6 +125,34 @@ export const fakeGrievancesChoices = {
         },
       ],
       __typename: 'IssueTypesObject',
+    },
+  ],
+  grievanceTicketUrgencyChoices: [
+    {
+      name: 'Very urgent',
+      value: '1',
+    },
+    {
+      name: 'Urgent',
+      value: '2',
+    },
+    {
+      name: 'Not urgent',
+      value: '3',
+    },
+  ],
+  grievanceTicketPriorityChoices: [
+    {
+      name: 'High',
+      value: '1',
+    },
+    {
+      name: 'Medium',
+      value: '2',
+    },
+    {
+      name: 'Low',
+      value: '3',
     },
   ],
 } as GrievancesChoiceDataQuery;

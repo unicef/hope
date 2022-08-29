@@ -57,6 +57,7 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
+from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
@@ -83,6 +84,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     urgency = graphene.Int()
     total_days = graphene.String()
     partner = graphene.Field(PartnerType)
+    programme = graphene.Field(ProgramNode)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -157,6 +159,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_partner(grievance_ticket: GrievanceTicket, info):
         return grievance_ticket.partner
+
+    @staticmethod
+    def resolve_programme(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.programme
 
 
 class TicketNoteNode(DjangoObjectType):
