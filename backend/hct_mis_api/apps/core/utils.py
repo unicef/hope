@@ -3,7 +3,8 @@ import io
 import itertools
 import logging
 import string
-from collections import MutableMapping, OrderedDict
+from collections import OrderedDict
+from collections.abc import MutableMapping
 
 from django.db.models import QuerySet
 

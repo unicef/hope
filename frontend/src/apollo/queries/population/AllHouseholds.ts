@@ -28,7 +28,7 @@ export const AllHouseholds = gql`
       orderBy: $orderBy
       programs: $programs
       headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
-      adminAreaNew: $adminArea
+      adminArea: $adminArea
       search: $search
       residenceStatus: $residenceStatus
       lastRegistrationDate: $lastRegistrationDate

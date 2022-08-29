@@ -23,6 +23,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
     fixtures = [
+        "hct_mis_api/apps/geo/fixtures/data.json",
         "hct_mis_api/apps/core/fixtures/data.json",
         "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json",
         "hct_mis_api/apps/registration_datahub/fixtures/diiadata_stg.json",
@@ -30,7 +31,9 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import RdiDiiaCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
+            RdiDiiaCreateTask,
+        )
 
         cls.RdiDiiaCreateTask = RdiDiiaCreateTask
 

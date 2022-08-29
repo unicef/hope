@@ -6,9 +6,10 @@
   "scripts": {
     "lint": "eslint 'cypress/**/*.{js,ts,tsx}'",
     "pretty": "prettier --write \"cypress/**/*.{ts,js,jsx,json}\"",
-    "setupDjangoAdmin": "docker-compose -f ../docker-compose.yml run backend ./manage.py loaddata hct_mis_api/apps/account/fixtures/superuser.json",
     "cy:run": "cypress run --config video=false",
-    "cy:open": "cypress open"
+    "cy:open": "cypress open",
+    "initdb": "docker-compose run --rm backend sh -c './manage.py initcypress --skip-drop'",
+    "generate-xlsx-files": "docker-compose run --rm backend sh -c './manage.py generate_rdi_xlsx_files' && cp ../backend/generated/* cypress/fixtures/"
   },
   "devDependencies": {
     "@types/cypress-cucumber-preprocessor": "^1.14.1",

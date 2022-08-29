@@ -450,6 +450,10 @@ class HouseholdSelection(TimeStampedUUIDModel):
             """,
     )
 
+    class Meta:
+        unique_together = ("household", "target_population")
+        verbose_name = "Household Selection"
+
 
 class TargetingCriteriaQueryingMixin:
     def __init__(self, rules=None, excluded_household_ids=None):
