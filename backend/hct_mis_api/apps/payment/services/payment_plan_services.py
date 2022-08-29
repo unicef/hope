@@ -207,6 +207,13 @@ class PaymentPlanService:
         except IntegrityError:
             raise GraphQLError(f"Duplicated Households in provided Targeting")
 
+    def _recreate_payments_and_recalculate(self):
+        self.payment_plan.payments.all().delete()
+        self._create_payments(self.payment_plan)
+        self.payment_plan.refresh_from_db()
+        self.payment_plan.update_population_count_fields()
+        self.payment_plan.update_money_fields()
+
     def create(self, input_data: dict, user: User) -> PaymentPlan:
         business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])
         if not business_area.is_payment_plan_applicable:
@@ -249,7 +256,7 @@ class PaymentPlanService:
 
     def update(self, input_data: dict) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
-            raise GraphQLError(f"Only Payment Plan in Open status can be edited")
+            raise GraphQLError("Only Payment Plan in Open status can be edited")
 
         recalculate = False
 
@@ -267,7 +274,7 @@ class PaymentPlanService:
                 )
 
                 if not new_target_population.program:
-                    raise GraphQLError(f"TargetPopulation should have related Program defined")
+                    raise GraphQLError("TargetPopulation should have related Program defined")
 
                 self.payment_plan.target_population.status = TargetPopulation.STATUS_READY
                 self.payment_plan.target_population.save()
@@ -297,17 +304,13 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         if recalculate:
-            self.payment_plan.payments.all().delete()
-            self._create_payments(self.payment_plan)
-            self.payment_plan.refresh_from_db()
-            self.payment_plan.update_population_count_fields()
-            self.payment_plan.update_money_fields()
+            self._recreate_payments_and_recalculate()
 
         return self.payment_plan
 
     def delete(self) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
-            raise GraphQLError(f"Only Payment Plan in Open status can be deleted")
+            raise GraphQLError("Only Payment Plan in Open status can be deleted")
 
         self.payment_plan.target_population.status = TargetPopulation.STATUS_READY
         self.payment_plan.target_population.save()
@@ -322,3 +325,14 @@ class PaymentPlanService:
         create_payment_plan_payment_list_xlsx.delay(self.payment_plan.pk, user.pk)
 
         return self.payment_plan
+
+    def update_payment_plan_after_update_target_population(self, target_population, update_tp_program):
+        program = target_population.program
+        for payment_plan in target_population.payment_plans.all():
+            self.payment_plan = payment_plan
+
+            if update_tp_program:
+                payment_plan.program = program
+                payment_plan.save()
+
+            self._recreate_payments_and_recalculate()
