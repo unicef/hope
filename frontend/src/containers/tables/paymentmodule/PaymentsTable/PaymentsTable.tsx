@@ -62,6 +62,8 @@ export const PaymentsTable = ({
         paymentPlan={paymentPlan}
         payment={dialogPayment}
         setDialogOpen={() => setDialogPayment(null)}
+        canViewDetails={canViewDetails}
+        businessArea={businessArea}
       />
     </>
   );

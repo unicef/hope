@@ -23,14 +23,6 @@ today.setHours(0, 0, 0, 0);
 
 export const CreatePaymentPlanPage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const initialValues = {
-    targetingId: '',
-    startDate: '',
-    endDate: '',
-    currency: null,
-    dispersionStartDate: '',
-    dispersionEndDate: '',
-  };
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -62,7 +54,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       .required(t('End Date is required'))
       .when(
         'startDate',
-        (startDate, schema) =>
+        (startDate: string, schema) =>
           startDate &&
           schema.min(
             startDate,
@@ -72,6 +64,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
           ),
         '',
       ),
+    currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -80,7 +73,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate, schema) =>
+        (dispersionStartDate: string, schema) =>
           dispersionStartDate &&
           schema.min(
             dispersionStartDate,
@@ -92,18 +85,22 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       ),
   });
 
-  const handleSubmit = async (values): Promise<void> => {
+  type FormValues = Yup.InferType<typeof validationSchema>;
+  const initialValues: FormValues = {
+    targetingId: '',
+    startDate: '',
+    endDate: '',
+    currency: null,
+    dispersionStartDate: '',
+    dispersionEndDate: '',
+  };
+  const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
       const res = await mutate({
         variables: {
           input: {
             businessAreaSlug: businessArea,
-            targetingId: values.targetingId,
-            startDate: values.startDate,
-            endDate: values.endDate,
-            dispersionStartDate: values.dispersionStartDate,
-            dispersionEndDate: values.dispersionEndDate,
-            currency: values.currency,
+            ...values,
           },
         },
       });
