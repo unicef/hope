@@ -953,6 +953,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
                 payment_plan.steficon_rule = steficon_rule.latest
 
             payment_plan.save()
+            print("CALL")
             payment_plan_apply_steficon.delay(payment_plan.pk)
         else:
             payment_plan.steficon_rule = None

@@ -11,6 +11,11 @@
 # once this is done, FSP (with limit) may be used in another payment plan
 
 
+from unittest.mock import patch
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.steficon.fixtures import RuleFactory
+from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.household.fixtures import IndividualRoleInHouseholdFactory
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -128,6 +133,27 @@ mutation FinalizeTP($id: ID!) {
     }
 }
 """
+
+SET_STEFICON_RULE_MUTATION = """
+mutation SetSteficonRuleOnPaymentPlanPaymentList($paymentPlanId: ID!, $steficonRuleId: ID!) {
+    setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
+        paymentPlan {
+            id
+        }
+    }
+}
+"""
+
+
+# UPDATE_PAYMENT_PLAN_MUTATION = """
+# mutation UpdatePaymentPlan($input: UpdatePaymentPlanInput!) {
+#     updatePaymentPlan(input: $input) {
+#         paymentPlan {
+#             id
+#         }
+#     }
+# }
+# """
 
 
 class TestPaymentPlanReconciliation(APITestCase):
@@ -282,19 +308,27 @@ class TestPaymentPlanReconciliation(APITestCase):
                 }
             },
         )
-        print("create_payment_plan_response", create_payment_plan_response)
         payment_plan_id = create_payment_plan_response["data"]["createPaymentPlan"]["paymentPlan"]["id"]
 
-        UPDATE_PAYMENT_PLAN_MUTATION = ""  # TODO
-        lock_payment_plan_response = self.graphql_request(
-            request_string=UPDATE_PAYMENT_PLAN_MUTATION,
-            context={"user": self.user},
-            variables={
-                "id": payment_plan_id,
-            },
-        )
-        print("lock_payment_plan_response", lock_payment_plan_response)
+        rule = RuleFactory(definition="result.value=Decimal('1.3')", name="Rule")
 
+        # patch calling payment_plan_apply_steficon.delay
+        print("STEFICON", payment_plan_id, rule.id)
+        with patch("hct_mis_api.apps.payment.celery_tasks.payment_plan_apply_steficon") as mock:
+            response = self.graphql_request(
+                request_string=SET_STEFICON_RULE_MUTATION,
+                context={"user": self.user},
+                variables={
+                    "paymentPlanId": payment_plan_id,
+                    "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+                },
+            )
+            print("R", response)
+            print(mock)
+            print(mock.delay)
+            pass
+
+        print("FSP")
         # set fsp
 
         # lock fsp
