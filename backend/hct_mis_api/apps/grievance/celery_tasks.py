@@ -1,15 +1,18 @@
 import logging
 from datetime import timedelta
 from typing import Sequence
-from django.utils import timezone
 
 from django.db.models import Q
+from django.utils import timezone
 
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
+from hct_mis_api.apps.grievance.services.fetch_feedback_to_household_messages import (
+    fetch_feedback_to_household_messages,
+)
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -72,3 +75,13 @@ def periodic_grievances_notifications():
             notification.send_email_notification()
             ticket.last_notification_sent = timezone.now()
             ticket.save()
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
+def periodic_fetch_feedback_to_household_messages_task():
+    try:
+        fetch_feedback_to_household_messages()
+    except Exception as e:
+        logger.exception(e)

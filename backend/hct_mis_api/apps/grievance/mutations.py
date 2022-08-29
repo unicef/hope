@@ -75,7 +75,15 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     verify_required_arguments,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
+from hct_mis_api.apps.grievance.schema import (
+    FeedbackToHouseholdNode,
+    GrievanceTicketNode,
+    TicketNoteNode,
+)
+from hct_mis_api.apps.grievance.services.send_message_to_household import (
+    InvalidPhoneNumberException,
+    send_message_to_household,
+)
 from hct_mis_api.apps.grievance.utils import get_individual, traverse_sibling_tickets
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.household.models import (
@@ -133,6 +141,11 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
 
 class CreateTicketNoteInput(graphene.InputObjectType):
     description = graphene.String(required=True)
+    ticket = graphene.GlobalID(node=GrievanceTicketNode, required=True)
+
+
+class CreateFeedbackToHouseholdInput(graphene.InputObjectType):
+    message = graphene.String(required=True)
     ticket = graphene.GlobalID(node=GrievanceTicketNode, required=True)
 
 
@@ -864,6 +877,46 @@ class CreateTicketNoteMutation(PermissionMutation):
         return cls(grievance_ticket_note=ticket_note)
 
 
+class CreateFeedbackToHouseholdMutation(PermissionMutation):
+    feedback_to_household = graphene.Field(FeedbackToHouseholdNode)
+
+    class Arguments:
+        feedback = CreateFeedbackToHouseholdInput(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, feedback, **kwargs):
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(feedback["feedback_to_household"]))
+        message = feedback["message"]
+        created_by = info.context.user
+
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_FEEDBACK_TO_HOUSEHOLD,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_FEEDBACK_TO_HOUSEHOLD_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_FEEDBACK_TO_HOUSEHOLD_AS_OWNER,
+        )
+
+        cls._has_proper_status(grievance_ticket)
+
+        try:
+            feedback_to_household = send_message_to_household(grievance_ticket, message, created_by)
+        except InvalidPhoneNumberException as e:
+            raise GraphQLError(str(e)) from e
+        return cls(feedback_to_household=feedback_to_household)
+
+    @classmethod
+    def _has_proper_status(cls, grievance_ticket: GrievanceTicket):
+        if not grievance_ticket.is_complaint_ticket():
+            raise GraphQLError("Incorrect grievance category")
+
+
 class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
@@ -1268,6 +1321,7 @@ class Mutations(graphene.ObjectType):
     grievance_status_change = GrievanceStatusChangeMutation.Field()
     bulk_update_grievance_assignee = BulkUpdateGrievanceTicketsAssigneesMutation.Field()
     create_ticket_note = CreateTicketNoteMutation.Field()
+    create_feedback_to_household = CreateFeedbackToHouseholdMutation.Field()
     approve_individual_data_change = IndividualDataChangeApproveMutation.Field()
     approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
     approve_add_individual = SimpleApproveMutation.Field()

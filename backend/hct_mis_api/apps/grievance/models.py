@@ -17,7 +17,7 @@ from hct_mis_api.apps.grievance.constants import (
     PRIORITY_CHOICES,
     PRIORITY_LOW,
     URGENCY_CHOICES,
-    URGENCY_NOT_URGENT
+    URGENCY_NOT_URGENT,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.models import (
@@ -424,6 +424,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     def grievance_type_to_string(self):
         return "user" if self.category in range(2, 8) else "system"
 
+    def is_complaint_ticket(self):
+        return self.category == self.CATEGORY_GRIEVANCE_COMPLAINT
+
 
 class GrievanceTicketThrough(TimeStampedUUIDModel):
     main_ticket = models.ForeignKey(
@@ -769,6 +772,41 @@ class TicketReferralDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+
+
+class FeedbackToHousehold(TimeStampedUUIDModel):
+    KIND_MESSAGE = 1
+    KIND_RESPONSE = 2
+
+    KIND_CHOICES = (
+        (KIND_MESSAGE, _("Message")),
+        (KIND_RESPONSE, _("Response")),
+    )
+
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket",
+        related_name="feedback_to_household",
+        on_delete=models.CASCADE,
+    )
+    individual = models.ForeignKey(
+        "household.Individual",
+        related_name="feedback_to_household",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    message = models.TextField(
+        verbose_name=_("Message"),
+        help_text=_("The content of the message."),
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="feedback_to_household",
+        blank=True,
+        null=True,
+        verbose_name=_("Created by"),
+    )
+    kind = models.PositiveSmallIntegerField(choices=KIND_CHOICES)
 
 
 @receiver(post_save, sender=TicketComplaintDetails)

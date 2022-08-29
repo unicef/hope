@@ -1,7 +1,6 @@
 import datetime
 import logging
 
-from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db.models import Case, DateField, F, Q, When
 from django.utils import timezone
@@ -17,6 +16,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
+from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
@@ -38,6 +38,7 @@ from hct_mis_api.apps.grievance.filters import (
     TicketNoteFilter,
 )
 from hct_mis_api.apps.grievance.models import (
+    FeedbackToHousehold,
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
@@ -54,7 +55,6 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.program.schema import ProgramNode
@@ -168,6 +168,14 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 class TicketNoteNode(DjangoObjectType):
     class Meta:
         model = TicketNote
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class FeedbackToHouseholdNode(DjangoObjectType):
+    class Meta:
+        model = FeedbackToHousehold
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -463,8 +471,8 @@ class Query(graphene.ObjectType):
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         return (
-            GrievanceTicket.objects
-            .filter(ignored=False).select_related("assigned_to", "created_by")
+            GrievanceTicket.objects.filter(ignored=False)
+            .select_related("assigned_to", "created_by")
             .annotate(
                 total=Case(
                     When(
