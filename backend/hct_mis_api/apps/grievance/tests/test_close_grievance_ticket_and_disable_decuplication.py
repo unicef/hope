@@ -1,16 +1,10 @@
 from datetime import date
 from unittest import mock
 
-from django_countries.fields import Country
-
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -38,6 +32,8 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     UPDATE_GRIEVANCE_TICKET_STATUS_CHANGE_MUTATION = """
     mutation GrievanceTicketStatusChange($grievanceTicketId: ID, $status: Int) {
         grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
@@ -58,22 +54,14 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
         cls.business_area.postpone_deduplication = True
         cls.business_area.save()
 
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123333")
-        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="2343123")
-
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
             name="Admin type one",
             country=country,
             area_level=2,
         )
-        cls.admin_area_1_new = AreaFactory(name="City Test", area_type=area_type, p_code="123333")
-        cls.admin_area_2_new = AreaFactory(name="City Example", area_type=area_type, p_code="2343123")
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123333")
+        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="2343123")
 
         program_one = ProgramFactory(
             name="Test program ONE",
@@ -86,10 +74,8 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
         household_one.programs.add(program_one)
 
         cls.individual = IndividualFactory(household=household_one)
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        birth_certificate_type = DocumentType.objects.get(
-            country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
-        )
+        national_id_type = DocumentType.objects.get(country=country, type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        birth_certificate_type = DocumentType.objects.get(country=country, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
         cls.national_id = DocumentFactory(
             type=national_id_type, document_number="789-789-645", individual=cls.individual
         )
@@ -104,7 +90,6 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
             admin2=cls.admin_area_1,
-            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
             created_by=cls.user,
