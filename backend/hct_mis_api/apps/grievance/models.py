@@ -486,6 +486,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         if self.category in range(2, 4):
             return self.ES_MAPPING_ISSUE_TYPES_CHOICES[self.category].get(self.issue_type)
 
+    def grievance_type_to_string(self):
+        return "user" if self.category in range(2, 8) else "system"
+
 
 class GrievanceTicketThrough(TimeStampedUUIDModel):
     main_ticket = models.ForeignKey(
