@@ -2,10 +2,11 @@ import random
 
 import factory
 from factory import enums, fuzzy
-from pytz import utc
 from faker import Faker
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
     MARITAL_STATUS_CHOICE,
@@ -83,8 +84,8 @@ class HouseholdFactory(factory.DjangoModelFactory):
         RESIDENCE_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    country_origin = factory.Faker("country_code")
-    country = factory.Faker("country_code")
+    country_origin = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
     size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
     registration_data_import = factory.SubFactory(
@@ -168,20 +169,21 @@ class BankAccountInfoFactory(factory.DjangoModelFactory):
     bank_account_number = random.randint(10**26, 10**27 - 1)
 
 
-class DocumentFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Document
-
-    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
-    type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by("?").first())
-    individual = factory.SubFactory(IndividualFactory)
-
-
 class DocumentTypeFactory(factory.DjangoModelFactory):
     class Meta:
         model = DocumentType
 
     type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
+
+
+class DocumentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Document
+        django_get_or_create = ("type",)
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.SubFactory(DocumentTypeFactory)
+    individual = factory.SubFactory(IndividualFactory)
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):

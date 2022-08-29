@@ -8,6 +8,7 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
+from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 
@@ -16,13 +17,12 @@ from PIL import Image
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_TAX_ID,
-    DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -62,11 +62,13 @@ def create_document_image():
 
 
 class TestRdiCreateTask(BaseElasticSearchTestCase):
+    multi_db = True
     databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
@@ -383,7 +385,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
+    multi_db = True
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @staticmethod
     def _return_test_image(*args, **kwargs):
@@ -407,7 +411,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:
-            document_types.append(DocumentType(country=Country("AFG"), label=label, type=doc_type))
+            document_types.append(ImportedDocumentType(country=Country("AFG"), label=label, type=doc_type))
         ImportedDocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
         content = Path(
@@ -434,27 +438,13 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         cls.business_area.kobo_username = "1234ABC"
         cls.business_area.save()
 
-        admin1_level = AdminAreaLevel.objects.create(name="Bakool", admin_level=1, business_area=cls.business_area)
-        admin1 = AdminArea.objects.create(p_code="SO25", title="SO25", admin_area_level=admin1_level)
-
-        admin2_level = AdminAreaLevel.objects.create(name="Ceel Barde", admin_level=2, business_area=cls.business_area)
-        admin2 = AdminArea.objects.create(p_code="SO2502", title="SO2502", parent=admin1, admin_area_level=admin2_level)
-
         country = geo_models.Country.objects.first()
 
-        admin1_type = geo_models.AreaType.objects.create(
-            name="Bakool", area_level=1, country=country, original_id=admin1_level.id
-        )
-        admin1_new = geo_models.Area.objects.create(
-            p_code="SO25", name="SO25", area_type=admin1_type, original_id=admin1.id
-        )
+        admin1_type = geo_models.AreaType.objects.create(name="Bakool", area_level=1, country=country)
+        admin1_new = geo_models.Area.objects.create(p_code="SO25", name="SO25", area_type=admin1_type)
 
-        admin2_type = geo_models.AreaType.objects.create(
-            name="Ceel Barde", area_level=2, country=country, original_id=admin2_level.id
-        )
-        geo_models.Area.objects.create(
-            p_code="SO2502", name="SO2502", parent=admin1_new, area_type=admin2_type, original_id=admin2.id
-        )
+        admin2_type = geo_models.AreaType.objects.create(name="Ceel Barde", area_level=2, country=country)
+        geo_models.Area.objects.create(p_code="SO2502", name="SO2502", parent=admin1_new, area_type=admin2_type)
 
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=cls.business_area.slug
