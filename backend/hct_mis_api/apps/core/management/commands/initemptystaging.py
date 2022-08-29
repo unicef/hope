@@ -27,8 +27,3 @@ class Command(BaseCommand):
 
         call_command("loadcountries")
         call_command("loadcountrycodes")
-        call_command("loadadminareas", "--business_area", "Afghanistan")
-        call_command("loadadminareas", "--business_area", "Somalia")
-        call_command("loadadminareas", "--business_area", "South Sudan")
-        call_command("loadadminareas", "--business_area", "Jordan")
-        call_command("loadadminareas", "--business_area", "Central African Republic")

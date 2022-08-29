@@ -1,6 +1,13 @@
 from django.db.models import Q
 from django.db.models.functions import Lower
-from django_filters import CharFilter, DateTimeFilter, FilterSet, ModelMultipleChoiceFilter, NumericRangeFilter
+
+from django_filters import (
+    CharFilter,
+    DateTimeFilter,
+    FilterSet,
+    ModelMultipleChoiceFilter,
+    NumericRangeFilter,
+)
 
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.core.filters import IntegerFilter
@@ -14,7 +21,7 @@ class HouseholdFilter(FilterSet):
             "id",
             Lower("head_of_household__full_name"),
             "size",
-            Lower("admin_area_new__name"),
+            Lower("admin_area__name"),
             "updated_at",
             "unicef_id",
         )

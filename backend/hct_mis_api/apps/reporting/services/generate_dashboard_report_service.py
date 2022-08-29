@@ -197,7 +197,7 @@ class GenerateDashboardReportContentHelpers:
             "created_at__year": report.year,
         }
         if report.admin_area:
-            filter_vars["admin2_new"] = report.admin_area_new
+            filter_vars["admin2"] = report.admin_area
 
         if not cls._is_report_global(report):
             filter_vars["business_area"] = report.business_area
