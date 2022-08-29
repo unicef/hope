@@ -13,11 +13,11 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.documents import (
-    CATEGORY_CHOICES,
-    STATUS_CHOICES,
-    PRIORITY_CHOICES,
-    URGENCY_CHOICES
+from hct_mis_api.apps.grievance.constants import (
+    ES_MAPPING_CATEGORY_CHOICES,
+    ES_MAPPING_STATUS_CHOICES,
+    ES_MAPPING_PRIORITY_CHOICES,
+    ES_MAPPING_URGENCY_CHOICES
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -374,21 +374,34 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             doc_type="_doc",
             id=cls.grievance_ticket_1.id,
             body={
-                "business_area": cls.grievance_ticket_1.business_area.name.lower(),
+                "business_area": {
+                    "slug": cls.grievance_ticket_1.business_area.name.lower()
+                },
                 "unicef_id": cls.grievance_ticket_1.unicef_id,
-                "admin": cls.grievance_ticket_1.admin2.id,
-                "registration_data_import": None,
-                "category": CATEGORY_CHOICES.get(cls.grievance_ticket_1.category),
-                "status": STATUS_CHOICES.get(cls.grievance_ticket_1.status),
+                "admin": {
+                    "id": cls.grievance_ticket_1.admin2.id
+                },
+                "registration_data_import": {
+                    "id": None
+                },
+                "category": ES_MAPPING_CATEGORY_CHOICES.get(cls.grievance_ticket_1.category),
+                "status": ES_MAPPING_STATUS_CHOICES.get(cls.grievance_ticket_1.status),
                 "issue_type": None,
-                "assigned_to": cls.user.id,
+                "assigned_to": {
+                    "id": cls.user.id
+                },
                 "created_at": "2022-04-30T09:54:07.827000",
                 "household_unicef_id": "HH-20-0000.0001",
-                "priority": PRIORITY_CHOICES.get(cls.grievance_ticket_1.priority),
-                "urgency": URGENCY_CHOICES.get(cls.grievance_ticket_1.urgency),
+                "priority": ES_MAPPING_PRIORITY_CHOICES.get(cls.grievance_ticket_1.priority),
+                "urgency": ES_MAPPING_URGENCY_CHOICES.get(cls.grievance_ticket_1.urgency),
                 "grievance_type": "user",
-                "head_of_household_last_name": "Kowalska_1",
-                "fsp": None
+                "ticket_details": {
+                    "household": {
+                        "head_of_household": {
+                            "family_name": "Kowalska_1"
+                        }
+                    }
+                }
             }
         )
 
@@ -417,21 +430,34 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             doc_type="_doc",
             id=cls.grievance_ticket_2.id,
             body={
-                "business_area": cls.grievance_ticket_2.business_area.name.lower(),
+                "business_area": {
+                    "slug": cls.grievance_ticket_2.business_area.name.lower()
+                },
                 "unicef_id": cls.grievance_ticket_2.unicef_id,
-                "admin": cls.grievance_ticket_2.admin2.id,
-                "registration_data_import": "04992dce-154b-4938-8e47-74341541ebcf",
-                "category": CATEGORY_CHOICES.get(cls.grievance_ticket_2.category),
-                "status": STATUS_CHOICES.get(cls.grievance_ticket_2.status),
+                "admin": {
+                    "id": cls.grievance_ticket_2.admin2.id
+                },
+                "registration_data_import": {
+                    "id": "04992dce-154b-4938-8e47-74341541ebcf"
+                },
+                "category": ES_MAPPING_CATEGORY_CHOICES.get(cls.grievance_ticket_2.category),
+                "status": ES_MAPPING_STATUS_CHOICES.get(cls.grievance_ticket_2.status),
                 "issue_type": "Fraud and forgery",
-                "assigned_to": cls.user2.id,
+                "assigned_to": {
+                    "id": cls.user2.id
+                },
                 "created_at": "2022-05-12T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0002",
-                "priority": PRIORITY_CHOICES.get(cls.grievance_ticket_2.priority),
-                "urgency": URGENCY_CHOICES.get(cls.grievance_ticket_2.urgency),
+                "priority": ES_MAPPING_PRIORITY_CHOICES.get(cls.grievance_ticket_2.priority),
+                "urgency": ES_MAPPING_URGENCY_CHOICES.get(cls.grievance_ticket_2.urgency),
                 "grievance_type": "user",
-                "head_of_household_last_name": "Kowalska_2",
-                "fsp": "Goldman Sachs"
+                "ticket_details": {
+                    "household": {
+                        "head_of_household": {
+                            "family_name": "Kowalska_2"
+                        }
+                    }
+                }
             }
         )
 
@@ -459,21 +485,34 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             doc_type="_doc",
             id=cls.grievance_ticket_3.id,
             body={
-                "business_area": cls.grievance_ticket_3.business_area.name.lower(),
+                "business_area": {
+                    "slug": cls.grievance_ticket_3.business_area.name.lower()
+                },
                 "unicef_id": cls.grievance_ticket_3.unicef_id,
-                "admin": cls.grievance_ticket_3.admin2.id,
-                "registration_data_import": None,
-                "category": CATEGORY_CHOICES.get(cls.grievance_ticket_3.category),
-                "status": STATUS_CHOICES.get(cls.grievance_ticket_3.status),
+                "admin": {
+                    "id": cls.grievance_ticket_3.admin2.id
+                },
+                "registration_data_import": {
+                    "id": None
+                },
+                "category": ES_MAPPING_CATEGORY_CHOICES.get(cls.grievance_ticket_3.category),
+                "status": ES_MAPPING_STATUS_CHOICES.get(cls.grievance_ticket_3.status),
                 "issue_type": None,
-                "assigned_to": cls.user.id,
+                "assigned_to": {
+                    "id": cls.user.id
+                },
                 "created_at": "2022-05-05T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0003",
-                "priority": PRIORITY_CHOICES.get(cls.grievance_ticket_3.priority),
-                "urgency": URGENCY_CHOICES.get(cls.grievance_ticket_3.urgency),
+                "priority": ES_MAPPING_PRIORITY_CHOICES.get(cls.grievance_ticket_3.priority),
+                "urgency": ES_MAPPING_URGENCY_CHOICES.get(cls.grievance_ticket_3.urgency),
                 "grievance_type": "system",
-                "head_of_household_last_name": "Kowalska_3",
-                "fsp": None
+                "ticket_details": {
+                    "household": {
+                        "head_of_household": {
+                            "family_name": "Kowalska_3"
+                        }
+                    }
+                }
             }
         )
 
@@ -498,6 +537,14 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             )
 
         return es
+
+    @classmethod
+    def tearDownClass(cls):
+        es = Elasticsearch("http://elasticsearch:9200")
+        es.indices.delete(
+            index="test_es_db",
+            ignore=[400, 404]
+        )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_unicef_id(self, mock_execute_test_es_query):
