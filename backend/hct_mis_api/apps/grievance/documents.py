@@ -54,10 +54,7 @@ class GrievanceTicketDocument(Document):
 
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
-        settings = {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
-        }
+        settings = settings.ELASTICSEARCH_BASE_SETTINGS
 
     def get_instances_from_related(self, related_instance):
         if isinstance(related_instance, BusinessArea):
