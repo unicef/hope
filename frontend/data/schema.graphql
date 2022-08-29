@@ -474,6 +474,8 @@ input CreateGrievanceTicketInput {
   priority: Int
   urgency: Int
   partner: Int
+  programme: ID
+  comments: String
 }
 
 type CreateGrievanceTicketMutation {
@@ -796,6 +798,8 @@ type GrievanceTicketNode implements Node {
   priority: Int
   urgency: Int
   partner: PartnerType
+  programme: ProgramNode
+  comments: String
   linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -2402,6 +2406,7 @@ type ProgramNode implements Node {
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
   individualDataNeeded: Boolean
+  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   cashPlans(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
@@ -3610,6 +3615,8 @@ input UpdateGrievanceTicketInput {
   priority: Int
   urgency: Int
   partner: Int
+  programme: ID
+  comments: String
 }
 
 type UpdateGrievanceTicketMutation {
