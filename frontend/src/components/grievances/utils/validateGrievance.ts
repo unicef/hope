@@ -212,6 +212,23 @@ export function validateUsingSteps(
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
   const errors: { [key: string]: string | { [key: string]: string } } = {};
+  const verficationStepFields = [
+    'size',
+    'maleChildrenCount',
+    'femaleChildrenCount',
+    'childrenDisabledCount',
+    'headOfHousehold',
+    'countryOrigin',
+    'address',
+    'village',
+    'admin1',
+    'unhcrId',
+    'months_displaced_h_f',
+    'fullName',
+    'birthDate',
+    'phoneNo',
+    'relationship',
+  ];
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
       if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
@@ -415,6 +432,17 @@ export function validateUsingSteps(
       errors.selectedHousehold = 'Individual is Required';
     } else if (isHouseholdRequired && !values.selectedHousehold) {
       errors.selectedHousehold = 'Household is Required';
+    }
+  }
+  if (
+    activeStep === GrievanceSteps.Verification &&
+    (values.selectedHousehold ||
+      (values.selectedIndividual && !values.verificationRequired))
+  ) {
+    if (
+      verficationStepFields.filter((item) => values[item] === true).length < 5
+    ) {
+      errors.verificationRequired = 'Select correctly minimum 5 questions';
     }
   }
   return errors;
