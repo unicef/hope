@@ -54,8 +54,21 @@ export const AllHouseholds = gql`
           headOfHousehold {
             id
             fullName
+            phoneNo
+            birthDate
+            phoneNo
+            relationship
           }
           size
+          address
+          village
+          maleChildrenCount
+          femaleChildrenCount
+          childrenDisabledCount
+          admin1 {
+            id
+            name
+          }
           admin2 {
             id
             name
