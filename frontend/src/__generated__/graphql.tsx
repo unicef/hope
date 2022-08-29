@@ -788,6 +788,8 @@ export type CreateGrievanceTicketInput = {
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
   partner?: Maybe<Scalars['Int']>,
+  programme?: Maybe<Scalars['ID']>,
+  comments?: Maybe<Scalars['String']>,
 };
 
 export type CreateGrievanceTicketMutation = {
@@ -1141,6 +1143,8 @@ export type GrievanceTicketNode = Node & {
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
   partner?: Maybe<PartnerType>,
+  programme?: Maybe<ProgramNode>,
+  comments?: Maybe<Scalars['String']>,
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -3494,6 +3498,7 @@ export type ProgramNode = Node & {
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
+  grievanceticketSet: GrievanceTicketNodeConnection,
   households: HouseholdNodeConnection,
   cashPlans: CashPlanNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
@@ -3512,6 +3517,15 @@ export type ProgramNodeAdminAreasArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   name?: Maybe<Scalars['String']>
+};
+
+
+export type ProgramNodeGrievanceticketSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -5761,6 +5775,8 @@ export type UpdateGrievanceTicketInput = {
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
   partner?: Maybe<Scalars['Int']>,
+  programme?: Maybe<Scalars['ID']>,
+  comments?: Maybe<Scalars['String']>,
 };
 
 export type UpdateGrievanceTicketMutation = {
@@ -8184,7 +8200,7 @@ export type GrievanceTicketQuery = (
   { __typename?: 'Query' }
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
-    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency'>
+    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency' | 'comments'>
     & { partner: Maybe<(
       { __typename?: 'PartnerType' }
       & Pick<PartnerType, 'id' | 'name'>
@@ -8462,7 +8478,10 @@ export type GrievanceTicketQuery = (
           )> }
         )> }
       )>> }
-    ) }
+    ), programme: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'name' | 'id'>
+    )> }
   )> }
 );
 
@@ -15360,6 +15379,11 @@ export const GrievanceTicketDocument = gql`
     }
     priority
     urgency
+    programme {
+      name
+      id
+    }
+    comments
   }
 }
     ${IndividualDetailedFragmentDoc}
@@ -21127,6 +21151,8 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   priority?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   urgency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   partner?: Resolver<Maybe<ResolversTypes['PartnerType']>, ParentType, ContextType>,
+  programme?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
@@ -21946,6 +21972,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, ProgramNodeGrievanceticketSetArgs>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
