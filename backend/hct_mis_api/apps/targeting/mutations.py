@@ -199,8 +199,8 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         vulnerability_score_max = input.get("vulnerability_score_max")
         excluded_ids = input.get("excluded_ids")
         exclusion_reason = input.get("exclusion_reason")
-        update_payment_tp = False
-        update_payment_tp_program = False
+        update_payment_plan_tp = False
+        update_payment_plan_tp_program = False
         if not target_population.is_approved() and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
@@ -226,7 +226,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if program_id_encoded:
             program = get_object_or_404(Program, pk=decode_id_string(program_id_encoded))
             target_population.program = program
-            update_payment_tp_program = True
+            update_payment_plan_tp_program = True
         targeting_criteria_input = input.get("targeting_criteria")
         if targeting_criteria_input is not None:
             TargetingCriteriaInputValidator.validate(targeting_criteria_input)
@@ -236,12 +236,12 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
                 if target_population.candidate_list_targeting_criteria:
                     target_population.candidate_list_targeting_criteria.delete()
                 target_population.candidate_list_targeting_criteria = targeting_criteria
-                update_payment_tp = True
+                update_payment_plan_tp = True
             elif target_population.status == TargetPopulation.STATUS_LOCKED:
                 if target_population.final_list_targeting_criteria:
                     target_population.final_list_targeting_criteria.delete()
                 target_population.final_list_targeting_criteria = targeting_criteria
-                update_payment_tp = True
+                update_payment_plan_tp = True
         if excluded_ids is not None:
             target_population.excluded_ids = excluded_ids
         if exclusion_reason is not None:
@@ -249,10 +249,10 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         target_population.full_clean()
         target_population.save()
 
-        if update_payment_tp or update_payment_tp_program:
+        if update_payment_plan_tp or update_payment_plan_tp_program:
             PaymentPlanService().update_payment_plan_after_update_target_population(
                 target_population,
-                update_payment_tp_program
+                update_payment_plan_tp_program
             )
 
         log_create(

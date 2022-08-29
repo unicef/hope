@@ -328,7 +328,9 @@ class PaymentPlanService:
 
     def update_payment_plan_after_update_target_population(self, target_population, update_tp_program):
         program = target_population.program
-        for payment_plan in target_population.payment_plans.all():
+        for payment_plan in target_population.payment_plans.filter(
+                status__in=(PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED)
+        ):
             self.payment_plan = payment_plan
 
             if update_tp_program:
