@@ -2554,7 +2554,6 @@ type PaymentChannelNodeEdge {
 
 type PaymentConflictDataNode {
   paymentPlanId: String
-  paymentPlanEncodedId: String
   paymentPlanUnicefId: String
   paymentPlanStartDate: String
   paymentPlanEndDate: String

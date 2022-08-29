@@ -266,13 +266,18 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class PaymentConflictDataNode(graphene.ObjectType):
     payment_plan_id = graphene.String()
-    payment_plan_encoded_id = graphene.String()
     payment_plan_unicef_id = graphene.String()
     payment_plan_start_date = graphene.String()
     payment_plan_end_date = graphene.String()
     payment_plan_status = graphene.String()
     payment_id = graphene.String()
     payment_unicef_id = graphene.String()
+
+    def resolve_payment_plan_id(self, info):
+        return encode_id_base64(self["payment_plan_id"], "PaymentPlan")
+
+    def resolve_payment_id(self, info):
+        return encode_id_base64(self["payment_id"], "Payment")
 
 
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -300,12 +305,7 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data):
         """parse list of conflicted payment plans data from Payment model json annotations"""
-        response = []
-        for conflict in conflicts_data:
-            json_data = json.loads(conflict)
-            json_data["payment_plan_encoded_id"] = encode_id_base64(json_data.get("payment_plan_id"), "PaymentPlan")
-            response.append(json_data)
-        return response
+        return [json.loads(conflict) for conflict in conflicts_data]
 
 
 class DeliveryMechanismNode(DjangoObjectType):

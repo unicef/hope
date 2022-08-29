@@ -3775,7 +3775,6 @@ export type PaymentChannelNodeEdge = {
 export type PaymentConflictDataNode = {
    __typename?: 'PaymentConflictDataNode',
   paymentPlanId?: Maybe<Scalars['String']>,
-  paymentPlanEncodedId?: Maybe<Scalars['String']>,
   paymentPlanUnicefId?: Maybe<Scalars['String']>,
   paymentPlanStartDate?: Maybe<Scalars['String']>,
   paymentPlanEndDate?: Maybe<Scalars['String']>,
@@ -10036,10 +10035,10 @@ export type AllPaymentsForTableQuery = (
           )> }
         ), paymentPlanHardConflictedData: Maybe<Array<Maybe<(
           { __typename?: 'PaymentConflictDataNode' }
-          & Pick<PaymentConflictDataNode, 'paymentPlanUnicefId' | 'paymentPlanEncodedId' | 'paymentPlanId' | 'paymentPlanStartDate' | 'paymentPlanEndDate' | 'paymentPlanStatus' | 'paymentId' | 'paymentUnicefId'>
+          & Pick<PaymentConflictDataNode, 'paymentPlanUnicefId' | 'paymentPlanId' | 'paymentPlanStartDate' | 'paymentPlanEndDate' | 'paymentPlanStatus' | 'paymentId' | 'paymentUnicefId'>
         )>>>, paymentPlanSoftConflictedData: Maybe<Array<Maybe<(
           { __typename?: 'PaymentConflictDataNode' }
-          & Pick<PaymentConflictDataNode, 'paymentPlanUnicefId' | 'paymentPlanEncodedId' | 'paymentPlanId' | 'paymentPlanStartDate' | 'paymentPlanEndDate' | 'paymentPlanStatus' | 'paymentId' | 'paymentUnicefId'>
+          & Pick<PaymentConflictDataNode, 'paymentPlanUnicefId' | 'paymentPlanId' | 'paymentPlanStartDate' | 'paymentPlanEndDate' | 'paymentPlanStatus' | 'paymentId' | 'paymentUnicefId'>
         )>>>, collector: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'fullName'>
@@ -18110,7 +18109,6 @@ export const AllPaymentsForTableDocument = gql`
         paymentPlanSoftConflicted
         paymentPlanHardConflictedData {
           paymentPlanUnicefId
-          paymentPlanEncodedId
           paymentPlanId
           paymentPlanStartDate
           paymentPlanEndDate
@@ -18120,7 +18118,6 @@ export const AllPaymentsForTableDocument = gql`
         }
         paymentPlanSoftConflictedData {
           paymentPlanUnicefId
-          paymentPlanEncodedId
           paymentPlanId
           paymentPlanStartDate
           paymentPlanEndDate
@@ -24600,7 +24597,6 @@ export type PaymentChannelNodeEdgeResolvers<ContextType = any, ParentType extend
 
 export type PaymentConflictDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentConflictDataNode'] = ResolversParentTypes['PaymentConflictDataNode']> = {
   paymentPlanId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  paymentPlanEncodedId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentPlanUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentPlanStartDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentPlanEndDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
