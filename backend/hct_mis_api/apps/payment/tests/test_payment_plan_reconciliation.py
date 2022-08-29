@@ -49,6 +49,34 @@ mutation CreateProgram($programData: CreateProgramInput!) {
 }
 """
 
+UPDATE_PROGRAM_MUTATION = """
+mutation UpdateProgram($programData: UpdateProgramInput!) {
+  updateProgram(programData: $programData) {
+    program {
+      id
+      name
+      startDate
+      endDate
+      status
+      caId
+      description
+      budget
+      frequencyOfPayments
+      cashPlus
+      populationGoal
+      scope
+      sector
+      totalNumberOfHouseholds
+      administrativeAreasOfImplementation
+      individualDataNeeded
+      __typename
+    }
+    validationErrors
+    __typename
+  }
+}
+"""
+
 
 CREATE_TARGET_POPULATION_MUTATION = """
 mutation CreateTP($input: CreateTargetPopulationInput!) {
@@ -70,7 +98,33 @@ mutation CreateTP($input: CreateTargetPopulationInput!) {
 
 
 CREATE_PAYMENT_PLAN_MUTATION = """
+mutation CreatePaymentPlan($input: CreatePaymentPlanInput!) {
+    createPaymentPlan(input: $input) {
+        paymentPlan {
+            id
+        }
+    }
+}
+"""
 
+APPROVE_TARGET_POPULATION_MUTATION = """
+mutation ApproveTP($id: ID!) {
+    approveTargetPopulation(id: $id) {
+        targetPopulation {
+            id
+        }
+    }
+}
+"""
+
+FINALIZE_TARGET_POPULATION_MUTATION = """
+mutation FinalizeTP($id: ID!) {
+    finalizeTargetPopulation(id: $id) {
+        targetPopulation {
+            id
+        }
+    }
+}
 """
 
 
@@ -88,7 +142,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_afghanistan()
+        create_afghanistan(is_payment_plan_applicable=True)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(
@@ -97,7 +151,10 @@ class TestPaymentPlanReconciliation(APITestCase):
                 Permissions.PAYMENT_MODULE_CREATE,
                 Permissions.PAYMENT_MODULE_VIEW_DETAILS,
                 Permissions.PROGRAMME_CREATE,
+                Permissions.PROGRAMME_ACTIVATE,
                 Permissions.TARGETING_CREATE,
+                Permissions.TARGETING_LOCK,
+                Permissions.TARGETING_SEND,
             ],
             cls.business_area,
         )
@@ -144,9 +201,18 @@ class TestPaymentPlanReconciliation(APITestCase):
                 }
             },
         )
-        print("create_programme_response", create_programme_response)
-
         program_id = create_programme_response["data"]["createProgram"]["program"]["id"]
+
+        self.graphql_request(
+            request_string=UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": program_id,
+                    "status": "ACTIVE",
+                },
+            },
+        )
 
         create_target_population_response = self.graphql_request(
             request_string=CREATE_TARGET_POPULATION_MUTATION,
@@ -176,11 +242,54 @@ class TestPaymentPlanReconciliation(APITestCase):
                 }
             },
         )
-        print("create_target_population_response", create_target_population_response)
+        target_population_id = create_target_population_response["data"]["createTargetPopulation"]["targetPopulation"][
+            "id"
+        ]
+
+        self.graphql_request(
+            request_string=APPROVE_TARGET_POPULATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "id": target_population_id,
+            },
+        )
+
+        finalize_target_population_response = self.graphql_request(
+            request_string=FINALIZE_TARGET_POPULATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "id": target_population_id,
+            },
+        )
+        print("finalize_target_population_response", finalize_target_population_response)
+
+        # TOOD: set status to ready here instead of ready for cash assist
 
         create_payment_plan_response = self.graphql_request(
             request_string=CREATE_PAYMENT_PLAN_MUTATION,
             context={"user": self.user},
-            variables={},
+            variables={
+                "input": {
+                    "businessAreaSlug": self.business_area.slug,
+                    "targetingId": target_population_id,
+                    "startDate": "2022-08-24",
+                    "endDate": "2022-08-31",
+                    "dispersionStartDate": "2022-08-24",
+                    "dispersionEndDate": "2022-08-31",
+                    "currency": "USD",
+                }
+            },
         )
         print("create_payment_plan_response", create_payment_plan_response)
+
+        # lock
+
+        # set fsp
+
+        # lock fsp
+
+        # ...
+
+        # receive reconciliation info
+
+        # observe that payments have received amounts set
