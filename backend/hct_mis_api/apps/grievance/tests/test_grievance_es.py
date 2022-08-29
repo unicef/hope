@@ -13,12 +13,6 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.constants import (
-    ES_MAPPING_CATEGORY_CHOICES,
-    ES_MAPPING_STATUS_CHOICES,
-    ES_MAPPING_PRIORITY_CHOICES,
-    ES_MAPPING_URGENCY_CHOICES
-)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
@@ -384,16 +378,16 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "registration_data_import": {
                     "id": None
                 },
-                "category": ES_MAPPING_CATEGORY_CHOICES.get(cls.grievance_ticket_1.category),
-                "status": ES_MAPPING_STATUS_CHOICES.get(cls.grievance_ticket_1.status),
+                "category": cls.grievance_ticket_1.get_category_display(),
+                "status": cls.grievance_ticket_1.get_status_display(),
                 "issue_type": None,
                 "assigned_to": {
                     "id": cls.user.id
                 },
                 "created_at": "2022-04-30T09:54:07.827000",
                 "household_unicef_id": "HH-20-0000.0001",
-                "priority": ES_MAPPING_PRIORITY_CHOICES.get(cls.grievance_ticket_1.priority),
-                "urgency": ES_MAPPING_URGENCY_CHOICES.get(cls.grievance_ticket_1.urgency),
+                "priority": cls.grievance_ticket_1.get_priority_display(),
+                "urgency": cls.grievance_ticket_1.get_urgency_display(),
                 "grievance_type": "user",
                 "ticket_details": {
                     "household": {
@@ -440,16 +434,16 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "registration_data_import": {
                     "id": "04992dce-154b-4938-8e47-74341541ebcf"
                 },
-                "category": ES_MAPPING_CATEGORY_CHOICES.get(cls.grievance_ticket_2.category),
-                "status": ES_MAPPING_STATUS_CHOICES.get(cls.grievance_ticket_2.status),
+                "category": cls.grievance_ticket_2.get_category_display(),
+                "status": cls.grievance_ticket_2.get_status_display(),
                 "issue_type": "Fraud and forgery",
                 "assigned_to": {
                     "id": cls.user2.id
                 },
                 "created_at": "2022-05-12T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0002",
-                "priority": ES_MAPPING_PRIORITY_CHOICES.get(cls.grievance_ticket_2.priority),
-                "urgency": ES_MAPPING_URGENCY_CHOICES.get(cls.grievance_ticket_2.urgency),
+                "priority": cls.grievance_ticket_2.get_priority_display(),
+                "urgency": cls.grievance_ticket_2.get_urgency_display(),
                 "grievance_type": "user",
                 "ticket_details": {
                     "household": {
@@ -495,16 +489,16 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "registration_data_import": {
                     "id": None
                 },
-                "category": ES_MAPPING_CATEGORY_CHOICES.get(cls.grievance_ticket_3.category),
-                "status": ES_MAPPING_STATUS_CHOICES.get(cls.grievance_ticket_3.status),
+                "category": cls.grievance_ticket_3.get_category_display(),
+                "status": cls.grievance_ticket_3.get_status_display(),
                 "issue_type": None,
                 "assigned_to": {
                     "id": cls.user.id
                 },
                 "created_at": "2022-05-05T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0003",
-                "priority": ES_MAPPING_PRIORITY_CHOICES.get(cls.grievance_ticket_3.priority),
-                "urgency": ES_MAPPING_URGENCY_CHOICES.get(cls.grievance_ticket_3.urgency),
+                "priority": cls.grievance_ticket_3.get_priority_display(),
+                "urgency": cls.grievance_ticket_3.get_urgency_display(),
                 "grievance_type": "system",
                 "ticket_details": {
                     "household": {
