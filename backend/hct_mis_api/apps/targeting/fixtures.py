@@ -101,4 +101,3 @@ class HouseholdSelectionFactory(factory.DjangoModelFactory):
     household = factory.SubFactory(HouseholdFactory)
     target_population = factory.SubFactory(TargetPopulationFactory)
     vulnerability_score = factory.fuzzy.FuzzyInteger(0, 100)
-    final = factory.fuzzy.FuzzyChoice([True, False])
