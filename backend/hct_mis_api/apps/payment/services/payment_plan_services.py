@@ -10,7 +10,10 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProcess, Payment
-from hct_mis_api.apps.payment.celery_tasks import create_payment_plan_payment_list_xlsx
+from hct_mis_api.apps.payment.celery_tasks import (
+    create_payment_plan_payment_list_xlsx,
+    create_payment_plan_payment_list_xlsx_per_fsp,
+)
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 
@@ -321,8 +324,14 @@ class PaymentPlanService:
     def export_xlsx(self, user: User) -> PaymentPlan:
         self.payment_plan.status_exporting()
         self.payment_plan.save()
-
         create_payment_plan_payment_list_xlsx.delay(self.payment_plan.pk, user.pk)
+
+        return self.payment_plan
+
+    def export_xlsx_per_fsp(self, user: User) -> PaymentPlan:
+        self.payment_plan.status_exporting()
+        self.payment_plan.save()
+        create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user.pk)
 
         return self.payment_plan
 
