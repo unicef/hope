@@ -734,7 +734,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 multiline
                                 fullWidth
                                 variant='outlined'
-                                label='Description*'
+                                label={
+                                  values.issueType ===
+                                    GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
+                                  values.issueType ===
+                                    GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+                                    ? t('Withdrawal Reason*')
+                                    : t('Description*')
+                                }
                                 component={FormikTextField}
                               />
                             </Grid>
@@ -744,7 +751,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 multiline
                                 fullWidth
                                 variant='outlined'
-                                label='Comments'
+                                label={t('Comments')}
                                 component={FormikTextField}
                               />
                             </Grid>
