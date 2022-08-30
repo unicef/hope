@@ -1,6 +1,10 @@
+from datetime import datetime
+
+from pytz import utc
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
+from django.utils import timezone
 
 from freezegun import freeze_time
 
@@ -28,7 +32,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
                 "size": 1,
                 "residence_status": "HOST",
                 "business_area": business_area,
-                "first_registration_date": "1900-01-01",
+                "first_registration_date": timezone.make_aware(
+                    datetime.strptime("1900-01-01", "%Y-%m-%d"), timezone=utc
+                ),
             },
             [{"birth_date": "1970-09-29"}],
         )
@@ -39,7 +45,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
                 "size": 1,
                 "residence_status": "HOST",
                 "business_area": business_area,
-                "first_registration_date": "1900-01-01",
+                "first_registration_date":  timezone.make_aware(
+                    datetime.strptime("1900-01-01", "%Y-%m-%d"), timezone=utc
+                ),
             },
             [{"birth_date": "1991-11-18"}],
         )
@@ -49,7 +57,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
                 "size": 1,
                 "residence_status": "HOST",
                 "business_area": business_area,
-                "first_registration_date": "2100-01-01",
+                "first_registration_date": timezone.make_aware(
+                    datetime.strptime("2100-01-01", "%Y-%m-%d"), timezone=utc
+                ),
             },
             [{"birth_date": "1991-11-18"}],
         )
@@ -61,7 +71,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
                 "size": 2,
                 "residence_status": "REFUGEE",
                 "business_area": business_area,
-                "first_registration_date": "1900-01-01",
+                "first_registration_date": timezone.make_aware(
+                    datetime.strptime("1900-01-01", "%Y-%m-%d"), timezone=utc
+                ),
             },
             [{"birth_date": "1991-11-18"}],
         )
@@ -274,7 +286,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         rule_filter = TargetingCriteriaRuleFilter(
             comparision_method="GREATER_THAN",
             field_name="first_registration_date",
-            arguments=["2000-01-01"],
+            arguments=["2000-01-01T00:00:00Z"],
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
