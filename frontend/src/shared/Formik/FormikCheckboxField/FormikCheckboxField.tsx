@@ -6,12 +6,7 @@ import {
   Grid,
 } from '@material-ui/core';
 import get from 'lodash/get';
-import styled from 'styled-components';
 import { LabelizedField } from '../../../components/core/LabelizedField';
-
-const Width80 = styled.div`
-  width: 80%;
-`;
 
 export const Check = ({
   field,
@@ -58,9 +53,9 @@ export const Check = ({
         label={displayValue ? '' : label}
       />
       {displayValue && (
-        <Width80>
+        < Grid item xs={9} >
           <LabelizedField label={label}>{displayValue}</LabelizedField>
-        </Width80>
+        </Grid>
       )}
       {isInvalid && get(form.errors, field.name) && (
         <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
