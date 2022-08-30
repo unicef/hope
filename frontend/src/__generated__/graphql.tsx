@@ -9101,11 +9101,14 @@ export type AllHouseholdsQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'status' | 'unicefId' | 'hasDuplicates' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'size' | 'residenceStatus' | 'totalCashReceived' | 'currency' | 'lastRegistrationDate'>
+        & Pick<HouseholdNode, 'id' | 'status' | 'unicefId' | 'hasDuplicates' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'size' | 'address' | 'village' | 'maleChildrenCount' | 'femaleChildrenCount' | 'childrenDisabledCount' | 'residenceStatus' | 'totalCashReceived' | 'currency' | 'lastRegistrationDate'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'fullName'>
-        ), admin2: Maybe<(
+          & Pick<IndividualNode, 'id' | 'fullName' | 'phoneNo' | 'birthDate' | 'relationship'>
+        ), admin1: Maybe<(
+          { __typename?: 'AreaNode' }
+          & Pick<AreaNode, 'id' | 'name'>
+        )>, admin2: Maybe<(
           { __typename?: 'AreaNode' }
           & Pick<AreaNode, 'id' | 'name'>
         )>, programs: (
@@ -9204,7 +9207,7 @@ export type AllIndividualsQuery = (
       & Pick<IndividualNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'fullName' | 'relationship' | 'age' | 'sex' | 'lastRegistrationDate'>
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'fullName' | 'relationship' | 'age' | 'sex' | 'lastRegistrationDate' | 'phoneNo' | 'birthDate'>
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -17024,8 +17027,21 @@ export const AllHouseholdsDocument = gql`
         headOfHousehold {
           id
           fullName
+          phoneNo
+          birthDate
+          phoneNo
+          relationship
         }
         size
+        address
+        village
+        maleChildrenCount
+        femaleChildrenCount
+        childrenDisabledCount
+        admin1 {
+          id
+          name
+        }
         admin2 {
           id
           name
@@ -17236,6 +17252,8 @@ export const AllIndividualsDocument = gql`
         age
         sex
         lastRegistrationDate
+        phoneNo
+        birthDate
         documents {
           edges {
             node {
