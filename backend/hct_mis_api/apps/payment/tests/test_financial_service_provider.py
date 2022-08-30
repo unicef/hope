@@ -27,7 +27,6 @@ class TestAllFinancialServiceProviders(APITestCase):
                 node {
                     fspXlsxTemplate {
                         name
-                        # columns
                     }
                     financialserviceproviderxlsxreportSet {
                         edges {
@@ -115,7 +114,10 @@ class TestAllFinancialServiceProviders(APITestCase):
         cls.create_user_role_with_permissions(
             cls.user, permissions, BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG)
         )
-        FinancialServiceProviderFactory.create_batch(10)
+        FinancialServiceProviderFactory.create_batch(
+            10,
+            fsp_xlsx_template=FinancialServiceProviderXlsxTemplateFactory(name="TestName123")
+        )
 
     def test_fetch_count_financial_service_providers(self):
         self.snapshot_graphql_request(

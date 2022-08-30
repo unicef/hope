@@ -18,7 +18,7 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'name': ''
+                            'name': 'TestName123'
                         }
                     }
                 },
@@ -29,7 +29,7 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'name': ''
+                            'name': 'TestName123'
                         }
                     }
                 },
@@ -40,7 +40,7 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'name': ''
+                            'name': 'TestName123'
                         }
                     }
                 },
@@ -51,7 +51,7 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'name': ''
+                            'name': 'TestName123'
                         }
                     }
                 },
@@ -62,7 +62,7 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'name': ''
+                            'name': 'TestName123'
                         }
                     }
                 },
@@ -73,7 +73,7 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'name': ''
+                            'name': 'TestName123'
                         }
                     }
                 },
@@ -84,7 +84,7 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'name': ''
+                            'name': 'TestName123'
                         }
                     }
                 },
@@ -95,7 +95,7 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'name': ''
+                            'name': 'TestName123'
                         }
                     }
                 },
@@ -106,7 +106,7 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'name': ''
+                            'name': 'TestName123'
                         }
                     }
                 },
@@ -117,7 +117,7 @@ snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_pr
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'name': ''
+                            'name': 'TestName123'
                         }
                     }
                 }
