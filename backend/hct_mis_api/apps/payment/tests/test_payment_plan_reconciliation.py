@@ -179,21 +179,27 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_afghanistan(is_payment_plan_applicable=True)
+        create_afghanistan(
+            is_payment_plan_applicable=True,
+            approval_number_required=1,
+            authorization_number_required=1,
+            finance_review_number_required=1,
+        )
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
+        cls.all_necessary_permissions = [
+            Permissions.PAYMENT_MODULE_CREATE,
+            Permissions.PAYMENT_MODULE_VIEW_DETAILS,
+            Permissions.PAYMENT_MODULE_VIEW_LIST,
+            Permissions.PROGRAMME_CREATE,
+            Permissions.PROGRAMME_ACTIVATE,
+            Permissions.TARGETING_CREATE,
+            Permissions.TARGETING_LOCK,
+            Permissions.TARGETING_SEND,
+        ]
         cls.create_user_role_with_permissions(
             cls.user,
-            [
-                Permissions.PAYMENT_MODULE_CREATE,
-                Permissions.PAYMENT_MODULE_VIEW_DETAILS,
-                Permissions.PAYMENT_MODULE_VIEW_LIST,
-                Permissions.PROGRAMME_CREATE,
-                Permissions.PROGRAMME_ACTIVATE,
-                Permissions.TARGETING_CREATE,
-                Permissions.TARGETING_LOCK,
-                Permissions.TARGETING_SEND,
-            ],
+            cls.all_necessary_permissions,
             cls.business_area,
         )
 
@@ -333,6 +339,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
         assert "errors" not in lock_payment_plan_response, lock_payment_plan_response
+        assert lock_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"] == "LOCKED"
 
         rule = RuleFactory(definition="result.value=Decimal('1.3')", name="Rule")
         RuleCommitFactory(rule=rule)
@@ -399,12 +406,92 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
         assert "errors" not in assign_fsp_mutation_response, assign_fsp_mutation_response
 
-        # set fsp
+        lock_fsp_in_payment_plan_response = self.graphql_request(
+            request_string=PAYMENT_PLAN_ACTION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "paymentPlanId": encoded_payment_plan_id,
+                    "action": "LOCK_FSP",
+                }
+            },
+        )
+        assert "errors" not in lock_fsp_in_payment_plan_response, lock_fsp_in_payment_plan_response
+        self.assertEqual(
+            lock_fsp_in_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
+            "LOCKED_FSP",
+        )
+        # observe that payments have received amounts set
 
-        # lock fsp
+        send_for_approval_payment_plan_response = self.graphql_request(
+            request_string=PAYMENT_PLAN_ACTION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "paymentPlanId": encoded_payment_plan_id,
+                    "action": "SEND_FOR_APPROVAL",
+                }
+            },
+        )
+        assert "errors" not in send_for_approval_payment_plan_response, send_for_approval_payment_plan_response
+        self.assertEqual(
+            send_for_approval_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
+            "IN_APPROVAL",
+        )
 
-        # ...
+        approve_payment_plan_response = self.graphql_request(
+            request_string=PAYMENT_PLAN_ACTION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "paymentPlanId": encoded_payment_plan_id,
+                    "action": "APPROVE",
+                }
+            },
+        )
+        assert "errors" not in approve_payment_plan_response, approve_payment_plan_response
+        self.assertEqual(
+            approve_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
+            "IN_AUTHORIZATION",
+        )
+
+        authorize_payment_plan_response = self.graphql_request(
+            request_string=PAYMENT_PLAN_ACTION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "paymentPlanId": encoded_payment_plan_id,
+                    "action": "AUTHORIZE",
+                }
+            },
+        )
+        assert "errors" not in authorize_payment_plan_response, authorize_payment_plan_response
+        self.assertEqual(
+            authorize_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
+            "IN_REVIEW",
+        )
+
+        review_payment_plan_response = self.graphql_request(
+            request_string=PAYMENT_PLAN_ACTION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "paymentPlanId": encoded_payment_plan_id,
+                    "action": "REVIEW",
+                }
+            },
+        )
+        assert "errors" not in review_payment_plan_response, review_payment_plan_response
+        self.assertEqual(
+            review_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
+            "ACCEPTED",
+        )
+
+        # TODO
+        # receive reconciliation info
+        # error, because nobody downloaded xlsx or smth
+
+        # download xlsx
 
         # receive reconciliation info
-
-        # observe that payments have received amounts set
+        # see payment entitlement delivered

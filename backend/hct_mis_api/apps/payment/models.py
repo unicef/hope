@@ -224,6 +224,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     class Action(models.TextChoices):
         LOCK = "LOCK", "Lock"
+        LOCK_FSP = "LOCK_FSP", "Lock FSP"
         UNLOCK = "UNLOCK", "Unlock"
         SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL", "Send For Approval"
         APPROVE = "APPROVE", "Approve"

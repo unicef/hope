@@ -30,6 +30,7 @@ class PaymentPlanService:
     def actions_map(self) -> dict:
         return {
             PaymentPlan.Action.LOCK.value: self.lock,
+            PaymentPlan.Action.LOCK_FSP.value: self.lock_fsp,
             PaymentPlan.Action.UNLOCK.value: self.unlock,
             PaymentPlan.Action.SEND_FOR_APPROVAL.value: self.send_for_approval,
             # use the same method for Approve, Authorize, Finance Review and Reject
@@ -98,6 +99,17 @@ class PaymentPlanService:
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
 
+        self.payment_plan.save()
+
+        return self.payment_plan
+
+    def lock_fsp(self):
+        print("LOCK FSP ACTION HANDLER")
+        # TODO: validation?
+
+        # set all payments with money expected to be delivered
+
+        self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
 
         return self.payment_plan
