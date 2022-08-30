@@ -12,6 +12,7 @@
 
 
 from unittest.mock import patch
+from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.payment.celery_tasks import payment_plan_apply_steficon
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.steficon.fixtures import RuleFactory, RuleCommitFactory
@@ -137,6 +138,26 @@ query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
         fsps {
             id
             name
+        }
+    }
+}
+"""
+
+ASSIGN_FSPS_MUTATION = """
+mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeliveryMechanismMappingInput!]!) {
+    assignFspToDeliveryMechanism(input: {
+        paymentPlanId: $paymentPlanId,
+        mappings: $mappings
+    }) {
+        paymentPlan {
+            id
+            deliveryMechanisms {
+                name
+                order
+                fsp {
+                    id
+                }
+            }
         }
     }
 }
@@ -299,14 +320,14 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
         assert "errors" not in create_payment_plan_response, create_payment_plan_response
-        payment_plan_id = create_payment_plan_response["data"]["createPaymentPlan"]["paymentPlan"]["id"]
+        encoded_payment_plan_id = create_payment_plan_response["data"]["createPaymentPlan"]["paymentPlan"]["id"]
 
         lock_payment_plan_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
             context={"user": self.user},
             variables={
                 "input": {
-                    "paymentPlanId": payment_plan_id,
+                    "paymentPlanId": encoded_payment_plan_id,
                     "action": "LOCK",
                 }
             },
@@ -321,7 +342,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 request_string=SET_STEFICON_RULE_MUTATION,
                 context={"user": self.user},
                 variables={
-                    "paymentPlanId": payment_plan_id,
+                    "paymentPlanId": encoded_payment_plan_id,
                     "steficonRuleId": encode_id_base64(rule.id, "Rule"),
                 },
             )
@@ -330,12 +351,18 @@ class TestPaymentPlanReconciliation(APITestCase):
             call_args = mock.delay.call_args[0]
             payment_plan_apply_steficon(*call_args)
 
+        santander_fsp = FinancialServiceProviderFactory(
+            name="Santander",
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH, GenericPayment.DELIVERY_TYPE_TRANSFER],
+        )
+        encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
+
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
             variables=dict(
                 input=dict(
-                    paymentPlanId=payment_plan_id,
+                    paymentPlanId=encoded_payment_plan_id,
                     deliveryMechanisms=[
                         GenericPayment.DELIVERY_TYPE_CASH,
                     ],
@@ -354,6 +381,23 @@ class TestPaymentPlanReconciliation(APITestCase):
         assert len(available_fsps_data) == 1
         fsps = available_fsps_data[0]["fsps"]
         assert len(fsps) > 0
+        assert fsps[0]["name"] == santander_fsp.name
+
+        assign_fsp_mutation_response = self.graphql_request(
+            request_string=ASSIGN_FSPS_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encoded_payment_plan_id,
+                "mappings": [
+                    {
+                        "deliveryMechanism": GenericPayment.DELIVERY_TYPE_CASH,
+                        "fspId": encoded_santander_fsp_id,
+                        "order": 1,
+                    }
+                ],
+            },
+        )
+        assert "errors" not in assign_fsp_mutation_response, assign_fsp_mutation_response
 
         # set fsp
 
