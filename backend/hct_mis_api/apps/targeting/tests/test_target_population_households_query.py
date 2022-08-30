@@ -63,7 +63,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         cls.household_size_2 = household
         cls.user = UserFactory.create()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
+            {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
         )
         cls.target_population_size_2 = TargetPopulation(
             name="target_population_size_2",
@@ -72,7 +72,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         )
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["REFUGEE"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["REFUGEE"], "comparison_method": "EQUALS"}
         )
         cls.target_population_residence_status = TargetPopulation(
             name="target_population_residence_status",
@@ -82,7 +82,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         cls.target_population_residence_status.save()
 
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS"}
+            {"field_name": "size", "arguments": [1], "comparison_method": "EQUALS"}
         )
         cls.target_population_size_1_approved = TargetPopulation(
             name="target_population_size_1_approved",

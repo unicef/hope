@@ -455,7 +455,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
     def get_core_fields(self):
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
 
-    comparision_method = models.CharField(
+    comparison_method = models.CharField(
         max_length=20,
         choices=TargetingCriteriaFilterMixin.COMPARISON_CHOICES,
     )
@@ -484,7 +484,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     def get_core_fields(self):
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
-    comparision_method = models.CharField(
+    comparison_method = models.CharField(
         max_length=20,
         choices=TargetingCriteriaFilterMixin.COMPARISON_CHOICES,
     )

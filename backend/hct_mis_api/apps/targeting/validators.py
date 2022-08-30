@@ -84,11 +84,11 @@ class TargetingCriteriaRuleFilterInputValidator:
                 raise ValidationError(
                     f"Can't find any flex field attribute associated with {rule_filter.field_name} field name"
                 )
-        comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(rule_filter.comparision_method)
-        if comparision_attribute is None:
-            logger.error(f"Unknown comparision method - {rule_filter.comparision_method}")
-            raise ValidationError(f"Unknown comparision method - {rule_filter.comparision_method}")
-        args_count = comparision_attribute.get("arguments")
+        comparison_attribute = TargetingCriteriaRuleFilter.COMPARISON_ATTRIBUTES.get(rule_filter.comparison_method)
+        if comparison_attribute is None:
+            logger.error(f"Unknown comparison method - {rule_filter.comparison_method}")
+            raise ValidationError(f"Unknown comparison method - {rule_filter.comparison_method}")
+        args_count = comparison_attribute.get("arguments")
         given_args_count = len(rule_filter.arguments)
         select_many = get_attr_value("type", attribute) == "SELECT_MANY"
         if select_many:
@@ -101,21 +101,21 @@ class TargetingCriteriaRuleFilterInputValidator:
                 )
         elif given_args_count != args_count:
             logger.error(
-                f"Comparision method - {rule_filter.comparision_method} "
+                f"Comparison method - {rule_filter.comparison_method} "
                 f"expect {args_count} arguments, {given_args_count} given"
             )
             raise ValidationError(
-                f"Comparision method - {rule_filter.comparision_method} "
+                f"Comparison method - {rule_filter.comparison_method} "
                 f"expect {args_count} arguments, {given_args_count} given"
             )
-        if get_attr_value("type", attribute) not in comparision_attribute.get("supported_types"):
+        if get_attr_value("type", attribute) not in comparison_attribute.get("supported_types"):
             logger.error(
                 f"{rule_filter.field_name} is {get_attr_value('type', attribute)} type filter "
-                f"and does not accept - {rule_filter.comparision_method} comparision method"
+                f"and does not accept - {rule_filter.comparison_method} comparison method"
             )
             raise ValidationError(
                 f"{rule_filter.field_name} is {get_attr_value( 'type', attribute)} type filter "
-                f"and does not accept - {rule_filter.comparision_method} comparision method"
+                f"and does not accept - {rule_filter.comparison_method} comparison method"
             )
 
 

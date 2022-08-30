@@ -5051,7 +5051,7 @@ export type TargetingCriteriaObjectType = {
   rules?: Maybe<Array<Maybe<TargetingCriteriaRuleObjectType>>>,
 };
 
-export enum TargetingCriteriaRuleFilterComparisionMethod {
+export enum TargetingCriteriaRuleFilterComparisonMethod {
   Equals = 'EQUALS',
   NotEquals = 'NOT_EQUALS',
   Contains = 'CONTAINS',
@@ -5067,7 +5067,7 @@ export type TargetingCriteriaRuleFilterNode = {
   id: Scalars['UUID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  comparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
+  comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod,
   targetingCriteriaRule: TargetingCriteriaRuleNode,
   isFlexField: Scalars['Boolean'],
   fieldName: Scalars['String'],
@@ -5076,7 +5076,7 @@ export type TargetingCriteriaRuleFilterNode = {
 };
 
 export type TargetingCriteriaRuleFilterObjectType = {
-  comparisionMethod: Scalars['String'],
+  comparisonMethod: Scalars['String'],
   isFlexField: Scalars['Boolean'],
   fieldName: Scalars['String'],
   arguments: Array<Maybe<Scalars['Arg']>>,
@@ -5097,7 +5097,7 @@ export type TargetingCriteriaRuleObjectType = {
   individualsFiltersBlocks?: Maybe<Array<Maybe<TargetingIndividualRuleFilterBlockObjectType>>>,
 };
 
-export enum TargetingIndividualBlockRuleFilterComparisionMethod {
+export enum TargetingIndividualBlockRuleFilterComparisonMethod {
   Equals = 'EQUALS',
   NotEquals = 'NOT_EQUALS',
   Contains = 'CONTAINS',
@@ -5113,7 +5113,7 @@ export type TargetingIndividualBlockRuleFilterNode = {
   id: Scalars['UUID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  comparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
+  comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod,
   individualsFiltersBlock: TargetingIndividualRuleFilterBlockNode,
   isFlexField: Scalars['Boolean'],
   fieldName: Scalars['String'],
@@ -6457,7 +6457,7 @@ export type TargetPopulationDetailedFragment = (
         { __typename?: 'TargetingIndividualRuleFilterBlockNode' }
         & { individualBlockFilters: Maybe<Array<Maybe<(
           { __typename?: 'TargetingIndividualBlockRuleFilterNode' }
-          & Pick<TargetingIndividualBlockRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+          & Pick<TargetingIndividualBlockRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisonMethod'>
           & { fieldAttribute: Maybe<(
             { __typename?: 'FieldAttributeNode' }
             & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
@@ -6469,7 +6469,7 @@ export type TargetPopulationDetailedFragment = (
         )>>> }
       )>>>, filters: Maybe<Array<Maybe<(
         { __typename?: 'TargetingCriteriaRuleFilterNode' }
-        & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+        & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisonMethod'>
         & { fieldAttribute: Maybe<(
           { __typename?: 'FieldAttributeNode' }
           & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
@@ -10473,7 +10473,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
           fieldName
           isFlexField
           arguments
-          comparisionMethod
+          comparisonMethod
           fieldAttribute {
             name
             labelEn
@@ -10489,7 +10489,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
         fieldName
         isFlexField
         arguments
-        comparisionMethod
+        comparisonMethod
         fieldAttribute {
           name
           labelEn
@@ -19442,12 +19442,12 @@ export type ResolversTypes = {
   TargetingCriteriaRuleNode: ResolverTypeWrapper<TargetingCriteriaRuleNode>,
   TargetingIndividualRuleFilterBlockNode: ResolverTypeWrapper<TargetingIndividualRuleFilterBlockNode>,
   TargetingIndividualBlockRuleFilterNode: ResolverTypeWrapper<TargetingIndividualBlockRuleFilterNode>,
-  TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
+  TargetingIndividualBlockRuleFilterComparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod,
   FieldAttributeNode: ResolverTypeWrapper<FieldAttributeNode>,
   LabelNode: ResolverTypeWrapper<LabelNode>,
   CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
   TargetingCriteriaRuleFilterNode: ResolverTypeWrapper<TargetingCriteriaRuleFilterNode>,
-  TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
+  TargetingCriteriaRuleFilterComparisonMethod: TargetingCriteriaRuleFilterComparisonMethod,
   RuleCommitNode: ResolverTypeWrapper<RuleCommitNode>,
   SteficonRuleNode: ResolverTypeWrapper<SteficonRuleNode>,
   RuleLanguage: RuleLanguage,
@@ -19817,12 +19817,12 @@ export type ResolversParentTypes = {
   TargetingCriteriaRuleNode: TargetingCriteriaRuleNode,
   TargetingIndividualRuleFilterBlockNode: TargetingIndividualRuleFilterBlockNode,
   TargetingIndividualBlockRuleFilterNode: TargetingIndividualBlockRuleFilterNode,
-  TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
+  TargetingIndividualBlockRuleFilterComparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod,
   FieldAttributeNode: FieldAttributeNode,
   LabelNode: LabelNode,
   CoreFieldChoiceObject: CoreFieldChoiceObject,
   TargetingCriteriaRuleFilterNode: TargetingCriteriaRuleFilterNode,
-  TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
+  TargetingCriteriaRuleFilterComparisonMethod: TargetingCriteriaRuleFilterComparisonMethod,
   RuleCommitNode: RuleCommitNode,
   SteficonRuleNode: SteficonRuleNode,
   RuleLanguage: RuleLanguage,
@@ -21979,7 +21979,7 @@ export type TargetingCriteriaRuleFilterNodeResolvers<ContextType = any, ParentTy
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  comparisionMethod?: Resolver<ResolversTypes['TargetingCriteriaRuleFilterComparisionMethod'], ParentType, ContextType>,
+  comparisonMethod?: Resolver<ResolversTypes['TargetingCriteriaRuleFilterComparisonMethod'], ParentType, ContextType>,
   targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>,
   isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -22000,7 +22000,7 @@ export type TargetingIndividualBlockRuleFilterNodeResolvers<ContextType = any, P
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  comparisionMethod?: Resolver<ResolversTypes['TargetingIndividualBlockRuleFilterComparisionMethod'], ParentType, ContextType>,
+  comparisonMethod?: Resolver<ResolversTypes['TargetingIndividualBlockRuleFilterComparisonMethod'], ParentType, ContextType>,
   individualsFiltersBlock?: Resolver<ResolversTypes['TargetingIndividualRuleFilterBlockNode'], ParentType, ContextType>,
   isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,

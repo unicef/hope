@@ -33,9 +33,9 @@ def age_to_birth_date_range_query(field_name, age_min, age_max):
     return Q(**query_dict)
 
 
-def age_to_birth_date_query(comparision_method, args):
+def age_to_birth_date_query(comparison_method, args):
     field_name = "birth_date"
-    comparision_method_args_count = {
+    comparison_method_args_count = {
         "RANGE": 2,
         "NOT_IN_RANGE": 2,
         "EQUALS": 1,
@@ -43,27 +43,27 @@ def age_to_birth_date_query(comparision_method, args):
         "GREATER_THAN": 1,
         "LESS_THAN": 1,
     }
-    args_count = comparision_method_args_count.get(comparision_method)
+    args_count = comparison_method_args_count.get(comparison_method)
     if args_count is None:
-        logger.error(f"Age filter query don't supports {comparision_method} type")
-        raise ValidationError(f"Age filter query don't supports {comparision_method} type")
+        logger.error(f"Age filter query don't supports {comparison_method} type")
+        raise ValidationError(f"Age filter query don't supports {comparison_method} type")
     if len(args) != args_count:
-        logger.error(f"Age {comparision_method} filter query expect {args_count} arguments")
-        raise ValidationError(f"Age {comparision_method} filter query expect {args_count} arguments")
-    if comparision_method == "RANGE":
+        logger.error(f"Age {comparison_method} filter query expect {args_count} arguments")
+        raise ValidationError(f"Age {comparison_method} filter query expect {args_count} arguments")
+    if comparison_method == "RANGE":
         return age_to_birth_date_range_query(field_name, *args)
-    if comparision_method == "NOT_IN_RANGE":
+    if comparison_method == "NOT_IN_RANGE":
         return ~(age_to_birth_date_range_query(field_name, *args))
-    if comparision_method == "EQUALS":
+    if comparison_method == "EQUALS":
         return age_to_birth_date_range_query(field_name, args[0], args[0])
-    if comparision_method == "NOT_EQUALS":
+    if comparison_method == "NOT_EQUALS":
         return ~(age_to_birth_date_range_query(field_name, args[0], args[0]))
-    if comparision_method == "GREATER_THAN":
+    if comparison_method == "GREATER_THAN":
         return age_to_birth_date_range_query(field_name, args[0], None)
-    if comparision_method == "LESS_THAN":
+    if comparison_method == "LESS_THAN":
         return age_to_birth_date_range_query(field_name, None, args[0])
-    logger.error(f"Age filter query don't supports {comparision_method} type")
-    raise ValidationError(f"Age filter query don't supports {comparision_method} type")
+    logger.error(f"Age filter query don't supports {comparison_method} type")
+    raise ValidationError(f"Age filter query don't supports {comparison_method} type")
 
 
 def get_birth_certificate_document_number_query(_, args):
@@ -167,25 +167,25 @@ def get_has_tax_id_query(_, args):
     return Q(documents__type__type="TAX_ID") if has_tax_id else ~Q(documents__type__type="TAX_ID")
 
 
-def country_generic_query(comparision_method, args, lookup):
+def country_generic_query(comparison_method, args, lookup):
     query = Q(**{lookup: Countries.get_country_value(args[0])})
-    if comparision_method == "EQUALS":
+    if comparison_method == "EQUALS":
         return query
-    elif comparision_method == "NOT_EQUALS":
+    elif comparison_method == "NOT_EQUALS":
         return ~query
-    logger.error(f"Country filter query does not support {comparision_method} type")
-    raise ValidationError(f"Country filter query does not support {comparision_method} type")
+    logger.error(f"Country filter query does not support {comparison_method} type")
+    raise ValidationError(f"Country filter query does not support {comparison_method} type")
 
 
-def country_query(comparision_method, args):
-    return country_generic_query(comparision_method, args, "country")
+def country_query(comparison_method, args):
+    return country_generic_query(comparison_method, args, "country")
 
 
-def country_origin_query(comparision_method, args):
-    return country_generic_query(comparision_method, args, "country_origin")
+def country_origin_query(comparison_method, args):
+    return country_generic_query(comparison_method, args, "country_origin")
 
 
-def admin_area1_query(comparision_method, args):
+def admin_area1_query(comparison_method, args):
     from django.db.models import Q
 
     return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__area_type__area_level=1)) | Q(
