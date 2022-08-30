@@ -12,6 +12,7 @@
 
 
 from unittest.mock import patch
+from hct_mis_api.apps.payment.celery_tasks import payment_plan_apply_steficon
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.steficon.fixtures import RuleFactory, RuleCommitFactory
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -35,23 +36,7 @@ mutation CreateProgram($programData: CreateProgramInput!) {
   createProgram(programData: $programData) {
     program {
       id
-      name
-      status
-      startDate
-      endDate
-      caId
-      budget
-      description
-      frequencyOfPayments
-      sector
-      scope
-      cashPlus
-      populationGoal
-      individualDataNeeded
-      __typename
     }
-    validationErrors
-    __typename
   }
 }
 """
@@ -61,25 +46,7 @@ mutation UpdateProgram($programData: UpdateProgramInput!) {
   updateProgram(programData: $programData) {
     program {
       id
-      name
-      startDate
-      endDate
-      status
-      caId
-      description
-      budget
-      frequencyOfPayments
-      cashPlus
-      populationGoal
-      scope
-      sector
-      totalNumberOfHouseholds
-      administrativeAreasOfImplementation
-      individualDataNeeded
-      __typename
     }
-    validationErrors
-    __typename
   }
 }
 """
@@ -91,14 +58,7 @@ mutation CreateTP($input: CreateTargetPopulationInput!) {
     targetPopulation {
       id
       status
-      candidateListTotalHouseholds
-      candidateListTotalIndividuals
-      finalListTotalHouseholds
-      finalListTotalIndividuals
-      __typename
     }
-    validationErrors
-    __typename
   }
 }
 """
@@ -154,6 +114,33 @@ mutation ActionPaymentPlanMutation($input: ActionPaymentPlanInput!) {
         }
     }
 }"""
+
+CHOOSE_DELIVERY_MECHANISMS_MUTATION = """
+mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanismsForPaymentPlanInput!) {
+    chooseDeliveryMechanismsForPaymentPlan(input: $input) {
+        paymentPlan {
+            id
+            deliveryMechanisms {
+                order
+                name
+            }
+        }
+    }
+}
+"""
+
+# TODO: make this in payment plan scope
+AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
+query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
+    availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
+        deliveryMechanism
+        fsps {
+            id
+            name
+        }
+    }
+}
+"""
 
 
 class TestPaymentPlanReconciliation(APITestCase):
@@ -295,7 +282,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         # TODO: check status in response - READY_FOR_PAYMENT_PLAN
 
         # TODO: naive datetime
-        # TODO: 403 Client Error: Quota Exceeded for url: https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes
         create_payment_plan_response = self.graphql_request(
             request_string=CREATE_PAYMENT_PLAN_MUTATION,
             context={"user": self.user},
@@ -325,15 +311,13 @@ class TestPaymentPlanReconciliation(APITestCase):
                 }
             },
         )
-        print(lock_payment_plan_response, "lock_payment_plan_response")
+        assert "errors" not in lock_payment_plan_response, lock_payment_plan_response
 
         rule = RuleFactory(definition="result.value=Decimal('1.3')", name="Rule")
         RuleCommitFactory(rule=rule)
 
-        # patch calling payment_plan_apply_steficon.delay
-        print("STEFICON", payment_plan_id, rule.id)
-        with patch("hct_mis_api.apps.payment.celery_tasks.payment_plan_apply_steficon") as mock:
-            response = self.graphql_request(
+        with patch("hct_mis_api.apps.payment.mutations.payment_plan_apply_steficon") as mock:
+            set_steficon_response = self.graphql_request(
                 request_string=SET_STEFICON_RULE_MUTATION,
                 context={"user": self.user},
                 variables={
@@ -341,12 +325,36 @@ class TestPaymentPlanReconciliation(APITestCase):
                     "steficonRuleId": encode_id_base64(rule.id, "Rule"),
                 },
             )
-            print("R", response)
-            print(mock)
-            print(mock.delay)
-            pass
+            assert "errors" not in set_steficon_response, set_steficon_response
+            assert mock.delay.call_count == 1
+            call_args = mock.delay.call_args[0]
+            payment_plan_apply_steficon(*call_args)
 
-        print("FSP")
+        choose_dms_response = self.graphql_request(
+            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
+            context={"user": self.user},
+            variables=dict(
+                input=dict(
+                    paymentPlanId=payment_plan_id,
+                    deliveryMechanisms=[
+                        GenericPayment.DELIVERY_TYPE_CASH,
+                    ],
+                )
+            ),
+        )
+        assert "errors" not in choose_dms_response, choose_dms_response
+
+        available_fsps_query_response = self.graphql_request(
+            request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
+            context={"user": self.user},
+            variables={"deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_CASH]},
+        )
+        assert "errors" not in available_fsps_query_response, available_fsps_query_response
+        available_fsps_data = available_fsps_query_response["data"]["availableFspsForDeliveryMechanisms"]
+        assert len(available_fsps_data) == 1
+        fsps = available_fsps_data[0]["fsps"]
+        assert len(fsps) > 0
+
         # set fsp
 
         # lock fsp

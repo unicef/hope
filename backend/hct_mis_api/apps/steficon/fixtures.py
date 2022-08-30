@@ -20,3 +20,4 @@ class RuleCommitFactory(factory.django.DjangoModelFactory):
     rule = factory.SubFactory(RuleFactory)
     version = factory.Sequence(lambda n: n)
     affected_fields = ["value"]
+    is_release = True

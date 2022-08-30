@@ -144,8 +144,6 @@ class Rule(models.Model):
     @property
     def latest(self):
         try:
-            print("GET latest")
-            print("HISTORY", self.history)
             return self.history.filter(is_release=True).order_by("-version").first()
         except RuleCommit.DoesNotExist:
             pass
