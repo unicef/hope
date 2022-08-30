@@ -2,9 +2,9 @@ import json
 import os
 from unittest.mock import patch
 
-from django.conf import settings
-
+from django.core.management import call_command
 from elasticsearch import Elasticsearch
+from django.conf import settings
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -13,12 +13,6 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.documents import (
-    CATEGORY_CHOICES,
-    PRIORITY_CHOICES,
-    STATUS_CHOICES,
-    URGENCY_CHOICES,
-)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
@@ -36,15 +30,13 @@ def execute_test_es_query(query_dict):
 
 
 class TestGrievanceQueryElasticSearch(APITestCase):
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
-
     PERMISSION = (
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
         Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
         Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-        Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER
     )
 
     FILTER_BY_SEARCH = """
@@ -338,27 +330,19 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         cls.es = cls.create_es_db()
 
         create_afghanistan()
+        call_command("loadcountries")
 
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
         country = Country.objects.first()
-        area_type = AreaTypeFactory(
+        area_type_new = AreaTypeFactory(
             name="Admin type one",
             area_level=2,
             country=country,
         )
-        cls.admin_area_1 = AreaFactory(
-            name="City Test",
-            area_type=area_type,
-            p_code="123aa123",
-        )
-        cls.admin_area_2 = AreaFactory(
-            name="City Example",
-            area_type=area_type,
-            p_code="sadasdasfd222",
-        )
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type_new, p_code="123aa123")
+        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type_new, p_code="sadasdasfd222")
 
         cls.grievance_ticket_1 = GrievanceTicket.objects.create(
             **{
@@ -375,7 +359,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "created_at": "2022-04-30T09:54:07.827000",
                 "household_unicef_id": "HH-20-0000.0001",
                 "priority": 1,
-                "urgency": 2,
+                "urgency": 2
             }
         )
 
@@ -384,22 +368,35 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             doc_type="_doc",
             id=cls.grievance_ticket_1.id,
             body={
-                "business_area": cls.grievance_ticket_1.business_area.name.lower(),
+                "business_area": {
+                    "slug": cls.grievance_ticket_1.business_area.name.lower()
+                },
                 "unicef_id": cls.grievance_ticket_1.unicef_id,
-                "admin": cls.grievance_ticket_1.admin2.id,
-                "registration_data_import": None,
-                "category": CATEGORY_CHOICES.get(cls.grievance_ticket_1.category),
-                "status": STATUS_CHOICES.get(cls.grievance_ticket_1.status),
+                "admin": {
+                    "id": cls.grievance_ticket_1.admin2.id
+                },
+                "registration_data_import": {
+                    "id": None
+                },
+                "category": cls.grievance_ticket_1.get_category_display(),
+                "status": cls.grievance_ticket_1.get_status_display(),
                 "issue_type": None,
-                "assigned_to": cls.user.id,
+                "assigned_to": {
+                    "id": cls.user.id
+                },
                 "created_at": "2022-04-30T09:54:07.827000",
                 "household_unicef_id": "HH-20-0000.0001",
-                "priority": PRIORITY_CHOICES.get(cls.grievance_ticket_1.priority),
-                "urgency": URGENCY_CHOICES.get(cls.grievance_ticket_1.urgency),
+                "priority": cls.grievance_ticket_1.get_priority_display(),
+                "urgency": cls.grievance_ticket_1.get_urgency_display(),
                 "grievance_type": "user",
-                "head_of_household_last_name": "Kowalska_1",
-                "fsp": None,
-            },
+                "ticket_details": {
+                    "household": {
+                        "head_of_household": {
+                            "family_name": "Kowalska_1"
+                        }
+                    }
+                }
+            }
         )
 
         cls.grievance_ticket_2 = GrievanceTicket.objects.create(
@@ -418,7 +415,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "created_at": "2022-05-12T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0001",
                 "priority": 2,
-                "urgency": 3,
+                "urgency": 3
             }
         )
 
@@ -427,22 +424,35 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             doc_type="_doc",
             id=cls.grievance_ticket_2.id,
             body={
-                "business_area": cls.grievance_ticket_2.business_area.name.lower(),
+                "business_area": {
+                    "slug": cls.grievance_ticket_2.business_area.name.lower()
+                },
                 "unicef_id": cls.grievance_ticket_2.unicef_id,
-                "admin": cls.grievance_ticket_2.admin2.id,
-                "registration_data_import": "04992dce-154b-4938-8e47-74341541ebcf",
-                "category": CATEGORY_CHOICES.get(cls.grievance_ticket_2.category),
-                "status": STATUS_CHOICES.get(cls.grievance_ticket_2.status),
+                "admin": {
+                    "id": cls.grievance_ticket_2.admin2.id
+                },
+                "registration_data_import": {
+                    "id": "04992dce-154b-4938-8e47-74341541ebcf"
+                },
+                "category": cls.grievance_ticket_2.get_category_display(),
+                "status": cls.grievance_ticket_2.get_status_display(),
                 "issue_type": "Fraud and forgery",
-                "assigned_to": cls.user2.id,
+                "assigned_to": {
+                    "id": cls.user2.id
+                },
                 "created_at": "2022-05-12T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0002",
-                "priority": PRIORITY_CHOICES.get(cls.grievance_ticket_2.priority),
-                "urgency": URGENCY_CHOICES.get(cls.grievance_ticket_2.urgency),
+                "priority": cls.grievance_ticket_2.get_priority_display(),
+                "urgency": cls.grievance_ticket_2.get_urgency_display(),
                 "grievance_type": "user",
-                "head_of_household_last_name": "Kowalska_2",
-                "fsp": "Goldman Sachs",
-            },
+                "ticket_details": {
+                    "household": {
+                        "head_of_household": {
+                            "family_name": "Kowalska_2"
+                        }
+                    }
+                }
+            }
         )
 
         cls.grievance_ticket_3 = GrievanceTicket.objects.create(
@@ -460,7 +470,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "created_at": "2022-05-05T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0003",
                 "priority": 3,
-                "urgency": 1,
+                "urgency": 1
             }
         )
 
@@ -469,22 +479,35 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             doc_type="_doc",
             id=cls.grievance_ticket_3.id,
             body={
-                "business_area": cls.grievance_ticket_3.business_area.name.lower(),
+                "business_area": {
+                    "slug": cls.grievance_ticket_3.business_area.name.lower()
+                },
                 "unicef_id": cls.grievance_ticket_3.unicef_id,
-                "admin": cls.grievance_ticket_3.admin2.id,
-                "registration_data_import": None,
-                "category": CATEGORY_CHOICES.get(cls.grievance_ticket_3.category),
-                "status": STATUS_CHOICES.get(cls.grievance_ticket_3.status),
+                "admin": {
+                    "id": cls.grievance_ticket_3.admin2.id
+                },
+                "registration_data_import": {
+                    "id": None
+                },
+                "category": cls.grievance_ticket_3.get_category_display(),
+                "status": cls.grievance_ticket_3.get_status_display(),
                 "issue_type": None,
-                "assigned_to": cls.user.id,
+                "assigned_to": {
+                    "id": cls.user.id
+                },
                 "created_at": "2022-05-05T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0003",
-                "priority": PRIORITY_CHOICES.get(cls.grievance_ticket_3.priority),
-                "urgency": URGENCY_CHOICES.get(cls.grievance_ticket_3.urgency),
+                "priority": cls.grievance_ticket_3.get_priority_display(),
+                "urgency": cls.grievance_ticket_3.get_urgency_display(),
                 "grievance_type": "system",
-                "head_of_household_last_name": "Kowalska_3",
-                "fsp": None,
-            },
+                "ticket_details": {
+                    "household": {
+                        "head_of_household": {
+                            "family_name": "Kowalska_3"
+                        }
+                    }
+                }
+            }
         )
 
     @staticmethod
@@ -503,8 +526,8 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                         "number_of_replicas": 1,
                         "index.store.type": "mmapfs",
                     },
-                    "mappings": json.load(f),
-                },
+                    "mappings": json.load(f)
+                }
             )
 
         return es
@@ -512,7 +535,10 @@ class TestGrievanceQueryElasticSearch(APITestCase):
     @classmethod
     def tearDownClass(cls):
         es = Elasticsearch("http://elasticsearch:9200")
-        es.indices.delete(index="test_es_db")
+        es.indices.delete(
+            index="test_es_db",
+            ignore=[400, 404]
+        )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_unicef_id(self, mock_execute_test_es_query):
@@ -581,7 +607,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"createdAtRange": '{"max":"2022-05-01"}'},
+            variables={"createdAtRange": '{\"max\":\"2022-05-01\"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -591,7 +617,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"createdAtRange": '{"min":"2022-05-10"}'},
+            variables={"createdAtRange": '{\"min\":\"2022-05-10\"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -601,7 +627,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"createdAtRange": '{"min":"2022-05-01","max":"2022-05-10"}'},
+            variables={"createdAtRange": '{\"min\":\"2022-05-01\",\"max\":\"2022-05-10\"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
