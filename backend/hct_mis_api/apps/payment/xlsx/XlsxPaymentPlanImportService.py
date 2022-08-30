@@ -1,8 +1,9 @@
 import openpyxl
 
 from django.contrib.admin.options import get_content_type_for_model
+from django.utils import timezone
 
-from hct_mis_api.apps.core.models import XLSXFileTemp
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentChannel
 from hct_mis_api.apps.payment.utils import float_to_decimal
 from hct_mis_api.apps.payment.xlsx.BaseXlsxImportService import XlsxImportBaseService
@@ -46,7 +47,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             self._import_row(row)
 
         Payment.objects.bulk_update(
-            self.payments_to_save, ("entitlement_quantity", "assigned_payment_channel")
+            self.payments_to_save, ("entitlement_quantity", "entitlement_date", "assigned_payment_channel")
         )
 
         if self.payments_to_save:
@@ -195,6 +196,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             entitlement_amount = float_to_decimal(entitlement_amount)
             if entitlement_amount != payment.entitlement_quantity:
                 payment.entitlement_quantity = entitlement_amount
+                payment.entitlement_date = timezone.now()
                 update = True
         if payment_channel_obj:
             payment.assigned_payment_channel = payment_channel_obj
@@ -204,32 +206,25 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             self.payments_to_save.append(payment)
 
     def remove_old_export_xlsx_files(self):
-        qs = XLSXFileTemp.objects.filter(
+        qs = FileTemp.objects.filter(
             object_id=self.payment_plan.pk,
-            content_type=self.payment_plan_content_type,
-            type=XLSXFileTemp.EXPORT
+            content_type=self.payment_plan_content_type
         )
         for obj in qs:
             obj.file.delete(save=False)
             obj.delete()
 
     def remove_old_and_create_new_import_xlsx(self, user):
-        # remove old imported files
-        delete_qs = XLSXFileTemp.objects.filter(
-            object_id=self.payment_plan.pk,
-            content_type=self.payment_plan_content_type,
-            type=XLSXFileTemp.IMPORT,
-        )
-        for xlsx_obj in delete_qs:
-            xlsx_obj.file.delete(save=False)
-            xlsx_obj.delete()
+        # remove old imported file
+        if self.payment_plan.imported_xlsx_file:
+            self.payment_plan.imported_xlsx_file.file.delete(save=False)
+            self.payment_plan.imported_xlsx_file.delete()
 
         # save new import xlsx file
-        xlsx_file = XLSXFileTemp.objects.create(
+        xlsx_file = FileTemp.objects.create(
             object_id=self.payment_plan.pk,
             content_type=self.payment_plan_content_type,
             created_by=user,
-            type=XLSXFileTemp.IMPORT,
             file=self.file,
         )
         return xlsx_file
