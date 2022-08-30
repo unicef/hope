@@ -11,6 +11,7 @@ import { PaperContainer } from './PaperContainer';
 import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -19,13 +20,13 @@ const Label = styled.p`
 interface TargetPopulationCoreProps {
   id: string;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
-  canViewHouseholdDetails: boolean;
+  permissions: string[];
 }
 
 export function TargetPopulationCore({
   id,
   targetPopulation,
-  canViewHouseholdDetails,
+  permissions,
 }: TargetPopulationCoreProps): React.ReactElement {
   const { t } = useTranslation();
   if (!targetPopulation) return null;
@@ -64,7 +65,10 @@ export function TargetPopulationCore({
       {targetPopulation.buildStatus === TargetPopulationBuildStatus.Ok ? (
         <TargetingHouseholds
           id={id}
-          canViewDetails={canViewHouseholdDetails}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            permissions,
+          )}
         />
       ) : (
         <PaperContainer>
@@ -77,7 +81,10 @@ export function TargetPopulationCore({
           </Label>
         </PaperContainer>
       )}
-      <UniversalActivityLogTable objectId={targetPopulation.id} />
+
+      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+        <UniversalActivityLogTable objectId={targetPopulation.id} />
+      )}
     </>
   );
 }

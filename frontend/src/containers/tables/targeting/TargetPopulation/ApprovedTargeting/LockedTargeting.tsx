@@ -34,7 +34,7 @@ export const LockedTargetPopulationTable = ({
         headCells={programmeHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useTargetPopulationHouseholdsQuery}
-        queriedObjectName='targetPopulationHouseholdsQuery'
+        queriedObjectName='targetPopulationHouseholds'
         initialVariables={initialVariables}
         renderRow={(row) => (
           <ProgrammeTableRow key={row.id} household={row} canViewDetails={canViewDetails} />
