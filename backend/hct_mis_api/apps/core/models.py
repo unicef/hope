@@ -499,21 +499,11 @@ class CustomDatabaseScheduler(DatabaseScheduler):
     Entry = CustomModelEntry
 
 
-class XLSXFileTemp(TimeStampedModel):
-    """Use this model for temporary store xlsx files"""
+class FileTemp(TimeStampedModel):
+    """Use this model for temporary store files"""
 
-    EXPORT = "EXPORT"
-    IMPORT = "IMPORT"
-    TEMP = "TEMP"
-
-    FILE_TYPE_CHOICES = (
-        (EXPORT, "Export"),
-        (IMPORT, "Import"),
-        (TEMP, "Temporary"),
-    )
     object_id = models.CharField(max_length=120, null=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    type = models.CharField(max_length=50, null=True, choices=FILE_TYPE_CHOICES, default=TEMP)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -523,4 +513,4 @@ class XLSXFileTemp(TimeStampedModel):
     file = models.FileField()
 
     def __str__(self):
-        return f"{self.file.name} - {self.created} - {self.type}"
+        return f"{self.file.name} - {self.created}"
