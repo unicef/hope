@@ -5,8 +5,8 @@ let individualId;
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
-  cy.get('input[name="username"]').type(Cypress.env('username'));
-  cy.get('input[name="password"]').type(Cypress.env('password'));
+  cy.get('input[name="username"]').type(Cypress.env('daUsername'));
+  cy.get('input[name="password"]').type(Cypress.env('daPassword'));
   cy.get('input').contains('Log in').click();
 });
 
@@ -67,8 +67,15 @@ When('I select the xlsx file', () => {
 });
 
 Then('I see it was chosen', () => {
-  cy.get('div').contains('1 Household available to import', { timeout: 10000 });
-  cy.get('div').contains('1 Individual available to import');
+  cy.get('[data-cy="number-of-households"]').contains(
+    '1 Household available to Import',
+    {
+      timeout: 10000,
+    },
+  );
+  cy.get('[data-cy="number-of-individuals"]').contains(
+    '1 Individual available to Import',
+  );
   cy.get('div').contains('Errors').should('not.exist');
 });
 
