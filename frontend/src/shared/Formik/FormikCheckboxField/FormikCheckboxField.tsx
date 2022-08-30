@@ -19,6 +19,7 @@ export const Check = ({
   label,
   initValue,
   displayValue = '',
+  container = true,
   ...otherProps
 }): React.ReactElement => {
   const handleChange = (): void => {
@@ -44,7 +45,7 @@ export const Check = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checked]);
   return (
-    <Grid container>
+    <Grid container={container}>
       <FormControlLabel
         control={
           <Checkbox
