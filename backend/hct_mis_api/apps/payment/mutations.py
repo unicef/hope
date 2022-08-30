@@ -726,13 +726,45 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
-        if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED):
-            logger.error("You can only export Payment List for LOCKED or ACCEPTED Payment Plan")
-            raise GraphQLError("You can only export Payment List for LOCKED or ACCEPTED Payment Plan")
+        if payment_plan.status != PaymentPlan.Status.LOCKED:
+            logger.error("You can only export Payment List for LOCKED Payment Plan")
+            raise GraphQLError("You can only export Payment List for LOCKED Payment Plan")
 
         old_payment_plan = copy_model_object(payment_plan)
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx(user=info.context.user)
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+
+        return cls(payment_plan=payment_plan)
+
+
+class ExportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, payment_plan_id, **kwargs):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.ACCEPTED:
+            logger.error("You can only export Payment List for ACCEPTED Payment Plan")
+            raise GraphQLError("You can only export Payment List for ACCEPTED Payment Plan")
+
+        old_payment_plan = copy_model_object(payment_plan)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user=info.context.user)
 
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -996,5 +1028,6 @@ class Mutations(graphene.ObjectType):
     delete_payment_plan = DeletePaymentPlanMutation.Field()
 
     export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()
+    export_xlsx_payment_plan_payment_list_per_fsp = ExportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
     import_xlsx_payment_plan_payment_list = ImportXLSXPaymentPlanPaymentListMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
