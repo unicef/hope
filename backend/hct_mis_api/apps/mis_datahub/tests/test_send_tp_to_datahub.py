@@ -377,7 +377,7 @@ class TestSendTpToDatahub(TestCase):
         target_population = TargetPopulationFactory(
             program=program,
             status=TargetPopulation.STATUS_PROCESSING,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
 
         try:
@@ -385,7 +385,6 @@ class TestSendTpToDatahub(TestCase):
                 HouseholdSelectionFactory(
                     household=self.household,
                     target_population=target_population,
-                    final=True,
                 )
         except IntegrityError:
             pass
