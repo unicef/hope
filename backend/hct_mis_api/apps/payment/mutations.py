@@ -936,8 +936,9 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
         if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.STEFICON_ERROR):
-            logger.error("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
-            raise GraphQLError("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
+            msg = "You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan"
+            logger.error(msg)
+            raise GraphQLError(msg)
 
         old_payment_plan = copy_model_object(payment_plan)
 
@@ -949,6 +950,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
             payment_plan.status = PaymentPlan.Status.STEFICON_WAIT
             payment_plan.status_date = timezone.now()
+            print("steficon_rule.latest", steficon_rule, steficon_rule.latest)
             if steficon_rule.latest.id != payment_plan.steficon_rule_id:
                 payment_plan.steficon_rule = steficon_rule.latest
 

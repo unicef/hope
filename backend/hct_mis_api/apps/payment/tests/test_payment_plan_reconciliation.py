@@ -13,7 +13,7 @@
 
 from unittest.mock import patch
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.steficon.fixtures import RuleFactory
+from hct_mis_api.apps.steficon.fixtures import RuleFactory, RuleCommitFactory
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.household.fixtures import IndividualRoleInHouseholdFactory
@@ -145,15 +145,15 @@ mutation SetSteficonRuleOnPaymentPlanPaymentList($paymentPlanId: ID!, $steficonR
 """
 
 
-# UPDATE_PAYMENT_PLAN_MUTATION = """
-# mutation UpdatePaymentPlan($input: UpdatePaymentPlanInput!) {
-#     updatePaymentPlan(input: $input) {
-#         paymentPlan {
-#             id
-#         }
-#     }
-# }
-# """
+PAYMENT_PLAN_ACTION_MUTATION = """
+mutation ActionPaymentPlanMutation($input: ActionPaymentPlanInput!) {
+    actionPaymentPlanMutation(input: $input) {
+        paymentPlan {
+            status
+            id
+        }
+    }
+}"""
 
 
 class TestPaymentPlanReconciliation(APITestCase):
@@ -179,6 +179,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             [
                 Permissions.PAYMENT_MODULE_CREATE,
                 Permissions.PAYMENT_MODULE_VIEW_DETAILS,
+                Permissions.PAYMENT_MODULE_VIEW_LIST,
                 Permissions.PROGRAMME_CREATE,
                 Permissions.PROGRAMME_ACTIVATE,
                 Permissions.TARGETING_CREATE,
@@ -208,7 +209,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
         )
 
-    def test_receiving_reconciliations_from_fsp(self):
+    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_receiving_reconciliations_from_fsp(self, mock_get_exchange_rate):
         create_programme_response = self.graphql_request(
             request_string=CREATE_PROGRAMME_MUTATION,
             context={"user": self.user},
@@ -293,6 +295,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         # TODO: check status in response - READY_FOR_PAYMENT_PLAN
 
         # TODO: naive datetime
+        # TODO: 403 Client Error: Quota Exceeded for url: https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes
         create_payment_plan_response = self.graphql_request(
             request_string=CREATE_PAYMENT_PLAN_MUTATION,
             context={"user": self.user},
@@ -308,9 +311,24 @@ class TestPaymentPlanReconciliation(APITestCase):
                 }
             },
         )
+
+        assert "errors" not in create_payment_plan_response, create_payment_plan_response
         payment_plan_id = create_payment_plan_response["data"]["createPaymentPlan"]["paymentPlan"]["id"]
 
+        lock_payment_plan_response = self.graphql_request(
+            request_string=PAYMENT_PLAN_ACTION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "paymentPlanId": payment_plan_id,
+                    "action": "LOCK",
+                }
+            },
+        )
+        print(lock_payment_plan_response, "lock_payment_plan_response")
+
         rule = RuleFactory(definition="result.value=Decimal('1.3')", name="Rule")
+        RuleCommitFactory(rule=rule)
 
         # patch calling payment_plan_apply_steficon.delay
         print("STEFICON", payment_plan_id, rule.id)
