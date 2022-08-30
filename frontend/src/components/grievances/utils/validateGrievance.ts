@@ -3,6 +3,7 @@ import {
   GrievanceSteps,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_SUB_CATEGORIES,
 } from '../../../utils/constants';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 
@@ -410,7 +411,15 @@ export function validateUsingSteps(
       }
     }
   }
-  if (activeStep === GrievanceSteps.Lookup && !values.selectedHousehold) {
+  const householdRequiredGrievanceTypes = [
+    GRIEVANCE_SUB_CATEGORIES.PAYMENT_COMPLAINT,
+    GRIEVANCE_SUB_CATEGORIES.FSP_COMPLAINT,
+  ];
+  if (
+    activeStep === GrievanceSteps.Lookup &&
+    !values.selectedHousehold &&
+    householdRequiredGrievanceTypes.includes(values.subCategory)
+  ) {
     errors.selectedHousehold = 'Household is Required';
   }
   if (activeStep === GrievanceSteps.Lookup) {
