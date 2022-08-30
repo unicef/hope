@@ -626,6 +626,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             name='consent'
                             label={t('Received Consent*')}
                             color='primary'
+                            fullWidth
+                            container={false}
                             component={FormikCheckboxField}
                           />
                         </BoxWithBorders>
