@@ -108,7 +108,7 @@ export function UserProfileMenu({
                 >
                   <MenuItem
                     onClick={handleClearCache}
-                    data-cy='menu-item-logout'
+                    data-cy='menu-item-clear-cache'
                   >
                     Clear Cache
                   </MenuItem>
