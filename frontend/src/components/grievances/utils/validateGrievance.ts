@@ -438,7 +438,7 @@ export function validateUsingSteps(
       values.issueType,
     );
     if (isIndividualRequired && !values.selectedIndividual) {
-      errors.selectedHousehold = 'Individual is Required';
+      errors.selectedIndividual = 'Individual is Required';
     } else if (isHouseholdRequired && !values.selectedHousehold) {
       errors.selectedHousehold = 'Household is Required';
     }
