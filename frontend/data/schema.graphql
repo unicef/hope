@@ -3099,6 +3099,7 @@ type TargetPopulationNode implements Node {
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
   totalFamilySize: Int
+  householdList(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
 }
 
 type TargetPopulationNodeConnection {
