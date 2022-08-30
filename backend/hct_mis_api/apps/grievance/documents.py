@@ -1,139 +1,61 @@
-from django.conf import settings
-
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
+from django.conf import settings
 
-from ..household.models import Household
-from .models import GrievanceTicket, TicketComplaintDetails, TicketSensitiveDetails
+from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.core.models import BusinessArea
 
-URGENCY_CHOICES = {
-    1: "Very urgent",
-    2: "Urgent",
-    3: "Not urgent",
-}
-
-PRIORITY_CHOICES = {
-    1: "High",
-    2: "Medium",
-    3: "Low",
-}
-
-CATEGORY_CHOICES = {
-    1: "Payment Verification",
-    2: "Data Change",
-    3: "Sensitive Grievance",
-    4: "Grievance Complaint",
-    5: "Negative Feedback",
-    6: "Referral",
-    7: "Positive Feedback",
-    8: "Needs Adjudication",
-    9: "System Flagging",
-}
-
-STATUS_CHOICES = {
-    1: "New",
-    2: "Assigned",
-    3: "In Progress",
-    4: "On Hold",
-    5: "For Approval",
-    6: "Closed",
-}
-
-ISSUE_TYPES_CHOICES = {
-    2: {
-        13: "Household Data Update",
-        14: "Individual Data Update",
-        15: "Withdraw Individual",
-        16: "Add Individual",
-        17: "Withdraw Household",
-    },
-    3: {
-        1: "Data breach",
-        2: "Bribery, corruption or kickback",
-        3: "Fraud and forgery",
-        4: "Fraud involving misuse of programme funds by third party",
-        5: "Harassment and abuse of authority",
-        6: "Inappropriate staff conduct",
-        7: "Unauthorized use, misuse or waste of UNICEF property or funds",
-        8: "Conflict of interest",
-        9: "Gross mismanagement",
-        10: "Personal disputes",
-        11: "Sexual harassment and sexual exploitation",
-        12: "Miscellaneous",
-    },
-}
+from .models import GrievanceTicket
 
 
 @registry.register_document
 class GrievanceTicketDocument(Document):
-    unicef_id = fields.KeywordField(similarity="boolean")
-    created_at = fields.DateField()
-    assigned_to = fields.KeywordField(similarity="boolean")
-    registration_data_import = fields.KeywordField(similarity="boolean")
-    household_unicef_id = fields.KeywordField(similarity="boolean")
-    status = fields.KeywordField(similarity="boolean")
-    issue_type = fields.KeywordField(similarity="boolean")
-    category = fields.KeywordField(similarity="boolean")
-    admin = fields.KeywordField(similarity="boolean")
-    priority = fields.KeywordField(similarity="boolean")
-    urgency = fields.KeywordField(similarity="boolean")
-    grievance_type = fields.KeywordField(similarity="boolean")
-    head_of_household_last_name = fields.KeywordField(similarity="boolean")
-    business_area = fields.KeywordField(similarity="boolean")
-    fsp = fields.KeywordField(similarity="boolean")
-
-    def prepare_assigned_to(self, instance):
-        if instance.assigned_to:
-            return instance.assigned_to.id
-
-    def prepare_registration_data_import(self, instance):
-        if instance.registration_data_import:
-            return instance.registration_data_import.id
-
-    def prepare_status(self, instance):
-        return STATUS_CHOICES.get(instance.status)
-
-    def prepare_issue_type(self, instance):
-        if instance.category in range(2, 4):
-            return ISSUE_TYPES_CHOICES[instance.category].get(instance.issue_type)
-
-    def prepare_category(self, instance):
-        return CATEGORY_CHOICES.get(instance.category)
-
-    def prepare_admin2(self, instance):
-        if instance.admin2:
-            return instance.admin2.id
-
-    def prepare_priority(self, instance):
-        return PRIORITY_CHOICES.get(instance.priority)
-
-    def prepare_urgency(self, instance):
-        return URGENCY_CHOICES.get(instance.urgency)
-
-    def prepare_grievance_type(self, instance):
-        return "user" if instance.category in range(2, 8) else "system"
-
-    def prepare_head_of_household_last_name(self, instance):
-        household_unicef_id = instance.household_unicef_id
-        if household_unicef_id:
-            household = Household.objects.filter(unicef_id=household_unicef_id).first()
-            return household.head_of_household.family_name
-
-    def prepare_business_area(self, instance):
-        return instance.business_area.slug
-
-    def prepare_fsp(self, instance):
-        if instance.ticket_details:
-            if isinstance(instance.ticket_details, (TicketComplaintDetails, TicketSensitiveDetails)):
-                if instance.ticket_details.payment_record:
-                    return instance.ticket_details.payment_record.service_provider.full_name
+    unicef_id = fields.KeywordField()
+    household_unicef_id = fields.KeywordField()
+    registration_data_import = fields.ObjectField(properties={
+        "id": fields.KeywordField()
+    })
+    admin2 = fields.ObjectField(properties={
+        "id": fields.KeywordField()
+    })
+    business_area = fields.ObjectField(properties={
+        "slug": fields.KeywordField()
+    })
+    category = fields.KeywordField(attr="category_to_string")
+    status = fields.KeywordField(attr="status_to_string")
+    issue_type = fields.KeywordField(attr="issue_type_to_string")
+    priority = fields.KeywordField(attr="priority_to_string")
+    urgency = fields.KeywordField(attr="urgency_to_string")
+    grievance_type = fields.KeywordField(attr="grievance_type_to_string")
+    assigned_to = fields.ObjectField(properties={
+        "id": fields.KeywordField()
+    })
+    ticket_details = fields.ObjectField(
+        properties={
+            "household": fields.ObjectField(
+                properties={
+                    "head_of_household": fields.ObjectField(properties={
+                        "family_name": fields.KeywordField()
+                    })
+                }
+            )
+        }
+    )
 
     class Django:
         model = GrievanceTicket
+        fields = [
+            "created_at",
+        ]
+        related_models = [Area, BusinessArea, Household, Individual, RegistrationDataImport, User]
 
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
-        settings = {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
-        }
+        settings = settings.ELASTICSEARCH_BASE_SETTINGS
+
+    def get_instances_from_related(self, related_instance):
+        if isinstance(related_instance, BusinessArea):
+            return related_instance.tickets.all()

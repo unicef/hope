@@ -1,63 +1,74 @@
 {
   "properties" : {
-    "admin" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+    "admin2" : {
+      "properties" : {
+        "id" : {
+          "type" : "keyword"
+        }
+      }
     },
     "assigned_to" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "properties" : {
+        "id" : {
+          "type" : "keyword"
+        }
+      }
     },
     "business_area" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "properties" : {
+        "slug" : {
+          "type" : "keyword"
+        }
+      }
     },
     "category" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "type" : "keyword"
     },
     "created_at" : {
       "type" : "date"
     },
-    "fsp" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
-    },
     "grievance_type" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
-    },
-    "head_of_household_last_name" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "type" : "keyword"
     },
     "household_unicef_id" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "type" : "keyword"
     },
     "issue_type" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "type" : "keyword"
     },
     "priority" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "type" : "keyword"
     },
     "registration_data_import" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "properties" : {
+        "id" : {
+          "type" : "keyword"
+        }
+      }
     },
     "status" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "type" : "keyword"
+    },
+    "ticket_details" : {
+      "properties" : {
+        "household" : {
+          "properties" : {
+            "head_of_household" : {
+              "properties" : {
+                "family_name" : {
+                  "type" : "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "unicef_id" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "type" : "keyword"
     },
     "urgency" : {
-      "type" : "keyword",
-      "similarity" : "boolean"
+      "type" : "keyword"
     }
   }
 }
