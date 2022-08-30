@@ -13,7 +13,7 @@ export const fakeApolloTargetPopulationHouseholds = [
     },
     result: {
       data: {
-        candidateHouseholdsListByTargetingCriteria: {
+        targetPopulationHouseholds: {
           edges: [
             {
               node: {
