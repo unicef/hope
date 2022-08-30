@@ -26,8 +26,8 @@ export const fakeApolloAllTargetPopulation = [
                 status: 'LOCKED',
                 createdAt: '2022-02-24T09:48:13.750979',
                 updatedAt: '2022-02-24T09:48:17.239308',
-                candidateListTotalHouseholds: 2,
-                finalListTotalHouseholds: 2,
+                totalHouseholdsCount: 2,
+                totalIndividualsCount: 2,
                 program: {
                   id:
                     'UHJvZ3JhbU5vZGU6MDBkNWI4MmYtMjRlMy00MDE2LWFhN2EtODNlODE0NjM5Mzcx',
