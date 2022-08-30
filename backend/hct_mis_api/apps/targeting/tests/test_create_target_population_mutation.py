@@ -23,7 +23,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
             targetingCriteria{
             rules{
               filters{
-                comparisionMethod
+                comparisonMethod
                 fieldName
                 arguments
                 isFlexField
@@ -71,7 +71,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                         {
                             "filters": [
                                 {
-                                    "comparisionMethod": "EQUALS",
+                                    "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
                                     "arguments": [3],
                                     "isFlexField": False,

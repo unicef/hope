@@ -55,7 +55,7 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target_0_with_permission 
                                     'arguments': [
                                         1
                                     ],
-                                    'comparisionMethod': 'EQUALS',
+                                    'comparisonMethod': 'EQUALS',
                                     'fieldName': 'size',
                                     'isFlexField': False
                                 }

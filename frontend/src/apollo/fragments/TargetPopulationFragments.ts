@@ -69,7 +69,7 @@ export const targetPopulationDetailed = gql`
             fieldName
             isFlexField
             arguments
-            comparisionMethod
+            comparisonMethod
             fieldAttribute {
               name
               labelEn
@@ -85,7 +85,7 @@ export const targetPopulationDetailed = gql`
           fieldName
           isFlexField
           arguments
-          comparisionMethod
+          comparisonMethod
           fieldAttribute {
             name
             labelEn

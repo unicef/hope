@@ -106,7 +106,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_0_with_permission
                                 'arguments': [
                                     1
                                 ],
-                                'comparisionMethod': 'EQUALS',
+                                'comparisonMethod': 'EQUALS',
                                 'fieldAttribute': {
                                     'labelEn': 'What is the household size?',
                                     'type': 'INTEGER'
@@ -157,7 +157,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_2_0_with_permissi
                                 'arguments': [
                                     'REFUGEE'
                                 ],
-                                'comparisionMethod': 'EQUALS',
+                                'comparisonMethod': 'EQUALS',
                                 'fieldAttribute': {
                                     'labelEn': 'Residence status',
                                     'type': 'SELECT_ONE'

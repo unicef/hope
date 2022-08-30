@@ -135,7 +135,7 @@ class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
-    comparision_method = graphene.String(required=True)
+    comparison_method = graphene.String(required=True)
     is_flex_field = graphene.Boolean(required=True)
     field_name = graphene.String(required=True)
     arguments = graphene.List(Arg, required=True)
