@@ -3,6 +3,7 @@ import {
   GrievanceSteps,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_SUB_CATEGORIES,
 } from '../../../utils/constants';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 
@@ -212,6 +213,23 @@ export function validateUsingSteps(
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
   const errors: { [key: string]: string | { [key: string]: string } } = {};
+  const verficationStepFields = [
+    'size',
+    'maleChildrenCount',
+    'femaleChildrenCount',
+    'childrenDisabledCount',
+    'headOfHousehold',
+    'countryOrigin',
+    'address',
+    'village',
+    'admin1',
+    'unhcrId',
+    'months_displaced_h_f',
+    'fullName',
+    'birthDate',
+    'phoneNo',
+    'relationship',
+  ];
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
       if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
@@ -225,7 +243,8 @@ export function validateUsingSteps(
       if (
         //xD
         values.selectedHousehold &&
-        !values.householdDataUpdateFields?.[0]?.fieldName
+        !values.householdDataUpdateFields?.[0]?.fieldName &&
+        activeStep === GrievanceSteps.Description
       ) {
         errors.householdDataUpdateFields = 'Household Data Change is Required';
       }
@@ -392,7 +411,15 @@ export function validateUsingSteps(
       }
     }
   }
-  if (activeStep === GrievanceSteps.Lookup && !values.selectedHousehold) {
+  const householdRequiredGrievanceTypes = [
+    GRIEVANCE_SUB_CATEGORIES.PAYMENT_COMPLAINT,
+    GRIEVANCE_SUB_CATEGORIES.FSP_COMPLAINT,
+  ];
+  if (
+    activeStep === GrievanceSteps.Lookup &&
+    !values.selectedHousehold &&
+    householdRequiredGrievanceTypes.includes(values.subCategory)
+  ) {
     errors.selectedHousehold = 'Household is Required';
   }
   if (activeStep === GrievanceSteps.Lookup) {
@@ -414,6 +441,17 @@ export function validateUsingSteps(
       errors.selectedHousehold = 'Individual is Required';
     } else if (isHouseholdRequired && !values.selectedHousehold) {
       errors.selectedHousehold = 'Household is Required';
+    }
+  }
+  if (
+    activeStep === GrievanceSteps.Verification &&
+    (values.selectedHousehold ||
+      (values.selectedIndividual && !values.verificationRequired))
+  ) {
+    if (
+      verficationStepFields.filter((item) => values[item] === true).length < 5
+    ) {
+      errors.verificationRequired = 'Select correctly minimum 5 questions';
     }
   }
   return errors;

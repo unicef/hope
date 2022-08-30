@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../../utils/utils';
@@ -6,6 +6,7 @@ import {
   AllIndividualsQuery,
   AllIndividualsQueryVariables,
   useAllIndividualsQuery,
+  useHouseholdLazyQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpIndividualTableHeadCells';
@@ -46,10 +47,19 @@ export const LookUpIndividualTable = ({
   withdrawn,
   noTableStyling = false,
 }: LookUpIndividualTableProps): React.ReactElement => {
+  const [getHousehold, results] = useHouseholdLazyQuery();
+
+  useEffect(() => {
+    if (results.data && !results.loading && !results.error) {
+      setFieldValue('selectedHousehold', results.data.household);
+      setSelectedHousehold(results.data.household);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [results, setSelectedHousehold]);
+
   const handleRadioChange = (individual): void => {
     if (individual.household?.id) {
-      setFieldValue('selectedHousehold', individual.household);
-      setSelectedHousehold(individual.household);
+      getHousehold({ variables: { id: individual.household.id.toString() } });
     }
     setSelectedIndividual(individual);
     setFieldValue('selectedIndividual', individual);
