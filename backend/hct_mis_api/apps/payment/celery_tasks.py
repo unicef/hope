@@ -108,9 +108,9 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
 
-            if not payment_plan.has_payment_list_xlsx_file:
-                service = XlsxPaymentPlanExportService(payment_plan)
-                service.save_xlsx_file(user)
+            # regenerate always xlsx
+            service = XlsxPaymentPlanExportService(payment_plan)
+            service.save_xlsx_file(user)
             payment_plan.status_lock()
             payment_plan.save()
 
@@ -135,9 +135,9 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
 
-            if not payment_plan.has_payment_list_xlsx_file:
-                service = XlsxPaymentPlanExportService(payment_plan)
-                service.export_per_fsp(user)
+            # regenerate always xlsx
+            service = XlsxPaymentPlanExportService(payment_plan)
+            service.export_per_fsp(user)
             payment_plan.status_date = timezone.now()
             payment_plan.status = PaymentPlan.Status.ACCEPTED
             payment_plan.save()
@@ -174,11 +174,10 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
             try:
                 with atomic():
                     service.import_payment_list()
-
-                payment_plan.xlsx_file_imported_date = timezone.now()
-                payment_plan.status_lock()
-                payment_plan.save()
-                payment_plan.update_money_fields()
+                    payment_plan.xlsx_file_imported_date = timezone.now()
+                    payment_plan.status_lock()
+                    payment_plan.save()
+                    payment_plan.update_money_fields()
             except Exception as e:
                 logger.exception("Error import from xlsx", e)
                 payment_plan.status_lock()
@@ -221,7 +220,7 @@ def payment_plan_apply_steficon(payment_plan_id):
                 entry.entitlement_quantity = result.value
                 entry.entitlement_date = timezone.now()
                 updates.append(entry)
-            Payment.objects.bulk_update(updates, ["entitlement_quantity"])
+            Payment.objects.bulk_update(updates, ["entitlement_quantity", "entitlement_date"])
         payment_plan.steficon_applied_date = timezone.now()
         payment_plan.status_lock()
         with disable_concurrency(payment_plan):
