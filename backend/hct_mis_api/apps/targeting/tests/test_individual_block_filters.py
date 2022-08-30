@@ -53,14 +53,14 @@ class TestIndividualBlockFilter(TestCase):
         individuals_filters_block.save()
         married_rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
-            comparision_method="EQUALS",
+            comparison_method="EQUALS",
             field_name="marital_status",
             arguments=["MARRIED"],
         )
         married_rule_filter.save()
         sex_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
-            comparision_method="EQUALS",
+            comparison_method="EQUALS",
             field_name="sex",
             arguments=[MALE],
         )
@@ -72,12 +72,12 @@ class TestIndividualBlockFilter(TestCase):
     def test_all_individuals_are_female_on_mixins(self):
         query = Household.objects.all()
         married_rule_filter = TargetingIndividualBlockRuleFilter(
-            comparision_method="EQUALS",
+            comparison_method="EQUALS",
             field_name="marital_status",
             arguments=["MARRIED"],
         )
         sex_filter = TargetingIndividualBlockRuleFilter(
-            comparision_method="EQUALS",
+            comparison_method="EQUALS",
             field_name="sex",
             arguments=[MALE],
         )
@@ -93,22 +93,22 @@ class TestIndividualBlockFilter(TestCase):
     def test_two_separate_blocks_on_mixins(self):
         query = Household.objects.all()
         married_rule_filter = TargetingIndividualBlockRuleFilter(
-            comparision_method="EQUALS",
+            comparison_method="EQUALS",
             field_name="marital_status",
             arguments=["MARRIED"],
         )
         single_rule_filter = TargetingIndividualBlockRuleFilter(
-            comparision_method="EQUALS",
+            comparison_method="EQUALS",
             field_name="marital_status",
             arguments=["SINGLE"],
         )
         male_sex_filter = TargetingIndividualBlockRuleFilter(
-            comparision_method="EQUALS",
+            comparison_method="EQUALS",
             field_name="sex",
             arguments=[MALE],
         )
         female_sex_filter = TargetingIndividualBlockRuleFilter(
-            comparision_method="EQUALS",
+            comparison_method="EQUALS",
             field_name="sex",
             arguments=[FEMALE],
         )

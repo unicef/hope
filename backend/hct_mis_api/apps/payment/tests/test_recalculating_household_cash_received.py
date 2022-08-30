@@ -127,7 +127,7 @@ class TestRecalculatingCash(APITestCase):
                         {
                             "filters": [
                                 {
-                                    "comparisionMethod": "EQUALS",
+                                    "comparisonMethod": "EQUALS",
                                     "fieldName": "consent",
                                     "isFlexField": False,
                                     "arguments": [True],

@@ -58,7 +58,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
         cls.target_population_draft = tp
@@ -70,7 +70,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
         tp.households.set(cls.households)
@@ -81,7 +81,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
         tp.households.set(cls.households)
@@ -171,7 +171,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
         cls.target_population_draft = tp
@@ -183,7 +183,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
         tp.households.set(cls.households)
@@ -194,7 +194,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
         tp.households.set(cls.households)
@@ -290,7 +290,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         tp.save()
         cls.target_population_draft = tp
@@ -302,7 +302,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
         tp.program = program
@@ -315,7 +315,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparison_method": "EQUALS"}
         )
         program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
         tp.program = program

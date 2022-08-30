@@ -161,7 +161,7 @@ class TargetingIndividualRuleFilterBlockMixin:
 
 
 class TargetingCriteriaFilterMixin:
-    COMPARISION_ATTRIBUTES = {
+    COMPARISON_ATTRIBUTES = {
         "EQUALS": {
             "arguments": 1,
             "lookup": "",
@@ -225,7 +225,7 @@ class TargetingCriteriaFilterMixin:
     )
 
     def get_criteria_string(self):
-        return f"{{{self.field_name} {self.comparision_method} ({','.join([str(x) for x in self.arguments])})}}"
+        return f"{{{self.field_name} {self.comparison_method} ({','.join([str(x) for x in self.arguments])})}}"
 
     def get_lookup_prefix(self, associated_with):
         return "individuals__" if associated_with == _INDIVIDUAL else ""
@@ -247,12 +247,12 @@ class TargetingCriteriaFilterMixin:
         field_attr,
     ):
         select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
-        comparision_attribute = TargetingCriteriaFilterMixin.COMPARISION_ATTRIBUTES.get(self.comparision_method)
-        args_count = comparision_attribute.get("arguments")
+        comparison_attribute = TargetingCriteriaFilterMixin.COMPARISON_ATTRIBUTES.get(self.comparison_method)
+        args_count = comparison_attribute.get("arguments")
         if self.arguments is None:
-            logger.error(f"{self.field_name} {self.comparision_method} filter query expect {args_count} " f"arguments")
+            logger.error(f"{self.field_name} {self.comparison_method} filter query expect {args_count} " f"arguments")
             raise ValidationError(
-                f"{self.field_name} {self.comparision_method} filter query expect {args_count} " f"arguments"
+                f"{self.field_name} {self.comparison_method} filter query expect {args_count} " f"arguments"
             )
         args_input_count = len(self.arguments)
         if select_many:
@@ -263,11 +263,11 @@ class TargetingCriteriaFilterMixin:
                 )
         elif args_count != args_input_count:
             logger.error(
-                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
+                f"{self.field_name} {self.comparison_method} filter query expect {args_count} "
                 f"arguments gets {args_input_count}"
             )
             raise ValidationError(
-                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
+                f"{self.field_name} {self.comparison_method} filter query expect {args_count} "
                 f"arguments gets {args_input_count}"
             )
         arguments = self.prepare_arguments(self.arguments, field_attr)
@@ -281,8 +281,8 @@ class TargetingCriteriaFilterMixin:
             else:
                 query = Q(**{f"{lookup}__contains": argument})
         else:
-            query = Q(**{f"{lookup}{comparision_attribute.get('lookup')}": argument})
-        if comparision_attribute.get("negative"):
+            query = Q(**{f"{lookup}{comparison_attribute.get('lookup')}": argument})
+        if comparison_attribute.get("negative"):
             return ~query
         return query
 
@@ -297,7 +297,7 @@ class TargetingCriteriaFilterMixin:
         core_field_attr = core_field_attrs[0]
         get_query = core_field_attr.get("get_query")
         if get_query:
-            return get_query(self.comparision_method, self.arguments)
+            return get_query(self.comparison_method, self.arguments)
         lookup = core_field_attr.get("lookup")
         if not lookup:
             logger.error(
@@ -328,4 +328,4 @@ class TargetingCriteriaFilterMixin:
         return self.get_query_for_flex_field()
 
     def __str__(self):
-        return f"{self.field_name} {self.comparision_method} {self.arguments}"
+        return f"{self.field_name} {self.comparison_method} {self.arguments}"

@@ -19,7 +19,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_0_wrong_args_cou
                     'line': 3
                 }
             ],
-            'message': "['Comparision method - EQUALS expect 1 arguments, 2 given']",
+            'message': "['Comparison method - EQUALS expect 1 arguments, 2 given']",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -39,7 +39,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_1_wrong_comparis
                     'line': 3
                 }
             ],
-            'message': "['size is INTEGER type filter and does not accept - CONTAINS comparision method']",
+            'message': "['size is INTEGER type filter and does not accept - CONTAINS comparison method']",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -59,7 +59,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_2_unknown_compar
                     'line': 3
                 }
             ],
-            'message': "['Unknown comparision method - BLABLA']",
+            'message': "['Unknown comparison method - BLABLA']",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -121,7 +121,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                                     'arguments': [
                                         3
                                     ],
-                                    'comparisionMethod': 'EQUALS',
+                                    'comparisonMethod': 'EQUALS',
                                     'fieldName': 'size',
                                     'isFlexField': False
                                 }

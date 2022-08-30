@@ -26727,7 +26727,7 @@
             "deprecationReason": null
           },
           {
-            "name": "comparisionMethod",
+            "name": "comparisonMethod",
             "description": null,
             "args": [],
             "type": {
@@ -26735,7 +26735,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "TargetingIndividualBlockRuleFilterComparisionMethod",
+                "name": "TargetingIndividualBlockRuleFilterComparisonMethod",
                 "ofType": null
               }
             },
@@ -26826,7 +26826,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "TargetingIndividualBlockRuleFilterComparisionMethod",
+        "name": "TargetingIndividualBlockRuleFilterComparisonMethod",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -27186,7 +27186,7 @@
             "deprecationReason": null
           },
           {
-            "name": "comparisionMethod",
+            "name": "comparisonMethod",
             "description": null,
             "args": [],
             "type": {
@@ -27194,7 +27194,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "TargetingCriteriaRuleFilterComparisionMethod",
+                "name": "TargetingCriteriaRuleFilterComparisonMethod",
                 "ofType": null
               }
             },
@@ -27285,7 +27285,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "TargetingCriteriaRuleFilterComparisionMethod",
+        "name": "TargetingCriteriaRuleFilterComparisonMethod",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -35380,7 +35380,7 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "comparisionMethod",
+            "name": "comparisonMethod",
             "description": null,
             "type": {
               "kind": "NON_NULL",

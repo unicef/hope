@@ -126,4 +126,14 @@ class Migration(migrations.Migration):
             field=models.DecimalField(blank=True, db_index=True, decimal_places=3, help_text='Written by Steficon',
                                       max_digits=6, null=True),
         ),
+        migrations.RenameField(
+            model_name="targetingcriteriarulefilter",
+            old_name="comparision_method",
+            new_name="comparison_method",
+        ),
+        migrations.RenameField(
+            model_name="targetingindividualblockrulefilter",
+            old_name="comparision_method",
+            new_name="comparison_method",
+        )
     ]
