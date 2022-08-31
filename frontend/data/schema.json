@@ -18336,6 +18336,18 @@
             "deprecationReason": null
           },
           {
+            "name": "unicefId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "businessArea",
             "description": null,
             "args": [],
@@ -18541,22 +18553,6 @@
               "ofType": {
                 "kind": "ENUM",
                 "name": "PaymentPlanStatus",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "unicefId",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
                 "ofType": null
               }
             },
@@ -18951,6 +18947,18 @@
           },
           {
             "name": "hasPaymentListXlsxFile",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hasPaymentListPerFspXlsxFile",
             "description": null,
             "args": [],
             "type": {
@@ -30567,6 +30575,18 @@
             "deprecationReason": null
           },
           {
+            "name": "unicefId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "businessArea",
             "description": null,
             "args": [],
@@ -30822,22 +30842,6 @@
               "kind": "OBJECT",
               "name": "PaymentChannelNode",
               "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "unicefId",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -52222,6 +52226,33 @@
             "deprecationReason": null
           },
           {
+            "name": "exportXlsxPaymentPlanPaymentListPerFsp",
+            "description": null,
+            "args": [
+              {
+                "name": "paymentPlanId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ExportXLSXPaymentPlanPaymentListPerFSPMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "importXlsxPaymentPlanPaymentList",
             "description": null,
             "args": [
@@ -57383,6 +57414,29 @@
       {
         "kind": "OBJECT",
         "name": "ExportXLSXPaymentPlanPaymentListMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "paymentPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentPlanNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ExportXLSXPaymentPlanPaymentListPerFSPMutation",
         "description": null,
         "fields": [
           {

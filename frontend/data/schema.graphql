@@ -869,6 +869,10 @@ type ExportXLSXPaymentPlanPaymentListMutation {
   paymentPlan: PaymentPlanNode
 }
 
+type ExportXLSXPaymentPlanPaymentListPerFSPMutation {
+  paymentPlan: PaymentPlanNode
+}
+
 type ExportXlsxCashPlanVerification {
   cashPlan: CashPlanNode
 }
@@ -2464,6 +2468,7 @@ type Mutations {
   updatePaymentPlan(input: UpdatePaymentPlanInput!): UpdatePaymentPlanMutation
   deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
   exportXlsxPaymentPlanPaymentList(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
+  exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID): SetSteficonRuleOnPaymentPlanPaymentListMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
@@ -2587,6 +2592,7 @@ type PaymentNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  unicefId: String
   businessArea: UserBusinessAreaNode!
   status: PaymentStatus!
   statusDate: DateTime!
@@ -2606,7 +2612,6 @@ type PaymentNode implements Node {
   financialServiceProvider: FinancialServiceProviderNode
   collector: IndividualNode!
   assignedPaymentChannel: PaymentChannelNode
-  unicefId: String!
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
   paymentPlanSoftConflicted: Boolean
@@ -2796,6 +2801,7 @@ type PaymentPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  unicefId: String
   businessArea: UserBusinessAreaNode!
   statusDate: DateTime!
   startDate: Date
@@ -2812,7 +2818,6 @@ type PaymentPlanNode implements Node {
   totalUndeliveredQuantityUsd: Float
   createdBy: UserNode!
   status: PaymentPlanStatus!
-  unicefId: String!
   targetPopulation: TargetPopulationNode!
   currency: PaymentPlanCurrency!
   dispersionStartDate: Date
@@ -2834,6 +2839,7 @@ type PaymentPlanNode implements Node {
   financeReviewNumberRequired: Int
   currencyName: String
   hasPaymentListXlsxFile: Boolean
+  hasPaymentListPerFspXlsxFile: Boolean
   importedXlsxFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
