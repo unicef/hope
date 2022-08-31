@@ -69,7 +69,7 @@ export const AcceptanceProcessRow = ({
                 sentForApprovalBy,
               )}`}
               topDate={sentForApprovalDate}
-              actions={actions.approval}
+              approvals={actions.approval}
             />
           )}
         </Grid>
@@ -80,7 +80,7 @@ export const AcceptanceProcessRow = ({
                 sentForAuthorizationBy,
               )}`}
               topDate={sentForAuthorizationDate}
-              actions={actions.authorization}
+              approvals={actions.authorization}
             />
           )}
         </Grid>
@@ -91,7 +91,7 @@ export const AcceptanceProcessRow = ({
                 sentForFinanceReviewBy,
               )}`}
               topDate={sentForFinanceReviewDate}
-              actions={actions.financeReview}
+              approvals={actions.financeReview}
             />
           )}
         </Grid>
@@ -102,7 +102,7 @@ export const AcceptanceProcessRow = ({
                 <GreyInfoCard
                   topMessage={getRejectedOnString(rejectedOn)}
                   topDate={actions.reject[0]?.createdAt}
-                  actions={actions.reject}
+                  approvals={actions.reject}
                 />
               )}
             </Grid>
@@ -111,7 +111,7 @@ export const AcceptanceProcessRow = ({
                 <GreyInfoCard
                   topMessage={getRejectedOnString(rejectedOn)}
                   topDate={actions.reject[0]?.createdAt}
-                  actions={actions.reject}
+                  approvals={actions.reject}
                 />
               )}
             </Grid>
@@ -120,7 +120,7 @@ export const AcceptanceProcessRow = ({
                 <GreyInfoCard
                   topMessage={getRejectedOnString(rejectedOn)}
                   topDate={actions.reject[0]?.createdAt}
-                  actions={actions.reject}
+                  approvals={actions.reject}
                 />
               )}
             </Grid>
