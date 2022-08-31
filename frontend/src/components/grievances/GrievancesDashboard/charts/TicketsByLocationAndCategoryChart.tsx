@@ -41,7 +41,9 @@ export const TicketsByLocationAndCategoryChart = ({
     categoryPercentage: 0.5,
     label: el.label,
     backgroundColor: categoriesAndColors[index].color,
-    data: matchDataSize(data.datasets[index].data),
+    data: matchDataSize(
+      data.datasets[index].data[0] ? data.datasets[index].data : [''],
+    ),
     stack: 2,
     maxBarThickness: 15,
   }));
