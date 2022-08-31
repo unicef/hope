@@ -346,7 +346,14 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=status,
-        source=[Status.LOCKED_FSP, Status.ACCEPTED],
+        source=[
+            Status.LOCKED,
+            Status.LOCKED_FSP,
+            Status.IN_APPROVAL,
+            Status.IN_APPROVAL,
+            Status.IN_REVIEW,
+            Status.ACCEPTED,
+        ],
         target=Status.XLSX_EXPORTING,
     )
     def status_exporting(self):
@@ -354,7 +361,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=status,
-        source=Status.LOCKED_FSP,
+        source=[Status.LOCKED, Status.ACCEPTED],
         target=Status.XLSX_IMPORTING,
     )
     def status_importing(self):
