@@ -342,37 +342,40 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_payments_for_individuals(report: Report):
+        if isinstance(report.date_to, str):
+            report.date_to = datetime.strptime(report.date_to, "%Y-%m-%d").date()
+
         date_to_time = datetime.fromordinal(report.date_to.toordinal())
         date_to_time += timedelta(days=1)
         filter_vars = {
-            "household__payment_records__business_area": report.business_area,
-            "household__payment_records__delivery_date__gte": report.date_from,
-            "household__payment_records__delivery_date__lt": date_to_time,
+            "household__paymentrecord__business_area": report.business_area,
+            "household__paymentrecord__delivery_date__gte": report.date_from,
+            "household__paymentrecord__delivery_date__lt": date_to_time,
         }
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
         if report.program:
-            filter_vars["household__payment_records__cash_plan__program"] = report.program
+            filter_vars["household__paymentrecord__cash_plan__program"] = report.program
 
         return (
-            Individual.objects.filter(**filter_vars)
-            .annotate(first_delivery_date=Min("household__payment_records__delivery_date"))
-            .annotate(last_delivery_date=Max("household__payment_records__delivery_date"))
+            Individual.objects.exclude(household__isnull=True).filter(**filter_vars)
+            .annotate(first_delivery_date=Min("household__paymentrecord__delivery_date"))
+            .annotate(last_delivery_date=Max("household__paymentrecord__delivery_date"))
             .annotate(
                 payments_made=Count(
-                    "household__payment_records",
-                    filter=Q(household__payment_records__delivered_quantity__gte=0),
+                    "household__paymentrecord",
+                    filter=Q(household__paymentrecord__delivered_quantity__gte=0),
                 )
             )
-            .annotate(payment_currency=ArrayAgg("household__payment_records__currency"))
+            .annotate(payment_currency=ArrayAgg("household__paymentrecord__currency"))
             .annotate(
                 total_delivered_quantity_local=Sum(
-                    "household__payment_records__delivered_quantity", output_field=DecimalField()
+                    "household__paymentrecord__delivered_quantity", output_field=DecimalField()
                 )
             )
             .annotate(
                 total_delivered_quantity_usd=Sum(
-                    "household__payment_records__delivered_quantity_usd", output_field=DecimalField()
+                    "household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()
                 )
             )
             .order_by("household__id")
