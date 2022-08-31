@@ -310,12 +310,16 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             + targeted_individuals.get("adult_male_count")
             + targeted_individuals.get("adult_female_count")
         )
+        self.build_status = TargetPopulation.BUILD_STATUS_OK
+        self.built_at = timezone.now()
 
     def full_rebuild(self):
         household_queryset = Household.objects.filter(business_area=self.business_area)
         household_queryset = household_queryset.filter(self.targeting_criteria.get_query())
         self.households.set(household_queryset)
         self.refresh_stats()
+        self.build_status = TargetPopulation.BUILD_STATUS_OK
+        self.built_at = timezone.now()
 
     def get_criteria_string(self):
         try:
