@@ -1,12 +1,12 @@
 import React from 'react';
+import { MockedProvider } from '@apollo/react-testing';
 import { render } from '../../../../testUtils/testUtils';
-import { PaymentGrievanceDetails } from '.';
 import { fakeApolloApprovePaymentDetailsMutation } from '../../../../../fixtures/grievances/fakeApolloApprovePaymentDetailsMutation';
 import { fakeGrievanceTicketPaymentVerification } from '../../../../../fixtures/grievances/fakeGrievanceTicketPaymentVerification';
-import { MockedProvider } from '@apollo/react-testing';
+import { PaymentGrievanceDetails } from '.';
 
 describe('components/grievances/PaymentGrievanceDetails', () => {
-  it('should render with data', async () => {
+  it('should render with data', () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
