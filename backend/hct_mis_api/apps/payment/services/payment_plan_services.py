@@ -107,7 +107,6 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock_fsp(self):
-        print("LOCK FSP ACTION HANDLER")
         # TODO: validation?
 
         # set all payments with money expected to be delivered
