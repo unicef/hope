@@ -68,8 +68,6 @@ def target_population_rebuild_stats(target_population_id):
         try:
             with transaction.atomic():
                 target_population.refresh_stats()
-                target_population.build_status = TargetPopulation.BUILD_STATUS_OK
-                target_population.built_at = timezone.now()
                 target_population.save()
         except Exception as e:
             logger.exception(e)
@@ -91,8 +89,6 @@ def target_population_full_rebuild(target_population_id):
                 if not target_population.is_open():
                     raise Exception('Target population is not in open status')
                 target_population.full_rebuild()
-                target_population.build_status = TargetPopulation.BUILD_STATUS_OK
-                target_population.built_at = timezone.now()
                 target_population.save()
         except Exception as e:
             logger.exception(e)
