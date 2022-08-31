@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 from django.core.management import call_command
 from elasticsearch import Elasticsearch
-from django.conf import settings
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -44,7 +43,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
           allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", search: $search) {
             edges {
               node {
-                unicefId
                 householdUnicefId
                 category
                 status
@@ -65,7 +63,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", admin: $admin) {
         edges {
           node {
-            unicefId
             householdUnicefId
             category
             status
@@ -86,7 +83,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", createdAtRange: $createdAtRange) {
         edges {
           node {
-            unicefId
             householdUnicefId
             category
             status
@@ -107,7 +103,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", status: $status) {
         edges {
           node {
-            unicefId
             householdUnicefId
             category
             status
@@ -128,7 +123,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", category: $category) {
         edges {
           node {
-            unicefId
             householdUnicefId
             category
             status
@@ -149,7 +143,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", assignedTo: $assignedTo) {
         edges {
           node {
-            unicefId
             householdUnicefId
             category
             status
@@ -170,7 +163,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
           allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", issueType: $issueType) {
             edges {
               node {
-                unicefId
                 householdUnicefId
                 category
                 status
@@ -191,7 +183,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
           allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", priority: $priority) {
             edges {
               node {
-                unicefId
                 householdUnicefId
                 category
                 status
@@ -212,7 +203,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", urgency: $urgency) {
         edges {
           node {
-            unicefId
             householdUnicefId
             category
             status
@@ -233,7 +223,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", registrationDataImport: $registrationDataImport) {
         edges {
           node {
-            unicefId
             householdUnicefId
             category
             status
@@ -254,7 +243,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
           allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", grievanceType: $grievanceType) {
             edges {
               node {
-                unicefId
                 householdUnicefId
                 category
                 status
@@ -269,27 +257,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
           }
         }
         """
-
-    FILTER_BY_SCORE = """
-    query AllGrievanceTickets($scoreMin: String, $scoreMax: String) {
-      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", scoreMax: $scoreMax, scoreMin: $scoreMin) {
-        edges {
-          node {
-            needsAdjudicationTicketDetails {
-              scoreMin
-              scoreMax
-            }
-            status
-            category
-            admin
-            language
-            description
-            consent
-          }
-        }
-      }
-    }
-    """
 
     FILTER_BY_MULTIPLE_FILTERS = """
         query AllGrievanceTickets(
@@ -308,7 +275,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
           ) {
             edges {
               node {
-                unicefId
                 householdUnicefId
                 category
                 status
@@ -326,7 +292,6 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        settings.ELASTICSEARCH_GRIEVANCE_TURN_ON = True
         cls.es = cls.create_es_db()
 
         create_afghanistan()

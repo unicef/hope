@@ -1,4 +1,4 @@
-from django.conf import settings
+from unittest.mock import patch
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -12,6 +12,7 @@ from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 
 
+@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
 class TestGrievanceQuerySearchFilter(APITestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
@@ -32,8 +33,6 @@ class TestGrievanceQuerySearchFilter(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        settings.ELASTICSEARCH_GRIEVANCE_TURN_ON = False
-
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()
