@@ -76,8 +76,7 @@ export function TargetPopulationCore({
             {t('Target Population is building')}
           </Typography>
           <Label>
-            Target population is processing, list of household will be available
-            when process will be finished
+            Target population is processing, the list of households will be available when the process is finished
           </Label>
         </PaperContainer>
       )}
