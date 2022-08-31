@@ -45,7 +45,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
                 "size": 1,
                 "residence_status": "HOST",
                 "business_area": business_area,
-                "first_registration_date":  timezone.make_aware(
+                "first_registration_date": timezone.make_aware(
                     datetime.strptime("1900-01-01", "%Y-%m-%d"), timezone=utc
                 ),
             },
@@ -140,9 +140,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 
     @freeze_time("2020-10-10")
     def test_rule_filter_age_range_1_49(self):
-        rule_filter = TargetingIndividualBlockRuleFilter(
-            comparison_method="RANGE", field_name="age", arguments=[1, 49]
-        )
+        rule_filter = TargetingIndividualBlockRuleFilter(comparison_method="RANGE", field_name="age", arguments=[1, 49])
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
         self.assertEqual(queryset.count(), 3)
@@ -150,9 +148,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 
     @freeze_time("2020-10-10")
     def test_rule_filter_age_range_1_50(self):
-        rule_filter = TargetingIndividualBlockRuleFilter(
-            comparison_method="RANGE", field_name="age", arguments=[1, 50]
-        )
+        rule_filter = TargetingIndividualBlockRuleFilter(comparison_method="RANGE", field_name="age", arguments=[1, 50])
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
         self.assertEqual(queryset.count(), 4)

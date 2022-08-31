@@ -3,41 +3,30 @@ import logging
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField, IntegerRangeField
-from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
     RangeMinValueValidator,
 )
-from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Case, Count, JSONField, Q, Value, When
+from django.db.models import Count, JSONField, Q
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
-from model_utils import Choices
-from model_utils.managers import SoftDeletableManager
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import (
-    _HOUSEHOLD,
-    _INDIVIDUAL,
-    TYPE_DECIMAL,
-    TYPE_INTEGER,
-    TYPE_SELECT_MANY,
     FieldFactory,
     Scope,
 )
-from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import (
-    get_attr_value,
     map_unicef_ids_to_households_unicef_ids,
 )
 from hct_mis_api.apps.household.models import (
