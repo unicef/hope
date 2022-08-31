@@ -1,5 +1,8 @@
 import * as Yup from 'yup';
-import { GrievanceSteps } from '../../../utils/constants';
+import {
+  GrievanceSteps,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../../utils/constants';
 
 export const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
@@ -24,6 +27,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
     category: Yup.string()
       .required('Category is required')
       .nullable(),
+    issueType: Yup.string().nullable(),
     admin: Yup.string().nullable(),
     description: Yup.string(),
     consent: Yup.bool(),
@@ -38,14 +42,17 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
   };
 
   if (currentStep === GrievanceSteps.Description) {
-    datum.description = Yup.string().required('Description is required');
+    datum.description = Yup.string().required(
+      datum.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
+        datum.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+        ? 'Withdrawal Reason is required'
+        : 'Description is required',
+    );
   }
 
   if (currentStep >= GrievanceSteps.Verification) {
     datum.consent = Yup.bool().oneOf([true], 'Consent is required');
   }
 
-  const validationSchema3 = Yup.object().shape(datum);
-
-  return validationSchema3;
+  return Yup.object().shape(datum);
 };

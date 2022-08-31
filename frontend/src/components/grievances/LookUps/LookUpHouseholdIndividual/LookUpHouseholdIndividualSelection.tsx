@@ -1,4 +1,4 @@
-import { Box, FormHelperText } from '@material-ui/core';
+import { Box, FormHelperText, Grid } from '@material-ui/core';
 import React, { useState } from 'react';
 import { isInvalid } from '../../../../utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';
@@ -44,7 +44,14 @@ export const LookUpHouseholdIndividualSelection = ({
           setSelectedIndividual={setSelectedIndividual}
         />
         {isInvalid('selectedIndividual', errors, touched) && (
-          <FormHelperText error>{errors?.selectedIndividual}</FormHelperText>
+          <Grid container spacing={4}>
+            <Grid item xs={4} />
+            <Grid item xs={4}>
+              <FormHelperText error>
+                {errors?.selectedIndividual}
+              </FormHelperText>
+            </Grid>
+          </Grid>
         )}
         {isInvalid('selectedHousehold', errors, touched) &&
           !selectedHousehold && (
