@@ -10,7 +10,7 @@ describe('components/paymentmodule/PaymentPlanParameters', () => {
       endDate: null,
       currency: null,
     };
-    const { container } = render(<PaymentPlanParameters values={values} />);
+    const { container } = render(<PaymentPlanParameters values={values} currencyChoicesData={[]} />);
     expect(container).toMatchSnapshot();
   });
 });

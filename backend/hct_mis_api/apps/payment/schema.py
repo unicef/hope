@@ -1,10 +1,9 @@
 import json
 from decimal import Decimal
 
-from django.db.models.functions import Coalesce
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
-
 
 import graphene
 from graphene import relay
@@ -29,40 +28,40 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_permission_decorator,
     decode_id_string,
-    to_choice_object,
     encode_id_base64,
+    to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
+    CashPlanPaymentVerificationFilter,
+    FinancialServiceProviderFilter,
+    FinancialServiceProviderXlsxReportFilter,
+    FinancialServiceProviderXlsxTemplateFilter,
+    PaymentFilter,
+    PaymentPlanFilter,
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter,
-    FinancialServiceProviderXlsxTemplateFilter,
-    FinancialServiceProviderXlsxReportFilter,
-    FinancialServiceProviderFilter,
-    PaymentPlanFilter,
-    PaymentFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
+    Approval,
+    ApprovalProcess,
     CashPlan,
     CashPlanPaymentVerification,
     CashPlanPaymentVerificationSummary,
+    DeliveryMechanismPerPaymentPlan,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
+    GenericPayment,
+    Payment,
+    PaymentChannel,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FinancialServiceProviderXlsxReport,
-    FinancialServiceProvider,
-    ApprovalProcess,
-    Approval,
-    PaymentPlan,
-    Payment,
-    DeliveryMechanismPerPaymentPlan,
-    GenericPayment,
-    PaymentChannel,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -274,6 +273,12 @@ class PaymentConflictDataNode(graphene.ObjectType):
     payment_id = graphene.String()
     payment_unicef_id = graphene.String()
 
+    def resolve_payment_plan_id(self, info):
+        return encode_id_base64(self["payment_plan_id"], "PaymentPlan")
+
+    def resolve_payment_id(self, info):
+        return encode_id_base64(self["payment_id"], "Payment")
+
 
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
@@ -281,6 +286,7 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
     payment_plan_soft_conflicted = graphene.Boolean()
     payment_plan_soft_conflicted_data = graphene.List(PaymentConflictDataNode)
+    has_payment_channel = graphene.Boolean()
 
     class Meta:
         model = Payment
@@ -292,6 +298,9 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_payment_plan_soft_conflicted_data(self, info):
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
+
+    def resolve_has_payment_channel(self, info):
+        return self.assigned_payment_channel is not None
 
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data):
@@ -362,6 +371,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     end_date = graphene.Date()
     currency_name = graphene.String()
     has_payment_list_xlsx_file = graphene.Boolean()
+    has_payment_list_per_fsp_xlsx_file = graphene.Boolean()
     imported_xlsx_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
@@ -391,11 +401,13 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
     def resolve_has_payment_list_xlsx_file(self, info):
-        return self.has_payment_plan_payment_list_xlsx_file
+        return self.has_payment_list_xlsx_file
+
+    def resolve_has_payment_list_per_fsp_xlsx_file(self):
+        return self.has_payment_list_per_fsp_xlsx_file
 
     def resolve_imported_xlsx_file_name(self, info):
-        import_file_obj = self.get_payment_plan_payment_list_import_xlsx_file_obj()
-        return import_file_obj.file.name if import_file_obj else ""
+        return self.imported_xlsx_file.file.name if self.imported_xlsx_file else ""
 
     def resolve_volume_by_delivery_mechanism(self, info):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")

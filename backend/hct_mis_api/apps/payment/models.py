@@ -23,7 +23,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 
-from hct_mis_api.apps.core.models import XLSXFileTemp
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -192,7 +192,7 @@ class GenericPayment(TimeStampedUUIDModel):
         abstract = True
 
 
-class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
+class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -238,7 +238,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         related_name="created_payment_plans",
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
@@ -254,6 +253,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     total_households_count = models.PositiveSmallIntegerField(default=0)
     total_individuals_count = models.PositiveSmallIntegerField(default=0)
     xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
+    imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
+    export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
+    export_per_fsp_xlsx_file = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE
+    )
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
@@ -333,7 +337,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
-        source=Status.LOCKED_FSP,
+        source=[Status.LOCKED_FSP, Status.ACCEPTED],
         target=Status.XLSX_EXPORTING,
     )
     def status_exporting(self):
@@ -422,30 +426,30 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
             ]
         )
 
-    def get_payment_plan_payment_list_xlsx_file_obj(self):
-        return XLSXFileTemp.objects.filter(
-            object_id=self.pk, content_type=get_content_type_for_model(self), type=XLSXFileTemp.EXPORT
-        ).first()
+    @property
+    def has_payment_list_xlsx_file(self):
+        return bool(self.export_xlsx_file)
 
     @property
-    def has_payment_plan_payment_list_xlsx_file(self):
-        return bool(self.get_payment_plan_payment_list_xlsx_file_obj())
+    def has_payment_list_per_fsp_xlsx_file(self):
+        return bool(self.export_per_fsp_xlsx_file)
 
     @property
-    def xlsx_payment_plan_payment_list_file_link(self):
-        file_obj = self.get_payment_plan_payment_list_xlsx_file_obj()
-        if file_obj:
-            return file_obj.file.url
+    def xlsx_payment_list_file_link(self):
+        if self.export_xlsx_file:
+            return self.export_xlsx_file.file.url
         return None
 
-    def get_payment_plan_payment_list_import_xlsx_file_obj(self):
-        return XLSXFileTemp.objects.filter(
-            object_id=self.pk, content_type=get_content_type_for_model(self), type=XLSXFileTemp.IMPORT
-        ).first()
+    @property
+    def xlsx_payment_list_per_fsp_file_link(self):
+        if self.export_per_fsp_xlsx_file:
+            return self.export_per_fsp_xlsx_file.file.url
+        return None
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     # TODO: add/remove fields after finalizing the fields
+    # after updating COLUMNS_TO_CHOOSE please update XlsxPaymentPlanExportService.export_per_fsp as well
     COLUMNS_TO_CHOOSE = (
         ("payment_id", _("Payment ID")),
         ("household_id", _("Household ID")),
@@ -775,7 +779,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
     )
 
 
-class Payment(SoftDeletableModel, GenericPayment):
+class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -788,7 +792,6 @@ class Payment(SoftDeletableModel, GenericPayment):
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
     assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
 
     objects = PaymentManager()
 

@@ -2,10 +2,21 @@ import { Box, Button } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { StatusBox } from '../../../core/StatusBox';
+import {
+  paymentPlanStatusMapping,
+  paymentPlanStatusToColor,
+} from '../../../../utils/utils';
+
+const StatusWrapper = styled.div`
+  width: 140px;
+  margin-left: 30px;
+`;
 
 interface EditPaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -32,7 +43,18 @@ export const EditPaymentPlanHeader = ({
 
   return (
     <PageHeader
-      title={`${t('Edit Payment Plan')} ID: ${id}`}
+      title={
+        <Box display='flex' alignItems='center'>
+          {t('Payment Plan')} ID {paymentPlan.unicefId}
+          <StatusWrapper>
+            <StatusBox
+              status={paymentPlan.status}
+              statusToColor={paymentPlanStatusToColor}
+              statusNameMapping={paymentPlanStatusMapping}
+            />
+          </StatusWrapper>
+        </Box>
+      }
       breadCrumbs={
         hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_LIST, permissions)
           ? breadCrumbsItems
