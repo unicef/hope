@@ -1,7 +1,10 @@
-import copy
 import logging
+import copy
+import openpyxl
+
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
+from openpyxl.utils import get_column_letter
 
 from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
@@ -9,9 +12,6 @@ from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Count, DecimalField, Max, Min, Q, Sum
 from django.template.loader import render_to_string
-
-import openpyxl
-from openpyxl.utils import get_column_letter
 
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -27,7 +27,8 @@ from hct_mis_api.apps.payment.models import (
     CashPlan,
     CashPlanPaymentVerification,
     PaymentRecord,
-    PaymentVerification
+    PaymentVerification,
+    PaymentPlan,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import Report
@@ -248,6 +249,29 @@ class GenerateReportContentHelpers:
             payment_verification.received_amount,
             payment_verification.status,
             payment_verification.status_date,
+        )
+
+    @staticmethod
+    def get_payment_plans(report: Report):
+        filter_vars = {
+            "business_area": report.business_area,
+            "dispersion_start_date__gte": report.date_from,
+            "dispersion_end_date__lte": report.date_to,
+        }
+        return PaymentPlan.objects.filter(**filter_vars)
+
+    @classmethod
+    def format_payment_plan_row(self, payment_plan: PaymentPlan) -> tuple:
+        return (
+            payment_plan.unicef_id,
+            payment_plan.get_status_display(),
+            payment_plan.total_households_count,
+            payment_plan.get_currency_display(),
+            payment_plan.total_entitled_quantity,
+            payment_plan.total_delivered_quantity,
+            payment_plan.total_undelivered_quantity,
+            self._format_date(payment_plan.dispersion_start_date),
+            self._format_date(payment_plan.dispersion_end_date),
         )
 
     @staticmethod
@@ -551,6 +575,17 @@ class GenerateReportService:
             "status",  # RECEIVED_WITH_ISSUES
             "status date",
         ),
+        Report.PAYMENT_PLAN: (
+            "payment plan ID",
+            "status",
+            "no. of households",
+            "currency",
+            "total entitled quantity",
+            "total delivered quantity",
+            "total undelivered quantity",
+            "dispersion start date",
+            "dispersion end date",
+        ),
         Report.CASH_PLAN: (
             "cash plan ID",  # ANT-21-CSH-00001
             "cash plan name",
@@ -645,6 +680,7 @@ class GenerateReportService:
         Report.CASH_PLAN_VERIFICATION: ("Completion Date From", "Completion Date To"),
         Report.PAYMENT_VERIFICATION: ("Completion Date From", "Completion Date To"),
         Report.PAYMENTS: ("Delivery Date From", "Delivery Date To"),
+        Report.PAYMENT_PLAN: ("Dispersion Start Date", "Dispersion End Date"),
         Report.INDIVIDUALS_AND_PAYMENT: ("Delivery Date From", "Delivery Date To"),
         Report.CASH_PLAN: ("End Date From", "End Date To"),
         Report.PROGRAM: ("End Date From", "End Date To"),
@@ -667,6 +703,10 @@ class GenerateReportService:
         Report.PAYMENT_VERIFICATION: (
             GenerateReportContentHelpers.get_payment_verifications,
             GenerateReportContentHelpers.format_payment_verification_row,
+        ),
+        Report.PAYMENT_PLAN: (
+            GenerateReportContentHelpers.get_payment_plans,
+            GenerateReportContentHelpers.format_payment_plan_row,
         ),
         Report.CASH_PLAN: (
             GenerateReportContentHelpers.get_cash_plans,
