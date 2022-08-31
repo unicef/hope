@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../../../../__generated__/graphql';
+import { useTargetPopulationHouseholdsQuery } from '../../../../../__generated__/graphql';
 import { UniversalTable } from '../../../UniversalTable';
 import { headCells as programmeHeadCells } from '../SentTargeting/ProgrammeHeadCells';
 import { ProgrammeTableRow } from '../SentTargeting/ProgrammeTableRow';
@@ -17,7 +17,7 @@ interface TargetPopulationHouseholdProps {
   canViewDetails?: boolean;
 }
 
-export const ApprovedTargetPopulationTable = ({
+export const LockedTargetPopulationTable = ({
   id,
   variables,
   canViewDetails,
@@ -33,8 +33,8 @@ export const ApprovedTargetPopulationTable = ({
         title={t('Households')}
         headCells={programmeHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useCandidateHouseholdsListByTargetingCriteriaQuery}
-        queriedObjectName='candidateHouseholdsListByTargetingCriteria'
+        query={useTargetPopulationHouseholdsQuery}
+        queriedObjectName='targetPopulationHouseholds'
         initialVariables={initialVariables}
         renderRow={(row) => (
           <ProgrammeTableRow key={row.id} household={row} canViewDetails={canViewDetails} />

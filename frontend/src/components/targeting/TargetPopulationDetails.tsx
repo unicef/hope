@@ -1,7 +1,7 @@
 import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TargetPopulationNode } from '../../__generated__/graphql';
+import { TargetPopulationQuery } from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { OverviewContainer } from '../core/OverviewContainer';
@@ -9,7 +9,7 @@ import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
 
 interface ProgramDetailsProps {
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
 }
 
 export function TargetPopulationDetails({
