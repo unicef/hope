@@ -212,7 +212,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': False,
+                        'excluded': True,
                         'paymentPlan': {
                             'unicefId': 'PP-01'
                         },
@@ -235,7 +235,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': True,
+                        'excluded': False,
                         'paymentPlan': {
                             'unicefId': 'PP-01'
                         },
