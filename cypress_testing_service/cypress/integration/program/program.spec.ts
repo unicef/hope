@@ -1,4 +1,5 @@
 import { When, Then, And, Given } from 'cypress-cucumber-preprocessor/steps';
+import { fillProgramForm } from '../../procedures/procedures';
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -32,34 +33,31 @@ Then('I should see the Set-up a new Programme modal', () => {
 });
 
 When('I fill out all the form fields', () => {
-  const uniqueSeed = Date.now().toString();
-
-  cy.get('[data-cy="input-programme-name"]').type(`test program ${uniqueSeed}`);
-  cy.get('[data-cy="input-cash-assist-scope"]').first().click();
-  cy.get('[data-cy="select-option-1"]').click();
-  cy.get('[data-cy="input-sector"]').first().click();
-  cy.get('[data-cy="select-option-1"]').click();
-  cy.get('[data-cy="input-start-date"]').click().type('2022-12-12');
-  cy.get('[data-cy="input-end-date"]').click().type('2022-12-23');
-  cy.get('[data-cy="input-description"]')
-    .first()
-    .click()
-    .type('test description');
-  cy.get('[data-cy="input-budget"]')
-    .first()
-    .click()
-    .type('{backspace}{backspace}{backspace}{backspace}9999');
-  cy.get('[data-cy="input-admin-area"]').click().type('Some Admin Area');
-  cy.get('[data-cy="input-population-goal"]')
-    .click()
-    .type('{backspace}{backspace}{backspace}{backspace}4000');
+  fillProgramForm(cy);
 });
 
 And('I click the save button', () => {
   cy.get('[data-cy="button-save"]').click({ force: true });
-  cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
 });
 
 Then('I should see the Program details page', () => {
   cy.get('h6').contains('Programme Details');
+});
+
+When('I click the activate button', () => {
+  cy.get('[data-cy="button-activate-program"]').click({ force: true });
+});
+
+Then('I should see the Activate Program Modal opened', () => {
+  cy.get('h6').contains('Activate Programme');
+});
+
+When('I click the activate button in the modal', () => {
+  cy.get('[data-cy="button-activate-program-modal"]').click({ force: true });
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+});
+
+Then('I should see the Program is active', () => {
+  cy.get('[data-cy="status-container"]').contains('ACTIVE');
 });
