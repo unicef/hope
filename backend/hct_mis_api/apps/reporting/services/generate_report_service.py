@@ -309,7 +309,7 @@ class GenerateReportContentHelpers:
             self._format_date(cash_plan.status_date),
             cash_plan.vision_id,
             cash_plan.validation_alerts_count,
-            cash_plan.verification_status,
+            # cash_plan.verification_status,
         )
 
     @staticmethod
@@ -608,7 +608,7 @@ class GenerateReportService:
             "status date",
             "VISION ID",  # 2345253423
             "validation alerts count",  # 2
-            "cash plan verification status",  # FINISHED
+            # "cash plan verification status",  # FINISHED
         ),
         Report.PROGRAM: (
             "programme ID",  # e46064c4-d5e2-4990-bb9b-f5cc2dde96f9
