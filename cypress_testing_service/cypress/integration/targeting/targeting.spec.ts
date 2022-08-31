@@ -53,6 +53,7 @@ Then('I should see the Create Target Population page', () => {
 When('I fill out the form fields and save', () => {
   cy.get('[data-cy="input-name"]').first().type(`test TP ${uniqueSeed}`);
   cy.get('[data-cy="input-program"]').first().click();
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[data-cy="select-option-1"]').click();
   cy.get('[data-cy="button-target-population-add-criteria"]').click();
   cy.get('[data-cy="button-household-rule"]').click();
