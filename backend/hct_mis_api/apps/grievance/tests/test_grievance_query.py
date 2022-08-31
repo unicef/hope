@@ -1,7 +1,8 @@
 from datetime import datetime
+from unittest.mock import patch
 
-from django.conf import settings
 from django.core.management import call_command
+from django.test import override_settings
 from django.utils import timezone
 
 from parameterized import parameterized
@@ -20,6 +21,7 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.household.fixtures import create_household
 
 
+@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
 class TestGrievanceQuery(APITestCase):
     ALL_GRIEVANCE_QUERY = """
     query AllGrievanceTickets {
@@ -167,8 +169,6 @@ class TestGrievanceQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        settings.ELASTICSEARCH_GRIEVANCE_TURN_ON = False
-
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()

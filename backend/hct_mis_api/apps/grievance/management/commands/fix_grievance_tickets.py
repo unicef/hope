@@ -64,6 +64,6 @@ class Command(BaseCommand):
     help = "Go through all grievance tickets, look for wrongly formatted data and fix it"
 
     def handle(self, *args, **options):
-        self.stdout.write("Fixing grievance tickets")
+        # self.stdout.write("Fixing grievance tickets")
 
         fix_disability_fields()  # PR #1608
