@@ -22,18 +22,21 @@ spec:
       http:
         paths:
         - path: /api/*
+          pathType: ImplementationSpecific
           backend:
             service:
               name: {{ $fullName }}-backend
               port:
                 number: {{ .Values.backend.service.port }}
         - path: /flower/*
+          pathType: ImplementationSpecific
           backend: 
             service:
               name: {{ include "hope.fullname" . }}-celery-flower
               port:
                 number: {{ .Values.celeryflower.service.port }}
         - path: /
+          pathType: ImplementationSpecific
           backend:
             service:
               name: {{ $fullName }}-frontend
