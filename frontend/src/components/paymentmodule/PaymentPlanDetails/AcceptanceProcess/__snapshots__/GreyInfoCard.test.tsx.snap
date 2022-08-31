@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/paymentmodule/PaymentPlanDetails/GreyInfoCard should render 1`] = `
+exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoCard should render 1`] = `
 <div>
   <div
     class="MuiBox-root MuiBox-root-1"

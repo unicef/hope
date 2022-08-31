@@ -62,12 +62,17 @@ export const VolumeByDeliveryMechanismSection = ({
   const { t } = useTranslation();
   const { volumeByDeliveryMechanism } = paymentPlan;
 
-  const mappedDeliveryMechanism = volumeByDeliveryMechanism.map((el) => (
-    <Grid item xs={6}>
-      <FieldBorder color={getDeliveryMechanismColor(el.deliveryMechanism.name)}>
+  const mappedDeliveryMechanism = volumeByDeliveryMechanism.map((vdm, index) => (
+    <Grid
+      item
+      xs={6}
+      /* eslint-disable-next-line react/no-array-index-key */
+      key={`${vdm.deliveryMechanism.id}-${index}`}
+    >
+      <FieldBorder color={getDeliveryMechanismColor(vdm.deliveryMechanism.name)}>
         <LabelizedField
-          label={`${el.deliveryMechanism.name} (${el.deliveryMechanism.fsp?.name})`}
-          value={el.volumeUsd}
+          label={`${vdm.deliveryMechanism.name} (${vdm.deliveryMechanism.fsp?.name})`}
+          value={vdm.volumeUsd}
         />
       </FieldBorder>
     </Grid>
@@ -86,44 +91,43 @@ export const VolumeByDeliveryMechanismSection = ({
 
     return defaultColorsArray;
   };
+
   return (
-    <>
-      <Box display='flex' flexDirection='column'>
-        <Title>
-          <Typography variant='h6'>
-            {t('Volume by Delivery Mechanism')} in USD
-          </Typography>{' '}
-        </Title>
-        <ContentWrapper>
-          <Grid container spacing={0} justify='flex-start'>
-            {mappedDeliveryMechanism}
-          </Grid>
-          <Grid container spacing={0} justify='flex-start' alignItems='center'>
-            <Grid item xs={4}>
-              <ChartContainer>
-                <Pie
-                  width={100}
-                  height={100}
-                  options={{
-                    legend: {
-                      display: false,
+    <Box display='flex' flexDirection='column'>
+      <Title>
+        <Typography variant='h6'>
+          {t('Volume by Delivery Mechanism')} in USD
+        </Typography>{' '}
+      </Title>
+      <ContentWrapper>
+        <Grid container spacing={0} justify='flex-start'>
+          {mappedDeliveryMechanism}
+        </Grid>
+        <Grid container spacing={0} justify='flex-start' alignItems='center'>
+          <Grid item xs={4}>
+            <ChartContainer>
+              <Pie
+                width={100}
+                height={100}
+                options={{
+                  legend: {
+                    display: false,
+                  },
+                }}
+                data={{
+                  labels: chartLabels,
+                  datasets: [
+                    {
+                      data: chartData,
+                      backgroundColor: chartColors,
                     },
-                  }}
-                  data={{
-                    labels: chartLabels,
-                    datasets: [
-                      {
-                        data: chartData,
-                        backgroundColor: chartColors,
-                      },
-                    ],
-                  }}
-                />
-              </ChartContainer>
-            </Grid>
+                  ],
+                }}
+              />
+            </ChartContainer>
           </Grid>
-        </ContentWrapper>
-      </Box>
-    </>
+        </Grid>
+      </ContentWrapper>
+    </Box>
   );
 };
