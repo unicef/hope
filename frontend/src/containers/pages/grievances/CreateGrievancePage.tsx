@@ -117,6 +117,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
 
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
+  const [validateData, setValidateData] = useState(false);
 
   const linkedTicketId = history.location.state?.linkedTicketId;
   const selectedHousehold = history.location.state?.selectedHousehold;
@@ -484,9 +485,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
             e.graphQLErrors.map((x) => showMessage(x.message));
           }
         } else {
+          setValidateData(false);
           handleNext();
         }
       }}
+      validateOnChange={
+        activeStep < GrievanceSteps.Verification || validateData
+      }
+      validateOnBlur={activeStep < GrievanceSteps.Verification || validateData}
       validate={(values) =>
         validateUsingSteps(
           values,
@@ -494,6 +500,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
           individualFieldsDict,
           householdFieldsDict,
           activeStep,
+          setValidateData,
         )
       }
       validationSchema={validationSchemaWithSteps(activeStep)}

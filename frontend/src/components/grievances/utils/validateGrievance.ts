@@ -209,6 +209,7 @@ export function validateUsingSteps(
   individualFieldsDict,
   householdFieldsDict,
   activeStep,
+  setValidateData,
 ) {
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
@@ -291,7 +292,8 @@ export function validateUsingSteps(
         !values.individualDataUpdateIdentitiesToEdit?.length &&
         !values.individualDataUpdateFieldsPaymentChannels?.length &&
         !values.individualDataUpdatePaymentChannelsToRemove?.length &&
-        !values.individualDataUpdatePaymentChannelsToEdit?.length
+        !values.individualDataUpdatePaymentChannelsToEdit?.length &&
+        activeStep === GrievanceSteps.Description
       ) {
         errors.individualDataUpdateFields =
           'Individual Data Change is Required';
@@ -451,8 +453,12 @@ export function validateUsingSteps(
     if (
       verficationStepFields.filter((item) => values[item] === true).length < 5
     ) {
+      setValidateData(true);
       errors.verificationRequired = 'Select correctly minimum 5 questions';
     }
+  }
+  if (activeStep === GrievanceSteps.Description) {
+    setValidateData(true);
   }
   return errors;
 }
