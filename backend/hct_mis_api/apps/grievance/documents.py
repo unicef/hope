@@ -24,11 +24,11 @@ class GrievanceTicketDocument(Document):
     business_area = fields.ObjectField(properties={
         "slug": fields.KeywordField()
     })
-    category = fields.KeywordField(attr="category_to_string")
-    status = fields.KeywordField(attr="status_to_string")
+    category = fields.KeywordField(attr="get_category_display")
+    status = fields.KeywordField(attr="get_status_display")
     issue_type = fields.KeywordField(attr="issue_type_to_string")
-    priority = fields.KeywordField(attr="priority_to_string")
-    urgency = fields.KeywordField(attr="urgency_to_string")
+    priority = fields.KeywordField(attr="get_priority_display")
+    urgency = fields.KeywordField(attr="get_urgency_display")
     grievance_type = fields.KeywordField(attr="grievance_type_to_string")
     assigned_to = fields.ObjectField(properties={
         "id": fields.KeywordField()

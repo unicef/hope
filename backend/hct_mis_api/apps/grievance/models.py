@@ -417,18 +417,6 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     def get_issue_type(self):
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
-    def priority_to_string(self):
-        return self.get_priority_display()
-
-    def urgency_to_string(self):
-        return self.get_urgency_display()
-
-    def status_to_string(self):
-        return self.get_status_display()
-
-    def category_to_string(self):
-        return self.get_category_display()
-
     def issue_type_to_string(self):
         if self.category in range(2, 4):
             return self.get_issue_type()
