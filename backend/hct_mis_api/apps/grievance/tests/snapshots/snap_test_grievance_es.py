@@ -21,7 +21,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ad
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-0000001',
                         'urgency': 2
                     }
                 }
@@ -44,7 +43,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_as
                         'language': 'Polish',
                         'priority': 2,
                         'status': 3,
-                        'unicefId': 'GRV-0000002',
                         'urgency': 3
                     }
                 }
@@ -67,7 +65,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ca
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-0000001',
                         'urgency': 2
                     }
                 }
@@ -90,7 +87,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_he
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-0000001',
                         'urgency': 2
                     }
                 }
@@ -113,7 +109,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ho
                         'language': 'Polish',
                         'priority': 3,
                         'status': 4,
-                        'unicefId': 'GRV-0000003',
                         'urgency': 1
                     }
                 }
@@ -136,7 +131,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_is
                         'language': 'Polish',
                         'priority': 2,
                         'status': 3,
-                        'unicefId': 'GRV-0000002',
                         'urgency': 3
                     }
                 }
@@ -159,7 +153,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ma
                         'language': 'Polish',
                         'priority': 2,
                         'status': 3,
-                        'unicefId': 'GRV-0000002',
                         'urgency': 3
                     }
                 }
@@ -182,7 +175,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_mi
                         'language': 'Polish',
                         'priority': 3,
                         'status': 4,
-                        'unicefId': 'GRV-0000003',
                         'urgency': 1
                     }
                 }
@@ -205,7 +197,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_mi
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-0000001',
                         'urgency': 2
                     }
                 }
@@ -228,7 +219,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_mu
                         'language': 'Polish',
                         'priority': 2,
                         'status': 3,
-                        'unicefId': 'GRV-0000002',
                         'urgency': 3
                     }
                 },
@@ -242,7 +232,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_mu
                         'language': 'Polish',
                         'priority': 3,
                         'status': 4,
-                        'unicefId': 'GRV-0000003',
                         'urgency': 1
                     }
                 }
@@ -265,7 +254,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_pr
                         'language': 'Polish',
                         'priority': 3,
                         'status': 4,
-                        'unicefId': 'GRV-0000003',
                         'urgency': 1
                     }
                 }
@@ -288,7 +276,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_re
                         'language': 'Polish',
                         'priority': 2,
                         'status': 3,
-                        'unicefId': 'GRV-0000002',
                         'urgency': 3
                     }
                 }
@@ -311,7 +298,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_st
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-0000001',
                         'urgency': 2
                     }
                 }
@@ -334,7 +320,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_un
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-0000001',
                         'urgency': 2
                     }
                 }
@@ -357,7 +342,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_by_ur
                         'language': 'Polish',
                         'priority': 3,
                         'status': 4,
-                        'unicefId': 'GRV-0000003',
                         'urgency': 1
                     }
                 }
@@ -380,7 +364,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_grievance_query_es_search_griev
                         'language': 'Polish',
                         'priority': 3,
                         'status': 4,
-                        'unicefId': 'GRV-0000003',
                         'urgency': 1
                     }
                 }
@@ -403,7 +386,6 @@ snapshots['TestGrievanceQueryElasticSearch::test_multiple_filters_should_return_
                         'language': 'Polish',
                         'priority': 1,
                         'status': 1,
-                        'unicefId': 'GRV-0000001',
                         'urgency': 2
                     }
                 }

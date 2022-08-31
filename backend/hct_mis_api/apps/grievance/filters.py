@@ -26,7 +26,6 @@ from hct_mis_api.apps.core.utils import choices_to_dict
 
 
 class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
-    USE_ALL_FIELDS_AS_ELASTIC_SEARCH = False
     USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH = (
         "search",
         "created_at_range",
