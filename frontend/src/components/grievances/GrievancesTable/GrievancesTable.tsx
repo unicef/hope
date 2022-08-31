@@ -1,5 +1,5 @@
 import { Box, Button } from '@material-ui/core';
-import { PublishOutlined, GetAppOutlined } from '@material-ui/icons';
+// import { PublishOutlined, GetAppOutlined } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -183,7 +183,7 @@ export const GrievancesTable = ({
         <Box display='flex' ml='auto'>
           <Box>
             {/* TODO: Enable Export Report button */}
-            <Button
+            {/* <Button
               startIcon={<GetAppOutlined />}
               variant='text'
               color='primary'
@@ -192,11 +192,11 @@ export const GrievancesTable = ({
               }}
             >
               {t('Export Report')}
-            </Button>
+            </Button> */}
           </Box>
           <Box ml={5} mr={7}>
             {/* TODO: Enable Upload Tickets button */}
-            <Button
+            {/* <Button
               startIcon={<PublishOutlined />}
               variant='text'
               color='primary'
@@ -205,7 +205,7 @@ export const GrievancesTable = ({
               }}
             >
               {t('Upload Tickets')}
-            </Button>
+            </Button> */}
           </Box>
           {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
             hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (

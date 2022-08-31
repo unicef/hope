@@ -117,6 +117,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
 
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
+  const [validateData, setValidateData] = useState(false);
 
   const linkedTicketId = history.location.state?.linkedTicketId;
   const selectedHousehold = history.location.state?.selectedHousehold;
@@ -484,9 +485,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
             e.graphQLErrors.map((x) => showMessage(x.message));
           }
         } else {
+          setValidateData(false);
           handleNext();
         }
       }}
+      validateOnChange={
+        activeStep < GrievanceSteps.Verification || validateData
+      }
+      validateOnBlur={activeStep < GrievanceSteps.Verification || validateData}
       validate={(values) =>
         validateUsingSteps(
           values,
@@ -494,11 +500,19 @@ export const CreateGrievancePage = (): React.ReactElement => {
           individualFieldsDict,
           householdFieldsDict,
           activeStep,
+          setValidateData,
         )
       }
       validationSchema={validationSchemaWithSteps(activeStep)}
     >
-      {({ submitForm, values, setFieldValue, errors, touched }) => {
+      {({
+        submitForm,
+        values,
+        setFieldValue,
+        errors,
+        touched,
+        handleChange,
+      }) => {
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
@@ -541,9 +555,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               name='category'
                               label='Category*'
                               onChange={(e) => {
-                                setFieldValue('category', e.target.value);
                                 setFieldValue('issueType', null);
                                 setFieldValue('subCategory', null);
+                                handleChange(e);
                               }}
                               variant='outlined'
                               choices={
@@ -734,7 +748,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 multiline
                                 fullWidth
                                 variant='outlined'
-                                label='Description*'
+                                label={
+                                  values.issueType ===
+                                    GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
+                                  values.issueType ===
+                                    GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+                                    ? t('Withdrawal Reason*')
+                                    : t('Description*')
+                                }
                                 component={FormikTextField}
                               />
                             </Grid>
@@ -744,7 +765,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 multiline
                                 fullWidth
                                 variant='outlined'
-                                label='Comments'
+                                label={t('Comments')}
                                 component={FormikTextField}
                               />
                             </Grid>

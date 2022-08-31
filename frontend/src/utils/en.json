@@ -638,5 +638,7 @@
   "Household Questionnaire": "Household Questionnaire",
   "Individual Questionnaire": "Individual Questionnaire",
   "Birth Date": "Birth Date",
-  "Individual Full Name": "Individual Full Name"
+  "Individual Full Name": "Individual Full Name",
+  "Withdrawal Reason*": "Withdrawal Reason*",
+  "Description*": "Description*"
 }
