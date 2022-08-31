@@ -129,7 +129,6 @@ export function TargetingCriteria({
                   {t('Add')} &apos;Or&apos; {t('Filter')}
                 </Button>
               )}
-              add
               <TargetCriteriaForm
                 criteria={criteriaObject}
                 title={t('Add Filter')}
