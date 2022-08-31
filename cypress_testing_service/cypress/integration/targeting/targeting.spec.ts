@@ -1,0 +1,71 @@
+import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
+import { fillProgramForm, uniqueSeed } from '../../procedures/procedures';
+
+Given('I am authenticated', () => {
+  cy.visit('/api/unicorn/');
+  cy.get('input[name="username"]').type(Cypress.env('daUsername'));
+  cy.get('input[name="password"]').type(Cypress.env('daPassword'));
+  cy.get('input').contains('Log in').click();
+});
+
+Given('I have an active program', () => {
+  cy.visit('/');
+  cy.get('span').contains('Programme Management').click();
+  cy.get('[data-cy="button-new-program"]').click({ force: true });
+  fillProgramForm(cy);
+  cy.get('[data-cy="button-save"]').click({ force: true });
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.get('[data-cy="button-activate-program"]').click({ force: true });
+  cy.get('[data-cy="button-activate-program-modal"]').click({ force: true });
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.get('[data-cy="status-container"]').contains('ACTIVE');
+});
+
+When('I visit the main dashboard', () => {
+  cy.visit('/');
+});
+
+Then('I should see the side panel with Targeting option', () => {
+  cy.get('span').contains('Targeting', { timeout: 10000 });
+});
+
+When('I click on Targeting option', () => {
+  cy.get('span').contains('Targeting').click();
+});
+
+Then('I should see the Targeting page', () => {
+  cy.get('h5').contains('Targeting');
+});
+
+When('I click the Create New button', () => {
+  cy.get('[data-cy="button-target-population-create-new"]').click({
+    force: true,
+  });
+});
+
+Then('I should see the Create Target Population page', () => {
+  cy.get('[data-cy="input-name"]')
+    .first()
+    .find('label')
+    .contains('Enter Target Population Name');
+});
+
+When('I fill out the form fields and save', () => {
+  cy.get('[data-cy="input-name"]').first().type(`test TP ${uniqueSeed}`);
+  cy.get('[data-cy="input-program"]').first().click();
+  cy.get('[data-cy="select-option-1"]').click();
+  cy.get('[data-cy="button-target-population-add-criteria"]').click();
+  cy.get('[data-cy="button-household-rule"]').click();
+  cy.get('[data-cy="autocomplete-target-criteria"]')
+    .click()
+    .type('residence status');
+  cy.contains('Residence status').click();
+  cy.get('[data-cy="select-filters[0].value"]').click();
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.get('li')[2].click();
+  cy.get('[data-cy="button-target-population-add-criteria"]').click();
+});
+
+Then('I should see the Households table', () => {
+  cy.get('h6').contains('Households');
+});
