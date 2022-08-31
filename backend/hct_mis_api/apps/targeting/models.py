@@ -48,10 +48,10 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
-    TargetingCriteriaQueryingMixin,
-    TargetingCriteriaRuleQueryingMixin,
-    TargetingIndividualRuleFilterBlockMixin,
-    TargetingCriteriaFilterMixin,
+    TargetingCriteriaQueryingBase,
+    TargetingCriteriaRuleQueryingBase,
+    TargetingIndividualRuleFilterBlockBase,
+    TargetingCriteriaFilterBase,
 )
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -386,7 +386,7 @@ class HouseholdSelection(TimeStampedUUIDModel):
         verbose_name = "Household Selection"
 
 
-class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
+class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     """
     This is a set of ORed Rules. These are either applied for a candidate list
     (against Golden Record) or for a final list (against the approved candidate
@@ -411,7 +411,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
         return query
 
 
-class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingMixin):
+class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingBase):
     """
     This is a set of ANDed Filters.
     """
@@ -431,7 +431,7 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingM
 
 class TargetingIndividualRuleFilterBlock(
     TimeStampedUUIDModel,
-    TargetingIndividualRuleFilterBlockMixin,
+    TargetingIndividualRuleFilterBlockBase,
 ):
     targeting_criteria_rule = models.ForeignKey(
         "TargetingCriteriaRule",
@@ -444,7 +444,7 @@ class TargetingIndividualRuleFilterBlock(
         return self.individual_block_filters.all()
 
 
-class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterMixin):
+class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
     """
     This is one explicit filter like:
         :Age <> 10-20
@@ -457,7 +457,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
 
     comparison_method = models.CharField(
         max_length=20,
-        choices=TargetingCriteriaFilterMixin.COMPARISON_CHOICES,
+        choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
     )
     targeting_criteria_rule = models.ForeignKey(
         "TargetingCriteriaRule",
@@ -473,7 +473,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
     )
 
 
-class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterMixin):
+class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
     """
     This is one explicit filter like:
         :Age <> 10-20
@@ -486,7 +486,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
 
     comparison_method = models.CharField(
         max_length=20,
-        choices=TargetingCriteriaFilterMixin.COMPARISON_CHOICES,
+        choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
     )
     individuals_filters_block = models.ForeignKey(
         "TargetingIndividualRuleFilterBlock",

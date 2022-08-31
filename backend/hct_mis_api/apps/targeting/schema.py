@@ -32,17 +32,17 @@ def targeting_criteria_object_type_to_query(
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
     if not isinstance(program, Program):
         program = decode_and_get_object(program, Program, True)
-    targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin(
+    targeting_criteria_querying = target_models.TargetingCriteriaQueryingBase(
         [], excluded_household_ids=map_unicef_ids_to_households_unicef_ids(excluded_ids)
     )
     for rule in targeting_criteria_object_type.get("rules", []):
-        targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingMixin(
+        targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingBase(
             filters=[], individuals_filters_blocks=[]
         )
         for filter_dict in rule.get("filters", []):
             targeting_criteria_rule_querying.filters.append(target_models.TargetingCriteriaRuleFilter(**filter_dict))
         for individuals_filters_block_dict in rule.get("individuals_filters_blocks", []):
-            individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockMixin(
+            individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockBase(
                 [], not program.individual_data_needed
             )
             targeting_criteria_rule_querying.individuals_filters_blocks.append(individuals_filters_block)

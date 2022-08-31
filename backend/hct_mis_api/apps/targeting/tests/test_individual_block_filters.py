@@ -7,12 +7,12 @@ from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import FEMALE, MALE, Household
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
-    TargetingCriteriaQueryingMixin,
+    TargetingCriteriaQueryingBase,
     TargetingCriteriaRule,
-    TargetingCriteriaRuleQueryingMixin,
+    TargetingCriteriaRuleQueryingBase,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-    TargetingIndividualRuleFilterBlockMixin,
+    TargetingIndividualRuleFilterBlockBase,
     TargetPopulation,
 )
 
@@ -81,11 +81,11 @@ class TestIndividualBlockFilter(TestCase):
             field_name="sex",
             arguments=[MALE],
         )
-        individuals_filters_block = TargetingIndividualRuleFilterBlockMixin(
+        individuals_filters_block = TargetingIndividualRuleFilterBlockBase(
             individual_block_filters=[married_rule_filter, sex_filter], target_only_hoh=False
         )
-        tcr = TargetingCriteriaRuleQueryingMixin(filters=[], individuals_filters_blocks=[individuals_filters_block])
-        tc = TargetingCriteriaQueryingMixin(rules=[tcr])
+        tcr = TargetingCriteriaRuleQueryingBase(filters=[], individuals_filters_blocks=[individuals_filters_block])
+        tc = TargetingCriteriaQueryingBase(rules=[tcr])
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_1_indiv.id)
@@ -112,16 +112,16 @@ class TestIndividualBlockFilter(TestCase):
             field_name="sex",
             arguments=[FEMALE],
         )
-        individuals_filters_block1 = TargetingIndividualRuleFilterBlockMixin(
+        individuals_filters_block1 = TargetingIndividualRuleFilterBlockBase(
             individual_block_filters=[married_rule_filter, female_sex_filter], target_only_hoh=False
         )
-        individuals_filters_block2 = TargetingIndividualRuleFilterBlockMixin(
+        individuals_filters_block2 = TargetingIndividualRuleFilterBlockBase(
             individual_block_filters=[single_rule_filter, male_sex_filter], target_only_hoh=False
         )
-        tcr = TargetingCriteriaRuleQueryingMixin(
+        tcr = TargetingCriteriaRuleQueryingBase(
             filters=[], individuals_filters_blocks=[individuals_filters_block1, individuals_filters_block2]
         )
-        tc = TargetingCriteriaQueryingMixin(rules=[tcr])
+        tc = TargetingCriteriaQueryingBase(rules=[tcr])
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_2_indiv.id)
