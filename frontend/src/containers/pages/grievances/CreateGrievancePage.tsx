@@ -505,7 +505,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
       }
       validationSchema={validationSchemaWithSteps(activeStep)}
     >
-      {({ submitForm, values, setFieldValue, errors, touched }) => {
+      {({
+        submitForm,
+        values,
+        setFieldValue,
+        errors,
+        touched,
+        handleChange,
+      }) => {
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
@@ -548,9 +555,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               name='category'
                               label='Category*'
                               onChange={(e) => {
-                                setFieldValue('category', e.target.value);
                                 setFieldValue('issueType', null);
                                 setFieldValue('subCategory', null);
+                                handleChange(e);
                               }}
                               variant='outlined'
                               choices={
