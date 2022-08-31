@@ -80,7 +80,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     created_by = factory.SubFactory(UserFactory)
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
     updated_at = factory.LazyAttribute(lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000)))
-    status = factory.fuzzy.FuzzyChoice([TargetPopulation.STATUS_OPEN])
+    status = TargetPopulation.STATUS_OPEN
     business_area = None
 
     @factory.post_generation
