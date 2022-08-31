@@ -6,6 +6,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.targeting.celery_tasks import target_population_full_rebuild
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
@@ -17,16 +18,14 @@ from hct_mis_api.apps.targeting.models import (
 
 class TestTargetPopulationQuery(APITestCase):
     ALL_TARGET_POPULATION_QUERY = """
-            query AllTargetPopulation($finalListTotalHouseholdsMin: Int) {
-                allTargetPopulation(finalListTotalHouseholdsMin:$finalListTotalHouseholdsMin, businessArea: "afghanistan", orderBy: "created_at") {
+            query AllTargetPopulation($totalHouseholdsCountMin: Int) {
+                allTargetPopulation(totalHouseholdsCountMin:$totalHouseholdsCountMin, businessArea: "afghanistan", orderBy: "created_at") {
                     edges {
                         node {
                              name
                              status
-                            candidateListTotalHouseholds
-                            candidateListTotalIndividuals
-                            finalListTotalHouseholds
-                            finalListTotalIndividuals
+                             totalHouseholdsCount
+                             totalIndividualsCount
                         }
                     }
                 }
@@ -37,14 +36,12 @@ class TestTargetPopulationQuery(APITestCase):
           targetPopulation(id:$id){
             name
             status
-            candidateListTotalHouseholds
-            candidateListTotalIndividuals
-            finalListTotalHouseholds
-            finalListTotalIndividuals
-            candidateListTargetingCriteria{
+            totalHouseholdsCount
+            totalIndividualsCount
+            targetingCriteria{
               rules{
                 filters{
-                  comparisionMethod
+                  comparisonMethod
                   fieldName
                   isFlexField
                   arguments
@@ -52,16 +49,6 @@ class TestTargetPopulationQuery(APITestCase):
                     labelEn
                     type
                   }
-                }
-              }
-            }
-            finalListTargetingCriteria{
-              rules{
-                filters{
-                  comparisionMethod
-                  fieldName
-                  isFlexField
-                  arguments
                 }
               }
             }
@@ -89,41 +76,43 @@ class TestTargetPopulationQuery(APITestCase):
 
         cls.user = UserFactory.create()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
+            {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
         )
         cls.target_population_size_2 = TargetPopulation(
             name="target_population_size_2",
             created_by=cls.user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
             business_area=cls.business_area,
         )
         cls.target_population_size_2.save()
+        cls.target_population_size_2.full_rebuild()
+        cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["REFUGEE"], "comparision_method": "EQUALS"}
+            {"field_name": "residence_status", "arguments": ["REFUGEE"], "comparison_method": "EQUALS"}
         )
         cls.target_population_residence_status = TargetPopulation(
             name="target_population_residence_status",
             created_by=cls.user,
             business_area=cls.business_area,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
+        cls.target_population_residence_status.save()
+        cls.target_population_residence_status.full_rebuild()
         cls.target_population_residence_status.save()
 
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS"}
+            {"field_name": "size", "arguments": [1], "comparison_method": "EQUALS"}
         )
         cls.target_population_size_1_approved = TargetPopulation(
             name="target_population_size_1_approved",
             created_by=cls.user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
         )
         cls.target_population_size_1_approved.save()
-        HouseholdSelection.objects.create(
-            household=cls.household_size_1,
-            target_population=cls.target_population_size_1_approved,
-        )
+        cls.target_population_size_1_approved.full_rebuild()
+        cls.target_population_size_1_approved.save()
 
     @staticmethod
     def get_targeting_criteria_for_rule(rule_filter):
@@ -144,9 +133,9 @@ class TestTargetPopulationQuery(APITestCase):
             ),
             ("without_permission", [], {}),
             (
-                "with_permission_filter_finalListTotalHouseholdsMin",
+                "with_permission_filter_totalHouseholdsCountMin",
                 [Permissions.TARGETING_VIEW_LIST],
-                {"finalListTotalHouseholdsMin": 1},
+                {"totalHouseholdsCountMin": 1},
             ),
         ]
     )

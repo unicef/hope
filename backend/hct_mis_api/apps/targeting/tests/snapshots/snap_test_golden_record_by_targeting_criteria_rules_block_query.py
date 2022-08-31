@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test_golden_record_by_targeting_criteria_has_bank_account_info 1'] = {
@@ -102,8 +103,35 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
     'data': {
         'goldenRecordByTargetingCriteria': {
             'edges': [
+                {
+                    'node': {
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'bankAccountInfo': None,
+                                        'documents': {
+                                            'edges': [
+                                                {
+                                                    'node': {
+                                                        'type': {
+                                                            'type': 'TAX_ID'
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        'fullName': 'individual_with_tax_id',
+                                        'phoneNo': '123456789'
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 1
+                    }
+                }
             ],
-            'totalCount': 0
+            'totalCount': 1
         }
     }
 }
