@@ -62,10 +62,20 @@ When('I fill out the form fields and save', () => {
   cy.contains('Residence status').click();
   cy.get('[data-cy="select-filters[0].value"]').click();
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.get('li')[2].click();
-  cy.get('[data-cy="button-target-population-add-criteria"]').click();
+  cy.get('li').eq(2).click();
+  cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click();
 });
 
 Then('I should see the Households table', () => {
   cy.get('h6').contains('Households');
+});
+
+When('I save the Target Population', () => {
+  cy.get(
+    '[data-cy=button-target-population-create] > .MuiButton-label',
+  ).click();
+});
+
+Then('I should see the Target Population details page', () => {
+  cy.get('h6').contains('Targeting Criteria');
 });
