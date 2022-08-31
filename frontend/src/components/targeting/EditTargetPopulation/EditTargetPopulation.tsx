@@ -176,10 +176,10 @@ export function EditTargetPopulation({
             <Exclusions initialOpen={Boolean(values.excludedIds)} />
             <PaperContainer>
               <Typography variant='h6'>
-                {t('Save to see list of households')}
+                {t('Save to see the list of households')}
               </Typography>
               <Label>
-                {t('List of household will be available after save.')}
+                {t('List of households will be available after save.')}
               </Label>
             </PaperContainer>
           </Form>
