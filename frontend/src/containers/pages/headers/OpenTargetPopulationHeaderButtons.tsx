@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Box, Button } from '@material-ui/core';
-import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
-import { TargetPopulationNode } from '../../../__generated__/graphql';
+import {
+  EditRounded,
+  Delete,
+  FileCopy,
+  RefreshRounded,
+} from '@material-ui/icons';
+import {
+  TargetPopulationQuery,
+  useRebuildTpMutation,
+} from '../../../__generated__/graphql';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { ApproveCandidateList } from '../../dialogs/targetPopulation/ApproveCandidateList';
+import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
 
 const IconContainer = styled.span`
   button {
@@ -19,7 +27,7 @@ const IconContainer = styled.span`
 `;
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
   setEditState: Function;
   canDuplicate: boolean;
   canRemove: boolean;
@@ -27,7 +35,7 @@ export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   canLock: boolean;
 }
 
-export const InProgressTargetPopulationHeaderButtons = ({
+export const OpenTargetPopulationHeaderButtons = ({
   targetPopulation,
   setEditState,
   canDuplicate,
@@ -38,6 +46,11 @@ export const InProgressTargetPopulationHeaderButtons = ({
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+
+  const [
+    rebuildTargetPopulation,
+    { loading: rebuildTargetPopulationLoading },
+  ] = useRebuildTpMutation();
   return (
     <Box display='flex' alignItems='center'>
       {canDuplicate && (
@@ -69,6 +82,23 @@ export const InProgressTargetPopulationHeaderButtons = ({
           </Button>
         </Box>
       )}
+      {canEdit && (
+        <Box m={2}>
+          <Button
+            variant='outlined'
+            color='primary'
+            disabled={rebuildTargetPopulationLoading}
+            startIcon={<RefreshRounded />}
+            onClick={() =>
+              rebuildTargetPopulation({
+                variables: { id: targetPopulation.id },
+              })
+            }
+          >
+            Rebuild
+          </Button>
+        </Box>
+      )}
       {canLock && (
         <Box m={2}>
           <Button
@@ -91,7 +121,7 @@ export const InProgressTargetPopulationHeaderButtons = ({
         setOpen={setOpenDelete}
         targetPopulationId={targetPopulation.id}
       />
-      <ApproveCandidateList
+      <LockTargetPopulationDialog
         open={openApprove}
         setOpen={setOpenApprove}
         targetPopulationId={targetPopulation.id}
