@@ -2611,6 +2611,7 @@ type PaymentNode implements Node {
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
   paymentPlanSoftConflicted: Boolean
   paymentPlanSoftConflictedData: [PaymentConflictDataNode]
+  hasPaymentChannel: Boolean
 }
 
 type PaymentNodeConnection {

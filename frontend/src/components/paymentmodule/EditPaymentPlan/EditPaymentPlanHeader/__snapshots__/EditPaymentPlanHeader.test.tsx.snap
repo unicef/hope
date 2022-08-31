@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
+exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
 <div>
   <div
     class="sc-bxivhb ixnywI"
@@ -35,7 +35,7 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
             >
               <a
                 class="sc-bdVaJa eFfWno"
-                href="/afghanistan/payment-module/"
+                href="/afghanistan/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
               >
                 Payment Module
               </a>
@@ -47,10 +47,30 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
             <h5
               class="MuiTypography-root MuiTypography-h5"
             >
-              New Payment Plan
+              <div
+                class="MuiBox-root MuiBox-root-2"
+              >
+                Payment Plan
+                 ID 
+                PP-0060-22-00000001
+                <div
+                  class="sc-gqjmRU bKymfA"
+                >
+                  <div
+                    class="sc-iwsKbI dUmvrG"
+                  >
+                    <div
+                      class="sc-gZMcBi iKWapA"
+                      data-cy="status-container"
+                    >
+                      In Authorization
+                    </div>
+                  </div>
+                </div>
+              </div>
             </h5>
             <div
-              class="MuiBox-root MuiBox-root-2"
+              class="MuiBox-root MuiBox-root-3"
             />
           </div>
         </div>
@@ -58,15 +78,15 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
           class="sc-bZQynM jdkaLI"
         >
           <div
-            class="MuiBox-root MuiBox-root-3"
+            class="MuiBox-root MuiBox-root-4"
           >
             <div
-              class="MuiBox-root MuiBox-root-4"
+              class="MuiBox-root MuiBox-root-5"
             >
               <a
                 aria-disabled="false"
                 class="MuiButtonBase-root MuiButton-root MuiButton-text"
-                href="/afghanistan/payment-module"
+                href="/afghanistan/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
                 role="button"
                 tabindex="0"
               >

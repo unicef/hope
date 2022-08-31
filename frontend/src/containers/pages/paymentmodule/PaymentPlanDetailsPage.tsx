@@ -53,7 +53,11 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
         </>
       )}
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-      <PaymentsTable businessArea={businessArea} paymentPlan={paymentPlan} />
+      <PaymentsTable
+        businessArea={businessArea}
+        paymentPlan={paymentPlan}
+        canViewDetails
+      />
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={paymentPlan.id} />
       )}

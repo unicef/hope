@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
+exports[`components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader should render 1`] = `
 <div>
   <div
     class="sc-bxivhb ixnywI"
@@ -35,7 +35,7 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
             >
               <a
                 class="sc-bdVaJa eFfWno"
-                href="/afghanistan/payment-module/"
+                href="/afghanistan/payment-module/payment-plans/undefined"
               >
                 Payment Module
               </a>
@@ -47,7 +47,7 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
             <h5
               class="MuiTypography-root MuiTypography-h5"
             >
-              New Payment Plan
+              Set up FSP
             </h5>
             <div
               class="MuiBox-root MuiBox-root-2"
@@ -56,46 +56,7 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
         </div>
         <div
           class="sc-bZQynM jdkaLI"
-        >
-          <div
-            class="MuiBox-root MuiBox-root-3"
-          >
-            <div
-              class="MuiBox-root MuiBox-root-4"
-            >
-              <a
-                aria-disabled="false"
-                class="MuiButtonBase-root MuiButton-root MuiButton-text"
-                href="/afghanistan/payment-module"
-                role="button"
-                tabindex="0"
-              >
-                <span
-                  class="MuiButton-label"
-                >
-                  Cancel
-                </span>
-                <span
-                  class="MuiTouchRipple-root"
-                />
-              </a>
-            </div>
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                Save
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
-          </div>
-        </div>
+        />
       </div>
     </div>
     <div

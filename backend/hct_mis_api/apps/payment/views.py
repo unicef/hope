@@ -1,9 +1,10 @@
 import logging
 
+from graphql import GraphQLError
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -47,8 +48,30 @@ def download_payment_plan_payment_list(request, payment_plan_id):
         logger.error("Permission Denied: User does not have correct permission.")
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
-    if payment_plan.has_payment_plan_payment_list_xlsx_file:
-        return redirect(payment_plan.xlsx_payment_plan_payment_list_file_link)
+    if payment_plan.has_payment_list_xlsx_file:
+        return redirect(payment_plan.xlsx_payment_list_file_link)
     else:
-        logger.error(f"File not found. CashPlanPaymentVerification ID: {payment_plan_id}")
+        logger.error(f"File not found. PaymentPlan ID: {payment_plan_id}")
+        raise GraphQLError("File not found")
+
+
+@login_required
+def download_payment_plan_payment_list_per_fsp(request, payment_plan_id):
+    payment_plan_id = decode_id_string(payment_plan_id)
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+
+    if not request.user.has_permission(
+        Permissions.PAYMENT_MODULE_VIEW_LIST.value, payment_plan.business_area
+    ):
+        logger.error("Permission Denied: User does not have correct permission.")
+        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+
+    if payment_plan.status != PaymentPlan.Status.ACCEPTED:
+        logger.error("Export XLSX is possible only for Payment Plan within status ACCEPTED.")
+        raise GraphQLError("Export XLSX is possible only for Payment Plan within status ACCEPTED.")
+
+    if payment_plan.has_payment_list_per_fsp_xlsx_file:
+        return redirect(payment_plan.xlsx_payment_list_per_fsp_file_link)
+    else:
+        logger.error(f"File not found. PaymentPlan ID: {payment_plan_id}")
         raise GraphQLError("File not found")

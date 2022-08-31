@@ -2,7 +2,7 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
-import { fakeApolloAllCashPlansPaymentVerification } from '../../../../../fixtures/payments/fakeApolloAllCashPlansPaymentVerification';
+import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
 import { PaymentPlansTable } from './PaymentPlansTable';
 
@@ -11,7 +11,7 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
-        mocks={fakeApolloAllCashPlansPaymentVerification}
+        mocks={fakeApolloAllPaymentPlansForTable}
       >
         <PaymentPlansTable
           canViewDetails={false}
@@ -25,12 +25,12 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('should render loading', () => {
+  it('should render loading', async () => {
     const { container } = render(
       <MockedProvider
         link={new ApolloLoadingLink()}
         addTypename={false}
-        mocks={fakeApolloAllCashPlansPaymentVerification}
+        mocks={fakeApolloAllPaymentPlansForTable}
       >
         <PaymentPlansTable
           canViewDetails={false}
@@ -39,6 +39,7 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
         />
       </MockedProvider>,
     );
+    await act(() => wait(0)); // wait for response
 
     expect(container).toMatchSnapshot();
   });

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
+exports[`components/paymentmodule/FspPlanDetails/FspHeader should render 1`] = `
 <div>
   <div
     class="sc-bxivhb ixnywI"
@@ -47,7 +47,7 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
             <h5
               class="MuiTypography-root MuiTypography-h5"
             >
-              New Payment Plan
+              Set up FSP
             </h5>
             <div
               class="MuiBox-root MuiBox-root-2"
@@ -65,35 +65,35 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
             >
               <a
                 aria-disabled="false"
-                class="MuiButtonBase-root MuiButton-root MuiButton-text"
-                href="/afghanistan/payment-module"
+                class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary"
+                href="/afghanistan/fsp/"
                 role="button"
                 tabindex="0"
               >
                 <span
                   class="MuiButton-label"
                 >
-                  Cancel
+                  <span
+                    class="MuiButton-startIcon MuiButton-iconSizeMedium"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M3 17.46v3.04c0 .28.22.5.5.5h3.04c.13 0 .26-.05.35-.15L17.81 9.94l-3.75-3.75L3.15 17.1c-.1.1-.15.22-.15.36zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                      />
+                    </svg>
+                  </span>
+                  Edit
                 </span>
                 <span
                   class="MuiTouchRipple-root"
                 />
               </a>
             </div>
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiButton-label"
-              >
-                Save
-              </span>
-              <span
-                class="MuiTouchRipple-root"
-              />
-            </button>
           </div>
         </div>
       </div>

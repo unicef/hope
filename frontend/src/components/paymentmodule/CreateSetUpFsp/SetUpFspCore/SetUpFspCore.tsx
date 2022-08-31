@@ -20,12 +20,20 @@ import { DeliveryMechanismWarning } from '../../EditSetUpFsp/DeliveryMechanismWa
 import { DeliveryMechanismRow } from '../DeliveryMechanismRow';
 import { SetUpFspButtonActions } from '../SetUpFspButtonActions/SetUpFspButtonActions';
 
+
+export interface FormValues {
+  deliveryMechanisms: {
+    deliveryMechanism: string;
+    fsp: string;
+  }[];
+}
+
 interface SetUpFspCoreProps {
   businessArea: string;
   permissions: string[];
-  initialValues;
-  setDeliveryMechanismsForQuery;
-  deliveryMechanismsForQuery;
+  initialValues: FormValues;
+  setDeliveryMechanismsForQuery: (deliveryMechanisms: string[]) => void;
+  deliveryMechanismsForQuery: string[];
 }
 
 export const SetUpFspCore = ({
@@ -84,7 +92,7 @@ export const SetUpFspCore = ({
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
-  const handleChooseDeliveryMechanisms = async (values): Promise<void> => {
+  const handleChooseDeliveryMechanisms = async (values: FormValues): Promise<void> => {
     setWarning('');
     const mappedDeliveryMechanisms = values.deliveryMechanisms.map(
       (el) => el.deliveryMechanism,
@@ -113,7 +121,7 @@ export const SetUpFspCore = ({
     }
   };
 
-  const handleAssignFspToDeliveryMechanism = async (values): Promise<void> => {
+  const handleAssignFspToDeliveryMechanism = async (values: FormValues): Promise<void> => {
     const mappings = values.deliveryMechanisms.map((el, index) => ({
       fspId: el.fsp,
       deliveryMechanism: el.deliveryMechanism,
@@ -138,7 +146,7 @@ export const SetUpFspCore = ({
     }
   };
 
-  const handleSubmit = (values): void => {
+  const handleSubmit = (values: FormValues): void => {
     if (activeStep === 0) {
       handleChooseDeliveryMechanisms(values);
     }
@@ -175,7 +183,7 @@ export const SetUpFspCore = ({
                   render={(arrayHelpers) => {
                     return (
                       <>
-                        {values.deliveryMechanisms.map((item, index) => {
+                        {values.deliveryMechanisms.map((item, index: number) => {
                           const mapping =
                             paymentPlanData?.paymentPlan
                               ?.availableFspsForDeliveryMechanisms[index];

@@ -268,13 +268,13 @@ class TestFSPSetup(APITestCase):
 
     def test_being_able_to_get_possible_delivery_mechanisms(self):
         query = """
-query AllDeliveryMechanisms {
-    allDeliveryMechanisms {
-        name
-        value
-    }
-}
-"""
+            query AllDeliveryMechanisms {
+                allDeliveryMechanisms {
+                    name
+                    value
+                }
+            }
+        """
         response = self.graphql_request(request_string=query, context={"user": self.user})
         assert response is not None and "data" in response
         all_delivery_mechanisms = response["data"]["allDeliveryMechanisms"]
@@ -823,23 +823,23 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         assert "errors" not in choose_dms_response, choose_dms_response
 
         GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY = """
-query PaymentPlan($paymentPlanId: ID!) {
-    paymentPlan(id: $paymentPlanId) {
-        volumeByDeliveryMechanism {
-            deliveryMechanism {
-                name
-                order
-                fsp {
-                    id
+            query PaymentPlan($paymentPlanId: ID!) {
+                paymentPlan(id: $paymentPlanId) {
+                    volumeByDeliveryMechanism {
+                        deliveryMechanism {
+                            name
+                            order
+                            fsp {
+                                id
+                            }
+                        }
+                        volume
+                        volumeUsd
+                    }
                 }
             }
-            volume
-            volumeUsd
-        }
-    }
-}
-
-"""
+            
+        """
 
         too_early_get_volume_by_delivery_mechanism_response = self.graphql_request(
             request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,
