@@ -1,10 +1,6 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "hope.fullname" . -}}
-{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- else -}}
-apiVersion: extensions/v1beta1
-{{- end }}
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -27,14 +23,17 @@ spec:
         paths:
         - path: /api/*
           backend:
-            serviceName: {{ $fullName }}-backend
-            servicePort: {{ .Values.backend.service.port }}
+            service:
+              name: {{ $fullName }}-backend
+              port: {{ .Values.backend.service.port }}
         - path: /flower/*
           backend: 
-            serviceName: {{ include "hope.fullname" . }}-celery-flower
-            servicePort: {{ .Values.celeryflower.service.port }}
+            service:
+              name: {{ include "hope.fullname" . }}-celery-flower
+              port: {{ .Values.celeryflower.service.port }}
         - path: /
           backend:
-            serviceName: {{ $fullName }}-frontend
-            servicePort: {{ .Values.frontend.service.port }}
+            service:
+              name: {{ $fullName }}-frontend
+              port: {{ .Values.frontend.service.port }}
 {{- end }}
