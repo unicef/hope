@@ -2,6 +2,7 @@ import { Box } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
 import { UniversalMoment } from '../../../core/UniversalMoment';
+import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { MessageDialog } from './MessageDialog';
 
 const GreyText = styled.div`
@@ -22,21 +23,23 @@ const IconPlaceholder = styled.div`
 const GreyBox = styled(Box)`
   background-color: #f4f5f6;
 `;
+
 interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
-  actions;
+  approvals: PaymentPlanQuery["paymentPlan"]["approvalProcess"]["edges"][number]["node"]["actions"]["approval"];
 }
+
 export const GreyInfoCard = ({
   topMessage,
   topDate,
-  actions,
+  approvals,
 }: GreyInfoCardProps): React.ReactElement => {
-  const mappedActions = actions.map((action) => {
+  const mappedApprovals = approvals.map((action) => {
     const { info, createdAt, comment, createdBy } = action;
     return (
       info && (
-        <Box alignItems='center' display='flex'>
+        <Box alignItems='center' display='flex' key={createdAt}>
           {info}
           <Box ml={1}>
             <GreyText>
@@ -74,7 +77,7 @@ export const GreyInfoCard = ({
         mr={3}
         p={3}
       >
-        {mappedActions}
+        {mappedApprovals}
       </GreyBox>
     </Box>
   );
