@@ -1,5 +1,8 @@
 import * as Yup from 'yup';
-import { GrievanceSteps, GRIEVANCE_ISSUE_TYPES } from '../../../utils/constants';
+import {
+  GrievanceSteps,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../../utils/constants';
 
 export const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
@@ -51,7 +54,5 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
     datum.consent = Yup.bool().oneOf([true], 'Consent is required');
   }
 
-  const validationSchema3 = Yup.object().shape(datum);
-
-  return validationSchema3;
+  return Yup.object().shape(datum);
 };
