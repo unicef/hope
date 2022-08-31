@@ -4,15 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { Title } from '../../../core/Title';
 
-interface TotalAmountProps {
-  businessArea: string;
-  permissions: string[];
-}
-
-export function TotalAmount({
-  businessArea,
-  permissions,
-}: TotalAmountProps): React.ReactElement {
+export function TotalAmount(): React.ReactElement {
   const { t } = useTranslation();
 
   return (
