@@ -35,6 +35,7 @@ class PaymentPlanService:
             PaymentPlan.Action.LOCK.value: self.lock,
             PaymentPlan.Action.LOCK_FSP.value: self.lock_fsp,
             PaymentPlan.Action.UNLOCK.value: self.unlock,
+            PaymentPlan.Action.UNLOCK_FSP.value: self.unlock_fsp,
             PaymentPlan.Action.SEND_FOR_APPROVAL.value: self.send_for_approval,
             # use the same method for Approve, Authorize, Finance Review and Reject
             PaymentPlan.Action.APPROVE.value: self.acceptance_process,
@@ -106,8 +107,21 @@ class PaymentPlanService:
 
         return self.payment_plan
 
+    def unlock(self):
+        # TODO: clear FSP
+        # TODO: clear entitlements
+
+        self.payment_plan.payments.all().update(excluded=False)
+        self.payment_plan.status_unlock()
+        self.payment_plan.update_population_count_fields()
+        self.payment_plan.update_money_fields()
+
+        self.payment_plan.save()
+
+        return self.payment_plan
+
     def lock_fsp(self):
-        # TODO: validation?
+        # TODO: cant lock FSP if no FSP choices
 
         # set all payments with money expected to be delivered
 
@@ -116,12 +130,9 @@ class PaymentPlanService:
 
         return self.payment_plan
 
-    def unlock(self):
-        self.payment_plan.payments.all().update(excluded=False)
-        self.payment_plan.status_unlock()
-        self.payment_plan.update_population_count_fields()
-        self.payment_plan.update_money_fields()
-
+    def unlock_fsp(self):
+        # TODO: clear payment FSPs?
+        self.payment_plan.status_unlock_fsp()
         self.payment_plan.save()
 
         return self.payment_plan

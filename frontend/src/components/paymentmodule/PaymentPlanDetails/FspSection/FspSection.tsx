@@ -2,7 +2,10 @@ import { Box, Button, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import {
+  PaymentPlanQuery,
+  PaymentPlanStatus,
+} from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { DividerLine } from '../../../core/DividerLine';
 import { LabelizedField } from '../../../core/LabelizedField';
@@ -32,14 +35,16 @@ export const FspSection = ({
           mt={4}
         >
           <Typography variant='h6'>{t('FSPs')}</Typography>
-          <Button
-            color='primary'
-            variant='contained'
-            component={Link}
-            to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp/edit`}
-          >
-            {t('Edit FSP')}
-          </Button>
+          {paymentPlan.status === PaymentPlanStatus.Locked && (
+            <Button
+              color='primary'
+              variant='contained'
+              component={Link}
+              to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp/edit`}
+            >
+              {t('Edit FSP')}
+            </Button>
+          )}
         </Box>
         <Grid container spacing={3}>
           {deliveryMechanisms.map((el) => (

@@ -226,6 +226,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         LOCK = "LOCK", "Lock"
         LOCK_FSP = "LOCK_FSP", "Lock FSP"
         UNLOCK = "UNLOCK", "Unlock"
+        UNLOCK_FSP = "UNLOCK_FSP", "Unlock FSP"
         SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL", "Send For Approval"
         APPROVE = "APPROVE", "Approve"
         AUTHORIZE = "AUTHORIZE", "Authorize"
@@ -285,6 +286,14 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         target=Status.OPEN,
     )
     def status_unlock(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.LOCKED_FSP,
+        target=Status.LOCKED,
+    )
+    def status_unlock_fsp(self):
         self.status_date = timezone.now()
 
     @transition(
