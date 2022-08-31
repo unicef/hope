@@ -10,8 +10,10 @@
 # once we have all, the payment plan is reconciliated
 # once this is done, FSP (with limit) may be used in another payment plan
 
-
+from datetime import timedelta
+from django.utils import timezone
 from unittest.mock import patch
+
 from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.payment.celery_tasks import payment_plan_apply_steficon
 from hct_mis_api.apps.core.utils import encode_id_base64
@@ -319,12 +321,11 @@ class TestPaymentPlanReconciliation(APITestCase):
                     "startDate": "2022-08-24",
                     "endDate": "2022-08-31",
                     "dispersionStartDate": "2022-08-24",
-                    "dispersionEndDate": "2022-08-31",
+                    "dispersionEndDate": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
                     "currency": "USD",
                 }
             },
         )
-
         assert "errors" not in create_payment_plan_response, create_payment_plan_response
         encoded_payment_plan_id = create_payment_plan_response["data"]["createPaymentPlan"]["paymentPlan"]["id"]
 
