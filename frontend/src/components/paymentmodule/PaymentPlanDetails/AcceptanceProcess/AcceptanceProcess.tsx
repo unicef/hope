@@ -24,9 +24,7 @@ export const AcceptanceProcess = ({
   const { edges } = paymentPlan.approvalProcess;
   const [showAll, setShowAll] = useState(false);
 
-  const matchDataSize = (
-    data,
-  ): PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'] => {
+  const matchDataSize = (data: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges']): PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'] => {
     return showAll ? data : [data[0]];
   };
 
