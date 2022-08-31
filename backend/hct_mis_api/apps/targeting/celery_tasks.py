@@ -17,18 +17,6 @@ from ..targeting.models import HouseholdSelection, TargetPopulation
 logger = logging.getLogger(__name__)
 
 
-@contextmanager
-def locked_cache(key, blocking_timeout=30, timeout=60 * 60 * 24):
-    try:
-        with cache.lock(key, blocking_timeout=blocking_timeout, timeout=timeout) as lock:
-            yield
-    except LockError as e:
-        logger.exception(f"Couldn't lock cache for key '{key}'. Failed with: {e}")
-    else:
-        if lock.locked():
-            lock.release()
-
-
 @app.task(queue="priority")
 @sentry_tags
 def target_population_apply_steficon(target_population_id):
