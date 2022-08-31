@@ -49,7 +49,7 @@ export const LockedFspPaymentPlanHeaderButtons = ({
             color='primary'
             onClick={() => unlock()}
           >
-            {t('Unlock FSPs')}
+            {t('Unlock FSP')}
           </LoadingButton>
         </Box>
       )}
