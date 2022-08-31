@@ -26,7 +26,7 @@ from hct_mis_api.apps.household.models import (
 logger = logging.getLogger(__name__)
 
 
-class TargetingCriteriaQueryingMixin:
+class TargetingCriteriaQueryingBase:
     """
     Whole query is built here
     this mixin connects OR blocks
@@ -69,7 +69,7 @@ class TargetingCriteriaQueryingMixin:
         return self.get_basic_query() & Q(query)
 
 
-class TargetingCriteriaRuleQueryingMixin:
+class TargetingCriteriaRuleQueryingBase:
     """
     Gets query for single block
     combines individual filters block with household filters
@@ -112,7 +112,7 @@ class TargetingCriteriaRuleQueryingMixin:
         return query
 
 
-class TargetingIndividualRuleFilterBlockMixin:
+class TargetingIndividualRuleFilterBlockBase:
     def __init__(self, individual_block_filters=None, target_only_hoh=None):
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
@@ -160,7 +160,7 @@ class TargetingIndividualRuleFilterBlockMixin:
 
 
 
-class TargetingCriteriaFilterMixin:
+class TargetingCriteriaFilterBase:
     COMPARISON_ATTRIBUTES = {
         "EQUALS": {
             "arguments": 1,
@@ -247,7 +247,7 @@ class TargetingCriteriaFilterMixin:
         field_attr,
     ):
         select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
-        comparison_attribute = TargetingCriteriaFilterMixin.COMPARISON_ATTRIBUTES.get(self.comparison_method)
+        comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)
         args_count = comparison_attribute.get("arguments")
         if self.arguments is None:
             logger.error(f"{self.field_name} {self.comparison_method} filter query expect {args_count} " f"arguments")
