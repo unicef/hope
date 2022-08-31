@@ -14,3 +14,5 @@ Feature: Targeting
         Then I should see the Create Target Population page
         When I fill out the form fields and save
         Then I should see the Households table
+        When I save the Target Population
+        Then I should see the Target Population details page
