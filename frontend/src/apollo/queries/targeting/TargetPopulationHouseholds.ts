@@ -1,26 +1,22 @@
 import { gql } from 'apollo-boost';
 
-export const FinalHouseholdsListByTargetingCriteria = gql`
-  query FinalHouseholdsListByTargetingCriteria(
+export const TargetPopulationHouseholds = gql`
+  query TargetPopulationHouseholds(
     $targetPopulation: ID!
-    $targetingCriteria: TargetingCriteriaObjectType
     $first: Int
     $after: String
     $before: String
     $last: Int
     $orderBy: String
-    $excludedIds: String!
     $businessArea: String
   ) {
-    finalHouseholdsListByTargetingCriteria(
+    targetPopulationHouseholds(
       targetPopulation: $targetPopulation
-      targetingCriteria: $targetingCriteria
       after: $after
       before: $before
       first: $first
       last: $last
       orderBy: $orderBy
-      excludedIds: $excludedIds
       businessArea: $businessArea
     ) {
       edges {
@@ -31,6 +27,7 @@ export const FinalHouseholdsListByTargetingCriteria = gql`
             id
             givenName
             familyName
+            fullName
           }
           size
           adminArea {

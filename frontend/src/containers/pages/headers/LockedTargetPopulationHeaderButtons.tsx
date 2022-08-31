@@ -6,8 +6,8 @@ import styled from 'styled-components';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
-  TargetPopulationNode,
-  useUnapproveTpMutation,
+  TargetPopulationQuery,
+  useUnlockTpMutation,
 } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
@@ -24,13 +24,13 @@ const IconContainer = styled.span`
 `;
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
   canUnlock: boolean;
   canDuplicate: boolean;
   canSend: boolean;
 }
 
-export const ApprovedTargetPopulationHeaderButtons = ({
+export const LockedTargetPopulationHeaderButtons = ({
   targetPopulation,
   canSend,
   canDuplicate,
@@ -40,7 +40,7 @@ export const ApprovedTargetPopulationHeaderButtons = ({
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useUnapproveTpMutation();
+  const [mutate, { loading }] = useUnlockTpMutation();
 
   return (
     <Box display='flex' alignItems='center'>
@@ -102,7 +102,7 @@ export const ApprovedTargetPopulationHeaderButtons = ({
         open={openFinalize}
         setOpen={setOpenFinalize}
         targetPopulationId={targetPopulation.id}
-        totalHouseholds={targetPopulation.finalListTotalHouseholds}
+        totalHouseholds={targetPopulation.totalHouseholdsCount}
       />
     </Box>
   );

@@ -2,8 +2,8 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
-import { ApprovedTargetPopulationTable } from '.';
-import { fakeApolloCandidateHouseholdsListByTargetingCriteria } from '../../../../../../fixtures/targeting/fakeApolloCandidateHouseholdsListByTargetingCriteria';
+import { LockedTargetPopulationTable } from '.';
+import { fakeApolloTargetPopulationHouseholds } from '../../../../../../fixtures/targeting/fakeApolloCandidateHouseholdsListByTargetingCriteria';
 import { ApolloLoadingLink, render } from '../../../../../testUtils/testUtils';
 
 describe('containers/tables/targeting/TargetPopulation/ApprovedTargeting', () => {
@@ -11,13 +11,11 @@ describe('containers/tables/targeting/TargetPopulation/ApprovedTargeting', () =>
     const { container } = render(
       <MockedProvider
         addTypename={false}
-        mocks={fakeApolloCandidateHouseholdsListByTargetingCriteria}
+        mocks={fakeApolloTargetPopulationHouseholds}
       >
-        <ApprovedTargetPopulationTable
-          id={
-            'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZDYzNWQ0ZDMtNGI1My00MTVkLTkzZWYtNjFlODhjZDg0MWMy'
-          }
-          canViewDetails={true}
+        <LockedTargetPopulationTable
+          id='VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZDYzNWQ0ZDMtNGI1My00MTVkLTkzZWYtNjFlODhjZDg0MWMy'
+          canViewDetails
         />
       </MockedProvider>,
     );
@@ -31,13 +29,11 @@ describe('containers/tables/targeting/TargetPopulation/ApprovedTargeting', () =>
       <MockedProvider
         link={new ApolloLoadingLink()}
         addTypename={false}
-        mocks={fakeApolloCandidateHouseholdsListByTargetingCriteria}
+        mocks={fakeApolloTargetPopulationHouseholds}
       >
-        <ApprovedTargetPopulationTable
-          id={
-            'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZDYzNWQ0ZDMtNGI1My00MTVkLTkzZWYtNjFlODhjZDg0MWMy'
-          }
-          canViewDetails={true}
+        <LockedTargetPopulationTable
+          id='VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZDYzNWQ0ZDMtNGI1My00MTVkLTkzZWYtNjFlODhjZDg0MWMy'
+          canViewDetails
         />
       </MockedProvider>,
     );

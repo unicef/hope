@@ -6,6 +6,7 @@ from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
@@ -22,33 +23,43 @@ class TargetValidator(BaseValidator):
         if target_status == "FINALIZED":
             logger.error("Target Population has been finalized. Cannot change.")
             raise ValidationError("Target Population has been finalized. Cannot change.")
-
-
-class ApproveTargetPopulationValidator:
+class RebuildTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
-        if target_population.status != "DRAFT":
-            logger.error("Only Target Population with status DRAFT can be approved")
-            raise ValidationError("Only Target Population with status DRAFT can be approved")
+        if target_population.status != TargetPopulation.STATUS_OPEN:
+            message = f"Only Target Population with status {TargetPopulation.STATUS_OPEN} can be rebuild"
+            logger.error(message)
+            raise ValidationError(message)
 
-
-class UnapproveTargetPopulationValidator:
+class LockTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
-        if target_population.status != "LOCKED":
-            logger.error("Only Target Population with status APPROVED can be unapproved")
-            raise ValidationError("Only Target Population with status APPROVED can be unapproved")
+        if target_population.status != TargetPopulation.STATUS_OPEN:
+            message = f"Only Target Population with status {TargetPopulation.STATUS_OPEN} can be approved"
+            logger.error(message)
+            raise ValidationError(message)
+
+
+class UnlockTargetPopulationValidator:
+    @staticmethod
+    def validate(target_population: TargetPopulation):
+        if not target_population.is_locked():
+            message = f"Only locked Target Population with status can be unlocked"
+            logger.error(message)
+            raise ValidationError(message)
 
 
 class FinalizeTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
-        if not target_population.is_approved():
-            logger.error("Only Target Population with status APPROVED can be finalized")
-            raise ValidationError("Only Target Population with status APPROVED can be finalized")
-        if target_population.program.status != "ACTIVE":
-            logger.error("Only Target Population assigned to program with status ACTIVE can be send")
-            raise ValidationError("Only Target Population assigned to program with status ACTIVE can be send")
+        if not target_population.is_locked():
+            message = f"Only locked Target Population with status can be finalized"
+            logger.error(message)
+            raise ValidationError(message)
+        if target_population.program.status != Program.ACTIVE:
+            message = f"Only Target Population assigned to program with status {Program.ACTIVE} can be send"
+            logger.error(message)
+            raise ValidationError(message)
 
 
 class TargetingCriteriaRuleFilterInputValidator:
@@ -73,11 +84,11 @@ class TargetingCriteriaRuleFilterInputValidator:
                 raise ValidationError(
                     f"Can't find any flex field attribute associated with {rule_filter.field_name} field name"
                 )
-        comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(rule_filter.comparision_method)
-        if comparision_attribute is None:
-            logger.error(f"Unknown comparision method - {rule_filter.comparision_method}")
-            raise ValidationError(f"Unknown comparision method - {rule_filter.comparision_method}")
-        args_count = comparision_attribute.get("arguments")
+        comparison_attribute = TargetingCriteriaRuleFilter.COMPARISON_ATTRIBUTES.get(rule_filter.comparison_method)
+        if comparison_attribute is None:
+            logger.error(f"Unknown comparison method - {rule_filter.comparison_method}")
+            raise ValidationError(f"Unknown comparison method - {rule_filter.comparison_method}")
+        args_count = comparison_attribute.get("arguments")
         given_args_count = len(rule_filter.arguments)
         select_many = get_attr_value("type", attribute) == "SELECT_MANY"
         if select_many:
@@ -90,21 +101,21 @@ class TargetingCriteriaRuleFilterInputValidator:
                 )
         elif given_args_count != args_count:
             logger.error(
-                f"Comparision method - {rule_filter.comparision_method} "
+                f"Comparison method - {rule_filter.comparison_method} "
                 f"expect {args_count} arguments, {given_args_count} given"
             )
             raise ValidationError(
-                f"Comparision method - {rule_filter.comparision_method} "
+                f"Comparison method - {rule_filter.comparison_method} "
                 f"expect {args_count} arguments, {given_args_count} given"
             )
-        if get_attr_value("type", attribute) not in comparision_attribute.get("supported_types"):
+        if get_attr_value("type", attribute) not in comparison_attribute.get("supported_types"):
             logger.error(
                 f"{rule_filter.field_name} is {get_attr_value('type', attribute)} type filter "
-                f"and does not accept - {rule_filter.comparision_method} comparision method"
+                f"and does not accept - {rule_filter.comparison_method} comparison method"
             )
             raise ValidationError(
                 f"{rule_filter.field_name} is {get_attr_value( 'type', attribute)} type filter "
-                f"and does not accept - {rule_filter.comparision_method} comparision method"
+                f"and does not accept - {rule_filter.comparison_method} comparison method"
             )
 
 

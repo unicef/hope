@@ -2,7 +2,7 @@ import { TargetPopulationStatus } from '../__generated__/graphql';
 
 export const TARGETING_STATES = {
   NONE: 'None',
-  [TargetPopulationStatus.Draft]: 'Open',
+  [TargetPopulationStatus.Open]: 'Open',
   [TargetPopulationStatus.Locked]: 'Locked',
   [TargetPopulationStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
   [TargetPopulationStatus.Processing]: 'Processing',
