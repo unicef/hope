@@ -358,7 +358,7 @@ class GenerateReportContentHelpers:
             filter_vars["household__paymentrecord__cash_plan__program"] = report.program
 
         return (
-            Individual.objects.exclude(household__isnull=True).filter(**filter_vars)
+            Individual.objects.filter(**filter_vars)
             .annotate(first_delivery_date=Min("household__paymentrecord__delivery_date"))
             .annotate(last_delivery_date=Max("household__paymentrecord__delivery_date"))
             .annotate(
