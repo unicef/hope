@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/paymentmodule/EditSetUpFspHeader should render 1`] = `
+exports[`components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader should render 1`] = `
 <div>
   <div
     class="sc-bxivhb ixnywI"
