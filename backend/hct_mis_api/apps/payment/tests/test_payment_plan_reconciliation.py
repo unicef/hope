@@ -1,37 +1,20 @@
-# scenario:
-# targeting is there
-# payment plan is created
-# locked
-# entitlements calculated
-# FSPs set
-# FSP locked
-# payments have FSPs assigned
-# we receive reconciliations from FSPs
-# once we have all, the payment plan is reconciliated
-# once this is done, FSP (with limit) may be used in another payment plan
-
 from datetime import timedelta
 from django.utils import timezone
 from unittest.mock import patch
 
-from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
-from hct_mis_api.apps.payment.celery_tasks import payment_plan_apply_steficon
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.steficon.fixtures import RuleFactory, RuleCommitFactory
-from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
-from hct_mis_api.apps.household.fixtures import IndividualRoleInHouseholdFactory
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory, TargetingCriteriaFactory, TargetPopulation
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentPlan, PaymentFactory, PaymentChannelFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals, IndividualRoleInHouseholdFactory
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.payment.celery_tasks import payment_plan_apply_steficon
+from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory, PaymentChannelFactory
 from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.steficon.fixtures import RuleFactory, RuleCommitFactory
 
 
 CREATE_PROGRAMME_MUTATION = """
