@@ -15,6 +15,7 @@ import { AcceptedPaymentPlanHeaderButtons } from './HeaderButtons/AcceptedPaymen
 import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
 import { InAuthorizationPaymentPlanHeaderButtons } from './HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
 import { InReviewPaymentPlanHeaderButtons } from './HeaderButtons/InReviewPaymentPlanHeaderButtons';
+import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 
@@ -42,9 +43,12 @@ export const PaymentPlanDetailsHeader = ({
     },
   ];
 
+  // TODO: add real values by permissions
+
   const canRemove = true;
   const canEdit = true;
   const canLock = true;
+  const canUnlock = true;
   const canSendForApproval = true;
   const canReject = true;
   const canApprove = true;
@@ -69,7 +73,15 @@ export const PaymentPlanDetailsHeader = ({
       buttons = (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
-          canLock={canLock}
+          canUnlock={canLock}
+        />
+      );
+      break;
+    case 'LOCKED_FSP':
+      buttons = (
+        <LockedFspPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canUnlock={canUnlock}
           canSendForApproval={canSendForApproval}
         />
       );

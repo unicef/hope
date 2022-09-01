@@ -78,12 +78,12 @@ class TestActionPaymentPlanMutation(APITestCase):
                 "lock_approve_authorize_reject",
                 [Permissions.PAYMENT_MODULE_VIEW_DETAILS],
                 None,
-                ["LOCK", "SEND_FOR_APPROVAL", "APPROVE", "AUTHORIZE", "REJECT"],
+                ["LOCK", "LOCK_FSP", "SEND_FOR_APPROVAL", "APPROVE", "AUTHORIZE", "REJECT"],
             ),
             (
                 "all_steps",
                 [Permissions.PAYMENT_MODULE_VIEW_DETAILS],
-                "LOCKED",
+                "LOCKED_FSP",
                 [
                     "SEND_FOR_APPROVAL",
                     "APPROVE",

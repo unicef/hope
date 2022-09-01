@@ -5,17 +5,18 @@ import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction'
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
-import { LockFspPaymentPlan } from '../LockFspPaymentPlan';
 
-export interface LockedPaymentPlanHeaderButtonsProps {
+export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   canUnlock: boolean;
+  canSendForApproval: boolean;
 }
 
-export const LockedPaymentPlanHeaderButtons = ({
+export const LockedFspPaymentPlanHeaderButtons = ({
   paymentPlan,
   canUnlock,
-}: LockedPaymentPlanHeaderButtonsProps): React.ReactElement => {
+  canSendForApproval,
+}: LockedFspPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = paymentPlan;
   const { showMessage } = useSnackbar();
@@ -23,10 +24,19 @@ export const LockedPaymentPlanHeaderButtons = ({
     mutatePaymentPlanAction: unlock,
     loading: loadingUnlock,
   } = usePaymentPlanAction(
-    Action.Unlock,
+    Action.UnlockFsp,
     id,
-    () => showMessage(t('Payment Plan has been unlocked.')),
+    () => showMessage(t('Payment Plan FSPs have been unlocked.')),
     () => showMessage(t('Error during unlocking Payment Plan.')),
+  );
+  const {
+    mutatePaymentPlanAction: sendForApproval,
+    loading: loadingSendForApproval,
+  } = usePaymentPlanAction(
+    Action.SendForApproval,
+    id,
+    () => showMessage(t('Payment Plan has been sent for approval.')),
+    () => showMessage(t('Error during sending Payment Plan for approval.')),
   );
 
   return (
@@ -39,11 +49,22 @@ export const LockedPaymentPlanHeaderButtons = ({
             color='primary'
             onClick={() => unlock()}
           >
-            {t('Unlock')}
+            {t('Unlock FSP')}
           </LoadingButton>
         </Box>
       )}
-      <LockFspPaymentPlan paymentPlan={paymentPlan} />
+      {canSendForApproval && (
+        <Box m={2}>
+          <LoadingButton
+            loading={loadingSendForApproval}
+            variant='contained'
+            color='primary'
+            onClick={() => sendForApproval()}
+          >
+            {t('Send For Approval')}
+          </LoadingButton>
+        </Box>
+      )}
     </Box>
   );
 };

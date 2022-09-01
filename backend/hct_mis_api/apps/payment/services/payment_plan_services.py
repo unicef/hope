@@ -33,7 +33,9 @@ class PaymentPlanService:
     def actions_map(self) -> dict:
         return {
             PaymentPlan.Action.LOCK.value: self.lock,
+            PaymentPlan.Action.LOCK_FSP.value: self.lock_fsp,
             PaymentPlan.Action.UNLOCK.value: self.unlock,
+            PaymentPlan.Action.UNLOCK_FSP.value: self.unlock_fsp,
             PaymentPlan.Action.SEND_FOR_APPROVAL.value: self.send_for_approval,
             # use the same method for Approve, Authorize, Finance Review and Reject
             PaymentPlan.Action.APPROVE.value: self.acceptance_process,
@@ -106,11 +108,30 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock(self):
+        # TODO: clear FSP
+        # TODO: clear entitlements
+
         self.payment_plan.payments.all().update(excluded=False)
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
 
+        self.payment_plan.save()
+
+        return self.payment_plan
+
+    def lock_fsp(self):
+        # TODO: cant lock FSP if no FSP choices
+
+        # set all payments with money expected to be delivered
+
+        self.payment_plan.status_lock_fsp()
+        self.payment_plan.save()
+
+        return self.payment_plan
+
+    def unlock_fsp(self):
+        self.payment_plan.status_unlock_fsp()
         self.payment_plan.save()
 
         return self.payment_plan
@@ -193,6 +214,13 @@ class PaymentPlanService:
     def _create_payments(self, payment_plan: PaymentPlan):
         payments_to_create = []
         for household in payment_plan.target_population.households.all():
+            try:
+                collector = household.individuals_and_roles.filter(role=ROLE_PRIMARY).first().individual
+            except AttributeError as exception:
+                msg = f"Couldn't find a primary collector in {household}"
+                logging.exception(msg)
+                raise GraphQLError(msg) from exception
+
             payments_to_create.append(
                 Payment(
                     payment_plan=payment_plan,
@@ -201,14 +229,14 @@ class PaymentPlanService:
                     status_date=timezone.now(),
                     household=household,
                     head_of_household=household.head_of_household,
-                    collector=household.individuals_and_roles.filter(role=ROLE_PRIMARY).first().individual,
+                    collector=collector,
                     currency=payment_plan.currency,
                 )
             )
         try:
             Payment.objects.bulk_create(payments_to_create)
         except IntegrityError:
-            raise GraphQLError(f"Duplicated Households in provided Targeting")
+            raise GraphQLError("Duplicated Households in provided Targeting")
 
     def _recreate_payments_and_recalculate(self):
         self.payment_plan.payments.all().delete()
@@ -220,7 +248,7 @@ class PaymentPlanService:
     def create(self, input_data: dict, user: User) -> PaymentPlan:
         business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])
         if not business_area.is_payment_plan_applicable:
-            raise GraphQLError(f"PaymentPlan can not be created in provided Business Area")
+            raise GraphQLError("PaymentPlan can not be created in provided Business Area")
 
         targeting_id = decode_id_string(input_data["targeting_id"])
         try:
@@ -228,7 +256,7 @@ class PaymentPlanService:
         except TargetPopulation.DoesNotExist:
             raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
         if not target_population.program:
-            raise GraphQLError(f"TargetPopulation should have related Program defined")
+            raise GraphQLError("TargetPopulation should have related Program defined")
 
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():

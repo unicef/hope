@@ -8,7 +8,6 @@ import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
 
-
 interface CreateTargetPopulationHeaderProps {
   handleSubmit: () => Promise<void>;
   values;
@@ -43,6 +42,7 @@ export function CreateTargetPopulationHeader({
           fullWidth
           required
           component={FormikTextField}
+          data-cy='input-name'
         />
       }
       breadCrumbs={
