@@ -48,7 +48,6 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 
 logger = logging.getLogger(__name__)
@@ -246,8 +245,6 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             target_population.exclusion_reason = exclusion_reason
         target_population.full_clean()
         target_population.save()
-
-
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",

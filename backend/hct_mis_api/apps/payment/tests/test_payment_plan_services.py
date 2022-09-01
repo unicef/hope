@@ -222,38 +222,3 @@ class TestPaymentPlanServices(APITestCase):
             self.assertEqual(updated_pp_2.target_population.status, TargetPopulation.STATUS_ASSIGNED)
             self.assertEqual(updated_pp_2.program, updated_pp_2.target_population.program)
             self.assertEqual(old_pp_targeting.status, TargetPopulation.STATUS_READY)
-
-    def test_update_payment_plan_after_update_target_population(self):
-        self.business_area.is_payment_plan_applicable = True
-        self.business_area.save()
-        program = ProgramFactory()
-        hoh = IndividualFactory(household=None)
-        hh = HouseholdFactory(head_of_household=hoh)
-        targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY)
-        targeting.program = program
-        targeting.households.set([hh])
-        targeting.save()
-
-        p_plan = PaymentPlanFactory(total_households_count=1, target_population=targeting)
-        PaymentFactory(payment_plan=p_plan, excluded=False, household=hh)
-
-        self.assertEqual(p_plan.payments.count(), targeting.households.all().count())
-
-        hoh1 = IndividualFactory(household=None)
-        hoh2 = IndividualFactory(household=None)
-        hh1 = HouseholdFactory(head_of_household=hoh1)
-        hh2 = HouseholdFactory(head_of_household=hoh2)
-        new_program = ProgramFactory()
-        IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
-        IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
-        IndividualFactory.create_batch(4, household=hh1)
-        targeting.households.set([hh1, hh2])
-        targeting.program = new_program
-        targeting.save()
-
-        PaymentPlanService().update_payment_plan_after_update_target_population(targeting, True)
-
-        p_plan.refresh_from_db()
-        self.assertEqual(p_plan.total_households_count, 2)
-        self.assertEqual(p_plan.payments.count(), targeting.households.all().count())
-        self.assertEqual(p_plan.program.id, new_program.pk)
