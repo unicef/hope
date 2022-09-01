@@ -1,5 +1,6 @@
 import logging
 import datetime
+import django_fsm
 
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
@@ -111,7 +112,10 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
             # regenerate always xlsx
             service = XlsxPaymentPlanExportService(payment_plan)
             service.save_xlsx_file(user)
-            payment_plan.status_lock()
+            try:
+                payment_plan.status_lock()
+            except django_fsm.TransitionNotAllowed:
+                pass  # for now this can be ignored
             payment_plan.save()
 
             service.send_email(service.get_context(user))
@@ -238,16 +242,13 @@ def payment_plan_apply_steficon(payment_plan_id):
 @log_start_and_end
 @sentry_tags
 def remove_old_payment_plan_payment_list_xlsx(past_days=30):
-    """ Remove old Payment Plan Payment List XLSX files """
+    """Remove old Payment Plan Payment List XLSX files"""
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
-        file_qs = FileTemp.objects.filter(
-            content_type=get_content_type_for_model(PaymentPlan),
-            created__lte=days
-        )
+        file_qs = FileTemp.objects.filter(content_type=get_content_type_for_model(PaymentPlan), created__lte=days)
         if file_qs:
             for xlsx_obj in file_qs:
                 xlsx_obj.file.delete(save=False)
