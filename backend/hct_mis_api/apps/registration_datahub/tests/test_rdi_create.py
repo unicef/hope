@@ -617,7 +617,6 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             }
         ]
         individual = ImportedIndividualFactory()
-        individuals_dict = {individual.get_hash_key: individual}
         documents_and_identities = [
             {
                 "birth_certificate": {

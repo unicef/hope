@@ -1,17 +1,14 @@
 import logging
-from contextlib import contextmanager
 
 from concurrency.api import disable_concurrency
 from django.core.cache import cache
 from django.db import transaction
 from django.db.transaction import atomic
 from django.utils import timezone
-from redis.exceptions import LockError
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.utils.sentry import sentry_tags
-from ..household.models import Household
 from ..targeting.models import HouseholdSelection, TargetPopulation
 
 logger = logging.getLogger(__name__)
@@ -87,7 +84,7 @@ def target_population_full_rebuild(target_population_id):
         try:
             with transaction.atomic():
                 if not target_population.is_open():
-                    raise Exception('Target population is not in open status')
+                    raise Exception("Target population is not in open status")
                 target_population.full_rebuild()
                 target_population.save()
         except Exception as e:

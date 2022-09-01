@@ -1,9 +1,6 @@
-from time import time
-
 from django.core.management import BaseCommand
 from django.db import transaction
 
-from hct_mis_api.apps.payment.services.handle_total_cash_in_households import handle_total_cash_in_households
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 

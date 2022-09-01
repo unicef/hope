@@ -23,6 +23,8 @@ class TargetValidator(BaseValidator):
         if target_status == "FINALIZED":
             logger.error("Target Population has been finalized. Cannot change.")
             raise ValidationError("Target Population has been finalized. Cannot change.")
+
+
 class RebuildTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
@@ -30,6 +32,7 @@ class RebuildTargetPopulationValidator:
             message = f"Only Target Population with status {TargetPopulation.STATUS_OPEN} can be rebuild"
             logger.error(message)
             raise ValidationError(message)
+
 
 class LockTargetPopulationValidator:
     @staticmethod
@@ -44,7 +47,7 @@ class UnlockTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
         if not target_population.is_locked():
-            message = f"Only locked Target Population with status can be unlocked"
+            message = "Only locked Target Population with status can be unlocked"
             logger.error(message)
             raise ValidationError(message)
 
@@ -53,7 +56,7 @@ class FinalizeTargetPopulationValidator:
     @staticmethod
     def validate(target_population: TargetPopulation):
         if not target_population.is_locked():
-            message = f"Only locked Target Population with status can be finalized"
+            message = "Only locked Target Population with status can be finalized"
             logger.error(message)
             raise ValidationError(message)
         if target_population.program.status != Program.ACTIVE:
