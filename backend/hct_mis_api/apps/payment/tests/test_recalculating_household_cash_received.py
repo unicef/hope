@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock
 
-from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.fixtures import UserFactory

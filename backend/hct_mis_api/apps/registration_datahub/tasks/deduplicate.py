@@ -85,7 +85,7 @@ class DeduplicateTask:
         names_queries = cls._prepare_queries_for_names_from_fields(fields)
         documents_queries = cls._prepare_documents_queries_from_fields(fields)
         identities_queries = cls._prepare_identities_queries_from_fields(fields)
-        households_and_roles_queries = cls._prepare_households_and_roles_queries_from_fields(fields)
+        households_and_roles_queries = cls._prepare_households_and_roles_queries_from_fields(fields)  # noqa: F841
         queries_list.extend(names_queries)
         queries_list.extend(documents_queries)
         queries_list.extend(identities_queries)

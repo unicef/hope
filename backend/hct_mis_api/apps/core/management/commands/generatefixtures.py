@@ -187,7 +187,7 @@ class Command(BaseCommand):
                         ),
                     }
 
-                    grievance_ticket = switch_dict.get(grievance_type)()
+                    grievance_ticket = switch_dict.get(grievance_type)()  # noqa: F841
 
                 EntitlementCardFactory(household=household)
         CashPlanPaymentVerificationFactory.create_batch(1)

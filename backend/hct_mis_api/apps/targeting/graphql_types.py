@@ -7,7 +7,6 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     Permissions,
     hopePermissionClass,
-    DjangoPermissionFilterConnectionField,
 )
 from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
