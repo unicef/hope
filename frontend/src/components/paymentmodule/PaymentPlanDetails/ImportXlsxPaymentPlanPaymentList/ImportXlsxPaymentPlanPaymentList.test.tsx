@@ -19,9 +19,6 @@ describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPayme
     );
     await act(() => wait(0)); // wait for response
 
-    const importButton = container.querySelector('button');
-    expect(importButton).toBeInTheDocument();
-
     expect(container).toMatchSnapshot();
   });
 });
