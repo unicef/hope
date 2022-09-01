@@ -207,6 +207,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         ]
     )
 
+    # TODO: divide status for "normal" status and "action" status
+    # and disallow to trigger actions, if in "action" status or something like that
     class Status(models.TextChoices):
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
@@ -350,7 +352,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             Status.LOCKED,
             Status.LOCKED_FSP,
             Status.IN_APPROVAL,
-            Status.IN_APPROVAL,
+            Status.IN_AUTHORIZATION,
             Status.IN_REVIEW,
             Status.ACCEPTED,
         ],
