@@ -1,6 +1,7 @@
-import { Checkbox } from '@material-ui/core';
+import { Checkbox, Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
@@ -29,6 +30,8 @@ export function LookUpPaymentRecordTableRow({
   checkboxClickHandler,
 }: LookUpPaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(paymentRecord.id);
   const received = paymentRecord?.verification?.receivedAmount;
@@ -40,12 +43,21 @@ export function LookUpPaymentRecordTableRow({
       key={paymentRecord.id}
     >
       <TableCell padding='checkbox'>
-        <Checkbox
-          color='primary'
-          onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
-          checked={isItemSelected}
-          inputProps={{ 'aria-labelledby': paymentRecord.id }}
-        />
+        {isEditTicket ? (
+          <Radio
+            color='primary'
+            onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': paymentRecord.id }}
+          />
+        ) : (
+          <Checkbox
+            color='primary'
+            onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': paymentRecord.id }}
+          />
+        )}
       </TableCell>
       <TableCell align='left'>
         <BlackLink to={`/${businessArea}/payment-records/${paymentRecord.id}`}>
