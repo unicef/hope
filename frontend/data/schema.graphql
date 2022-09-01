@@ -3610,6 +3610,7 @@ input UpdateGrievanceTicketInput {
   linkedTickets: [ID]
   household: ID
   individual: ID
+  paymentRecord: ID
   subCategory: Int
   extras: UpdateGrievanceTicketExtrasInput
   priority: Int

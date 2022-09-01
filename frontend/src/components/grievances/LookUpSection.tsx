@@ -11,6 +11,8 @@ export const LookUpSection = ({
   values,
   disabledHouseholdIndividual,
   disabledPaymentRecords,
+  paymentModalWithRadioButtons = true,
+  showPaymentRecords = true,
   errors,
   touched,
 }: {
@@ -20,6 +22,8 @@ export const LookUpSection = ({
   disabledPaymentRecords?;
   errors?;
   touched?;
+  paymentModalWithRadioButtons?;
+  showPaymentRecords?;
 }): React.ReactElement => {
   const renderedLookupHouseholdIndividual = (
     <Grid item xs={6}>
@@ -50,6 +54,7 @@ export const LookUpSection = ({
           disabled={disabledPaymentRecords}
           values={values}
           onValueChange={onValueChange}
+          paymentModalWithRadioButtons={paymentModalWithRadioButtons}
         />
       </Box>
     </Grid>
@@ -57,7 +62,7 @@ export const LookUpSection = ({
   const allThree = (
     <Grid container alignItems='center'>
       {renderedLookupHouseholdIndividual}
-      {renderedLookupPaymentRecords}
+      {showPaymentRecords && renderedLookupPaymentRecords}
       {renderedLookupRelatedTickets}
     </Grid>
   );

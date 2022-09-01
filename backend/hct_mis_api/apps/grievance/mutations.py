@@ -9,6 +9,8 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
+from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.schema import PaymentRecordNode
 
 import graphene
 from graphql import GraphQLError
@@ -119,6 +121,7 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     linked_tickets = graphene.List(graphene.ID)
     household = graphene.GlobalID(node=HouseholdNode, required=False)
     individual = graphene.GlobalID(node=IndividualNode, required=False)
+    payment_record = graphene.GlobalID(node=PaymentRecordNode, required=False)
     sub_category = graphene.Int()
     extras = UpdateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
@@ -432,13 +435,16 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         arg = lambda name, default=None: input.get(name, default)
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
         grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
-        household, individual = None, None
+        household, individual, payment_record = None, None, None
 
         if arg("household") is not None:
             household = get_object_or_404(Household, id=decode_id_string(arg("household")))
 
         if arg("individual") is not None:
             individual = get_object_or_404(Individual, id=decode_id_string(arg("individual")))
+
+        if arg("payment_record") is not None:
+            payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(arg("payment_record")))
 
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         business_area = grievance_ticket.business_area
@@ -503,6 +509,8 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
                 ticket_details.household = household
             if individual:
                 ticket_details.individual = individual
+            if payment_record:
+                ticket_details.payment_record = payment_record
             ticket_details.save()
 
         log_create(
