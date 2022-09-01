@@ -1,7 +1,7 @@
 import copy
 import enum
 import logging
-from datetime import datetime, date
+from datetime import datetime
 from functools import reduce
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
