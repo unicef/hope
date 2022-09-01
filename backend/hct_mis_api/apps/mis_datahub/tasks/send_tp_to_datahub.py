@@ -5,7 +5,7 @@ from django.db.models import F, Q
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import CountryCodeMap
-from hct_mis_api.apps.core.utils import build_arg_dict
+from hct_mis_api.apps.core.utils import build_arg_dict, timezone_datetime
 from hct_mis_api.apps.household.models import (
     Document,
     Household,
@@ -211,8 +211,12 @@ class SendTPToDatahubTask:
         if not (program.last_sync_at is None or program.last_sync_at < program.updated_at):
             return
         dh_program_args = build_arg_dict(program, SendTPToDatahubTask.MAPPING_PROGRAM_DICT)
+
         dh_program = dh_mis_models.Program(**dh_program_args)
         dh_program.session = self.dh_session
+
+        dh_program.start_date = timezone_datetime(dh_program.start_date)
+        dh_program.end_date = timezone_datetime(dh_program.end_date)
         dh_program.save()
 
         program.last_sync_at = timezone.now()
