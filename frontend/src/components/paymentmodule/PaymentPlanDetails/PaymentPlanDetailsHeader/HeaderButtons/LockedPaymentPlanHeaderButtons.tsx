@@ -10,13 +10,11 @@ import { LockFspPaymentPlan } from '../LockFspPaymentPlan';
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   canUnlock: boolean;
-  canLockFsp: boolean;
 }
 
 export const LockedPaymentPlanHeaderButtons = ({
   paymentPlan,
   canUnlock,
-  canLockFsp,
 }: LockedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = paymentPlan;
@@ -29,16 +27,6 @@ export const LockedPaymentPlanHeaderButtons = ({
     id,
     () => showMessage(t('Payment Plan has been unlocked.')),
     () => showMessage(t('Error during unlocking Payment Plan.')),
-  );
-
-  const {
-    mutatePaymentPlanAction: lockFsp,
-    loading: loadingLockFsp,
-  } = usePaymentPlanAction(
-    Action.LockFsp,
-    id,
-    () => showMessage(t('Payment Plan FSP is locked.')),
-    () => showMessage(t('Error during locking FSP in Payment Plan.')),
   );
 
   return (
