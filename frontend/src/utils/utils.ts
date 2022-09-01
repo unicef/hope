@@ -6,6 +6,7 @@ import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
+  PaymentPlanStatus,
   ProgramStatus, TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
@@ -191,7 +192,6 @@ export function targetPopulationStatusToColor(
   return theme.palette.error.main;
 }
 
-
 export function targetPopulationBuildStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -201,6 +201,31 @@ export function targetPopulationBuildStatusToColor(
     [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
     [TargetPopulationBuildStatus.Building]: theme.hctPalette.oragne,
     [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function paymentPlanStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
+    [PaymentPlanStatus.Locked]: theme.hctPalette.oragne,
+    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.oragne,
+    [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
+    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
+    [PaymentPlanStatus.SteficonWait]: theme.hctPalette.oragne,
+    [PaymentPlanStatus.SteficonRun]: theme.hctPalette.blue,
+    [PaymentPlanStatus.SteficonCompleted]: theme.hctPalette.green,
+    [PaymentPlanStatus.SteficonError]: theme.palette.error.main,
+    [PaymentPlanStatus.XlsxExporting]: theme.hctPalette.green,
+    [PaymentPlanStatus.XlsxImporting]: theme.hctPalette.blue,
   };
   if (status in colorsMap) {
     return colorsMap[status];
