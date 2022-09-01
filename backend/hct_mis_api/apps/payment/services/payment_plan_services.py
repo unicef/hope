@@ -131,7 +131,6 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock_fsp(self):
-        # TODO: clear payment FSPs?
         self.payment_plan.status_unlock_fsp()
         self.payment_plan.save()
 
