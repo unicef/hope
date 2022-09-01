@@ -292,11 +292,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                             {
                                 "individualBlockFilters": [
                                     {
-<<<<<<< HEAD
-                                        "comparisionMethod": "EQUALS",
-=======
                                         "comparisonMethod": "EQUALS",
->>>>>>> 9bb0d5ac52fdeb03140bc915f9b164364e102f89
                                         "arguments": ["True"],
                                         "fieldName": "has_the_bank_account_number",
                                         "isFlexField": False,
@@ -338,11 +334,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                             {
                                 "individualBlockFilters": [
                                     {
-<<<<<<< HEAD
-                                        "comparisionMethod": "EQUALS",
-=======
                                         "comparisonMethod": "EQUALS",
->>>>>>> 9bb0d5ac52fdeb03140bc915f9b164364e102f89
                                         "arguments": ["False"],
                                         "fieldName": "has_the_bank_account_number",
                                         "isFlexField": False,
@@ -383,11 +375,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                             {
                                 "individualBlockFilters": [
                                     {
-<<<<<<< HEAD
-                                        "comparisionMethod": "EQUALS",
-=======
                                         "comparisonMethod": "EQUALS",
->>>>>>> 9bb0d5ac52fdeb03140bc915f9b164364e102f89
                                         "arguments": ["True"],
                                         "fieldName": "has_tax_id_number",
                                         "isFlexField": False,
