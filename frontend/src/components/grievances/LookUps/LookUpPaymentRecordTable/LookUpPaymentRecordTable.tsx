@@ -13,11 +13,13 @@ interface LookUpPaymentRecordTableProps {
   openInNewTab?: boolean;
   setFieldValue;
   initialValues;
+  paymentModalWithRadioButtons?: boolean;
 }
 export function LookUpPaymentRecordTable({
   openInNewTab = false,
   setFieldValue,
   initialValues,
+  paymentModalWithRadioButtons = false,
 }: LookUpPaymentRecordTableProps): ReactElement {
   const businessArea = useBusinessArea();
   const initialVariables = {
@@ -31,18 +33,21 @@ export function LookUpPaymentRecordTable({
   const handleCheckboxClick = (event, name): void => {
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
+    if (!paymentModalWithRadioButtons) {
+      if (selectedIndex === -1) {
+        newSelected = newSelected.concat(selected, name);
+      } else if (selectedIndex === 0) {
+        newSelected = newSelected.concat(selected.slice(1));
+      } else if (selectedIndex === selected.length - 1) {
+        newSelected = newSelected.concat(selected.slice(0, -1));
+      } else if (selectedIndex > 0) {
+        newSelected = newSelected.concat(
+          selected.slice(0, selectedIndex),
+          selected.slice(selectedIndex + 1),
+        );
+      }
+    } else {
+      newSelected = [name];
     }
 
     setSelected(newSelected);
@@ -60,6 +65,26 @@ export function LookUpPaymentRecordTable({
     setFieldValue('selectedPaymentRecords', []);
   };
   const numSelected = selected.length;
+  if (paymentModalWithRadioButtons) {
+    return (
+      <UniversalTable<PaymentRecordNode, LookUpPaymentRecordsQueryVariables>
+        headCells={headCells}
+        query={useLookUpPaymentRecordsQuery}
+        queriedObjectName='allPaymentRecords'
+        initialVariables={initialVariables}
+        renderRow={(row) => (
+          <LookUpPaymentRecordTableRow
+            paymentModalWithRadioButtons={paymentModalWithRadioButtons}
+            openInNewTab={openInNewTab}
+            key={row.id}
+            paymentRecord={row}
+            checkboxClickHandler={handleCheckboxClick}
+            selected={selected}
+          />
+        )}
+      />
+    );
+  }
   return (
     <UniversalTable<PaymentRecordNode, LookUpPaymentRecordsQueryVariables>
       headCells={headCells}

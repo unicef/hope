@@ -48373,6 +48373,16 @@
             "defaultValue": null
           },
           {
+            "name": "paymentRecord",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
             "name": "subCategory",
             "description": null,
             "type": {

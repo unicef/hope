@@ -27,6 +27,7 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: string[];
+  paymentRecord?: string;
   selectedRelatedTickets: string[];
   individualData?;
   householdDataUpdateFields?;
@@ -200,6 +201,7 @@ export function prepareInitialValues(
     selectedHousehold: ticket.household || null,
     selectedIndividual: ticket.individual || null,
     issueType: ticket.issueType || null,
+    paymentRecord: ticket?.paymentRecord?.id || null,
     selectedPaymentRecords: ticket?.paymentRecord?.id
       ? [ticket.paymentRecord.id]
       : [],
@@ -477,6 +479,7 @@ export function prepareVariables(businessArea, values, ticket) {
     partner: values.partner,
     comments: values.comments,
     programme: values.programme,
+    paymentRecord: values.selectedPaymentRecords[0] || null,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,

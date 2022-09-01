@@ -1,4 +1,4 @@
-import { Checkbox } from '@material-ui/core';
+import { Checkbox, Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
@@ -14,6 +14,7 @@ import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
   openInNewTab: boolean;
+  paymentModalWithRadioButtons?: boolean;
   selected: Array<string>;
   checkboxClickHandler: (
     event:
@@ -26,6 +27,7 @@ interface LookUpPaymentRecordTableRowProps {
 export function LookUpPaymentRecordTableRow({
   paymentRecord,
   selected,
+  paymentModalWithRadioButtons = false,
   checkboxClickHandler,
 }: LookUpPaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
@@ -40,12 +42,21 @@ export function LookUpPaymentRecordTableRow({
       key={paymentRecord.id}
     >
       <TableCell padding='checkbox'>
-        <Checkbox
-          color='primary'
-          onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
-          checked={isItemSelected}
-          inputProps={{ 'aria-labelledby': paymentRecord.id }}
-        />
+        {paymentModalWithRadioButtons ? (
+          <Radio
+            color='primary'
+            onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': paymentRecord.id }}
+          />
+        ) : (
+          <Checkbox
+            color='primary'
+            onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': paymentRecord.id }}
+          />
+        )}
       </TableCell>
       <TableCell align='left'>
         <BlackLink to={`/${businessArea}/payment-records/${paymentRecord.id}`}>

@@ -5770,6 +5770,7 @@ export type UpdateGrievanceTicketInput = {
   linkedTickets?: Maybe<Array<Maybe<Scalars['ID']>>>,
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Scalars['ID']>,
   subCategory?: Maybe<Scalars['Int']>,
   extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,

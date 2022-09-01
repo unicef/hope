@@ -3,7 +3,6 @@ import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import get from 'lodash/get';
 import styled from 'styled-components';
 import {
   hasCreatorOrOwnerPermissions,
@@ -365,7 +364,14 @@ export const EditGrievancePage = (): React.ReactElement => {
                             values.selectedIndividual ||
                             values.selectedHousehold
                           }
-                          disabledPaymentRecords
+                          disabledPaymentRecords={Boolean(ticket.paymentRecord)}
+                          showPaymentRecords={
+                            values.subCategory ===
+                              +GRIEVANCE_SUB_CATEGORIES.PAYMENT_COMPLAINT ||
+                            values.subCategory ===
+                              +GRIEVANCE_SUB_CATEGORIES.FSP_COMPLAINT
+                          }
+                          paymentModalWithRadioButtons
                           onValueChange={setFieldValue}
                           errors={errors}
                           touched={touched}
