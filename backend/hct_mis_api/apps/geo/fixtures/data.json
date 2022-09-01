@@ -1343,28 +1343,6 @@
 },
 {
   "model": "geo.country",
-  "pk": "03919bf6-0794-4989-82b0-415a34895080",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.703-00:00",
-    "updated_at": "2022-03-30 09:03:55.703-00:00",
-    "original_id": null,
-    "name": "Zimbabwe",
-    "short_name": "Zimbabwe",
-    "iso_code2": "ZW",
-    "iso_code3": "ZWE",
-    "iso_num": "0716",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.703-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 250,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
   "pk": "039ef092-4a6d-4f95-aa69-d4d50ac76968",
   "fields": {
     "created_at": "2022-03-30 09:03:55.433-00:00",
@@ -4753,50 +4731,6 @@
 },
 {
   "model": "geo.country",
-  "pk": "052254c9-e821-4b8a-b7f5-4b7087397278",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.542-00:00",
-    "updated_at": "2022-03-30 09:03:55.542-00:00",
-    "original_id": null,
-    "name": "El Salvador",
-    "short_name": "El Salvador",
-    "iso_code2": "SV",
-    "iso_code3": "SLV",
-    "iso_num": "0222",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.542-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 67,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "06acf78d-baa6-465a-8f04-2d475573f3ac",
-  "fields": {
-    "created_at": "2022-03-30 09:03:56.050-00:00",
-    "updated_at": "2022-03-30 09:03:56.050-00:00",
-    "original_id": null,
-    "name": "Northern Mariana Islands",
-    "short_name": "Northern Mariana Islands",
-    "iso_code2": "MP",
-    "iso_code3": "MNP",
-    "iso_num": "0580",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:56.050-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 165,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
   "pk": "06c69f3e-7e34-49a7-9867-11a147a8cd2d",
   "fields": {
     "created_at": "2022-03-30 09:03:55.922-00:00",
@@ -4814,28 +4748,6 @@
     "lft": 1,
     "rght": 2,
     "tree_id": 194,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "e273bba9-05c9-42ea-ac65-2ecc741d37fc",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.524-00:00",
-    "updated_at": "2022-03-30 09:03:55.524-00:00",
-    "original_id": null,
-    "name": "Ghana",
-    "short_name": "Ghana",
-    "iso_code2": "GH",
-    "iso_code3": "GHA",
-    "iso_num": "0288",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.524-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 85,
     "level": 0
   }
 },
@@ -4885,50 +4797,6 @@
 },
 {
   "model": "geo.country",
-  "pk": "06eb3442-e8a4-4f1f-b265-7502085de101",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.619-00:00",
-    "updated_at": "2022-03-30 09:03:55.619-00:00",
-    "original_id": null,
-    "name": "American Samoa",
-    "short_name": "American Samoa",
-    "iso_code2": "AS",
-    "iso_code3": "ASM",
-    "iso_num": "0016",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.619-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 5,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "0705d1c6-a04c-4296-8ca0-6c77833fbe00",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.626-00:00",
-    "updated_at": "2022-03-30 09:03:55.627-00:00",
-    "original_id": null,
-    "name": "Sierra Leone",
-    "short_name": "Sierra Leone",
-    "iso_code2": "SL",
-    "iso_code3": "SLE",
-    "iso_num": "0694",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.627-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 199,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
   "pk": "075f5c01-5510-4783-8219-f1462d61c42c",
   "fields": {
     "created_at": "2022-03-30 09:03:55.545-00:00",
@@ -4951,94 +4819,6 @@
 },
 {
   "model": "geo.country",
-  "pk": "0bbcd4bf-c75d-43ec-bd84-32ec352d8f94",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.852-00:00",
-    "updated_at": "2022-03-30 09:03:55.852-00:00",
-    "original_id": null,
-    "name": "Trinidad and Tobago",
-    "short_name": "Trinidad and Tobago",
-    "iso_code2": "TT",
-    "iso_code3": "TTO",
-    "iso_num": "0780",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.852-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 226,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "0caf1756-91e4-4080-a5e7-8226c4dde853",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.860-00:00",
-    "updated_at": "2022-03-30 09:03:55.860-00:00",
-    "original_id": null,
-    "name": "Pakistan",
-    "short_name": "Pakistan",
-    "iso_code2": "PK",
-    "iso_code3": "PAK",
-    "iso_num": "0586",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.860-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 168,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "0d84a1f9-0f88-4c6f-ba07-d78d9071468c",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.582-00:00",
-    "updated_at": "2022-03-30 09:03:55.582-00:00",
-    "original_id": null,
-    "name": "Cabo Verde",
-    "short_name": "Cabo Verde",
-    "iso_code2": "CV",
-    "iso_code3": "CPV",
-    "iso_num": "0132",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.582-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 38,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "0d983966-955c-4d0f-b4bb-d284e783c195",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.409-00:00",
-    "updated_at": "2022-03-30 09:03:55.409-00:00",
-    "original_id": null,
-    "name": "Mayotte",
-    "short_name": "Mayotte",
-    "iso_code2": "YT",
-    "iso_code3": "MYT",
-    "iso_num": "0175",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.409-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 141,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
   "pk": "0df9f6e3-dac0-4596-b8eb-224ce6310b55",
   "fields": {
     "created_at": "2022-03-30 09:03:55.474-00:00",
@@ -5056,50 +4836,6 @@
     "lft": 1,
     "rght": 2,
     "tree_id": 69,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "12bb672e-648d-459b-8b7f-e3c8aa6ec758",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.805-00:00",
-    "updated_at": "2022-03-30 09:03:55.805-00:00",
-    "original_id": null,
-    "name": "Nepal",
-    "short_name": "Nepal",
-    "iso_code2": "NP",
-    "iso_code3": "NPL",
-    "iso_num": "0524",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.805-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 154,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "12dfb2ad-4683-4bbc-b55a-6588e351ffe7",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.968-00:00",
-    "updated_at": "2022-03-30 09:03:55.968-00:00",
-    "original_id": null,
-    "name": "Cyprus",
-    "short_name": "Cyprus",
-    "iso_code2": "CY",
-    "iso_code3": "CYP",
-    "iso_num": "0196",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.969-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 59,
     "level": 0
   }
 },
@@ -5347,28 +5083,6 @@
 },
 {
   "model": "geo.country",
-  "pk": "161339ad-713e-494c-be53-372bc0a282ec",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.484-00:00",
-    "updated_at": "2022-03-30 09:03:55.484-00:00",
-    "original_id": null,
-    "name": "Jordan",
-    "short_name": "Jordan",
-    "iso_code2": "JO",
-    "iso_code3": "JOR",
-    "iso_num": "0400",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.484-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 115,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
   "pk": "16aedef9-47c2-44ea-95f0-8648a52dad7b",
   "fields": {
     "created_at": "2022-03-30 09:03:55.798-00:00",
@@ -5452,116 +5166,6 @@
     "lft": 1,
     "rght": 2,
     "tree_id": 242,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "f72bad33-1238-4be0-8eb1-e7401c950d62",
-  "fields": {
-    "created_at": "2022-03-30 09:03:55.504-00:00",
-    "updated_at": "2022-03-30 09:03:55.504-00:00",
-    "original_id": null,
-    "name": "Panama",
-    "short_name": "Panama",
-    "iso_code2": "PA",
-    "iso_code3": "PAN",
-    "iso_num": "0591",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:55.504-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 171,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "f9b0bfaa-cc6b-46eb-a486-0c29ba0ca642",
-  "fields": {
-    "created_at": "2022-03-30 09:03:56.120-00:00",
-    "updated_at": "2022-03-30 09:03:56.120-00:00",
-    "original_id": null,
-    "name": "Sri Lanka",
-    "short_name": "Sri Lanka",
-    "iso_code2": "LK",
-    "iso_code3": "LKA",
-    "iso_num": "0144",
-    "parent": null,
-    "valid_from": "2022-03-30 09:03:56.120-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 211,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "fa94df9c-b539-4599-8228-dfe9383abde3",
-  "fields": {
-    "created_at": "2021-10-28 09:39:12.254-00:00",
-    "updated_at": "2021-10-28 09:39:12.254-00:00",
-    "original_id": null,
-    "name": "Anguilla",
-    "short_name": "Anguilla",
-    "iso_code2": "AI",
-    "iso_code3": "AIA",
-    "iso_num": "0660",
-    "parent": null,
-    "valid_from": "2021-10-28 09:39:12.254-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 8,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "fd333c5f-5048-4040-8532-75299b5f2b82",
-  "fields": {
-    "created_at": "2021-10-28 09:39:12.456-00:00",
-    "updated_at": "2021-10-28 09:39:12.456-00:00",
-    "original_id": null,
-    "name": "Chad",
-    "short_name": "Chad",
-    "iso_code2": "TD",
-    "iso_code3": "TCD",
-    "iso_num": "0148",
-    "parent": null,
-    "valid_from": "2021-10-28 09:39:12.456-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 44,
-    "level": 0
-  }
-},
-{
-  "model": "geo.country",
-  "pk": "fea412b2-a617-4c23-b773-d0001f36a932",
-  "fields": {
-    "created_at": "2021-10-28 09:39:13.492-00:00",
-    "updated_at": "2021-10-28 09:39:13.492-00:00",
-    "original_id": null,
-    "name": "Ukraine",
-    "short_name": "Ukraine",
-    "iso_code2": "UA",
-    "iso_code3": "UKR",
-    "iso_num": "0804",
-    "parent": null,
-    "valid_from": "2021-10-28 09:39:13.492-00:00",
-    "valid_until": null,
-    "extras": {},
-    "lft": 1,
-    "rght": 2,
-    "tree_id": 233,
     "level": 0
   }
 },

@@ -6,6 +6,7 @@ from factory import fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.program.models import Program
 
 
