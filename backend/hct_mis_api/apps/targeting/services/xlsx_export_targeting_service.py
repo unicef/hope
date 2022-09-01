@@ -31,8 +31,8 @@ class XlsxExportTargetingService:
 
     @cached_property
     def households(self):
-        if self.target_population.status == TargetPopulation.STATUS_DRAFT:
-            return self.target_population.candidate_list
+        if self.target_population.status == TargetPopulation.STATUS_OPEN:
+            return self.target_population.open_household_list
         return self.target_population.vulnerability_score_filtered_households
 
     @cached_property

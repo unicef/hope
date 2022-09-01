@@ -7,11 +7,11 @@ from django.utils import timezone
 from hct_mis_api.apps.core.models import CountryCodeMap
 from hct_mis_api.apps.core.utils import build_arg_dict
 from hct_mis_api.apps.household.models import (
+    Document,
     Household,
     Individual,
-    IndividualRoleInHousehold,
-    Document,
     IndividualIdentity,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.mis_datahub import models as dh_mis_models
 from hct_mis_api.apps.targeting.models import HouseholdSelection
@@ -23,7 +23,7 @@ class SendTPToDatahubTask:
     MAPPING_TP_DICT = {
         "mis_id": "id",
         "name": "name",
-        "active_households": "final_list_total_households",
+        "active_households": "total_households_count",
         "program_mis_id": "program_id",
         "targeting_criteria": "targeting_criteria_string",
     }
@@ -46,8 +46,8 @@ class SendTPToDatahubTask:
         "status": "status",
         "household_size": "size",
         "address": "address",
-        "admin1": "admin1.title",
-        "admin2": "admin2.title",
+        "admin1": "admin1.name",
+        "admin2": "admin2.name",
         "residence_status": "residence_status",
         "registration_date": "last_registration_date",
         "village": "village",
@@ -90,64 +90,62 @@ class SendTPToDatahubTask:
         roles_to_bulk_create = []
 
         try:
-            with transaction.atomic(using="default"):
-                with transaction.atomic(using="cash_assist_datahub_mis"):
-                    program = target_population.program
-                    self.dh_session = dh_mis_models.Session(
-                        source=dh_mis_models.Session.SOURCE_MIS,
-                        status=dh_mis_models.Session.STATUS_READY,
-                        business_area=program.business_area.cash_assist_code,
-                    )
-                    self.dh_session.save()
+            program = target_population.program
+            self.dh_session = dh_mis_models.Session(
+                source=dh_mis_models.Session.SOURCE_MIS,
+                status=dh_mis_models.Session.STATUS_READY,
+                business_area=program.business_area.cash_assist_code,
+            )
+            self.dh_session.save()
 
-                    (
-                        documents_to_sync,
-                        households_to_sync,
-                        individuals_to_sync,
-                        roles_to_sync,
-                        target_population_selections,
-                    ) = self._prepare_data_to_send(program, target_population)
-                    self._send_program(program)
-                    self._send_target_population_object(target_population)
-                    for household in households_to_sync:
-                        dh_household = self._prepare_datahub_object_household(household)
-                        households_to_bulk_create.append(dh_household)
+            (
+                documents_to_sync,
+                households_to_sync,
+                individuals_to_sync,
+                roles_to_sync,
+                target_population_selections,
+            ) = self._prepare_data_to_send(program, target_population)
+            self._send_program(program)
+            self._send_target_population_object(target_population)
+            for household in households_to_sync:
+                dh_household = self._prepare_datahub_object_household(household)
+                households_to_bulk_create.append(dh_household)
 
-                    for individual in individuals_to_sync:
-                        dh_individual = self._prepare_datahub_object_individual(individual)
-                        individuals_to_bulk_create.append(dh_individual)
+            for individual in individuals_to_sync:
+                dh_individual = self._prepare_datahub_object_individual(individual)
+                individuals_to_bulk_create.append(dh_individual)
 
-                    for role in roles_to_sync:
-                        dh_role = self._prepare_datahub_object_role(role)
-                        roles_to_bulk_create.append(dh_role)
+            for role in roles_to_sync:
+                dh_role = self._prepare_datahub_object_role(role)
+                roles_to_bulk_create.append(dh_role)
 
-                    for document in documents_to_sync:
-                        dh_document = self._prepare_datahub_object_document(document)
-                        documents_to_bulk_create.append(dh_document)
+            for document in documents_to_sync:
+                dh_document = self._prepare_datahub_object_document(document)
+                documents_to_bulk_create.append(dh_document)
 
-                    for selection in target_population_selections:
-                        dh_target_population_selection = self._prepare_datahub_object_target_entry(selection)
-                        tp_entries_to_bulk_create.append(dh_target_population_selection)
+            for selection in target_population_selections:
+                dh_target_population_selection = self._prepare_datahub_object_target_entry(selection)
+                tp_entries_to_bulk_create.append(dh_target_population_selection)
 
-                    dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
-                    dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
-                    dh_mis_models.IndividualRoleInHousehold.objects.bulk_create(roles_to_bulk_create)
-                    dh_mis_models.Document.objects.bulk_create(documents_to_bulk_create)
-                    dh_mis_models.TargetPopulationEntry.objects.bulk_create(tp_entries_to_bulk_create)
-                    target_population.set_to_ready_for_cash_assist()
-                    target_population.save()
+            dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
+            dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
+            dh_mis_models.IndividualRoleInHousehold.objects.bulk_create(roles_to_bulk_create)
+            dh_mis_models.Document.objects.bulk_create(documents_to_bulk_create)
+            dh_mis_models.TargetPopulationEntry.objects.bulk_create(tp_entries_to_bulk_create)
+            target_population.set_to_ready_for_cash_assist()
+            target_population.save()
 
-                    households_to_sync.update(last_sync_at=timezone.now())
-                    individuals_to_sync.update(last_sync_at=timezone.now())
-                    return {
-                        "session": self.dh_session.id,
-                        "program": str(program),
-                        "target_population": str(target_population),
-                        "households_count": len(households_to_bulk_create),
-                        "individuals_count": len(individuals_to_bulk_create),
-                        "roles_count": len(roles_to_bulk_create),
-                        "tp_entries_count": len(tp_entries_to_bulk_create),
-                    }
+            households_to_sync.update(last_sync_at=timezone.now())
+            individuals_to_sync.update(last_sync_at=timezone.now())
+            return {
+                "session": self.dh_session.id,
+                "program": str(program),
+                "target_population": str(target_population),
+                "households_count": len(households_to_bulk_create),
+                "individuals_count": len(individuals_to_bulk_create),
+                "roles_count": len(roles_to_bulk_create),
+                "tp_entries_count": len(tp_entries_to_bulk_create),
+            }
         except Exception as e:
             logger.exception(e)
             raise
@@ -164,7 +162,6 @@ class SendTPToDatahubTask:
         target_population_selections = (
             HouseholdSelection.objects.filter(
                 target_population__id=target_population.id,
-                final=True,
                 household_id__in=all_targeted_households_ids,
             )
             .select_related("household")
@@ -183,7 +180,7 @@ class SendTPToDatahubTask:
         self.unhcr_id_dict = {identity.individual_id: identity.number for identity in individual_identities}
 
     def _get_individuals_and_hauseholds(self, program, target_population):
-        all_targeted_households_ids = target_population.final_list.values_list("id", flat=True)
+        all_targeted_households_ids = target_population.household_list.values_list("id", flat=True)
         if program.individual_data_needed:
             # all targeted individuals + collectors (primary_collector,alternate_collector)
             all_individuals = Individual.objects.filter(
@@ -231,7 +228,7 @@ class SendTPToDatahubTask:
 
     def _prepare_datahub_object_household(self, household):
         dh_household_args = build_arg_dict(household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT)
-        dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.code)
+        dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.iso_code2)
         dh_household = dh_mis_models.Household(**dh_household_args)
         dh_household.unhcr_id = self._get_unhcr_household_id(household)
         dh_household.session = self.dh_session

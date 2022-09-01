@@ -6,8 +6,7 @@ import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
-  PaymentPlanStatus,
-  ProgramStatus,
+  ProgramStatus, TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
 import {
@@ -175,7 +174,7 @@ export function targetPopulationStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [TargetPopulationStatus.Draft]: theme.hctPalette.gray,
+    [TargetPopulationStatus.Open]: theme.hctPalette.gray,
     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
     [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
@@ -192,24 +191,16 @@ export function targetPopulationStatusToColor(
   return theme.palette.error.main;
 }
 
-export function paymentPlanStatusToColor(
+
+export function targetPopulationBuildStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
-    [PaymentPlanStatus.Locked]: theme.hctPalette.oragne,
-    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.oragne,
-    [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
-    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
-    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
-    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
-    [PaymentPlanStatus.SteficonWait]: theme.hctPalette.oragne,
-    [PaymentPlanStatus.SteficonRun]: theme.hctPalette.blue,
-    [PaymentPlanStatus.SteficonCompleted]: theme.hctPalette.green,
-    [PaymentPlanStatus.SteficonError]: theme.palette.error.main,
-    [PaymentPlanStatus.XlsxExporting]: theme.hctPalette.green,
-    [PaymentPlanStatus.XlsxImporting]: theme.hctPalette.blue,
+    [TargetPopulationBuildStatus.Ok]: theme.hctPalette.green,
+    [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
+    [TargetPopulationBuildStatus.Building]: theme.hctPalette.oragne,
+    [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
     return colorsMap[status];

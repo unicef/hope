@@ -259,7 +259,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                             {
                                 "filters": [
                                     {
-                                        "comparisionMethod": "EQUALS",
+                                        "comparisonMethod": "EQUALS",
                                         "arguments": ["True"],
                                         "fieldName": "consent",
                                         "isFlexField": False,

@@ -9,6 +9,7 @@ from django.db.models import F
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.contrib.admin import SimpleListFilter
 
 import requests
 from admin_extra_buttons.decorators import button, link
@@ -276,9 +277,6 @@ class ValidateForm(RemeberDataForm):
     SYNC_COOKIE = "ocr"
     picture_field = forms.CharField()
     number_field = forms.CharField()
-
-
-from django.contrib.admin import SimpleListFilter
 
 
 class AlexisFilter(SimpleListFilter):

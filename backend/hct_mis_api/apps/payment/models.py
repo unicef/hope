@@ -3,9 +3,6 @@ from decimal import Decimal
 from functools import cached_property
 from typing import Optional
 
-from django.conf import settings
-from django.contrib.admin.options import get_content_type_for_model
-from django.contrib.postgres.fields import CICharField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models

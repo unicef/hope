@@ -125,6 +125,7 @@ class TestAutomatingRDICreationTask(TestCase):
         "cash_assist_datahub_mis",
         "registration_datahub",
     ]
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     def test_successful_run_without_records_to_import(self):
         result = run_automate_rdi_creation_task(registration_id=123, page_size=1)

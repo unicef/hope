@@ -1,8 +1,10 @@
 from django.contrib import admin
+from django.template.response import TemplateResponse
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
+    ValueFilter,
 )
 
 from ..utils.admin import (
@@ -24,3 +26,27 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdm
     )
     raw_id_fields = ("business_area",)
     filter_horizontal = ("admin_areas",)
+
+
+@admin.register(CashPlan)
+class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+    list_display = ("name", "program", "delivery_type", "status", "verification_status", "ca_id")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
+        ("delivery_type", ChoicesFieldComboFilter),
+        ("cash_plan_payment_verification_summary__status", ChoicesFieldComboFilter),
+        ("program__id", ValueFilter),
+        ("vision_id", ValueFilter),
+    )
+    raw_id_fields = ("business_area", "program", "service_provider")
+    search_fields = ("name",)
+
+    def verification_status(self, obj):
+        return obj.cash_plan_payment_verification_summary.status
+
+    @button()
+    def payments(self, request, pk):
+        context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
+
+        return TemplateResponse(request, "admin/cashplan/payments.html", context)

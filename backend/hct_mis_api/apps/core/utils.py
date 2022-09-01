@@ -3,7 +3,8 @@ import io
 import itertools
 import logging
 import string
-from collections import MutableMapping, OrderedDict
+from collections import OrderedDict
+from collections.abc import MutableMapping
 
 from django.db.models import QuerySet
 
@@ -101,7 +102,7 @@ def _slug_strip(value, separator="-"):
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("{}+".format(re_sep, separator, value))
+        value = re.sub("{}+".format(re_sep, separator, value))  # noqa: F523 # TODO: bug?
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":

@@ -41,7 +41,7 @@ def to_dataset(result):
         try:
             for obj in result.all():
                 data.append([obj[f] if isinstance(obj, dict) else str(getattr(obj, f)) for f in fields])
-        except Exception as e:
+        except Exception:
             raise ValueError("Results can't be rendered as a tablib Dataset")
     elif isinstance(result, (list, tuple)):
         data = tablib.Dataset()
@@ -50,7 +50,7 @@ def to_dataset(result):
         try:
             for obj in result:
                 data.append([obj[f] for f in fields])
-        except Exception as e:
+        except Exception:
             raise ValueError("Results can't be rendered as a tablib Dataset")
     elif isinstance(result, (tablib.Dataset, dict)):
         data = result
