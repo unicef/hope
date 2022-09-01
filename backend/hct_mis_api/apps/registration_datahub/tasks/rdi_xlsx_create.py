@@ -15,7 +15,6 @@ import openpyxl
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.core_fields_attributes import TYPE_DATETIME
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
 from hct_mis_api.apps.household.models import (
@@ -388,7 +387,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "IMAGE": self._handle_image_field,
             "DECIMAL": self._handle_decimal_field,
             "BOOL": self._handle_bool_field,
-            TYPE_DATETIME: self._handle_datetime,
         }
 
         sheet_title = sheet.title.lower()

@@ -8310,7 +8310,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'first_registration_date',
                 'required': True,
-                'type': 'DATETIME'
+                'type': 'DATE'
             },
             {
                 'associatedWith': 'Individual',
@@ -8327,7 +8327,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'first_registration_date',
                 'required': True,
-                'type': 'DATETIME'
+                'type': 'DATE'
             },
             {
                 'associatedWith': 'Household',
