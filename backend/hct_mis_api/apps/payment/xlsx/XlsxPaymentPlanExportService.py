@@ -1,13 +1,25 @@
-from tempfile import NamedTemporaryFile
+import logging
+import zipfile
+import openpyxl
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.urls import reverse
+from graphql import GraphQLError
+from tempfile import NamedTemporaryFile
 
-from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.payment.models import (
+    Payment,
+    PaymentPlan,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+)
 from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
-from hct_mis_api.apps.core.models import XLSXFileTemp
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import encode_id_base64
+
+
+logger = logging.getLogger(__name__)
 
 
 class XlsxPaymentPlanExportService(XlsxExportBaseService):
@@ -28,7 +40,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
     PAYMENT_CHANNEL_COLUMN_INDEX = 5
     ENTITLEMENT_COLUMN_INDEX = 8
 
-    def __init__(self, payment_plan):
+    def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.all_active_payments
 
@@ -65,19 +77,24 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         filename = f"payment_plan_payment_list_{self.payment_plan.unicef_id or self.payment_plan.id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
-            xlsx_obj = XLSXFileTemp(
+            xlsx_obj = FileTemp(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
-                created_by=user,
-                type=XLSXFileTemp.EXPORT
+                created_by=user
             )
             self.wb.save(tmp.name)
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
+            self.payment_plan.export_xlsx_file = xlsx_obj
+            self.payment_plan.save()
 
-    def get_context(self, user):
+    def get_context(self, user, per_fsp=False):
         payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
-        link = self.get_link(reverse("download-payment-plan-payment-list", args=[payment_verification_id]))
+        if per_fsp:
+            path_name = "download-payment-plan-payment-list-per-fsp"
+        else:
+            path_name = "download-payment-plan-payment-list"
+        link = self.get_link(reverse(path_name, args=[payment_verification_id]))
 
         msg = "Payment Plan Payment List xlsx file was generated and below You have the link to download this file."
 
@@ -91,3 +108,86 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         }
 
         return context
+
+    def export_per_fsp(self, user):
+        # after updating this list
+        # please update 'map_obj_name_column' as well
+        possible_exported_column = [
+            "payment_id",
+            "household_id",
+            "admin_leve_2",
+            "collector_name",
+            "payment_channel",
+            "fsp_name",
+            "entitlement_quantity",
+        ]
+        fsp_ids = self.payment_list.values_list("financial_service_provider_id", flat=True)
+        fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
+
+        # create temp zip file
+        with NamedTemporaryFile() as tmp_zip:
+            with zipfile.ZipFile(tmp_zip.name, mode="w") as zip_file:
+                for fsp in fsp_qs:
+                    wb = openpyxl.Workbook()
+                    ws_fsp = wb.active
+                    ws_fsp.title = fsp.name
+
+                    payment_qs = self.payment_list.filter(financial_service_provider=fsp)
+
+                    # get headers
+                    col_list = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
+                    if fsp.fsp_xlsx_template and fsp.fsp_xlsx_template.columns:
+                        col_list = fsp.fsp_xlsx_template.columns
+
+                    diff_columns = list(set(col_list).difference(set(possible_exported_column)))
+                    if diff_columns:
+                        msg = f"Please contact admin because we can't export columns: {diff_columns}"
+                        logger.error(msg)
+                        raise GraphQLError(msg)
+
+                    # add headers
+                    ws_fsp.append(col_list)
+
+                    # add rows
+                    for payment in payment_qs:
+                        self._add_rows(ws_fsp, col_list, fsp, payment)
+
+                    self._adjust_column_width_from_col(ws_fsp, 0, 1, 7)
+
+                    filename = f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}.xlsx"
+
+                    with NamedTemporaryFile() as tmp:
+                        wb.save(tmp.name)
+                        tmp.seek(0)
+                        # add xlsx to zip
+                        zip_file.writestr(filename, tmp.read())
+
+            xlsx_obj = FileTemp(
+                object_id=self.payment_plan.pk,
+                content_type=get_content_type_for_model(self.payment_plan),
+                created_by=user
+            )
+            tmp_zip.seek(0)
+            zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
+            xlsx_obj.file.save(zip_file_name, File(tmp_zip))
+            self.payment_plan.export_per_fsp_xlsx_file = xlsx_obj
+            self.payment_plan.save()
+
+    @staticmethod
+    def _add_rows(ws_fsp, col_list: list, fsp: FinancialServiceProvider, payment: Payment):
+        map_obj_name_column = {
+            "payment_id": {payment: "unicef_id"},
+            "household_id": {payment.household: "unicef_id"},
+            "admin_leve_2": {payment.household.admin2: "title"},
+            "collector_name": {payment.collector: "full_name"},
+            "fsp_name": {fsp: "name"},
+            "payment_channel": {payment.assigned_payment_channel: "delivery_mechanism"},
+            "entitlement_quantity": {payment: "entitlement_quantity"},
+        }
+
+        payment_row = tuple()
+        for col in col_list:
+            for obj, col_name in map_obj_name_column.get(col, {None: "wrong_column_name"}).items():
+                value = getattr(obj, col_name, "wrong_column_name")
+                payment_row = (*payment_row, value)
+        ws_fsp.append(payment_row)

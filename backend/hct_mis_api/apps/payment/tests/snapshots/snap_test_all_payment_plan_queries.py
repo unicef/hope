@@ -188,8 +188,8 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_locked_payment_pl
                         'paymentPlanSoftConflicted': True,
                         'paymentPlanSoftConflictedData': [
                             {
-                                'paymentPlanEndDate': '11-10-2020',
-                                'paymentPlanStartDate': '09-10-2020',
+                                'paymentPlanEndDate': '2020-11-10',
+                                'paymentPlanStartDate': '2020-09-10',
                                 'paymentPlanStatus': 'OPEN'
                             }
                         ]
@@ -212,15 +212,15 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': False,
+                        'excluded': True,
                         'paymentPlan': {
                             'unicefId': 'PP-01'
                         },
                         'paymentPlanHardConflicted': True,
                         'paymentPlanHardConflictedData': [
                             {
-                                'paymentPlanEndDate': '11-10-2020',
-                                'paymentPlanStartDate': '09-10-2020',
+                                'paymentPlanEndDate': '2020-11-10',
+                                'paymentPlanStartDate': '2020-09-10',
                                 'paymentPlanStatus': 'LOCKED'
                             }
                         ],
@@ -235,7 +235,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
-                        'excluded': True,
+                        'excluded': False,
                         'paymentPlan': {
                             'unicefId': 'PP-01'
                         },
@@ -263,6 +263,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
             {
                 'name': 'Locked',
                 'value': 'LOCKED'
+            },
+            {
+                'name': 'Locked FSP',
+                'value': 'LOCKED_FSP'
             },
             {
                 'name': 'In Approval',

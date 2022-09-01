@@ -68,6 +68,21 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
             'paymentPlan': {
                 'approvalProcess': {
                     'edges': [
+                    ],
+                    'totalCount': 0
+                },
+                'status': 'LOCKED_FSP'
+            }
+        }
+    }
+}
+
+snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock_approve_authorize_reject 3'] = {
+    'data': {
+        'actionPaymentPlanMutation': {
+            'paymentPlan': {
+                'approvalProcess': {
+                    'edges': [
                         {
                             'node': {
                                 'actions': {
@@ -98,7 +113,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
     }
 }
 
-snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock_approve_authorize_reject 3'] = {
+snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock_approve_authorize_reject 4'] = {
     'data': {
         'actionPaymentPlanMutation': {
             'paymentPlan': {
@@ -138,7 +153,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
     }
 }
 
-snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock_approve_authorize_reject 4'] = {
+snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock_approve_authorize_reject 5'] = {
     'data': {
         'actionPaymentPlanMutation': None
     },
@@ -158,7 +173,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
     ]
 }
 
-snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock_approve_authorize_reject 5'] = {
+snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock_approve_authorize_reject 6'] = {
     'data': {
         'actionPaymentPlanMutation': {
             'paymentPlan': {
@@ -196,7 +211,7 @@ snapshots['TestActionPaymentPlanMutation::test_update_status_payment_plan_2_lock
                     ],
                     'totalCount': 1
                 },
-                'status': 'LOCKED'
+                'status': 'LOCKED_FSP'
             }
         }
     }

@@ -745,6 +745,38 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class ExportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, payment_plan_id, **kwargs):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.ACCEPTED:
+            logger.error("You can only export Payment List for ACCEPTED Payment Plan")
+            raise GraphQLError("You can only export Payment List for ACCEPTED Payment Plan")
+
+        old_payment_plan = copy_model_object(payment_plan)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user=info.context.user)
+
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+
+        return cls(payment_plan=payment_plan)
+
+
 def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid, delivery_mechanisms_in_order):
     needed_delivery_mechanisms = list(
         PaymentChannel.objects.filter(
@@ -778,7 +810,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             raise GraphQLError("Payment plan must be locked to choose delivery mechanisms")
         delivery_mechanisms_in_order = input.get("delivery_mechanisms")
         for delivery_mechanism in delivery_mechanisms_in_order:
-            if delivery_mechanism == '':
+            if delivery_mechanism == "":
                 raise GraphQLError("Delivery mechanism cannot be empty.")
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
@@ -913,9 +945,11 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             return cls(None, import_service.errors)
 
         payment_plan.status_importing()
-        payment_plan.save()
 
         new_xlsx_file = import_service.remove_old_and_create_new_import_xlsx(info.context.user)
+        payment_plan.imported_xlsx_file = new_xlsx_file
+        payment_plan.save()
+
         import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id, new_xlsx_file.id)
 
         return cls(payment_plan, import_service.errors)
@@ -936,8 +970,9 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
         if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.STEFICON_ERROR):
-            logger.error("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
-            raise GraphQLError("You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan")
+            msg = "You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan"
+            logger.error(msg)
+            raise GraphQLError(msg)
 
         old_payment_plan = copy_model_object(payment_plan)
 
@@ -994,5 +1029,6 @@ class Mutations(graphene.ObjectType):
     delete_payment_plan = DeletePaymentPlanMutation.Field()
 
     export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()
+    export_xlsx_payment_plan_payment_list_per_fsp = ExportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
     import_xlsx_payment_plan_payment_list = ImportXLSXPaymentPlanPaymentListMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()

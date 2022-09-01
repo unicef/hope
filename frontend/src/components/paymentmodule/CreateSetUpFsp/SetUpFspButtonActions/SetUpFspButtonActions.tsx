@@ -26,7 +26,7 @@ export const SetUpFspButtonActions = ({
         {step === 0 && (
           <Button
             component={Link}
-            to={`/${businessArea}/payment-module/payment-plan/${paymentPlanId}`}
+            to={`/${businessArea}/payment-module/payment-plans/${paymentPlanId}`}
           >
             {t('Cancel')}
           </Button>
