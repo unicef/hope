@@ -3,12 +3,11 @@ from django.utils import timezone
 import json
 from contextlib import contextmanager
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.test import TestCase
 
-from constance import config
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -126,6 +125,7 @@ class TestAutomatingRDICreationTask(TestCase):
         "cash_assist_datahub_mis",
         "registration_datahub",
     ]
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     def test_successful_run_without_records_to_import(self):
         result = run_automate_rdi_creation_task(registration_id=123, page_size=1)

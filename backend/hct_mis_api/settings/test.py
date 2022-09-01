@@ -1,4 +1,5 @@
 import logging
+import os
 
 from .base import *  # noqa: ignore=F403
 
@@ -80,13 +81,10 @@ ELASTICSEARCH_DSL = {
     "default": {"hosts": "elasticsearch:9200"},
     "test": {"hosts": "elasticsearch:9200"},
 }
-ELASTICSEARCH_INDEX_PREFIX = 'test_'
+ELASTICSEARCH_INDEX_PREFIX = "test_"
 
-try:
-    from .local import *  # noqa: ignore=F403
-except ImportError:
-    pass
 logging.disable(logging.CRITICAL)
 
 EXCHANGE_RATE_CACHE_EXPIRY = 0
 del DATABASES["read_only"]
+CELERY_TASK_ALWAYS_EAGER = True

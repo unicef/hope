@@ -1,8 +1,6 @@
 import logging
 
-from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
@@ -13,11 +11,9 @@ from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ValueFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household import models as households
 from hct_mis_api.apps.mis_datahub.models import (
     Document,

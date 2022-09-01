@@ -1,19 +1,13 @@
 from pathlib import Path
 
 from django.conf import settings
-from django.core.management import call_command
-from django.forms.models import inlineformset_factory
-from django.test import Client, TestCase
 from django.urls import reverse
 
 import responses
-from constance import config
 from constance.test import override_config
 from django_webtest import WebTest
 
 from hct_mis_api.apps.account.admin import (
-    UserRoleAdminForm,
-    UserRoleInlineFormSet,
     get_valid_kobo_username,
 )
 from hct_mis_api.apps.account.fixtures import (
@@ -22,7 +16,7 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
     UserRoleFactory,
 )
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
+from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 
@@ -90,7 +84,7 @@ class UserImportCSVTest(WebTest):
     @responses.activate
     def test_import_csv_do_not_change_partner(self):
         partner2 = PartnerFactory(name="Partner2")
-        u: User = UserFactory(email="test@example.com", partner=self.partner)
+        u: User = UserFactory(email="test@example.com", partner=self.partner)  # noqa: F841
 
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)

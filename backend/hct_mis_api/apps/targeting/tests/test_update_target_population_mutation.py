@@ -1,7 +1,5 @@
 import copy
 
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -24,24 +22,12 @@ mutation UpdateTargetPopulation($updateTargetPopulationInput: UpdateTargetPopula
     targetPopulation{
         name
         status
-        candidateListTotalHouseholds
-        candidateListTotalIndividuals
-        finalListTotalHouseholds
-        finalListTotalIndividuals
-        candidateListTargetingCriteria{
+        totalHouseholdsCount
+        totalIndividualsCount
+        targetingCriteria{
         rules{
             filters{
-            comparisionMethod
-            fieldName
-            arguments
-            isFlexField
-            }
-        }
-        }
-        finalListTargetingCriteria{
-        rules{
-            filters{
-            comparisionMethod
+            comparisonMethod
             fieldName
             arguments
             isFlexField
@@ -60,7 +46,7 @@ VARIABLES = {
                 {
                     "filters": [
                         {
-                            "comparisionMethod": "EQUALS",
+                            "comparisonMethod": "EQUALS",
                             "fieldName": "size",
                             "arguments": [3],
                             "isFlexField": False,
@@ -79,7 +65,7 @@ VARIABLES_WRONG_ARGS_COUNT = {
                 {
                     "filters": [
                         {
-                            "comparisionMethod": "EQUALS",
+                            "comparisonMethod": "EQUALS",
                             "fieldName": "size",
                             "arguments": [3, 3],
                             "isFlexField": False,
@@ -90,14 +76,14 @@ VARIABLES_WRONG_ARGS_COUNT = {
         },
     }
 }
-VARIABLES_WRONG_COMPARISION_METHOD = {
+VARIABLES_WRONG_COMPARISON_METHOD = {
     "updateTargetPopulationInput": {
         "targetingCriteria": {
             "rules": [
                 {
                     "filters": [
                         {
-                            "comparisionMethod": "CONTAINS",
+                            "comparisonMethod": "CONTAINS",
                             "fieldName": "size",
                             "arguments": [3],
                             "isFlexField": False,
@@ -108,14 +94,14 @@ VARIABLES_WRONG_COMPARISION_METHOD = {
         },
     }
 }
-VARIABLES_UNKNOWN_COMPARISION_METHOD = {
+VARIABLES_UNKNOWN_COMPARISON_METHOD = {
     "updateTargetPopulationInput": {
         "targetingCriteria": {
             "rules": [
                 {
                     "filters": [
                         {
-                            "comparisionMethod": "BLABLA",
+                            "comparisonMethod": "BLABLA",
                             "fieldName": "size",
                             "arguments": [3],
                             "isFlexField": False,
@@ -133,7 +119,7 @@ VARIABLES_UNKNOWN_FLEX_FIELD_NAME = {
                 {
                     "filters": [
                         {
-                            "comparisionMethod": "EQUALS",
+                            "comparisonMethod": "EQUALS",
                             "fieldName": "foo_bar",
                             "arguments": [3],
                             "isFlexField": True,
@@ -151,7 +137,7 @@ VARIABLES_UNKNOWN_CORE_FIELD_NAME = {
                 {
                     "filters": [
                         {
-                            "comparisionMethod": "EQUALS",
+                            "comparisonMethod": "EQUALS",
                             "fieldName": "foo_bar",
                             "arguments": [3],
                             "isFlexField": False,
@@ -175,8 +161,8 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
-            candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
-                {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
+            targeting_criteria=cls.get_targeting_criteria_for_rule(
+                {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
             ),
             created_by=cls.user,
             business_area=cls.business_area,
@@ -184,8 +170,8 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         cls.draft_target_population.save()
         cls.approved_target_population = TargetPopulation(
             name="approved_target_population",
-            candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
-                {"field_name": "size", "arguments": [1], "comparision_method": "GREATER_THAN"}
+            targeting_criteria=cls.get_targeting_criteria_for_rule(
+                {"field_name": "size", "arguments": [1], "comparison_method": "GREATER_THAN"}
             ),
             status="LOCKED",
             created_by=cls.user,
@@ -236,8 +222,8 @@ class TestUpdateTargetPopulationMutation(APITestCase):
     @parameterized.expand(
         [
             ("wrong_args_count", VARIABLES_WRONG_ARGS_COUNT),
-            ("wrong_comparison_method", VARIABLES_WRONG_COMPARISION_METHOD),
-            ("unknown_comparison_method", VARIABLES_UNKNOWN_COMPARISION_METHOD),
+            ("wrong_comparison_method", VARIABLES_WRONG_COMPARISON_METHOD),
+            ("unknown_comparison_method", VARIABLES_UNKNOWN_COMPARISON_METHOD),
             ("unknown_flex_field_name", VARIABLES_UNKNOWN_FLEX_FIELD_NAME),
             ("unknown_core_field_name", VARIABLES_UNKNOWN_CORE_FIELD_NAME),
         ]

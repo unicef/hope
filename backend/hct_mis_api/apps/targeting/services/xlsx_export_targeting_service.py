@@ -26,13 +26,13 @@ class XlsxExportTargetingService:
             "Household unicef_id": "household.unicef_id",
             "unicef_id": "unicef_id",
             "Linked Households": self._render_all_linked_households,
-            "Bank account information": self._bank_account_info
+            "Bank account information": self._bank_account_info,
         }
 
     @cached_property
     def households(self):
-        if self.target_population.status == TargetPopulation.STATUS_DRAFT:
-            return self.target_population.candidate_list
+        if self.target_population.status == TargetPopulation.STATUS_OPEN:
+            return self.target_population.open_household_list
         return self.target_population.vulnerability_score_filtered_households
 
     @cached_property

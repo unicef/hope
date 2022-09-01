@@ -1,7 +1,4 @@
-from time import time
-
-from django.core.management import BaseCommand
-from django.db.models import DecimalField, Sum, F, Subquery, OuterRef
+from django.db.models import Sum, Subquery, OuterRef
 from django.db.models.functions import Coalesce
 
 from hct_mis_api.apps.household.models import Household

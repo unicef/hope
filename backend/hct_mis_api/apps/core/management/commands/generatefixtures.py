@@ -12,7 +12,7 @@ from hct_mis_api.apps.cash_assist_datahub import (
     fixtures as cash_assist_datahub_fixtures,
 )
 from hct_mis_api.apps.cash_assist_datahub.models import Programme, Session
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceComplaintTicketWithoutExtrasFactory,
@@ -109,9 +109,6 @@ class Command(BaseCommand):
             help="Suppresses Elasticsearch reindex.",
         )
 
-    def _generate_admin_areas(self, business_area):
-        call_command("loadadminareas", "--business_area", business_area.name)
-
     @staticmethod
     def _generate_program_with_dependencies(options, business_area_index):
         cash_plans_amount = options["cash_plans_amount"]
@@ -129,7 +126,7 @@ class Command(BaseCommand):
 
         target_population = TargetPopulationFactory(
             created_by=user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
             business_area=business_area,
         )
         for _ in range(cash_plans_amount):
@@ -144,12 +141,7 @@ class Command(BaseCommand):
                     {
                         "registration_data_import": registration_data_import,
                         "business_area": business_area,
-                        "admin_area": AdminArea.objects.filter(admin_area_level__business_area=business_area)
-                        .order_by("?")
-                        .first(),
-                        "admin_area_new": Area.objects.filter(area_type__business_area=business_area)
-                        .order_by("?")
-                        .first(),
+                        "admin_area": Area.objects.filter(area_type__business_area=business_area).order_by("?").first(),
                     },
                     {"registration_data_import": registration_data_import},
                 )
@@ -178,16 +170,10 @@ class Command(BaseCommand):
                     should_contain_payment_record = random.choice((True, False))
                     switch_dict = {
                         "feedback": lambda: GrievanceTicketFactory(
-                            admin2=AdminArea.objects.filter(admin_area_level__business_area=business_area, level=2)
+                            admin2=Area.objects.filter(area_type__business_area=business_area, area_type__area_level=2)
                             .order_by("?")
                             .first()
-                            .title,
-                            admin2_new=Area.objects.filter(
-                                area_type__business_area=business_area, area_type__area_level=2
-                            )
-                            .order_by("?")
-                            .first()
-                            .title,
+                            .name,
                         ),
                         "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
                             household=household,
@@ -201,7 +187,7 @@ class Command(BaseCommand):
                         ),
                     }
 
-                    grievance_ticket = switch_dict.get(grievance_type)()
+                    grievance_ticket = switch_dict.get(grievance_type)()  # noqa: F841
 
                 EntitlementCardFactory(household=household)
         CashPlanPaymentVerificationFactory.create_batch(1)
@@ -209,7 +195,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        self.stdout.write(f"Generating fixtures...")
+        self.stdout.write("Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")
             call_command("flush", "--noinput", database="cash_assist_datahub_mis")
@@ -254,7 +240,6 @@ class Command(BaseCommand):
         if not UserRole.objects.count():
             call_command("generateroles")
         for index in range(business_area_amount):
-            self._generate_admin_areas(BusinessArea.objects.all()[index])
             for _ in range(programs_amount):
                 self._generate_program_with_dependencies(options, index)
 

@@ -3,10 +3,12 @@ from django.test import TestCase
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.models import CountryCodeMap, CountryCodeMapManager
+from hct_mis_api.apps.core.models import CountryCodeMap
 
 
 class TestCountryCodeMap(TestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     @classmethod
     def setUpTestData(cls):
         call_command("loadcountrycodes")

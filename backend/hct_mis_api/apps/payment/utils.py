@@ -20,7 +20,7 @@ def is_right_phone_number_format(phone_number):
 
     phone_number = phone_number.strip()
     if phone_number.startswith("00"):
-        phone_number = f"+{phone_number[2:]}"    
+        phone_number = f"+{phone_number[2:]}"
 
     try:
         phonenumbers.parse(phone_number)
@@ -35,7 +35,7 @@ def get_number_of_samples(payment_records_sample_count, confidence_interval, mar
 
     variable = 0.5
     z_score = NormalDist().inv_cdf(confidence_interval + (1 - confidence_interval) / 2)
-    theoretical_sample = (z_score ** 2) * variable * (1 - variable) / margin_of_error ** 2
+    theoretical_sample = (z_score**2) * variable * (1 - variable) / margin_of_error**2
     actual_sample = ceil(
         (payment_records_sample_count * theoretical_sample / (theoretical_sample + payment_records_sample_count)) * 1.5
     )
@@ -100,7 +100,7 @@ def get_payment_records_for_dashboard(year, business_area_slug, filters, only_wi
             **chart_create_filter_query(
                 filters,
                 program_id_path="cash_plan__program__id",
-                administrative_area_path="household__admin_area_new",
+                administrative_area_path="household__admin_area",
             ),
         },
         year_filter_path="delivery_date",

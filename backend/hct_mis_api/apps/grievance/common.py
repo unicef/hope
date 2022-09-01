@@ -1,8 +1,6 @@
-from collections import defaultdict
+import logging
 
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -11,9 +9,6 @@ def _get_min_max_score(golden_records):
     items = [item.get("score", 0.0) for item in golden_records]
 
     return min(items, default=0.0), max(items, default=0.0)
-
-
-
 
 
 def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
@@ -28,11 +23,9 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
 
     registration_data_import = kwargs.get("registration_data_import", None)
     if registration_data_import:
-        ticket_details_to_check = (
-            TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
-            .filter(ticket__registration_data_import_id=registration_data_import.pk)
-            .prefetch_related("possible_duplicates")
-        )
+        ticket_details_to_check = TicketNeedsAdjudicationDetails.objects.exclude(
+            ticket__status=GrievanceTicket.STATUS_CLOSED
+        ).filter(ticket__registration_data_import_id=registration_data_import.pk)
 
         ticket_all_individuals = {main_individual, *possible_duplicates}
 
@@ -46,14 +39,12 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
 
     household = main_individual.household
     admin_level_2 = household.admin2 if household else None
-    admin_level_2_new = household.admin2_new if household else None
     area = household.village if household else ""
 
     ticket = GrievanceTicket.objects.create(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         business_area=business_area,
         admin2=admin_level_2,
-        admin2_new=admin_level_2_new,
         area=area,
         registration_data_import=registration_data_import,
     )

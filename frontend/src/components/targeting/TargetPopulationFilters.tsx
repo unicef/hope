@@ -43,7 +43,7 @@ export function TargetPopulationFilters({
             icon={<Person />}
           >
             <MenuItem value=''>{TARGETING_STATES.NONE}</MenuItem>
-            <MenuItem value='DRAFT'>{TARGETING_STATES.DRAFT}</MenuItem>
+            <MenuItem value='DRAFT'>{TARGETING_STATES.OPEN}</MenuItem>
             <MenuItem value='LOCKED'>{TARGETING_STATES.LOCKED}</MenuItem>
             <MenuItem value='PROCESSING'>
               {TARGETING_STATES.PROCESSING}

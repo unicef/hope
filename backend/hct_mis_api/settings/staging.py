@@ -1,5 +1,4 @@
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
+import os
 
 from .base import *  # noqa: ignore=F403
 

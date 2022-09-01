@@ -1,5 +1,3 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -19,12 +17,12 @@ class TestCreateTargetPopulationMutation(APITestCase):
         targetPopulation{
           name
           status
-          candidateListTotalHouseholds
-          candidateListTotalIndividuals
-            candidateListTargetingCriteria{
+          totalHouseholdsCount
+          totalIndividualsCount
+            targetingCriteria{
             rules{
               filters{
-                comparisionMethod
+                comparisonMethod
                 fieldName
                 arguments
                 isFlexField
@@ -72,7 +70,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                         {
                             "filters": [
                                 {
-                                    "comparisionMethod": "EQUALS",
+                                    "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
                                     "arguments": [3],
                                     "isFlexField": False,
