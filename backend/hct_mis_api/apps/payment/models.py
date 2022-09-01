@@ -363,6 +363,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=status,
+        # TODO: ACCEPTED status is used for the sake of importing the reconciliation info
+        # so we'd need some explicit "action" status where we can differentiate
+        # between importing xlsx for entitlemets
+        # and importing xlsx for reconciliation
         source=[Status.LOCKED, Status.ACCEPTED],
         target=Status.XLSX_IMPORTING,
     )
