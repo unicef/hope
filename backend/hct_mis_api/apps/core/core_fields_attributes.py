@@ -1,7 +1,7 @@
 import copy
 import enum
 import logging
-from datetime import datetime
+from datetime import datetime, date
 from functools import reduce
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -62,6 +62,7 @@ TYPE_STRING = "STRING"
 TYPE_LIST_OF_IDS = "LIST_OF_IDS"
 TYPE_BOOL = "BOOL"
 TYPE_DATE = "DATE"
+TYPE_DATETIME = "DATETIME"
 TYPE_IMAGE = "IMAGE"
 TYPE_SELECT_ONE = "SELECT_ONE"
 TYPE_SELECT_MANY = "SELECT_MANY"
@@ -74,7 +75,8 @@ FIELD_TYPES_TO_INTERNAL_TYPE = {
     TYPE_STRING: str,
     TYPE_LIST_OF_IDS: list,
     TYPE_BOOL: bool,
-    TYPE_DATE: datetime,
+    TYPE_DATE: date,
+    TYPE_DATETIME: datetime,
     TYPE_IMAGE: (
         str,
         InMemoryUploadedFile,
@@ -88,7 +90,7 @@ FIELD_TYPES_TO_INTERNAL_TYPE = {
 _INDIVIDUAL = "Individual"
 _HOUSEHOLD = "Household"
 
-FILTERABLE_TYPES = [TYPE_INTEGER, TYPE_STRING, TYPE_SELECT_ONE, TYPE_SELECT_MANY, TYPE_DATE, TYPE_BOOL]
+FILTERABLE_TYPES = [TYPE_INTEGER, TYPE_STRING, TYPE_SELECT_ONE, TYPE_SELECT_MANY, TYPE_DATE, TYPE_DATETIME, TYPE_BOOL]
 
 
 class Scope(str, enum.Enum):
@@ -1442,7 +1444,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "6536a987-a50e-453b-9517-57c1dccd1340",
-        "type": TYPE_DATE,
+        "type": TYPE_DATETIME,
         "name": "first_registration_date",
         "lookup": "first_registration_date",
         "required": True,
@@ -1455,7 +1457,7 @@ CORE_FIELDS_ATTRIBUTES = [
     },
     {
         "id": "2fe6d876-388f-45d9-b497-eb2f8af923e8",
-        "type": TYPE_DATE,
+        "type": TYPE_DATETIME,
         "name": "first_registration_date",
         "lookup": "first_registration_date",
         "required": True,

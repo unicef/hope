@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import partial
 from io import BytesIO
 
+import pytz
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
@@ -14,8 +15,9 @@ import openpyxl
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core.core_fields_attributes import TYPE_DATETIME
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import SheetImageLoader
+from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_DICT,
@@ -193,6 +195,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         return Point(x=float(longitude), y=float(latitude), srid=4326)
 
+    def _handle_datetime(self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs):
+        return timezone_datetime(cell.value)
+
     def _handle_identity_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
             return
@@ -366,6 +371,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "bank_name_i_c": self._handle_bank_account_fields,
                 "bank_account_number_i_c": self._handle_bank_account_fields,
                 "debit_card_number_i_c": self._handle_bank_account_fields,
+                "first_registration_date_i_c": self._handle_datetime,
             },
             "households": {
                 "consent_sign_h_c": self._handle_image_field,
@@ -373,6 +379,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "fchild_hoh_h_c": self._handle_bool_field,
                 "child_hoh_h_c": self._handle_bool_field,
                 "consent_h_c": self._handle_bool_field,
+                "first_registration_date_h_c": self._handle_datetime,
             },
         }
 
@@ -381,6 +388,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "IMAGE": self._handle_image_field,
             "DECIMAL": self._handle_decimal_field,
             "BOOL": self._handle_bool_field,
+            TYPE_DATETIME: self._handle_datetime,
         }
 
         sheet_title = sheet.title.lower()
