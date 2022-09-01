@@ -67,6 +67,7 @@ import { OverviewContainer } from '../../../components/core/OverviewContainer';
 import { ContentLink } from '../../../components/core/ContentLink';
 import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
+import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 
 const steps = [
   'Category Selection',
@@ -834,13 +835,34 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           </Grid>
                           <Box pt={5}>
                             <BoxWithBorders>
-                              <Grid item xs={6}>
-                                <Box py={3}>
-                                  <LookUpRelatedTickets
-                                    values={values}
-                                    onValueChange={setFieldValue}
-                                  />
-                                </Box>
+                              <Grid container spacing={4}>
+                                <Grid item xs={6}>
+                                  <Box py={3}>
+                                    <LookUpRelatedTickets
+                                      values={values}
+                                      onValueChange={setFieldValue}
+                                    />
+                                  </Box>
+                                </Grid>
+                                {(values.subCategory ===
+                                  GRIEVANCE_SUB_CATEGORIES.PAYMENT_COMPLAINT ||
+                                  values.subCategory ===
+                                    GRIEVANCE_SUB_CATEGORIES.FSP_COMPLAINT) && (
+                                  <Grid item xs={6}>
+                                    <Box py={3}>
+                                      <LookUpPaymentRecord
+                                        values={values}
+                                        onValueChange={setFieldValue}
+                                      />
+                                    </Box>
+                                    <FormHelperText
+                                      key='selectedPaymentRecords'
+                                      error
+                                    >
+                                      {errors.selectedPaymentRecords}
+                                    </FormHelperText>
+                                  </Grid>
+                                )}
                               </Grid>
                             </BoxWithBorders>
                           </Box>
