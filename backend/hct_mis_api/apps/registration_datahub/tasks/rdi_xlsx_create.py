@@ -4,7 +4,6 @@ from datetime import datetime
 from functools import partial
 from io import BytesIO
 
-import pytz
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage

@@ -1,6 +1,5 @@
 import logging
 
-import pytz
 from django.db import transaction
 from django.db.models import F, Q
 from django.utils import timezone
