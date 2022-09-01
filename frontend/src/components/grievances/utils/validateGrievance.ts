@@ -458,6 +458,12 @@ export function validateUsingSteps(
     }
   }
   if (activeStep === GrievanceSteps.Description) {
+    if (
+      values.subCategory === GRIEVANCE_SUB_CATEGORIES.PAYMENT_COMPLAINT &&
+      !Object.keys(values.selectedPaymentRecords).length
+    ) {
+      errors.selectedPaymentRecords = 'Payment Records are required';
+    }
     setValidateData(true);
   }
   return errors;
