@@ -210,7 +210,6 @@ class TestPaymentPlanServices(APITestCase):
             old_pp_targeting = updated_pp_1.target_population
             old_pp_exchange_rate = updated_pp_1.exchange_rate
             old_pp_total_households_count = updated_pp_1.total_households_count
-            print(f"old_pp_total_households_count {old_pp_total_households_count}")
 
             updated_pp_2 = PaymentPlanService(payment_plan=pp).update(
                 input_data=dict(targeting_id=self.id_to_base64(new_targeting.id, "Targeting"))

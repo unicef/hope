@@ -26,7 +26,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -56,7 +57,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -86,7 +88,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -116,7 +119,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -146,7 +150,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -176,7 +181,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -206,7 +212,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -236,7 +243,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -266,7 +274,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -296,7 +305,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -326,7 +336,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -356,7 +367,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -386,7 +398,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -416,7 +429,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -446,7 +460,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -476,7 +491,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -506,7 +522,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -536,7 +553,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -566,7 +584,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -596,7 +615,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -626,7 +646,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -656,7 +677,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -686,7 +708,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -716,7 +739,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -746,7 +770,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -776,7 +801,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -806,7 +832,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -836,7 +863,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -866,7 +894,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -896,7 +925,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -926,7 +956,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -956,7 +987,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -986,7 +1018,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1016,7 +1049,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1046,7 +1080,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1076,7 +1111,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1106,7 +1142,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1136,7 +1173,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1166,7 +1204,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1196,7 +1235,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1226,7 +1266,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1256,7 +1297,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1286,7 +1328,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1316,7 +1359,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1346,7 +1390,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1376,7 +1421,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1406,7 +1452,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1436,7 +1483,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1466,7 +1514,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1496,7 +1545,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1526,7 +1576,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1556,7 +1607,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1586,7 +1638,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1616,7 +1669,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1646,7 +1700,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1676,7 +1731,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1706,7 +1762,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1736,7 +1793,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1766,7 +1824,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1796,7 +1855,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1826,7 +1886,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1856,7 +1917,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1886,7 +1948,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1916,7 +1979,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1946,7 +2010,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -1976,7 +2041,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2006,7 +2072,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2036,7 +2103,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2066,7 +2134,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2096,7 +2165,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2126,7 +2196,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2156,7 +2227,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2186,7 +2258,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2216,7 +2289,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2246,7 +2320,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2276,7 +2351,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2306,7 +2382,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2336,7 +2413,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2366,7 +2444,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2396,7 +2475,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2426,7 +2506,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2456,7 +2537,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2486,7 +2568,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2516,7 +2599,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2546,7 +2630,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2576,7 +2661,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2606,7 +2692,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2636,7 +2723,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2666,7 +2754,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2696,7 +2785,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2726,7 +2816,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2756,7 +2847,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2786,7 +2878,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2816,7 +2909,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2846,7 +2940,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2876,7 +2971,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2906,7 +3002,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2936,7 +3033,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2966,7 +3064,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -2996,7 +3095,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3026,7 +3126,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3056,7 +3157,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3086,7 +3188,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3116,7 +3219,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3146,7 +3250,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3176,7 +3281,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3206,7 +3312,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3236,7 +3343,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3266,7 +3374,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3296,7 +3405,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3326,7 +3436,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3356,7 +3467,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3386,7 +3498,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3416,7 +3529,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3446,7 +3560,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3476,7 +3591,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3506,7 +3622,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3536,7 +3653,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3566,7 +3684,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3596,7 +3715,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3626,7 +3746,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3656,7 +3777,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3686,7 +3808,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3716,7 +3839,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3746,7 +3870,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3776,7 +3901,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3806,7 +3932,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3836,7 +3963,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3866,7 +3994,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3896,7 +4025,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3926,7 +4056,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": true
   }
 },
 {
@@ -3956,7 +4087,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -3986,7 +4118,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4016,7 +4149,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4046,7 +4180,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4076,7 +4211,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4106,7 +4242,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4136,7 +4273,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4166,7 +4304,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4196,7 +4335,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4226,7 +4366,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4256,7 +4397,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4286,7 +4428,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4316,7 +4459,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4346,7 +4490,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4376,7 +4521,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4406,7 +4552,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4436,7 +4583,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4466,7 +4614,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4496,7 +4645,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4526,7 +4676,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4556,7 +4707,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4586,7 +4738,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4616,7 +4769,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4646,7 +4800,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4676,7 +4831,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4706,7 +4862,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4736,7 +4893,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4766,7 +4924,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4796,7 +4955,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4826,7 +4986,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
@@ -4856,7 +5017,8 @@
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
     "countries": [],
-    "countries_new": []
+    "countries_new": [],
+    "is_payment_plan_applicable": false
   }
 },
 {
