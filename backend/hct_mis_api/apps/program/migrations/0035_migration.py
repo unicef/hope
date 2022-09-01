@@ -6,15 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('program', '0032_migration'),
+        ("program", "0034_migration"),
     ]
 
     operations = [
         migrations.SeparateDatabaseAndState(
-            state_operations=[
-            ],
-            database_operations=[
-                migrations.AlterModelTable('CashPlan', 'payment_cashplan')
-            ],
+            state_operations=[],
+            database_operations=[migrations.AlterModelTable("CashPlan", "payment_cashplan")],
         )
     ]

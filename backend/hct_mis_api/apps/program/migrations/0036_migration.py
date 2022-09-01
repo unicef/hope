@@ -6,18 +6,17 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0046_migration'),
-        ('program', '0033_migration'),
+        ("payment", "0046_migration"),
+        ("program", "0035_migration"),
     ]
 
     operations = [
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.DeleteModel(
-                    name='CashPlan',
+                    name="CashPlan",
                 ),
             ],
-            database_operations=[
-            ],
+            database_operations=[],
         )
     ]
