@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
@@ -8309,7 +8310,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'first_registration_date',
                 'required': True,
-                'type': 'DATE'
+                'type': 'DATETIME'
             },
             {
                 'associatedWith': 'Individual',
@@ -8326,7 +8327,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'first_registration_date',
                 'required': True,
-                'type': 'DATE'
+                'type': 'DATETIME'
             },
             {
                 'associatedWith': 'Household',
