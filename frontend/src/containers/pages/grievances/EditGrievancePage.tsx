@@ -371,7 +371,6 @@ export const EditGrievancePage = (): React.ReactElement => {
                             values.subCategory ===
                               +GRIEVANCE_SUB_CATEGORIES.FSP_COMPLAINT
                           }
-                          paymentModalWithRadioButtons
                           onValueChange={setFieldValue}
                           errors={errors}
                           touched={touched}

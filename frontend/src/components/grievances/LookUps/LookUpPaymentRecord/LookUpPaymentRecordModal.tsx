@@ -17,7 +17,6 @@ export const LookUpPaymentRecordModal = ({
   initialValues,
   lookUpDialogOpen,
   setLookUpDialogOpen,
-  paymentModalWithRadioButtons,
 }): React.ReactElement => {
   const { t } = useTranslation();
   return (
@@ -48,7 +47,6 @@ export const LookUpPaymentRecordModal = ({
                 openInNewTab
                 setFieldValue={setFieldValue}
                 initialValues={initialValues}
-                paymentModalWithRadioButtons={paymentModalWithRadioButtons}
               />
             </DialogContent>
             <DialogFooter>
