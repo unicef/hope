@@ -1,6 +1,6 @@
 import logging
-
 import graphene
+
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -22,7 +22,6 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
@@ -49,7 +48,7 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
-from .celery_tasks import target_population_apply_steficon
+from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 
 logger = logging.getLogger(__name__)
 
@@ -219,6 +218,9 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if target_population.is_finalized():
             logger.error("Finalized Target Population can't be changed")
             raise ValidationError("Finalized Target Population can't be changed")
+        if target_population.status == TargetPopulation.STATUS_ASSIGNED:
+            logger.error("Assigned Target Population can't be changed")
+            raise ValidationError("Assigned Target Population can't be changed")
         if name:
             target_population.name = name
         if program_id_encoded:
