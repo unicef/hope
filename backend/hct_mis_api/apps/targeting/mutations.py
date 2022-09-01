@@ -332,31 +332,38 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
 
     @classmethod
     def validated_mutate(cls, root, info, **kwargs):
-        with transaction.atomic():
-            user = info.context.user
-            target_population: TargetPopulation = kwargs.get("model_object")
-            old_target_population = kwargs.get("old_model_object")
-            target_population.status = TargetPopulation.STATUS_PROCESSING
-            target_population.finalized_by = user
-            target_population.finalized_at = timezone.now()
-            if target_population.final_list_targeting_criteria:
-                """Gets all households from candidate list which
-                don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)
-                 final=False (final list is candidate list filtered by final=True"""
-                households_ids_queryset = target_population.households.filter(
-                    ~Q(target_population.final_list_targeting_criteria.get_query())
-                ).values_list("id")
-                HouseholdSelection.objects.filter(
-                    household__id__in=households_ids_queryset,
-                    target_population=target_population,
+        user = info.context.user
+        old_target_population = kwargs.get("old_model_object")
+        target_population: TargetPopulation = kwargs.get("model_object")
+        if target_population.program.business_area.is_payment_plan_applicable:
+            with transaction.atomic():
+                target_population.status = TargetPopulation.STATUS_READY
+                target_population.finalized_by = user
+                target_population.finalized_at = timezone.now()
+                target_population.save()
+        else:
+            with transaction.atomic():
+                target_population.status = TargetPopulation.STATUS_PROCESSING
+                target_population.finalized_by = user
+                target_population.finalized_at = timezone.now()
+                if target_population.final_list_targeting_criteria:
+                    """Gets all households from candidate list which
+                    don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)
+                    final=False (final list is candidate list filtered by final=True"""
+                    households_ids_queryset = target_population.households.filter(
+                        ~Q(target_population.final_list_targeting_criteria.get_query())
+                    ).values_list("id")
+                    HouseholdSelection.objects.filter(
+                        household__id__in=households_ids_queryset,
+                        target_population=target_population,
+                    ).update(final=False)
+
+                HouseholdSelection.objects.filter(target_population=target_population,).exclude(
+                    household__id__in=target_population.vulnerability_score_filtered_households.values_list("id")
                 ).update(final=False)
 
-            HouseholdSelection.objects.filter(target_population=target_population,).exclude(
-                household__id__in=target_population.vulnerability_score_filtered_households.values_list("id")
-            ).update(final=False)
-
-            target_population.save()
-        send_target_population_task.delay(target_population.id)
+                target_population.save()
+            send_target_population_task.delay(target_population.id)
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",

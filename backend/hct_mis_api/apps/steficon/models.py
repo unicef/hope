@@ -59,8 +59,7 @@ class Rule(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     type = models.CharField(
-        choices=TYPE_CHOICES, max_length=50, default=TYPE_TARGETING,
-        help_text="Use Rule for Targeting or Payment Plan"
+        choices=TYPE_CHOICES, max_length=50, default=TYPE_TARGETING, help_text="Use Rule for Targeting or Payment Plan"
     )
 
     flags = JSONField(default=dict, blank=True)
