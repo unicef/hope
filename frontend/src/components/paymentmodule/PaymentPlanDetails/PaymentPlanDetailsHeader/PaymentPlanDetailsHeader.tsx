@@ -74,7 +74,6 @@ export const PaymentPlanDetailsHeader = ({
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canUnlock={canLock}
-          canLockFsp={canLock}
         />
       );
       break;
