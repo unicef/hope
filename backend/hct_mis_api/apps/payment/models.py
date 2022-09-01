@@ -207,9 +207,12 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         ]
     )
 
+    # TODO: divide status for "normal" status and "action" status
+    # and disallow to trigger actions, if in "action" status or something like that
     class Status(models.TextChoices):
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
+        LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
         IN_APPROVAL = "IN_APPROVAL", "In Approval"
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
@@ -223,7 +226,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     class Action(models.TextChoices):
         LOCK = "LOCK", "Lock"
+        LOCK_FSP = "LOCK_FSP", "Lock FSP"
         UNLOCK = "UNLOCK", "Unlock"
+        UNLOCK_FSP = "UNLOCK_FSP", "Unlock FSP"
         SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL", "Send For Approval"
         APPROVE = "APPROVE", "Approve"
         AUTHORIZE = "AUTHORIZE", "Authorize"
@@ -254,11 +259,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
     export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
     export_per_fsp_xlsx_file = models.ForeignKey(
-        FileTemp,
-        null=True,
-        blank=True,
-        related_name="+",
-        on_delete=models.CASCADE
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE
     )
     steficon_rule = models.ForeignKey(
         RuleCommit,
@@ -291,15 +292,31 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=status,
-        source=[Status.IN_APPROVAL, Status.IN_AUTHORIZATION, Status.IN_REVIEW],
+        source=Status.LOCKED_FSP,
         target=Status.LOCKED,
+    )
+    def status_unlock_fsp(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=[Status.LOCKED],
+        target=Status.LOCKED_FSP,
+    )
+    def status_lock_fsp(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=[Status.IN_APPROVAL, Status.IN_AUTHORIZATION, Status.IN_REVIEW],
+        target=Status.LOCKED_FSP,
     )
     def status_reject(self):
         self.status_date = timezone.now()
 
     @transition(
         field=status,
-        source=Status.LOCKED,
+        source=Status.LOCKED_FSP,
         target=Status.IN_APPROVAL,
     )
     def status_send_to_approval(self):
@@ -331,7 +348,14 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=status,
-        source=[Status.LOCKED, Status.ACCEPTED],
+        source=[
+            Status.LOCKED,
+            Status.LOCKED_FSP,
+            Status.IN_APPROVAL,
+            Status.IN_AUTHORIZATION,
+            Status.IN_REVIEW,
+            Status.ACCEPTED,
+        ],
         target=Status.XLSX_EXPORTING,
     )
     def status_exporting(self):
@@ -339,7 +363,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=status,
-        source=Status.LOCKED,
+        # TODO: ACCEPTED status is used for the sake of importing the reconciliation info
+        # so we'd need some explicit "action" status where we can differentiate
+        # between importing xlsx for entitlemets
+        # and importing xlsx for reconciliation
+        source=[Status.LOCKED, Status.ACCEPTED],
         target=Status.XLSX_IMPORTING,
     )
     def status_importing(self):
