@@ -74,7 +74,7 @@ FIELD_TYPES_TO_INTERNAL_TYPE = {
     TYPE_STRING: str,
     TYPE_LIST_OF_IDS: list,
     TYPE_BOOL: bool,
-    TYPE_DATE: date,
+    TYPE_DATE: datetime,
     TYPE_IMAGE: (
         str,
         InMemoryUploadedFile,
