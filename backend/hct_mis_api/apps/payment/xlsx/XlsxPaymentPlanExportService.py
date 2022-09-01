@@ -35,10 +35,12 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         "currency",
         "entitlement",
         "entitlement_usd",
+        "received_amount",
     )
     ID_COLUMN_INDEX = 0
     PAYMENT_CHANNEL_COLUMN_INDEX = 5
     ENTITLEMENT_COLUMN_INDEX = 8
+    RECEIVED_AMOUNT_COLUMN_INDEX = 10
 
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
@@ -58,6 +60,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             str(payment.currency),
             payment.entitlement_quantity,
             payment.entitlement_quantity_usd,
+            "",  # empty field to be filled with received_amount
         )
         self.ws_export_list.append(payment_row)
 
@@ -69,8 +72,14 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         self._create_workbook()
         self._add_headers()
         self._add_payment_list()
-        self._adjust_column_width_from_col(self.ws_export_list, 0, 1, 7)
-        self._add_col_bgcolor([6, 9])
+        self._adjust_column_width_from_col(ws=self.ws_export_list, min_row=0, min_col=1, max_col=10)
+        self._add_col_bgcolor(
+            [
+                self.PAYMENT_CHANNEL_COLUMN_INDEX + 1,
+                self.ENTITLEMENT_COLUMN_INDEX + 1,
+                self.RECEIVED_AMOUNT_COLUMN_INDEX + 1,
+            ]
+        )
         return self.wb
 
     def save_xlsx_file(self, user):
@@ -80,7 +89,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             xlsx_obj = FileTemp(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
-                created_by=user
+                created_by=user,
             )
             self.wb.save(tmp.name)
             tmp.seek(0)
@@ -165,7 +174,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             xlsx_obj = FileTemp(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
-                created_by=user
+                created_by=user,
             )
             tmp_zip.seek(0)
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"

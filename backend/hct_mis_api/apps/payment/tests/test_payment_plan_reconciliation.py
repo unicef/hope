@@ -479,3 +479,10 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         # receive reconciliation info
         # see payment entitlement delivered
+
+
+# TODO: be able to trigger xlsx export via FE
+# download file
+# check content
+# fill content
+# upload file
