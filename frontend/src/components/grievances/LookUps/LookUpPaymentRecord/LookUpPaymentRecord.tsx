@@ -8,12 +8,10 @@ export const LookUpPaymentRecord = ({
   onValueChange,
   values,
   disabled,
-  paymentModalWithRadioButtons,
 }: {
   onValueChange;
   values;
   disabled?;
-  paymentModalWithRadioButtons?;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
@@ -39,7 +37,6 @@ export const LookUpPaymentRecord = ({
         />
       )}
       <LookUpPaymentRecordModal
-        paymentModalWithRadioButtons={paymentModalWithRadioButtons}
         lookUpDialogOpen={lookUpDialogOpen}
         setLookUpDialogOpen={setLookUpDialogOpen}
         initialValues={values}

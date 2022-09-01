@@ -1,6 +1,7 @@
 import { Checkbox, Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
@@ -14,7 +15,6 @@ import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
   openInNewTab: boolean;
-  paymentModalWithRadioButtons?: boolean;
   selected: Array<string>;
   checkboxClickHandler: (
     event:
@@ -27,10 +27,11 @@ interface LookUpPaymentRecordTableRowProps {
 export function LookUpPaymentRecordTableRow({
   paymentRecord,
   selected,
-  paymentModalWithRadioButtons = false,
   checkboxClickHandler,
 }: LookUpPaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(paymentRecord.id);
   const received = paymentRecord?.verification?.receivedAmount;
@@ -42,7 +43,7 @@ export function LookUpPaymentRecordTableRow({
       key={paymentRecord.id}
     >
       <TableCell padding='checkbox'>
-        {paymentModalWithRadioButtons ? (
+        {isEditTicket ? (
           <Radio
             color='primary'
             onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
