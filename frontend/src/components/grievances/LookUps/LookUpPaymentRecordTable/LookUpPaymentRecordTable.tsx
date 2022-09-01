@@ -1,4 +1,5 @@
 import React, { ReactElement, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
@@ -13,15 +14,15 @@ interface LookUpPaymentRecordTableProps {
   openInNewTab?: boolean;
   setFieldValue;
   initialValues;
-  paymentModalWithRadioButtons?: boolean;
 }
 export function LookUpPaymentRecordTable({
   openInNewTab = false,
   setFieldValue,
   initialValues,
-  paymentModalWithRadioButtons = false,
 }: LookUpPaymentRecordTableProps): ReactElement {
   const businessArea = useBusinessArea();
+  const location = useLocation();
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const initialVariables = {
     household: initialValues?.selectedHousehold?.id,
     businessArea,
@@ -33,7 +34,7 @@ export function LookUpPaymentRecordTable({
   const handleCheckboxClick = (event, name): void => {
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
-    if (!paymentModalWithRadioButtons) {
+    if (!isEditTicket) {
       if (selectedIndex === -1) {
         newSelected = newSelected.concat(selected, name);
       } else if (selectedIndex === 0) {
@@ -65,7 +66,7 @@ export function LookUpPaymentRecordTable({
     setFieldValue('selectedPaymentRecords', []);
   };
   const numSelected = selected.length;
-  if (paymentModalWithRadioButtons) {
+  if (isEditTicket) {
     return (
       <UniversalTable<PaymentRecordNode, LookUpPaymentRecordsQueryVariables>
         headCells={headCells}
@@ -74,7 +75,6 @@ export function LookUpPaymentRecordTable({
         initialVariables={initialVariables}
         renderRow={(row) => (
           <LookUpPaymentRecordTableRow
-            paymentModalWithRadioButtons={paymentModalWithRadioButtons}
             openInNewTab={openInNewTab}
             key={row.id}
             paymentRecord={row}
