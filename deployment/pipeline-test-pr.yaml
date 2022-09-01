@@ -43,6 +43,7 @@ stages:
           - script: yarn test --watchAll=false
             workingDirectory: 'frontend'
             displayName: "Test"
+
   - stage: build_and_push
     dependsOn: []
     displayName: BUILD and PUSH
@@ -87,8 +88,56 @@ stages:
                 dev-latest
                 $(System.PullRequest.PullRequestId)-latest
 
-  - stage: test_backend
+  - stage: lint_backend
     dependsOn: build_and_push
+    displayName: Lint-Backend
+    jobs:
+      - job: django_lint
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[DJANGO LINT]"
+        variables:
+          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registry)
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: '.env-django-test'
+          - task: CmdLine@2
+            displayName: "Setup .env and docker-compose.tst.yml"
+            inputs:
+              script: |
+               mv deployment/docker-compose.tst.yml docker-compose.tst.yml
+               mv $(Agent.TempDirectory)/.env-django-test .env
+
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registry)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run --no-deps backend ./docker-lint-entrypoint.sh'
+              dockerComposeFileArgs: |
+               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
+
+          - task: PublishTestResults@2
+            displayName: "Publish lint result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'backend/lint-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'Lint results'
+
+  - stage: test_backend
+    dependsOn: lint_backend
     displayName: Test-Backend
     jobs:
       - job: django_tests

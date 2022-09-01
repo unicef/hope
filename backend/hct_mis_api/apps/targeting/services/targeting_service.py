@@ -2,7 +2,6 @@ import logging
 
 from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
-from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
@@ -157,7 +156,6 @@ class TargetingIndividualRuleFilterBlockBase:
 
         households_id = q.values_list("household_id", flat=True)
         return Q(id__in=households_id)
-
 
 
 class TargetingCriteriaFilterBase:

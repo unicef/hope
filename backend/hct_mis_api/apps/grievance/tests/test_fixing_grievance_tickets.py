@@ -1,4 +1,3 @@
-from django.core.management import call_command
 from parameterized import parameterized
 
 from hct_mis_api.apps.grievance.fixtures import TicketIndividualDataUpdateDetailsFactory

@@ -6,9 +6,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.targeting.celery_tasks import target_population_full_rebuild
 from hct_mis_api.apps.targeting.models import (
-    HouseholdSelection,
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,

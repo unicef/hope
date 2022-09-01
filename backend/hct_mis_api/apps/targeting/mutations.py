@@ -3,7 +3,6 @@ import logging
 import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphql import GraphQLError
@@ -22,7 +21,6 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
@@ -45,7 +43,8 @@ from hct_mis_api.apps.targeting.validators import (
     FinalizeTargetPopulationValidator,
     TargetingCriteriaInputValidator,
     TargetValidator,
-    UnlockTargetPopulationValidator, RebuildTargetPopulationValidator,
+    UnlockTargetPopulationValidator,
+    RebuildTargetPopulationValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
@@ -63,7 +62,6 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
 
     id = graphene.ID()
     name = graphene.String()
-
 
 
 class ValidatedMutation(PermissionMutation):
@@ -574,6 +572,7 @@ class RebuildTargetPopulationMutation(ValidatedMutation):
             target_population,
         )
         return cls(target_population=target_population)
+
 
 class Mutations(graphene.ObjectType):
     create_target_population = CreateTargetPopulationMutation.Field()
