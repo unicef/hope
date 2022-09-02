@@ -1,5 +1,4 @@
 import factory
-from django_countries.fields import Country
 from pytz import utc
 
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual

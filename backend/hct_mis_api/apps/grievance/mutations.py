@@ -1182,7 +1182,9 @@ class PaymentDetailsApproveMutation(PermissionMutation):
             logger.error("Payment Details changes can approve only for Grievance Ticket on status For Approval")
             raise GraphQLError("Payment Details changes can approve only for Grievance Ticket on status For Approval")
 
-        old_payment_verification_ticket_details = grievance_ticket.payment_verification_ticket_details
+        old_payment_verification_ticket_details = (  # noqa F841
+            grievance_ticket.payment_verification_ticket_details
+        )  # TODO: is this a bug?
         grievance_ticket.payment_verification_ticket_details.approve_status = kwargs.get("approve_status", False)
         grievance_ticket.payment_verification_ticket_details.save()
 

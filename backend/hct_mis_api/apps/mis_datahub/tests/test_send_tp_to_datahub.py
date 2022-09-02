@@ -58,13 +58,6 @@ class TestSendTpToDatahub(TestCase):
             "changed_by": None,
             "finalized_at": None,
             "finalized_by": None,
-            "candidate_list_total_households": None,
-            "candidate_list_total_individuals": None,
-            "final_list_total_households": None,
-            "final_list_total_individuals": None,
-            "selection_computation_metadata": None,
-            "candidate_list_targeting_criteria": None,
-            "final_list_targeting_criteria": None,
         }
 
         return TargetPopulation.objects.create(
@@ -194,6 +187,8 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_first.households.set([cls.household])
+        cls.target_population_first.refresh_stats()
+        cls.target_population_first.save()
 
         cls.target_population_second = cls._create_target_population(
             sent_to_datahub=False,
@@ -203,6 +198,8 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_second.households.set([cls.household])
+        cls.target_population_second.refresh_stats()
+        cls.target_population_second.save()
 
         cls.target_population_third = cls._create_target_population(
             sent_to_datahub=False,
@@ -212,6 +209,8 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_third.households.set([cls.household_second])
+        cls.target_population_third.refresh_stats()
+        cls.target_population_third.save()
 
     def test_individual_data_needed_true(self):
         task = SendTPToDatahubTask()
@@ -278,7 +277,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         target_population_first.households.set([household])
-
+        target_population_first.refresh_stats()
         target_population_second = self._create_target_population(
             sent_to_datahub=False,
             name="Test TP xD 2",
@@ -287,7 +286,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         target_population_second.households.set([household])
-
+        target_population_second.refresh_stats()
         task = SendTPToDatahubTask()
         task.send_target_population(target_population_first)
         dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
@@ -328,8 +327,9 @@ class TestSendTpToDatahub(TestCase):
         target_population = TargetPopulationFactory(
             program=program,
             status=TargetPopulation.STATUS_PROCESSING,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
+        target_population.refresh_stats()
 
         task = SendTPToDatahubTask()
         task.send_target_population(target_population)
@@ -352,8 +352,9 @@ class TestSendTpToDatahub(TestCase):
         target_population = TargetPopulationFactory(
             program=program,
             status=TargetPopulation.STATUS_PROCESSING,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
+        target_population.refresh_stats()
 
         task = SendTPToDatahubTask()
         task.send_target_population(target_population)
@@ -376,7 +377,7 @@ class TestSendTpToDatahub(TestCase):
         target_population = TargetPopulationFactory(
             program=program,
             status=TargetPopulation.STATUS_PROCESSING,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
 
         try:
@@ -384,7 +385,6 @@ class TestSendTpToDatahub(TestCase):
                 HouseholdSelectionFactory(
                     household=self.household,
                     target_population=target_population,
-                    final=True,
                 )
         except IntegrityError:
             pass
