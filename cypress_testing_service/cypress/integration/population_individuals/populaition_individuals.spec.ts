@@ -43,4 +43,5 @@ Then('I should see the Individual details page', () => {
   cy.get('[data-cy="page-header-container"]').contains('Individual ID:');
   cy.get('h6').contains('Bio Data');
   cy.get('h6').contains('Vulnerabilities');
+  cy.get('h6').contains('Activity Log');
 });
