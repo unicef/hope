@@ -43,4 +43,10 @@ Then('I should see the Household details page', () => {
   cy.get('[data-cy="page-header-container"]').contains('Household ID:');
   cy.get('h6').contains('Details');
   cy.get('h6').contains('Benefits');
+  cy.get('h6').contains('Household Composition');
+  cy.get('h6').contains('Individuals in Household');
+  cy.get('h6').contains('Payment Records');
+  cy.get('h6').contains('Vulnerabilities');
+  cy.get('h6').contains('Registration Details');
+  cy.get('h6').contains('Activity Log');
 });
