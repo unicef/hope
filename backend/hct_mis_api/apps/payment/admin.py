@@ -35,7 +35,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("target_population", AutoCompleteFilter),
-        ("cash_plan", AutoCompleteFilter),
+        ("parent", AutoCompleteFilter),
         ("service_provider", AutoCompleteFilter),
         # ValueFilter.factory("cash_plan__id", "CashPlan ID"),
         # ValueFilter.factory("target_population__id", "TargetPopulation ID"),
@@ -44,13 +44,13 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "status",
         "delivery_date",
         ("service_provider__name", "Service Provider"),
-        ("cash_plan__name", "CashPlan"),
+        ("parent__name", "CashPlan"),
         ("target_population__name", "TargetPopulation"),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = (
         "business_area",
-        "cash_plan",
+        "parent",
         "household",
         "head_of_household",
         "target_population",
@@ -58,11 +58,11 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     )
 
     def cash_plan_name(self, obj):
-        return obj.cash_plan.name
+        return obj.parent.name
 
     def get_queryset(self, request):
         return (
-            super().get_queryset(request).select_related("household", "cash_plan", "target_population", "business_area")
+            super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
         )
 
 
@@ -188,31 +188,31 @@ class PaymentPlanAdmin(HOPEModelAdminBase):
 
 @admin.register(Payment)
 class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
-    list_display = ("unicef_id", "household", "status", "payment_plan")
+    list_display = ("unicef_id", "household", "status", "parent")
     list_filter = (
         ("unicef_id", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
-        ("payment_plan", AutoCompleteFilter),
+        ("parent", AutoCompleteFilter),
         ("financial_service_provider", AutoCompleteFilter),
     )
     advanced_filter_fields = (
         "status",
         "delivery_date",
         ("financial_service_provider__name", "Service Provider"),
-        ("payment_plan", "PaymentPlan"),
+        ("parent", "Payment Plan"),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = (
         "business_area",
-        "payment_plan",
+        "parent",
         "household",
         "head_of_household",
         "financial_service_provider",
     )
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related("household", "payment_plan", "business_area")
+        return super().get_queryset(request).select_related("household", "parent", "business_area")
 
 
 @admin.register(DeliveryMechanismPerPaymentPlan)

@@ -49,7 +49,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
 
         PaymentRecordFactory.create_batch(
             3,
-            cash_plan=cash_plans_program1[0],
+            parent=cash_plans_program1[0],
             currency="AFG",
             delivered_quantity_usd=50,
             delivered_quantity=100,
@@ -57,7 +57,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         )
         PaymentRecordFactory.create_batch(
             3,
-            cash_plan=cash_plans_program1[1],
+            parent=cash_plans_program1[1],
             currency="AFG",
             delivered_quantity_usd=100,
             delivered_quantity=200,
@@ -66,7 +66,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
 
         PaymentRecordFactory.create_batch(
             3,
-            cash_plan=cash_plans_program2[0],
+            parent=cash_plans_program2[0],
             currency="USD",
             delivered_quantity_usd=100,
             delivered_quantity=100,
@@ -74,7 +74,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         )
         PaymentRecordFactory.create_batch(
             3,
-            cash_plan=cash_plans_program2[1],
+            parent=cash_plans_program2[1],
             currency="USD",
             delivered_quantity_usd=200,
             delivered_quantity=200,

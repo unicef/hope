@@ -27,7 +27,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'financeReviewNumberRequired': 3,
                         'maleAdultsCount': 1,
                         'maleChildrenCount': 0,
-                        'payments': {
+                        'paymentItems': {
                             'totalCount': 2
                         },
                         'paymentsConflictsCount': 0,
@@ -62,7 +62,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'financeReviewNumberRequired': 3,
                         'maleAdultsCount': 0,
                         'maleChildrenCount': 1,
-                        'payments': {
+                        'paymentItems': {
                             'totalCount': 2
                         },
                         'paymentsConflictsCount': 1,
@@ -179,7 +179,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_locked_payment_pl
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
                         'excluded': False,
-                        'paymentPlan': {
+                        'parent': {
                             'unicefId': 'PP-02'
                         },
                         'paymentPlanHardConflicted': False,
@@ -192,7 +192,8 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_locked_payment_pl
                                 'paymentPlanStartDate': '2020-09-10',
                                 'paymentPlanStatus': 'OPEN'
                             }
-                        ]
+                        ],
+                        'unicefId': 'RCPT-0060-20-0.000.003'
                     }
                 }
             ],
@@ -212,8 +213,27 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
+                        'excluded': False,
+                        'parent': {
+                            'unicefId': 'PP-01'
+                        },
+                        'paymentPlanHardConflicted': False,
+                        'paymentPlanHardConflictedData': [
+                        ],
+                        'paymentPlanSoftConflicted': False,
+                        'paymentPlanSoftConflictedData': [
+                        ],
+                        'unicefId': 'RCPT-0060-20-0.000.001'
+                    }
+                },
+                {
+                    'node': {
+                        'deliveredQuantity': 50.0,
+                        'deliveredQuantityUsd': 100.0,
+                        'entitlementQuantity': 100.0,
+                        'entitlementQuantityUsd': 200.0,
                         'excluded': True,
-                        'paymentPlan': {
+                        'parent': {
                             'unicefId': 'PP-01'
                         },
                         'paymentPlanHardConflicted': True,
@@ -226,25 +246,8 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         ],
                         'paymentPlanSoftConflicted': False,
                         'paymentPlanSoftConflictedData': [
-                        ]
-                    }
-                },
-                {
-                    'node': {
-                        'deliveredQuantity': 50.0,
-                        'deliveredQuantityUsd': 100.0,
-                        'entitlementQuantity': 100.0,
-                        'entitlementQuantityUsd': 200.0,
-                        'excluded': False,
-                        'paymentPlan': {
-                            'unicefId': 'PP-01'
-                        },
-                        'paymentPlanHardConflicted': False,
-                        'paymentPlanHardConflictedData': [
                         ],
-                        'paymentPlanSoftConflicted': False,
-                        'paymentPlanSoftConflictedData': [
-                        ]
+                        'unicefId': 'RCPT-0060-20-0.000.002'
                     }
                 }
             ],
@@ -283,7 +286,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
             {
                 'name': 'Accepted',
                 'value': 'ACCEPTED'
-            },
+            }
         ]
     }
 }

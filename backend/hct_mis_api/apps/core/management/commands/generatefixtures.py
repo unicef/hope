@@ -154,7 +154,7 @@ class Command(BaseCommand):
                     program.admin_areas.add(household.admin_area)
 
                 payment_record = PaymentRecordFactory(
-                    cash_plan=cash_plan,
+                    parent=cash_plan,
                     household=household,
                     target_population=target_population,
                     delivered_quantity_usd=None,

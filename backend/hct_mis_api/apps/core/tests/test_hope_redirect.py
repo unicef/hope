@@ -75,7 +75,7 @@ class TestHopeRedirect(APITestCase):
             business_area=business_area,
         )
         payment_record = PaymentRecordFactory(
-            cash_plan=cash_plan,
+            parent=cash_plan,
             household=household,
             target_population=target_population,
             ca_id="P8F-21-CSH-00031-0000006",

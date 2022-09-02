@@ -42,7 +42,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
                 business_area=business_area,
                 delivery_type=PaymentRecord.DELIVERY_TYPE_CASH,
                 delivered_quantity_usd=200.20,
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 household=household,
             )
             PaymentRecordFactory.create_batch(
@@ -51,7 +51,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
                 business_area=business_area,
                 delivery_type=PaymentRecord.DELIVERY_TYPE_VOUCHER,
                 delivered_quantity_usd=100.00,
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 household=household,
             )
 
