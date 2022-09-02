@@ -1,3 +1,6 @@
+from django.db import DEFAULT_DB_ALIAS, connections
+from django.test.utils import CaptureQueriesContext
+
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -112,7 +115,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             type=dt, document_number="ASD123", individual=cls.individuals[0], status=Document.STATUS_VALID
         )
         cls.document2 = Document(type=dt, document_number="ASD123", individual=cls.individuals[1])
-        cls.document3 = Document(type=dt, document_number="ASD1235", individual=cls.individuals[2])
+        cls.document3 = Document(type=dt, document_number="BBC999", individual=cls.individuals[2])
         cls.document4 = Document(type=dt, document_number="ASD123", individual=cls.individuals[3])
         cls.document5 = Document(
             type=dt, document_number="TOTALY UNIQ", individual=cls.individuals[4], status=Document.STATUS_VALID
@@ -120,18 +123,39 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         cls.document6 = Document.objects.create(
             type=dt_tax_id, document_number="ASD123", individual=cls.individuals[2], status=Document.STATUS_VALID
         )
+        cls.document7 = Document.objects.create(
+            type=dt,
+            document_number="ASD123",
+            individual=cls.individuals[1],
+        )
+        cls.document8 = Document.objects.create(
+            type=dt,
+            document_number="ASD123",
+            individual=cls.individuals[4],
+        )
+
         cls.document1.save()
         cls.document2.save()
         cls.document3.save()
         cls.document4.save()
         cls.document5.save()
+        cls.all_documents = [
+            cls.document1,
+            cls.document2,
+            cls.document3,
+            cls.document4,
+            cls.document5,
+            cls.document6,
+            cls.document7,
+        ]
+
+    def refresh_all_documents(self):
+        for document in self.all_documents:
+            document.refresh_from_db()
 
     def test_hard_documents_deduplication(self):
         DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
-        self.document1.refresh_from_db()
-        self.document2.refresh_from_db()
-        self.document3.refresh_from_db()
-        self.document4.refresh_from_db()
+        self.refresh_all_documents()
         self.assertEqual(self.document1.status, Document.STATUS_VALID)
         self.assertEqual(self.document2.status, Document.STATUS_NEED_INVESTIGATION)
         self.assertEqual(self.document3.status, Document.STATUS_VALID)
@@ -143,10 +167,32 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     def test_hard_documents_deduplication_for_initially_valid(self):
         DeduplicateTask.hard_deduplicate_documents((self.document5,))
-        self.document5.refresh_from_db()
+        self.refresh_all_documents()
         self.assertEqual(self.document5.status, Document.STATUS_VALID)
         self.assertEqual(GrievanceTicket.objects.count(), 0)
 
     def test_hard_documents_deduplication_number_of_queries(self):
-        with self.assertNumQueries(13):
+        context = CaptureQueriesContext(connection=connections[DEFAULT_DB_ALIAS])
+        with context:
             DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))
+            first_dedup_query_count = len(context.captured_queries)
+            DeduplicateTask.hard_deduplicate_documents(
+                (self.document2, self.document3, self.document4, self.document5, self.document7, self.document8),
+                self.registration_data_import,
+            )
+            second_dedup_query_count = len(context.captured_queries) - first_dedup_query_count
+            self.assertEqual(
+                first_dedup_query_count, second_dedup_query_count, "Both queries should use same amount of queries"
+            )
+            self.assertEqual(first_dedup_query_count, 6, "Should only use 6 queries")
+
+    def test_ticket_created_correctly(self):
+        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))
+        self.refresh_all_documents()
+
+        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        DeduplicateTask.hard_deduplicate_documents(
+            (self.document7,),
+            self.registration_data_import,
+        )
+        self.assertEqual(GrievanceTicket.objects.count(), 1)
