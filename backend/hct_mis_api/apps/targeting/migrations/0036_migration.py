@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name="status",
             field=models.CharField(
                 choices=[
-                    ("DRAFT", "Open"),
+                    ("OPEN", "Open"),
                     ("LOCKED", "Locked"),
                     ("STEFICON_WAIT", "Waiting for Rule Engine"),
                     ("STEFICON_RUN", "Rule Engine Running"),
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                     ("ASSIGNED", "Assigned"),
                 ],
                 db_index=True,
-                default="DRAFT",
+                default="OPEN",
                 max_length=256,
             ),
         ),
