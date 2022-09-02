@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.geo.models import Area
@@ -72,10 +72,7 @@ class CreateReport(ReportValidator, PermissionMutation):
 
         report = Report.objects.create(**report_vars)
         if admin_areas:
-            report.admin_area_new.set(admin_areas)
-            admin_areas_original_id = [area.original_id for area in admin_areas]
-            admin_areas_old = AdminArea.objects.filter(pk__in=admin_areas_original_id)
-            report.admin_area.set(admin_areas_old)
+            report.admin_area.set(admin_areas)
 
         report_export_task.delay(report_id=str(report.id))
 
@@ -146,10 +143,7 @@ class CreateDashboardReport(PermissionMutation):
             report_vars["program"] = program
 
         if admin_area_id and business_area.slug != "global":
-            admin_area_new = get_object_or_404(Area, id=decode_id_string(admin_area_id))
-            report_vars["admin_area_new"] = admin_area_new
-
-            admin_area = get_object_or_404(AdminArea, id=admin_area_new.original_id)
+            admin_area = get_object_or_404(Area, id=decode_id_string(admin_area_id))
             report_vars["admin_area"] = admin_area
 
         report = DashboardReport.objects.create(**report_vars)

@@ -36,6 +36,13 @@ def invalid_file_no_match():
     return File(BytesIO(content), name="iban_update_invalid_no_match.xlsx")
 
 
+def invalid_file_empty_cell():
+    content = Path(
+        f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/iban_update_invalid_empty_cell.xlsx"
+    ).read_bytes()
+    return File(BytesIO(content), name="iban_update_invalid_empty_cell.xlsx")
+
+
 def invalid_file_bad_columns():
     content = Path(
         f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/iban_update_invalid_bad_columns.xlsx"
@@ -65,6 +72,10 @@ class TestIndividualXlsxUpdate(TestCase):
 
         cls.xlsx_invalid_file_no_match = XlsxUpdateFile.objects.create(
             file=invalid_file_no_match(), business_area=cls.business_area, uploaded_by=cls.user
+        )
+
+        cls.xlsx_invalid_file_empty_cell = XlsxUpdateFile.objects.create(
+            file=invalid_file_empty_cell(), business_area=cls.business_area, uploaded_by=cls.user
         )
 
         cls.xlsx_invalid_file_bad_columns = XlsxUpdateFile.objects.create(
@@ -110,9 +121,8 @@ class TestIndividualXlsxUpdate(TestCase):
         _, cls.individuals = create_household_and_individuals(
             household_data=household_data, individuals_data=individuals_data
         )
-
+        # overwrite unicef_id
         for individual in cls.individuals:
-            BankAccountInfoFactory(individual=individual)
             individual.save()
 
     @mock.patch(
@@ -146,7 +156,7 @@ class TestIndividualXlsxUpdate(TestCase):
                 "first_name": self.user.first_name,
                 "last_name": self.user.last_name,
                 "email": self.user.email,
-                "message": "['No UNICEF_ID column in provided file', 'No IBAN column in provided file']",
+                "message": "['No UNICEF_ID column in provided file', 'No IBAN column in provided file', 'No BANK_NAME column in provided file']",
                 "upload_file_id": str(self.xlsx_invalid_file_bad_columns.id),
             }
         )
@@ -154,7 +164,7 @@ class TestIndividualXlsxUpdate(TestCase):
     @mock.patch(
         "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
     )
-    def test_update_individuals_iban_from_xlsx_task_invalid_file_no_match_fail(self, prepare_email_mock):
+    def test_update_individuals_iban_from_xlsx_task_invalid_no_match_fail(self, prepare_email_mock):
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_invalid_file_no_match.id,
             uploaded_by_id=self.user.id,
@@ -173,6 +183,10 @@ class TestIndividualXlsxUpdate(TestCase):
         "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
     )
     def test_update_individuals_iban_from_xlsx_task_valid_match(self, prepare_email_mock):
+        # creating BankAccountInfo for only one individual, second one should be populated on demand
+        BankAccountInfoFactory(individual=self.individuals[0])
+        self.individuals[0].save()
+
         update_individuals_iban_from_xlsx_task.run(
             xlsx_update_file_id=self.xlsx_valid_file.id,
             uploaded_by_id=self.user.id,
@@ -183,10 +197,31 @@ class TestIndividualXlsxUpdate(TestCase):
                 "first_name": self.user.first_name,
                 "last_name": self.user.last_name,
                 "email": self.user.email,
-                "message": "All of the Individuals IBAN number we're updated successfuly",
+                "message": "All of the Individuals IBAN number we're updated successfully",
                 "upload_file_id": str(self.xlsx_valid_file.id),
             }
         )
+        bank_account_info_0 = self.individuals[0].bank_account_info.first()
+        bank_account_info_1 = self.individuals[1].bank_account_info.first()
+        self.assertEqual(bank_account_info_0.bank_account_number, "1111111111")
+        self.assertEqual(bank_account_info_0.bank_name, "Super Bank")
+        self.assertEqual(bank_account_info_1.bank_account_number, "2222222222")
+        self.assertEqual(bank_account_info_1.bank_name, "Bank")
 
-        self.assertEqual(self.individuals[0].bank_account_info.first().bank_account_number, "1111111111")
-        self.assertEqual(self.individuals[1].bank_account_info.first().bank_account_number, "2222222222")
+    @mock.patch(
+        "hct_mis_api.apps.household.services.individuals_iban_xlsx_update.IndividualsIBANXlsxUpdate._prepare_email"
+    )
+    def test_update_individuals_iban_from_xlsx_task_invalid_empty_cell(self, prepare_email_mock):
+        update_individuals_iban_from_xlsx_task.run(
+            xlsx_update_file_id=self.xlsx_invalid_file_empty_cell.id,
+            uploaded_by_id=self.user.id,
+        )
+        prepare_email_mock.assert_called_once_with(
+            context={
+                "first_name": self.user.first_name,
+                "last_name": self.user.last_name,
+                "email": self.user.email,
+                "message": "There was an unexpected error during Individuals IBAN update: BankAccountInfo data is missing for Individual IND-88-0000.0002 in Row 3, One of IBAN/BANK_NAME value was not provided. Please validate also other rows for missing data.",
+                "upload_file_id": str(self.xlsx_invalid_file_empty_cell.id),
+            }
+        )

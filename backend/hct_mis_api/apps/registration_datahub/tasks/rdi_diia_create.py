@@ -1,49 +1,50 @@
 import logging
-import dateutil.parser
 
-from django.db import transaction
-from django_countries.fields import Country
 from django.core.exceptions import ValidationError
+from django.db import transaction
+
+import dateutil.parser
+from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.models import (
+    DISABLED,
+    FEMALE,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_TAX_ID,
-    DISABLED,
-    NOT_DISABLED,
-    WIFE_HUSBAND,
-    SON_DAUGHTER,
-    RELATIONSHIP_UNKNOWN,
     MALE,
-    FEMALE,
+    NOT_DISABLED,
+    RELATIONSHIP_UNKNOWN,
+    SON_DAUGHTER,
+    WIFE_HUSBAND,
     YES,
     Document,
     DocumentType,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportedIndividual,
-    ImportedHousehold,
-    RegistrationDataImportDatahub,
+    DIIA_DISABLED,
+    DIIA_RELATIONSHIP_DAUGHTER,
+    DIIA_RELATIONSHIP_HEAD,
+    DIIA_RELATIONSHIP_HUSBAND,
+    DIIA_RELATIONSHIP_SON,
+    DIIA_RELATIONSHIP_WIFE,
+    DiiaHousehold,
+    DiiaIndividual,
+    ImportData,
     ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
-    DiiaIndividual,
-    DiiaHousehold,
-    ImportData,
-    DIIA_DISABLED,
-    DIIA_RELATIONSHIP_HEAD,
-    DIIA_RELATIONSHIP_SON,
-    DIIA_RELATIONSHIP_DAUGHTER,
-    DIIA_RELATIONSHIP_WIFE,
-    DIIA_RELATIONSHIP_HUSBAND,
+    ImportedHousehold,
+    ImportedIndividual,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-
 
 logger = logging.getLogger(__name__)
 
@@ -350,7 +351,7 @@ class RdiDiiaCreateTask:
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
         self.doc_type_for_tax_id, _ = DocumentType.objects.get_or_create(
-            country=Country("UA"),
+            country=GeoCountry.objects.get(iso_code2="UA"),
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
 

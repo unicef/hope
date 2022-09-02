@@ -43,7 +43,7 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.file.url if self.file else ""
 
     def resolve_admin_area(self, info, **kwargs):
-        return self.admin_area_new.all()
+        return self.admin_area.all()
 
 
 class Query(graphene.ObjectType):

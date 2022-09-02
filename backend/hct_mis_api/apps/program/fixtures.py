@@ -5,9 +5,8 @@ import factory
 from factory import fuzzy
 from pytz import utc
 
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
-
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.program.models import Program
 
 
@@ -39,7 +38,7 @@ class ProgramFactory(factory.DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    locations = factory.SubFactory(AdminAreaFactory)
+    locations = factory.SubFactory(AreaFactory)
     budget = factory.fuzzy.FuzzyDecimal(1000000.0, 900000000.0)
     frequency_of_payments = fuzzy.FuzzyChoice(
         Program.FREQUENCY_OF_PAYMENTS_CHOICE,
@@ -66,7 +65,7 @@ class ProgramFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def locations(self, create, extracted, **kwargs):
         if not create:
-            self.locations.add(AdminAreaFactory())
+            self.locations.add(AreaFactory())
 
         if extracted:
             for location in extracted:

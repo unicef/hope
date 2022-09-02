@@ -4,7 +4,7 @@ import { Box, Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import { FileCopy } from '@material-ui/icons';
 import {
-  TargetPopulationNode,
+  TargetPopulationQuery,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
@@ -22,7 +22,7 @@ const IconContainer = styled.span`
 `;
 
 export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
   canDuplicate: boolean;
 }
 
