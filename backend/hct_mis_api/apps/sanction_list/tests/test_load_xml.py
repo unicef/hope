@@ -10,6 +10,7 @@ from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTas
 
 class TestLoadXML(BaseElasticSearchTestCase):
     databases = ("default", "registration_datahub")
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     def test_execute(self):
         main_test_files_path = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
@@ -43,7 +44,7 @@ class TestLoadXML(BaseElasticSearchTestCase):
 
         self.assertIn(
             "KP",
-            updated_individual.nationalities.values_list("nationality", flat=True),
+            updated_individual.nationalities.values_list("nationality__iso_code2", flat=True),
         )
 
         task = LoadSanctionListXMLTask(file_path=f"{main_test_files_path}/updated2-consolidated.xml")

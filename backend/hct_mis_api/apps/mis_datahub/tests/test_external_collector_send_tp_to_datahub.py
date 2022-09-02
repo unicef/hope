@@ -2,12 +2,10 @@ from django.core.management import call_command
 from django.test import TestCase
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
@@ -27,6 +25,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
     @staticmethod
     def _pre_test_commands():
         create_afghanistan()
+        call_command("loadcountries")
         call_command("generatedocumenttypes")
         call_command("loadcountrycodes")
         business_area_with_data_sharing = BusinessArea.objects.first()
@@ -43,13 +42,6 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             "changed_by": None,
             "finalized_at": None,
             "finalized_by": None,
-            "candidate_list_total_households": None,
-            "candidate_list_total_individuals": None,
-            "final_list_total_households": None,
-            "final_list_total_individuals": None,
-            "selection_computation_metadata": None,
-            "candidate_list_targeting_criteria": None,
-            "final_list_targeting_criteria": None,
         }
 
         return TargetPopulation.objects.create(
@@ -62,12 +54,14 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls._pre_test_commands()
 
         business_area_with_data_sharing = BusinessArea.objects.first()
-        state_area_type = AdminAreaLevelFactory(
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
             name="State",
-            business_area=business_area_with_data_sharing,
-            admin_level=1,
+            country=country,
+            area_level=1,
         )
-        admin_area = AdminAreaFactory(admin_area_level=state_area_type)
+        admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         cls.program_individual_data_needed_true = ProgramFactory(
             individual_data_needed=True,
@@ -94,6 +88,9 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_with_individuals.households.set([cls.household, cls.household_second])
+        cls.target_population_with_individuals.refresh_stats()
+        cls.target_population_with_individuals.save()
+
 
         cls.target_population_without_individuals = cls._create_target_population(
             sent_to_datahub=False,
@@ -103,6 +100,8 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_without_individuals.households.set([cls.household, cls.household_second])
+        cls.target_population_without_individuals.refresh_stats()
+        cls.target_population_without_individuals.save()
 
     @classmethod
     def create_first_household(cls, admin_area, rdi):

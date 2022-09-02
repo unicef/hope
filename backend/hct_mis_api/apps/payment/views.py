@@ -42,9 +42,7 @@ def download_payment_plan_payment_list(request, payment_plan_id):
     payment_plan_id = decode_id_string(payment_plan_id)
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
-    if not request.user.has_permission(
-            Permissions.PAYMENT_MODULE_VIEW_LIST.value, payment_plan.business_area
-    ):
+    if not request.user.has_permission(Permissions.PAYMENT_MODULE_VIEW_LIST.value, payment_plan.business_area):
         logger.error("Permission Denied: User does not have correct permission.")
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
@@ -60,9 +58,7 @@ def download_payment_plan_payment_list_per_fsp(request, payment_plan_id):
     payment_plan_id = decode_id_string(payment_plan_id)
     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
-    if not request.user.has_permission(
-        Permissions.PAYMENT_MODULE_VIEW_LIST.value, payment_plan.business_area
-    ):
+    if not request.user.has_permission(Permissions.PAYMENT_MODULE_VIEW_LIST.value, payment_plan.business_area):
         logger.error("Permission Denied: User does not have correct permission.")
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
