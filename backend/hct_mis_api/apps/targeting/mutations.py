@@ -1,6 +1,6 @@
 import logging
-
 import graphene
+
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -48,6 +48,7 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
+
 from .celery_tasks import (
     target_population_apply_steficon,
     target_population_full_rebuild,
@@ -205,11 +206,15 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         exclusion_reason = input.get("exclusion_reason")
         targeting_criteria_input = input.get("targeting_criteria")
 
-        cls.validate_statuses(
-            name, target_population, targeting_criteria_input, vulnerability_score_max, vulnerability_score_min
-        )
-        should_rebuild_list = False
-        should_rebuild_stats = False
+        if target_population.is_locked() and name:
+            logger.error("Name can't be changed when Target Population is in APPROVED status")
+            raise ValidationError("Name can't be changed when Target Population is in APPROVED status")
+        if target_population.is_finalized():
+            logger.error("Finalized Target Population can't be changed")
+            raise ValidationError("Finalized Target Population can't be changed")
+        if target_population.status == TargetPopulation.STATUS_ASSIGNED:
+            logger.error("Assigned Target Population can't be changed")
+            raise ValidationError("Assigned Target Population can't be changed")
         if name:
             target_population.name = name
         if vulnerability_score_min is not None:

@@ -27,12 +27,14 @@ class Report(TimeStampedUUIDModel):
     PROGRAM = 7
     INDIVIDUALS_AND_PAYMENT = 8
     GRIEVANCES = 9
+    PAYMENT_PLAN = 10
     REPORT_TYPES = (
         (INDIVIDUALS, _("Individuals")),
         (HOUSEHOLD_DEMOGRAPHICS, _("Households")),
         (CASH_PLAN_VERIFICATION, _("Cash Plan Verification")),
         (PAYMENTS, _("Payments")),
         (PAYMENT_VERIFICATION, _("Payment verification")),
+        (PAYMENT_PLAN, _("Payment Plan")),
         (CASH_PLAN, _("Cash Plan")),
         (PROGRAM, _("Programme")),
         (INDIVIDUALS_AND_PAYMENT, _("Individuals & Payment")),
