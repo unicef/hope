@@ -1,10 +1,10 @@
 import logging
-
 from datetime import date, datetime
 
 from dateutil.parser import parse
 
 from hct_mis_api.apps.core.core_fields_attributes import (
+    TYPE_BOOL,
     TYPE_DATE,
     TYPE_DECIMAL,
     TYPE_INTEGER,
@@ -118,6 +118,13 @@ class RdiBaseCreateTask:
                 return value
 
             if isinstance(value, str):
-                value = parse(value)
+                return parse(value)
+
+        if value_type == TYPE_BOOL:
+            if isinstance(value, str):
+                if value.lower() == "false":
+                    return False
+                elif value.lower() == "true":
+                    return True
 
         return value
