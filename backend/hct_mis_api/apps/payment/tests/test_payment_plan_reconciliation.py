@@ -60,9 +60,9 @@ mutation CreatePaymentPlan($input: CreatePaymentPlanInput!) {
 }
 """
 
-APPROVE_TARGET_POPULATION_MUTATION = """
-mutation ApproveTP($id: ID!) {
-    approveTargetPopulation(id: $id) {
+LOCK_TARGET_POPULATION_MUTATION = """
+mutation LockTP($id: ID!) {
+    lockTargetPopulation(id: $id) {
         targetPopulation {
             id
         }
@@ -278,7 +278,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         ]
 
         self.graphql_request(
-            request_string=APPROVE_TARGET_POPULATION_MUTATION,
+            request_string=LOCK_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables={
                 "id": target_population_id,
