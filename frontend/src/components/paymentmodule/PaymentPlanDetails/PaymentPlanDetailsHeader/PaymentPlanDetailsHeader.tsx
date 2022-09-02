@@ -116,7 +116,6 @@ export const PaymentPlanDetailsHeader = ({
     case 'ACCEPTED':
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          paymentPlan={paymentPlan}
           canDownloadXlsx={canDownloadXlsx}
           canSendToFsp={canSendToFsp}
         />
