@@ -588,7 +588,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
     is_multiple_duplicates_version = models.BooleanField(default=False)
     possible_duplicate = models.ForeignKey(
-        "household.Individual", related_name="+", on_delete=models.CASCADE
+        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True
     )  # this field will be deprecated
     possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
     selected_individual = models.ForeignKey(
