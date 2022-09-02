@@ -11,6 +11,7 @@ from hct_mis_api.apps.registration_datahub.validators import (
 
 class TestKoboSaveValidatorsMethods(TestCase):
     databases = ("default", "registration_datahub")
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
     VALID_JSON = [
         {
             "_notes": [],
@@ -592,7 +593,6 @@ class TestKoboSaveValidatorsMethods(TestCase):
             self.assertEqual(result, data["expected"])
 
     def test_validate_everything(self):
-        self.maxDiff = None
         validator = KoboProjectImportDataInstanceValidator()
         business_area = BusinessArea.objects.first()
 

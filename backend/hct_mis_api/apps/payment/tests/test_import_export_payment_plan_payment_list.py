@@ -24,11 +24,12 @@ from hct_mis_api.apps.payment.fixtures import (
     ServiceProviderFactory,
     RealProgramFactory,
     PaymentPlanFactory,
-    PaymentFactory
+    PaymentFactory,
 )
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo import models as geo_models
 
 
 def valid_file():
@@ -42,16 +43,16 @@ def invalid_file():
 
 
 class ImportExportPaymentPlanPaymentListTest(APITestCase):
-
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
 
         if not Household.objects.all().count():
             for n in range(1, 4):
                 create_household(
-                    {"size": n, "address": "Lorem Ipsum", "country_origin": "PL"},
+                    {"size": n, "address": "Lorem Ipsum", "country_origin": country_origin},
                 )
 
         if ServiceProvider.objects.count() < 3:
@@ -88,20 +89,20 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
     def test_import_invalid_file(self):
         error_msg = [
-            ('Payment Plan - Payment List', 'A2', 'This payment id 123123 is not in Payment Plan Payment List'),
+            ("Payment Plan - Payment List", "A2", "This payment id 123123 is not in Payment Plan Payment List"),
             (
-                'Payment Plan - Payment List',
-                'F3',
+                "Payment Plan - Payment List",
+                "F3",
                 "Payment_channel should be one of ['Cardless cash withdrawal', 'Cash', 'Cash by FSP', 'Cheque', "
                 "'Deposit to Card', 'In Kind', 'Mobile Money', 'Other', 'Pre-paid card', 'Referral', 'Transfer', "
-                "'Transfer to Account', 'Voucher'] but received Invalid"
+                "'Transfer to Account', 'Voucher'] but received Invalid",
             ),
             (
-                'Payment Plan - Payment List',
-                'F3',
+                "Payment Plan - Payment List",
+                "F3",
                 "You can't set payment_channel Invalid for Payment with already assigned "
-                "payment channel Deposit to Card"
-            )
+                "payment channel Deposit to Card",
+            ),
         ]
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_invalid_file)
         wb = service.open_workbook()
@@ -173,11 +174,8 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             self.assertEqual(len(fsp_ids), len(file_list))
             fsp_names = FinancialServiceProvider.objects.filter(id__in=fsp_ids).values_list("name", flat=True)
             file_list_fsp = [
-                f.replace(
-                    ".xlsx", ""
-                ).replace(
-                    f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_", ""
-                ) for f in file_list
+                f.replace(".xlsx", "").replace(f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_", "")
+                for f in file_list
             ]
             for fsp_name in fsp_names:
                 self.assertIn(fsp_name, file_list_fsp)

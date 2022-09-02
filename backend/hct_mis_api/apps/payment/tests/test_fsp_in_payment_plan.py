@@ -98,11 +98,12 @@ def payment_plan_setup(cls):
     target_population = TargetPopulationFactory(
         id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
         created_by=cls.user,
-        candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+        targeting_criteria=(TargetingCriteriaFactory()),
         business_area=cls.business_area,
         status=TargetPopulation.STATUS_LOCKED,
     )
-    target_population.apply_criteria_query()  # simulate having TP households calculated
+    target_population.full_rebuild()
+    target_population.save()
     cls.payment_plan = PaymentPlanFactory(
         total_households_count=4, target_population=target_population, status=PaymentPlan.Status.LOCKED
     )
@@ -268,11 +269,12 @@ class TestFSPSetup(APITestCase):
     def test_lacking_delivery_mechanisms(self):
         target_population = TargetPopulationFactory(
             created_by=self.user,
-            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+            targeting_criteria=(TargetingCriteriaFactory()),
             business_area=self.business_area,
             status=TargetPopulation.STATUS_LOCKED,
         )
-        target_population.apply_criteria_query()  # simulate having TP households calculated
+        target_population.full_rebuild()
+        target_population.save()
         payment_plan = PaymentPlanFactory(
             total_households_count=3, target_population=target_population, status=PaymentPlan.Status.LOCKED
         )
