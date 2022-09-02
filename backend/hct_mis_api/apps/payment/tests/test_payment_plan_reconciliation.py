@@ -2,6 +2,9 @@ from datetime import timedelta
 from django.utils import timezone
 from unittest.mock import patch
 
+from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -305,7 +308,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                     "targetingId": target_population_id,
                     "startDate": "2022-08-24",
                     "endDate": "2022-08-31",
-                    "dispersionStartDate": "2022-08-24",
+                    "dispersionStartDate": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
                     "dispersionEndDate": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
                     "currency": "USD",
                 }
@@ -313,6 +316,24 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
         assert "errors" not in create_payment_plan_response, create_payment_plan_response
         encoded_payment_plan_id = create_payment_plan_response["data"]["createPaymentPlan"]["paymentPlan"]["id"]
+        payment_plan_id = decode_id_string(encoded_payment_plan_id)
+
+        santander_fsp = FinancialServiceProviderFactory(
+            name="Santander",
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH, GenericPayment.DELIVERY_TYPE_TRANSFER],
+        )
+        encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
+
+        PaymentFactory(
+            payment_plan=PaymentPlan.objects.get(id=payment_plan_id),
+            business_area=self.business_area,
+            household=self.household_1,
+            collector=self.individual_1,
+            delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+            entitlement_quantity=100,
+            entitlement_quantity_usd=100,
+            financial_service_provider=santander_fsp,
+        )
 
         lock_payment_plan_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
@@ -343,12 +364,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             assert mock.delay.call_count == 1
             call_args = mock.delay.call_args[0]
             payment_plan_apply_steficon(*call_args)
-
-        santander_fsp = FinancialServiceProviderFactory(
-            name="Santander",
-            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH, GenericPayment.DELIVERY_TYPE_TRANSFER],
-        )
-        encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,

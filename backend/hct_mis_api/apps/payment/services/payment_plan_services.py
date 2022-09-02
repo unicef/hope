@@ -96,7 +96,7 @@ class PaymentPlanService:
 
     def lock(self):
         if not self.payment_plan.can_be_locked:
-            raise GraphQLError(f"At least one valid Payment should exist in order to Lock the Payment Plan")
+            raise GraphQLError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
         self.payment_plan.payments.all().filter(payment_plan_hard_conflicted=True).update(excluded=True)
         self.payment_plan.status_lock()
