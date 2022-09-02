@@ -8,7 +8,8 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.fixtures import CashPlanPaymentVerificationFactory
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 
 
 class TestXlsxVerificationExport(APITestCase):

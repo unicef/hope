@@ -1,5 +1,4 @@
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, CashPlanFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
@@ -62,7 +61,7 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
             variables=manual_sample_query_variables,
             context={"user": self.user},
         )
-        self.assertTrue(manual_response["data"]["sampleSize"]["paymentRecordCount"] == 1)
+        self.assertEqual(manual_response["data"]["sampleSize"]["paymentRecordCount"], 1)
 
         rapid_pro_sample_query_variables = create_query_variables(cash_plan, "RAPIDPRO")
         rapid_pro_response = self.graphql_request(
@@ -70,4 +69,4 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
             variables=rapid_pro_sample_query_variables,
             context={"user": self.user},
         )
-        self.assertTrue(rapid_pro_response["data"]["sampleSize"]["paymentRecordCount"] == 0)
+        self.assertEqual(rapid_pro_response["data"]["sampleSize"]["paymentRecordCount"], 0)
