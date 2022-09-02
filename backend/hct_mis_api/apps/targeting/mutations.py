@@ -390,22 +390,6 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 target_population.status = TargetPopulation.STATUS_PROCESSING
                 target_population.finalized_by = user
                 target_population.finalized_at = timezone.now()
-                if target_population.final_list_targeting_criteria:
-                    """Gets all households from candidate list which
-                    don't meet final_list_targeting_criteria and set them (HouseholdSelection m2m model)
-                    final=False (final list is candidate list filtered by final=True"""
-                    households_ids_queryset = target_population.households.filter(
-                        ~Q(target_population.final_list_targeting_criteria.get_query())
-                    ).values_list("id")
-                    HouseholdSelection.objects.filter(
-                        household__id__in=households_ids_queryset,
-                        target_population=target_population,
-                    ).update(final=False)
-
-                HouseholdSelection.objects.filter(target_population=target_population,).exclude(
-                    household__id__in=target_population.vulnerability_score_filtered_households.values_list("id")
-                ).update(final=False)
-
                 target_population.save()
             send_target_population_task.delay(target_population.id)
         log_create(
