@@ -586,12 +586,12 @@ class Query(graphene.ObjectType):
 
     def resolve_sample_size(self, info, input, **kwargs):
         def get_payment_records(cash_plan, payment_verification_plan, verification_channel):
+            kwargs = {}
+            if payment_verification_plan:
+                kwargs["payment_verification_plan"] = payment_verification_plan
             if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
-                return cash_plan.available_payment_records(
-                    payment_verification_plan=payment_verification_plan,
-                    extra_validation=does_payment_record_have_right_hoh_phone_number,
-                )
-            return cash_plan.available_payment_records(payment_verification_plan=payment_verification_plan)
+                kwargs["extra_validation"] = does_payment_record_have_right_hoh_phone_number
+            return cash_plan.available_payment_records(**kwargs)
 
         cash_plan_id = decode_id_string(input.get("cash_plan_id"))
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
