@@ -35,7 +35,7 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_delete_open(self):
         pp = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
-        self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_DRAFT)
+        self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_OPEN)
 
         pp = PaymentPlanService(payment_plan=pp).delete()
         self.assertEqual(pp.is_removed, True)

@@ -1,7 +1,8 @@
 import logging
 
-from django.utils import timezone
 from django.core.cache import cache
+from django.utils import timezone
+
 from constance import config
 
 from hct_mis_api.apps.grievance.models import (
@@ -33,7 +34,7 @@ class CheckAgainstSanctionListPreMergeTask:
                     "must": [
                         {"match": {"documents.number": doc.document_number}},
                         {"match": {"documents.type": IDENTIFICATION_TYPE_NATIONAL_ID}},
-                        {"match": {"documents.country": doc.issuing_country.alpha3}},
+                        {"match": {"documents.country": getattr(doc.issuing_country, "iso_code3", "")}},
                     ],
                     "boost": 2,
                 }
@@ -103,13 +104,11 @@ class CheckAgainstSanctionListPreMergeTask:
                         possible_matches.add(marked_individual.id)
                         household = marked_individual.household
                         admin_level_2 = household.admin2 if household else ""
-                        admin_level_2_new = household.admin2_new if household else ""
                         area = household.village if household else ""
                         ticket = GrievanceTicket(
                             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
                             business_area=marked_individual.business_area,
                             admin2=admin_level_2,
-                            admin2_new=admin_level_2_new,
                             area=area,
                             registration_data_import=registration_data_import,
                         )

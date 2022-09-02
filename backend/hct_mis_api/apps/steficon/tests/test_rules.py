@@ -113,8 +113,8 @@ class TestBasicRule(TestCase):
         rule2 = Rule.objects.create(
             name="Rule2", definition=f"result.value=invoke({rule1.pk}, context).value", enabled=True
         )
-        release1 = rule1.release()
-        release2 = rule2.release()
+        rule1.release()
+        rule2.release()
 
         result = rule2.execute({"hh": self.household})
         self.assertEqual(result.value, 101)

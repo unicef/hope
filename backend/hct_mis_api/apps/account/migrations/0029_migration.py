@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def restore_partner(apps, schema_editor):
-    User = apps.get_model("account", "User")
+    User = apps.get_model("account", "User")  # noqa: F841
     # for user in User.objects.all():
     #     user.org = user.partner.name
     #     user.save()

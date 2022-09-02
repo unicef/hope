@@ -2,6 +2,7 @@ from io import BytesIO
 from pathlib import Path
 
 from parameterized import parameterized
+
 from django.conf import settings
 from django.core.files import File
 
@@ -9,7 +10,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory,
@@ -17,7 +18,6 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, XlsxCashPlanPaymentVerificationFile
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-
 
 
 class TestXlsxVerificationMarkAsInvalid(APITestCase):
@@ -49,8 +49,7 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
         cls.user = UserFactory()
 
         program = ProgramFactory(business_area=cls.business_area)
-        program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
-        program.admin_areas_new.set(Area.objects.order_by("?")[:3])
+        program.admin_areas.set(Area.objects.order_by("?")[:3])
 
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
