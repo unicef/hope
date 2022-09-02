@@ -13,7 +13,6 @@ import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
 from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
-from mptt.models import MPTTModel
 
 
 class BusinessArea(TimeStampedUUIDModel):

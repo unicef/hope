@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import {
-  TargetPopulationNode,
+  TargetPopulationQuery,
   TargetPopulationStatus,
 } from '../../../__generated__/graphql';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -10,12 +10,13 @@ import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/core/StatusBox';
 import {
+  targetPopulationBuildStatusToColor,
   targetPopulationStatusMapping,
   targetPopulationStatusToColor,
 } from '../../../utils/utils';
-import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
+import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
-import { ApprovedTargetPopulationHeaderButtons } from './ApprovedTargetPopulationHeaderButtons';
+import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -27,11 +28,13 @@ const HeaderWrapper = styled.div`
 `;
 const StatusWrapper = styled.div`
   width: 140px;
+  display: flex;
+  flex-direction: row;
 `;
 
 export interface ProgramDetailsPageHeaderPropTypes {
   setEditState: Function;
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
   canEdit: boolean;
   canRemove: boolean;
   canDuplicate: boolean;
@@ -62,9 +65,9 @@ export const TargetPopulationPageHeader = ({
   let buttons;
 
   switch (targetPopulation.status) {
-    case TargetPopulationStatus.Draft:
+    case TargetPopulationStatus.Open:
       buttons = (
-        <InProgressTargetPopulationHeaderButtons
+        <OpenTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           setEditState={setEditState}
           canDuplicate={canDuplicate}
@@ -76,8 +79,10 @@ export const TargetPopulationPageHeader = ({
       break;
     case TargetPopulationStatus.Locked:
     case TargetPopulationStatus.SteficonCompleted:
+    case TargetPopulationStatus.SteficonError:
+    case TargetPopulationStatus.SteficonRun:
       buttons = (
-        <ApprovedTargetPopulationHeaderButtons
+        <LockedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           canDuplicate={canDuplicate}
           canUnlock={canUnlock}
@@ -106,6 +111,10 @@ export const TargetPopulationPageHeader = ({
                 status={targetPopulation.status}
                 statusToColor={targetPopulationStatusToColor}
                 statusNameMapping={targetPopulationStatusMapping}
+              />
+              <StatusBox
+                status={targetPopulation.buildStatus}
+                statusToColor={targetPopulationBuildStatusToColor}
               />
             </StatusWrapper>
           </HeaderWrapper>

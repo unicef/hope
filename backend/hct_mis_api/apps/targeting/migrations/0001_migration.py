@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingCriteriaQueryingMixin),
+            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingCriteriaQueryingBase),
         ),
         migrations.CreateModel(
             name='TargetingCriteriaRule',
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingCriteriaRuleQueryingMixin),
+            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingCriteriaRuleQueryingBase),
         ),
         migrations.CreateModel(
             name='TargetPopulation',
