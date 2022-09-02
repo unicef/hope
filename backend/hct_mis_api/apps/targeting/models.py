@@ -385,16 +385,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     def is_locked(self):
         return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
 
-    def apply_criteria_query(self):
-        household_queryset = Household.objects
-        households = (
-            household_queryset.filter(business_area=self.business_area)
-            .filter(self.candidate_list_targeting_criteria.get_query())
-            .distinct()
-        )
-        HouseholdSelection.objects.filter(target_population=self).delete()
-        self.households.set(households)
-
     def is_open(self):
         return self.status in (self.STATUS_OPEN,)
 

@@ -314,7 +314,7 @@ class LockTargetPopulationMutation(ValidatedMutation):
         target_population.status = TargetPopulation.STATUS_LOCKED
         target_population.changed_by = user
         target_population.change_date = timezone.now()
-        target_population.apply_criteria_query()
+        target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
         target_population.save()
         transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
         log_create(
