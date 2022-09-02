@@ -1,5 +1,7 @@
 from decimal import Decimal
 from math import ceil
+import phonenumbers
+import logging
 
 import datetime
 from django.db.models import Q
@@ -79,7 +81,7 @@ def get_payment_records_for_dashboard(year, business_area_slug, filters, only_wi
             **chart_create_filter_query(
                 filters,
                 program_id_path="cash_plan__program__id",
-                administrative_area_path="household__admin_area_new",
+                administrative_area_path="household__admin_area",
             ),
         },
         year_filter_path="delivery_date",

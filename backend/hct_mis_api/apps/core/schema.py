@@ -1,5 +1,5 @@
 import logging
-from collections import Iterable
+from collections.abc import Iterable
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models

@@ -57,6 +57,17 @@ class Country(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def get_choices(cls):
+        queryset = cls.objects.all().order_by("name")
+        return [
+            {
+                "label": {"English(EN)": country.name},
+                "value": country.iso_code3,
+            }
+            for country in queryset
+        ]
+
 
 class AreaType(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     name = CICharField(max_length=255, db_index=True)
