@@ -1,6 +1,5 @@
 import csv
 import logging
-import time
 from io import StringIO
 
 from django import forms
@@ -15,6 +14,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
+from django.db.models import Aggregate, CharField
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -28,16 +28,9 @@ import xlrd
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    AllValuesComboFilter,
-    ChoicesFieldComboFilter,
-    ValueFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminFiltersMixin
 from constance import config
-from import_export import fields, resources
-from import_export.admin import ImportExportModelAdmin
-from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
@@ -46,11 +39,7 @@ from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
-from hct_mis_api.apps.core.datamart.api import DatamartAPI
-from hct_mis_api.apps.core.export_locations import ExportLocations
 from hct_mis_api.apps.core.models import (
-    AdminArea,
-    AdminAreaLevel,
     BusinessArea,
     CountryCodeMap,
     FlexibleAttribute,
@@ -58,7 +47,6 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
 )
-from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
@@ -111,9 +99,6 @@ class BusinessofficeFilter(SimpleListFilter):
         elif self.value() == "1":
             return queryset.exclude(parent_id__isnull=True)
         return queryset
-
-
-from django.db.models import Aggregate, CharField
 
 
 class GroupConcat(Aggregate):
@@ -454,331 +439,6 @@ UNICEF HOPE""",
             )
 
 
-class CountryFilter(SimpleListFilter):
-    template = "adminfilters/combobox.html"
-    title = "Country"
-    parameter_name = "country"
-
-    def lookups(self, request, model_admin):
-        return AdminArea.objects.filter(admin_area_level__admin_level=0).values_list("id", "title")
-
-    def value(self):
-        return self.used_parameters.get(self.parameter_name)
-
-    def queryset(self, request, queryset):
-        try:
-            if self.value():
-                country = AdminArea.objects.get(id=self.value())
-                return queryset.filter(tree_id=country.tree_id)
-        except AdminArea.DoesNotExist:
-            pass
-        return queryset
-
-
-class AdminLevelFilter(SimpleListFilter):
-    template = "adminfilters/combobox.html"
-
-    title = "Admin Level"
-    parameter_name = "alevel"
-
-    def lookups(self, request, model_admin):
-        return [(l, f"Level {l}") for l in range(3)]
-
-    def value(self):
-        return self.used_parameters.get(self.parameter_name)
-
-    def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(admin_area_level__admin_level=self.value())
-        return queryset
-
-
-class AdminAreaLevelResource(resources.ModelResource):
-    business_area = fields.Field(widget=ForeignKeyWidget(BusinessArea, field="code"), attribute="business_area")
-
-    class Meta:
-        model = AdminAreaLevel
-        fields = (
-            "name",
-            "display_name",
-            "admin_level",
-            "business_area",
-            "area_code",
-            "country_name",
-            "datamart_id",
-        )
-        import_id_fields = (
-            "name",
-            "country_name",
-            "admin_level",
-        )
-
-    def after_import(self, *args, **kwargs):
-        super().after_import(*args, **kwargs)
-
-        countries = AdminAreaLevel.objects.get_countries()
-        for country, country_name in countries:
-            AdminAreaLevel.objects.filter(country_name=country_name).update(country=country)
-
-
-@admin.register(AdminAreaLevel)
-class AdminAreaLevelAdmin(ImportExportModelAdmin, AdminFiltersMixin, ExtraButtonsMixin, admin.ModelAdmin):
-    list_display = ("name", "country_name", "admin_level", "area_code")
-    list_filter = (
-        ("admin_level", AllValuesComboFilter),
-        ("country_name", AllValuesComboFilter),
-    )
-    search_fields = ("name",)
-    ordering = ("country_name", "admin_level")
-    resource_class = AdminAreaLevelResource
-
-    @button(permission="core.load_from_datamart")
-    def load_from_datamart(self, request):
-        api = DatamartAPI()
-        admin_areas_country_name = []
-        for level in api.get_admin_levels():
-            try:
-                admin_area, _ = AdminAreaLevel.objects.update_or_create(
-                    datamart_id=level["id"],
-                    defaults={
-                        "name": level["name"],
-                        "country_name": level["country_name"],
-                        "area_code": level["area_code"],
-                        "admin_level": level["admin_level"],
-                    },
-                )
-                if level["admin_level"] == 0:
-                    admin_areas_country_name.append((admin_area, level["country_name"]))
-            except Exception as e:
-                logger.exception(e)
-        if admin_areas_country_name:
-            for admin_area, country_name in admin_areas_country_name:
-                AdminAreaLevel.objects.filter(country_name=country_name).update(country=admin_area)
-
-
-class LoadAdminAreaForm(forms.Form):
-    # country = forms.ChoiceField(choices=AdminAreaLevel.objects.get_countries())
-    country = forms.ModelChoiceField(queryset=AdminAreaLevel.objects.filter(admin_level=0).order_by("country_name"))
-    geometries = forms.BooleanField(required=False)
-    run_in_background = forms.BooleanField(required=False)
-
-    page_size = forms.IntegerField(required=True, validators=[lambda x: x >= 1])
-    max_records = forms.IntegerField(required=False, help_text="Leave blank for all records")
-
-    skip_rebuild = forms.BooleanField(required=False, help_text="Do not rebuild MPTT tree")
-
-
-class ExportLocationsForm(forms.Form):
-    country = forms.ModelChoiceField(
-        queryset=AdminArea.objects.filter(admin_area_level__admin_level=0).order_by("title")
-    )
-
-
-class ImportAreaForm(forms.Form):
-    # country = forms.ChoiceField(choices=AdminAreaLevel.objects.get_countries())
-    country = forms.ModelChoiceField(queryset=AdminArea.objects.filter(admin_area_level__admin_level=0))
-    file = forms.FileField()
-
-
-class AdminAreaResource(resources.ModelResource):
-    admin_area_level = fields.Field(
-        widget=ForeignKeyWidget(AdminAreaLevel, field="datamart_id"), attribute="admin_area_level"
-    )
-    parent = fields.Field(widget=ForeignKeyWidget(AdminArea, field="p_code"), attribute="parent")
-
-    class Meta:
-        model = AdminArea
-        fields = (
-            "external_id",
-            "title",
-            "admin_area_level",
-            "p_code",
-            "parent",
-            "geom",
-            "point",
-        )
-        import_id_fields = (
-            "title",
-            "p_code",
-        )
-
-
-@admin.register(AdminArea)
-class AdminAreaAdmin(ImportExportModelAdmin, AdminFiltersMixin, ExtraButtonsMixin, MPTTModelAdmin):
-    search_fields = ("p_code", "title")
-    list_display = (
-        "title",
-        "country",
-        "parent",
-        "tree_id",
-        "external_id",
-        "admin_area_level",
-        "p_code",
-    )
-    list_filter = (
-        AdminLevelFilter,
-        CountryFilter,
-        ("tree_id", ValueFilter),
-        ("external_id", ValueFilter),
-    )
-    resource_class = AdminAreaResource
-
-    @button(permission=lambda r, __: r.user.is_superuser)
-    def rebuild_tree(self, request):
-        try:
-            AdminArea.objects.rebuild()
-        except Exception as e:
-            self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
-
-    @button(permission="core.import_from_csv")
-    def import_file(self, request):
-        context = self.get_common_context(request)
-        if request.method == "GET":
-            form = ImportAreaForm(initial={})
-            context["form"] = form
-        else:
-            form = ImportAreaForm(data=request.POST, files=request.FILES)
-            if form.is_valid():
-                try:
-                    csv_file = form.cleaned_data["file"]
-                    # If file is too large
-                    if csv_file.multiple_chunks():
-                        raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
-
-                    data_set = csv_file.read().decode("utf-8-sig").splitlines()
-                    reader = csv.DictReader(data_set, quoting=csv.QUOTE_NONE, delimiter=";")
-                    provided = set(reader.fieldnames)
-                    minimum_set = {
-                        "area_code",
-                        "area_level",
-                        "parent_area_code",
-                        "area_name",
-                    }
-                    if not minimum_set.issubset(provided):
-                        raise Exception(f"Invalid columns {reader.fieldnames}. {provided.difference(minimum_set)}")
-                    lines = []
-                    infos = {"skipped": 0}
-                    # country = form.cleaned_data['country']
-                    # country = AdminArea.objects.get(admin_area_level=form.cleaned_data["country"])
-                    country = form.cleaned_data["country"]
-                    with transaction.atomic():
-                        external_id = f"import-{int(time.time())}"
-                        for row in reader:
-                            if all(row.values()):
-                                level_number = int(row["area_level"])
-                                level, __ = AdminAreaLevel.objects.get_or_create(
-                                    country=country.admin_area_level,
-                                    admin_level=level_number,
-                                    defaults={
-                                        "name": row.get(
-                                            "level_name",
-                                            f"{country.title} {level_number}",
-                                        )
-                                    },
-                                )
-                                parent = AdminArea.objects.filter(
-                                    tree_id=country.tree_id,
-                                    p_code=row["parent_area_code"],
-                                ).first()
-                                if parent is None:
-                                    assert level_number == 0, f"Cannot find parent area for {row}"
-                                AdminArea.objects.create(
-                                    external_id=external_id,
-                                    title=row["area_name"],
-                                    admin_area_level=level,
-                                    p_code=row["area_code"],
-                                    parent=parent,
-                                )
-                                lines.append(row)
-                            else:
-                                infos["skipped"] += 1
-                        try:
-                            AdminArea.objects.rebuild()
-                        except Exception as e:
-                            raise Warning(
-                                f"Data successfully loaded but MPTT rebuild failed due to {e.__class__.__name__}: {e}"
-                            ) from e
-                    context["country"] = form.cleaned_data["country"]
-                    context["columns"] = minimum_set
-                    context["lines"] = lines
-                    context["infos"] = infos
-                except Warning as e:
-                    logger.exception(e)
-                    context["form"] = form
-                    self.message_user(request, str(e), messages.ERROR)
-                except Exception as e:
-                    logger.exception(e)
-                    context["form"] = form
-                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
-            else:
-                context["form"] = form
-
-        return TemplateResponse(request, "core/admin/import_locations.html", context)
-
-    @button(permission="core.load_from_datamart")
-    def load_from_datamart(self, request):
-        context = self.get_common_context(request)
-        if request.method == "GET":
-            form = LoadAdminAreaForm(initial={"page_size": DatamartAPI.PAGE_SIZE})
-            context["form"] = form
-        else:
-            form = LoadAdminAreaForm(data=request.POST)
-            if form.is_valid():
-                try:
-                    country = form.cleaned_data["country"]
-                    geom = form.cleaned_data["geometries"]
-                    page_size = form.cleaned_data["page_size"]
-                    max_records = form.cleaned_data["max_records"]
-                    if form.cleaned_data["run_in_background"]:
-                        load_admin_area.delay(
-                            country.id,
-                            geom,
-                            page_size=page_size,
-                            max_records=max_records,
-                            notify_to=[request.user.email],
-                            rebuild_mptt=not form.cleaned_data["skip_rebuild"],
-                        )
-                        context["run_in_background"] = True
-                    else:
-                        results = load_admin_area(
-                            country.id,
-                            geom,
-                            page_size,
-                            max_records,
-                            rebuild_mptt=not form.cleaned_data["skip_rebuild"],
-                        )
-                        context["admin_areas"] = results
-                except Exception as e:
-                    logger.exception(e)
-                    context["form"] = form
-                    self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-            else:
-                context["form"] = form
-
-        return TemplateResponse(request, "core/admin/load_admin_areas.html", context)
-
-    @button()
-    def export_locations(self, request):
-        context = self.get_common_context(request)
-        if request.method == "GET":
-            form = ExportLocationsForm()
-            context["form"] = form
-        else:
-            form = ExportLocationsForm(data=request.POST)
-            if form.is_valid():
-                try:
-                    country = form.cleaned_data["country"]
-                    export_locations = ExportLocations(country=country)
-                    return export_locations.export_to_file()
-                except Exception as e:
-                    logger.exception(e)
-                    context["form"] = form
-                    self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-            else:
-                context["form"] = form
-        return TemplateResponse(request, "core/admin/export_locations.html", context)
-
-
 class FlexibleAttributeInline(admin.TabularInline):
     model = FlexibleAttribute
     fields = readonly_fields = ("name", "associated_with", "required")
@@ -966,7 +626,7 @@ class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     search_fields = ("country",)
 
     def alpha2(self, obj):
-        return obj.country.countries.alpha2(obj.country.code)
+        return obj.country.iso_code2
 
     def alpha3(self, obj):
-        return obj.country.countries.alpha3(obj.country.code)
+        return obj.country.iso_code3

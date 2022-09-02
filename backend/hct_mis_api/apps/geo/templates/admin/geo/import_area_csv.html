@@ -1,0 +1,58 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+
+{% block content %}
+
+{% if form %}
+    <h4>Upload a csv file with headers in the format bellow:</h4>
+
+    <p>
+        <table>
+             <thead>
+                 <tr>
+                     <th><strong>Country</strong></th>
+                     <th><strong>Province</strong></th>
+                     <th><strong>District</strong></th>
+                     <th><strong>Commune</strong></th>
+                     <th><strong>Admin0</strong></th>
+                     <th><strong>Admin1</strong></th>
+                     <th><strong>Admin2</strong></th>
+                     <th><strong>Admin3</strong></th>
+                 </tr>
+             </thead>
+             <tbody>
+                 <tr>
+                     <td>Afghanistan</td>
+                     <td>Kandahar</td>
+                     <td>Dand</td>
+                     <td>Shorabak</td>
+                     <td>AF</td>
+                     <td>AF33</td>
+                     <td>AF3301</td>
+                     <td>AF330101</td>
+                 </tr>
+             </tbody>
+        </table>
+    </p>
+
+
+
+    <p>
+        <ul>
+         <li>Up to 7 area levels </li>
+         <li> The names of Area types must appear in the descending order, starting by the country, ... E.g: Country -> Province -> District -> Commune
+         <li> The same apply to Admin level denomination. E.g: Admin0 -> Admin1 -> Admin2 -> Admin3 
+         <li> In the above sample, <strong>Country</strong>&nbsp; correspond to <strong>Admin0</strong>, <strong>Province</strong> correspond to <strong>Admin1</strong>, <strong>District</strong> correspond to <strong>Admin2 </strong>... and so on.</li>
+        </ul> 
+    </p>
+
+        <hr>
+    <form method="POST" id="load_users" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {{form}}
+        <div><input type="submit" value="Import"></div>
+    </form>
+{% endif %}
+
+{% endblock content %}

@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock
+
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -52,18 +53,6 @@ class TestRecalculatingCash(APITestCase):
           id
           name
           status
-          candidateListTotalHouseholds
-          candidateListTotalIndividuals
-            candidateListTargetingCriteria{
-            rules{
-              filters{
-                comparisionMethod
-                fieldName
-                arguments
-                isFlexField
-              }
-            }
-          }
         }
       }
     }
@@ -79,9 +68,9 @@ class TestRecalculatingCash(APITestCase):
     }
     """
 
-    APPROVE_TARGET_POPULATION_MUTATION = """
-    mutation ApproveTP($id: ID!) {
-        approveTargetPopulation(id: $id) {
+    LOCK_TARGET_POPULATION_MUTATION = """
+    mutation LockTP($id: ID!) {
+        lockTargetPopulation(id: $id) {
             targetPopulation {
                 __typename
             }
@@ -137,7 +126,7 @@ class TestRecalculatingCash(APITestCase):
                         {
                             "filters": [
                                 {
-                                    "comparisionMethod": "EQUALS",
+                                    "comparisonMethod": "EQUALS",
                                     "fieldName": "consent",
                                     "isFlexField": False,
                                     "arguments": [True],
@@ -159,7 +148,7 @@ class TestRecalculatingCash(APITestCase):
 
     def send_successful_graphql_request(self, **kwargs):
         response = self.graphql_request(**kwargs)
-        self.assertTrue("data" in response)  # ensures successful response
+        assert "data" in response, response
         return response
 
     def create_program(self):
@@ -185,7 +174,7 @@ class TestRecalculatingCash(APITestCase):
 
     def lock_target_population(self, target_population_id):
         return self.send_successful_graphql_request(
-            request_string=self.APPROVE_TARGET_POPULATION_MUTATION,
+            request_string=self.LOCK_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables={"id": target_population_id},
         )

@@ -1,17 +1,14 @@
 import json
 from datetime import date
 
-from django_countries.fields import Country
+from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -113,17 +110,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdsdf334")
-        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="jghhrrr")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -131,8 +121,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area_1_new = AreaFactory(name="City Test", area_type=area_type, p_code="asdsdf334")
-        cls.admin_area_2_new = AreaFactory(name="City Example", area_type=area_type, p_code="jghhrrr")
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="asdsdf334")
+        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="jghhrrr")
 
         program_one = ProgramFactory(
             name="Test program ONE",
@@ -165,9 +155,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             IndividualFactory(household=household_one, **individual) for individual in cls.individuals_to_create
         ]
         first_individual = cls.individuals[0]
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country_pl = geo_models.Country.objects.get(iso_code2="PL")
+        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
         birth_certificate_type = DocumentType.objects.get(
-            country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+            country=country_pl, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
         )
 
         cls.national_id = DocumentFactory(
@@ -191,7 +182,6 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
             admin2=cls.admin_area_1,
-            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
         )
         TicketAddIndividualDetailsFactory(
@@ -225,7 +215,6 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=cls.admin_area_1,
-            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
         )
         TicketIndividualDataUpdateDetailsFactory(
@@ -275,7 +264,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             id="72ee7d98-6108-4ef0-85bd-2ef20e1d5410",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            admin2_new=cls.admin_area_1_new,
+            admin2=cls.admin_area_1,
             business_area=cls.business_area,
         )
         TicketHouseholdDataUpdateDetailsFactory(

@@ -87,3 +87,4 @@ logging.disable(logging.CRITICAL)
 
 EXCHANGE_RATE_CACHE_EXPIRY = 0
 del DATABASES["read_only"]
+CELERY_TASK_ALWAYS_EAGER = True
