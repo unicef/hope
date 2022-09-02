@@ -69,13 +69,13 @@ class TargetPopulationFilter(FilterSet):
         return queryset
 
     def filter_number_of_households_min(self, queryset, model_field, value):
-        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_DRAFT).filter(
+        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_OPEN).filter(
             number_of_households__gte=value
         )
         return queryset
 
     def filter_number_of_households_max(self, queryset, model_field, value):
-        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_DRAFT).filter(
+        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_OPEN).filter(
             number_of_households__lte=value
         )
         return queryset

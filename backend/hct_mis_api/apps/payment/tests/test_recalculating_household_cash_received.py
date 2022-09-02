@@ -53,18 +53,6 @@ class TestRecalculatingCash(APITestCase):
           id
           name
           status
-          candidateListTotalHouseholds
-          candidateListTotalIndividuals
-            candidateListTargetingCriteria{
-            rules{
-              filters{
-                comparisonMethod
-                fieldName
-                arguments
-                isFlexField
-              }
-            }
-          }
         }
       }
     }
@@ -160,7 +148,7 @@ class TestRecalculatingCash(APITestCase):
 
     def send_successful_graphql_request(self, **kwargs):
         response = self.graphql_request(**kwargs)
-        self.assertTrue("data" in response)  # ensures successful response
+        assert "data" in response, response
         return response
 
     def create_program(self):

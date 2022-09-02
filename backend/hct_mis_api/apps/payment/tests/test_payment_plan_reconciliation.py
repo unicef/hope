@@ -75,6 +75,7 @@ mutation FinalizeTP($id: ID!) {
     finalizeTargetPopulation(id: $id) {
         targetPopulation {
             id
+            status
         }
     }
 }
@@ -284,14 +285,15 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
 
-        self.graphql_request(
+        finalize_tp_response = self.graphql_request(
             request_string=FINALIZE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables={
                 "id": target_population_id,
             },
         )
-        # TODO: check status in response - READY_FOR_PAYMENT_PLAN
+        status = finalize_tp_response["data"]["finalizeTargetPopulation"]["targetPopulation"]["status"]
+        self.assertEqual(status, "READY")
 
         # TODO: naive datetime
         create_payment_plan_response = self.graphql_request(

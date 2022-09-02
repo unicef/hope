@@ -328,36 +328,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return Truncator(self.get_criteria_string()).chars(390, "...")
 
     @property
-    def final_stats(self):
-        if self.status == TargetPopulation.STATUS_DRAFT:
-            return None
-        elif self.status == TargetPopulation.STATUS_LOCKED:
-            households_ids = (
-                self.vulnerability_score_filtered_households.filter(self.final_list_targeting_criteria.get_query())
-                .filter(business_area=self.business_area)
-                .values_list("id")
-                .distinct()
-            )
-        else:
-            households_ids = self.final_list.values_list("id").distinct()
-        delta18 = relativedelta(years=+18)
-        date18ago = timezone.now() - delta18
-
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
-            child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
-        )
-
-        return {
-            "child_male": targeted_individuals.get("child_male"),
-            "child_female": targeted_individuals.get("child_female"),
-            "adult_male": targeted_individuals.get("adult_male"),
-            "adult_female": targeted_individuals.get("adult_female"),
-        }
-
-    @property
     def allowed_steficon_rule(self):
         if not self.program:
             return None
