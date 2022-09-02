@@ -29,11 +29,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-<<<<<<< HEAD
 from hct_mis_api.apps.utils.phone_number import is_right_phone_number_format
-=======
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
->>>>>>> 9bb0d5ac52fdeb03140bc915f9b164364e102f89
 
 
 class TestRapidProVerificationTask(TestCase):
