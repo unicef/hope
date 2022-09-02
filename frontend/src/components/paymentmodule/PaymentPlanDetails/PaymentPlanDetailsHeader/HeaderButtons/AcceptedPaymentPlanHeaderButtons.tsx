@@ -1,20 +1,18 @@
 import { Box, Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
   canDownloadXlsx: boolean;
   canSendToFsp: boolean;
 }
 
 export const AcceptedPaymentPlanHeaderButtons = ({
-  paymentPlan,
   canDownloadXlsx,
   canSendToFsp,
 }: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [openApprove, setOpenApprove] = useState(false);
 
   return (

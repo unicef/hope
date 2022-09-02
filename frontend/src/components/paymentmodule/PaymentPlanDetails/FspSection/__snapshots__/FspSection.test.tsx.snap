@@ -1,0 +1,264 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Edit FSP 1`] = `
+<div>
+  <div
+    class="MuiBox-root MuiBox-root-3"
+  >
+    <div
+      class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
+    >
+      <div
+        class="MuiBox-root MuiBox-root-4"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-h6"
+        >
+          FSPs
+        </h6>
+        <a
+          aria-disabled="false"
+          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+          href="/afghanistan/payment-module/payment-plans/undefined/setup-fsp/edit"
+          role="button"
+          tabindex="0"
+        >
+          <span
+            class="MuiButton-label"
+          >
+            Edit FSP
+          </span>
+          <span
+            class="MuiTouchRipple-root"
+          />
+        </a>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bxivhb faHsOD"
+              color="textSecondary"
+            >
+              Cash
+            </span>
+            <div>
+              <span
+                class="sc-ifAKCX fziVZR"
+                color="textSecondary"
+              >
+                Miranda Ltd
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bxivhb faHsOD"
+              color="textSecondary"
+            >
+              In Kind
+            </span>
+            <div>
+              <span
+                class="sc-ifAKCX fziVZR"
+                color="textSecondary"
+              >
+                Frazier-Watson
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bxivhb faHsOD"
+              color="textSecondary"
+            >
+              Transfer
+            </span>
+            <div>
+              <span
+                class="sc-ifAKCX fziVZR"
+                color="textSecondary"
+              >
+                Bray Group
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="sc-bwzfXH gUDLEP"
+      >
+        <div
+          class="sc-htpNat hMtgFq"
+        />
+      </div>
+      <div
+        class="MuiBox-root MuiBox-root-5"
+      >
+        <div
+          class="sc-EHOje gBtHDd"
+        >
+          <h6
+            class="MuiTypography-root MuiTypography-h6"
+          >
+            Volume by Delivery Mechanism
+             in USD
+          </h6>
+           
+        </div>
+        <div
+          class="sc-bZQynM kzlsZH"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-container"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <div
+                class="sc-gzVnrw gSvbrF"
+                color="#D8E1EE"
+              >
+                <div>
+                  <span
+                    class="sc-bxivhb faHsOD"
+                    color="textSecondary"
+                  >
+                    Cash (Miranda Ltd)
+                  </span>
+                  <div>
+                    <span
+                      class="sc-ifAKCX fziVZR"
+                      color="textSecondary"
+                    >
+                      0
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <div
+                class="sc-gzVnrw dcTani"
+                color=" #d8d8d8"
+              >
+                <div>
+                  <span
+                    class="sc-bxivhb faHsOD"
+                    color="textSecondary"
+                  >
+                    In Kind (Frazier-Watson)
+                  </span>
+                  <div>
+                    <span
+                      class="sc-ifAKCX fziVZR"
+                      color="textSecondary"
+                    >
+                      0
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <div
+                class="sc-gzVnrw kUxuIr"
+                color="#003C8F"
+              >
+                <div>
+                  <span
+                    class="sc-bxivhb faHsOD"
+                    color="textSecondary"
+                  >
+                    Transfer (Bray Group)
+                  </span>
+                  <div>
+                    <span
+                      class="sc-ifAKCX fziVZR"
+                      color="textSecondary"
+                    >
+                      0
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+            >
+              <div
+                class="sc-htoDjs iquLtL"
+              >
+                <canvas
+                  class="chartjs-render-monitor"
+                  height="0"
+                  style="display: block;"
+                  width="0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Set Up FSP 1`] = `
+<div>
+  <div
+    class="MuiBox-root MuiBox-root-1"
+  >
+    <div
+      class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
+    >
+      <div
+        class="MuiBox-root MuiBox-root-2"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-h6"
+        >
+          FSPs
+        </h6>
+        <a
+          aria-disabled="false"
+          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+          href="/afghanistan/payment-module/payment-plans/undefined/setup-fsp/create"
+          role="button"
+          tabindex="0"
+        >
+          <span
+            class="MuiButton-label"
+          >
+            Set up FSP
+          </span>
+          <span
+            class="MuiTouchRipple-root"
+          />
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+`;
