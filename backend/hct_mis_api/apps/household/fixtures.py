@@ -302,7 +302,9 @@ def create_household_and_individuals(household_data=None, individuals_data=None,
 
 
 def create_individual_document(individual, document_type=None):
+    additional_fields = {}
     if document_type:
-        DocumentTypeFactory(type=document_type)
-    document = DocumentFactory(individual=individual)
+        document_type = DocumentTypeFactory(type=document_type)
+        additional_fields["type"] = document_type
+    document = DocumentFactory(individual=individual, **additional_fields)
     return document

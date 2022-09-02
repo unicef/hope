@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useApproveTpMutation } from '../../../__generated__/graphql';
+import { useLockTpMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
@@ -21,7 +21,7 @@ export interface ApproveCandidateListPropTypes {
   setOpen: Function;
 }
 
-export function ApproveCandidateList({
+export function LockTargetPopulationDialog({
   open,
   setOpen,
   targetPopulationId,
@@ -30,7 +30,7 @@ export function ApproveCandidateList({
   const businessArea = useBusinessArea();
 
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useApproveTpMutation();
+  const [mutate, { loading }] = useLockTpMutation();
   return (
     <Dialog
       open={open}

@@ -50,13 +50,7 @@ class TestDataSendTpToDatahub(TestCase):
             "changed_by": None,
             "finalized_at": None,
             "finalized_by": None,
-            "candidate_list_total_households": None,
-            "candidate_list_total_individuals": None,
-            "final_list_total_households": None,
-            "final_list_total_individuals": None,
-            "selection_computation_metadata": None,
-            "candidate_list_targeting_criteria": None,
-            "final_list_targeting_criteria": None,
+            "targeting_criteria": None,
         }
 
         return TargetPopulation.objects.create(
@@ -104,6 +98,8 @@ class TestDataSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population.households.set([cls.household])
+        cls.target_population.refresh_stats()
+        cls.target_population.save()
         HouseholdSelection.objects.update(vulnerability_score=1.23)
 
     @classmethod
@@ -219,6 +215,8 @@ class TestDataSendTpToDatahub(TestCase):
     def test_household_send_correctly(self):
         task = SendTPToDatahubTask()
         self.target_population.refresh_from_db()
+        self.target_population.refresh_stats()
+        self.target_population.save()
         task.send_target_population(self.target_population)
         self.household.refresh_from_db()
         expected_household_dict = {

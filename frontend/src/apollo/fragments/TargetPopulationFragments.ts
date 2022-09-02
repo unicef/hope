@@ -7,8 +7,8 @@ export const targetPopulationMinimal = gql`
     status
     createdAt
     updatedAt
-    candidateListTotalHouseholds
-    finalListTotalHouseholds
+    totalHouseholdsCount
+    totalIndividualsCount
     program {
       id
       name
@@ -25,10 +25,13 @@ export const targetPopulationDetailed = gql`
     id
     name
     status
-    candidateListTotalHouseholds
-    candidateListTotalIndividuals
-    finalListTotalHouseholds
-    finalListTotalIndividuals
+    buildStatus
+    totalHouseholdsCount
+    totalIndividualsCount
+    childMaleCount
+    childFemaleCount
+    adultMaleCount
+    adultFemaleCount
     caHashId
     excludedIds
     exclusionReason
@@ -58,14 +61,7 @@ export const targetPopulationDetailed = gql`
       firstName
       lastName
     }
-    candidateListTargetingCriteria {
-      targetPopulationCandidate {
-        createdBy {
-          id
-          firstName
-          lastName
-        }
-      }
+    targetingCriteria {
       rules {
         id
         individualsFiltersBlocks {
@@ -73,7 +69,7 @@ export const targetPopulationDetailed = gql`
             fieldName
             isFlexField
             arguments
-            comparisionMethod
+            comparisonMethod
             fieldAttribute {
               name
               labelEn
@@ -89,7 +85,7 @@ export const targetPopulationDetailed = gql`
           fieldName
           isFlexField
           arguments
-          comparisionMethod
+          comparisonMethod
           fieldAttribute {
             name
             labelEn
@@ -101,47 +97,6 @@ export const targetPopulationDetailed = gql`
           }
         }
       }
-    }
-    finalListTargetingCriteria {
-      targetPopulationFinal {
-        createdBy {
-          id
-          firstName
-          lastName
-        }
-      }
-      rules {
-        id
-        filters {
-          fieldName
-          isFlexField
-          arguments
-          comparisionMethod
-          fieldAttribute {
-            name
-            labelEn
-            type
-            choices {
-              value
-              labelEn
-            }
-          }
-        }
-      }
-    }
-    candidateStats {
-      childMale
-      childFemale
-      adultMale
-      adultFemale
-      allHouseholds
-      allIndividuals
-    }
-    finalStats {
-      childMale
-      childFemale
-      adultMale
-      adultFemale
     }
   }
 `;

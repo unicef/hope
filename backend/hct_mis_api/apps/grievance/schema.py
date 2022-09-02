@@ -15,11 +15,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.core_fields_attributes import (
-    TYPE_IMAGE,
-    FieldFactory,
-    Scope,
-)
+from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
@@ -100,7 +96,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         if user.has_permission(perm, business_area) or check_creator or check_assignee:
             return True
 
-        msg = "User is not active creator/assignee and does not have '{perm}' permission"
+        msg = f"User is not active creator/assignee and does not have '{perm}' permission"
         logger.error(msg)
         raise GraphQLError(msg)
 

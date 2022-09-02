@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingIndividualRuleFilterBlockMixin),
+            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingIndividualRuleFilterBlockBase),
         ),
         migrations.CreateModel(
             name='TargetingIndividualBlockRuleFilter',
@@ -47,6 +47,6 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingCriteriaFilterMixin),
+            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingCriteriaFilterBase),
         ),
     ]
