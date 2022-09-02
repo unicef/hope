@@ -116,7 +116,6 @@ venv.bak/
 /.DS_Store
 *.sql
 
->>>>>>> 9bb0d5ac52fdeb03140bc915f9b164364e102f89
 *.DS_Store
 /.vscode/settings.json
 /HCT-MIS.code-workspace
