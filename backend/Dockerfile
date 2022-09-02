@@ -20,9 +20,18 @@ WORKDIR /tmp
 ARG APP_ENV=prod
 ENV POETRY_VERSION=1.1.4
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+RUN poetry config virtualenvs.create false \
+  && poetry install $(test "$APP_ENV" == prod && echo "--no-dev")  --no-interaction --no-ansi
+
+ENV WAITFORIT_VERSION="v2.4.1"
+RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/$WAITFORIT_VERSION/waitforit-linux_amd64 && \
+  chmod +x /usr/local/bin/waitforit
+
+ADD . /code/
 ENV PATH = "${PATH}:/root/.poetry/bin"
 
 ADD pyproject.toml poetry.lock /tmp/
+
 RUN poetry config virtualenvs.create false \
   && poetry install $(test "$APP_ENV" == prod && echo "--no-dev")  --no-interaction --no-ansi
 
