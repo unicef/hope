@@ -27,8 +27,8 @@ describe('components/paymentmodule/CreateSetUpFsp/SetUpFspCore', () => {
             },
           ],
         }}
-        setDeliveryMechanismsForQuery={(deliveryMechanisms) => {
-          console.log(deliveryMechanisms);
+        setDeliveryMechanismsForQuery={(_deliveryMechanisms) => {
+          console.log(_deliveryMechanisms);
         }}
         deliveryMechanismsForQuery={fakeDeliveryMechanisms.allDeliveryMechanisms.map((dm) => {
           return dm.name;

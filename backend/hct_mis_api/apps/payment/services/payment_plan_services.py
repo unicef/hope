@@ -298,7 +298,7 @@ class PaymentPlanService:
                 )
 
                 if not new_target_population.program:
-                    raise GraphQLError(f"TargetPopulation should have related Program defined")
+                    raise GraphQLError("TargetPopulation should have related Program defined")
 
                 self.payment_plan.target_population.status = TargetPopulation.STATUS_READY
                 self.payment_plan.target_population.save()
@@ -338,7 +338,7 @@ class PaymentPlanService:
 
     def delete(self) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
-            raise GraphQLError(f"Only Payment Plan in Open status can be deleted")
+            raise GraphQLError("Only Payment Plan in Open status can be deleted")
 
         self.payment_plan.target_population.status = TargetPopulation.STATUS_READY
         self.payment_plan.target_population.save()
