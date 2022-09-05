@@ -14,6 +14,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold, Individual
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import XlsxPaymentPlanImportPerFspService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -29,7 +30,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     fsp_generate_xlsx_report_task,
     payment_plan_apply_steficon,
     import_payment_plan_payment_list_from_xlsx,
-    import_payment_plan_payment_list_from_xlsx_per_fsp,
+    import_payment_plan_payment_list_per_fsp_from_xlsx,
 )
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
@@ -978,21 +979,17 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        import_service = XlsxPaymentPlanImportService(payment_plan, file)
+        import_service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
         import_service.open_workbook()
         import_service.validate()
         if import_service.errors:
             return cls(None, import_service.errors)
 
-        payment_plan.status_importing()
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).import_xlsx_per_fsp(
+            user=info.context.user, file=file
+        )
 
-        new_xlsx_file = import_service.remove_old_and_create_new_import_xlsx(info.context.user)
-        payment_plan.imported_xlsx_file = new_xlsx_file
-        payment_plan.save()
-
-        import_payment_plan_payment_list_from_xlsx_per_fsp.delay(payment_plan.id, new_xlsx_file.id)
-
-        return cls(payment_plan, import_service.errors)
+        return cls(payment_plan, None)
 
 
 class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
