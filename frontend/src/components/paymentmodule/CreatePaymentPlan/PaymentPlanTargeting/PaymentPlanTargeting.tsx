@@ -54,6 +54,7 @@ export const PaymentPlanTargeting = ({
                 required
                 choices={mappedTargetPopulations}
                 component={FormikSelectField}
+                data-cy='input-target-population'
               />
             </Grid>
           </Grid>
