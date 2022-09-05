@@ -139,7 +139,7 @@ class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 obj.mis_sync_flag = True
                 obj.mis_sync_date = timezone.now()
                 obj.save()
-                return redirect(f"/api/admin/erp_datahub/fundscommitment/{pk}/")
+                return redirect(f"{settings.ADMIN_PANEL_URL}/erp_datahub/fundscommitment/{pk}/")
 
         context["form"] = form
         return TemplateResponse(request, "admin/erp_datahub/funds_commitment/assign_business_office.html", context)
@@ -231,7 +231,7 @@ class DownPaymentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 obj.mis_sync_date = timezone.now()
                 obj.save()
                 mis_down_payment.save()
-                return redirect(f"/api/admin/erp_datahub/downpayment/{pk}/")
+                return redirect(f"{settings.ADMIN_PANEL_URL}/erp_datahub/downpayment/{pk}/")
 
         context["form"] = form
         return TemplateResponse(request, "admin/erp_datahub/funds_commitment/assign_business_office.html", context)

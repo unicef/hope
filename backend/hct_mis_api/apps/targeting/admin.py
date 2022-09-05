@@ -52,7 +52,7 @@ class TargetPopulationAdmin(
     def selection(self, request, pk):
         obj = self.get_object(request, pk)
         url = reverse("admin:targeting_householdselection_changelist")
-        return HttpResponseRedirect(f"{url}?target_population|id={obj.id}")
+        return HttpResponseRedirect(f"{url}?target_population={obj.id}")
 
     @button()
     def inspect(self, request, pk):
@@ -77,7 +77,6 @@ class HouseholdSelectionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         "household",
         "target_population",
         "vulnerability_score",
-        "final",
     )
     raw_id_fields = (
         "household",
@@ -87,7 +86,6 @@ class HouseholdSelectionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         ("household__unicef_id", ValueFilter),
         ("target_population", AutoCompleteFilter),
         ("target_population__id", ValueFilter),
-        "final",
         ("vulnerability_score", MaxMinFilter),
     )
     actions = ["reset_sync_date", "reset_vulnerability_score"]
