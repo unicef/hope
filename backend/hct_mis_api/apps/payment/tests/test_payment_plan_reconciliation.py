@@ -1,7 +1,12 @@
 from datetime import timedelta
+import os
+import tempfile
+from zipfile import ZipFile
 from django.utils import timezone
+from django.core.files import File
 from unittest.mock import patch
 
+from hct_mis_api.apps.payment.celery_tasks import create_payment_plan_payment_list_xlsx_per_fsp
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.fixtures import PaymentFactory
@@ -147,6 +152,16 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
                     id
                 }
             }
+        }
+    }
+}
+"""
+
+EXPORT_XSLX_PER_FSP_MUTATION = """
+mutation ExportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!) {
+    exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId) {
+        paymentPlan {
+            id
         }
     }
 }
@@ -488,18 +503,31 @@ class TestPaymentPlanReconciliation(APITestCase):
             "ACCEPTED",
         )
 
-        # TODO
-        # receive reconciliation info
-        # error, because nobody downloaded xlsx or smth
+        with patch(
+            "hct_mis_api.apps.payment.services.payment_plan_services.create_payment_plan_payment_list_xlsx_per_fsp"
+        ) as mock:
+            export_file_mutation = self.graphql_request(
+                request_string=EXPORT_XSLX_PER_FSP_MUTATION,
+                context={"user": self.user},
+                variables={
+                    "paymentPlanId": encoded_payment_plan_id,
+                },
+            )
+            assert "errors" not in export_file_mutation, export_file_mutation
+            assert mock.delay.call_count == 1
+            call_args = mock.delay.call_args[0]
+            create_payment_plan_payment_list_xlsx_per_fsp(*call_args)
 
-        # download xlsx
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        zip_file = payment_plan.export_per_fsp_xlsx_file
+        assert zip_file is not None
 
-        # receive reconciliation info
-        # see payment entitlement delivered
+        with tempfile.TemporaryDirectory() as temp_dir:
+            self.assertEqual(len(os.listdir(temp_dir)), 0)
 
+            with ZipFile(zip_file.file, "r") as zip_ref:
+                zip_ref.extractall(temp_dir)
 
-# TODO: be able to trigger xlsx export via FE
-# download file
-# check content
-# fill content
-# upload file
+            self.assertEqual(len(os.listdir(temp_dir)), 1)
+            file_name = os.listdir(temp_dir)[0]
+            assert file_name.endswith(".xlsx")
