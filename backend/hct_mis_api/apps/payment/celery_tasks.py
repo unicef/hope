@@ -1,5 +1,6 @@
 import logging
 import datetime
+import traceback
 import django_fsm
 
 from concurrency.api import disable_concurrency
@@ -199,7 +200,6 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
 @sentry_tags
 def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id, file):
     try:
-        print("TODO import_payment_plan_payment_list_per_fsp_from_xlsx")
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -216,6 +216,8 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
                     # payment_plan.status_approved() # TODO
                     payment_plan.save()
             except Exception as e:
+                print(e)
+                traceback.print_exc()
                 logger.exception("Error import from xlsx", e)
                 # payment_plan.status_approved() # TODO
                 payment_plan.save()
