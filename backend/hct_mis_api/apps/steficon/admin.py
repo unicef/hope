@@ -20,6 +20,7 @@ from django.utils.translation import get_language
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_buttons.decorators import view
 from admin_extra_buttons.utils import labelize
+from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
 from import_export import fields
@@ -30,6 +31,7 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
 from ..account.models import User
+from ..administration.publish.mixin import PublishMixin
 from ..administration.widgets import JsonWidget
 from ..utils.security import is_root
 from .forms import (
@@ -207,7 +209,7 @@ class RuleResource(ModelResource):
 
 
 @register(Rule)
-class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
+class RuleAdmin(PublishMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
@@ -459,6 +461,17 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
             obj.created_by = request.user
         obj.updated_by = request.user
         obj.save()
+
+    def _get_data(self, record) -> str:
+        roles = RuleCommit.objects.filter(rule=record)
+        c = ForeignKeysCollector(None)
+        objs = []
+        for qs in [roles]:
+            objs.extend(qs)
+        objs.extend(Rule.objects.filter(pk=record.pk))
+        c.collect(objs)
+        serializer = self.get_serializer("json")
+        return serializer.serialize(c.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3)
 
 
 class RuleCommitResource(ModelResource):

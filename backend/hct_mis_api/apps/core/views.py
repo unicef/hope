@@ -38,20 +38,6 @@ class CommandForm(forms.Form):
     no_input = forms.BooleanField(label="No input", required=False)
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def call_command_view(request):
-    form = CommandForm()
-    if request.method == "POST":
-        form = CommandForm(request.POST)
-        if form.is_valid():
-            if form.data.get("no_input", False):
-                call_command(form.data["command"], "--noinput")
-            else:
-                call_command(form.data["command"])
-
-    return render(request, "core/call_command.html", {"form": form})
-
-
 def trigger_error(request):
     division_by_zero = 1 / 0  # noqa: F841
 
