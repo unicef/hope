@@ -84,7 +84,7 @@ class TargetPopulationFilter(FilterSet):
         if value is True:
             return queryset.filter(
                 Q(business_area__is_payment_plan_applicable=True)
-                & Q(status=target_models.TargetPopulation.STATUS_READY)
+                & Q(status=target_models.TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
             )
         return queryset
 

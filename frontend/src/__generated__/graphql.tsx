@@ -4021,9 +4021,11 @@ export enum PaymentPlanStatus {
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
   Accepted = 'ACCEPTED',
-  SteficonWait = 'STEFICON_WAIT',
+}
+
+export enum PaymentPlanBackgroundActionStatus {
+  None = '',
   SteficonRun = 'STEFICON_RUN',
-  SteficonCompleted = 'STEFICON_COMPLETED',
   SteficonError = 'STEFICON_ERROR',
   XlsxExporting = 'XLSX_EXPORTING',
   XlsxImporting = 'XLSX_IMPORTING',
