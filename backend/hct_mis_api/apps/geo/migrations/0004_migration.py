@@ -10,15 +10,16 @@ class DeferredForwardRunSQL(migrations.RunSQL):
         schema_editor.deferred_sql.append(self.sql[0])
 
 
-MODELS = ("core.CountryCodeMap",
-          "household.Household",
-          "household.DocumentType",
-          "household.Agency",
-          "sanction_list.SanctionListIndividualCountries",
-          "sanction_list.SanctionListIndividualNationalities",
-          "sanction_list.SanctionListIndividualDocument",
-          "sanction_list.SanctionListIndividual",
-          )
+MODELS = (
+    "core.CountryCodeMap",
+    "household.Household",
+    "household.DocumentType",
+    "household.Agency",
+    "sanction_list.SanctionListIndividualCountries",
+    "sanction_list.SanctionListIndividualNationalities",
+    "sanction_list.SanctionListIndividualDocument",
+    "sanction_list.SanctionListIndividual",
+)
 
 
 def copy_country_data(apps, schema_editor):
@@ -26,12 +27,12 @@ def copy_country_data(apps, schema_editor):
 
     countries = {}
     for model in MODELS:
-        Model = apps.get_model(*model.split('.'))
+        Model = apps.get_model(*model.split("."))
         try:
             for field in Model._meta.get_fields():
                 if type(field) == ForeignKey:
                     opts = field.related_model._meta
-                    if opts.app_label == 'geo' and opts.model_name == 'country':
+                    if opts.app_label == "geo" and opts.model_name == "country":
                         old_field_name = field.name[:-4]
                         geo_name = field.name
                         records = Model.objects.all()
@@ -42,7 +43,7 @@ def copy_country_data(apps, schema_editor):
                                     countries[source] = Country.objects.get(iso_code2=source)
                                 setattr(record, geo_name, countries[source])
                         Model.objects.bulk_update(records, [geo_name])
-        except Exception as e:
+        except Exception:
             raise
 
 
@@ -52,10 +53,10 @@ def empty_reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('geo', '0003_migration'),
-        ('core', '0041_migration'),
-        ('household', '0086_migration'),
-        ('sanction_list', '0010_migration'),
+        ("geo", "0003_migration"),
+        ("core", "0041_migration"),
+        ("household", "0086_migration"),
+        ("sanction_list", "0010_migration"),
     ]
 
     operations = [

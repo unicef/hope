@@ -15,6 +15,7 @@ class ReportValidator(CommonValidator):
         Report.CASH_PLAN_VERIFICATION: ["program"],
         Report.PAYMENTS: ["admin_area"],
         Report.PAYMENT_VERIFICATION: ["program"],
+        Report.PAYMENT_PLAN: [],
         Report.CASH_PLAN: ["program"],
         Report.PROGRAM: [],
         Report.INDIVIDUALS_AND_PAYMENT: ["admin_area", "program"],

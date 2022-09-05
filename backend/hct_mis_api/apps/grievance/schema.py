@@ -15,11 +15,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.core_fields_attributes import (
-    TYPE_IMAGE,
-    FieldFactory,
-    Scope,
-)
+from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
@@ -100,7 +96,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         if user.has_permission(perm, business_area) or check_creator or check_assignee:
             return True
 
-        msg = "User is not active creator/assignee and does not have '{perm}' permission"
+        msg = f"User is not active creator/assignee and does not have '{perm}' permission"
         logger.error(msg)
         raise GraphQLError(msg)
 
@@ -128,11 +124,11 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_admin(grievance_ticket: GrievanceTicket, info):
-        return getattr(grievance_ticket.admin2_new, "name", None)
+        return getattr(grievance_ticket.admin2, "name", None)
 
     @staticmethod
     def resolve_admin2(grievance_ticket: GrievanceTicket, info):
-        return grievance_ticket.admin2_new
+        return grievance_ticket.admin2
 
     @staticmethod
     def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
@@ -492,7 +488,7 @@ class Query(graphene.ObjectType):
         if filters.get("administrative_area") is not None:
             try:
                 grievance_tickets = grievance_tickets.filter(
-                    admin2_new=Area.objects.get(id=filters.get("administrative_area"))
+                    admin2=Area.objects.get(id=filters.get("administrative_area"))
                 )
             except Area.DoesNotExist:
                 pass

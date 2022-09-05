@@ -4,15 +4,11 @@ from django.db import migrations
 
 
 def preload_areas(apps, schema_editor):
-    from hct_mis_api.apps.geo.utils import initialise_area_types, initialise_areas
-    initialise_area_types()
-    initialise_areas()
+    pass
 
 
 def rebuild(apps, schema_editor):
-    from hct_mis_api.apps.geo.models import Area, AreaType
-    Area.objects.rebuild()
-    AreaType.objects.rebuild()
+    pass
 
 
 def empty_reverse(apps, schema_editor):

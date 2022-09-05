@@ -1,7 +1,10 @@
-import copy
 import logging
+import copy
+import openpyxl
+
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
+from openpyxl.utils import get_column_letter
 
 from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
@@ -13,7 +16,6 @@ from django.template.loader import render_to_string
 import openpyxl
 from openpyxl.utils import get_column_letter
 
-from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -27,7 +29,8 @@ from hct_mis_api.apps.payment.models import (
     CashPlan,
     CashPlanPaymentVerification,
     PaymentRecord,
-    PaymentVerification
+    PaymentVerification,
+    PaymentPlan,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import Report
@@ -158,9 +161,7 @@ class GenerateReportContentHelpers:
         result = []
         for admin_area_id in admin_areas_ids:
             admin_area_id = decode_id_string(admin_area_id)
-            if admin_area := AdminArea.objects.filter(id=admin_area_id).first():
-                result.append(admin_area.title)
-            elif admin_area := Area.objects.filter(id=admin_area_id).first():
+            if admin_area := Area.objects.filter(id=admin_area_id).first():
                 result.append(admin_area.name)
         return ", ".join(result)
 
@@ -251,6 +252,29 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
+    def get_payment_plans(report: Report):
+        filter_vars = {
+            "business_area": report.business_area,
+            "dispersion_start_date__gte": report.date_from,
+            "dispersion_end_date__lte": report.date_to,
+        }
+        return PaymentPlan.objects.filter(**filter_vars)
+
+    @classmethod
+    def format_payment_plan_row(self, payment_plan: PaymentPlan) -> tuple:
+        return (
+            payment_plan.unicef_id,
+            payment_plan.get_status_display(),
+            payment_plan.total_households_count,
+            payment_plan.get_currency_display(),
+            payment_plan.total_entitled_quantity,
+            payment_plan.total_delivered_quantity,
+            payment_plan.total_undelivered_quantity,
+            self._format_date(payment_plan.dispersion_start_date),
+            self._format_date(payment_plan.dispersion_end_date),
+        )
+
+    @staticmethod
     def get_cash_plans(report: Report):
         filter_vars = {
             "business_area": report.business_area,
@@ -285,7 +309,7 @@ class GenerateReportContentHelpers:
             self._format_date(cash_plan.status_date),
             cash_plan.vision_id,
             cash_plan.validation_alerts_count,
-            cash_plan.verification_status,
+            # cash_plan.verification_status,
         )
 
     @staticmethod
@@ -318,37 +342,40 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_payments_for_individuals(report: Report):
+        if isinstance(report.date_to, str):
+            report.date_to = datetime.strptime(report.date_to, "%Y-%m-%d").date()
+
         date_to_time = datetime.fromordinal(report.date_to.toordinal())
         date_to_time += timedelta(days=1)
         filter_vars = {
-            "household__payment_records__business_area": report.business_area,
-            "household__payment_records__delivery_date__gte": report.date_from,
-            "household__payment_records__delivery_date__lt": date_to_time,
+            "household__paymentrecord__business_area": report.business_area,
+            "household__paymentrecord__delivery_date__gte": report.date_from,
+            "household__paymentrecord__delivery_date__lt": date_to_time,
         }
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
         if report.program:
-            filter_vars["household__payment_records__cash_plan__program"] = report.program
+            filter_vars["household__paymentrecord__cash_plan__program"] = report.program
 
         return (
             Individual.objects.filter(**filter_vars)
-            .annotate(first_delivery_date=Min("household__payment_records__delivery_date"))
-            .annotate(last_delivery_date=Max("household__payment_records__delivery_date"))
+            .annotate(first_delivery_date=Min("household__paymentrecord__delivery_date"))
+            .annotate(last_delivery_date=Max("household__paymentrecord__delivery_date"))
             .annotate(
                 payments_made=Count(
-                    "household__payment_records",
-                    filter=Q(household__payment_records__delivered_quantity__gte=0),
+                    "household__paymentrecord",
+                    filter=Q(household__paymentrecord__delivered_quantity__gte=0),
                 )
             )
-            .annotate(payment_currency=ArrayAgg("household__payment_records__currency"))
+            .annotate(payment_currency=ArrayAgg("household__paymentrecord__currency"))
             .annotate(
                 total_delivered_quantity_local=Sum(
-                    "household__payment_records__delivered_quantity", output_field=DecimalField()
+                    "household__paymentrecord__delivered_quantity", output_field=DecimalField()
                 )
             )
             .annotate(
                 total_delivered_quantity_usd=Sum(
-                    "household__payment_records__delivered_quantity_usd", output_field=DecimalField()
+                    "household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()
                 )
             )
             .order_by("household__id")
@@ -401,7 +428,7 @@ class GenerateReportContentHelpers:
             "created_at__lte": report.date_to,
         }
 
-        return GrievanceTicket.objects.filter(**filter_vars).select_related("admin2_new", "created_by", "assigned_to")
+        return GrievanceTicket.objects.filter(**filter_vars).select_related("admin2", "created_by", "assigned_to")
 
     @classmethod
     def format_grievance_tickets_row(cls, grievance_ticket: GrievanceTicket) -> tuple:
@@ -422,8 +449,8 @@ class GenerateReportContentHelpers:
             grievance_ticket.get_status_display(),
             grievance_ticket.get_category_display(),
             grievance_ticket.get_issue_type(),
-            grievance_ticket.admin2_new.name,
-            grievance_ticket.admin2_new.p_code,
+            grievance_ticket.admin2.name,
+            grievance_ticket.admin2.p_code,
             get_username(grievance_ticket.created_by),
             get_full_name(grievance_ticket.created_by),
             get_username(grievance_ticket.assigned_to),
@@ -551,6 +578,17 @@ class GenerateReportService:
             "status",  # RECEIVED_WITH_ISSUES
             "status date",
         ),
+        Report.PAYMENT_PLAN: (
+            "payment plan ID",
+            "status",
+            "no. of households",
+            "currency",
+            "total entitled quantity",
+            "total delivered quantity",
+            "total undelivered quantity",
+            "dispersion start date",
+            "dispersion end date",
+        ),
         Report.CASH_PLAN: (
             "cash plan ID",  # ANT-21-CSH-00001
             "cash plan name",
@@ -573,7 +611,7 @@ class GenerateReportService:
             "status date",
             "VISION ID",  # 2345253423
             "validation alerts count",  # 2
-            "cash plan verification status",  # FINISHED
+            # "cash plan verification status",  # FINISHED
         ),
         Report.PROGRAM: (
             "programme ID",  # e46064c4-d5e2-4990-bb9b-f5cc2dde96f9
@@ -645,6 +683,7 @@ class GenerateReportService:
         Report.CASH_PLAN_VERIFICATION: ("Completion Date From", "Completion Date To"),
         Report.PAYMENT_VERIFICATION: ("Completion Date From", "Completion Date To"),
         Report.PAYMENTS: ("Delivery Date From", "Delivery Date To"),
+        Report.PAYMENT_PLAN: ("Dispersion Start Date", "Dispersion End Date"),
         Report.INDIVIDUALS_AND_PAYMENT: ("Delivery Date From", "Delivery Date To"),
         Report.CASH_PLAN: ("End Date From", "End Date To"),
         Report.PROGRAM: ("End Date From", "End Date To"),
@@ -667,6 +706,10 @@ class GenerateReportService:
         Report.PAYMENT_VERIFICATION: (
             GenerateReportContentHelpers.get_payment_verifications,
             GenerateReportContentHelpers.format_payment_verification_row,
+        ),
+        Report.PAYMENT_PLAN: (
+            GenerateReportContentHelpers.get_payment_plans,
+            GenerateReportContentHelpers.format_payment_plan_row,
         ),
         Report.CASH_PLAN: (
             GenerateReportContentHelpers.get_cash_plans,
