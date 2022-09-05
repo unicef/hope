@@ -3,8 +3,8 @@ import os
 import tempfile
 from zipfile import ZipFile
 from django.utils import timezone
-from django.core.files import File
 from unittest.mock import patch
+from openpyxl import load_workbook
 
 from hct_mis_api.apps.payment.celery_tasks import create_payment_plan_payment_list_xlsx_per_fsp
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -528,6 +528,22 @@ class TestPaymentPlanReconciliation(APITestCase):
             with ZipFile(zip_file.file, "r") as zip_ref:
                 zip_ref.extractall(temp_dir)
 
-            self.assertEqual(len(os.listdir(temp_dir)), 1)
+            self.assertEqual(len(os.listdir(temp_dir)), 1)  # seems unstable
+
             file_name = os.listdir(temp_dir)[0]
             assert file_name.endswith(".xlsx")
+            file_path = os.path.join(temp_dir, file_name)
+            print("file_path", file_path)
+            breakpoint()
+
+            workbook = load_workbook(file_path)
+            assert workbook.sheetnames == ["Santander"], workbook.sheetnames
+
+            sheet = workbook["Santander"]
+            assert sheet.max_row == 2, sheet.max_row
+
+            # self.assertEqual(sheet.cell(row=1, column=1).value, "payment_id")
+            # self.assertEqual(sheet.cell(row=2, column=1).value, payment_plan_id)
+
+            # self.assertEqual(sheet.cell(row=1, column=6).value, "payment_channel")
+            # self.assertEqual(sheet.cell(row=2, column=6).value, "Cash")
