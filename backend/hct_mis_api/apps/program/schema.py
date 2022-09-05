@@ -23,7 +23,6 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
@@ -33,7 +32,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
-from hct_mis_api.apps.program.filters import ProgramFilter, CashPlanFilter
+from hct_mis_api.apps.program.filters import CashPlanFilter, ProgramFilter
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 

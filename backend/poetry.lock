@@ -453,7 +453,6 @@ python-dateutil = "2.6.0"
 [package.source]
 type = "url"
 url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip"
-
 [[package]]
 name = "django-author"
 version = "1.2.0"
@@ -744,17 +743,6 @@ redis = ">=3,<4.0.0 || >4.0.0,<4.0.1 || >4.0.1"
 
 [package.extras]
 hiredis = ["redis[hiredis] (>=3,!=4.0.0,!=4.0.1)"]
-
-[[package]]
-name = "django-reversion"
-version = "5.0.2"
-description = "An extension to the Django web framework that provides version control for model instances."
-category = "main"
-optional = false
-python-versions = ">=3.7"
-
-[package.dependencies]
-django = ">=2.0"
 
 [[package]]
 name = "django-silk"
@@ -2224,7 +2212,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "14f9744af32cd0c6f3d38fc9633e055e1d4b3690dd91cde272219cecd3e61854"
+content-hash = "9834cb86c8374a4492c6b3dfa2d5386216bb2e3bd834841b609774d9b6bd9b2c"
 
 [metadata.files]
 amqp = [
@@ -2443,7 +2431,6 @@ django-redis = [
     {file = "django-redis-5.2.0.tar.gz", hash = "sha256:8a99e5582c79f894168f5865c52bd921213253b7fd64d16733ae4591564465de"},
     {file = "django_redis-5.2.0-py3-none-any.whl", hash = "sha256:1d037dc02b11ad7aa11f655d26dac3fb1af32630f61ef4428860a2e29ff92026"},
 ]
-django-reversion = []
 django-silk = []
 django-smart-admin = []
 django-sql-explorer = []
