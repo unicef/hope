@@ -40,7 +40,7 @@ class TestPaymentPlanServices(APITestCase):
         pp = PaymentPlanService(payment_plan=pp).delete()
         self.assertEqual(pp.is_removed, True)
         pp.target_population.refresh_from_db()
-        self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_READY)
+        self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
 
     def test_delete_locked(self):
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
@@ -68,10 +68,11 @@ class TestPaymentPlanServices(APITestCase):
         self.business_area.save()
 
         with self.assertRaisesMessage(
-            GraphQLError, f"TargetPopulation id:{targeting.id} does not exist or is not in status Ready"
+            GraphQLError,
+            f"TargetPopulation id:{targeting.id} does not exist or is not in status 'Ready for Payment Module'",
         ):
             pp = PaymentPlanService().create(input_data=input_data, user=self.user)
-        targeting.status = TargetPopulation.STATUS_READY
+        targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         targeting.save()
 
         with self.assertRaisesMessage(GraphQLError, "TargetPopulation should have related Program defined"):
@@ -92,7 +93,7 @@ class TestPaymentPlanServices(APITestCase):
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
 
-        targeting.status = TargetPopulation.STATUS_READY
+        targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         targeting.program = ProgramFactory()
 
         hoh1 = IndividualFactory(household=None)
@@ -158,7 +159,7 @@ class TestPaymentPlanServices(APITestCase):
             GraphQLError, f"TargetPopulation id:{new_targeting.id} does not exist or is not in status Ready"
         ):
             pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
-        new_targeting.status = TargetPopulation.STATUS_READY
+        new_targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         new_targeting.save()
 
         with self.assertRaisesMessage(GraphQLError, "TargetPopulation should have related Program defined"):
@@ -181,7 +182,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.payments.count(), 1)
 
         new_targeting = TargetPopulationFactory()
-        new_targeting.status = TargetPopulation.STATUS_READY
+        new_targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         new_targeting.program = ProgramFactory()
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -221,4 +222,4 @@ class TestPaymentPlanServices(APITestCase):
             self.assertEqual(updated_pp_2.target_population, new_targeting)
             self.assertEqual(updated_pp_2.target_population.status, TargetPopulation.STATUS_ASSIGNED)
             self.assertEqual(updated_pp_2.program, updated_pp_2.target_population.program)
-            self.assertEqual(old_pp_targeting.status, TargetPopulation.STATUS_READY)
+            self.assertEqual(old_pp_targeting.status, TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
