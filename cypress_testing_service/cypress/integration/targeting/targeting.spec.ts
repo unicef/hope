@@ -63,7 +63,7 @@ When('I fill out the form fields and save', () => {
   cy.contains('Residence status').click();
   cy.get('[data-cy="select-filters[0].value"]').click();
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.get('li').eq(2).click();
+  cy.get('li').eq(3).click();
   cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click();
 });
 
@@ -77,6 +77,32 @@ When('I save the Target Population', () => {
   ).click();
 });
 
-Then('I should see the Target Population details page', () => {
+Then('I should see the Target Population details page and status Open', () => {
   cy.get('h6').contains('Targeting Criteria');
+  cy.get('[data-cy="status-container"]').contains('Open');
+});
+
+When('I Lock Target Population', () => {
+  cy.get('[data-cy="button-target-population-lock"]').click();
+  cy.get('[data-cy="button-target-population-modal-lock"]').click();
+});
+
+Then(
+  'I should see the Target Population details page and status Locked',
+  () => {
+    cy.get('h6').contains('Targeting Criteria');
+    cy.get('[data-cy="status-container"]').contains('Locked');
+  },
+);
+
+When('I Send Target Population to HOPE', () => {
+  cy.get('[data-cy="button-target-population-send-to-hope"]').click({
+    force: true,
+  });
+  cy.get('[data-cy="button-target-population-modal-send-to-hope"]').click();
+});
+
+Then('I should see the Target Population details page and status Ready', () => {
+  cy.get('h6').contains('Targeting Criteria');
+  cy.get('[data-cy="status-container"]').contains('Ready');
 });

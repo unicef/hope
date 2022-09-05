@@ -4055,7 +4055,7 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   updatedAt: DateTime!
   goldenRecordsIndividual: IndividualNode!
   isMultipleDuplicatesVersion: Boolean!
-  possibleDuplicate: IndividualNode!
+  possibleDuplicate: IndividualNode
   possibleDuplicates: [IndividualNode]
   selectedIndividual: IndividualNode
   selectedIndividuals: [IndividualNode]
