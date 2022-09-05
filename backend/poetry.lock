@@ -46,7 +46,7 @@ tests = ["pytest", "pytest-asyncio", "mypy (>=0.800)"]
 
 [[package]]
 name = "asttokens"
-version = "2.0.5"
+version = "2.0.8"
 description = "Annotate AST trees with source code positions"
 category = "main"
 optional = false
@@ -56,7 +56,7 @@ python-versions = "*"
 six = "*"
 
 [package.extras]
-test = ["astroid", "pytest"]
+test = ["astroid (<=2.5.3)", "pytest"]
 
 [[package]]
 name = "async-timeout"
@@ -137,7 +137,7 @@ python-versions = "*"
 
 [[package]]
 name = "black"
-version = "22.6.0"
+version = "22.8.0"
 description = "The uncompromising code formatter."
 category = "main"
 optional = false
@@ -230,7 +230,7 @@ pycparser = "*"
 
 [[package]]
 name = "charset-normalizer"
-version = "2.1.0"
+version = "2.1.1"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 category = "main"
 optional = false
@@ -355,7 +355,7 @@ python-versions = ">=2.7"
 
 [[package]]
 name = "django"
-version = "3.2.13"
+version = "3.2.15"
 description = "A high-level Python Web framework that encourages rapid development and clean, pragmatic design."
 category = "main"
 optional = false
@@ -372,7 +372,7 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-admin-extra-buttons"
-version = "1.4.2"
+version = "1.5.0"
 description = "Django mixin to easily add buttons to any ModelAdmin"
 category = "main"
 optional = false
@@ -380,8 +380,8 @@ python-versions = "*"
 
 [package.extras]
 dev = ["autopep8", "check-manifest", "django", "pip-tools", "flake8", "pep8", "readme", "sphinx", "wheel", "isort"]
-docs = ["markdown-include", "mdx-gh-links", "mkdocs", "mkdocs-material"]
-test = ["coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox (>=2.3)", "wheel"]
+docs = ["markdown-include", "mdx-gh-links", "mkdocs", "mkdocs-material", "mkdocs-material"]
+test = ["coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "tox (>=2.3)", "wheel"]
 
 [[package]]
 name = "django-adminactions"
@@ -784,7 +784,7 @@ full = ["django-adminfilters (>=2)", "django-admin-extra-buttons", "django-admin
 
 [[package]]
 name = "django-sql-explorer"
-version = "2.4.1"
+version = "2.4.2"
 description = "A pluggable app that allows users (admins) to execute SQL, view, and export the results."
 category = "main"
 optional = false
@@ -909,7 +909,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "executing"
-version = "0.9.1"
+version = "1.0.0"
 description = "Get the currently executing AST node of a frame, and other information"
 category = "main"
 optional = false
@@ -961,6 +961,18 @@ python-versions = ">=3.6"
 mccabe = ">=0.6.0,<0.7.0"
 pycodestyle = ">=2.8.0,<2.9.0"
 pyflakes = ">=2.4.0,<2.5.0"
+
+[[package]]
+name = "flake8-formatter-junit-xml"
+version = "0.0.6"
+description = "JUnit XML Formatter for flake8"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+flake8 = ">3.0.0"
+junit-xml = ">=1.8"
 
 [[package]]
 name = "freezegun"
@@ -1213,6 +1225,17 @@ MarkupSafe = ">=2.0"
 i18n = ["Babel (>=2.7)"]
 
 [[package]]
+name = "junit-xml"
+version = "1.9"
+description = "Creates JUnit XML test result documents that can be read by tools such as Jenkins"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+six = "*"
+
+[[package]]
 name = "kombu"
 version = "5.2.4"
 description = "Messaging library for Python."
@@ -1272,7 +1295,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "matplotlib-inline"
-version = "0.1.3"
+version = "0.1.6"
 description = "Inline Matplotlib backend for Jupyter"
 category = "main"
 optional = false
@@ -1408,11 +1431,11 @@ testing = ["docopt", "pytest (<6.0.0)"]
 
 [[package]]
 name = "pathspec"
-version = "0.9.0"
+version = "0.10.0"
 description = "Utility library for gitignore style pattern matching of file paths."
 category = "main"
 optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
+python-versions = ">=3.7"
 
 [[package]]
 name = "pexpect"
@@ -1577,10 +1600,10 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
-docs = ["zope.interface", "sphinx-rtd-theme", "sphinx"]
-dev = ["pre-commit", "mypy", "coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)", "cryptography (>=3.3.1)", "zope.interface", "sphinx-rtd-theme", "sphinx"]
 crypto = ["cryptography (>=3.3.1)"]
+dev = ["sphinx", "sphinx-rtd-theme", "zope.interface", "cryptography (>=3.3.1)", "pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)", "mypy", "pre-commit"]
+docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
+tests = ["pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)"]
 
 [[package]]
 name = "pyparsing"
@@ -1595,7 +1618,7 @@ diagrams = ["railroad-diagrams", "jinja2"]
 
 [[package]]
 name = "pytesseract"
-version = "0.3.9"
+version = "0.3.10"
 description = "Python-tesseract is a python wrapper for Google's Tesseract-OCR"
 category = "main"
 optional = false
@@ -1707,7 +1730,7 @@ use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "requests-mock"
-version = "1.9.3"
+version = "1.10.0"
 description = "Mock out responses from the requests package"
 category = "dev"
 optional = false
@@ -1719,7 +1742,7 @@ six = "*"
 
 [package.extras]
 fixture = ["fixtures"]
-test = ["fixtures", "mock", "purl", "pytest", "sphinx", "testrepository (>=0.0.18)", "testtools"]
+test = ["fixtures", "mock", "purl", "pytest", "sphinx", "testrepository (>=0.0.18)", "testtools", "requests-futures"]
 
 [[package]]
 name = "requests-oauthlib"
@@ -1922,7 +1945,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "stack-data"
-version = "0.3.0"
+version = "0.5.0"
 description = "Extract data from python stack frames and tracebacks for informative displays"
 category = "main"
 optional = false
@@ -2023,7 +2046,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "tzdata"
-version = "2022.1"
+version = "2022.2"
 description = "Provider of IANA time zone data"
 category = "main"
 optional = false
@@ -2197,7 +2220,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "b00d66239e60e398891765c4fa9005b2856aaec21ada2d5fba1fc760a9ff27bf"
+content-hash = "7b0b16aa160d62cffc81fd23e904b904411705654e563c427d89d59f3c3976b9"
 
 [metadata.files]
 amqp = []
@@ -2275,6 +2298,7 @@ factory-boy = []
 faker = []
 fastdiff = []
 flake8 = []
+flake8-formatter-junit-xml = []
 freezegun = []
 gevent = []
 gprof2dot = []
@@ -2291,6 +2315,7 @@ ipython = []
 isodate = []
 jedi = []
 jinja2 = []
+junit-xml = []
 kombu = []
 lxml = []
 markuppy = []

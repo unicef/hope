@@ -87,11 +87,11 @@ class DocumentTypeNode(DjangoObjectType):
     country = graphene.String(description="Country name")
     country_iso3 = graphene.String(description="Country ISO3")
 
-    def resolve_country(parent, info):
+    def resolve_country(parent: DocumentType, info):
         return parent.country.name
 
-    def resolve_country_iso3(parent, info):
-        return parent.country.alpha3
+    def resolve_country_iso3(parent: DocumentType, info):
+        return parent.country.iso_code3
 
     class Meta:
         model = DocumentType
@@ -101,11 +101,11 @@ class AgencyNode(DjangoObjectType):
     country = graphene.String(description="Country name")
     country_iso3 = graphene.String(description="Country ISO3")
 
-    def resolve_country(parent, info):
+    def resolve_country(parent: Agency, info):
         return parent.country.name
 
-    def resolve_country_iso3(parent, info):
-        return parent.country.alpha3
+    def resolve_country_iso3(parent: Agency, info):
+        return parent.country.iso_code3
 
     class Meta:
         model = Agency
@@ -213,17 +213,17 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin_area = graphene.Field(AreaNode)
 
     def resolve_admin1(parent, info):
-        return parent.admin1_new
+        return parent.admin1
 
     def resolve_admin2(parent, info):
-        return parent.admin2_new
+        return parent.admin2
 
     def resolve_admin_area(parent, info):
-        return parent.admin_area_new
+        return parent.admin_area
 
     def resolve_admin_area_title(parent, info):
-        if parent.admin_area_new:
-            return parent.admin_area_new.name
+        if parent.admin_area:
+            return parent.admin_area.name
         return ""
 
     def resolve_programs_with_delivered_quantity(parent, info):
