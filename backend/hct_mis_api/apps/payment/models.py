@@ -189,6 +189,14 @@ class GenericPayment(TimeStampedUUIDModel):
     class Meta:
         abstract = True
 
+    @property
+    def is_reconciled(self):
+        return (
+            self.delivered_quantity is not None
+            and self.entitlement_quantity is not None
+            and self.delivered_quantity == self.entitlement_quantity
+        )
+
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -478,6 +486,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("payment_channel", _("Payment Channel (Delivery mechanism)")),
         ("fsp_name", _("FSP Name")),
         ("entitlement_quantity", _("Entitlement Quantity")),
+        ("delivered_quantity", _("Delivered Quantity")),
         ("tbd", _("TBD")),
     )
     DEFAULT_COLUMNS = [
@@ -488,6 +497,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         "payment_channel",
         "fsp_name",
         "entitlement_quantity",
+        "delivered_quantity",
     ]
 
     created_by = models.ForeignKey(

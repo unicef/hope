@@ -125,16 +125,14 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             "payment_channel",
             "fsp_name",
             "entitlement_quantity",
+            "delivered_quantity",
         ]
-        print("payment_list", self.payment_list.count(), self.payment_list.all())
         fsp_ids = self.payment_list.values_list("financial_service_provider_id", flat=True)
-        print("fsp_ids", fsp_ids)
         fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
 
         # create temp zip file
         with NamedTemporaryFile() as tmp_zip:
             with zipfile.ZipFile(tmp_zip.name, mode="w") as zip_file:
-                print("fsp_qs", fsp_qs.count(), fsp_qs)
                 for fsp in fsp_qs:
                     wb = openpyxl.Workbook()
                     ws_fsp = wb.active
@@ -157,7 +155,6 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
                     ws_fsp.append(col_list)
 
                     # add rows
-                    print("payment_qs", payment_qs.count(), payment_qs)
                     for payment in payment_qs:
                         self._add_rows(ws_fsp, col_list, fsp, payment)
 
@@ -178,7 +175,6 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             )
             tmp_zip.seek(0)
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
-            print("SAVE FILE")
             xlsx_obj.file.save(zip_file_name, File(tmp_zip))
             self.payment_plan.export_per_fsp_xlsx_file = xlsx_obj
             self.payment_plan.save()
@@ -193,6 +189,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             "fsp_name": (fsp, "name"),
             "payment_channel": (payment.assigned_payment_channel, lambda pch: pch.delivery_mechanism),
             "entitlement_quantity": (payment, "entitlement_quantity"),
+            "delivered_quantity": (payment, "delivered_quantity"),
         }
 
         payment_row = tuple()
@@ -205,7 +202,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
                     value = value(obj)
                 else:
                     value = getattr(obj, value, "")
-            print(f"column_name: {column_name}, value: {value}")
+                value = value or ""
             payment_row = (*payment_row, value)
 
         ws_fsp.append(payment_row)
