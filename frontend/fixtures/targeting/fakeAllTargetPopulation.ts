@@ -8,7 +8,7 @@ export const fakeAllTargetPopulation = {
           id:
             'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZTkzMTU2YWUtOWQ2Ni00MTVkLTk2OWUtMzYzZGJkMjlkNzVl',
           name: 'Example Target Population',
-          status: 'DRAFT',
+          status: 'OPEN',
           createdAt: '2022-04-13T08:56:10.671921',
           updatedAt: '2022-04-13T08:56:10.671951',
           candidateListTotalHouseholds: 0,

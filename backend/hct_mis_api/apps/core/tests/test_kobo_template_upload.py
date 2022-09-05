@@ -48,6 +48,8 @@ def raise_as_func(exception):
 
 
 class TestKoboTemplateUpload(APITestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()

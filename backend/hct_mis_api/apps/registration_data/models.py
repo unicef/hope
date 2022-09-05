@@ -124,3 +124,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
             }
             for rdi in queryset
         ]
+
+    def can_be_merged(self):
+        return self.status in [self.IN_REVIEW, self.MERGE_ERROR]

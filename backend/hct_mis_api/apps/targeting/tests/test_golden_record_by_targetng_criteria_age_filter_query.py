@@ -77,7 +77,7 @@ class GoldenRecordTargetingCriteriaAgeFilterQueryTestCase(APITestCase):
                                 "individualBlockFilters": [
                                     {
                                         "arguments": arguments,
-                                        "comparisionMethod": method,
+                                        "comparisonMethod": method,
                                         "fieldName": "age",
                                         "isFlexField": False,
                                     }

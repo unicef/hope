@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Optional
 
 from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
@@ -8,11 +9,14 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
+from django.db.models import Q
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -110,12 +114,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     ca_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
     ca_hash_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
-    admin_areas = models.ManyToManyField(
-        "core.AdminArea",
-        related_name="programs",
-        blank=True,
-    )
-    admin_areas_new = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
+    admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     budget = models.DecimalField(
         decimal_places=2,

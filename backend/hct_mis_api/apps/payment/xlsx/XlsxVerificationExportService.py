@@ -115,8 +115,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
             xlsx_obj = XlsxCashPlanPaymentVerificationFile(
-                created_by=user,
-                cash_plan_payment_verification=self.cashplan_payment_verification
+                created_by=user, cash_plan_payment_verification=self.cashplan_payment_verification
             )
             self.wb.save(tmp.name)
             tmp.seek(0)

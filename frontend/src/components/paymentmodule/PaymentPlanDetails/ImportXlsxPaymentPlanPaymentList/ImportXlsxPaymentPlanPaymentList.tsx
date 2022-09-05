@@ -99,7 +99,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
         scroll='paper'
         aria-labelledby='form-dialog-title'
       >
-        <DialogTitleWrapper>
+        <DialogTitleWrapper data-cy='dialog-import'>
           <DialogTitle id='scroll-dialog-title'>
             {t('Select File to Import')}
           </DialogTitle>
@@ -134,14 +134,14 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             ) : null}
           </>
           <DialogActions>
-            <Button onClick={() => setOpenImport(false)}>CANCEL</Button>
+            <Button data-cy="close-button" onClick={() => setOpenImport(false)}>CANCEL</Button>
             <Button
               disabled={!fileToImport}
               type='submit'
               color='primary'
               variant='contained'
               onClick={() => handleImport()}
-              data-cy='button-import'
+              data-cy='button-import-submit'
             >
               {t('IMPORT')}
             </Button>

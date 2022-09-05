@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSection should render 1`] = `
+<div>
+  <div
+    class="MuiBox-root MuiBox-root-1"
+  >
+    <div
+      class="sc-htpNat fhvuOp"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6"
+      >
+        Volume by Delivery Mechanism
+         in USD
+      </h6>
+       
+    </div>
+    <div
+      class="sc-bxivhb cDFCAd"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-container"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        >
+          <div
+            class="sc-ifAKCX jUgrjC"
+            color="#D8E1EE"
+          >
+            <div>
+              <span
+                class="sc-bdVaJa kwsjSG"
+                color="textSecondary"
+              >
+                Cash (Miranda Ltd)
+              </span>
+              <div>
+                <span
+                  class="sc-bwzfXH emFVa"
+                  color="textSecondary"
+                >
+                  0
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        >
+          <div
+            class="sc-ifAKCX bPCvhn"
+            color=" #d8d8d8"
+          >
+            <div>
+              <span
+                class="sc-bdVaJa kwsjSG"
+                color="textSecondary"
+              >
+                In Kind (Frazier-Watson)
+              </span>
+              <div>
+                <span
+                  class="sc-bwzfXH emFVa"
+                  color="textSecondary"
+                >
+                  0
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        >
+          <div
+            class="sc-ifAKCX ecqLoz"
+            color="#003C8F"
+          >
+            <div>
+              <span
+                class="sc-bdVaJa kwsjSG"
+                color="textSecondary"
+              >
+                Transfer (Bray Group)
+              </span>
+              <div>
+                <span
+                  class="sc-bwzfXH emFVa"
+                  color="textSecondary"
+                >
+                  0
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div
+            class="sc-EHOje johpGE"
+          >
+            <canvas
+              class="chartjs-render-monitor"
+              height="0"
+              style="display: block;"
+              width="0"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
