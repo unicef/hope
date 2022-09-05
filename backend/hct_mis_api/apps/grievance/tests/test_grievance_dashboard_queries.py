@@ -26,7 +26,6 @@ class TestGrievanceDashboardQuery(APITestCase):
             systemGeneratedCount
             closedUserGeneratedCount
             closedSystemGeneratedCount
-            userGeneratedAvgResolution
             systemGeneratedAvgResolution
         }
     }
