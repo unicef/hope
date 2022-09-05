@@ -196,6 +196,18 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
 @app.task
 @log_start_and_end
 @sentry_tags
+def import_payment_plan_payment_list_from_xlsx_per_fsp(payment_plan_id, file_id):
+    try:
+        print("TODO import_payment_plan_payment_list_from_xlsx_per_fsp")
+
+    except Exception as e:
+        logger.exception(e)
+        raise
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
 def payment_plan_apply_steficon(payment_plan_id):
     from hct_mis_api.apps.steficon.models import RuleCommit
     from hct_mis_api.apps.payment.models import PaymentPlan, Payment
