@@ -11,6 +11,7 @@ from sentry_sdk import configure_scope
 from django.contrib.auth import get_user_model
 
 from hct_mis_api.apps.payment.models import XlsxCashPlanPaymentVerificationFile, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import XlsxPaymentPlanImportPerFspService
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.utils.logs import log_start_and_end
@@ -196,9 +197,28 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_from_xlsx_per_fsp(payment_plan_id, file_id):
+def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id, file):
     try:
-        print("TODO import_payment_plan_payment_list_from_xlsx_per_fsp")
+        print("TODO import_payment_plan_payment_list_per_fsp_from_xlsx")
+        from hct_mis_api.apps.payment.models import PaymentPlan
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+
+        with configure_scope() as scope:
+            scope.set_tag("business_area", payment_plan.business_area)
+
+            service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
+            service.open_workbook()
+            try:
+                with atomic():
+                    service.import_payment_list()
+                    payment_plan.xlsx_file_imported_date = timezone.now()
+                    # payment_plan.status_approved() # TODO
+                    payment_plan.save()
+            except Exception as e:
+                logger.exception("Error import from xlsx", e)
+                # payment_plan.status_approved() # TODO
+                payment_plan.save()
 
     except Exception as e:
         logger.exception(e)
