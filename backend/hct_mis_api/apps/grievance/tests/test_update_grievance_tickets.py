@@ -635,7 +635,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         if name == "with_permission":
             self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
             self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.name, self.admin_area_1.name)
+            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.name, self.admin_area_2.name)
             self.assertNotEqual(self.positive_feedback_grievance_ticket.language, "Polish, English")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
         else:

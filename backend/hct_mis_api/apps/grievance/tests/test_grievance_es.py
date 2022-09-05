@@ -504,6 +504,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             index="test_es_db",
             ignore=[400, 404]
         )
+        super().tearDownClass()
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_unicef_id(self, mock_execute_test_es_query):
