@@ -20,7 +20,7 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(PaymentRecord)
-class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("household", "status", "cash_plan_name", "target_population")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
