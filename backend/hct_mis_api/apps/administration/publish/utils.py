@@ -10,7 +10,7 @@ from django.core import signing
 from django.core.management import call_command
 from django.core.serializers import get_serializer
 from django.core.signing import BadSignature
-from django.db.models import Model, Q
+from django.db.models import Model
 from django.http import Http404, HttpResponse
 from django.template import loader
 from django.urls.base import reverse
@@ -51,7 +51,7 @@ def loaddata_from_url(url, auth, user=None, comment=None):
     out = io.StringIO()
     payload = unwrap(ret.content)
     workdir = Path(".").absolute()
-    kwargs = {"dir": workdir, "prefix": f"~LOADDATA-{slugify(url)}", "suffix": ".json", "delete": False}
+    kwargs = {"dir": workdir, "prefix": f"~LOADDATA-{slugify(url)}", "suffix": ".json", "delete": True}
     payload = payload.replace("smart_register", "aurora")
     with tempfile.NamedTemporaryFile(**kwargs) as fdst:
         assert isinstance(fdst.write, object)

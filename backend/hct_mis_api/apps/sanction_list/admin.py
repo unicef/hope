@@ -2,7 +2,6 @@ from django.contrib import admin
 
 from adminfilters.filters import ValueFilter
 
-
 from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
     SanctionListIndividualDateOfBirth,
