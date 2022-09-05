@@ -5,8 +5,12 @@ from zipfile import ZipFile
 from django.utils import timezone
 from unittest.mock import patch
 from openpyxl import load_workbook
+from django.core.files.uploadedfile import SimpleUploadedFile
 
-from hct_mis_api.apps.payment.celery_tasks import create_payment_plan_payment_list_xlsx_per_fsp
+from hct_mis_api.apps.payment.celery_tasks import (
+    create_payment_plan_payment_list_xlsx_per_fsp,
+    import_payment_plan_payment_list_per_fsp_from_xlsx,
+)
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.fixtures import PaymentFactory
@@ -157,9 +161,19 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
 }
 """
 
-EXPORT_XSLX_PER_FSP_MUTATION = """
+EXPORT_XLSX_PER_FSP_MUTATION = """
 mutation ExportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!) {
     exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId) {
+        paymentPlan {
+            id
+        }
+    }
+}
+"""
+
+IMPORT_XLSX_PER_FSP_MUTATION = """
+mutation ImportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $file: Upload!) {
+    importXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId, file: $file) {
         paymentPlan {
             id
         }
@@ -513,17 +527,17 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         with patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.create_payment_plan_payment_list_xlsx_per_fsp"
-        ) as mock:
+        ) as mock_export:
             export_file_mutation = self.graphql_request(
-                request_string=EXPORT_XSLX_PER_FSP_MUTATION,
+                request_string=EXPORT_XLSX_PER_FSP_MUTATION,
                 context={"user": self.user},
                 variables={
                     "paymentPlanId": encoded_payment_plan_id,
                 },
             )
             assert "errors" not in export_file_mutation, export_file_mutation
-            assert mock.delay.call_count == 1
-            call_args = mock.delay.call_args[0]
+            assert mock_export.delay.call_count == 1
+            call_args = mock_export.delay.call_args[0]
             create_payment_plan_payment_list_xlsx_per_fsp(*call_args)
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -571,7 +585,28 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(payment.delivered_quantity, None)
             self.assertEqual(payment.is_reconciled, False)
 
-            # TODO: import file with filled delivered quantity
+            sheet.cell(row=2, column=8).value = 500
+            filled_file_name = "filled.xlsx"
+            filled_file_path = os.path.join(temp_dir, filled_file_name)
+            workbook.save(filled_file_path)
+
+            with open(filled_file_path, "rb") as file:
+                uploaded_file = SimpleUploadedFile(filled_file_name, file.read())
+                with patch(
+                    "hct_mis_api.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx"
+                ) as mock_import:
+                    import_mutation_response = self.graphql_request(
+                        request_string=IMPORT_XLSX_PER_FSP_MUTATION,
+                        context={"user": self.user},
+                        variables={
+                            "paymentPlanId": encoded_payment_plan_id,
+                            "file": uploaded_file,
+                        },
+                    )
+                    assert "errors" not in import_mutation_response, import_mutation_response
+                    assert mock_import.delay.call_count == 1
+                    call_args = mock_import.delay.call_args[0]
+                    import_payment_plan_payment_list_per_fsp_from_xlsx(*call_args)
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
