@@ -759,8 +759,9 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
         if payment_plan.status != PaymentPlan.Status.ACCEPTED:
-            logger.error("You can only export Payment List for ACCEPTED Payment Plan")
-            raise GraphQLError("You can only export Payment List for ACCEPTED Payment Plan")
+            msg = "You can only export Payment List for ACCEPTED Payment Plan"
+            logger.error(msg)
+            raise GraphQLError(msg)
 
         old_payment_plan = copy_model_object(payment_plan)
 
