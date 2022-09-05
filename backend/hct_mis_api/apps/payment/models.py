@@ -213,8 +213,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         ]
     )
 
-    # TODO: divide status for "normal" status and "action" status
-    # and disallow to trigger actions, if in "action" status or something like that
     class Status(models.TextChoices):
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
@@ -223,12 +221,22 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
-        STEFICON_WAIT = "STEFICON_WAIT", "Waiting for Rule Engine"
+
+    class BackgroundActionStatus(models.TextChoices):
+        NONE = "", ""
         STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
-        STEFICON_COMPLETED = "STEFICON_COMPLETED", "Rule Engine Completed"
         STEFICON_ERROR = "STEFICON_ERROR", "Rule Engine Errored"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
-        XLSX_IMPORTING = "XLSX_IMPORTING", "Importing XLSX file"
+        XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
+        XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
+        XLSX_IMPORTING_ENTITLEMENTS = "XLSX_IMPORTING_ENTITLEMENTS", "Importing Entitlements XLSX file"
+        XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"
+
+    BACKGROUND_ACTION_ERROR_STATES = [
+        BackgroundActionStatus.XLSX_EXPORT_ERROR,
+        BackgroundActionStatus.XLSX_IMPORT_ERROR,
+        BackgroundActionStatus.STEFICON_ERROR,
+    ]
 
     class Action(models.TextChoices):
         LOCK = "LOCK", "Lock"
@@ -247,6 +255,13 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         related_name="created_payment_plans",
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
+    background_action_status = FSMField(
+        default=BackgroundActionStatus.NONE,
+        protected=False,
+        db_index=True,
+        blank=True,
+        choices=BackgroundActionStatus.choices,
+    )
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
@@ -281,8 +296,78 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         ordering = ["created_at"]
 
     @transition(
+        field=background_action_status,
+        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        target=BackgroundActionStatus.XLSX_EXPORTING,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
+    )
+    def background_action_status_xlsx_exporting(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=BackgroundActionStatus.XLSX_EXPORTING,
+        target=BackgroundActionStatus.XLSX_EXPORT_ERROR,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
+    )
+    def background_action_status_xlsx_export_error(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        target=BackgroundActionStatus.STEFICON_RUN,
+        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
+    )
+    def background_action_status_steficon_run(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[BackgroundActionStatus.STEFICON_RUN],
+        target=BackgroundActionStatus.STEFICON_ERROR,
+        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
+    )
+    def background_action_status_steficon_error(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        target=BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
+        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
+    )
+    def background_action_status_xlsx_importing_entitlements(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        target=BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
+    )
+    def background_action_status_xlsx_importing_reconciliation(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[
+            BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
+            BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        ],
+        target=BackgroundActionStatus.XLSX_IMPORT_ERROR,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
+    )
+    def background_action_status_xlsx_import_error(self):
+        pass
+
+    @transition(field=background_action_status, source="*", target=BackgroundActionStatus.NONE)
+    def background_action_status_none(self):
+        pass
+
+    @transition(
         field=status,
-        source=[Status.OPEN, Status.XLSX_EXPORTING, Status.XLSX_IMPORTING, Status.STEFICON_ERROR, Status.STEFICON_RUN],
+        source=Status.OPEN,
         target=Status.LOCKED,
     )
     def status_lock(self):
@@ -294,6 +379,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         target=Status.OPEN,
     )
     def status_unlock(self):
+        self.background_action_status_none()
         self.status_date = timezone.now()
 
     @transition(
@@ -306,10 +392,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=status,
-        source=[Status.LOCKED],
+        source=Status.LOCKED,
         target=Status.LOCKED_FSP,
     )
     def status_lock_fsp(self):
+        self.background_action_status_none()
         self.status_date = timezone.now()
 
     @transition(
@@ -350,33 +437,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         target=Status.ACCEPTED,
     )
     def status_mark_as_reviewed(self):
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=[
-            Status.LOCKED,
-            Status.LOCKED_FSP,
-            Status.IN_APPROVAL,
-            Status.IN_AUTHORIZATION,
-            Status.IN_REVIEW,
-            Status.ACCEPTED,
-        ],
-        target=Status.XLSX_EXPORTING,
-    )
-    def status_exporting(self):
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        # TODO: ACCEPTED status is used for the sake of importing the reconciliation info
-        # so we'd need some explicit "action" status where we can differentiate
-        # between importing xlsx for entitlemets
-        # and importing xlsx for reconciliation
-        source=[Status.LOCKED, Status.ACCEPTED],
-        target=Status.XLSX_IMPORTING,
-    )
-    def status_importing(self):
         self.status_date = timezone.now()
 
     @property
