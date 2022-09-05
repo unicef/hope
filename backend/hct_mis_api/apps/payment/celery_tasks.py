@@ -227,7 +227,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
             service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
             service.open_workbook()
             try:
-                with atomic():
+                with transaction.atomic():
                     service.import_payment_list()
                     payment_plan.xlsx_file_imported_date = timezone.now()
                     # payment_plan.status_approved() # TODO
