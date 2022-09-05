@@ -39,7 +39,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
 }: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
-  const [fileToImport, setFileToImport] = useState(null);
+  const [fileToImport, setFileToImport] = useState<File | null>(null);
 
   const { t } = useTranslation();
 
@@ -124,7 +124,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               }}
             />
             {error?.graphQLErrors?.length || xlsxErrors?.length ? (
-              <Error>
+              <Error data-cy="error-list">
                 <p>Errors</p>
                 {error
                   ? error.graphQLErrors.map((x) => <p>{x.message}</p>)

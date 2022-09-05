@@ -17,9 +17,12 @@ describe(
           mocks={fakeActionPpMutation}
         >
           <PaymentPlanDetailsResults paymentPlan={fakeApolloPaymentPlan} />
-        </MockedProvider>
-        ,
+        </MockedProvider>,
       );
+
+      const chartContainer = container.querySelector('[data-cy="chart-container"]');
+      expect(chartContainer).toBeInTheDocument();
+      expect(chartContainer).not.toBeEmpty();
 
       await act(() => wait(0)); // wait for the mutation to complete
 
