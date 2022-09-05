@@ -2,8 +2,9 @@ Feature: Create Payment Plan
     Checks, if creating a payment plan is possible
 
     Background:
-        Given I am on the New Payment Plan
-        And I can see the form correctly displayed
+        Given I am authenticated
+        Given I have an active program
+        Given I have target population in ready status
 
     Scenario: Create Payment Plan
         When I fill in the form
