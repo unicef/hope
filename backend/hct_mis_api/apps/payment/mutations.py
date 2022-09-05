@@ -951,7 +951,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
     class Input:
         payment_plan_id = graphene.ID(required=True)
-        steficon_rule_id = graphene.ID(required=False)
+        steficon_rule_id = graphene.ID(required=True)
 
     @classmethod
     @is_authenticated
@@ -961,7 +961,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
-            msg = "You can run formula for 'Locked' or 'Rule Engine Errored' statuses of Payment Plan"
+            msg = "You can run formula only for 'Locked' status of Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
 
@@ -971,19 +971,14 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             raise GraphQLError(msg)
 
         old_payment_plan = copy_model_object(payment_plan)
-        if steficon_rule_id:
-            steficon_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
-            if not steficon_rule.enabled or steficon_rule.deprecated:
-                msg = "This steficon rule is not enabled or is deprecated."
-                logger.error(msg)
-                raise GraphQLError(msg)
 
-            payment_plan_apply_steficon.delay(payment_plan.pk, steficon_rule_id)
+        steficon_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
+        if not steficon_rule.enabled or steficon_rule.deprecated:
+            msg = "This steficon rule is not enabled or is deprecated."
+            logger.error(msg)
+            raise GraphQLError(msg)
 
-        else:
-            payment_plan.steficon_rule = None
-            payment_plan.background_action_status_none()
-            payment_plan.save()
+        payment_plan_apply_steficon.delay(payment_plan.pk, steficon_rule_id)
 
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

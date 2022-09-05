@@ -383,7 +383,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         target_population: TargetPopulation = kwargs.get("model_object")
         if target_population.program.business_area.is_payment_plan_applicable:
             with transaction.atomic():
-                target_population.status = TargetPopulation.STATUS_READY
+                target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
                 target_population.finalized_by = user
                 target_population.finalized_at = timezone.now()
                 target_population.save()

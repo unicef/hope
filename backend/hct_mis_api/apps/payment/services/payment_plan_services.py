@@ -245,9 +245,13 @@ class PaymentPlanService:
 
         targeting_id = decode_id_string(input_data["targeting_id"])
         try:
-            target_population = TargetPopulation.objects.get(id=targeting_id, status=TargetPopulation.STATUS_READY)
+            target_population = TargetPopulation.objects.get(
+                id=targeting_id, status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
+            )
         except TargetPopulation.DoesNotExist:
-            raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
+            raise GraphQLError(
+                f"TargetPopulation id:{targeting_id} does not exist or is not in status 'Ready for Payment Module'"
+            )
         if not target_population.program:
             raise GraphQLError("TargetPopulation should have related Program defined")
 
@@ -282,7 +286,8 @@ class PaymentPlanService:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             raise GraphQLError("Only Payment Plan in Open status can be edited")
 
-        recalculate = False
+        recreate_payments = False
+        recalculate_payments = False
 
         basic_fields = ["start_date", "end_date", "dispersion_start_date"]
 
@@ -294,20 +299,21 @@ class PaymentPlanService:
         if targeting_id and targeting_id != str(self.payment_plan.target_population.id):
             try:
                 new_target_population = TargetPopulation.objects.get(
-                    id=targeting_id, status=TargetPopulation.STATUS_READY
+                    id=targeting_id, status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
                 )
 
                 if not new_target_population.program:
                     raise GraphQLError("TargetPopulation should have related Program defined")
 
-                self.payment_plan.target_population.status = TargetPopulation.STATUS_READY
+                self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
                 self.payment_plan.target_population.save()
 
                 self.payment_plan.target_population = new_target_population
                 self.payment_plan.program = new_target_population.program
                 self.payment_plan.target_population.status = TargetPopulation.STATUS_ASSIGNED
                 self.payment_plan.target_population.save()
-                recalculate = True
+                recreate_payments = True
+                recalculate_payments = True
 
             except TargetPopulation.DoesNotExist:
                 raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
@@ -319,17 +325,20 @@ class PaymentPlanService:
             if input_data["dispersion_end_date"] <= timezone.now().date():
                 raise GraphQLError(f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date")
             self.payment_plan.dispersion_end_date = input_data["dispersion_end_date"]
-            recalculate = True
+            recalculate_payments = True
 
         if input_data.get("currency") and input_data["currency"] != self.payment_plan.currency:
             self.payment_plan.currency = input_data["currency"]
-            recalculate = True
+            recreate_payments = True
+            recalculate_payments = True
 
         self.payment_plan.save()
 
-        if recalculate:
+        if recreate_payments:
             self.payment_plan.payments.all().delete()
             self._create_payments(self.payment_plan)
+
+        if recalculate_payments:
             self.payment_plan.refresh_from_db()
             self.payment_plan.update_population_count_fields()
             self.payment_plan.update_money_fields()
@@ -340,7 +349,7 @@ class PaymentPlanService:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             raise GraphQLError("Only Payment Plan in Open status can be deleted")
 
-        self.payment_plan.target_population.status = TargetPopulation.STATUS_READY
+        self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         self.payment_plan.target_population.save()
         self.payment_plan.delete()
 
