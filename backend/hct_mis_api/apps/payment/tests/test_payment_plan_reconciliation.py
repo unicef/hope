@@ -525,16 +525,16 @@ class TestPaymentPlanReconciliation(APITestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             self.assertEqual(len(os.listdir(temp_dir)), 0)
 
+            assert zip_file.file is not None
             with ZipFile(zip_file.file, "r") as zip_ref:
+                self.assertEqual(len(zip_ref.namelist()), 1)  # seems unstable
                 zip_ref.extractall(temp_dir)
 
-            self.assertEqual(len(os.listdir(temp_dir)), 1)  # seems unstable
+            self.assertEqual(len(os.listdir(temp_dir)), 1)
 
             file_name = os.listdir(temp_dir)[0]
             assert file_name.endswith(".xlsx")
             file_path = os.path.join(temp_dir, file_name)
-            print("file_path", file_path)
-            breakpoint()
 
             workbook = load_workbook(file_path)
             assert workbook.sheetnames == ["Santander"], workbook.sheetnames
@@ -542,8 +542,11 @@ class TestPaymentPlanReconciliation(APITestCase):
             sheet = workbook["Santander"]
             assert sheet.max_row == 2, sheet.max_row
 
-            # self.assertEqual(sheet.cell(row=1, column=1).value, "payment_id")
-            # self.assertEqual(sheet.cell(row=2, column=1).value, payment_plan_id)
+            self.assertEqual(sheet.cell(row=1, column=1).value, "payment_id")
+            payment = payment_plan.payments.first()
+            self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
 
-            # self.assertEqual(sheet.cell(row=1, column=6).value, "payment_channel")
-            # self.assertEqual(sheet.cell(row=2, column=6).value, "Cash")
+            self.assertEqual(payment.assigned_payment_channel.delivery_mechanism, "CASH")
+
+            self.assertEqual(sheet.cell(row=1, column=5).value, "payment_channel")
+            self.assertEqual(sheet.cell(row=2, column=5).value, "Cash")
