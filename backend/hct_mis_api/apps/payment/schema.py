@@ -381,6 +381,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
+    background_action_status =  graphene.String()
 
     class Meta:
         model = PaymentPlan

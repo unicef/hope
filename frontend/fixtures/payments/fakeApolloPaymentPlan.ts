@@ -1,9 +1,15 @@
-import { PaymentPlanQuery, PaymentPlanStatus, PaymentPlanCurrency } from '../../src/__generated__/graphql';
+import {
+  PaymentPlanQuery,
+  PaymentPlanStatus,
+  PaymentPlanCurrency,
+  PaymentPlanBackgroundActionStatus
+} from '../../src/__generated__/graphql';
 
 export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   "id": "UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ==",
   "unicefId": "PP-0060-22-00000001",
   "status": PaymentPlanStatus.InAuthorization,
+  "backgroundActionStatus": PaymentPlanBackgroundActionStatus.None,
   "createdBy": {
     "id": "VXNlck5vZGU6ZjRlMTYwZDEtOTgyNy00NmEwLTg4MzAtZmU1MjljZDVhNDBj",
     "firstName": "Matthew",
