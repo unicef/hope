@@ -9,11 +9,11 @@ from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
 from hct_mis_api.apps.targeting.models import (
+    HouseholdSelection,
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetPopulation,
-    HouseholdSelection,
 )
 
 

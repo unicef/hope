@@ -1,4 +1,3 @@
-from django.utils import timezone
 import uuid
 from io import BytesIO
 from pathlib import Path
@@ -6,9 +5,10 @@ from pathlib import Path
 from django.conf import settings
 from django.core.files import File
 from django.test import TestCase
+from django.utils import timezone
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedHouseholdFactory,

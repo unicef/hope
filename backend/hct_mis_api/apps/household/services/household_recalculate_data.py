@@ -1,9 +1,16 @@
+from django.db.models import Count, Q
 from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
-from django.db.models import Q, Count
 
-from hct_mis_api.apps.household.models import Household, NON_BENEFICIARY, FEMALE, MALE, DISABLED, YES
+from hct_mis_api.apps.household.models import (
+    DISABLED,
+    FEMALE,
+    MALE,
+    NON_BENEFICIARY,
+    YES,
+    Household,
+)
 
 
 def recalculate_data(household: Household) -> None:

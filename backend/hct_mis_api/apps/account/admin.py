@@ -19,7 +19,6 @@ from django.contrib.auth.forms import UserCreationForm, UsernameField
 from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
-from django.core.serializers import get_serializer
 from django.db import router, transaction
 from django.db.models import JSONField, Q
 from django.db.transaction import atomic
