@@ -9,6 +9,8 @@ import { PageHeader } from '../../../core/PageHeader';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { StatusBox } from '../../../core/StatusBox';
 import {
+  paymentPlanBackgroundActionStatusMapping,
+  paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
@@ -53,6 +55,13 @@ export const EditPaymentPlanHeader = ({
               statusNameMapping={paymentPlanStatusMapping}
             />
           </StatusWrapper>
+          {paymentPlan.backgroundActionStatus && <StatusWrapper>
+              <StatusBox
+                  status={paymentPlan.backgroundActionStatus}
+                  statusToColor={paymentPlanBackgroundActionStatusToColor}
+                  statusNameMapping={paymentPlanBackgroundActionStatusMapping}
+              />
+          </StatusWrapper>}
         </Box>
       }
       breadCrumbs={

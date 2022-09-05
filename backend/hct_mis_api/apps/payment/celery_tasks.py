@@ -3,7 +3,7 @@ import datetime
 
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
-from django.db.transaction import atomic
+from django.db import transaction
 from django.utils import timezone
 from sentry_sdk import configure_scope
 
@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from hct_mis_api.apps.payment.models import XlsxCashPlanPaymentVerificationFile, CashPlanPaymentVerification
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -104,20 +105,30 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        payment_plan.background_action_status_xlsx_exporting()
+        payment_plan.save()
 
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
 
-            # regenerate always xlsx
-            service = XlsxPaymentPlanExportService(payment_plan)
-            service.save_xlsx_file(user)
-            payment_plan.status_lock()
-            payment_plan.save()
+            try:
+                with transaction.atomic():
+                    # regenerate always xlsx
+                    service = XlsxPaymentPlanExportService(payment_plan)
+                    service.save_xlsx_file(user)
+                    payment_plan.background_action_status_none()
+                    payment_plan.save()
 
-            service.send_email(service.get_context(user))
+                    transaction.on_commit(lambda: service.send_email(service.get_context(user)))
 
-    except Exception as e:
-        logger.exception(e)
+            except Exception:
+                payment_plan.background_action_status_xlsx_export_error()
+                payment_plan.save()
+                logger.exception("Create Payment Plan Generate XLSX Error")
+                raise
+
+    except Exception:
+        logger.exception("Create Payment Plan List XLSX Error")
         raise
 
 
@@ -131,21 +142,31 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        payment_plan.background_action_status_xlsx_exporting()
+        payment_plan.save()
 
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
 
-            # regenerate always xlsx
-            service = XlsxPaymentPlanExportService(payment_plan)
-            service.export_per_fsp(user)
-            payment_plan.status_date = timezone.now()
-            payment_plan.status = PaymentPlan.Status.ACCEPTED
-            payment_plan.save()
+            try:
+                with transaction.atomic():
+                    # regenerate always xlsx
+                    service = XlsxPaymentPlanExportService(payment_plan)
+                    service.export_per_fsp(user)
+                    payment_plan.status_date = timezone.now()
+                    payment_plan.status = PaymentPlan.Status.ACCEPTED
+                    payment_plan.save()
 
-            service.send_email(service.get_context(user, per_fsp=True))
+                    transaction.on_commit(lambda: service.send_email(service.get_context(user, per_fsp=True)))
 
-    except Exception as e:
-        logger.exception(e)
+            except Exception:
+                payment_plan.background_action_status_xlsx_export_error()
+                payment_plan.save()
+                logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
+                raise
+
+    except Exception:
+        logger.exception("Create Payment Plan List XLSX Per FSP Error")
         raise
 
 
@@ -165,54 +186,48 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
 
             try:
                 file = FileTemp.objects.get(pk=file_id).file
-            except FileTemp.DoesNotExist as e:
-                logger.exception(f"Error import from xlsx, FileTemp object with ID {file_id} not found.", e)
+            except FileTemp.DoesNotExist:
+                logger.exception(f"Error import from xlsx, FileTemp object with ID {file_id} not found.")
                 raise
 
             service = XlsxPaymentPlanImportService(payment_plan, file)
             service.open_workbook()
             try:
-                with atomic():
+                with transaction.atomic():
                     service.import_payment_list()
                     payment_plan.xlsx_file_imported_date = timezone.now()
-                    payment_plan.status_lock()
+                    payment_plan.background_action_status_none()
                     payment_plan.save()
                     payment_plan.update_money_fields()
-            except Exception as e:
-                logger.exception("Error import from xlsx", e)
-                payment_plan.status_lock()
+            except Exception:
+                logger.exception("PaymentPlan Error import from xlsx")
+                payment_plan.background_action_status_xlsx_import_error()
                 payment_plan.save()
-                payment_plan.update_money_fields()
 
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
+        logger.exception("PaymentPlan Unexpected Error import from xlsx")
         raise
 
 
 @app.task
 @log_start_and_end
 @sentry_tags
-def payment_plan_apply_steficon(payment_plan_id):
-    from hct_mis_api.apps.steficon.models import RuleCommit
+def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
+    from hct_mis_api.apps.steficon.models import Rule, RuleCommit
     from hct_mis_api.apps.payment.models import PaymentPlan, Payment
 
-    try:
-        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-        with configure_scope() as scope:
-            scope.set_tag("business_area", payment_plan.business_area)
+    payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+    steficon_rule = Rule.objects.get(id=decode_id_string(steficon_rule_id))
+    rule: RuleCommit = steficon_rule.latest
 
-            rule: RuleCommit = payment_plan.steficon_rule
-            if not rule:
-                raise Exception("PaymentPlan does not have a Steficon rule")
-    except Exception as e:
-        logger.exception(e)
-        raise
+    if rule.id != payment_plan.steficon_rule_id:
+        payment_plan.steficon_rule = rule
+    payment_plan.background_action_status_steficon_run()
+    payment_plan.save()
+
     try:
-        payment_plan.status = PaymentPlan.Status.STEFICON_RUN
-        payment_plan.steficon_applied_date = timezone.now()
-        payment_plan.save()
         updates = []
-        with atomic():
+        with transaction.atomic():
             entry: Payment
             for entry in payment_plan.all_active_payments:
                 # TODO: not sure how will work steficon function payment_plan or payment need ??
@@ -221,15 +236,16 @@ def payment_plan_apply_steficon(payment_plan_id):
                 entry.entitlement_date = timezone.now()
                 updates.append(entry)
             Payment.objects.bulk_update(updates, ["entitlement_quantity", "entitlement_date"])
-        payment_plan.steficon_applied_date = timezone.now()
-        payment_plan.status_lock()
-        with disable_concurrency(payment_plan):
-            payment_plan.save()
-            payment_plan.update_money_fields()
-    except Exception as e:
-        logger.exception(e)
-        payment_plan.steficon_applied_date = timezone.now()
-        payment_plan.status = PaymentPlan.Status.STEFICON_ERROR
+
+            payment_plan.steficon_applied_date = timezone.now()
+            payment_plan.background_action_status_none()
+            with disable_concurrency(payment_plan):
+                payment_plan.save()
+                payment_plan.update_money_fields()
+
+    except Exception:
+        logger.exception("PaymentPlan Steficon Error")
+        payment_plan.background_action_status_steficon_error()
         payment_plan.save()
         raise
 
@@ -252,6 +268,6 @@ def remove_old_payment_plan_payment_list_xlsx(past_days=30):
 
             logger.info(f"Removed old FileTemp: {file_qs.count()}")
 
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
+        logger.exception("Remove old Payment Plan Payment List Error")
         raise
