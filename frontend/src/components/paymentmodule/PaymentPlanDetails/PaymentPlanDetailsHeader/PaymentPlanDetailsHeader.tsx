@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
+  paymentPlanBackgroundActionStatusMapping, paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
@@ -137,6 +138,13 @@ export const PaymentPlanDetailsHeader = ({
               statusNameMapping={paymentPlanStatusMapping}
             />
           </StatusWrapper>
+          {paymentPlan.backgroundActionStatus && <StatusWrapper>
+              <StatusBox
+                  status={paymentPlan.backgroundActionStatus}
+                  statusToColor={paymentPlanBackgroundActionStatusToColor}
+                  statusNameMapping={paymentPlanBackgroundActionStatusMapping}
+              />
+          </StatusWrapper>}
         </Box>
       }
       breadCrumbs={

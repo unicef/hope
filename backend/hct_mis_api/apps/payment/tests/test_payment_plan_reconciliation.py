@@ -325,7 +325,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
         status = finalize_tp_response["data"]["finalizeTargetPopulation"]["targetPopulation"]["status"]
-        self.assertEqual(status, "READY")
+        self.assertEqual(status, "READY_FOR_PAYMENT_MODULE")
 
         # TODO: naive datetime
         create_payment_plan_response = self.graphql_request(
