@@ -35,12 +35,10 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         "currency",
         "entitlement",
         "entitlement_usd",
-        "received_amount",
     )
     ID_COLUMN_INDEX = 0
     PAYMENT_CHANNEL_COLUMN_INDEX = 5
     ENTITLEMENT_COLUMN_INDEX = 8
-    RECEIVED_AMOUNT_COLUMN_INDEX = 10
 
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
@@ -60,7 +58,6 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             str(payment.currency),
             payment.entitlement_quantity,
             payment.entitlement_quantity_usd,
-            "",  # empty field to be filled with received_amount
         )
         self.ws_export_list.append(payment_row)
 
@@ -77,7 +74,6 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             [
                 self.PAYMENT_CHANNEL_COLUMN_INDEX + 1,
                 self.ENTITLEMENT_COLUMN_INDEX + 1,
-                self.RECEIVED_AMOUNT_COLUMN_INDEX + 1,
             ]
         )
         return self.wb
