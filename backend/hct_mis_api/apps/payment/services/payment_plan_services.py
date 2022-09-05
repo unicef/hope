@@ -364,7 +364,5 @@ class PaymentPlanService:
         return self.payment_plan
 
     def import_xlsx_per_fsp(self, user, file) -> PaymentPlan:
-        self.payment_plan.status_importing()
-        self.payment_plan.save()
         import_payment_plan_payment_list_per_fsp_from_xlsx.delay(self.payment_plan.pk, user.pk, file)
         return self.payment_plan
