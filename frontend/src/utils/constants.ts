@@ -1,4 +1,5 @@
 import {
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
@@ -26,12 +27,16 @@ export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatus.InAuthorization]: 'In Authorization',
   [PaymentPlanStatus.InReview]: 'In Review',
   [PaymentPlanStatus.Accepted]: 'Accepted',
-  [PaymentPlanStatus.SteficonWait]: 'Steficon Wait',
-  [PaymentPlanStatus.SteficonRun]: 'Steficon Run',
-  [PaymentPlanStatus.SteficonCompleted]: 'Steficon Completed',
-  [PaymentPlanStatus.SteficonError]: 'Steficon Error',
-  [PaymentPlanStatus.XlsxExporting]: 'XLSX Exporting',
-  [PaymentPlanStatus.XlsxImporting]: 'XLSX Importing',
+};
+
+export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
+  [PaymentPlanBackgroundActionStatus.SteficonRun]: 'Steficon Run',
+  [PaymentPlanBackgroundActionStatus.SteficonError]: 'Steficon Error',
+  [PaymentPlanBackgroundActionStatus.XlsxExporting]: 'XLSX Exporting',
+  [PaymentPlanBackgroundActionStatus.XlsxExportError]: 'XLSX Export Error',
+  [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]: 'XLSX Importing Entitlements',
+  [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]: 'XLSX Importing Reconciliation',
+  [PaymentPlanBackgroundActionStatus.XlsxImportError]: 'XLSX Import Error',
 };
 
 export const PAYMENT_PLAN_ACTIONS = {
