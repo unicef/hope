@@ -126,12 +126,15 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             "fsp_name",
             "entitlement_quantity",
         ]
+        print("payment_list", self.payment_list.count(), self.payment_list.all())
         fsp_ids = self.payment_list.values_list("financial_service_provider_id", flat=True)
+        print("fsp_ids", fsp_ids)
         fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
 
         # create temp zip file
         with NamedTemporaryFile() as tmp_zip:
             with zipfile.ZipFile(tmp_zip.name, mode="w") as zip_file:
+                print("fsp_qs", fsp_qs.count(), fsp_qs)
                 for fsp in fsp_qs:
                     wb = openpyxl.Workbook()
                     ws_fsp = wb.active
@@ -154,6 +157,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
                     ws_fsp.append(col_list)
 
                     # add rows
+                    print("payment_qs", payment_qs.count(), payment_qs)
                     for payment in payment_qs:
                         self._add_rows(ws_fsp, col_list, fsp, payment)
 
@@ -174,6 +178,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             )
             tmp_zip.seek(0)
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
+            print("SAVE FILE")
             xlsx_obj.file.save(zip_file_name, File(tmp_zip))
             self.payment_plan.export_per_fsp_xlsx_file = xlsx_obj
             self.payment_plan.save()
@@ -181,18 +186,26 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
     @staticmethod
     def _add_rows(ws_fsp, col_list: list, fsp: FinancialServiceProvider, payment: Payment):
         map_obj_name_column = {
-            "payment_id": {payment: "unicef_id"},
-            "household_id": {payment.household: "unicef_id"},
-            "admin_leve_2": {payment.household.admin2: "title"},
-            "collector_name": {payment.collector: "full_name"},
-            "fsp_name": {fsp: "name"},
-            "payment_channel": {payment.assigned_payment_channel: "delivery_mechanism"},
-            "entitlement_quantity": {payment: "entitlement_quantity"},
+            "payment_id": (payment, "unicef_id"),
+            "household_id": (payment.household, "unicef_id"),
+            "admin_leve_2": (payment.household.admin2, "title"),
+            "collector_name": (payment.collector, "full_name"),
+            "fsp_name": (fsp, "name"),
+            "payment_channel": (payment.assigned_payment_channel, lambda pch: pch.delivery_mechanism),
+            "entitlement_quantity": (payment, "entitlement_quantity"),
         }
 
         payment_row = tuple()
-        for col in col_list:
-            for obj, col_name in map_obj_name_column.get(col, {None: "wrong_column_name"}).items():
-                value = getattr(obj, col_name, "wrong_column_name")
-                payment_row = (*payment_row, value)
+        for column_name in col_list:
+            if column_name not in map_obj_name_column:
+                value = "wrong_column_name"
+            else:
+                obj, value = map_obj_name_column[column_name]
+                if callable(value):
+                    value = value(obj)
+                else:
+                    value = getattr(obj, value, "")
+            print(f"column_name: {column_name}, value: {value}")
+            payment_row = (*payment_row, value)
+
         ws_fsp.append(payment_row)

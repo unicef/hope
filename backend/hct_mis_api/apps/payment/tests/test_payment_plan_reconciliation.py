@@ -348,6 +348,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             entitlement_quantity=100,
             entitlement_quantity_usd=100,
             financial_service_provider=santander_fsp,
+            assigned_payment_channel=self.payment_channel_1_cash,
         )
 
         lock_payment_plan_response = self.graphql_request(
@@ -516,6 +517,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             assert "errors" not in export_file_mutation, export_file_mutation
             assert mock.delay.call_count == 1
             call_args = mock.delay.call_args[0]
+            print("call_args", call_args)
             create_payment_plan_payment_list_xlsx_per_fsp(*call_args)
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -543,10 +545,11 @@ class TestPaymentPlanReconciliation(APITestCase):
             assert sheet.max_row == 2, sheet.max_row
 
             self.assertEqual(sheet.cell(row=1, column=1).value, "payment_id")
+            assert payment_plan.payments.count() == 1
             payment = payment_plan.payments.first()
             self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
 
-            self.assertEqual(payment.assigned_payment_channel.delivery_mechanism, "CASH")
+            self.assertEqual(payment.assigned_payment_channel.delivery_mechanism, "Cash")
 
             self.assertEqual(sheet.cell(row=1, column=5).value, "payment_channel")
             self.assertEqual(sheet.cell(row=2, column=5).value, "Cash")
