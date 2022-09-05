@@ -45,7 +45,7 @@ class TestBuildSummary(TestCase):
         self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_PENDING)
 
     def test_status_active_when_at_least_one_active_verification(self):
-        self._create_active_verification()
+        self._create_verification_with_status(CashPlanPaymentVerification.STATUS_ACTIVE)
 
         build_summary(self.cash_plan)
 
@@ -53,7 +53,7 @@ class TestBuildSummary(TestCase):
         self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_ACTIVE)
 
     def test_status_finished_when_all_verifications_finished(self):
-        self._create_finished_verification()
+        self._create_verification_with_status(CashPlanPaymentVerification.STATUS_FINISHED)
 
         build_summary(self.cash_plan)
 
@@ -61,7 +61,7 @@ class TestBuildSummary(TestCase):
         self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_FINISHED)
 
     def test_status_pending_when_add_and_removed_verification(self):
-        payment_verification_plan = self._create_pending_verification()
+        payment_verification_plan = self._create_verification_with_status(CashPlanPaymentVerification.STATUS_PENDING)
         payment_verification_plan.delete()
 
         build_summary(self.cash_plan)
@@ -73,32 +73,12 @@ class TestBuildSummary(TestCase):
         with self.assertNumQueries(3):
             build_summary(self.cash_plan)
 
-    def _create_active_verification(self):
+    def _create_verification_with_status(self, status):
         return create_payment_verification_plan_with_status(
             self.cash_plan,
             self.user,
             self.business_area,
             self.program,
             self.target_population,
-            CashPlanPaymentVerification.STATUS_ACTIVE,
-        )
-
-    def _create_pending_verification(self):
-        return create_payment_verification_plan_with_status(
-            self.cash_plan,
-            self.user,
-            self.business_area,
-            self.program,
-            self.target_population,
-            CashPlanPaymentVerification.STATUS_PENDING,
-        )
-
-    def _create_finished_verification(self):
-        return create_payment_verification_plan_with_status(
-            self.cash_plan,
-            self.user,
-            self.business_area,
-            self.program,
-            self.target_population,
-            CashPlanPaymentVerification.STATUS_FINISHED,
+            status,
         )
