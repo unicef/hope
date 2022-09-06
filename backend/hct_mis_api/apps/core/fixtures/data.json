@@ -3795,7 +3795,11 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+    "approval_number_required": 2,
+    "authorization_number_required": 3,
+    "finance_review_number_required": 2,
+    "is_payment_plan_applicable": true
   }
 },
 {
