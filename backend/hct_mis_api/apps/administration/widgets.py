@@ -12,7 +12,7 @@ class JsonWidget(forms.widgets.TextInput):
 
         css = {"screen": ("administration/pygments.css",)}
 
-    def get_context(self, name, value, attrs):
+    def get_email_context(self, name, value, attrs):
         import json
 
         from pygments import highlight
