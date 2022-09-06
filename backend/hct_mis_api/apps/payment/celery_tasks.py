@@ -228,14 +228,11 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
             try:
                 with transaction.atomic():
                     service.import_payment_list()
-                    payment_plan.xlsx_file_imported_date = timezone.now()
-                    # payment_plan.status_approved() # TODO
+                    payment_plan.background_action_status_none()
                     payment_plan.save()
             except Exception as e:
-                print(e)
-                traceback.print_exc()
                 logger.exception("Error import from xlsx", e)
-                # payment_plan.status_approved() # TODO
+                payment_plan.background_action_status_xlsx_import_error()
                 payment_plan.save()
 
     except Exception as e:
