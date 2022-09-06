@@ -541,7 +541,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             create_payment_plan_payment_list_xlsx_per_fsp(*call_args)
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-        zip_file = payment_plan.export_per_fsp_xlsx_file
+        zip_file = payment_plan.export_per_fsp_zip_file
         assert zip_file is not None
 
         with tempfile.TemporaryDirectory() as temp_dir:

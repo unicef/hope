@@ -66,7 +66,7 @@ def download_payment_plan_payment_list_per_fsp(request, payment_plan_id):
         logger.error("Export XLSX is possible only for Payment Plan within status ACCEPTED.")
         raise GraphQLError("Export XLSX is possible only for Payment Plan within status ACCEPTED.")
 
-    if payment_plan.has_payment_list_per_fsp_xlsx_file:
+    if payment_plan.has_payment_list_per_fsp_zip_file:
         return redirect(payment_plan.xlsx_payment_list_per_fsp_file_link)
     else:
         logger.error(f"File not found. PaymentPlan ID: {payment_plan_id}")
