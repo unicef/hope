@@ -13,6 +13,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold, Individual
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import XlsxPaymentPlanImportPerFspService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -28,6 +29,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     fsp_generate_xlsx_report_task,
     payment_plan_apply_steficon,
     import_payment_plan_payment_list_from_xlsx,
+    import_payment_plan_payment_list_per_fsp_from_xlsx,
 )
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
@@ -946,6 +948,40 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         return cls(payment_plan, import_service.errors)
 
 
+class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+    errors = graphene.List(XlsxErrorNode)
+
+    class Arguments:
+        file = Upload(required=True)
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, file, payment_plan_id):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_LIST, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.ACCEPTED:
+            msg = "You can only import for ACCEPTED Payment Plan"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        import_service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
+        import_service.open_workbook()
+        import_service.validate()
+        if import_service.errors:
+            return cls(None, import_service.errors)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).import_xlsx_per_fsp(
+            user=info.context.user, file=file
+        )
+
+        return cls(payment_plan, None)
+
+
 class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -1016,4 +1052,5 @@ class Mutations(graphene.ObjectType):
     export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()
     export_xlsx_payment_plan_payment_list_per_fsp = ExportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
     import_xlsx_payment_plan_payment_list = ImportXLSXPaymentPlanPaymentListMutation.Field()
+    import_xlsx_payment_plan_payment_list_per_fsp = ImportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()

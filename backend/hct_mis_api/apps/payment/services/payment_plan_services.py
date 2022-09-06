@@ -13,6 +13,7 @@ from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProce
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
+    import_payment_plan_payment_list_per_fsp_from_xlsx,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
@@ -352,7 +353,6 @@ class PaymentPlanService:
         self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         self.payment_plan.target_population.save()
         self.payment_plan.delete()
-
         return self.payment_plan
 
     def export_xlsx(self, user: User) -> PaymentPlan:
@@ -361,5 +361,8 @@ class PaymentPlanService:
 
     def export_xlsx_per_fsp(self, user: User) -> PaymentPlan:
         create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user.pk)
+        return self.payment_plan
 
+    def import_xlsx_per_fsp(self, user, file) -> PaymentPlan:
+        import_payment_plan_payment_list_per_fsp_from_xlsx.delay(self.payment_plan.pk, user.pk, file)
         return self.payment_plan

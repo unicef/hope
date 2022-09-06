@@ -130,10 +130,7 @@ class FinancialServiceProviderXlsxTemplateFactory(factory.DjangoModelFactory):
         model = FinancialServiceProviderXlsxTemplate
 
     name = factory.Faker("name")
-    columns = fuzzy.FuzzyChoice(
-        FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS,
-        getter=lambda c: c,
-    )
+    columns = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
 
 
 class FinancialServiceProviderFactory(factory.DjangoModelFactory):
