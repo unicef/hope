@@ -189,6 +189,14 @@ class GenericPayment(TimeStampedUUIDModel):
     class Meta:
         abstract = True
 
+    @property
+    def is_reconciled(self):
+        return (
+            self.delivered_quantity is not None
+            and self.entitlement_quantity is not None
+            and self.delivered_quantity == self.entitlement_quantity
+        )
+
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -271,7 +279,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
     imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
     export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-    export_per_fsp_xlsx_file = models.ForeignKey(
+    export_per_fsp_zip_file = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE
     )
     steficon_rule = models.ForeignKey(
@@ -511,8 +519,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return bool(self.export_xlsx_file)
 
     @property
-    def has_payment_list_per_fsp_xlsx_file(self):
-        return bool(self.export_per_fsp_xlsx_file)
+    def has_payment_list_per_fsp_zip_file(self):
+        return bool(self.export_per_fsp_zip_file)
 
     @property
     def xlsx_payment_list_file_link(self):
@@ -522,8 +530,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def xlsx_payment_list_per_fsp_file_link(self):
-        if self.export_per_fsp_xlsx_file:
-            return self.export_per_fsp_xlsx_file.file.url
+        if self.export_per_fsp_zip_file:
+            return self.export_per_fsp_zip_file.file.url
         return None
 
 
@@ -538,6 +546,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("payment_channel", _("Payment Channel (Delivery mechanism)")),
         ("fsp_name", _("FSP Name")),
         ("entitlement_quantity", _("Entitlement Quantity")),
+        ("delivered_quantity", _("Delivered Quantity")),
         ("tbd", _("TBD")),
     )
     DEFAULT_COLUMNS = [
@@ -548,6 +557,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         "payment_channel",
         "fsp_name",
         "entitlement_quantity",
+        "delivered_quantity",
     ]
 
     created_by = models.ForeignKey(

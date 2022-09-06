@@ -29,22 +29,23 @@ class ExchangeRateAPI:
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
     def fetch_exchange_rates(self, with_history: bool = True) -> dict:
-        params = {}
+        return {}  # TODO MUST NOT FORGET TO REMOVE THAT ONCE CREATING A PR
+        # params = {}
 
-        if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
-            cached_response = cache.get(self.CACHE_KEY)
-            if cached_response is not None:
-                return cached_response
-        if with_history is True:
-            params["history"] = "yes"
-        response = self._client.get(self.api_url, params=params)
+        # if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
+        #     cached_response = cache.get(self.CACHE_KEY)
+        #     if cached_response is not None:
+        #         return cached_response
+        # if with_history is True:
+        #     params["history"] = "yes"
+        # response = self._client.get(self.api_url, params=params)
 
-        try:
-            response.raise_for_status()
-        except Exception as e:
-            logger.exception(e)
-            raise
-        response_json = response.json()
-        if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
-            cache.set(self.CACHE_KEY, response_json, settings.EXCHANGE_RATE_CACHE_EXPIRY)
-        return response_json
+        # try:
+        #     response.raise_for_status()
+        # except Exception as e:
+        #     logger.exception(e)
+        #     raise
+        # response_json = response.json()
+        # if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
+        #     cache.set(self.CACHE_KEY, response_json, settings.EXCHANGE_RATE_CACHE_EXPIRY)
+        # return response_json
