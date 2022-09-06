@@ -2638,6 +2638,16 @@ type PaymentNodeEdge {
   cursor: String!
 }
 
+enum PaymentPlanBackgroundActionStatus {
+  STEFICON_RUN
+  STEFICON_ERROR
+  XLSX_EXPORTING
+  XLSX_EXPORT_ERROR
+  XLSX_IMPORT_ERROR
+  XLSX_IMPORTING_ENTITLEMENTS
+  XLSX_IMPORTING_RECONCILIATION
+}
+
 enum PaymentPlanCurrency {
   A_
   AED
@@ -2825,7 +2835,7 @@ type PaymentPlanNode implements Node {
   totalUndeliveredQuantityUsd: Float
   createdBy: UserNode!
   status: PaymentPlanStatus!
-  backgroundActionStatus: String
+  backgroundActionStatus: PaymentPlanBackgroundActionStatus
   targetPopulation: TargetPopulationNode!
   currency: PaymentPlanCurrency!
   dispersionStartDate: Date
@@ -3170,6 +3180,7 @@ type Query {
   allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, orderBy: String): PaymentNodeConnection
   allDeliveryMechanisms: [ChoiceObject]
   availableFspsForDeliveryMechanisms(deliveryMechanisms: [String]): [FspChoices]
+  paymentPlanBackgroundActionStatusChoices: [ChoiceObject]
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String): [FieldAttributeNode]

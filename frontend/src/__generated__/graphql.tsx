@@ -3869,6 +3869,16 @@ export type PaymentNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum PaymentPlanBackgroundActionStatus {
+  SteficonRun = 'STEFICON_RUN',
+  SteficonError = 'STEFICON_ERROR',
+  XlsxExporting = 'XLSX_EXPORTING',
+  XlsxExportError = 'XLSX_EXPORT_ERROR',
+  XlsxImportError = 'XLSX_IMPORT_ERROR',
+  XlsxImportingEntitlements = 'XLSX_IMPORTING_ENTITLEMENTS',
+  XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION'
+}
+
 export enum PaymentPlanCurrency {
   A = 'A_',
   Aed = 'AED',
@@ -4057,7 +4067,7 @@ export type PaymentPlanNode = Node & {
   totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
   createdBy: UserNode,
   status: PaymentPlanStatus,
-  backgroundActionStatus?: Maybe<Scalars['String']>,
+  backgroundActionStatus?: Maybe<PaymentPlanBackgroundActionStatus>,
   targetPopulation: TargetPopulationNode,
   currency: PaymentPlanCurrency,
   dispersionStartDate?: Maybe<Scalars['Date']>,
@@ -4541,6 +4551,7 @@ export type Query = {
   allPayments?: Maybe<PaymentNodeConnection>,
   allDeliveryMechanisms?: Maybe<Array<Maybe<ChoiceObject>>>,
   availableFspsForDeliveryMechanisms?: Maybe<Array<Maybe<FspChoices>>>,
+  paymentPlanBackgroundActionStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   businessArea?: Maybe<BusinessAreaNode>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
@@ -9745,7 +9756,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -17583,6 +17594,7 @@ export const PaymentPlanDocument = gql`
     id
     unicefId
     status
+    backgroundActionStatus
     createdBy {
       id
       firstName
@@ -22173,6 +22185,7 @@ export type ResolversTypes = {
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
   ReportNode: ResolverTypeWrapper<ReportNode>,
   PaymentPlanStatus: PaymentPlanStatus,
+  PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
   PaymentPlanCurrency: PaymentPlanCurrency,
   DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
   FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>,
@@ -22609,6 +22622,7 @@ export type ResolversParentTypes = {
   ReportNodeEdge: ReportNodeEdge,
   ReportNode: ReportNode,
   PaymentPlanStatus: PaymentPlanStatus,
+  PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
   PaymentPlanCurrency: PaymentPlanCurrency,
   DeliveryMechanismNode: DeliveryMechanismNode,
   FinancialServiceProviderNode: FinancialServiceProviderNode,
@@ -24500,7 +24514,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentPlanStatus'], ParentType, ContextType>,
-  backgroundActionStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  backgroundActionStatus?: Resolver<Maybe<ResolversTypes['PaymentPlanBackgroundActionStatus']>, ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
   currency?: Resolver<ResolversTypes['PaymentPlanCurrency'], ParentType, ContextType>,
   dispersionStartDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
@@ -24755,6 +24769,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allPayments?: Resolver<Maybe<ResolversTypes['PaymentNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentsArgs, 'businessArea' | 'paymentPlanId'>>,
   allDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   availableFspsForDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoices']>>>, ParentType, ContextType, QueryAvailableFspsForDeliveryMechanismsArgs>,
+  paymentPlanBackgroundActionStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
