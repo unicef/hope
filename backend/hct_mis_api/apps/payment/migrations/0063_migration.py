@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="paymentplan",
-            name="export_per_fsp_xlsx_file",
+            name="export_per_fsp_zip_file",
             field=models.ForeignKey(
                 blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name="+", to="core.filetemp"
             ),

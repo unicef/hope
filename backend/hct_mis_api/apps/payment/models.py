@@ -189,6 +189,14 @@ class GenericPayment(TimeStampedUUIDModel):
     class Meta:
         abstract = True
 
+    @property
+    def is_reconciled(self):
+        return (
+            self.delivered_quantity is not None
+            and self.entitlement_quantity is not None
+            and self.delivered_quantity == self.entitlement_quantity
+        )
+
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -215,7 +223,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         ACCEPTED = "ACCEPTED", "Accepted"
 
     class BackgroundActionStatus(models.TextChoices):
-        NONE = "", ""
         STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
         STEFICON_ERROR = "STEFICON_ERROR", "Rule Engine Errored"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
@@ -248,10 +255,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
     background_action_status = FSMField(
-        default=BackgroundActionStatus.NONE,
+        default=None,
         protected=False,
         db_index=True,
         blank=True,
+        null=True,
         choices=BackgroundActionStatus.choices,
     )
     target_population = models.ForeignKey(
@@ -271,7 +279,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
     imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
     export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-    export_per_fsp_xlsx_file = models.ForeignKey(
+    export_per_fsp_zip_file = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE
     )
     steficon_rule = models.ForeignKey(
@@ -289,7 +297,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.XLSX_EXPORTING,
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
     )
@@ -307,7 +315,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.STEFICON_RUN,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
@@ -325,7 +333,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
@@ -334,7 +342,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
@@ -353,9 +361,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def background_action_status_xlsx_import_error(self):
         pass
 
-    @transition(field=background_action_status, source="*", target=BackgroundActionStatus.NONE)
+    @transition(field=background_action_status, source="*", target=None)
     def background_action_status_none(self):
-        pass
+        self.background_action_status = None  # little hack
 
     @transition(
         field=status,
@@ -511,8 +519,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return bool(self.export_xlsx_file)
 
     @property
-    def has_payment_list_per_fsp_xlsx_file(self):
-        return bool(self.export_per_fsp_xlsx_file)
+    def has_payment_list_per_fsp_zip_file(self):
+        return bool(self.export_per_fsp_zip_file)
 
     @property
     def xlsx_payment_list_file_link(self):
@@ -522,8 +530,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def xlsx_payment_list_per_fsp_file_link(self):
-        if self.export_per_fsp_xlsx_file:
-            return self.export_per_fsp_xlsx_file.file.url
+        if self.export_per_fsp_zip_file:
+            return self.export_per_fsp_zip_file.file.url
         return None
 
 
@@ -538,6 +546,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("payment_channel", _("Payment Channel (Delivery mechanism)")),
         ("fsp_name", _("FSP Name")),
         ("entitlement_quantity", _("Entitlement Quantity")),
+        ("delivered_quantity", _("Delivered Quantity")),
         ("tbd", _("TBD")),
     )
     DEFAULT_COLUMNS = [
@@ -548,6 +557,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         "payment_channel",
         "fsp_name",
         "entitlement_quantity",
+        "delivered_quantity",
     ]
 
     created_by = models.ForeignKey(
