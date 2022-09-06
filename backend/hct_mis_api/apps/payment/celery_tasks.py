@@ -156,8 +156,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
                     # regenerate always xlsx
                     service = XlsxPaymentPlanExportService(payment_plan)
                     service.export_per_fsp(user)
-                    payment_plan.status_date = timezone.now()
-                    payment_plan.status = PaymentPlan.Status.ACCEPTED
+                    payment_plan.background_action_status_none()
                     payment_plan.save()
 
                     transaction.on_commit(lambda: service.send_email(service.get_email_context(user, per_fsp=True)))
