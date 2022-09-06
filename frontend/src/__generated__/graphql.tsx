@@ -1373,6 +1373,7 @@ export enum FinancialServiceProviderXlsxTemplateColumns {
   PaymentChannel = 'PAYMENT_CHANNEL',
   FspName = 'FSP_NAME',
   EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
+  DeliveredQuantity = 'DELIVERED_QUANTITY',
   Tbd = 'TBD'
 }
 
@@ -2715,6 +2716,12 @@ export type ImportXlsxPaymentPlanPaymentListMutation = {
   errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
 };
 
+export type ImportXlsxPaymentPlanPaymentListPerFspMutation = {
+   __typename?: 'ImportXLSXPaymentPlanPaymentListPerFSPMutation',
+  paymentPlan?: Maybe<PaymentPlanNode>,
+  errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
+};
+
 export type IndividualDataChangeApproveMutation = {
    __typename?: 'IndividualDataChangeApproveMutation',
   grievanceTicket?: Maybe<GrievanceTicketNode>,
@@ -3296,6 +3303,7 @@ export type Mutations = {
   exportXlsxPaymentPlanPaymentList?: Maybe<ExportXlsxPaymentPlanPaymentListMutation>,
   exportXlsxPaymentPlanPaymentListPerFsp?: Maybe<ExportXlsxPaymentPlanPaymentListPerFspMutation>,
   importXlsxPaymentPlanPaymentList?: Maybe<ImportXlsxPaymentPlanPaymentListMutation>,
+  importXlsxPaymentPlanPaymentListPerFsp?: Maybe<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   setSteficonRuleOnPaymentPlanPaymentList?: Maybe<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
@@ -3567,9 +3575,15 @@ export type MutationsImportXlsxPaymentPlanPaymentListArgs = {
 };
 
 
+export type MutationsImportXlsxPaymentPlanPaymentListPerFspArgs = {
+  file: Scalars['Upload'],
+  paymentPlanId: Scalars['ID']
+};
+
+
 export type MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs = {
   paymentPlanId: Scalars['ID'],
-  steficonRuleId?: Maybe<Scalars['ID']>
+  steficonRuleId: Scalars['ID']
 };
 
 
@@ -4043,7 +4057,7 @@ export type PaymentPlanNode = Node & {
   totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
   createdBy: UserNode,
   status: PaymentPlanStatus,
-  backgroundActionStatus: PaymentPlanBackgroundActionStatus,
+  backgroundActionStatus?: Maybe<Scalars['String']>,
   targetPopulation: TargetPopulationNode,
   currency: PaymentPlanCurrency,
   dispersionStartDate?: Maybe<Scalars['Date']>,
@@ -4065,7 +4079,7 @@ export type PaymentPlanNode = Node & {
   financeReviewNumberRequired?: Maybe<Scalars['Int']>,
   currencyName?: Maybe<Scalars['String']>,
   hasPaymentListXlsxFile?: Maybe<Scalars['Boolean']>,
-  hasPaymentListPerFspXlsxFile?: Maybe<Scalars['Boolean']>,
+  hasPaymentListPerFspZipFile?: Maybe<Scalars['Boolean']>,
   importedXlsxFileName?: Maybe<Scalars['String']>,
   paymentsConflictsCount?: Maybe<Scalars['Int']>,
   volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>,
@@ -4110,18 +4124,7 @@ export enum PaymentPlanStatus {
   InApproval = 'IN_APPROVAL',
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
-  Accepted = 'ACCEPTED',
-}
-
-export enum PaymentPlanBackgroundActionStatus {
-  None = '',
-  SteficonRun = 'STEFICON_RUN',
-  SteficonError = 'STEFICON_ERROR',
-  XlsxExporting = 'XLSX_EXPORTING',
-  XlsxExportError = 'XLSX_EXPORT_ERROR',
-  XlsxImportingEntitlements = 'XLSX_IMPORTING_ENTITLEMENTS',
-  XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION',
-  XlsxImportError = 'XLSX_IMPORT_ERROR'
+  Accepted = 'ACCEPTED'
 }
 
 export enum PaymentRecordDeliveryType {
@@ -6289,7 +6292,6 @@ export enum TargetPopulationStatus {
   SteficonCompleted = 'STEFICON_COMPLETED',
   SteficonError = 'STEFICON_ERROR',
   Processing = 'PROCESSING',
-  Ready = 'READY',
   ReadyForCashAssist = 'READY_FOR_CASH_ASSIST',
   ReadyForPaymentModule = 'READY_FOR_PAYMENT_MODULE',
   Assigned = 'ASSIGNED'
@@ -6453,7 +6455,7 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   updatedAt: Scalars['DateTime'],
   goldenRecordsIndividual: IndividualNode,
   isMultipleDuplicatesVersion: Scalars['Boolean'],
-  possibleDuplicate: IndividualNode,
+  possibleDuplicate?: Maybe<IndividualNode>,
   possibleDuplicates?: Maybe<Array<Maybe<IndividualNode>>>,
   selectedIndividual?: Maybe<IndividualNode>,
   selectedIndividuals?: Maybe<Array<Maybe<IndividualNode>>>,
@@ -8053,6 +8055,22 @@ export type ExportXlsxPpListMutation = (
   )> }
 );
 
+export type ExportXlsxPpListPerFspMutationVariables = {
+  paymentPlanId: Scalars['ID']
+};
+
+
+export type ExportXlsxPpListPerFspMutation = (
+  { __typename?: 'Mutations' }
+  & { exportXlsxPaymentPlanPaymentListPerFsp: Maybe<(
+    { __typename?: 'ExportXLSXPaymentPlanPaymentListPerFSPMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
 export type ImportXlsxPpListMutationVariables = {
   paymentPlanId: Scalars['ID'],
   file: Scalars['Upload']
@@ -8073,9 +8091,29 @@ export type ImportXlsxPpListMutation = (
   )> }
 );
 
+export type ImportXlsxPpListPerFspMutationVariables = {
+  paymentPlanId: Scalars['ID'],
+  file: Scalars['Upload']
+};
+
+
+export type ImportXlsxPpListPerFspMutation = (
+  { __typename?: 'Mutations' }
+  & { importXlsxPaymentPlanPaymentListPerFsp: Maybe<(
+    { __typename?: 'ImportXLSXPaymentPlanPaymentListPerFSPMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'status'>
+    )>, errors: Maybe<Array<Maybe<(
+      { __typename?: 'XlsxErrorNode' }
+      & Pick<XlsxErrorNode, 'sheet' | 'coordinates' | 'message'>
+    )>>> }
+  )> }
+);
+
 export type SetSteficonRuleOnPpListMutationVariables = {
   paymentPlanId: Scalars['ID'],
-  steficonRuleId?: Maybe<Scalars['ID']>
+  steficonRuleId: Scalars['ID']
 };
 
 
@@ -9479,7 +9517,7 @@ export type GrievanceTicketQuery = (
           { __typename?: 'DeduplicationResultNode' }
           & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
         )>>> }
-      ), possibleDuplicate: (
+      ), possibleDuplicate: Maybe<(
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
         & { documents: (
@@ -9506,7 +9544,7 @@ export type GrievanceTicketQuery = (
           { __typename?: 'DeduplicationResultNode' }
           & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
         )>>> }
-      ), possibleDuplicates: Maybe<Array<Maybe<(
+      )>, possibleDuplicates: Maybe<Array<Maybe<(
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
         & { documents: (
@@ -9743,7 +9781,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'hasPaymentListPerFspZipFile'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -13269,6 +13307,58 @@ export function useExportXlsxPpListMutation(baseOptions?: ApolloReactHooks.Mutat
 export type ExportXlsxPpListMutationHookResult = ReturnType<typeof useExportXlsxPpListMutation>;
 export type ExportXlsxPpListMutationResult = ApolloReactCommon.MutationResult<ExportXlsxPpListMutation>;
 export type ExportXlsxPpListMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportXlsxPpListMutation, ExportXlsxPpListMutationVariables>;
+export const ExportXlsxPpListPerFspDocument = gql`
+    mutation ExportXlsxPPListPerFsp($paymentPlanId: ID!) {
+  exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId) {
+    paymentPlan {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ExportXlsxPpListPerFspMutationFn = ApolloReactCommon.MutationFunction<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>;
+export type ExportXlsxPpListPerFspComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>, 'mutation'>;
+
+    export const ExportXlsxPpListPerFspComponent = (props: ExportXlsxPpListPerFspComponentProps) => (
+      <ApolloReactComponents.Mutation<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables> mutation={ExportXlsxPpListPerFspDocument} {...props} />
+    );
+    
+export type ExportXlsxPpListPerFspProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables> & TChildProps;
+export function withExportXlsxPpListPerFsp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ExportXlsxPpListPerFspMutation,
+  ExportXlsxPpListPerFspMutationVariables,
+  ExportXlsxPpListPerFspProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables, ExportXlsxPpListPerFspProps<TChildProps>>(ExportXlsxPpListPerFspDocument, {
+      alias: 'exportXlsxPpListPerFsp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useExportXlsxPpListPerFspMutation__
+ *
+ * To run a mutation, you first call `useExportXlsxPpListPerFspMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExportXlsxPpListPerFspMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [exportXlsxPpListPerFspMutation, { data, loading, error }] = useExportXlsxPpListPerFspMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *   },
+ * });
+ */
+export function useExportXlsxPpListPerFspMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>) {
+        return ApolloReactHooks.useMutation<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>(ExportXlsxPpListPerFspDocument, baseOptions);
+      }
+export type ExportXlsxPpListPerFspMutationHookResult = ReturnType<typeof useExportXlsxPpListPerFspMutation>;
+export type ExportXlsxPpListPerFspMutationResult = ApolloReactCommon.MutationResult<ExportXlsxPpListPerFspMutation>;
+export type ExportXlsxPpListPerFspMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>;
 export const ImportXlsxPpListDocument = gql`
     mutation importXlsxPPList($paymentPlanId: ID!, $file: Upload!) {
   importXlsxPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, file: $file) {
@@ -13327,8 +13417,66 @@ export function useImportXlsxPpListMutation(baseOptions?: ApolloReactHooks.Mutat
 export type ImportXlsxPpListMutationHookResult = ReturnType<typeof useImportXlsxPpListMutation>;
 export type ImportXlsxPpListMutationResult = ApolloReactCommon.MutationResult<ImportXlsxPpListMutation>;
 export type ImportXlsxPpListMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxPpListMutation, ImportXlsxPpListMutationVariables>;
+export const ImportXlsxPpListPerFspDocument = gql`
+    mutation importXlsxPPListPerFsp($paymentPlanId: ID!, $file: Upload!) {
+  importXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId, file: $file) {
+    paymentPlan {
+      id
+      status
+    }
+    errors {
+      sheet
+      coordinates
+      message
+    }
+  }
+}
+    `;
+export type ImportXlsxPpListPerFspMutationFn = ApolloReactCommon.MutationFunction<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>;
+export type ImportXlsxPpListPerFspComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>, 'mutation'>;
+
+    export const ImportXlsxPpListPerFspComponent = (props: ImportXlsxPpListPerFspComponentProps) => (
+      <ApolloReactComponents.Mutation<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables> mutation={ImportXlsxPpListPerFspDocument} {...props} />
+    );
+    
+export type ImportXlsxPpListPerFspProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables> & TChildProps;
+export function withImportXlsxPpListPerFsp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportXlsxPpListPerFspMutation,
+  ImportXlsxPpListPerFspMutationVariables,
+  ImportXlsxPpListPerFspProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables, ImportXlsxPpListPerFspProps<TChildProps>>(ImportXlsxPpListPerFspDocument, {
+      alias: 'importXlsxPpListPerFsp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportXlsxPpListPerFspMutation__
+ *
+ * To run a mutation, you first call `useImportXlsxPpListPerFspMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useImportXlsxPpListPerFspMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [importXlsxPpListPerFspMutation, { data, loading, error }] = useImportXlsxPpListPerFspMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      file: // value for 'file'
+ *   },
+ * });
+ */
+export function useImportXlsxPpListPerFspMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>) {
+        return ApolloReactHooks.useMutation<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>(ImportXlsxPpListPerFspDocument, baseOptions);
+      }
+export type ImportXlsxPpListPerFspMutationHookResult = ReturnType<typeof useImportXlsxPpListPerFspMutation>;
+export type ImportXlsxPpListPerFspMutationResult = ApolloReactCommon.MutationResult<ImportXlsxPpListPerFspMutation>;
+export type ImportXlsxPpListPerFspMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>;
 export const SetSteficonRuleOnPpListDocument = gql`
-    mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID) {
+    mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID!) {
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
     paymentPlan {
       id
@@ -17723,6 +17871,7 @@ export const PaymentPlanDocument = gql`
       volume
       volumeUsd
     }
+    hasPaymentListPerFspZipFile
   }
 }
     `;
@@ -22457,6 +22606,7 @@ export type ResolversTypes = {
   ExportXLSXPaymentPlanPaymentListMutation: ResolverTypeWrapper<ExportXlsxPaymentPlanPaymentListMutation>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ExportXlsxPaymentPlanPaymentListPerFspMutation>,
   ImportXLSXPaymentPlanPaymentListMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListMutation>,
+  ImportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: ResolverTypeWrapper<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
@@ -22892,6 +23042,7 @@ export type ResolversParentTypes = {
   ExportXLSXPaymentPlanPaymentListMutation: ExportXlsxPaymentPlanPaymentListMutation,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation: ExportXlsxPaymentPlanPaymentListPerFspMutation,
   ImportXLSXPaymentPlanPaymentListMutation: ImportXlsxPaymentPlanPaymentListMutation,
+  ImportXLSXPaymentPlanPaymentListPerFSPMutation: ImportXlsxPaymentPlanPaymentListPerFspMutation,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: SetSteficonRuleOnPaymentPlanPaymentListMutation,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: CreateTargetPopulationMutation,
@@ -24070,6 +24221,11 @@ export type ImportXlsxPaymentPlanPaymentListMutationResolvers<ContextType = any,
   errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
 };
 
+export type ImportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation'] = ResolversParentTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
+};
+
 export type IndividualDataChangeApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualDataChangeApproveMutation'] = ResolversParentTypes['IndividualDataChangeApproveMutation']> = {
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
@@ -24342,7 +24498,8 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   exportXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListArgs, 'paymentPlanId'>>,
   exportXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListPerFspArgs, 'paymentPlanId'>>,
   importXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListArgs, 'file' | 'paymentPlanId'>>,
-  setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId'>>,
+  importXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListPerFspArgs, 'file' | 'paymentPlanId'>>,
+  setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -24490,6 +24647,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentPlanStatus'], ParentType, ContextType>,
+  backgroundActionStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
   currency?: Resolver<ResolversTypes['PaymentPlanCurrency'], ParentType, ContextType>,
   dispersionStartDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
@@ -24511,7 +24669,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   financeReviewNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   currencyName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   hasPaymentListXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  hasPaymentListPerFspXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasPaymentListPerFspZipFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   importedXlsxFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentsConflictsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   volumeByDeliveryMechanism?: Resolver<Maybe<Array<Maybe<ResolversTypes['VolumeByDeliveryMechanismNode']>>>, ParentType, ContextType>,
@@ -25468,7 +25626,7 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   isMultipleDuplicatesVersion?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  possibleDuplicate?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  possibleDuplicate?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   possibleDuplicates?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>,
   selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   selectedIndividuals?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>,
@@ -25940,6 +26098,7 @@ export type Resolvers<ContextType = any> = {
   ImportedIndividualNodeEdge?: ImportedIndividualNodeEdgeResolvers<ContextType>,
   ImportXlsxCashPlanVerification?: ImportXlsxCashPlanVerificationResolvers<ContextType>,
   ImportXLSXPaymentPlanPaymentListMutation?: ImportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
+  ImportXLSXPaymentPlanPaymentListPerFSPMutation?: ImportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,
   IndividualDataChangeApproveMutation?: IndividualDataChangeApproveMutationResolvers<ContextType>,
   IndividualIdentityNode?: IndividualIdentityNodeResolvers<ContextType>,
   IndividualIdentityNodeConnection?: IndividualIdentityNodeConnectionResolvers<ContextType>,
