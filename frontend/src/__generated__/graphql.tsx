@@ -3569,7 +3569,7 @@ export type MutationsImportXlsxPaymentPlanPaymentListArgs = {
 
 export type MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs = {
   paymentPlanId: Scalars['ID'],
-  steficonRuleId?: Maybe<Scalars['ID']>
+  steficonRuleId: Scalars['ID']
 };
 
 
@@ -4043,7 +4043,7 @@ export type PaymentPlanNode = Node & {
   totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
   createdBy: UserNode,
   status: PaymentPlanStatus,
-  backgroundActionStatus: PaymentPlanBackgroundActionStatus,
+  backgroundActionStatus?: Maybe<Scalars['String']>,
   targetPopulation: TargetPopulationNode,
   currency: PaymentPlanCurrency,
   dispersionStartDate?: Maybe<Scalars['Date']>,
@@ -4110,18 +4110,7 @@ export enum PaymentPlanStatus {
   InApproval = 'IN_APPROVAL',
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
-  Accepted = 'ACCEPTED',
-}
-
-export enum PaymentPlanBackgroundActionStatus {
-  None = '',
-  SteficonRun = 'STEFICON_RUN',
-  SteficonError = 'STEFICON_ERROR',
-  XlsxExporting = 'XLSX_EXPORTING',
-  XlsxExportError = 'XLSX_EXPORT_ERROR',
-  XlsxImportingEntitlements = 'XLSX_IMPORTING_ENTITLEMENTS',
-  XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION',
-  XlsxImportError = 'XLSX_IMPORT_ERROR'
+  Accepted = 'ACCEPTED'
 }
 
 export enum PaymentRecordDeliveryType {
@@ -6289,7 +6278,6 @@ export enum TargetPopulationStatus {
   SteficonCompleted = 'STEFICON_COMPLETED',
   SteficonError = 'STEFICON_ERROR',
   Processing = 'PROCESSING',
-  Ready = 'READY',
   ReadyForCashAssist = 'READY_FOR_CASH_ASSIST',
   ReadyForPaymentModule = 'READY_FOR_PAYMENT_MODULE',
   Assigned = 'ASSIGNED'
@@ -6453,7 +6441,7 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   updatedAt: Scalars['DateTime'],
   goldenRecordsIndividual: IndividualNode,
   isMultipleDuplicatesVersion: Scalars['Boolean'],
-  possibleDuplicate: IndividualNode,
+  possibleDuplicate?: Maybe<IndividualNode>,
   possibleDuplicates?: Maybe<Array<Maybe<IndividualNode>>>,
   selectedIndividual?: Maybe<IndividualNode>,
   selectedIndividuals?: Maybe<Array<Maybe<IndividualNode>>>,
@@ -8075,7 +8063,7 @@ export type ImportXlsxPpListMutation = (
 
 export type SetSteficonRuleOnPpListMutationVariables = {
   paymentPlanId: Scalars['ID'],
-  steficonRuleId?: Maybe<Scalars['ID']>
+  steficonRuleId: Scalars['ID']
 };
 
 
@@ -8985,7 +8973,7 @@ export type BusinessAreaDataQuery = (
   { __typename?: 'Query' }
   & { businessArea: Maybe<(
     { __typename?: 'BusinessAreaNode' }
-    & Pick<BusinessAreaNode, 'id' | 'screenBeneficiary'>
+    & Pick<BusinessAreaNode, 'id' | 'screenBeneficiary' | 'isPaymentPlanApplicable'>
   )> }
 );
 
@@ -9479,7 +9467,7 @@ export type GrievanceTicketQuery = (
           { __typename?: 'DeduplicationResultNode' }
           & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
         )>>> }
-      ), possibleDuplicate: (
+      ), possibleDuplicate: Maybe<(
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
         & { documents: (
@@ -9506,7 +9494,7 @@ export type GrievanceTicketQuery = (
           { __typename?: 'DeduplicationResultNode' }
           & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
         )>>> }
-      ), possibleDuplicates: Maybe<Array<Maybe<(
+      )>, possibleDuplicates: Maybe<Array<Maybe<(
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
         & { documents: (
@@ -9743,7 +9731,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -13328,7 +13316,7 @@ export type ImportXlsxPpListMutationHookResult = ReturnType<typeof useImportXlsx
 export type ImportXlsxPpListMutationResult = ApolloReactCommon.MutationResult<ImportXlsxPpListMutation>;
 export type ImportXlsxPpListMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxPpListMutation, ImportXlsxPpListMutationVariables>;
 export const SetSteficonRuleOnPpListDocument = gql`
-    mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID) {
+    mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID!) {
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
     paymentPlan {
       id
@@ -15798,6 +15786,7 @@ export const BusinessAreaDataDocument = gql`
   businessArea(businessAreaSlug: $businessAreaSlug) {
     id
     screenBeneficiary
+    isPaymentPlanApplicable
   }
 }
     `;
@@ -17580,7 +17569,6 @@ export const PaymentPlanDocument = gql`
     id
     unicefId
     status
-    backgroundActionStatus
     createdBy {
       id
       firstName
@@ -24342,7 +24330,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   exportXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListArgs, 'paymentPlanId'>>,
   exportXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListPerFspArgs, 'paymentPlanId'>>,
   importXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListArgs, 'file' | 'paymentPlanId'>>,
-  setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId'>>,
+  setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -24490,6 +24478,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentPlanStatus'], ParentType, ContextType>,
+  backgroundActionStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
   currency?: Resolver<ResolversTypes['PaymentPlanCurrency'], ParentType, ContextType>,
   dispersionStartDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
@@ -25468,7 +25457,7 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   isMultipleDuplicatesVersion?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  possibleDuplicate?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  possibleDuplicate?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   possibleDuplicates?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>,
   selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   selectedIndividuals?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>,

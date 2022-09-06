@@ -46,6 +46,7 @@ export function PaymentVerificationTableRow({
       onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={plan.id}
+      data-cy='cash-plan-table-row'
     >
       <TableCell align='left'>
         {canViewDetails ? (

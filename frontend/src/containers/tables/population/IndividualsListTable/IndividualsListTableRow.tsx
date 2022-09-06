@@ -53,6 +53,7 @@ export function IndividualsListTableRow({
       onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={individual.id}
+      data-cy='individual-table-row'
     >
       <TableCell align='left'>
         <>
