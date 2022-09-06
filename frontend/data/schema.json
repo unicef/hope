@@ -18078,6 +18078,18 @@
             "deprecationReason": null
           },
           {
+            "name": "backgroundActionStatus",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "targetPopulation",
             "description": null,
             "args": [],
@@ -22425,12 +22437,6 @@
           },
           {
             "name": "PROCESSING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "READY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -27232,42 +27238,6 @@
           },
           {
             "name": "ACCEPTED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "STEFICON_WAIT",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "STEFICON_RUN",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "STEFICON_COMPLETED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "STEFICON_ERROR",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "XLSX_EXPORTING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "XLSX_IMPORTING",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -34867,13 +34837,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "IndividualNode",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "IndividualNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -51461,9 +51427,13 @@
                 "name": "steficonRuleId",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               }

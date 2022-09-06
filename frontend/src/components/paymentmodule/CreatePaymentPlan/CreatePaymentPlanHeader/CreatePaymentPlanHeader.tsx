@@ -49,6 +49,7 @@ export const CreatePaymentPlanHeader = ({
           variant='contained'
           color='primary'
           onClick={handleSubmit}
+          data-cy='button-save-payment-plan'
         >
           {t('Save')}
         </LoadingButton>
