@@ -53,7 +53,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             household.size,
             str(household.admin2.name) if household.admin2 else "",
             str(payment.collector.full_name) if payment.collector else "",
-            str(payment.assigned_payment_channel.delivery_mechanism) if payment.assigned_payment_channel else "",
+            str(payment.assigned_payment_channel.get_delivery_mechanism_display()) if payment.assigned_payment_channel else "",
             str(payment.financial_service_provider.name) if payment.financial_service_provider else "",
             str(payment.currency),
             payment.entitlement_quantity,

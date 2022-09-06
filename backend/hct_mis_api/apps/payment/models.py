@@ -295,6 +295,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
 
+    def __str__(self):
+        return self.unicef_id
+
     @transition(
         field=background_action_status,
         source=[None] + BACKGROUND_ACTION_ERROR_STATES,
