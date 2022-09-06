@@ -6,6 +6,8 @@ from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPayme
 
 
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
+    DELIVERED_QUANTITY_COLUMN_INDEX = 7
+
     def __init__(self, payment_plan, file):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.all_active_payments
@@ -36,5 +38,5 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
     def _import_row(self, row):
         payment_id = row[XlsxPaymentPlanExportService.ID_COLUMN_INDEX].value
         payment = self.payments_dict[payment_id]
-        payment.delivered_quantity = row[7].value
+        payment.delivered_quantity = row[self.DELIVERED_QUANTITY_COLUMN_INDEX].value
         self.payments_to_save.append(payment)
