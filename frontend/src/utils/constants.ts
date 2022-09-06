@@ -9,7 +9,7 @@ export const TARGETING_STATES = {
   [TargetPopulationStatus.Open]: 'Open',
   [TargetPopulationStatus.Locked]: 'Locked',
   [TargetPopulationStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
-  [TargetPopulationStatus.Ready]: 'Ready',
+  [TargetPopulationStatus.ReadyForPaymentModule]: 'Ready For Payment Module',
   [TargetPopulationStatus.Processing]: 'Processing',
   [TargetPopulationStatus.SteficonWait]: 'Steficon Wait',
   [TargetPopulationStatus.SteficonRun]: 'Steficon Run',
