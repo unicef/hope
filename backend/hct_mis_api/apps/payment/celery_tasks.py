@@ -72,7 +72,7 @@ def create_cash_plan_payment_verification_xls(cash_plan_payment_verification_id,
 
             cash_plan_payment_verification.xlsx_file_exporting = False
             cash_plan_payment_verification.save()
-            service.send_email(service.get_context(user))
+            service.send_email(service.get_email_context(user))
     except Exception as e:
         logger.exception(e)
         raise
@@ -122,7 +122,7 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
                     payment_plan.background_action_status_none()
                     payment_plan.save()
 
-                    transaction.on_commit(lambda: service.send_email(service.get_context(user)))
+                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
 
             except Exception:
                 payment_plan.background_action_status_xlsx_export_error()
@@ -160,7 +160,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
                     payment_plan.status = PaymentPlan.Status.ACCEPTED
                     payment_plan.save()
 
-                    transaction.on_commit(lambda: service.send_email(service.get_context(user, per_fsp=True)))
+                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user, per_fsp=True)))
 
             except Exception:
                 payment_plan.background_action_status_xlsx_export_error()

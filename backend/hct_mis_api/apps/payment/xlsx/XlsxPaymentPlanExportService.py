@@ -93,7 +93,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             self.payment_plan.export_xlsx_file = xlsx_obj
             self.payment_plan.save()
 
-    def get_context(self, user, per_fsp=False):
+    def get_email_context(self, user, per_fsp=False):
         payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
         if per_fsp:
             path_name = "download-payment-plan-payment-list-per-fsp"
@@ -101,7 +101,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             path_name = "download-payment-plan-payment-list"
         link = self.get_link(reverse(path_name, args=[payment_verification_id]))
 
-        msg = "Payment Plan Payment List xlsx file was generated and below You have the link to download this file."
+        msg = "Payment Plan Payment List xlsx file(s) were generated and below You have the link to download this file."
 
         context = {
             "first_name": user.first_name,
@@ -109,7 +109,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             "email": user.email,
             "message": msg,
             "link": link,
-            "title": "Payment Plan Payment List XLSX file generated",
+            "title": "Payment Plan Payment List files generated",
         }
 
         return context
@@ -176,7 +176,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             tmp_zip.seek(0)
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
             xlsx_obj.file.save(zip_file_name, File(tmp_zip))
-            self.payment_plan.export_per_fsp_xlsx_file = xlsx_obj
+            self.payment_plan.export_per_fsp_zip_file = xlsx_obj
             self.payment_plan.save()
 
     @staticmethod

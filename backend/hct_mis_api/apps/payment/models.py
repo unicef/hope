@@ -279,7 +279,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
     imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
     export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-    export_per_fsp_xlsx_file = models.ForeignKey(
+    export_per_fsp_zip_file = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE
     )
     steficon_rule = models.ForeignKey(
@@ -519,8 +519,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return bool(self.export_xlsx_file)
 
     @property
-    def has_payment_list_per_fsp_xlsx_file(self):
-        return bool(self.export_per_fsp_xlsx_file)
+    def has_payment_list_per_fsp_zip_file(self):
+        return bool(self.export_per_fsp_zip_file)
 
     @property
     def xlsx_payment_list_file_link(self):
@@ -530,8 +530,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def xlsx_payment_list_per_fsp_file_link(self):
-        if self.export_per_fsp_xlsx_file:
-            return self.export_per_fsp_xlsx_file.file.url
+        if self.export_per_fsp_zip_file:
+            return self.export_per_fsp_zip_file.file.url
         return None
 
 
