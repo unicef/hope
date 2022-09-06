@@ -1373,6 +1373,7 @@ export enum FinancialServiceProviderXlsxTemplateColumns {
   PaymentChannel = 'PAYMENT_CHANNEL',
   FspName = 'FSP_NAME',
   EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
+  DeliveredQuantity = 'DELIVERED_QUANTITY',
   Tbd = 'TBD'
 }
 
@@ -2715,6 +2716,12 @@ export type ImportXlsxPaymentPlanPaymentListMutation = {
   errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
 };
 
+export type ImportXlsxPaymentPlanPaymentListPerFspMutation = {
+   __typename?: 'ImportXLSXPaymentPlanPaymentListPerFSPMutation',
+  paymentPlan?: Maybe<PaymentPlanNode>,
+  errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
+};
+
 export type IndividualDataChangeApproveMutation = {
    __typename?: 'IndividualDataChangeApproveMutation',
   grievanceTicket?: Maybe<GrievanceTicketNode>,
@@ -3296,6 +3303,7 @@ export type Mutations = {
   exportXlsxPaymentPlanPaymentList?: Maybe<ExportXlsxPaymentPlanPaymentListMutation>,
   exportXlsxPaymentPlanPaymentListPerFsp?: Maybe<ExportXlsxPaymentPlanPaymentListPerFspMutation>,
   importXlsxPaymentPlanPaymentList?: Maybe<ImportXlsxPaymentPlanPaymentListMutation>,
+  importXlsxPaymentPlanPaymentListPerFsp?: Maybe<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   setSteficonRuleOnPaymentPlanPaymentList?: Maybe<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
@@ -3562,6 +3570,12 @@ export type MutationsExportXlsxPaymentPlanPaymentListPerFspArgs = {
 
 
 export type MutationsImportXlsxPaymentPlanPaymentListArgs = {
+  file: Scalars['Upload'],
+  paymentPlanId: Scalars['ID']
+};
+
+
+export type MutationsImportXlsxPaymentPlanPaymentListPerFspArgs = {
   file: Scalars['Upload'],
   paymentPlanId: Scalars['ID']
 };
@@ -4065,7 +4079,7 @@ export type PaymentPlanNode = Node & {
   financeReviewNumberRequired?: Maybe<Scalars['Int']>,
   currencyName?: Maybe<Scalars['String']>,
   hasPaymentListXlsxFile?: Maybe<Scalars['Boolean']>,
-  hasPaymentListPerFspXlsxFile?: Maybe<Scalars['Boolean']>,
+  hasPaymentListPerFspZipFile?: Maybe<Scalars['Boolean']>,
   importedXlsxFileName?: Maybe<Scalars['String']>,
   paymentsConflictsCount?: Maybe<Scalars['Int']>,
   volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>,
@@ -22445,6 +22459,7 @@ export type ResolversTypes = {
   ExportXLSXPaymentPlanPaymentListMutation: ResolverTypeWrapper<ExportXlsxPaymentPlanPaymentListMutation>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ExportXlsxPaymentPlanPaymentListPerFspMutation>,
   ImportXLSXPaymentPlanPaymentListMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListMutation>,
+  ImportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListPerFspMutation>,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: ResolverTypeWrapper<SetSteficonRuleOnPaymentPlanPaymentListMutation>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
@@ -22880,6 +22895,7 @@ export type ResolversParentTypes = {
   ExportXLSXPaymentPlanPaymentListMutation: ExportXlsxPaymentPlanPaymentListMutation,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation: ExportXlsxPaymentPlanPaymentListPerFspMutation,
   ImportXLSXPaymentPlanPaymentListMutation: ImportXlsxPaymentPlanPaymentListMutation,
+  ImportXLSXPaymentPlanPaymentListPerFSPMutation: ImportXlsxPaymentPlanPaymentListPerFspMutation,
   SetSteficonRuleOnPaymentPlanPaymentListMutation: SetSteficonRuleOnPaymentPlanPaymentListMutation,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: CreateTargetPopulationMutation,
@@ -24058,6 +24074,11 @@ export type ImportXlsxPaymentPlanPaymentListMutationResolvers<ContextType = any,
   errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
 };
 
+export type ImportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation'] = ResolversParentTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
+};
+
 export type IndividualDataChangeApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualDataChangeApproveMutation'] = ResolversParentTypes['IndividualDataChangeApproveMutation']> = {
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
@@ -24330,6 +24351,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   exportXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListArgs, 'paymentPlanId'>>,
   exportXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListPerFspArgs, 'paymentPlanId'>>,
   importXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListArgs, 'file' | 'paymentPlanId'>>,
+  importXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListPerFspArgs, 'file' | 'paymentPlanId'>>,
   setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
@@ -24500,7 +24522,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   financeReviewNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   currencyName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   hasPaymentListXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  hasPaymentListPerFspXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasPaymentListPerFspZipFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   importedXlsxFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentsConflictsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   volumeByDeliveryMechanism?: Resolver<Maybe<Array<Maybe<ResolversTypes['VolumeByDeliveryMechanismNode']>>>, ParentType, ContextType>,
@@ -25929,6 +25951,7 @@ export type Resolvers<ContextType = any> = {
   ImportedIndividualNodeEdge?: ImportedIndividualNodeEdgeResolvers<ContextType>,
   ImportXlsxCashPlanVerification?: ImportXlsxCashPlanVerificationResolvers<ContextType>,
   ImportXLSXPaymentPlanPaymentListMutation?: ImportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
+  ImportXLSXPaymentPlanPaymentListPerFSPMutation?: ImportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,
   IndividualDataChangeApproveMutation?: IndividualDataChangeApproveMutationResolvers<ContextType>,
   IndividualIdentityNode?: IndividualIdentityNodeResolvers<ContextType>,
   IndividualIdentityNodeConnection?: IndividualIdentityNodeConnectionResolvers<ContextType>,
