@@ -31,6 +31,7 @@ export function CashPlanTableRow({
       onClick={handleClick}
       role='checkbox'
       key={cashPlan.id}
+      data-cy='cash-plan-table-row'
     >
       <TableCell align='left'>
         <BlackLink to={cashPlanPath}>

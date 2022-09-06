@@ -381,7 +381,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
-    background_action_status = graphene.String()
 
     class Meta:
         model = PaymentPlan
@@ -558,6 +557,7 @@ class Query(graphene.ObjectType):
     available_fsps_for_delivery_mechanisms = graphene.List(
         FspChoices, delivery_mechanisms=graphene.List(graphene.String)
     )
+    payment_plan_background_action_status_choices = graphene.List(ChoiceObject)
 
     def resolve_available_fsps_for_delivery_mechanisms(self, info, delivery_mechanisms):
         def get_fsps_for_delivery_mechanism(mechanism):
@@ -819,3 +819,6 @@ class Query(graphene.ObjectType):
 
     def resolve_payment_plan_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentPlan.Status.choices)
+
+    def resolve_payment_plan_background_action_status_choices(self, info, **kwargs):
+        return to_choice_object(PaymentPlan.BackgroundActionStatus.choices)

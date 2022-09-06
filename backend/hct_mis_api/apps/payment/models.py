@@ -223,7 +223,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         ACCEPTED = "ACCEPTED", "Accepted"
 
     class BackgroundActionStatus(models.TextChoices):
-        NONE = "", ""
         STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
         STEFICON_ERROR = "STEFICON_ERROR", "Rule Engine Errored"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
@@ -256,10 +255,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
     background_action_status = FSMField(
-        default=BackgroundActionStatus.NONE,
+        default=None,
         protected=False,
         db_index=True,
         blank=True,
+        null=True,
         choices=BackgroundActionStatus.choices,
     )
     target_population = models.ForeignKey(
@@ -297,7 +297,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.XLSX_EXPORTING,
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
     )
@@ -315,7 +315,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.STEFICON_RUN,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
@@ -333,7 +333,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
@@ -342,7 +342,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(
         field=background_action_status,
-        source=[BackgroundActionStatus.NONE] + BACKGROUND_ACTION_ERROR_STATES,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
     )
@@ -361,7 +361,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def background_action_status_xlsx_import_error(self):
         pass
 
-    @transition(field=background_action_status, source="*", target=BackgroundActionStatus.NONE)
+    @transition(field=background_action_status, source="*", target=None)
     def background_action_status_none(self):
         pass
 
