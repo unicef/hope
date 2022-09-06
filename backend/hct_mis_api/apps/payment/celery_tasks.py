@@ -230,8 +230,8 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
                     service.import_payment_list()
                     payment_plan.background_action_status_none()
                     payment_plan.save()
-            except Exception as e:
-                logger.exception("Error import from xlsx", e)
+            except Exception:
+                logger.exception("Unexpected error during xlsx per fsp import")
                 payment_plan.background_action_status_xlsx_import_error()
                 payment_plan.save()
 
