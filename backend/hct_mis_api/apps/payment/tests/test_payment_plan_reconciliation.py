@@ -385,6 +385,9 @@ class TestPaymentPlanReconciliation(APITestCase):
         rule = RuleFactory(name="Rule")
         RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule)
 
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        self.assertEqual(payment_plan.background_action_status, None)
+
         with patch("hct_mis_api.apps.payment.mutations.payment_plan_apply_steficon") as mock:
             set_steficon_response = self.graphql_request(
                 request_string=SET_STEFICON_RULE_MUTATION,
@@ -398,6 +401,9 @@ class TestPaymentPlanReconciliation(APITestCase):
             assert mock.delay.call_count == 1
             call_args = mock.delay.call_args[0]
             payment_plan_apply_steficon(*call_args)
+
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.background_action_status, None)
 
         payment.refresh_from_db()
         self.assertEqual(payment.entitlement_quantity, 500)
@@ -525,6 +531,9 @@ class TestPaymentPlanReconciliation(APITestCase):
             "ACCEPTED",
         )
 
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.background_action_status, None)
+
         with patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.create_payment_plan_payment_list_xlsx_per_fsp"
         ) as mock_export:
@@ -540,7 +549,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             call_args = mock_export.delay.call_args[0]
             create_payment_plan_payment_list_xlsx_per_fsp(*call_args)
 
-        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        payment_plan.refresh_from_db()
         zip_file = payment_plan.export_per_fsp_zip_file
         assert zip_file is not None
 
