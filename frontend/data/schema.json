@@ -3279,6 +3279,22 @@
             "deprecationReason": null
           },
           {
+            "name": "paymentPlanBackgroundActionStatusChoices",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ChoiceObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "businessArea",
             "description": null,
             "args": [
@@ -18082,8 +18098,8 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
+              "kind": "ENUM",
+              "name": "PaymentPlanBackgroundActionStatus",
               "ofType": null
             },
             "isDeprecated": false,
@@ -18488,7 +18504,7 @@
             "deprecationReason": null
           },
           {
-            "name": "hasPaymentListPerFspXlsxFile",
+            "name": "hasPaymentListPerFspZipFile",
             "description": null,
             "args": [],
             "type": {
@@ -27247,6 +27263,59 @@
       },
       {
         "kind": "ENUM",
+        "name": "PaymentPlanBackgroundActionStatus",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "STEFICON_RUN",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "STEFICON_ERROR",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "XLSX_EXPORTING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "XLSX_EXPORT_ERROR",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "XLSX_IMPORT_ERROR",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "XLSX_IMPORTING_ENTITLEMENTS",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "XLSX_IMPORTING_RECONCILIATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
         "name": "PaymentPlanCurrency",
         "description": null,
         "fields": null,
@@ -29106,6 +29175,12 @@
           },
           {
             "name": "ENTITLEMENT_QUANTITY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "DELIVERED_QUANTITY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -51406,6 +51481,47 @@
             "deprecationReason": null
           },
           {
+            "name": "importXlsxPaymentPlanPaymentListPerFsp",
+            "description": null,
+            "args": [
+              {
+                "name": "file",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Upload",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "paymentPlanId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ImportXLSXPaymentPlanPaymentListPerFSPMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "setSteficonRuleOnPaymentPlanPaymentList",
             "description": null,
             "args": [
@@ -56615,6 +56731,45 @@
       {
         "kind": "OBJECT",
         "name": "ImportXLSXPaymentPlanPaymentListMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "paymentPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentPlanNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "errors",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "XlsxErrorNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ImportXLSXPaymentPlanPaymentListPerFSPMutation",
         "description": null,
         "fields": [
           {
