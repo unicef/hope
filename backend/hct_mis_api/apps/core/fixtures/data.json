@@ -25,7 +25,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -54,7 +55,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -83,7 +85,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -112,7 +115,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -141,7 +145,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -170,7 +175,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -199,7 +205,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -228,7 +235,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -257,7 +265,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -286,7 +295,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -315,7 +325,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -344,7 +355,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -373,7 +385,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -402,7 +415,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -431,7 +445,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -460,7 +475,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -489,7 +505,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -518,7 +535,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -547,7 +565,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -576,7 +595,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -605,7 +625,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -634,7 +655,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -663,7 +685,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -692,7 +715,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -721,7 +745,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -750,7 +775,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -779,7 +805,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -808,7 +835,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -837,7 +865,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -866,7 +895,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -895,7 +925,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -924,7 +955,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -953,7 +985,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -982,7 +1015,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1011,7 +1045,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1040,7 +1075,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1069,7 +1105,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1098,7 +1135,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1127,7 +1165,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1156,7 +1195,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1185,7 +1225,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1214,7 +1255,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1243,7 +1285,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1272,7 +1315,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1301,7 +1345,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1330,7 +1375,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1359,7 +1405,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1388,7 +1435,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1417,7 +1465,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1446,7 +1495,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1475,7 +1525,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1504,7 +1555,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1533,7 +1585,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1562,7 +1615,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1591,7 +1645,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1620,7 +1675,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1649,7 +1705,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1678,7 +1735,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1707,7 +1765,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1736,7 +1795,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1765,7 +1825,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1794,7 +1855,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1823,7 +1885,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1852,7 +1915,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1881,7 +1945,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1910,7 +1975,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1939,7 +2005,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1968,7 +2035,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -1997,7 +2065,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2026,7 +2095,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2055,7 +2125,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2084,7 +2155,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2113,7 +2185,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2142,7 +2215,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2171,7 +2245,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2200,7 +2275,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2229,7 +2305,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2258,7 +2335,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2287,7 +2365,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2316,7 +2395,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2345,7 +2425,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2374,7 +2455,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2403,7 +2485,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2432,7 +2515,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2461,7 +2545,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2490,7 +2575,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2519,7 +2605,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2548,7 +2635,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2577,7 +2665,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2606,7 +2695,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2635,7 +2725,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2664,7 +2755,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2693,7 +2785,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2722,7 +2815,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2751,7 +2845,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2780,7 +2875,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2809,7 +2905,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2838,7 +2935,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2867,7 +2965,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2896,7 +2995,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2925,7 +3025,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2954,7 +3055,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -2983,7 +3085,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3012,7 +3115,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3041,7 +3145,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3070,7 +3175,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3099,7 +3205,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3128,7 +3235,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3157,7 +3265,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3186,7 +3295,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3215,7 +3325,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3244,7 +3355,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3273,7 +3385,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3302,7 +3415,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3331,7 +3445,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3360,7 +3475,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3389,7 +3505,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3418,7 +3535,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3447,7 +3565,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3476,7 +3595,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3505,7 +3625,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3534,7 +3655,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3563,7 +3685,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3592,7 +3715,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3621,7 +3745,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3650,7 +3775,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3679,7 +3805,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3708,7 +3835,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3737,7 +3865,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3766,7 +3895,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3795,7 +3925,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": true
   }
 },
 {
@@ -3824,7 +3955,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3853,7 +3985,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3882,7 +4015,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3911,7 +4045,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3940,7 +4075,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3969,7 +4105,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -3998,7 +4135,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4027,7 +4165,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4056,7 +4195,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4085,7 +4225,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4114,7 +4255,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4143,7 +4285,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4172,7 +4315,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4201,7 +4345,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4230,7 +4375,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4259,7 +4405,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4288,7 +4435,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4317,7 +4465,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4346,7 +4495,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4375,7 +4525,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4404,7 +4555,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4433,7 +4585,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4462,7 +4615,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4491,7 +4645,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4520,7 +4675,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4549,7 +4705,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4578,7 +4735,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4607,7 +4765,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4636,7 +4795,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4665,7 +4825,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
@@ -4694,7 +4855,8 @@
     "deduplication_golden_record_duplicates_percentage": 50,
     "deduplication_golden_record_duplicates_allowed": 5,
     "screen_beneficiary": false,
-    "countries": []
+    "countries": [],
+.   "is_payment_plan_applicable": false
   }
 },
 {
