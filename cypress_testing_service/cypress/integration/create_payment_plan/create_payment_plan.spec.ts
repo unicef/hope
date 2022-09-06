@@ -77,6 +77,7 @@ Then('I should see the New Payment Plan page', () => {
 
 When('I fill out the form fields and save', () => {
   cy.get('[data-cy="input-target-population"]').first().click();
+  cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[data-cy="select-option-1"]').click();
   cy.get('[data-cy="input-start-date"]').click().type('2022-12-12');
   cy.get('[data-cy="input-end-date"]').click().type('2022-12-23');

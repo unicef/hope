@@ -1,11 +1,15 @@
+from locale import currency
+from uuid import UUID
 import factory
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
 from random import randint
 from factory import fuzzy
 from pytz import utc
 
+from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
@@ -607,3 +611,43 @@ def generate_real_payment_plans():
         for financial_service_provider in FinancialServiceProvider.objects.all().order_by("?")[:3]:
             financial_service_provider.delivery_mechanisms.append(delivery_mechanism)
             financial_service_provider.save()
+
+
+def generate_payment_plan():
+    # creates a payment plan that has all the necessary data needed to go with it for manual testing
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    root = User.objects.get(username="root")
+    now = datetime.now()
+
+    program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
+    program = Program.objects.update_or_create(
+        pk=program_pk,
+        business_area=afghanistan,
+        name="Test Program",
+        start_date=now,
+        end_date=now + timedelta(days=365),
+        budget=pow(10, 6),
+        cash_plus=True,
+        population_goal=250,
+    )[0]
+
+    target_population_pk = UUID("00000000-0000-0000-0000-faceb00c0123")
+    target_population = TargetPopulation.objects.update_or_create(
+        pk=target_population_pk,
+        name="Test Target Population",
+    )[0]
+
+    payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
+    PaymentPlan.objects.update_or_create(
+        pk=payment_plan_pk,
+        business_area=afghanistan,
+        target_population=target_population,
+        start_date=now,
+        end_date=now + timedelta(days=30),
+        currency="USD",
+        dispersion_start_date=now,
+        dispersion_end_date=now + timedelta(days=14),
+        status_date=now,
+        created_by=root,
+        program=program,
+    )
