@@ -284,30 +284,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
                 'name': 'Accepted',
                 'value': 'ACCEPTED'
             },
-            {
-                'name': 'Waiting for Rule Engine',
-                'value': 'STEFICON_WAIT'
-            },
-            {
-                'name': 'Rule Engine Running',
-                'value': 'STEFICON_RUN'
-            },
-            {
-                'name': 'Rule Engine Completed',
-                'value': 'STEFICON_COMPLETED'
-            },
-            {
-                'name': 'Rule Engine Errored',
-                'value': 'STEFICON_ERROR'
-            },
-            {
-                'name': 'Exporting XLSX file',
-                'value': 'XLSX_EXPORTING'
-            },
-            {
-                'name': 'Importing XLSX file',
-                'value': 'XLSX_IMPORTING'
-            }
         ]
     }
 }
