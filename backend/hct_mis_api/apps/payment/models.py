@@ -363,7 +363,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @transition(field=background_action_status, source="*", target=None)
     def background_action_status_none(self):
-        pass
+        self.background_action_status = None  # little hack
 
     @transition(
         field=status,
