@@ -34,6 +34,7 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
             <div
               choices="[object Object]"
               class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+              data-cy="input-target-population"
               label="Target Population"
             >
               <label
@@ -52,6 +53,7 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
               <div
                 choices="[object Object]"
                 class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-marginDense MuiOutlinedInput-marginDense"
+                data-cy="input-target-population"
                 required=""
               >
                 <div
