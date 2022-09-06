@@ -1,9 +1,9 @@
-import React from 'react';
 import { MockedProvider } from '@apollo/react-testing';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import wait from 'waait';
-import { fakeImportXlsxPpListMutation } from '../../../../../fixtures/paymentmodule/fakeImportXlsxPpListMutation';
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
+import { fakeImportXlsxPpListMutation } from '../../../../../fixtures/paymentmodule/fakeImportXlsxPpListMutation';
 import { render } from '../../../../testUtils/testUtils';
 import { ImportXlsxPaymentPlanPaymentList } from './ImportXlsxPaymentPlanPaymentList';
 
