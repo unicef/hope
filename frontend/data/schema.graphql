@@ -975,6 +975,7 @@ enum FinancialServiceProviderXlsxTemplateColumns {
   PAYMENT_CHANNEL
   FSP_NAME
   ENTITLEMENT_QUANTITY
+  DELIVERED_QUANTITY
   TBD
 }
 
@@ -1358,6 +1359,11 @@ enum ImportDataStatus {
 }
 
 type ImportXLSXPaymentPlanPaymentListMutation {
+  paymentPlan: PaymentPlanNode
+  errors: [XlsxErrorNode]
+}
+
+type ImportXLSXPaymentPlanPaymentListPerFSPMutation {
   paymentPlan: PaymentPlanNode
   errors: [XlsxErrorNode]
 }
@@ -2469,6 +2475,7 @@ type Mutations {
   exportXlsxPaymentPlanPaymentList(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
   exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
+  importXlsxPaymentPlanPaymentListPerFsp(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListPerFSPMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!): SetSteficonRuleOnPaymentPlanPaymentListMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
@@ -2840,7 +2847,7 @@ type PaymentPlanNode implements Node {
   financeReviewNumberRequired: Int
   currencyName: String
   hasPaymentListXlsxFile: Boolean
-  hasPaymentListPerFspXlsxFile: Boolean
+  hasPaymentListPerFspZipFile: Boolean
   importedXlsxFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
