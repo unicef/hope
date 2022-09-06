@@ -160,7 +160,7 @@ class PaymentChannelFactory(factory.DjangoModelFactory):
         model = PaymentChannel
 
     individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE)
+    delivery_mechanism = fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
     delivery_data = factory.Faker("json")
 
 
