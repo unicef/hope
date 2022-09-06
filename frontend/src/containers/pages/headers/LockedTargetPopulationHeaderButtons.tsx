@@ -6,11 +6,13 @@ import styled from 'styled-components';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
+  BusinessAreaDataQuery,
   TargetPopulationQuery,
   useUnlockTpMutation,
 } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
+import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
 
 const IconContainer = styled.span`
   button {
@@ -28,6 +30,7 @@ export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   canUnlock: boolean;
   canDuplicate: boolean;
   canSend: boolean;
+  businessAreaData: BusinessAreaDataQuery;
 }
 
 export const LockedTargetPopulationHeaderButtons = ({
@@ -35,12 +38,15 @@ export const LockedTargetPopulationHeaderButtons = ({
   canSend,
   canDuplicate,
   canUnlock,
+  businessAreaData,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
+  const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useUnlockTpMutation();
+  const { isPaymentPlanApplicable } = businessAreaData.businessArea;
 
   return (
     <Box display='flex' alignItems='center'>
@@ -72,25 +78,47 @@ export const LockedTargetPopulationHeaderButtons = ({
       )}
       {canSend && (
         <Box m={2}>
-          <Tooltip
-            title={
-              targetPopulation.program.status !== 'ACTIVE'
-                ? t('Assigned programme is not ACTIVE')
-                : t('Send to Cash Assist')
-            }
-          >
-            <span>
-              <Button
-                variant='contained'
-                color='primary'
-                disabled={targetPopulation.program.status !== 'ACTIVE'}
-                onClick={() => setOpenFinalize(true)}
-                data-cy='button-target-population-send-to-cash-assist'
-              >
-                {t('Send to Cash Assist')}
-              </Button>
-            </span>
-          </Tooltip>
+          {isPaymentPlanApplicable ? (
+            <Tooltip
+              title={
+                targetPopulation.program.status !== 'ACTIVE'
+                  ? t('Assigned programme is not ACTIVE')
+                  : ''
+              }
+            >
+              <span>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  disabled={targetPopulation.program.status !== 'ACTIVE'}
+                  onClick={() => setOpenFinalizePaymentPlan(true)}
+                  data-cy='button-target-population-send-to-hope'
+                >
+                  {t('Send to Hope')}
+                </Button>
+              </span>
+            </Tooltip>
+          ) : (
+            <Tooltip
+              title={
+                targetPopulation.program.status !== 'ACTIVE'
+                  ? t('Assigned programme is not ACTIVE')
+                  : t('Send to Cash Assist')
+              }
+            >
+              <span>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  disabled={targetPopulation.program.status !== 'ACTIVE'}
+                  onClick={() => setOpenFinalize(true)}
+                  data-cy='button-target-population-send-to-cash-assist'
+                >
+                  {t('Send to Cash Assist')}
+                </Button>
+              </span>
+            </Tooltip>
+          )}
         </Box>
       )}
       <DuplicateTargetPopulation
@@ -104,6 +132,14 @@ export const LockedTargetPopulationHeaderButtons = ({
         targetPopulationId={targetPopulation.id}
         totalHouseholds={targetPopulation.totalHouseholdsCount}
       />
+      {isPaymentPlanApplicable && (
+        <FinalizeTargetPopulationPaymentPlan
+          open={openFinalizePaymentPlan}
+          setOpen={setOpenFinalizePaymentPlan}
+          targetPopulationId={targetPopulation.id}
+          totalHouseholds={targetPopulation.totalHouseholdsCount}
+        />
+      )}
     </Box>
   );
 };
