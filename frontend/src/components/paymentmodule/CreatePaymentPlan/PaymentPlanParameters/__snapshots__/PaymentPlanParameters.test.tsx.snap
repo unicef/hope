@@ -25,6 +25,7 @@ exports[`components/paymentmodule/PaymentPlanParameters should render 1`] = `
         >
           <div
             class="MuiFormControl-root MuiTextField-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            data-cy="input-start-date"
           >
             <label
               class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-required Mui-required"
@@ -103,6 +104,7 @@ exports[`components/paymentmodule/PaymentPlanParameters should render 1`] = `
         >
           <div
             class="MuiFormControl-root MuiTextField-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            data-cy="input-end-date"
           >
             <label
               class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-disabled Mui-disabled Mui-required Mui-required"
@@ -181,6 +183,7 @@ exports[`components/paymentmodule/PaymentPlanParameters should render 1`] = `
           <div
             choices=""
             class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            data-cy="input-currency"
             label="Currency"
           >
             <label
@@ -199,6 +202,7 @@ exports[`components/paymentmodule/PaymentPlanParameters should render 1`] = `
             <div
               choices=""
               class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-marginDense MuiOutlinedInput-marginDense"
+              data-cy="input-currency"
               required=""
             >
               <div
@@ -252,6 +256,7 @@ exports[`components/paymentmodule/PaymentPlanParameters should render 1`] = `
         >
           <div
             class="MuiFormControl-root MuiTextField-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            data-cy="input-dispersion-start-date"
           >
             <label
               class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-required Mui-required"
@@ -330,6 +335,7 @@ exports[`components/paymentmodule/PaymentPlanParameters should render 1`] = `
         >
           <div
             class="MuiFormControl-root MuiTextField-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            data-cy="input-dispersion-end-date"
           >
             <label
               class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-disabled Mui-disabled Mui-required Mui-required"
