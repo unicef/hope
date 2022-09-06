@@ -1,5 +1,5 @@
 Feature: Targeting
-    Checks, if creating Target Population works.
+    Checks, if creating Target Population and statuses flow work.
 
     Background:
         Given I am authenticated
@@ -15,4 +15,8 @@ Feature: Targeting
         When I fill out the form fields and save
         Then I should see the Households table
         When I save the Target Population
-        Then I should see the Target Population details page
+        Then I should see the Target Population details page and status Open
+        When I Lock Target Population
+        Then I should see the Target Population details page and status Locked
+        When I Send Target Population to HOPE
+        Then I should see the Target Population details page and status Ready
