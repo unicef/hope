@@ -10,7 +10,10 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
-import { PaymentPlansFilters, FilterProps } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
+import {
+  PaymentPlansFilters,
+  FilterProps,
+} from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 
 export function PaymentModulePage(): React.ReactElement {
   const { t } = useTranslation();
@@ -40,6 +43,7 @@ export function PaymentModulePage(): React.ReactElement {
             color='primary'
             component={Link}
             to={`/${businessArea}/payment-module/new-plan`}
+            data-cy='button-new-payment-plan'
           >
             {t('NEW PAYMENT PLAN')}
           </Button>
