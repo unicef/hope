@@ -408,7 +408,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_has_payment_list_xlsx_file(self, info):
         return self.has_payment_list_xlsx_file
 
-    def resolve_has_payment_list_per_fsp_zip_file(self):
+    def resolve_has_payment_list_per_fsp_zip_file(self, info):
         return self.has_payment_list_per_fsp_zip_file
 
     def resolve_imported_xlsx_file_name(self, info):
