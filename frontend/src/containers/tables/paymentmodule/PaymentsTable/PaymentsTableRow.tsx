@@ -1,6 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

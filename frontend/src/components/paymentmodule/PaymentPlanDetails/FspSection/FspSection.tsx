@@ -66,11 +66,12 @@ export const FspSection = ({
           alignItems='center'
           mt={4}
         >
+          {/* TODO: disable button after the demo */}
           <Typography variant='h6'>{t('FSPs')}</Typography>
           <Button
             color='primary'
             variant='contained'
-            disabled={!paymentPlan.totalEntitledQuantityUsd}
+            // disabled={!paymentPlan.totalEntitledQuantityUsd}
             component={Link}
             to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp/create`}
           >
