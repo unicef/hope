@@ -39,6 +39,16 @@ export const AcceptanceProcessRow = ({
     financeReviewNumberRequired,
   } = paymentPlan;
 
+  const getActiveStep = (): number => {
+    if (actions.authorization.length === authorizationNumberRequired) {
+      return 2;
+    }
+    if (actions.approval.length === approvalNumberRequired) {
+      return 1;
+    }
+    return 0;
+  };
+
   const getRejectedOnString = (stage: string): string => {
     switch (stage) {
       case 'IN_APPROVAL':
@@ -56,10 +66,11 @@ export const AcceptanceProcessRow = ({
   return (
     <StyledBox m={5}>
       <AcceptanceProcessStepper
-        acceptanceProcess={acceptanceProcess}
         approvalNumberRequired={approvalNumberRequired}
         authorizationNumberRequired={authorizationNumberRequired}
         financeReviewNumberRequired={financeReviewNumberRequired}
+        acceptanceProcess={acceptanceProcess}
+        activeStep={getActiveStep()}
       />
       <Grid container>
         <Grid item xs={4}>

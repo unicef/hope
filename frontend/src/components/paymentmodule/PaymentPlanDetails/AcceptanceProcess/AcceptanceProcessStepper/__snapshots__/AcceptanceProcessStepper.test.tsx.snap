@@ -19,7 +19,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-completed"
+              class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-active MuiStepIcon-completed"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -32,7 +32,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
             class="MuiStepLabel-labelContainer"
           >
             <span
-              class="MuiTypography-root MuiStepLabel-label MuiStepLabel-completed MuiTypography-body2 MuiTypography-displayBlock"
+              class="MuiTypography-root MuiStepLabel-label MuiStepLabel-completed MuiStepLabel-active MuiTypography-body2 MuiTypography-displayBlock"
             >
               Approval (1/1)
             </span>
@@ -40,7 +40,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
         </span>
       </div>
       <div
-        class="MuiStepConnector-root MuiStepConnector-horizontal MuiStepConnector-active"
+        class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled"
       >
         <span
           class="MuiStepConnector-line MuiStepConnector-lineHorizontal"
@@ -50,14 +50,14 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
         class="MuiStep-root MuiStep-horizontal"
       >
         <span
-          class="MuiStepLabel-root MuiStepLabel-horizontal"
+          class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled"
         >
           <span
             class="MuiStepLabel-iconContainer"
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-active"
+              class="MuiSvgIcon-root MuiStepIcon-root"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -80,7 +80,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
             class="MuiStepLabel-labelContainer"
           >
             <span
-              class="MuiTypography-root MuiStepLabel-label MuiStepLabel-active MuiTypography-body2 MuiTypography-displayBlock"
+              class="MuiTypography-root MuiStepLabel-label MuiTypography-body2 MuiTypography-displayBlock"
             >
               Authorization (0/1)
             </span>
@@ -159,7 +159,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-completed"
+              class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-active MuiStepIcon-completed"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -172,7 +172,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
             class="MuiStepLabel-labelContainer"
           >
             <span
-              class="MuiTypography-root MuiStepLabel-label MuiStepLabel-completed MuiTypography-body2 MuiTypography-displayBlock"
+              class="MuiTypography-root MuiStepLabel-label MuiStepLabel-completed MuiStepLabel-active MuiTypography-body2 MuiTypography-displayBlock"
             >
               Approval (1/1)
             </span>
@@ -180,7 +180,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
         </span>
       </div>
       <div
-        class="MuiStepConnector-root MuiStepConnector-horizontal MuiStepConnector-active"
+        class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled"
       >
         <span
           class="MuiStepConnector-line MuiStepConnector-lineHorizontal"
@@ -190,14 +190,14 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
         class="MuiStep-root MuiStep-horizontal"
       >
         <span
-          class="MuiStepLabel-root MuiStepLabel-horizontal"
+          class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled"
         >
           <span
             class="MuiStepLabel-iconContainer"
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-active"
+              class="MuiSvgIcon-root MuiStepIcon-root"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -220,7 +220,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
             class="MuiStepLabel-labelContainer"
           >
             <span
-              class="MuiTypography-root MuiStepLabel-label MuiStepLabel-active MuiTypography-body2 MuiTypography-displayBlock"
+              class="MuiTypography-root MuiStepLabel-label MuiTypography-body2 MuiTypography-displayBlock"
             >
               Authorization (0/1)
             </span>
