@@ -713,7 +713,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
 
 
 class PaymentChannel(TimeStampedUUIDModel):
-    individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
+    individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="payment_channels")
     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, null=True)
     delivery_data = JSONField(default=dict, blank=True)
 
@@ -888,6 +888,10 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 name="payment_plan_and_household",
             )
         ]
+
+    @property
+    def admin2(self):
+        return self.household.admin2.name if self.household.admin2 else ""
 
 
 class ServiceProvider(TimeStampedUUIDModel):
