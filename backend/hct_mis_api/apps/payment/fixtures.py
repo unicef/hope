@@ -704,6 +704,9 @@ def generate_payment_plan():
         cash_plus=True,
         population_goal=250,
         status=Program.ACTIVE,
+        frequency_of_payments=Program.ONE_OFF,
+        sector=Program.MULTI_PURPOSE,
+        scope=Program.SCOPE_UNICEF,
     )[0]
 
     targeting_criteria_pk = UUID("00000000-0000-0000-0000-feedb00c0000")
