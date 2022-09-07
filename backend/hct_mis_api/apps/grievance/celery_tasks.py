@@ -13,6 +13,7 @@ from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.services.fetch_feedback_to_household_messages import (
     fetch_feedback_to_household_messages,
 )
+from hct_mis_api.apps.grievance.services.sms_provider import get_sms_provider
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -82,6 +83,6 @@ def periodic_grievances_notifications():
 @sentry_tags
 def periodic_fetch_feedback_to_household_messages_task():
     try:
-        fetch_feedback_to_household_messages()
+        fetch_feedback_to_household_messages(get_sms_provider())
     except Exception as e:
         logger.exception(e)

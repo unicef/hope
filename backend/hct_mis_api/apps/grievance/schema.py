@@ -34,6 +34,7 @@ from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.filters import (
     ExistingGrievanceTicketFilter,
+    FeedbackToHouseholdFilter,
     GrievanceTicketFilter,
     TicketNoteFilter,
 )
@@ -451,6 +452,10 @@ class Query(graphene.ObjectType):
     all_ticket_notes = DjangoPermissionFilterConnectionField(
         TicketNoteNode,
         filterset_class=TicketNoteFilter,
+    )
+    all_feedback_to_household = DjangoPermissionFilterConnectionField(
+        FeedbackToHouseholdNode,
+        filterset_class=FeedbackToHouseholdFilter,
     )
     chart_grievances = graphene.Field(
         ChartGrievanceTicketsNode,

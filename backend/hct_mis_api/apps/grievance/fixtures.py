@@ -7,6 +7,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
+    FeedbackToHousehold,
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
@@ -17,11 +18,11 @@ from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketNegativeFeedbackDetails,
     TicketNote,
+    TicketPaymentVerificationDetails,
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
-    TicketPaymentVerificationDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
@@ -284,3 +285,20 @@ class TicketPaymentVerificationDetailsFactory(factory.DjangoModelFactory):
     payment_verification = factory.SubFactory(
         PaymentVerificationFactory, status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
     )
+
+
+class FeedbackToHouseholdFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = FeedbackToHousehold
+
+    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT)
+    individual = None
+    message = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
+    created_by = factory.SubFactory(UserFactory)
+    kind = factory.fuzzy.FuzzyChoice(FeedbackToHousehold.KIND_CHOICES, getter=lambda c: c[0])
+
+    @factory.post_generation
+    def create_extras(obj, create, extracted, **kwargs):
+        complaint_ticket = GrievanceComplaintTicketFactory(ticket=obj.ticket)
+        obj.individual = complaint_ticket.individual
+        obj.save()

@@ -427,6 +427,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     def is_complaint_ticket(self):
         return self.category == self.CATEGORY_GRIEVANCE_COMPLAINT
 
+    def is_sent_for_approval(self):
+        return self.status == self.STATUS_FOR_APPROVAL
+
 
 class GrievanceTicketThrough(TimeStampedUUIDModel):
     main_ticket = models.ForeignKey(
@@ -485,6 +488,7 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+    approve_status = models.BooleanField(default=False)
 
 
 class TicketSensitiveDetails(TimeStampedUUIDModel):
@@ -775,15 +779,15 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 
 
 class FeedbackToHousehold(TimeStampedUUIDModel):
-    KIND_MESSAGE = 1
-    KIND_RESPONSE = 2
+    MESSAGE = 1
+    RESPONSE = 2
 
     KIND_CHOICES = (
-        (KIND_MESSAGE, _("Message")),
-        (KIND_RESPONSE, _("Response")),
+        (MESSAGE, _("Message")),
+        (RESPONSE, _("Response")),
     )
 
-    ticket = models.OneToOneField(
+    ticket = models.ForeignKey(
         "grievance.GrievanceTicket",
         related_name="feedback_to_household",
         on_delete=models.CASCADE,

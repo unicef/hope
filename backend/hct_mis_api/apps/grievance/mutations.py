@@ -7,10 +7,6 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.program.schema import ProgramNode
-from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.payment.schema import PaymentRecordNode
 
 import graphene
 from graphql import GraphQLError
@@ -84,6 +80,7 @@ from hct_mis_api.apps.grievance.services.send_message_to_household import (
     InvalidPhoneNumberException,
     send_message_to_household,
 )
+from hct_mis_api.apps.grievance.services.sms_provider import get_sms_provider
 from hct_mis_api.apps.grievance.utils import get_individual, traverse_sibling_tickets
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.household.models import (
@@ -95,6 +92,10 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
+from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.schema import PaymentRecordNode
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.schema import ProgramNode
 
 logger = logging.getLogger(__name__)
 
@@ -903,18 +904,24 @@ class CreateFeedbackToHouseholdMutation(PermissionMutation):
             Permissions.GRIEVANCES_FEEDBACK_TO_HOUSEHOLD_AS_OWNER,
         )
 
+        cls._has_proper_type(grievance_ticket)
         cls._has_proper_status(grievance_ticket)
 
         try:
-            feedback_to_household = send_message_to_household(grievance_ticket, message, created_by)
+            feedback_to_household = send_message_to_household(grievance_ticket, message, created_by, get_sms_provider())
         except InvalidPhoneNumberException as e:
             raise GraphQLError(str(e)) from e
         return cls(feedback_to_household=feedback_to_household)
 
     @classmethod
-    def _has_proper_status(cls, grievance_ticket: GrievanceTicket):
+    def _has_proper_type(cls, grievance_ticket: GrievanceTicket):
         if not grievance_ticket.is_complaint_ticket():
-            raise GraphQLError("Incorrect grievance category")
+            raise GraphQLError("Incorrect grievance ticket category")
+
+    @classmethod
+    def _has_proper_status(cls, grievance_ticket):
+        if not grievance_ticket.is_sent_for_approval():
+            raise GraphQLError("Incorrect grievance ticket status")
 
 
 class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutation):
@@ -1105,6 +1112,16 @@ class SimpleApproveMutation(PermissionMutation):
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
                 grievance_ticket.assigned_to == info.context.user,
                 Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            )
+        elif grievance_ticket.category == GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT:
+            cls.has_creator_or_owner_permission(
+                info,
+                grievance_ticket.business_area,
+                Permissions.GRIEVANCES_APPROVE_COMPLAINT,
+                grievance_ticket.created_by == info.context.user,
+                Permissions.GRIEVANCES_APPROVE_COMPLAINT_AS_CREATOR,
+                grievance_ticket.assigned_to == info.context.user,
+                Permissions.GRIEVANCES_APPROVE_COMPLAINT_AS_OWNER,
             )
         else:
             cls.has_creator_or_owner_permission(
@@ -1328,6 +1345,7 @@ class Mutations(graphene.ObjectType):
     approve_delete_individual = SimpleApproveMutation.Field()
     approve_delete_household = SimpleApproveMutation.Field()
     approve_system_flagging = SimpleApproveMutation.Field()
+    approve_complaint = SimpleApproveMutation.Field()
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     approve_payment_details = PaymentDetailsApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()

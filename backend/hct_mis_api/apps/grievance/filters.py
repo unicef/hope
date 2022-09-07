@@ -16,13 +16,17 @@ from django_filters import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.es_filters import ElasticSearchFilterSet
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
+from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.geo.models import Area, ValidityQuerySet
-from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
+from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
+from hct_mis_api.apps.grievance.models import (
+    FeedbackToHousehold,
+    GrievanceTicket,
+    TicketNote,
+)
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.core.utils import choices_to_dict
 
 
 class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
@@ -347,3 +351,11 @@ class TicketNoteFilter(FilterSet):
     class Meta:
         fields = ("id",)
         model = TicketNote
+
+
+class FeedbackToHouseholdFilter(FilterSet):
+    ticket = UUIDFilter(field_name="ticket", required=True)
+
+    class Meta:
+        fields = ("id",)
+        model = FeedbackToHousehold
