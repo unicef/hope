@@ -1,5 +1,5 @@
 import React from 'react';
-import { fakeApolloPaymentPlan } from '../../../../../fixtures/payments/fakeApolloPaymentPlan';
+import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { render } from '../../../../testUtils/testUtils';
 import { FspSection } from './FspSection';
 
@@ -9,13 +9,18 @@ describe('components/paymentmodule/PaymentPlanDetails/FspSection', () => {
       <FspSection
         businessArea='afghanistan'
         paymentPlan={{ ...fakeApolloPaymentPlan, deliveryMechanisms: [] }}
-      />
+      />,
     );
     expect(container).toMatchSnapshot();
   });
 
   it('should render Edit FSP', () => {
-    const { container } = render(<FspSection businessArea='afghanistan' paymentPlan={fakeApolloPaymentPlan} />);
+    const { container } = render(
+      <FspSection
+        businessArea='afghanistan'
+        paymentPlan={fakeApolloPaymentPlan}
+      />,
+    );
     expect(container).toMatchSnapshot();
   });
 });
