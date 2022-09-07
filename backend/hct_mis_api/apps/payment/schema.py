@@ -305,7 +305,7 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
 
     def resolve_has_payment_channel(self, info):
-        return self.assigned_payment_channel is not None
+        return self.collector.payment_channels.count() > 0
 
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data):
