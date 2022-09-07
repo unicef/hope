@@ -43,7 +43,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Payment Channel',
-    id: 'has_payment_channel', //fix
+    id: 'assigned_payment_channel',
     numeric: false,
   },
   {

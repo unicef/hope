@@ -287,7 +287,7 @@ class PaymentFilter(FilterSet):
             "household__size",
             "household__admin2__name",
             "collector_id",
-            "has_payment_channel",
+            "assigned_payment_channel",
             "entitlement_quantity_usd",
             "delivered_quantity",
         )
