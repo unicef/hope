@@ -8066,6 +8066,22 @@ export type ExportXlsxPpListMutation = (
   )> }
 );
 
+export type ExportXlsxPpListPerFspMutationVariables = {
+  paymentPlanId: Scalars['ID']
+};
+
+
+export type ExportXlsxPpListPerFspMutation = (
+  { __typename?: 'Mutations' }
+  & { exportXlsxPaymentPlanPaymentListPerFsp: Maybe<(
+    { __typename?: 'ExportXLSXPaymentPlanPaymentListPerFSPMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
 export type ImportXlsxPpListMutationVariables = {
   paymentPlanId: Scalars['ID'],
   file: Scalars['Upload']
@@ -8076,6 +8092,26 @@ export type ImportXlsxPpListMutation = (
   { __typename?: 'Mutations' }
   & { importXlsxPaymentPlanPaymentList: Maybe<(
     { __typename?: 'ImportXLSXPaymentPlanPaymentListMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id' | 'status'>
+    )>, errors: Maybe<Array<Maybe<(
+      { __typename?: 'XlsxErrorNode' }
+      & Pick<XlsxErrorNode, 'sheet' | 'coordinates' | 'message'>
+    )>>> }
+  )> }
+);
+
+export type ImportXlsxPpListPerFspMutationVariables = {
+  paymentPlanId: Scalars['ID'],
+  file: Scalars['Upload']
+};
+
+
+export type ImportXlsxPpListPerFspMutation = (
+  { __typename?: 'Mutations' }
+  & { importXlsxPaymentPlanPaymentListPerFsp: Maybe<(
+    { __typename?: 'ImportXLSXPaymentPlanPaymentListPerFSPMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'PaymentPlanNode' }
       & Pick<PaymentPlanNode, 'id' | 'status'>
@@ -9756,7 +9792,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'hasPaymentListPerFspZipFile'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -13282,6 +13318,58 @@ export function useExportXlsxPpListMutation(baseOptions?: ApolloReactHooks.Mutat
 export type ExportXlsxPpListMutationHookResult = ReturnType<typeof useExportXlsxPpListMutation>;
 export type ExportXlsxPpListMutationResult = ApolloReactCommon.MutationResult<ExportXlsxPpListMutation>;
 export type ExportXlsxPpListMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportXlsxPpListMutation, ExportXlsxPpListMutationVariables>;
+export const ExportXlsxPpListPerFspDocument = gql`
+    mutation ExportXlsxPPListPerFsp($paymentPlanId: ID!) {
+  exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId) {
+    paymentPlan {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ExportXlsxPpListPerFspMutationFn = ApolloReactCommon.MutationFunction<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>;
+export type ExportXlsxPpListPerFspComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>, 'mutation'>;
+
+    export const ExportXlsxPpListPerFspComponent = (props: ExportXlsxPpListPerFspComponentProps) => (
+      <ApolloReactComponents.Mutation<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables> mutation={ExportXlsxPpListPerFspDocument} {...props} />
+    );
+    
+export type ExportXlsxPpListPerFspProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables> & TChildProps;
+export function withExportXlsxPpListPerFsp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ExportXlsxPpListPerFspMutation,
+  ExportXlsxPpListPerFspMutationVariables,
+  ExportXlsxPpListPerFspProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables, ExportXlsxPpListPerFspProps<TChildProps>>(ExportXlsxPpListPerFspDocument, {
+      alias: 'exportXlsxPpListPerFsp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useExportXlsxPpListPerFspMutation__
+ *
+ * To run a mutation, you first call `useExportXlsxPpListPerFspMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExportXlsxPpListPerFspMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [exportXlsxPpListPerFspMutation, { data, loading, error }] = useExportXlsxPpListPerFspMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *   },
+ * });
+ */
+export function useExportXlsxPpListPerFspMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>) {
+        return ApolloReactHooks.useMutation<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>(ExportXlsxPpListPerFspDocument, baseOptions);
+      }
+export type ExportXlsxPpListPerFspMutationHookResult = ReturnType<typeof useExportXlsxPpListPerFspMutation>;
+export type ExportXlsxPpListPerFspMutationResult = ApolloReactCommon.MutationResult<ExportXlsxPpListPerFspMutation>;
+export type ExportXlsxPpListPerFspMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>;
 export const ImportXlsxPpListDocument = gql`
     mutation importXlsxPPList($paymentPlanId: ID!, $file: Upload!) {
   importXlsxPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, file: $file) {
@@ -13340,6 +13428,64 @@ export function useImportXlsxPpListMutation(baseOptions?: ApolloReactHooks.Mutat
 export type ImportXlsxPpListMutationHookResult = ReturnType<typeof useImportXlsxPpListMutation>;
 export type ImportXlsxPpListMutationResult = ApolloReactCommon.MutationResult<ImportXlsxPpListMutation>;
 export type ImportXlsxPpListMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxPpListMutation, ImportXlsxPpListMutationVariables>;
+export const ImportXlsxPpListPerFspDocument = gql`
+    mutation importXlsxPPListPerFsp($paymentPlanId: ID!, $file: Upload!) {
+  importXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId, file: $file) {
+    paymentPlan {
+      id
+      status
+    }
+    errors {
+      sheet
+      coordinates
+      message
+    }
+  }
+}
+    `;
+export type ImportXlsxPpListPerFspMutationFn = ApolloReactCommon.MutationFunction<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>;
+export type ImportXlsxPpListPerFspComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>, 'mutation'>;
+
+    export const ImportXlsxPpListPerFspComponent = (props: ImportXlsxPpListPerFspComponentProps) => (
+      <ApolloReactComponents.Mutation<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables> mutation={ImportXlsxPpListPerFspDocument} {...props} />
+    );
+    
+export type ImportXlsxPpListPerFspProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables> & TChildProps;
+export function withImportXlsxPpListPerFsp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportXlsxPpListPerFspMutation,
+  ImportXlsxPpListPerFspMutationVariables,
+  ImportXlsxPpListPerFspProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables, ImportXlsxPpListPerFspProps<TChildProps>>(ImportXlsxPpListPerFspDocument, {
+      alias: 'importXlsxPpListPerFsp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportXlsxPpListPerFspMutation__
+ *
+ * To run a mutation, you first call `useImportXlsxPpListPerFspMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useImportXlsxPpListPerFspMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [importXlsxPpListPerFspMutation, { data, loading, error }] = useImportXlsxPpListPerFspMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      file: // value for 'file'
+ *   },
+ * });
+ */
+export function useImportXlsxPpListPerFspMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>) {
+        return ApolloReactHooks.useMutation<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>(ImportXlsxPpListPerFspDocument, baseOptions);
+      }
+export type ImportXlsxPpListPerFspMutationHookResult = ReturnType<typeof useImportXlsxPpListPerFspMutation>;
+export type ImportXlsxPpListPerFspMutationResult = ApolloReactCommon.MutationResult<ImportXlsxPpListPerFspMutation>;
+export type ImportXlsxPpListPerFspMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>;
 export const SetSteficonRuleOnPpListDocument = gql`
     mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID!) {
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
@@ -17737,6 +17883,7 @@ export const PaymentPlanDocument = gql`
       volume
       volumeUsd
     }
+    hasPaymentListPerFspZipFile
   }
 }
     `;

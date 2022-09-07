@@ -55,6 +55,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
             >
               <h6
                 class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+                data-cy="table-title"
               >
                 Individuals
               </h6>
@@ -273,6 +274,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
             >
               <tr
                 class="MuiTableRow-root sc-bZQynM IAXmQ MuiTableRow-hover"
+                data-cy="individual-table-row"
                 role="checkbox"
               >
                 <td
