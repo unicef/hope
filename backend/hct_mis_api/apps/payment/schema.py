@@ -299,9 +299,13 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_payment_plan_hard_conflicted_data(self, info):
+        if self.payment_plan.status != PaymentPlan.Status.OPEN:
+            return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_hard_conflicted_data", []))
 
     def resolve_payment_plan_soft_conflicted_data(self, info):
+        if self.payment_plan.status != PaymentPlan.Status.OPEN:
+            return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
 
     def resolve_has_payment_channel(self, info):
