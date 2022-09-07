@@ -27270,6 +27270,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "STEFICON_RUN",
             "description": null,
             "isDeprecated": false,
@@ -29175,12 +29181,6 @@
           },
           {
             "name": "ENTITLEMENT_QUANTITY",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "DELIVERED_QUANTITY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

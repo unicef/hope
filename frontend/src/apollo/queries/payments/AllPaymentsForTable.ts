@@ -41,6 +41,9 @@ export const AllPaymentsForTable = gql`
             }
           }
           entitlementQuantityUsd
+          currency
+          deliveredQuantity
+          deliveredQuantityUsd
           paymentPlanHardConflicted
           paymentPlanSoftConflicted
           paymentPlanHardConflictedData {
