@@ -737,7 +737,6 @@ def generate_payment_plan():
     )[0]
     target_population.full_rebuild()
     target_population.save()
-    # TODO: adult_male_count is not calculated properly
 
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     payment_plan = PaymentPlan.objects.update_or_create(
