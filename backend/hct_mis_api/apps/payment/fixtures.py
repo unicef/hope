@@ -14,7 +14,7 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
-from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY, Individual
+from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY, Individual, MALE
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     FinancialServiceProvider,
@@ -636,6 +636,8 @@ def generate_payment_plan():
         first_registration_date=now - timedelta(days=365),
         last_registration_date=now,
         business_area=afghanistan,
+        full_name="Jan Kowalski",
+        sex=MALE,
     )[0]
     payment_channel_1 = PaymentChannelFactory(
         individual=individual_1,
@@ -700,6 +702,8 @@ def generate_payment_plan():
         created_by=root,
         program=program,
     )[0]
+
+    breakpoint()
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
     fsp_1 = FinancialServiceProvider.objects.update_or_create(
