@@ -54,7 +54,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
     >
       <DialogTitleWrapper>
         <DialogTitle id='scroll-dialog-title'>
-          <Typography variant='h6'>{t('Send to HOPE')}</Typography>
+          <Typography variant='h6'>{t('Mark Ready')}</Typography>
         </DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
@@ -76,7 +76,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
             disabled={loading || !totalHouseholds}
             data-cy='button-target-population-modal-send-to-hope'
           >
-            {t('Send to Hope')}
+            {t('Mark Ready')}
           </LoadingButton>
         </DialogActions>
       </DialogFooter>
