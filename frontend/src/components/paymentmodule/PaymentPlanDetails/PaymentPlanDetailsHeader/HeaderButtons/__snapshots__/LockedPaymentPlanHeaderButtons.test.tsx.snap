@@ -9,32 +9,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       class="MuiBox-root MuiBox-root-2"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary"
-        tabindex="0"
-        type="button"
-      >
-        <span
-          class="MuiButton-label"
-        >
-          Unlock
-        </span>
-        <span
-          class="MuiTouchRipple-root"
-        />
-      </button>
-    </div>
-    <div
-      class="MuiBox-root MuiBox-root-3"
-    >
-      <button
         class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+        data-cy="button-lock-plan"
         tabindex="0"
         type="button"
       >
         <span
           class="MuiButton-label"
         >
-          Send For Approval
+          Lock FSP
         </span>
         <span
           class="MuiTouchRipple-root"
