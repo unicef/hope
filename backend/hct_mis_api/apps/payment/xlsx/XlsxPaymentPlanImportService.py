@@ -4,7 +4,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentChannel
+from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentChannel, PaymentPlan
 from hct_mis_api.apps.payment.utils import float_to_decimal
 from hct_mis_api.apps.payment.xlsx.BaseXlsxImportService import XlsxImportBaseService
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
@@ -13,7 +13,7 @@ from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPayme
 class XlsxPaymentPlanImportService(XlsxImportBaseService):
     COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n")
 
-    def __init__(self, payment_plan, file):
+    def __init__(self, payment_plan: PaymentPlan, file):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.all_active_payments
         self.payment_plan_content_type = get_content_type_for_model(payment_plan)
@@ -50,8 +50,6 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             self.payments_to_save, ("entitlement_quantity", "entitlement_date", "assigned_payment_channel")
         )
 
-        if self.payments_to_save:
-            self.remove_old_export_xlsx_files()
 
     def _validate_headers(self):
         headers_row = self.ws_payments[1]
@@ -133,7 +131,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             return
         payment_channel = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX].value
         payment_channel_cell = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX]
-        if payment_channel not in [x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]:
+        if payment_channel and payment_channel not in [x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]:
             self.errors.append(
                 (
                     XlsxPaymentPlanExportService.TITLE,
@@ -162,7 +160,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                 (
                     XlsxPaymentPlanExportService.TITLE,
                     None,
-                    "Wrong data. There are no any updates in imported file, please add changes and try again",
+                    "There are no any updates in imported file, please add changes and try again",
                 )
             )
 
@@ -179,7 +177,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         payment_id = row[XlsxPaymentPlanExportService.ID_COLUMN_INDEX].value
         entitlement_amount = row[XlsxPaymentPlanExportService.ENTITLEMENT_COLUMN_INDEX].value
         payment_channel = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX].value
-        payment = self.payments_dict[payment_id]
+        payment = self.payments_dict.get(payment_id)
         update = False
         payment_channel_obj = None
 
@@ -205,16 +203,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         if update:
             self.payments_to_save.append(payment)
 
-    def remove_old_export_xlsx_files(self):
-        qs = FileTemp.objects.filter(
-            object_id=self.payment_plan.pk,
-            content_type=self.payment_plan_content_type
-        )
-        for obj in qs:
-            obj.file.delete(save=False)
-            obj.delete()
-
-    def remove_old_and_create_new_import_xlsx(self, user):
+    def remove_old_and_create_new_import_xlsx(self, user) -> FileTemp:
         # remove old imported file
         if self.payment_plan.imported_xlsx_file:
             self.payment_plan.imported_xlsx_file.file.delete(save=False)
