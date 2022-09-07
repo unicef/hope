@@ -15,9 +15,9 @@ import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWr
 import { ImportErrors } from '../../../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
-  ImportXlsxPpListMutation,
+  ImportXlsxPpListPerFspMutation,
   PaymentPlanQuery,
-  useImportXlsxPpListMutation,
+  useImportXlsxPpListPerFspMutation,
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
 
@@ -30,13 +30,13 @@ const UploadIcon = styled(Publish)`
   color: #043f91;
 `;
 
-interface ImportXlsxPaymentPlanPaymentListProps {
+interface ImportXlsxPaymentPlanPaymentListPerFspProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const ImportXlsxPaymentPlanPaymentList = ({
+export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
   paymentPlan,
-}: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement => {
+}: ImportXlsxPaymentPlanPaymentListPerFspProps): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
@@ -46,11 +46,11 @@ export const ImportXlsxPaymentPlanPaymentList = ({
   const [
     mutate,
     { data: uploadData, loading: fileLoading, error },
-  ] = useImportXlsxPpListMutation();
+  ] = useImportXlsxPpListPerFspMutation();
 
-  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] = get(
+  const xlsxErrors: ImportXlsxPpListPerFspMutation['importXlsxPaymentPlanPaymentListPerFsp']['errors'] = get(
     uploadData,
-    'importXlsxPaymentPlanPaymentList.errors',
+    'importXlsxPaymentPlanPaymentListPerFsp.errors',
   );
 
   const handleImport = async (): Promise<void> => {
@@ -70,7 +70,10 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             },
           ],
         });
-        if (!errors && !data?.importXlsxPaymentPlanPaymentList.errors.length) {
+        if (
+          !errors &&
+          !data?.importXlsxPaymentPlanPaymentListPerFsp.errors.length
+        ) {
           setOpenImport(false);
           showMessage(t('Your import was successful!'));
         }
