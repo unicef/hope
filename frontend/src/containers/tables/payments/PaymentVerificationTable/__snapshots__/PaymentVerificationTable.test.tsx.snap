@@ -48,6 +48,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
           >
             <h6
               class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+              data-cy="table-title"
             >
               List of Cash Plans
             </h6>

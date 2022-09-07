@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp should render 1`] = `
+<div>
+  <div
+    class="MuiBox-root MuiBox-root-1"
+  >
+    <button
+      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary"
+      data-cy="button-import"
+      tabindex="0"
+      type="button"
+    >
+      <span
+        class="MuiButton-label"
+      >
+        <span
+          class="MuiButton-startIcon MuiButton-iconSizeMedium"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root sc-bZQynM bKNwua"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M5 4v2h14V4H5zm0 10h4v6h6v-6h4l-7-7-7 7z"
+            />
+          </svg>
+        </span>
+        Import XLSX
+      </span>
+      <span
+        class="MuiTouchRipple-root"
+      />
+    </button>
+  </div>
+</div>
+`;

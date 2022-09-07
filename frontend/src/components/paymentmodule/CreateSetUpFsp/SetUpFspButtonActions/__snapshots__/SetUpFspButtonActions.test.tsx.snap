@@ -11,7 +11,7 @@ exports[`components/paymentmodule/CreateSetUpFsp/SetUpFspButtonActions should re
       <a
         aria-disabled="false"
         class="MuiButtonBase-root MuiButton-root MuiButton-text"
-        href="/afghanistan/payment-module/payment-plan/asdjkfhsakdjfsd76asdf0sdf=="
+        href="/afghanistan/payment-module/payment-plans/asdjkfhsakdjfsd76asdf0sdf=="
         role="button"
         tabindex="0"
       >

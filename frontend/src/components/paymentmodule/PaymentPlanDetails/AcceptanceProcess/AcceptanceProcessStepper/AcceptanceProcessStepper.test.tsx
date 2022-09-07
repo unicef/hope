@@ -1,7 +1,7 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
-import { fakeApolloPaymentPlan } from '../../../../../../fixtures/payments/fakeApolloPaymentPlan';
+import { fakeApolloPaymentPlan } from '../../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { render } from '../../../../../testUtils/testUtils';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper';
 
@@ -21,7 +21,10 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
   it('should render step Sent for Approval Date', async () => {
     const { container } = render(
       <AcceptanceProcessStepper
-        acceptanceProcess={{...fakeApolloPaymentPlan.approvalProcess.edges[0].node, sentForApprovalDate: '2020-01-01'}}
+        acceptanceProcess={{
+          ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
+          sentForApprovalDate: '2020-01-01',
+        }}
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
         financeReviewNumberRequired={1}
@@ -33,7 +36,10 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
   it('should render step Sent for Authorization Date', async () => {
     const { container } = render(
       <AcceptanceProcessStepper
-        acceptanceProcess={{...fakeApolloPaymentPlan.approvalProcess.edges[0].node, sentForAuthorizationDate: '2020-01-01'}}
+        acceptanceProcess={{
+          ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
+          sentForAuthorizationDate: '2020-01-01',
+        }}
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
         financeReviewNumberRequired={1}
@@ -45,7 +51,10 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
   it('should render step Sent for Finance Review Date', async () => {
     const { container } = render(
       <AcceptanceProcessStepper
-        acceptanceProcess={{...fakeApolloPaymentPlan.approvalProcess.edges[0].node, sentForFinanceReviewDate: '2020-01-02'}}
+        acceptanceProcess={{
+          ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
+          sentForFinanceReviewDate: '2020-01-02',
+        }}
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
         financeReviewNumberRequired={1}
