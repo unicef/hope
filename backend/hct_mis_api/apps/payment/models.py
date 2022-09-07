@@ -277,23 +277,22 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     total_households_count = models.PositiveSmallIntegerField(default=0)
     total_individuals_count = models.PositiveSmallIntegerField(default=0)
     xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
-    imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-    export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
+    imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
+    export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     export_per_fsp_zip_file = models.ForeignKey(
-        FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
     )
     steficon_rule = models.ForeignKey(
-        RuleCommit,
-        null=True,
-        on_delete=models.PROTECT,
-        related_name="payment_plans",
-        blank=True,
+        RuleCommit, null=True, on_delete=models.PROTECT, related_name="payment_plans", blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
+
+    def __str__(self):
+        return self.unicef_id
 
     @transition(
         field=background_action_status,

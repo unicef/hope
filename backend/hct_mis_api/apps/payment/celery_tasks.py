@@ -1,14 +1,11 @@
 import logging
 import datetime
-import traceback
-import django_fsm
 
 from concurrency.api import disable_concurrency
+from sentry_sdk import configure_scope
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.utils import timezone
-from sentry_sdk import configure_scope
-
 from django.contrib.auth import get_user_model
 
 from hct_mis_api.apps.payment.models import XlsxCashPlanPaymentVerificationFile, CashPlanPaymentVerification
@@ -199,6 +196,11 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
                     service.import_payment_list()
                     payment_plan.xlsx_file_imported_date = timezone.now()
                     payment_plan.background_action_status_none()
+                    # remove old export file
+                    if payment_plan.export_xlsx_file:
+                        payment_plan.export_xlsx_file.file.delete(save=False)
+                        payment_plan.export_xlsx_file.delete()
+                        payment_plan.export_xlsx_file = None
                     payment_plan.save()
                     payment_plan.update_money_fields()
             except Exception:
@@ -273,6 +275,13 @@ def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
             with disable_concurrency(payment_plan):
                 payment_plan.save()
                 payment_plan.update_money_fields()
+                # remove exported and imported files after apply steficon
+                if payment_plan.imported_xlsx_file:
+                    payment_plan.imported_xlsx_file.file.delete(save=False)
+                    payment_plan.imported_xlsx_file.delete()
+                if payment_plan.export_xlsx_file:
+                    payment_plan.export_xlsx_file.file.delete(save=False)
+                    payment_plan.export_xlsx_file.delete()
 
     except Exception:
         logger.exception("PaymentPlan Steficon Error")
