@@ -8,7 +8,10 @@ import { BlackLink } from '../../../../components/core/BlackLink';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { formatCurrency } from '../../../../utils/utils';
+import {
+  formatCurrency,
+  formatCurrencyWithSymbol,
+} from '../../../../utils/utils';
 import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
 
 const ErrorText = styled.div`
@@ -62,13 +65,10 @@ export const PaymentsTableRow = ({
   };
 
   return (
-    <ClickableTableRow
-      hover
-      role='checkbox'
-      key={payment.id}
-    >
+    <ClickableTableRow hover role='checkbox' key={payment.id}>
       <TableCell align='left'>
-        {(payment.paymentPlanHardConflicted || payment.paymentPlanSoftConflicted) && (
+        {(payment.paymentPlanHardConflicted ||
+          payment.paymentPlanSoftConflicted) && (
           <WarningTooltip
             handleClick={(e) => handleDialogWarningOpen(e)}
             message={t(
@@ -92,7 +92,9 @@ export const PaymentsTableRow = ({
       <TableCell align='left'>{payment.household.admin2.name}</TableCell>
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={collectorDetailsPath}>{payment.collector.fullName}</BlackLink>
+          <BlackLink to={collectorDetailsPath}>
+            {payment.collector.fullName}
+          </BlackLink>
         ) : (
           payment.collector.fullName
         )}
@@ -101,14 +103,24 @@ export const PaymentsTableRow = ({
         {payment.hasPaymentChannel ? (
           <CheckCircleOutlined />
         ) : (
-        <ErrorText>
-          <ErrorOutline />
-          {t('Missing')}
-        </ErrorText>
+          <ErrorText>
+            <ErrorOutline />
+            {t('Missing')}
+          </ErrorText>
         )}
       </TableCell>
       <TableCell align='left'>
-        {payment.entitlementQuantityUsd > 0 ? formatCurrency(payment.entitlementQuantityUsd, true) : '-'}
+        {payment.entitlementQuantityUsd > 0
+          ? formatCurrency(payment.entitlementQuantityUsd, true)
+          : '-'}
+      </TableCell>
+      <TableCell align='left'>
+        {payment.deliveredQuantity > 0
+          ? formatCurrencyWithSymbol(
+              payment.deliveredQuantity,
+              payment.currency,
+            )
+          : '-'}
       </TableCell>
     </ClickableTableRow>
   );

@@ -1373,7 +1373,6 @@ export enum FinancialServiceProviderXlsxTemplateColumns {
   PaymentChannel = 'PAYMENT_CHANNEL',
   FspName = 'FSP_NAME',
   EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
-  DeliveredQuantity = 'DELIVERED_QUANTITY',
   Tbd = 'TBD'
 }
 
@@ -3870,6 +3869,7 @@ export type PaymentNodeEdge = {
 };
 
 export enum PaymentPlanBackgroundActionStatus {
+  A = 'A_',
   SteficonRun = 'STEFICON_RUN',
   SteficonError = 'STEFICON_ERROR',
   XlsxExporting = 'XLSX_EXPORTING',
@@ -9961,7 +9961,7 @@ export type AllPaymentsForTableQuery = (
       & Pick<PaymentNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentNode' }
-        & Pick<PaymentNode, 'id' | 'unicefId' | 'entitlementQuantityUsd' | 'paymentPlanHardConflicted' | 'paymentPlanSoftConflicted' | 'hasPaymentChannel'>
+        & Pick<PaymentNode, 'id' | 'unicefId' | 'entitlementQuantityUsd' | 'currency' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'paymentPlanHardConflicted' | 'paymentPlanSoftConflicted' | 'hasPaymentChannel'>
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
@@ -18008,6 +18008,9 @@ export const AllPaymentsForTableDocument = gql`
           }
         }
         entitlementQuantityUsd
+        currency
+        deliveredQuantity
+        deliveredQuantityUsd
         paymentPlanHardConflicted
         paymentPlanSoftConflicted
         paymentPlanHardConflictedData {
