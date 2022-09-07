@@ -21,6 +21,7 @@ interface AcceptanceProcessStepperProps {
   approvalNumberRequired: number;
   authorizationNumberRequired: number;
   financeReviewNumberRequired: number;
+  activeStep: number;
 }
 
 export const AcceptanceProcessStepper = ({
@@ -28,46 +29,29 @@ export const AcceptanceProcessStepper = ({
   approvalNumberRequired,
   authorizationNumberRequired,
   financeReviewNumberRequired,
+  activeStep,
 }: AcceptanceProcessStepperProps): React.ReactElement => {
-  const {
-    sentForApprovalDate,
-    sentForAuthorizationDate,
-    sentForFinanceReviewDate,
-    rejectedOn,
-    actions,
-  } = acceptanceProcess;
-
+  const { rejectedOn, actions } = acceptanceProcess;
   const { t } = useTranslation();
-  const getActiveStep = (): number => {
-    if (sentForFinanceReviewDate) {
-      return 2;
-    }
-    if (sentForAuthorizationDate) {
-      return 1;
-    }
-
-    if (sentForApprovalDate) {
-      return 0;
-    }
-    return 0;
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [activeStep, setActiveStep] = useState(() => getActiveStep());
-
   const steps = [
     {
-      name: `${t('Approval')} (${actions.approval.length}/${approvalNumberRequired})`,
+      name: `${t('Approval')} (${
+        actions.approval.length
+      }/${approvalNumberRequired})`,
       hasError: rejectedOn === 'IN_APPROVAL',
       isCompleted: actions.approval.length === approvalNumberRequired,
     },
     {
-      name: `${t('Authorization')} (${actions.authorization.length}/${authorizationNumberRequired})`,
+      name: `${t('Authorization')} (${
+        actions.authorization.length
+      }/${authorizationNumberRequired})`,
       hasError: rejectedOn === 'IN_AUTHORIZATION',
       isCompleted: actions.authorization.length === authorizationNumberRequired,
     },
     {
-      name: `${t('Finance Review')} (${actions.financeReview.length}/${financeReviewNumberRequired})`,
+      name: `${t('Finance Review')} (${
+        actions.financeReview.length
+      }/${financeReviewNumberRequired})`,
       hasError: rejectedOn === 'IN_REVIEW',
       isCompleted: actions.financeReview.length === financeReviewNumberRequired,
     },

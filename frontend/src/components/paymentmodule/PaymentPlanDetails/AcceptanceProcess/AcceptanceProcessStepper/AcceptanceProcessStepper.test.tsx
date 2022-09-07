@@ -13,6 +13,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
         financeReviewNumberRequired={1}
+        activeStep={0}
       />,
     );
     await act(() => wait(0)); // wait for response
@@ -28,6 +29,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
         financeReviewNumberRequired={1}
+        activeStep={0}
       />,
     );
     await act(() => wait(0)); // wait for response
@@ -43,6 +45,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
         financeReviewNumberRequired={1}
+        activeStep={1}
       />,
     );
     await act(() => wait(0)); // wait for response
@@ -58,6 +61,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
         approvalNumberRequired={1}
         authorizationNumberRequired={1}
         financeReviewNumberRequired={1}
+        activeStep={2}
       />,
     );
     await act(() => wait(0)); // wait for response
