@@ -975,7 +975,6 @@ enum FinancialServiceProviderXlsxTemplateColumns {
   PAYMENT_CHANNEL
   FSP_NAME
   ENTITLEMENT_QUANTITY
-  DELIVERED_QUANTITY
   TBD
 }
 
@@ -2639,6 +2638,7 @@ type PaymentNodeEdge {
 }
 
 enum PaymentPlanBackgroundActionStatus {
+  A_
   STEFICON_RUN
   STEFICON_ERROR
   XLSX_EXPORTING
