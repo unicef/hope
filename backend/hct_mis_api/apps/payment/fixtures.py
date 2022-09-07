@@ -7,7 +7,12 @@ from random import randint
 from factory import fuzzy
 from pytz import utc
 
-from hct_mis_api.apps.targeting.models import TargetPopulation, TargetingCriteria, TargetingCriteriaRule
+from hct_mis_api.apps.targeting.models import (
+    TargetPopulation,
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+)
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -619,6 +624,7 @@ def generate_payment_plan():
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = datetime.now()
+    address = "Ohio"
 
     rdi_pk = UUID("4d100000-0000-0000-0000-000000000000")
     rdi = RegistrationDataImport.objects.update_or_create(
@@ -644,6 +650,21 @@ def generate_payment_plan():
         delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
     )
 
+    individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
+    individual_2 = Individual.objects.update_or_create(
+        pk=individual_2_pk,
+        birth_date=now - timedelta(days=365 * 30),
+        first_registration_date=now - timedelta(days=365),
+        last_registration_date=now,
+        business_area=afghanistan,
+        full_name="Adam Nowak",
+        sex=MALE,
+    )[0]
+    payment_channel_2 = PaymentChannelFactory(
+        individual=individual_2,
+        delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+    )
+
     household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
     household_1 = Household.objects.update_or_create(
         pk=household_1_pk,
@@ -653,7 +674,24 @@ def generate_payment_plan():
         registration_data_import=rdi,
         first_registration_date=now - timedelta(days=365),
         last_registration_date=now,
+        address=address,
     )[0]
+    individual_1.household = household_1
+    individual_1.save()
+
+    household_2_pk = UUID("aa000000-0000-0000-0000-000000000002")
+    household_2 = Household.objects.update_or_create(
+        pk=household_2_pk,
+        size=4,
+        head_of_household=individual_2,
+        business_area=afghanistan,
+        registration_data_import=rdi,
+        first_registration_date=now - timedelta(days=365),
+        last_registration_date=now,
+        address=address,
+    )[0]
+    individual_2.household = household_2
+    individual_2.save()
 
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
     program = Program.objects.update_or_create(
@@ -674,10 +712,19 @@ def generate_payment_plan():
     )[0]
 
     targeting_criteria_rule_pk = UUID("00000000-0000-0000-0000-feedb00c0009")
-    TargetingCriteriaRule.objects.update_or_create(
+    targeting_criteria_rule = TargetingCriteriaRule.objects.update_or_create(
         pk=targeting_criteria_rule_pk,
         targeting_criteria=targeting_criteria,
     )[0]
+
+    targeting_criteria_rule_condition_pk = UUID("00000000-0000-0000-0000-feedb00c0008")
+    TargetingCriteriaRuleFilter.objects.update_or_create(
+        pk=targeting_criteria_rule_condition_pk,
+        targeting_criteria_rule=targeting_criteria_rule,
+        comparison_method="EQUALS",
+        field_name="address",
+        arguments=[address],
+    )
 
     target_population_pk = UUID("00000000-0000-0000-0000-faceb00c0123")
     target_population = TargetPopulation.objects.update_or_create(
@@ -686,7 +733,11 @@ def generate_payment_plan():
         targeting_criteria=targeting_criteria,
         status=TargetPopulation.STATUS_ASSIGNED,
         business_area=afghanistan,
+        created_by=root,
     )[0]
+    target_population.full_rebuild()
+    target_population.save()
+    # TODO: adult_male_count is not calculated properly
 
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     payment_plan = PaymentPlan.objects.update_or_create(
@@ -702,8 +753,6 @@ def generate_payment_plan():
         created_by=root,
         program=program,
     )[0]
-
-    breakpoint()
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
     fsp_1 = FinancialServiceProvider.objects.update_or_create(
@@ -722,6 +771,20 @@ def generate_payment_plan():
         collector=individual_1,
         delivery_type=Payment.DELIVERY_TYPE_CASH,
         assigned_payment_channel=payment_channel_1,
+        financial_service_provider=fsp_1,
+        status_date=now,
+    )
+
+    payment_2_pk = UUID("20000000-feed-beef-0000-00000badf00d")
+    Payment.objects.update_or_create(
+        pk=payment_2_pk,
+        payment_plan=payment_plan,
+        excluded=False,
+        business_area=afghanistan,
+        household=household_2,
+        collector=individual_2,
+        delivery_type=Payment.DELIVERY_TYPE_CASH,
+        assigned_payment_channel=payment_channel_2,
         financial_service_provider=fsp_1,
         status_date=now,
     )
