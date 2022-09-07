@@ -37,7 +37,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Collector',
-    id: 'household__collector_id', //fix
+    id: 'collector_id',
     numeric: false,
   },
   {
@@ -49,7 +49,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Entitlement (USD)',
-    id: 'entitlement_quantity_usd', //fix
+    id: 'entitlement_quantity_usd',
     numeric: false,
   },
   {
