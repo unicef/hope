@@ -1,5 +1,5 @@
 import React from 'react';
-import { fakeApolloPaymentPlan } from '../../../../../fixtures/payments/fakeApolloPaymentPlan';
+import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { PERMISSIONS } from '../../../../config/permissions';
 import { render } from '../../../../testUtils/testUtils';
 import { EditPaymentPlanHeader } from './EditPaymentPlanHeader';

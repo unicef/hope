@@ -55,6 +55,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
             >
               <h6
                 class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+                data-cy="table-title"
               >
                 Households
               </h6>
@@ -297,6 +298,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
             >
               <tr
                 class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
+                data-cy="household-table-row"
                 role="checkbox"
               >
                 <td

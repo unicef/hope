@@ -149,6 +149,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         volume
         volumeUsd
       }
+      hasPaymentListPerFspZipFile
     }
   }
 `;

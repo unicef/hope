@@ -48,6 +48,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
           >
             <h6
               class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+              data-cy="table-title"
             >
               Cash Plans
             </h6>
@@ -258,6 +259,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
           >
             <tr
               class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              data-cy="cash-plan-table-row"
               role="checkbox"
             >
               <td
