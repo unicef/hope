@@ -1,3 +1,4 @@
+import pytz
 from datetime import datetime
 
 from parameterized import parameterized
@@ -25,7 +26,6 @@ class TestGrievanceDashboardQuery(APITestCase):
             systemGeneratedCount
             closedUserGeneratedCount
             closedSystemGeneratedCount
-            userGeneratedAvgResolution
             systemGeneratedAvgResolution
         }
     }
@@ -81,9 +81,9 @@ class TestGrievanceDashboardQuery(APITestCase):
         cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
 
         created_at_dates_to_set = {
-            GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
-            GrievanceTicket.STATUS_ON_HOLD: datetime(year=2020, month=7, day=12),
-            GrievanceTicket.STATUS_IN_PROGRESS: datetime(year=2020, month=8, day=22),
+            GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12, tzinfo=pytz.UTC),
+            GrievanceTicket.STATUS_ON_HOLD: datetime(year=2020, month=7, day=12, tzinfo=pytz.UTC),
+            GrievanceTicket.STATUS_IN_PROGRESS: datetime(year=2020, month=8, day=22, tzinfo=pytz.UTC),
         }
 
         grievances_to_create = (
