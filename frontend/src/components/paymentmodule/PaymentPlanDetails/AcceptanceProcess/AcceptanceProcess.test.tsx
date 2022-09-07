@@ -1,5 +1,5 @@
 import React from 'react';
-import { fakeApolloPaymentPlan } from '../../../../../fixtures/payments/fakeApolloPaymentPlan';
+import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { render } from '../../../../testUtils/testUtils';
 import { AcceptanceProcess } from './AcceptanceProcess';
 
@@ -13,7 +13,15 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess', () => 
 
   it('should render empty without Approval Process', () => {
     const { container } = render(
-      <AcceptanceProcess paymentPlan={{...fakeApolloPaymentPlan, approvalProcess: {...fakeApolloPaymentPlan.approvalProcess, edges: []}}} />,
+      <AcceptanceProcess
+        paymentPlan={{
+          ...fakeApolloPaymentPlan,
+          approvalProcess: {
+            ...fakeApolloPaymentPlan.approvalProcess,
+            edges: [],
+          },
+        }}
+      />,
     );
     expect(container).toMatchSnapshot();
   });

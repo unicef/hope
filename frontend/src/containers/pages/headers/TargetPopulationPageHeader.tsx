@@ -1,24 +1,24 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import {
-  TargetPopulationQuery,
-  TargetPopulationStatus,
-  useBusinessAreaDataQuery,
-} from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/core/PageHeader';
+import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
 import { StatusBox } from '../../../components/core/StatusBox';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   targetPopulationBuildStatusToColor,
   targetPopulationStatusMapping,
   targetPopulationStatusToColor,
 } from '../../../utils/utils';
-import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
+import {
+  TargetPopulationQuery,
+  TargetPopulationStatus,
+  useBusinessAreaDataQuery,
+} from '../../../__generated__/graphql';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
 
 const HeaderWrapper = styled.div`
   display: flex;
