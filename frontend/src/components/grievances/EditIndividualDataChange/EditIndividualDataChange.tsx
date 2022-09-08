@@ -21,7 +21,6 @@ import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
 
@@ -126,48 +125,54 @@ export const EditIndividualDataChange = ({
           />
         </Grid>
       </BoxWithBorders>
-      <Box mt={3}>
-        <Title>
-          <Typography variant='h6'>{t('Documents')}</Typography>
-        </Title>
-        <ExistingDocumentFieldArray
-          values={values}
-          setFieldValue={setFieldValue}
-          individual={individual}
-          addIndividualFieldsData={addIndividualFieldsData}
-        />
-        <NewDocumentFieldArray
-          values={values}
-          addIndividualFieldsData={addIndividualFieldsData}
-          setFieldValue={setFieldValue}
-        />
-      </Box>
-      <Box mt={3}>
-        <Title>
-          <Typography variant='h6'>{t('Identities')}</Typography>
-        </Title>
-        <ExistingIdentityFieldArray
-          values={values}
-          setFieldValue={setFieldValue}
-          individual={individual}
-          addIndividualFieldsData={addIndividualFieldsData}
-        />
-        <NewIdentityFieldArray
-          values={values}
-          addIndividualFieldsData={addIndividualFieldsData}
-        />
-      </Box>
-      <Box mt={3}>
-        <Title>
-          <Typography variant='h6'>{t('Payment Channel')}</Typography>
-        </Title>
-        <ExistingPaymentChannelFieldArray
-          values={values}
-          setFieldValue={setFieldValue}
-          individual={individual}
-        />
-        <NewPaymentChannelFieldArray values={values} />
-      </Box>
+      <BoxWithBorders>
+        <Box mt={3}>
+          <Title>
+            <Typography variant='h6'>{t('Documents')}</Typography>
+          </Title>
+          <ExistingDocumentFieldArray
+            values={values}
+            setFieldValue={setFieldValue}
+            individual={individual}
+            addIndividualFieldsData={addIndividualFieldsData}
+          />
+          <NewDocumentFieldArray
+            values={values}
+            addIndividualFieldsData={addIndividualFieldsData}
+            setFieldValue={setFieldValue}
+          />
+        </Box>
+      </BoxWithBorders>
+      <BoxWithBorders>
+        <Box mt={3}>
+          <Title>
+            <Typography variant='h6'>{t('Identities')}</Typography>
+          </Title>
+          <ExistingIdentityFieldArray
+            values={values}
+            setFieldValue={setFieldValue}
+            individual={individual}
+            addIndividualFieldsData={addIndividualFieldsData}
+          />
+          <NewIdentityFieldArray
+            values={values}
+            addIndividualFieldsData={addIndividualFieldsData}
+          />
+        </Box>
+      </BoxWithBorders>
+      <BoxWithBorders>
+        <Box mt={3}>
+          <Title>
+            <Typography variant='h6'>{t('Payment Channel')}</Typography>
+          </Title>
+          <ExistingPaymentChannelFieldArray
+            values={values}
+            setFieldValue={setFieldValue}
+            individual={individual}
+          />
+          <NewPaymentChannelFieldArray values={values} />
+        </Box>
+      </BoxWithBorders>
     </>
   );
 };

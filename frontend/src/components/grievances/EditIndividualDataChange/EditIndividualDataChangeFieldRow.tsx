@@ -78,11 +78,11 @@ export const EditIndividualDataChangeFieldRow = ({
       ) : (
         <Grid item xs={4} />
       )}
-      <Grid item xs={1}>
+      {itemValue.fieldName && <Grid item xs={1}>
         <IconButton onClick={onDelete}>
           <Delete />
         </IconButton>
-      </Grid>
+      </Grid>}
     </>
   );
 };
