@@ -80,11 +80,13 @@ export const EditHouseholdDataChangeFieldRow = ({
       ) : (
         <Grid item xs={4} />
       )}
-      <Grid item xs={1}>
-        <IconButton onClick={onDelete}>
-          <Delete />
-        </IconButton>
-      </Grid>
+      {itemValue.fieldName && (
+        <Grid item xs={1}>
+          <IconButton onClick={onDelete}>
+            <Delete />
+          </IconButton>
+        </Grid>
+      )}
     </>
   );
 };

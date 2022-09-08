@@ -27003,7 +27003,7 @@
     "phone_no": "0048503123555",
     "phone_no_alternative": "",
     "relationship": "NON_BENEFICIARY",
-    "household": null,
+    "household": "3db2729e-7259-4b13-83b2-3090d847e5cc",
     "registration_data_import": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
     "disability": "not disabled",
     "work_status": "NOT_PROVIDED",
