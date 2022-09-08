@@ -37,6 +37,7 @@ export const AcceptanceProcessRow = ({
     approvalNumberRequired,
     authorizationNumberRequired,
     financeReviewNumberRequired,
+    approvalProcess,
   } = paymentPlan;
 
   const getRejectedOnString = (stage: string): string => {
@@ -127,7 +128,7 @@ export const AcceptanceProcessRow = ({
           </Grid>
         )}
       </Grid>
-      <DividerLine />
+      {approvalProcess.totalCount > 1 && <DividerLine />}
     </StyledBox>
   );
 };
