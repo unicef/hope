@@ -2,17 +2,12 @@ import { Box, Button } from '@material-ui/core';
 import { GetApp } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import {
   PaymentPlanQuery,
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
-
-const DownloadIcon = styled(GetApp)`
-  color: #043f91;
-`;
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
