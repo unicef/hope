@@ -36,6 +36,7 @@ def _time(some_time):
 
 class TestDetails(TestCase):
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):

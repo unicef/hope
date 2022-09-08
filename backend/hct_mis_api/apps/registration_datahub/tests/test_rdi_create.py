@@ -344,6 +344,15 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         result = task._cast_value("MALE", "gender_i_c")
         self.assertEqual(result, "MALE")
 
+        result = task._cast_value("TRUE", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("true", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("True", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
     def test_store_row_id(self):
         task = self.RdiXlsxCreateTask()
         task.execute(
