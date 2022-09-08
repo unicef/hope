@@ -533,6 +533,18 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             return self.export_per_fsp_zip_file.file.url
         return None
 
+    def remove_export_file(self):
+        if self.export_xlsx_file:
+            self.export_xlsx_file.file.delete(save=False)
+            self.export_xlsx_file.delete()
+            self.export_xlsx_file = None
+
+    def remove_imported_file(self):
+        if self.imported_xlsx_file:
+            self.imported_xlsx_file.file.delete(save=False)
+            self.imported_xlsx_file.delete()
+            self.imported_xlsx_file = None
+
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     # TODO: add/remove fields after finalizing the fields
@@ -888,10 +900,6 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 name="payment_plan_and_household",
             )
         ]
-
-    @property
-    def admin2(self):
-        return self.household.admin2.name if self.household.admin2 else ""
 
 
 class ServiceProvider(TimeStampedUUIDModel):
