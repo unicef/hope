@@ -1,4 +1,4 @@
-import { Box, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, GridSize, Paper, Typography } from '@material-ui/core';
 import WarningIcon from '@material-ui/icons/Warning';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +28,7 @@ const WarnIcon = styled(WarningIcon)`
   margin-right: 10px;
 `;
 
-export function TicketsAlreadyExist({ values }): React.ReactElement {
+export function TicketsAlreadyExist({ values, size = 6 }): React.ReactElement {
   const businessArea = useBusinessArea();
   const { t } = useTranslation();
   const { data, loading } = useExistingGrievanceTicketsQuery({
@@ -54,23 +54,25 @@ export function TicketsAlreadyExist({ values }): React.ReactElement {
     </Box>
   ));
   return edges.length ? (
-    <StyledBox>
-      <OrangeTitle>
-        <Typography variant='h6'>
-          <WarnIcon />
-          {edges.length === 1
-            ? 'Ticket already exists'
-            : 'Tickets already exist'}
+    <Grid item xs={size as GridSize}>
+      <StyledBox>
+        <OrangeTitle>
+          <Typography variant='h6'>
+            <WarnIcon />
+            {edges.length === 1
+              ? t('Ticket already exists')
+              : t('Tickets already exist')}
+          </Typography>
+        </OrangeTitle>
+        <Typography variant='body2'>
+          {t(
+            'There is an open ticket(s) in the same category for the related entity. Please review them before proceeding.',
+          )}
         </Typography>
-      </OrangeTitle>
-      <Typography variant='body2'>
-        {t(
-          'There is an open ticket(s) in the same category for the related entity. Please review them before proceeding.',
-        )}
-      </Typography>
-      <Box mt={3} display='flex' flexDirection='column'>
-        {mappedTickets}
-      </Box>
-    </StyledBox>
+        <Box mt={3} display='flex' flexDirection='column'>
+          {mappedTickets}
+        </Box>
+      </StyledBox>
+    </Grid>
   ) : null;
 }
