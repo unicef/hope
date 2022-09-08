@@ -43,7 +43,7 @@ export const FormikSelectField = ({
             <MenuItem
               key={each.value ? each.value : each.name || ''}
               value={each.value ? each.value : each.name || ''}
-              data-cy={`select-option-${index}`}
+              data-cy={`select-option-${each.name}`}
               disabled={each.disabled || false}
             >
               {each.labelEn || each.name || each.label}
