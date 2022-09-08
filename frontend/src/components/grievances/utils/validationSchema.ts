@@ -6,7 +6,6 @@ import {
 
 export const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
-  assignedTo: Yup.string().required('Assigned To is required'),
   category: Yup.string()
     .required('Category is required')
     .nullable(),
