@@ -737,7 +737,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   name='partner'
                                   fullWidth
                                   variant='outlined'
-                                  label={t('Partner')}
+                                  label={t('Partner*')}
                                   choices={userChoices.userPartnerChoices}
                                   component={FormikSelectField}
                                 />
@@ -826,7 +826,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   name='programme'
                                   fullWidth
                                   variant='outlined'
-                                  label={t('Programme')}
+                                  label={t('Programme Title')}
                                   choices={mappedPrograms}
                                   component={FormikSelectField}
                                 />
@@ -911,9 +911,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                 <Grid item xs={12}>
                   <NewTicket>
                     <Grid container spacing={3}>
-                      <Grid item xs={6}>
-                        {renderAlreadyExistsBox(values)}
-                      </Grid>
+                      {renderAlreadyExistsBox(values)}
                       <Grid item xs={6}>
                         {values.category && values.selectedHousehold?.id && (
                           <OtherRelatedTicketsCreate values={values} />

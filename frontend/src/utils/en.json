@@ -374,6 +374,7 @@
   "Send date": "Send date",
   "Selected programme that the Target Population is created for": "Selected programme that the Target Population is created for",
   "Partner": "Partner",
+  "Partner*": "Partner*",
   "Module": "Module",
   "Error": "Error",
   "Cash Plan Details": "Cash Plan Details",
@@ -640,5 +641,6 @@
   "Birth Date": "Birth Date",
   "Individual Full Name": "Individual Full Name",
   "Withdrawal Reason*": "Withdrawal Reason*",
-  "Description*": "Description*"
+  "Description*": "Description*",
+  "Programme Title": "Programme Title"
 }
