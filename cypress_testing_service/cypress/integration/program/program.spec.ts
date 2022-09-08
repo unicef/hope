@@ -25,6 +25,8 @@ Then('I should see the Programs page', () => {
 });
 
 When('I click the New Programme button', () => {
+  // TODO: fix custom get command not working
+  // cy.getByCyId('button-new-program').click({ force: true });
   cy.get('[data-cy="button-new-program"]').click({ force: true });
 });
 
