@@ -1,9 +1,11 @@
 from uuid import UUID
 import factory
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from random import randint
+
+from django.utils import timezone
 from factory import fuzzy
 from pytz import utc
 
@@ -623,7 +625,7 @@ def generate_payment_plan():
 
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
-    now = datetime.now()
+    now = timezone.now()
     address = "Ohio"
 
     rdi_pk = UUID("4d100000-0000-0000-0000-000000000000")
