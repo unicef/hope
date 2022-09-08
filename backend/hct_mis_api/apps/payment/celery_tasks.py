@@ -1,5 +1,6 @@
 import logging
 import datetime
+from decimal import Decimal
 
 from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
@@ -266,9 +267,10 @@ def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
                 # TODO: not sure how will work steficon function payment_plan or payment need ??
                 result = rule.execute({"household": entry.household, "payment_plan": payment_plan})
                 entry.entitlement_quantity = result.value
+                entry.entitlement_quantity_usd = Decimal(result.value / Decimal(payment_plan.exchange_rate)).quantize(Decimal(".01"))
                 entry.entitlement_date = timezone.now()
                 updates.append(entry)
-            Payment.objects.bulk_update(updates, ["entitlement_quantity", "entitlement_date"])
+            Payment.objects.bulk_update(updates, ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"])
 
             payment_plan.steficon_applied_date = timezone.now()
             payment_plan.background_action_status_none()

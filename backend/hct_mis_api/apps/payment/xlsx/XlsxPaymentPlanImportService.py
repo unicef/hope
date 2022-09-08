@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import openpyxl
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -17,6 +19,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.all_active_payments
         self.payment_plan_content_type = get_content_type_for_model(payment_plan)
+        self.exchange_rate = self.payment_plan.exchange_rate
         self.file = file
         self.errors = []
         self.updates = None
@@ -47,7 +50,9 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             self._import_row(row)
 
         Payment.objects.bulk_update(
-            self.payments_to_save, ("entitlement_quantity", "entitlement_date", "assigned_payment_channel")
+            self.payments_to_save, (
+                "entitlement_quantity", "entitlement_quantity_usd", "entitlement_date", "assigned_payment_channel"
+            )
         )
 
 
@@ -195,6 +200,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             if entitlement_amount != payment.entitlement_quantity:
                 payment.entitlement_quantity = entitlement_amount
                 payment.entitlement_date = timezone.now()
+                payment.entitlement_quantity_usd = Decimal(entitlement_amount / Decimal(self.exchange_rate)).quantize(Decimal(".01"))
                 update = True
         if payment_channel_obj:
             payment.assigned_payment_channel = payment_channel_obj
