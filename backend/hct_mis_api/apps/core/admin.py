@@ -57,6 +57,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
+    StorageFile
 )
 from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
@@ -913,3 +914,6 @@ class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
     def alpha3(self, obj):
         return obj.country.countries.alpha3(obj.country.code)
+
+
+admin.site.register(StorageFile)
