@@ -506,5 +506,17 @@ class StorageFile(models.Model):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
     file = models.FileField(upload_to="files/%Y/%m/%d")
 
+    @property
+    def file_name(self):
+        return self.file.name
+
+    @property
+    def file_url(self):
+        return self.file.url
+
+    @property
+    def file_size(self):
+        return self.file.size
+
     def __str__(self):
         return self.file.name

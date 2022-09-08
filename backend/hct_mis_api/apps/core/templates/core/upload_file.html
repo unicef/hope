@@ -4,29 +4,56 @@
         <meta charset="utf-8">
         <title>Minimal Django File Upload Example</title>
     </head>
+    <style>
+      .btn {
+          background-color: #008CBA;
+          font-size: 16px;
+          border-radius: 4px;
+          border: none;
+          padding: 12px 28px;
+          cursor: pointer;
+      }
+      .main {
+          width: 50%;
+      }
+      .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+      }
+      .alert-success {
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+        color: #3c763d;
+      }
+
+    </style>
     <body>
+
     {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
+        <div class="row" >
+          <div class="col-sm-offset-1" style="width: 50%;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    <p>{{ message }}</p>
+                </div>
+            {% endfor %}
+          </div>
+        </div>
     {% endif %}
 
-    {% if files %}
-        <ul>
-        {% for file in files %}
-            <li><a href="{{ file.uploaded_file.url }}">{{ file.uploaded_file.name }}</a></li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No uploaded files.</p>
-    {% endif %}
+    <section class="main">
+      <form method="post" enctype="multipart/form-data">
+        <fieldset>
+          <legend><h2>Upload File</h2></legend>
+          {% csrf_token %}
+          {{ form.as_p }}
+          <p><button type="submit" value="Upload" class="btn">Upload</button></p>
+        </fieldset>
+      </form>
+    </section>
 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-      <p><button type="submit" value="Upload">Upload</button></p>
-    </form>
+
     </body>
 </html>
