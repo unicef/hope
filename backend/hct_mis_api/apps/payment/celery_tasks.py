@@ -1,7 +1,7 @@
 import logging
 import datetime
-from decimal import Decimal
 
+from decimal import Decimal
 from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 from django.contrib.admin.options import get_content_type_for_model
@@ -226,6 +226,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
                 with transaction.atomic():
                     service.import_payment_list()
                     payment_plan.background_action_status_none()
+                    payment_plan.remove_export_per_fsp_zip_file()
                     payment_plan.save()
             except Exception:
                 logger.exception("Unexpected error during xlsx per fsp import")

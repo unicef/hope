@@ -153,7 +153,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                     (
                         XlsxPaymentPlanExportService.TITLE,
                         payment_channel_cell.coordinate,
-                        f"You can't set payment_channel {payment_channel} for Payment with already assigned payment "
+                        f"You can't set payment_channel {payment_channel} for Collector with already assigned payment "
                         f"channels: {', '.join(collectors_payment_channels)}",
                     )
                 )
@@ -185,7 +185,6 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         payment_channels_list = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX].value.split(", ")
 
         payment = self.payments_dict.get(payment_id)
-        update = False
 
         if payment is None:
             return
@@ -195,7 +194,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                 if payment_channel is not None and payment_channel != "":
                     PaymentChannel.objects.get_or_create(
                         individual=payment.collector,
-                        delivery_mechanism=payment_channel
+                        delivery_mechanism=payment_channel,
                     )
 
         if entitlement_amount is not None and entitlement_amount != "":
@@ -209,16 +208,14 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                     exchange_rate=self.exchange_rate,
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
-                update = True
 
-        if update:
-            self.payments_to_save.append(payment)
+                self.payments_to_save.append(payment)
 
     def create_import_xlsx_file(self, user):
         # remove old imported file
         self.payment_plan.remove_imported_file()
 
-        # save new import xlsx file
+        # create new imported xlsx file
         xlsx_file = FileTemp.objects.create(
             object_id=self.payment_plan.pk,
             content_type=self.payment_plan_content_type,
