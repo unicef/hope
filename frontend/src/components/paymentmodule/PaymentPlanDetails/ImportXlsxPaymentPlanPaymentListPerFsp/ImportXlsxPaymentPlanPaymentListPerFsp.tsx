@@ -92,7 +92,7 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
           data-cy='button-import'
           onClick={() => setOpenImport(true)}
         >
-          {t('Import XLSX')}
+          {t('Upload Reconciliation Info')}
         </Button>
       </Box>
       <Dialog
