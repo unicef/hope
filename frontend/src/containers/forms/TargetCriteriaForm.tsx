@@ -331,6 +331,7 @@ export function TargetCriteriaForm({
               <Box display='flex' flexDirection='column'>
                 <ButtonBox>
                   <Button
+                    data-cy='button-individual-rule'
                     onClick={() =>
                       individualsFiltersBlocksWrapperRef.current
                         .getArrayHelpers()
