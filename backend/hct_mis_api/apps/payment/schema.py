@@ -758,7 +758,7 @@ class Query(graphene.ObjectType):
         admin_areas = (
             Area.objects.filter(
                 area_type__area_level=2,
-                household__payment_records__in=payment_records,
+                household__paymentrecord__in=payment_records,
             )
             .distinct()
             .annotate(total_transferred=Sum("household__payment_records__delivered_quantity_usd"))
