@@ -642,5 +642,7 @@
   "Individual Full Name": "Individual Full Name",
   "Withdrawal Reason*": "Withdrawal Reason*",
   "Description*": "Description*",
+  "Ticket already exists": "Ticket already exists",
+  "Tickets already exists": "Tickets already exists",
   "Programme Title": "Programme Title"
 }
