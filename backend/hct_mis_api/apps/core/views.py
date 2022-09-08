@@ -73,3 +73,7 @@ def hope_redirect(request):
     programid = request.GET.get("programid")
     hope_redirect = get_hope_redirect(request.user, ent, caid, sourceid, programid)
     return redirect(hope_redirect.url())
+
+
+def upload_file(request):
+    return render(request, "core/upload_file.html")
