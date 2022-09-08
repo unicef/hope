@@ -11,6 +11,7 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrency,
   formatCurrencyWithSymbol,
+  renderSomethingOrDash,
 } from '../../../../utils/utils';
 import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
 
@@ -89,7 +90,9 @@ export const PaymentsTableRow = ({
         )}
       </TableCell>
       <TableCell align='left'>{payment.household.size}</TableCell>
-      <TableCell align='left'>{payment.household.admin2.name}</TableCell>
+      <TableCell align='left'>
+        {renderSomethingOrDash(payment.household.admin2?.name)}
+      </TableCell>
       <TableCell align='left'>
         {canViewDetails ? (
           <BlackLink to={collectorDetailsPath}>
