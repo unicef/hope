@@ -918,7 +918,17 @@ class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
 
 @admin.register(StorageFile)
-class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
-    list_display = ("file_name", "file_size")
+class StorageFileAdmin(admin.ModelAdmin):
+    list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
 
+    def has_change_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
 
+    def has_delete_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_add_permission(self, request):
+        return request.user.can_download_storage_files()
