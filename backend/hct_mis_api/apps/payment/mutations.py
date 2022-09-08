@@ -939,11 +939,9 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         payment_plan.background_action_status_xlsx_importing_entitlements()
         payment_plan.save()
 
-        new_xlsx_file = import_service.remove_old_and_create_new_import_xlsx(info.context.user)
-        payment_plan.imported_xlsx_file = new_xlsx_file
-        payment_plan.save()
+        import_service.create_import_xlsx_file(info.context.user)
 
-        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id, new_xlsx_file.id)
+        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id)
 
         return cls(payment_plan, import_service.errors)
 

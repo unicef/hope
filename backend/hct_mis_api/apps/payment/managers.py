@@ -68,7 +68,6 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 Q(payment_plan__start_date__lte=OuterRef("payment_plan__end_date"))
                 & Q(payment_plan__end_date__gte=OuterRef("payment_plan__start_date")),
                 payment_plan__status=PaymentPlan.Status.OPEN,
-                payment_plan__is_removed=False,
                 household=OuterRef("household"),
             )
         )
