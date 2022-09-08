@@ -77,7 +77,6 @@ export const PaymentsTable = ({
           />
         </Paper>
       </TableWrapper>
-
       <WarningTooltipTable
         paymentPlan={paymentPlan}
         payment={dialogPayment}
