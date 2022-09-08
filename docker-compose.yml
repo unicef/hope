@@ -2,7 +2,7 @@ version: '3.7'
 
 volumes:
   backend-data:
-  db:
+  db_1:
   db_ca:
   db_mis:
   db_erp:
@@ -113,10 +113,10 @@ services:
   db:
     image: johniak/postgis:11-alpine
     volumes:
-      - db:/var/lib/postgresql/data
+      - db_1:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
     environment:
-      POSTGRES_MULTIPLE_DATABASES: rdi_datahub,mis_datahub,erp_datahub,ca_datahub
+      POSTGRES_MULTIPLE_DATABASES: unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
     env_file:
       - .env
     ports:
