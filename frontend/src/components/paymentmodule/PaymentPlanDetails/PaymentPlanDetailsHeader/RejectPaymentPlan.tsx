@@ -38,7 +38,6 @@ export const RejectPaymentPlan = ({
     Action.Reject,
     paymentPlanId,
     () => showMessage(t('Payment Plan has been rejected.')),
-    () => showMessage(t('Error during rejecting Payment Plan.')),
     () => setRejectDialogOpen(false),
   );
 

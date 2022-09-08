@@ -33,7 +33,6 @@ export const LockFspPaymentPlan = ({
     Action.LockFsp,
     paymentPlan.id,
     () => showMessage(t('Payment Plan FSP is locked.')),
-    () => showMessage(t('Error during FSP locking in Payment Plan.')),
     () => setLockDialogOpen(false),
   );
 
