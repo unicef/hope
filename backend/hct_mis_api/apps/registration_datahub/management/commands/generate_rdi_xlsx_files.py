@@ -98,7 +98,7 @@ individual_header_mapping = {
     "B": ("age", random_number),
     "C": ("relationship_i_c", "HEAD"),
     "D": ("full_name_i_c", name),
-    "E": ("given_name_i_c", name),
+    "E": ("given_name_i_c", None),
     "F": ("middle_name_i_c", None),
     "G": ("family_name_i_c", name),
     "H": ("gender_i_c", "MALE"),
@@ -176,12 +176,18 @@ class Command(BaseCommand):
             type=int,
         )
 
-        # TODO: add some option for seed
-        # and pass seed to e.g. minutes_to_school_i_f or whatever
+        parser.add_argument(
+            "--seed",
+            default=None,
+            action="store",
+            nargs="?",
+            type=int,
+        )
 
     def handle(self, *args, **options):
         amount = options["amount"]
-        print(f"Generating xlsx file ({amount}x HHs & INDs)")
+        seed = options["seed"]
+        print(f"Generating xlsx file ({amount}x HHs & INDs) with seed {seed}")
 
         generated_dir = os.path.join(settings.PROJECT_ROOT, "..", "generated")
         if os.path.exists(generated_dir):
@@ -201,6 +207,7 @@ class Command(BaseCommand):
                 if value is None:
                     continue
                 to_write = value() if callable(value) else value
+                # TODO: unique seed to household somewhere?
                 households.cell(row=3 + count, column=index + 1).value = to_write
                 if key == "A":
                     household_ids.append(to_write)
@@ -213,7 +220,12 @@ class Command(BaseCommand):
             for index, (key, (header, value)) in enumerate(individual_header_mapping.items()):
                 if value is None:
                     continue
-                to_write = (value() if callable(value) else value) if key not in ["AY", "A"] else household_ids[count]
+                if key in ["AY", "A"]:
+                    to_write = household_ids[count]
+                elif callable(value):
+                    to_write = value()
+                else:
+                    to_write = value
                 individuals.cell(row=3 + count, column=index + 1).value = to_write
 
         wb.save(filepath)

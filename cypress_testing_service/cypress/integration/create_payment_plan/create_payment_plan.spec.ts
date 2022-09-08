@@ -23,8 +23,7 @@ const clearCache = () => {
 };
 
 Given("There are individuals and households imported", () => {
-  // TODO: pass e.g. uniqueSeed to --seed
-  cy.exec('yarn run generate-xlsx-files 3');
+  cy.exec(`yarn run generate-xlsx-files 3 --seed ${uniqueSeed}`);
   cy.visit('/');
   clearCache();
   cy.get('span').contains('Registration Data Import', { timeout: 10000 }).click();
@@ -148,7 +147,9 @@ When('I fill out the form fields and save', () => {
 });
 
 Then('I should see the Payment Plan details page', () => {
-  cy.get('[data-cy="page-header-container"]').contains('Payment Plan ID');
+  // TODO: this wait is needed for some reason
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  // cy.get('[data-cy="page-header-container"]').contains('Payment Plan ID'); // TODO
   cy.get('h6').contains('Details');
   cy.get('h6').contains('Results');
   cy.get('h6').contains('Payments List');
