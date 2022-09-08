@@ -14,10 +14,7 @@ class StorageFileForm(forms.Form):
             queryset=self.get_business_area_queryset()
         )
 
-        self.fields["file"] = forms.FileField(
-            label="Select a file",
-            help_text=f"Max. {settings.MAX_STORAGE_FILE_SIZE} megabytes"
-        )
+        self.fields["file"] = forms.FileField(label="Select a file")
 
     def get_business_area_queryset(self):
         return BusinessArea.objects.filter(
