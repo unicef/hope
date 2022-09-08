@@ -4,6 +4,7 @@ import time
 from io import StringIO
 
 from django import forms
+from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
@@ -916,4 +917,8 @@ class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         return obj.country.countries.alpha3(obj.country.code)
 
 
-admin.site.register(StorageFile)
+@admin.register(StorageFile)
+class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+    list_display = ("file_name", "file_size")
+
+
