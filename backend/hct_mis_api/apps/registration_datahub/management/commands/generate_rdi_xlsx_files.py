@@ -144,7 +144,7 @@ individual_header_mapping = {
     "AV": ("comms_disability_i_c", None),
     "AW": ("who_answers_phone_i_c", None),
     "AX": ("who_answers_alt_phone_i_c", None),
-    "AY": ("primary_collector_id", ""),  # Special
+    "AY": ("primary_collector_id", ""),  # SPECIAL
     "AZ": ("alternate_collector_id", None),
     "BA": ("photo_i_f", None),
     "BB": ("id_type_i_f", None),

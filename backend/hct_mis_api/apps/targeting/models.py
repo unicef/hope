@@ -284,7 +284,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return queryset.distinct()
 
     def refresh_stats(self):
-        households = self.household_list.all()
+        households = self.household_list.only("id")
         delta18 = relativedelta(years=+18)
         date18ago = timezone.now() - delta18
         targeted_individuals = Individual.objects.filter(household__in=households).aggregate(
