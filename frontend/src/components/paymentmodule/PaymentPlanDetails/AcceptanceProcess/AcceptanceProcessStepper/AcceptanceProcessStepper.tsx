@@ -1,16 +1,11 @@
-import { Box } from '@material-ui/core';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
 import CancelIcon from '@material-ui/icons/Cancel';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
-
-const StyledBox = styled(Box)`
-  width: 100%;
-`;
 
 const StyledCancelIcon = styled(CancelIcon)`
   color: #e90202;
@@ -21,7 +16,6 @@ interface AcceptanceProcessStepperProps {
   approvalNumberRequired: number;
   authorizationNumberRequired: number;
   financeReviewNumberRequired: number;
-  activeStep: number;
 }
 
 export const AcceptanceProcessStepper = ({
@@ -29,7 +23,6 @@ export const AcceptanceProcessStepper = ({
   approvalNumberRequired,
   authorizationNumberRequired,
   financeReviewNumberRequired,
-  activeStep,
 }: AcceptanceProcessStepperProps): React.ReactElement => {
   const { rejectedOn, actions } = acceptanceProcess;
   const { t } = useTranslation();
@@ -56,21 +49,28 @@ export const AcceptanceProcessStepper = ({
       isCompleted: actions.financeReview.length === financeReviewNumberRequired,
     },
   ];
+  const getActiveStep = (): number => {
+    if (actions.authorization.length === authorizationNumberRequired) {
+      return 2;
+    }
+    if (actions.approval.length === approvalNumberRequired) {
+      return 1;
+    }
+    return 0;
+  };
 
   return (
-    <StyledBox>
-      <Stepper activeStep={activeStep}>
-        {steps.map((step) => (
-          <Step completed={step.isCompleted} key={step.name}>
-            <StepLabel
-              error={step.hasError}
-              StepIconComponent={step.hasError ? StyledCancelIcon : null}
-            >
-              {step.name}
-            </StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-    </StyledBox>
+    <Stepper activeStep={getActiveStep()}>
+      {steps.map((step) => (
+        <Step completed={step.isCompleted} key={step.name}>
+          <StepLabel
+            error={step.hasError}
+            StepIconComponent={step.hasError ? StyledCancelIcon : null}
+          >
+            {step.name}
+          </StepLabel>
+        </Step>
+      ))}
+    </Stepper>
   );
 };
