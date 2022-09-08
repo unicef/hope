@@ -173,7 +173,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
+def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -184,24 +184,18 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
 
-            try:
-                file = FileTemp.objects.get(pk=file_id).file
-            except FileTemp.DoesNotExist:
-                logger.exception(f"Error import from xlsx, FileTemp object with ID {file_id} not found.")
+            if not payment_plan.imported_xlsx_file:
+                logger.exception(f"Error import from xlsx, file does not exists for PaymentPlan ID {payment_plan.unicef_id}.")
                 raise
 
-            service = XlsxPaymentPlanImportService(payment_plan, file)
+            service = XlsxPaymentPlanImportService(payment_plan, payment_plan.imported_xlsx_file.file)
             service.open_workbook()
             try:
                 with transaction.atomic():
                     service.import_payment_list()
                     payment_plan.xlsx_file_imported_date = timezone.now()
                     payment_plan.background_action_status_none()
-                    # remove old export file
-                    if payment_plan.export_xlsx_file:
-                        payment_plan.export_xlsx_file.file.delete(save=False)
-                        payment_plan.export_xlsx_file.delete()
-                        payment_plan.export_xlsx_file = None
+                    payment_plan.remove_export_file()
                     payment_plan.save()
                     payment_plan.update_money_fields()
             except Exception:
@@ -275,15 +269,10 @@ def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
             payment_plan.steficon_applied_date = timezone.now()
             payment_plan.background_action_status_none()
             with disable_concurrency(payment_plan):
+                payment_plan.remove_export_file()
+                payment_plan.remove_imported_file()
                 payment_plan.save()
                 payment_plan.update_money_fields()
-                # remove exported and imported files after apply steficon
-                if payment_plan.imported_xlsx_file:
-                    payment_plan.imported_xlsx_file.file.delete(save=False)
-                    payment_plan.imported_xlsx_file.delete()
-                if payment_plan.export_xlsx_file:
-                    payment_plan.export_xlsx_file.file.delete(save=False)
-                    payment_plan.export_xlsx_file.delete()
 
     except Exception:
         logger.exception("PaymentPlan Steficon Error")
