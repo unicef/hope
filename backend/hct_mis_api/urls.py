@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.views import (
     logout_view,
     schema,
     trigger_error,
+    upload_file
 )
 
 from hct_mis_api.apps.core.rest_api import all_fields_attributes
@@ -77,6 +78,7 @@ api_patterns = [
     ),
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
     path("hh-status", hct_mis_api.apps.household.views.HouseholdStatusView.as_view()),
+    path("upload-file/", upload_file, name="upload-file"),
 ]
 
 if settings.PROFILING:
