@@ -504,7 +504,7 @@ class StorageFile(models.Model):
         verbose_name=_("Created by"),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
-    file = models.FileField(upload_to="files/%Y/%m/%d")
+    file = models.FileField(upload_to="files")
 
     @property
     def file_name(self):
