@@ -6,6 +6,7 @@ Feature: Create Payment Plan
         Given There are individuals and households imported
         Given I have an active program
         Given I have target population in ready status
+    # Given There are steficon rules provided # via admin panel
     # Given I am sure that my business area is payment plan applicable
     # query businessAreaData
 
@@ -18,3 +19,24 @@ Feature: Create Payment Plan
         Then I should see the New Payment Plan page
         When I fill out the form fields and save
         Then I should see the Payment Plan details page
+# TODO
+# When I lock the Payment Plan
+# Then I see the entitlements input
+# When I choose the steficon rule
+# And I apply the steficon rule
+# Then I see the entitlements calculated
+# And I am able to set up FSPs
+# When I set up the FSPs # (choose dms & fsps)
+# Then I see the volumes calculated
+# When I lock the FSPs
+# Then I should see the needed approvals etc
+# When I approve, review, etc
+# Then I am able to accept the Payment Plan
+# And I am able to upload the reconciliation info
+# When I download the zip archive
+# And I unarchive it
+# Then I should see that there are multiple xlsx files inside the archive
+# When I fill the data in xlsx files with delivered quantities
+# And I upload the xlsx files
+# Then I should see that the delivered quantities are visible in the system
+# And the Payment Plan is reconciled # TODO: show that on FE
