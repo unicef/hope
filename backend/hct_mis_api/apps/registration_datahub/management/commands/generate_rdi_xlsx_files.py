@@ -176,6 +176,9 @@ class Command(BaseCommand):
             type=int,
         )
 
+        # TODO: add some option for seed
+        # and pass seed to e.g. minutes_to_school_i_f or whatever
+
     def handle(self, *args, **options):
         amount = options["amount"]
         print(f"Generating xlsx file ({amount}x HHs & INDs)")

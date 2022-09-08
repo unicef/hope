@@ -2,7 +2,11 @@ import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
 import {
   fillProgramForm,
   fillTargetingForm,
+  uniqueSeed,
 } from '../../procedures/procedures';
+
+let programName;
+let targetPopulationName;
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -19,6 +23,7 @@ const clearCache = () => {
 };
 
 Given("There are individuals and households imported", () => {
+  // TODO: pass e.g. uniqueSeed to --seed
   cy.exec('yarn run generate-xlsx-files 3');
   cy.visit('/');
   clearCache();
@@ -66,7 +71,7 @@ Given('I have an active program', () => {
   cy.visit('/');
   cy.get('span').contains('Programme Management').click();
   cy.get('[data-cy="button-new-program"]').click({ force: true });
-  fillProgramForm(cy);
+  programName = fillProgramForm(cy);
   cy.get('[data-cy="button-save"]').click({ force: true });
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[data-cy="button-activate-program"]').click({ force: true });
@@ -81,7 +86,7 @@ Given('I have target population in ready status', () => {
   cy.get('[data-cy="button-target-population-create-new"]').click({
     force: true,
   });
-  fillTargetingForm(cy);
+  targetPopulationName = fillTargetingForm(cy, programName, uniqueSeed);
   cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click();
   cy.get(
     '[data-cy=button-target-population-create] > .MuiButton-label',
@@ -129,17 +134,17 @@ Then('I should see the New Payment Plan page', () => {
 When('I fill out the form fields and save', () => {
   cy.get('[data-cy="input-target-population"]').first().click();
   cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.get('[data-cy="select-option-1"]').click();
+  cy.get(`[data-cy="select-option-${targetPopulationName}"]`).click();
+
   cy.get('[data-cy="input-start-date"]').click().type('2022-12-12');
   cy.get('[data-cy="input-end-date"]').click().type('2022-12-23');
   cy.get('[data-cy="input-currency"]').first().click();
-  cy.get('[data-cy="select-option-1"]').click();
+  cy.get('[data-cy="select-option-Afghan afghani"]').click();
   cy.get('[data-cy="input-dispersion-start-date"]').click().type('2023-12-12');
   cy.get('[data-cy="input-dispersion-end-date"]').click().type('2023-12-23');
   cy.get('[data-cy="button-save-payment-plan"]').click({
     force: true,
   });
-  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
 });
 
 Then('I should see the Payment Plan details page', () => {
