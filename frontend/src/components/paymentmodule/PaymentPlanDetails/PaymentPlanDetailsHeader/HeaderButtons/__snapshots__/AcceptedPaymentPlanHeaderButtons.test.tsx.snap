@@ -9,7 +9,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       class="MuiBox-root MuiBox-root-3"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
         tabindex="0"
         type="button"
       >
@@ -40,39 +40,20 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
     <div
       class="MuiBox-root MuiBox-root-4"
     >
-      <div
-        class="MuiBox-root MuiBox-root-5"
+      <button
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+        tabindex="0"
+        type="button"
       >
-        <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary"
-          data-cy="button-import"
-          tabindex="0"
-          type="button"
+        <span
+          class="MuiButton-label"
         >
-          <span
-            class="MuiButton-label"
-          >
-            <span
-              class="MuiButton-startIcon MuiButton-iconSizeMedium"
-            >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root sc-bZQynM bKNwua"
-                focusable="false"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M5 4v2h14V4H5zm0 10h4v6h6v-6h4l-7-7-7 7z"
-                />
-              </svg>
-            </span>
-            Import XLSX
-          </span>
-          <span
-            class="MuiTouchRipple-root"
-          />
-        </button>
-      </div>
+          Send to FSP
+        </span>
+        <span
+          class="MuiTouchRipple-root"
+        />
+      </button>
     </div>
   </div>
 </div>

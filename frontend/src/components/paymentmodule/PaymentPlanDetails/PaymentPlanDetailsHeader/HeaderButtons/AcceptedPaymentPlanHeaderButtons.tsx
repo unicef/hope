@@ -43,7 +43,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
                 loading={loadingExport}
                 disabled={loadingExport}
                 color='primary'
-                variant='outlined'
+                variant='contained'
                 startIcon={<GetApp />}
                 onClick={async () => {
                   try {
@@ -65,8 +65,8 @@ export const AcceptedPaymentPlanHeaderButtons = ({
             <Box m={2}>
               <Button
                 color='primary'
-                startIcon={<DownloadIcon />}
                 component='a'
+                variant='contained'
                 download
                 href={`/api/download-payment-plan-payment-list-per-fsp/${paymentPlan.id}`}
               >
@@ -78,7 +78,10 @@ export const AcceptedPaymentPlanHeaderButtons = ({
       )}
       {canSendToFsp && (
         <Box m={2}>
-          <ImportXlsxPaymentPlanPaymentListPerFsp paymentPlan={paymentPlan} />
+          {/*TODO: connect this button*/}
+          <Button color='primary' variant='contained'>
+            {t('Send to FSP')}
+          </Button>
         </Box>
       )}
     </Box>
