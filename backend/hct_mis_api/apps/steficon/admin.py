@@ -20,6 +20,7 @@ from django.utils.translation import get_language
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_buttons.decorators import view
 from admin_extra_buttons.utils import labelize
+from admin_sync.mixin import SyncMixin
 from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
@@ -31,7 +32,6 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
 from ..account.models import User
-from ..administration.publish.mixin import PublishMixin
 from ..administration.widgets import JsonWidget
 from ..utils.security import is_root
 from .forms import (
@@ -209,7 +209,7 @@ class RuleResource(ModelResource):
 
 
 @register(Rule)
-class RuleAdmin(PublishMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
+class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)

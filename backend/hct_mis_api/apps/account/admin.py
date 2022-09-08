@@ -34,6 +34,7 @@ from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_buttons.api import ExtraButtonsMixin, button
+from admin_sync.mixin import SyncMixin
 from adminactions.export import ForeignKeysCollector
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -53,7 +54,6 @@ from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, Role, User
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.administration.publish.mixin import PublishMixin
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -987,7 +987,7 @@ class RoleAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 
 @admin.register(account_models.UserRole)
-class UserRoleAdmin(PublishMixin, HOPEModelAdminBase):
+class UserRoleAdmin(SyncMixin, HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
     autocomplete_fields = ("role",)

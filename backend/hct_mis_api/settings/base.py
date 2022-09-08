@@ -241,7 +241,7 @@ DJANGO_APPS = [
     "smart_admin.logs",
     "smart_admin.apps.SmartTemplateConfig",
     "hct_mis_api.apps.administration.apps.Config",
-    "hct_mis_api.apps.administration.publish.apps.Config",
+    "admin_sync.apps.Config",
     "django_sysinfo",
     "django.contrib.auth",
     "django.contrib.humanize",
@@ -806,3 +806,5 @@ if PROFILING:
     INSTALLED_APPS.append("silk")
     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
     SILKY_PYTHON_PROFILER = True
+
+ADMIN_SYNC_USE_REVERSION = False
