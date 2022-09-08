@@ -3,6 +3,7 @@ Feature: Create Payment Plan
 
     Background:
         Given I am authenticated
+        Given There are individuals and households imported
         Given I have an active program
         Given I have target population in ready status
     # Given I am sure that my business area is payment plan applicable
