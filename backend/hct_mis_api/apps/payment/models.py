@@ -545,6 +545,12 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
             self.imported_xlsx_file.delete()
             self.imported_xlsx_file = None
 
+    def remove_export_per_fsp_zip_file(self):
+        if self.export_per_fsp_zip_file:
+            self.export_per_fsp_zip_file.file.delete(save=False)
+            self.export_per_fsp_zip_file.delete()
+            self.export_per_fsp_zip_file = None
+
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     # TODO: add/remove fields after finalizing the fields

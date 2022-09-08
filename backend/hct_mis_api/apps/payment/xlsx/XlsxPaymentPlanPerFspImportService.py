@@ -6,6 +6,7 @@ from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPayme
 
 
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
+    # TODO: index depends on FSPXlsxTemplate !!!
     DELIVERED_QUANTITY_COLUMN_INDEX = 7
 
     def __init__(self, payment_plan, file):

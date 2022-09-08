@@ -133,6 +133,12 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         ]
         fsp_ids = self.payment_list.values_list("financial_service_provider_id", flat=True)
         fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
+        if not fsp_qs:
+            logger.error(
+                f"Not possible to generate export file. "
+                f"There are no any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}."
+            )
+            raise
 
         # create temp zip file
         with NamedTemporaryFile() as tmp_zip:
@@ -179,6 +185,8 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
                 created_by=user,
             )
             tmp_zip.seek(0)
+            # remove old file
+            self.payment_plan.remove_export_per_fsp_zip_file()
             xlsx_obj.file.save(zip_file_name, File(tmp_zip))
             self.payment_plan.export_per_fsp_zip_file = xlsx_obj
             self.payment_plan.save()
