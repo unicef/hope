@@ -1,10 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
-  <h1>Upload file</h1>
-</body>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Minimal Django File Upload Example</title>
+    </head>
+    <body>
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if files %}
+        <ul>
+        {% for file in files %}
+            <li><a href="{{ file.uploaded_file.url }}">{{ file.uploaded_file.name }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No uploaded files.</p>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+      <p><button type="submit" value="Upload">Upload</button></p>
+    </form>
+    </body>
 </html>
