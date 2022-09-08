@@ -23,6 +23,7 @@ from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import MarkSub
 
 class TestMarkSubmissions(TestCase):
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):
