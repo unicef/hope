@@ -284,10 +284,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return queryset.distinct()
 
     def refresh_stats(self):
-        households_ids = self.household_list.values_list("id")
+        households = self.household_list.only("id")
         delta18 = relativedelta(years=+18)
         date18ago = timezone.now() - delta18
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+        targeted_individuals = Individual.objects.filter(household__in=households).aggregate(
             child_male_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
             child_female_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
             adult_male_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
@@ -297,7 +297,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.child_female_count = targeted_individuals.get("child_female_count")
         self.adult_male_count = targeted_individuals.get("adult_male_count")
         self.adult_female_count = targeted_individuals.get("adult_female_count")
-        self.total_households_count = len(households_ids)
+        self.total_households_count = households.count()
         self.total_individuals_count = (
             targeted_individuals.get("child_male_count")
             + targeted_individuals.get("child_female_count")
