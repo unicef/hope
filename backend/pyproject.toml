@@ -60,7 +60,8 @@ black = "^22.3.0"
 celery = {extras = ["redis"], version = "^5.2.7"}
 defusedxml = "0.7.0rc1"
 django-advanced-filters = "2.0.0"
-django-admin-extra-buttons = "^1.4.2"
+django-admin-extra-buttons = "^1.5"
+django-admin-sync = "*"
 django-adminactions = "^2"
 django-adminfilters = "^2"
 django-auditlog = { url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip" }
@@ -120,6 +121,7 @@ pytesseract = "^0.3.9"
 newrelic = "^7.10.0"
 djangorestframework = "^3.13.1"
 django-silk = "5.0.1"
+django-reversion = "^5.0.2"
 
 [tool.poetry.dev-dependencies]
 django-webtest = "^1.9.10"
