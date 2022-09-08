@@ -463,6 +463,11 @@ export function validateUsingSteps(
       !Object.keys(values.selectedPaymentRecords).length
     ) {
       errors.selectedPaymentRecords = 'Payment Records are required';
+    } else if (
+      values.subCategory === GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT &&
+      !values.partner
+    ) {
+      errors.partner = 'Partner is required';
     }
     setValidateData(true);
   }
