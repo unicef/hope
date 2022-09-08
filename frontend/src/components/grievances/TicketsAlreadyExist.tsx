@@ -60,8 +60,8 @@ export function TicketsAlreadyExist({ values, size = 6 }): React.ReactElement {
           <Typography variant='h6'>
             <WarnIcon />
             {edges.length === 1
-              ? 'Ticket already exists'
-              : 'Tickets already exist'}
+              ? t('Ticket already exists')
+              : t('Tickets already exist')}
           </Typography>
         </OrangeTitle>
         <Typography variant='body2'>
