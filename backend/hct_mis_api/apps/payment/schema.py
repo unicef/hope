@@ -298,18 +298,24 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_payment_plan_hard_conflicted_data(self, info):
+    def resolve_payment_plan_hard_conflicted_data(self, info) -> list:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_hard_conflicted_data", []))
 
-    def resolve_payment_plan_soft_conflicted_data(self, info):
+    def resolve_payment_plan_soft_conflicted_data(self, info) -> list:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
 
-    def resolve_has_payment_channel(self, info):
-        return self.collector.payment_channels.count() > 0
+    def resolve_has_payment_channel(self, info) -> bool:
+        return self.collector.payment_channels.exists()
+
+    def resolve_payment_plan_hard_conflicted(self, info) -> bool:
+        return self.payment_plan.status == PaymentPlan.Status.OPEN and self.payment_plan_hard_conflicted
+
+    def resolve_payment_plan_soft_conflicted(self, info) -> bool:
+        return self.payment_plan.status == PaymentPlan.Status.OPEN and self.payment_plan_soft_conflicted
 
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data):

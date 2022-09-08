@@ -232,6 +232,7 @@ class PaymentPlanService:
                     head_of_household=household.head_of_household,
                     collector=collector,
                     currency=payment_plan.currency,
+                    assigned_payment_channel=collector.payment_channels.first(),  # TODO: it's ok??
                 )
             )
         try:
