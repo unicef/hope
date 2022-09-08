@@ -8,7 +8,12 @@ from pytz import utc
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
-from hct_mis_api.apps.household.fixtures import HouseholdFactory
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.fixtures import (
+    EntitlementCardFactory,
+    HouseholdFactory,
+    create_household,
+)
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -21,6 +26,7 @@ from hct_mis_api.apps.program.fixtures import (
     CashPlanPaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
@@ -350,3 +356,34 @@ def generate_real_cash_plans_for_households(households):
         .filter(cash_plan__in=cash_plans)
         .values_list("household__id", flat=True)
     )
+
+
+def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
+    cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
+    cash_plan_payment_verification.status = status
+    cash_plan_payment_verification.save(update_fields=("status",))
+    registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
+    for _ in range(5):
+        household, _ = create_household(
+            {
+                "registration_data_import": registration_data_import,
+                "admin_area": Area.objects.order_by("?").first(),
+            },
+            {"registration_data_import": registration_data_import},
+        )
+
+        household.programs.add(program)
+
+        payment_record = PaymentRecordFactory(
+            cash_plan=cash_plan,
+            household=household,
+            target_population=target_population,
+        )
+
+        PaymentVerificationFactory(
+            cash_plan_payment_verification=cash_plan_payment_verification,
+            payment_record=payment_record,
+            status=PaymentVerification.STATUS_PENDING,
+        )
+        EntitlementCardFactory(household=household)
+    return cash_plan_payment_verification

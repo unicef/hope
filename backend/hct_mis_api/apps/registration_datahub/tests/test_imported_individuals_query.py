@@ -67,6 +67,7 @@ query ImportedIndividual($id: ID!) {
 
 class TestImportedIndividualQuery(APITestCase):
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     # IMPORTANT!
     # FREEZGUN doesn't work this snapshot have to be updated once a year
