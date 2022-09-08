@@ -773,7 +773,7 @@ def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid
     )
     if (
         GenericPayment.DELIVERY_TYPE_CASH not in delivery_mechanisms_in_order
-        and collectors_that_cant_be_paid.filter(paymentchannel__isnull=True).exists()
+        and collectors_that_cant_be_paid.filter(payment_channels__isnull=True).exists()
     ):
         needed_delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_CASH)
     return f"Delivery mechanisms that may be needed: {', '.join(needed_delivery_mechanisms)}."
@@ -808,9 +808,9 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             ).values_list("individual", flat=True)
         )
 
-        query = Q(paymentchannel__delivery_mechanism__in=delivery_mechanisms_in_order)
+        query = Q(payment_channels__delivery_mechanism__in=delivery_mechanisms_in_order)
         if GenericPayment.DELIVERY_TYPE_CASH in delivery_mechanisms_in_order:
-            query |= Q(paymentchannel__isnull=True)
+            query |= Q(payment_channels__isnull=True)
 
         collectors_that_can_be_paid = collectors_in_target_population.filter(query).distinct()
         collectors_that_cant_be_paid = collectors_in_target_population.exclude(id__in=collectors_that_can_be_paid)
