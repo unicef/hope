@@ -20,4 +20,20 @@ export const fillProgramForm = (cy) => {
     .type('{backspace}{backspace}{backspace}{backspace}4000');
 };
 
+export const fillTargetingForm = (cy) => {
+  cy.get('[data-cy="input-name"]').first().type(`test TP ${uniqueSeed}`);
+  cy.get('[data-cy="input-program"]').first().click();
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.get('[data-cy="select-option-1"]').click();
+  cy.get('[data-cy="button-target-population-add-criteria"]').click();
+  cy.get('[data-cy="button-household-rule"]').click();
+  cy.get('[data-cy="autocomplete-target-criteria"]')
+    .click()
+    .type('residence status');
+  cy.contains('Residence status').click();
+  cy.get('[data-cy="select-filters[0].value"]').click();
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.get('li').eq(3).click();
+};
+
 export const uniqueSeed = Date.now().toString();

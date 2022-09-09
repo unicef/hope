@@ -82,6 +82,7 @@ exports[`components/paymentmodule/CreatePaymentPlanHeader should render 1`] = `
             </div>
             <button
               class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+              data-cy="button-save-payment-plan"
               tabindex="0"
               type="button"
             >

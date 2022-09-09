@@ -1,7 +1,16 @@
 from datetime import timedelta
+import os
+import tempfile
+from zipfile import ZipFile
 from django.utils import timezone
 from unittest.mock import patch
+from openpyxl import load_workbook
+from django.core.files.uploadedfile import SimpleUploadedFile
 
+from hct_mis_api.apps.payment.celery_tasks import (
+    create_payment_plan_payment_list_xlsx_per_fsp,
+    import_payment_plan_payment_list_per_fsp_from_xlsx,
+)
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.fixtures import PaymentFactory
@@ -147,6 +156,26 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
                     id
                 }
             }
+        }
+    }
+}
+"""
+
+EXPORT_XLSX_PER_FSP_MUTATION = """
+mutation ExportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!) {
+    exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId) {
+        paymentPlan {
+            id
+        }
+    }
+}
+"""
+
+IMPORT_XLSX_PER_FSP_MUTATION = """
+mutation ImportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $file: Upload!) {
+    importXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId, file: $file) {
+        paymentPlan {
+            id
         }
     }
 }
@@ -324,16 +353,21 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
-        PaymentFactory(
+        payment = PaymentFactory(
             payment_plan=PaymentPlan.objects.get(id=payment_plan_id),
             business_area=self.business_area,
             household=self.household_1,
             collector=self.individual_1,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
-            entitlement_quantity=100,
+            entitlement_quantity=1000,
             entitlement_quantity_usd=100,
+            delivered_quantity=None,
+            delivered_quantity_usd=None,
             financial_service_provider=santander_fsp,
+            assigned_payment_channel=self.payment_channel_1_cash,
+            excluded=False,
         )
+        self.assertEqual(payment.entitlement_quantity, 1000)
 
         lock_payment_plan_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
@@ -348,8 +382,11 @@ class TestPaymentPlanReconciliation(APITestCase):
         assert "errors" not in lock_payment_plan_response, lock_payment_plan_response
         assert lock_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"] == "LOCKED"
 
-        rule = RuleFactory(definition="result.value=Decimal('1.3')", name="Rule")
-        RuleCommitFactory(rule=rule)
+        rule = RuleFactory(name="Rule")
+        RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule)
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        self.assertEqual(payment_plan.background_action_status, None)
 
         with patch("hct_mis_api.apps.payment.mutations.payment_plan_apply_steficon") as mock:
             set_steficon_response = self.graphql_request(
@@ -364,6 +401,12 @@ class TestPaymentPlanReconciliation(APITestCase):
             assert mock.delay.call_count == 1
             call_args = mock.delay.call_args[0]
             payment_plan_apply_steficon(*call_args)
+
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.background_action_status, None)
+
+        payment.refresh_from_db()
+        self.assertEqual(payment.entitlement_quantity, 500)
 
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
@@ -422,7 +465,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             lock_fsp_in_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
             "LOCKED_FSP",
         )
-        # observe that payments have received amounts set
+        # TODO: observe that payments have received amounts set
 
         send_for_approval_payment_plan_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
@@ -488,11 +531,93 @@ class TestPaymentPlanReconciliation(APITestCase):
             "ACCEPTED",
         )
 
-        # TODO
-        # receive reconciliation info
-        # error, because nobody downloaded xlsx or smth
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.background_action_status, None)
 
-        # download xlsx
+        with patch(
+            "hct_mis_api.apps.payment.services.payment_plan_services.create_payment_plan_payment_list_xlsx_per_fsp"
+        ) as mock_export:
+            export_file_mutation = self.graphql_request(
+                request_string=EXPORT_XLSX_PER_FSP_MUTATION,
+                context={"user": self.user},
+                variables={
+                    "paymentPlanId": encoded_payment_plan_id,
+                },
+            )
+            assert "errors" not in export_file_mutation, export_file_mutation
+            assert mock_export.delay.call_count == 1
+            call_args = mock_export.delay.call_args[0]
+            create_payment_plan_payment_list_xlsx_per_fsp(*call_args)
 
-        # receive reconciliation info
-        # see payment entitlement delivered
+        payment_plan.refresh_from_db()
+        zip_file = payment_plan.export_per_fsp_zip_file
+        assert zip_file is not None
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            self.assertEqual(len(os.listdir(temp_dir)), 0)
+
+            assert zip_file.file is not None
+            with ZipFile(zip_file.file, "r") as zip_ref:
+                self.assertEqual(len(zip_ref.namelist()), 1)
+                zip_ref.extractall(temp_dir)
+
+            self.assertEqual(len(os.listdir(temp_dir)), 1)
+
+            file_name = os.listdir(temp_dir)[0]
+            assert file_name.endswith(".xlsx")
+            file_path = os.path.join(temp_dir, file_name)
+
+            workbook = load_workbook(file_path)
+            assert workbook.sheetnames == ["Santander"], workbook.sheetnames
+
+            sheet = workbook["Santander"]
+            assert sheet.max_row == 2, sheet.max_row
+
+            self.assertEqual(sheet.cell(row=1, column=1).value, "payment_id")
+            assert payment_plan.payments.count() == 1
+            payment = payment_plan.payments.first()
+            self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
+
+            self.assertEqual(payment.assigned_payment_channel.delivery_mechanism, "Cash")
+
+            self.assertEqual(sheet.cell(row=1, column=5).value, "payment_channel")
+            self.assertEqual(sheet.cell(row=2, column=5).value, "Cash")
+
+            self.assertEqual(sheet.cell(row=1, column=7).value, "entitlement_quantity")
+            self.assertEqual(sheet.cell(row=2, column=7).value, 500)
+
+            self.assertEqual(sheet.cell(row=1, column=8).value, "delivered_quantity")
+            self.assertEqual(sheet.cell(row=2, column=8).value, None)
+
+            payment.refresh_from_db()
+            self.assertEqual(payment.entitlement_quantity, 500)
+            self.assertEqual(payment.delivered_quantity, None)
+            self.assertEqual(payment.is_reconciled, False)
+
+            sheet.cell(row=2, column=8).value = 500
+            filled_file_name = "filled.xlsx"
+            filled_file_path = os.path.join(temp_dir, filled_file_name)
+            workbook.save(filled_file_path)
+
+            with open(filled_file_path, "rb") as file:
+                uploaded_file = SimpleUploadedFile(filled_file_name, file.read())
+                with patch(
+                    "hct_mis_api.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx"
+                ) as mock_import:
+                    import_mutation_response = self.graphql_request(
+                        request_string=IMPORT_XLSX_PER_FSP_MUTATION,
+                        context={"user": self.user},
+                        variables={
+                            "paymentPlanId": encoded_payment_plan_id,
+                            "file": uploaded_file,
+                        },
+                    )
+                    assert "errors" not in import_mutation_response, import_mutation_response
+                    assert mock_import.delay.call_count == 1
+                    call_args = mock_import.delay.call_args[0]
+                    import_payment_plan_payment_list_per_fsp_from_xlsx(*call_args)
+
+            payment.refresh_from_db()
+            self.assertEqual(payment.entitlement_quantity, 500)
+            self.assertEqual(payment.delivered_quantity, 500)
+            self.assertEqual(payment.is_reconciled, True)

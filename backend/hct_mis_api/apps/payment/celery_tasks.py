@@ -1,5 +1,7 @@
 import logging
 import datetime
+import traceback
+import django_fsm
 
 from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
@@ -10,6 +12,7 @@ from sentry_sdk import configure_scope
 from django.contrib.auth import get_user_model
 
 from hct_mis_api.apps.payment.models import XlsxCashPlanPaymentVerificationFile, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import XlsxPaymentPlanImportPerFspService
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -69,7 +72,7 @@ def create_cash_plan_payment_verification_xls(cash_plan_payment_verification_id,
 
             cash_plan_payment_verification.xlsx_file_exporting = False
             cash_plan_payment_verification.save()
-            service.send_email(service.get_context(user))
+            service.send_email(service.get_email_context(user))
     except Exception as e:
         logger.exception(e)
         raise
@@ -119,7 +122,7 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
                     payment_plan.background_action_status_none()
                     payment_plan.save()
 
-                    transaction.on_commit(lambda: service.send_email(service.get_context(user)))
+                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
 
             except Exception:
                 payment_plan.background_action_status_xlsx_export_error()
@@ -153,11 +156,10 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
                     # regenerate always xlsx
                     service = XlsxPaymentPlanExportService(payment_plan)
                     service.export_per_fsp(user)
-                    payment_plan.status_date = timezone.now()
-                    payment_plan.status = PaymentPlan.Status.ACCEPTED
+                    payment_plan.background_action_status_none()
                     payment_plan.save()
 
-                    transaction.on_commit(lambda: service.send_email(service.get_context(user, per_fsp=True)))
+                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user, per_fsp=True)))
 
             except Exception:
                 payment_plan.background_action_status_xlsx_export_error()
@@ -206,6 +208,35 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
 
     except Exception:
         logger.exception("PaymentPlan Unexpected Error import from xlsx")
+        raise
+
+
+@app.task
+@log_start_and_end
+@sentry_tags
+def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id, file):
+    try:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+
+        with configure_scope() as scope:
+            scope.set_tag("business_area", payment_plan.business_area)
+
+            service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
+            service.open_workbook()
+            try:
+                with transaction.atomic():
+                    service.import_payment_list()
+                    payment_plan.background_action_status_none()
+                    payment_plan.save()
+            except Exception:
+                logger.exception("Unexpected error during xlsx per fsp import")
+                payment_plan.background_action_status_xlsx_import_error()
+                payment_plan.save()
+
+    except Exception as e:
+        logger.exception(e)
         raise
 
 

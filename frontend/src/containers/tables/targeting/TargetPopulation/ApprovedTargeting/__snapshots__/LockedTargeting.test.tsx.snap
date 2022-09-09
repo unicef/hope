@@ -55,6 +55,7 @@ exports[`containers/tables/targeting/TargetPopulation/ApprovedTargeting should r
             >
               <h6
                 class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+                data-cy="table-title"
               >
                 Households
               </h6>
