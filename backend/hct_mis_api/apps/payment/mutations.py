@@ -722,8 +722,8 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
     @classmethod
     def export_action(cls, payment_plan: PaymentPlan, user) -> PaymentPlan:
-        if payment_plan.status not in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]:
-            msg = "You can only export Payment List for LOCKED/ACCEPTED Payment Plan"
+        if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
+            msg = "You can only export Payment List for LOCKED Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
 
