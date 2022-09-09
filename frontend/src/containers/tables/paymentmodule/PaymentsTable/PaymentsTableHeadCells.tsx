@@ -13,7 +13,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Payment Id',
-    id: 'id',
+    id: 'unicef_id',
     numeric: false,
   },
   {
@@ -31,7 +31,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Administrative Level 2',
-    id: 'household__admin2__name', //fix
+    id: 'admin2',
     numeric: false,
   },
   {
