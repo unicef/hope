@@ -6,6 +6,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       id
       unicefId
       status
+      backgroundActionStatus
       createdBy {
         id
         firstName
@@ -148,6 +149,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         volume
         volumeUsd
       }
+      hasPaymentListPerFspZipFile
     }
   }
 `;

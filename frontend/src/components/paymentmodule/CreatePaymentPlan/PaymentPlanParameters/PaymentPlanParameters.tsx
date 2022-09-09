@@ -36,6 +36,7 @@ export const PaymentPlanParameters = ({
               required
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+              data-cy='input-start-date'
             />
           </Grid>
           <Grid item xs={4}>
@@ -49,6 +50,7 @@ export const PaymentPlanParameters = ({
               initialFocusedDate={values.startDate}
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+              data-cy='input-end-date'
             />
           </Grid>
 
@@ -61,6 +63,7 @@ export const PaymentPlanParameters = ({
               component={FormikSelectField}
               choices={currencyChoicesData}
               required
+              data-cy='input-currency'
             />
           </Grid>
           <Grid item xs={4}>
@@ -71,6 +74,7 @@ export const PaymentPlanParameters = ({
               required
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+              data-cy='input-dispersion-start-date'
             />
           </Grid>
           <Grid item xs={4}>
@@ -84,6 +88,7 @@ export const PaymentPlanParameters = ({
               initialFocusedDate={values.dispersionStartDate}
               fullWidth
               decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+              data-cy='input-dispersion-end-date'
             />
           </Grid>
         </Grid>

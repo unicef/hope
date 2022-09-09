@@ -73,7 +73,7 @@ export function LockTargetPopulationDialog({
                   });
                 });
               }}
-              data-cy='button-target-population-close'
+              data-cy='button-target-population-modal-lock'
             >
               {t('Lock')}
             </LoadingButton>

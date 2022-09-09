@@ -75,8 +75,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           showMessage(t('Your import was successful!'));
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
+        e.graphQLErrors.map((x) => showMessage(x.message));
       }
     }
   };
@@ -134,7 +133,9 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             ) : null}
           </>
           <DialogActions>
-            <Button data-cy="close-button" onClick={() => setOpenImport(false)}>CANCEL</Button>
+            <Button data-cy='close-button' onClick={() => setOpenImport(false)}>
+              CANCEL
+            </Button>
             <Button
               disabled={!fileToImport}
               type='submit'

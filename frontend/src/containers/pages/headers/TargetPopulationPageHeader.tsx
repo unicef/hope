@@ -1,22 +1,24 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import {
-  TargetPopulationQuery,
-  TargetPopulationStatus,
-} from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/core/PageHeader';
+import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
 import { StatusBox } from '../../../components/core/StatusBox';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   targetPopulationBuildStatusToColor,
   targetPopulationStatusMapping,
   targetPopulationStatusToColor,
 } from '../../../utils/utils';
-import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
+import {
+  TargetPopulationQuery,
+  TargetPopulationStatus,
+  useBusinessAreaDataQuery,
+} from '../../../__generated__/graphql';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
+import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -55,12 +57,21 @@ export const TargetPopulationPageHeader = ({
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
+  const {
+    data: businessAreaData,
+    loading: businessAreaDataLoading,
+  } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Targeting',
       to: `/${businessArea}/target-population/`,
     },
   ];
+
+  if (!businessAreaData) return null;
+  if (businessAreaDataLoading) return <LoadingComponent />;
 
   let buttons;
 
@@ -87,6 +98,7 @@ export const TargetPopulationPageHeader = ({
           canDuplicate={canDuplicate}
           canUnlock={canUnlock}
           canSend={canSend}
+          businessAreaData={businessAreaData}
         />
       );
       break;
@@ -96,6 +108,7 @@ export const TargetPopulationPageHeader = ({
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           canDuplicate={canDuplicate}
+          businessAreaData={businessAreaData}
         />
       );
       break;

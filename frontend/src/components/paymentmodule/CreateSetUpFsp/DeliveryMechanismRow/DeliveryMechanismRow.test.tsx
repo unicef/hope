@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '../../../../testUtils/testUtils';
-import { fakeDeliveryMechanisms } from '../../../../../fixtures/payments/fakeDeliveryMechanisms';
-import { fakeFspsData } from '../../../../../fixtures/payments/fakeFspsData';
+import { fakeDeliveryMechanisms } from '../../../../../fixtures/paymentmodule/fakeDeliveryMechanisms';
+import { fakeFspsData } from '../../../../../fixtures/paymentmodule/fakeFspsData';
 import { PERMISSIONS } from '../../../../config/permissions';
 import { DeliveryMechanismRow } from './DeliveryMechanismRow';
 
@@ -15,8 +15,7 @@ describe('components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow', () => {
         },
       ],
     };
-    const mapping =
-      fakeFspsData?.availableFspsForDeliveryMechanisms[0];
+    const mapping = fakeFspsData?.availableFspsForDeliveryMechanisms[0];
     const mappedFsps = mapping?.fsps.map((el) => ({
       name: el.name,
       value: el.id,

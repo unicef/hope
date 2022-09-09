@@ -4,6 +4,7 @@ import { Box, Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import { FileCopy } from '@material-ui/icons';
 import {
+  BusinessAreaDataQuery,
   TargetPopulationQuery,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
@@ -24,16 +25,19 @@ const IconContainer = styled.span`
 export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   canDuplicate: boolean;
+  businessAreaData: BusinessAreaDataQuery;
 }
 
 export const FinalizedTargetPopulationHeaderButtons = ({
   targetPopulation,
   canDuplicate,
+  businessAreaData,
 }: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
+
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
@@ -46,17 +50,19 @@ export const FinalizedTargetPopulationHeaderButtons = ({
         </IconContainer>
       )}
       <Box m={2}>
-        <Button
-          variant='contained'
-          color='primary'
-          component='a'
-          disabled={!targetPopulation.caHashId}
-          target='_blank'
-          href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
-          startIcon={<OpenInNewRoundedIcon />}
-        >
-          Open in CashAssist
-        </Button>
+        {!businessAreaData.businessArea.isPaymentPlanApplicable && (
+          <Button
+            variant='contained'
+            color='primary'
+            component='a'
+            disabled={!targetPopulation.caHashId}
+            target='_blank'
+            href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
+            startIcon={<OpenInNewRoundedIcon />}
+          >
+            Open in CashAssist
+          </Button>
+        )}
       </Box>
       <DuplicateTargetPopulation
         open={openDuplicate}

@@ -3,17 +3,14 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from 'react-dom/test-utils';
 import wait from 'waait';
 import { fakeApolloAllSteficonRules } from '../../../../../fixtures/steficon/fakeApolloAllSteficonRules';
-import { fakeApolloPaymentPlan } from '../../../../../fixtures/payments/fakeApolloPaymentPlan';
+import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { render } from '../../../../testUtils/testUtils';
 import { Entitlement } from './Entitlement';
 
 describe('components/paymentmodule/PaymentPlanDetails/Entitlement', () => {
   it('should render', async () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllSteficonRules}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllSteficonRules}>
         <Entitlement paymentPlan={fakeApolloPaymentPlan} />
       </MockedProvider>,
     );
