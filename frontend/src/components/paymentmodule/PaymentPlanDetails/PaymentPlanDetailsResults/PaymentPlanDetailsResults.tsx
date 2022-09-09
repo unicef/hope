@@ -112,7 +112,7 @@ export const PaymentPlanDetailsResults = ({
           </Grid>
           <Grid container spacing={0} justify='flex-start' alignItems='center'>
             <Grid item xs={4}>
-              <ChartContainer>
+              <ChartContainer data-cy="chart-container">
                 <Pie
                   width={100}
                   height={100}
