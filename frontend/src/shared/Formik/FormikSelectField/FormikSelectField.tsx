@@ -39,7 +39,7 @@ export const FormikSelectField = ({
             MenuListProps: { 'data-cy': 'select-options-container' },
           }}
         >
-          {otherProps.choices.map((each, index) => (
+          {otherProps.choices.map((each) => (
             <MenuItem
               key={each.value ? each.value : each.name || ''}
               value={each.value ? each.value : each.name || ''}
