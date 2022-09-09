@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 import openpyxl
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -22,12 +20,10 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         self.exchange_rate = self.payment_plan.get_exchange_rate()
         self.file = file
         self.errors = []
-        self.updates = None
         self.payments_dict = {
             str(x.unicef_id): x for x in self.payment_list
         }
-        self.payment_ids = [str(x.unicef_id) for x in self.payment_list]
-
+        self.payment_ids = list(self.payments_dict.keys())
         self.payments_to_save = []
         self.payment_channel_update = False
         self.entitlement_update = False
@@ -154,7 +150,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                         XlsxPaymentPlanExportService.TITLE,
                         payment_channel_cell.coordinate,
                         f"You can't set payment_channel {payment_channel} for Collector with already assigned payment "
-                        f"channels: {', '.join(collectors_payment_channels)}",
+                        f"channel(s): {', '.join(collectors_payment_channels)}",
                     )
                 )
             if not payment.collector.payment_channels.exists() and payment_channel:
