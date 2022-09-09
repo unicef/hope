@@ -272,6 +272,9 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
+    def check_sync_permission(self, request, obj=None):
+        return is_root(request)
+
     def has_delete_permission(self, request, obj=None):
         return is_root(request)
 

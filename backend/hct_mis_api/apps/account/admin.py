@@ -999,6 +999,9 @@ class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
         ("role__subsystem", AllValuesComboFilter),
     )
 
+    def check_sync_permission(self, request, obj=None):
+        return request.user.is_staff
+
     def check_publish_permission(self, request, obj=None):
         return False
 
