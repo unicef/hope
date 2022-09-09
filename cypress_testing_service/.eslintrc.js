@@ -6,6 +6,7 @@ module.exports = {
     'airbnb-typescript/base',
     'plugin:cypress/recommended',
     'prettier',
+    'prettier/@typescript-eslint',
     "eslint:recommended",
     "plugin:import/recommended"
   ],
@@ -36,7 +37,7 @@ module.exports = {
   "globals": {
     "globalThis": false, // means it is not writeable
     module: true,
-    // Chai: true,
+    Chai: true,
     require: true,
     Loggable: true,
     Timeoutable: true,
