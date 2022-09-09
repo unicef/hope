@@ -372,7 +372,7 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-admin-extra-buttons"
-version = "1.5.1"
+version = "1.5.2"
 description = "Django mixin to easily add buttons to any ModelAdmin"
 category = "main"
 optional = false
@@ -385,7 +385,7 @@ test = ["coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytest
 
 [[package]]
 name = "django-admin-sync"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 category = "main"
 optional = false

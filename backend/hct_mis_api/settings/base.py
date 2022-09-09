@@ -383,6 +383,7 @@ CACHES = {
 }
 
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "sessionid")
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 AUTH_USER_MODEL = "account.User"
 

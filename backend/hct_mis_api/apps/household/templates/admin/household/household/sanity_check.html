@@ -54,12 +54,14 @@
             <th></th><th>Name</th><th>Unicef ID</th>
         <tr>
             <td>Primary</td>
-            <td><a href="{% url "admin:household_individual_change"  primary.individual.pk %}">{{ primary.individual.full_name }}</a></td>
+            {% url "admin:household_individual_change"  primary.individual.pk as aa %}
+            <td><a href="{{ aa }}">{{ primary.individual.full_name }}</a></td>
             <td>{{ primary.individual.unicef_id }}</td>
         </tr>
         <tr>
             <td>Alternate</td>
-            <td><a href="{% url "admin:household_individual_change" alternate.individual.pk %}">{{ alternate.individual.full_name }}</a></td>
+            {% url "admin:household_individual_change"  alternate.individual.pk as aa %}
+            <td><a href="{{ aa }}">{{ alternate.individual.full_name }}</a></td>
             <td>{{ alternate.individual.unicef_id }}</td>
         </tr>
         {#    </table>#}

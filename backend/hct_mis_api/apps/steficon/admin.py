@@ -278,7 +278,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
     def has_change_permission(self, request, obj=None):
         return is_root(request)
 
-    def get_ignored_linked_objects(self):
+    def get_ignored_linked_objects(self, request):
         return ["history"]
 
     def get_form(self, request, obj=None, change=False, **kwargs):
