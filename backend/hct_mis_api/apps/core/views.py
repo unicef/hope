@@ -5,19 +5,14 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.contrib import messages
-from django.views.generic import View
 
 from graphene_django.settings import graphene_settings
 from graphql.utils import schema_printer
 
-from hct_mis_api.apps.account.permissions import Permissions, UploadFilePermissionMixin
-from hct_mis_api.apps.core.forms import StorageFileForm
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.hope_redirect import get_hope_redirect
-from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.reporting.models import DashboardReport
 
 logger = logging.getLogger(__name__)
@@ -78,33 +73,3 @@ def hope_redirect(request):
     programid = request.GET.get("programid")
     hope_redirect = get_hope_redirect(request.user, ent, caid, sourceid, programid)
     return redirect(hope_redirect.url())
-
-
-class UploadFile(UploadFilePermissionMixin, View):
-    def get(self, request):
-        user = request.user
-        return render(request, self.template_name, {"form": StorageFileForm(user=user)})
-
-    def post(self, request):
-        user = request.user
-        form = StorageFileForm(request.POST, request.FILES, user=user)
-        if form.is_valid():
-            new_file = StorageFile(
-                created_by=user,
-                file=request.FILES["file"],
-                business_area_id=request.POST["business_area"]
-            )
-            new_file.save()
-            messages.success(request, f"File {new_file.file.name} has been successfully uploaded.")
-            return HttpResponseRedirect(reverse("upload-file"))
-        else:
-            messages.error(request, self.format_form_error(form))
-            return render(request, self.template_name, {"form": StorageFileForm(user=user)})
-
-    @property
-    def template_name(self):
-        return "core/upload_file.html"
-
-    @staticmethod
-    def format_form_error(form):
-        return form.errors.get_json_data()["__all__"][0]["message"]
