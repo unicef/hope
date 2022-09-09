@@ -130,7 +130,7 @@ class HouseholdAdmin(
         "country",
         "head_of_household",
         "size",
-        "registration_data_import",
+        "withdrawn",
     )
     list_filter = (
         DepotManager,
@@ -139,6 +139,7 @@ class HouseholdAdmin(
         # ("unhcr_id", MultiValueFilter),
         # ("id", MultiValueFilter),
         ("registration_data_import", AutoCompleteFilter),
+        ("withdrawn", ChoicesFieldComboFilter),
         # ("country", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         # ("size", MaxMinFilter),
@@ -185,12 +186,55 @@ class HouseholdAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
+    actions = ["mass_withdraw", "mass_unwithdraw"]
 
     def get_ignored_linked_objects(self, request):
         return []
 
+    def _toggle_withdraw_status(self, request, hh: Household, tickets: list = None):
+        from hct_mis_api.apps.grievance.models import GrievanceTicket
+
+        if not tickets:
+            tickets = GrievanceTicket.objects.belong_household(hh)
+            if hh.withdrawn:
+                tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
+            else:
+                tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
+        service = HouseholdWithdraw(hh)
+        service.withdraw()
+        service.change_tickets_status(tickets)
+        if hh.withdrawn:
+            message = "{} has been withdrawn"
+            ticket_message = "Ticket closed due to Household withdrawn"
+        else:
+            message = "{} has been restored"
+            ticket_message = "Ticket reopened due to Household restore"
+
+        for individual in service.individuals:
+            self.log_change(request, individual, message.format("Individual"))
+
+        for ticket in tickets:
+            self.log_change(request, ticket.ticket, ticket_message)
+        self.log_change(request, hh, message.format("Household"))
+
+        return service
+
+    def mass_withdraw(self, request, qs):
+        with atomic():
+            for hh in qs.filter(withdrawn=False):
+                self._toggle_withdraw_status(request, hh)
+
+    mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
+
+    def mass_unwithdraw(self, request, qs):
+        with atomic():
+            for hh in qs.filter(withdrawn=True):
+                self._toggle_withdraw_status(request, hh)
+
+    mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
+
     @button(permission="household.can_withdrawn")
-    def withdrawn(self, request, pk):
+    def withdraw(self, request, pk):
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
         context = self.get_common_context(request, pk, title="Withdrawn")
@@ -207,24 +251,11 @@ class HouseholdAdmin(
         if request.method == "POST":
             try:
                 with atomic():
-                    service = HouseholdWithdraw(obj)
-                    service.withdraw()
-                    service.change_tickets_status(tickets)
-
-                    if obj.withdrawn:
-                        message = "{} has been withdrawn"
-                        ticket_message = "Ticket closed due to Household withdrawn"
-                    else:
-                        message = "{} has been restored"
-                        ticket_message = "Ticket reopened due to Household restore"
-
-                    for individual in service.individuals:
-                        self.log_change(request, individual, message.format("Individual"))
-
-                    for ticket in tickets:
-                        self.log_change(request, ticket.ticket, ticket_message)
-
-                    self.log_change(request, obj, message.format("Household"))
+                    # service = HouseholdWithdraw(obj)
+                    # service.withdraw()
+                    # service.change_tickets_status(tickets)
+                    service = self._toggle_withdraw_status(request, obj, tickets)
+                    self.message_user(request, "Household successfully withdrawn", messages.SUCCESS)
                     return HttpResponseRedirect(request.path)
             except Exception as e:
                 self.message_user(request, str(e), messages.ERROR)

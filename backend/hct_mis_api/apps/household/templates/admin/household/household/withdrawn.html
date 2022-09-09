@@ -1,7 +1,7 @@
 {% extends "admin_extra_buttons/action_page.html" %}{% load hope i18n admin_urls static admin_modify %}
 {% block action-content %}
     {% if original.withdrawn %}
-    <h1 style="color: red">Warning: Household already withdrawn</h1>
+    <h1 style="color: red">Household currently withdrawn</h1>
         <h2>Continuing will restore this household and all his  members (not the external collectors) and
             will reopen all tickets closed when it was withdrew.
         </h2>
