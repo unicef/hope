@@ -19,13 +19,18 @@ Feature: Create Payment Plan
         Then I should see the New Payment Plan page
         When I fill out the form fields and save
         Then I should see the Payment Plan details page
-# TODO
-# When I lock the Payment Plan
-# Then I see the entitlements input
-# When I choose the steficon rule
-# And I apply the steficon rule
-# Then I see the entitlements calculated
-# And I am able to set up FSPs
+        When I lock the Payment Plan
+        Then I see the entitlements input
+        When I choose the steficon rule
+        And I apply the steficon rule
+        Then I see the entitlements calculated
+        And I am able to set up FSPs
+        Then I should see the Set up FSP page
+
+
+
+
+#TODO
 # When I set up the FSPs # (choose dms & fsps)
 # Then I see the volumes calculated
 # When I lock the FSPs

@@ -1,4 +1,4 @@
-import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, Given, And } from 'cypress-cucumber-preprocessor/steps';
 import {
   fillProgramForm,
   fillTargetingForm,
@@ -22,11 +22,13 @@ const clearCache = () => {
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
 };
 
-Given("There are individuals and households imported", () => {
+Given('There are individuals and households imported', () => {
   cy.exec(`yarn run generate-xlsx-files 3 --seed ${uniqueSeed}`);
   cy.visit('/');
   clearCache();
-  cy.get('span').contains('Registration Data Import', { timeout: 10000 }).click();
+  cy.get('span')
+    .contains('Registration Data Import', { timeout: 10000 })
+    .click();
   cy.get('button > span').contains('IMPORT').click({ force: true });
 
   cy.get('[data-cy="import-type-select"]').click();
@@ -64,7 +66,7 @@ Given("There are individuals and households imported", () => {
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
   cy.get('div').contains('MERGED');
-})
+});
 
 Given('I have an active program', () => {
   cy.visit('/');
@@ -154,4 +156,40 @@ Then('I should see the Payment Plan details page', () => {
   cy.get('h6').contains('Results');
   cy.get('h6').contains('Payments List');
   cy.get('h6').contains('Activity Log');
+});
+
+When('I lock the Payment Plan', () => {
+  cy.get('[data-cy="button-lock-plan"]').click({
+    force: true,
+  });
+  cy.get('[data-cy="button-submit"]').click({
+    force: true,
+  });
+});
+
+Then('I see the entitlements input', () => {
+  cy.get('[data-cy=input-entitlement-formula] > .MuiSelect-root').click({
+    force: true,
+  });
+});
+
+When('I choose the steficon rule', () => {
+  cy.get('[data-cy="select-option-0"]').click();
+});
+
+And('I apply the steficon rule', () => {
+  cy.get('[data-cy="button-apply-steficon"]').click({ force: true });
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
+});
+
+Then('I see the entitlements calculated', () => {
+  cy.get('[data-cy="total-entitled-quantity-usd"]').should('not.be.empty');
+});
+
+And('And I am able to set up FSPs', () => {
+  cy.get('[data-cy="button-set-up-fsp"]').click({ force: true });
+});
+
+Then('I should see the Set up FSP page', () => {
+  cy.get('[data-cy="page-header-title"]').contains('Set up FSP');
 });
