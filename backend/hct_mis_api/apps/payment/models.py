@@ -894,7 +894,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
-    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
+    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.PROTECT, null=True)  # TODO: on_delete=CASCADE ?
 
     objects = PaymentManager()
 
