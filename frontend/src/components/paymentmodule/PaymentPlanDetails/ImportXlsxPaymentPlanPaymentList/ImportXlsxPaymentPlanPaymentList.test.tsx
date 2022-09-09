@@ -48,8 +48,6 @@ describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPayme
     act(() => {
       buttonClose.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
-    
-    // expect(inputFile).not.toBeInTheDocument();
 
     await act(() => wait(0)); // wait for response
 
