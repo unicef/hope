@@ -4,6 +4,7 @@ from itertools import chain
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.contrib.messages import DEFAULT_TAGS
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import JSONField, Q
 from django.db.transaction import atomic
@@ -15,6 +16,7 @@ from django.urls import reverse
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     MaxMinFilter,
@@ -131,16 +133,17 @@ class HouseholdAdmin(
         "registration_data_import",
     )
     list_filter = (
-        ("unicef_id", MultiValueFilter),
-        ("unhcr_id", MultiValueFilter),
-        ("id", MultiValueFilter),
+        DepotManager,
+        QueryStringFilter,
+        # ("unicef_id", MultiValueFilter),
+        # ("unhcr_id", MultiValueFilter),
+        # ("id", MultiValueFilter),
         ("registration_data_import", AutoCompleteFilter),
         # ("country", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
-        ("size", MaxMinFilter),
+        # ("size", MaxMinFilter),
         "org_enumerator",
         "last_registration_date",
-        QueryStringFilter,
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
@@ -183,7 +186,7 @@ class HouseholdAdmin(
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
 
-    def get_ignored_linked_objects(self):
+    def get_ignored_linked_objects(self, request):
         return []
 
     @button(permission="household.can_withdrawn")
@@ -243,7 +246,7 @@ class HouseholdAdmin(
     def members(self, request, pk):
         obj = Household.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.unicef_id}")
+        return HttpResponseRedirect(f"{url}?qs=unicef_id={obj.unicef_id}")
 
     @button()
     def sanity_check(self, request, pk):
@@ -255,13 +258,13 @@ class HouseholdAdmin(
         head = None
         try:
             primary = IndividualRoleInHousehold.objects.get(household=hh, role=ROLE_PRIMARY)
-        except IndividualRoleInHousehold.DoesNotExist:
+        except ObjectDoesNotExist:
             warnings.append([messages.ERROR, "Head of househould not found"])
 
         alternate = IndividualRoleInHousehold.objects.filter(household=hh, role=ROLE_ALTERNATE).first()
         try:
             head = hh.individuals.get(relationship=HEAD)
-        except IndividualRoleInHousehold.DoesNotExist:
+        except ObjectDoesNotExist:
             warnings.append([messages.ERROR, "Head of househould not found"])
 
         total_in_ranges = 0
@@ -363,6 +366,7 @@ class IndividualAdmin(
     exclude = ("created_at", "updated_at")
     inlines = [IndividualRoleInHouseholdInline, BankAccountInfoStackedInline]
     list_filter = (
+        DepotManager,
         QueryStringFilter,
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
@@ -481,7 +485,11 @@ class IndividualAdmin(
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("individual_id", "household_id", "role")
-    list_filter = ("role",)
+    list_filter = (
+        DepotManager,
+        QueryStringFilter,
+        "role",
+    )
     raw_id_fields = (
         "individual",
         "household",

@@ -34,7 +34,7 @@ from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_buttons.api import ExtraButtonsMixin, button
-from admin_sync.mixin import SyncMixin
+from admin_sync.mixin import GetManyFromRemoteMixin, SyncMixin
 from adminactions.export import ForeignKeysCollector
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -601,7 +601,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
 
     @button(
         permission="account.can_create_kobo_user",
-        visible=lambda o, r: not o.custom_fields.get("kobo_username"),
+        enabled=lambda b: not b.original.custom_fields.get("kobo_username"),
     )
     def create_kobo_user(self, request, pk):
         try:
@@ -613,7 +613,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
 
     @button(
         permission="account.can_create_kobo_user",
-        visible=lambda o, r: o.custom_fields.get("kobo_username"),
+        enabled=lambda b: not b.custom_fields.get("kobo_username"),
     )
     def remove_kobo_access(self, request, pk):
         try:
@@ -987,7 +987,7 @@ class RoleAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 
 @admin.register(account_models.UserRole)
-class UserRoleAdmin(SyncMixin, HOPEModelAdminBase):
+class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
     autocomplete_fields = ("role",)

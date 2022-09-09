@@ -6,7 +6,9 @@ from django.urls import reverse
 
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, ValueFilter
+from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
@@ -33,6 +35,8 @@ class TargetPopulationAdmin(
     date_hierarchy = "created_at"
     search_fields = ("name",)
     list_filter = (
+        DepotManager,
+        QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("steficon_rule__rule", AutoCompleteFilter),
@@ -66,9 +70,9 @@ class TargetPopulationAdmin(
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
 
-    @button()
-    def download_xlsx(self, request, pk):
-        return redirect("admin-download-target-population", target_population_id=pk)
+    # @button()
+    # def download_xlsx(self, request, pk):
+    #     return redirect("admin-download-target-population", target_population_id=pk)
 
 
 @admin.register(HouseholdSelection)
@@ -83,6 +87,8 @@ class HouseholdSelectionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         "target_population",
     )
     list_filter = (
+        DepotManager,
+        QueryStringFilter,
         ("household__unicef_id", ValueFilter),
         ("target_population", AutoCompleteFilter),
         ("target_population__id", ValueFilter),
