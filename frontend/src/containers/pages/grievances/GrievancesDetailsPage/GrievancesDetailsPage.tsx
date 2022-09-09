@@ -18,6 +18,8 @@ import {
   useMeQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
+import { GRIEVANCE_CATEGORIES } from '../../../../utils/constants';
+import { FeedbackToHousehold } from '../../../../components/grievances/FeedbackToHousehold';
 import { grievancePermissions } from './grievancePermissions';
 
 export const GrievancesDetailsPage = (): React.ReactElement => {
@@ -92,6 +94,9 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
           canApproveDataChange={canApproveDataChange}
           canApprovePaymentVerification={canApprovePaymentVerification}
         />
+        {ticket.category === +GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT && (
+          <FeedbackToHousehold />
+        )}
         <Notes notes={ticket.ticketNotes} canAddNote={canAddNote} />
         <GrievancesSidebar
           ticket={ticket}

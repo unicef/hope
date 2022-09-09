@@ -1,0 +1,1 @@
+export { FeedbackToHousehold } from './FeedbackToHousehold';

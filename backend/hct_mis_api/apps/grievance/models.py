@@ -779,8 +779,8 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 
 
 class FeedbackToHousehold(TimeStampedUUIDModel):
-    MESSAGE = 1
-    RESPONSE = 2
+    MESSAGE = "MESSAGE"
+    RESPONSE = "RESPONSE"
 
     KIND_CHOICES = (
         (MESSAGE, _("Message")),
@@ -795,7 +795,7 @@ class FeedbackToHousehold(TimeStampedUUIDModel):
     individual = models.ForeignKey(
         "household.Individual",
         related_name="feedback_to_household",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
     )
     message = models.TextField(
@@ -810,7 +810,7 @@ class FeedbackToHousehold(TimeStampedUUIDModel):
         null=True,
         verbose_name=_("Created by"),
     )
-    kind = models.PositiveSmallIntegerField(choices=KIND_CHOICES)
+    kind = models.CharField(choices=KIND_CHOICES, max_length=10)
 
 
 @receiver(post_save, sender=TicketComplaintDetails)

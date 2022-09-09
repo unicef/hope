@@ -767,6 +767,16 @@ export type CreateDashboardReportInput = {
   program?: Maybe<Scalars['ID']>,
 };
 
+export type CreateFeedbackToHouseholdInput = {
+  message: Scalars['String'],
+  ticket: Scalars['ID'],
+};
+
+export type CreateFeedbackToHouseholdMutation = {
+   __typename?: 'CreateFeedbackToHouseholdMutation',
+  feedbackToHousehold?: Maybe<FeedbackToHouseholdNode>,
+};
+
 export type CreateGrievanceTicketExtrasInput = {
   category?: Maybe<CategoryExtrasInput>,
   issueType?: Maybe<IssueTypeExtrasInput>,
@@ -1056,6 +1066,36 @@ export type ExportXlsxCashPlanVerification = {
   cashPlan?: Maybe<CashPlanNode>,
 };
 
+export enum FeedbackToHouseholdKind {
+  Message = 'MESSAGE',
+  Response = 'RESPONSE'
+}
+
+export type FeedbackToHouseholdNode = Node & {
+   __typename?: 'FeedbackToHouseholdNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  individual?: Maybe<IndividualNode>,
+  message: Scalars['String'],
+  createdBy?: Maybe<UserNode>,
+  kind: FeedbackToHouseholdKind,
+};
+
+export type FeedbackToHouseholdNodeConnection = {
+   __typename?: 'FeedbackToHouseholdNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<FeedbackToHouseholdNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type FeedbackToHouseholdNodeEdge = {
+   __typename?: 'FeedbackToHouseholdNodeEdge',
+  node?: Maybe<FeedbackToHouseholdNode>,
+  cursor: Scalars['String'],
+};
+
 export type FieldAttributeNode = {
    __typename?: 'FieldAttributeNode',
   id?: Maybe<Scalars['String']>,
@@ -1160,6 +1200,7 @@ export type GrievanceTicketNode = Node & {
   positiveFeedbackTicketDetails?: Maybe<TicketPositiveFeedbackDetailsNode>,
   negativeFeedbackTicketDetails?: Maybe<TicketNegativeFeedbackDetailsNode>,
   referralTicketDetails?: Maybe<TicketReferralDetailsNode>,
+  feedbackToHousehold: FeedbackToHouseholdNodeConnection,
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
   paymentRecord?: Maybe<PaymentRecordNode>,
@@ -1189,6 +1230,15 @@ export type GrievanceTicketNodeLinkedTicketsRelatedArgs = {
 
 
 export type GrievanceTicketNodeTicketNotesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type GrievanceTicketNodeFeedbackToHouseholdArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -2511,6 +2561,7 @@ export type IndividualNode = Node & {
   positiveFeedbackTicketDetails: TicketPositiveFeedbackDetailsNodeConnection,
   negativeFeedbackTicketDetails: TicketNegativeFeedbackDetailsNodeConnection,
   referralTicketDetails: TicketReferralDetailsNodeConnection,
+  feedbackToHousehold: FeedbackToHouseholdNodeConnection,
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -2618,6 +2669,15 @@ export type IndividualNodeNegativeFeedbackTicketDetailsArgs = {
 
 
 export type IndividualNodeReferralTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeFeedbackToHouseholdArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -2875,12 +2935,14 @@ export type Mutations = {
   grievanceStatusChange?: Maybe<GrievanceStatusChangeMutation>,
   bulkUpdateGrievanceAssignee?: Maybe<BulkUpdateGrievanceTicketsAssigneesMutation>,
   createTicketNote?: Maybe<CreateTicketNoteMutation>,
+  createFeedbackToHousehold?: Maybe<CreateFeedbackToHouseholdMutation>,
   approveIndividualDataChange?: Maybe<IndividualDataChangeApproveMutation>,
   approveHouseholdDataChange?: Maybe<HouseholdDataChangeApproveMutation>,
   approveAddIndividual?: Maybe<SimpleApproveMutation>,
   approveDeleteIndividual?: Maybe<SimpleApproveMutation>,
   approveDeleteHousehold?: Maybe<SimpleApproveMutation>,
   approveSystemFlagging?: Maybe<SimpleApproveMutation>,
+  approveComplaint?: Maybe<SimpleApproveMutation>,
   approveNeedsAdjudication?: Maybe<NeedsAdjudicationApproveMutation>,
   approvePaymentDetails?: Maybe<PaymentDetailsApproveMutation>,
   reassignRole?: Maybe<ReassignRoleMutation>,
@@ -2964,6 +3026,12 @@ export type MutationsCreateTicketNoteArgs = {
 };
 
 
+export type MutationsCreateFeedbackToHouseholdArgs = {
+  feedback: CreateFeedbackToHouseholdInput,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
 export type MutationsApproveIndividualDataChangeArgs = {
   approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedDocumentsToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
@@ -3011,6 +3079,13 @@ export type MutationsApproveDeleteHouseholdArgs = {
 
 
 export type MutationsApproveSystemFlaggingArgs = {
+  approveStatus: Scalars['Boolean'],
+  grievanceTicketId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsApproveComplaintArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
@@ -3647,6 +3722,7 @@ export type Query = {
   allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>,
   existingGrievanceTickets?: Maybe<GrievanceTicketNodeConnection>,
   allTicketNotes?: Maybe<TicketNoteNodeConnection>,
+  allFeedbackToHousehold?: Maybe<FeedbackToHouseholdNodeConnection>,
   chartGrievances?: Maybe<ChartGrievanceTicketsNode>,
   allAddIndividualsFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
@@ -3910,6 +3986,17 @@ export type QueryExistingGrievanceTicketsArgs = {
 
 
 export type QueryAllTicketNotesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  ticket: Scalars['UUID']
+};
+
+
+export type QueryAllFeedbackToHouseholdArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -5395,6 +5482,7 @@ export type TicketComplaintDetailsNode = Node & {
   paymentRecord?: Maybe<PaymentRecordNode>,
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
+  approveStatus: Scalars['Boolean'],
 };
 
 export type TicketComplaintDetailsNodeConnection = {
@@ -6061,6 +6149,7 @@ export type UserNode = Node & {
   createdTickets: GrievanceTicketNodeConnection,
   assignedTickets: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
+  feedbackToHousehold: FeedbackToHouseholdNodeConnection,
   registrationDataImports: RegistrationDataImportNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
   lockedTargetPopulations: TargetPopulationNodeConnection,
@@ -6090,6 +6179,15 @@ export type UserNodeAssignedTicketsArgs = {
 
 
 export type UserNodeTicketNotesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeFeedbackToHouseholdArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -6711,6 +6809,23 @@ export type ApproveAddIndividualDataChangeMutation = (
   )> }
 );
 
+export type ApproveComplaintMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  approveStatus: Scalars['Boolean']
+};
+
+
+export type ApproveComplaintMutation = (
+  { __typename?: 'Mutations' }
+  & { approveComplaint: Maybe<(
+    { __typename?: 'SimpleApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
 export type ApproveDeleteHouseholdDataChangeMutationVariables = {
   grievanceTicketId: Scalars['ID'],
   approveStatus: Scalars['Boolean']
@@ -6930,6 +7045,29 @@ export type CreateGrievanceTicketNoteMutation = (
       & { createdBy: Maybe<(
         { __typename?: 'UserNode' }
         & Pick<UserNode, 'firstName' | 'lastName' | 'username' | 'email'>
+      )> }
+    )> }
+  )> }
+);
+
+export type CreateTicketFeedbackToHouseholdMutationVariables = {
+  feedback: CreateFeedbackToHouseholdInput
+};
+
+
+export type CreateTicketFeedbackToHouseholdMutation = (
+  { __typename?: 'Mutations' }
+  & { createFeedbackToHousehold: Maybe<(
+    { __typename?: 'CreateFeedbackToHouseholdMutation' }
+    & { feedbackToHousehold: Maybe<(
+      { __typename?: 'FeedbackToHouseholdNode' }
+      & Pick<FeedbackToHouseholdNode, 'id' | 'createdAt' | 'message' | 'kind'>
+      & { individual: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'fullName'>
+      )>, createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'firstName' | 'lastName'>
       )> }
     )> }
   )> }
@@ -8050,6 +8188,32 @@ export type ImportedIndividualFieldsQuery = (
   )>>> }
 );
 
+export type AllFeedbackToHouseholdQueryVariables = {
+  ticket: Scalars['UUID']
+};
+
+
+export type AllFeedbackToHouseholdQuery = (
+  { __typename?: 'Query' }
+  & { allFeedbackToHousehold: Maybe<(
+    { __typename?: 'FeedbackToHouseholdNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'FeedbackToHouseholdNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'FeedbackToHouseholdNode' }
+        & Pick<FeedbackToHouseholdNode, 'id' | 'createdAt' | 'message' | 'kind'>
+        & { individual: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'fullName'>
+        )>, createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'firstName' | 'lastName'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllGrievanceDashboardChartsQueryVariables = {
   businessAreaSlug: Scalars['String']
 };
@@ -8466,6 +8630,9 @@ export type GrievanceTicketQuery = (
         )> }
         & IndividualDetailedFragment
       )>>> }
+    )>, complaintTicketDetails: Maybe<(
+      { __typename?: 'TicketComplaintDetailsNode' }
+      & Pick<TicketComplaintDetailsNode, 'id' | 'approveStatus'>
     )>, ticketNotes: (
       { __typename?: 'TicketNoteNodeConnection' }
       & { edges: Array<Maybe<(
@@ -10956,6 +11123,59 @@ export function useApproveAddIndividualDataChangeMutation(baseOptions?: ApolloRe
 export type ApproveAddIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveAddIndividualDataChangeMutation>;
 export type ApproveAddIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveAddIndividualDataChangeMutation>;
 export type ApproveAddIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>;
+export const ApproveComplaintDocument = gql`
+    mutation ApproveComplaint($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+  approveComplaint(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveComplaintMutationFn = ApolloReactCommon.MutationFunction<ApproveComplaintMutation, ApproveComplaintMutationVariables>;
+export type ApproveComplaintComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveComplaintMutation, ApproveComplaintMutationVariables>, 'mutation'>;
+
+    export const ApproveComplaintComponent = (props: ApproveComplaintComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveComplaintMutation, ApproveComplaintMutationVariables> mutation={ApproveComplaintDocument} {...props} />
+    );
+    
+export type ApproveComplaintProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveComplaintMutation, ApproveComplaintMutationVariables> & TChildProps;
+export function withApproveComplaint<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveComplaintMutation,
+  ApproveComplaintMutationVariables,
+  ApproveComplaintProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveComplaintMutation, ApproveComplaintMutationVariables, ApproveComplaintProps<TChildProps>>(ApproveComplaintDocument, {
+      alias: 'approveComplaint',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveComplaintMutation__
+ *
+ * To run a mutation, you first call `useApproveComplaintMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveComplaintMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveComplaintMutation, { data, loading, error }] = useApproveComplaintMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      approveStatus: // value for 'approveStatus'
+ *   },
+ * });
+ */
+export function useApproveComplaintMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveComplaintMutation, ApproveComplaintMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveComplaintMutation, ApproveComplaintMutationVariables>(ApproveComplaintDocument, baseOptions);
+      }
+export type ApproveComplaintMutationHookResult = ReturnType<typeof useApproveComplaintMutation>;
+export type ApproveComplaintMutationResult = ApolloReactCommon.MutationResult<ApproveComplaintMutation>;
+export type ApproveComplaintMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveComplaintMutation, ApproveComplaintMutationVariables>;
 export const ApproveDeleteHouseholdDataChangeDocument = gql`
     mutation ApproveDeleteHouseholdDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!) {
   approveDeleteHousehold(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
@@ -11573,6 +11793,67 @@ export function useCreateGrievanceTicketNoteMutation(baseOptions?: ApolloReactHo
 export type CreateGrievanceTicketNoteMutationHookResult = ReturnType<typeof useCreateGrievanceTicketNoteMutation>;
 export type CreateGrievanceTicketNoteMutationResult = ApolloReactCommon.MutationResult<CreateGrievanceTicketNoteMutation>;
 export type CreateGrievanceTicketNoteMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables>;
+export const CreateTicketFeedbackToHouseholdDocument = gql`
+    mutation CreateTicketFeedbackToHousehold($feedback: CreateFeedbackToHouseholdInput!) {
+  createFeedbackToHousehold(feedback: $feedback) {
+    feedbackToHousehold {
+      id
+      individual {
+        fullName
+      }
+      createdBy {
+        firstName
+        lastName
+      }
+      createdAt
+      message
+      kind
+    }
+  }
+}
+    `;
+export type CreateTicketFeedbackToHouseholdMutationFn = ApolloReactCommon.MutationFunction<CreateTicketFeedbackToHouseholdMutation, CreateTicketFeedbackToHouseholdMutationVariables>;
+export type CreateTicketFeedbackToHouseholdComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateTicketFeedbackToHouseholdMutation, CreateTicketFeedbackToHouseholdMutationVariables>, 'mutation'>;
+
+    export const CreateTicketFeedbackToHouseholdComponent = (props: CreateTicketFeedbackToHouseholdComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateTicketFeedbackToHouseholdMutation, CreateTicketFeedbackToHouseholdMutationVariables> mutation={CreateTicketFeedbackToHouseholdDocument} {...props} />
+    );
+    
+export type CreateTicketFeedbackToHouseholdProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateTicketFeedbackToHouseholdMutation, CreateTicketFeedbackToHouseholdMutationVariables> & TChildProps;
+export function withCreateTicketFeedbackToHousehold<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateTicketFeedbackToHouseholdMutation,
+  CreateTicketFeedbackToHouseholdMutationVariables,
+  CreateTicketFeedbackToHouseholdProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateTicketFeedbackToHouseholdMutation, CreateTicketFeedbackToHouseholdMutationVariables, CreateTicketFeedbackToHouseholdProps<TChildProps>>(CreateTicketFeedbackToHouseholdDocument, {
+      alias: 'createTicketFeedbackToHousehold',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateTicketFeedbackToHouseholdMutation__
+ *
+ * To run a mutation, you first call `useCreateTicketFeedbackToHouseholdMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTicketFeedbackToHouseholdMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTicketFeedbackToHouseholdMutation, { data, loading, error }] = useCreateTicketFeedbackToHouseholdMutation({
+ *   variables: {
+ *      feedback: // value for 'feedback'
+ *   },
+ * });
+ */
+export function useCreateTicketFeedbackToHouseholdMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateTicketFeedbackToHouseholdMutation, CreateTicketFeedbackToHouseholdMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateTicketFeedbackToHouseholdMutation, CreateTicketFeedbackToHouseholdMutationVariables>(CreateTicketFeedbackToHouseholdDocument, baseOptions);
+      }
+export type CreateTicketFeedbackToHouseholdMutationHookResult = ReturnType<typeof useCreateTicketFeedbackToHouseholdMutation>;
+export type CreateTicketFeedbackToHouseholdMutationResult = ApolloReactCommon.MutationResult<CreateTicketFeedbackToHouseholdMutation>;
+export type CreateTicketFeedbackToHouseholdMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateTicketFeedbackToHouseholdMutation, CreateTicketFeedbackToHouseholdMutationVariables>;
 export const GrievanceTicketStatusChangeDocument = gql`
     mutation GrievanceTicketStatusChange($grievanceTicketId: ID, $status: Int) {
   grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
@@ -14742,6 +15023,70 @@ export function useImportedIndividualFieldsLazyQuery(baseOptions?: ApolloReactHo
 export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFieldsQuery>;
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
+export const AllFeedbackToHouseholdDocument = gql`
+    query AllFeedbackToHousehold($ticket: UUID!) {
+  allFeedbackToHousehold(ticket: $ticket) {
+    edges {
+      node {
+        id
+        individual {
+          fullName
+        }
+        createdBy {
+          firstName
+          lastName
+        }
+        createdAt
+        message
+        kind
+      }
+    }
+  }
+}
+    `;
+export type AllFeedbackToHouseholdComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllFeedbackToHouseholdQuery, AllFeedbackToHouseholdQueryVariables>, 'query'> & ({ variables: AllFeedbackToHouseholdQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllFeedbackToHouseholdComponent = (props: AllFeedbackToHouseholdComponentProps) => (
+      <ApolloReactComponents.Query<AllFeedbackToHouseholdQuery, AllFeedbackToHouseholdQueryVariables> query={AllFeedbackToHouseholdDocument} {...props} />
+    );
+    
+export type AllFeedbackToHouseholdProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllFeedbackToHouseholdQuery, AllFeedbackToHouseholdQueryVariables> & TChildProps;
+export function withAllFeedbackToHousehold<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllFeedbackToHouseholdQuery,
+  AllFeedbackToHouseholdQueryVariables,
+  AllFeedbackToHouseholdProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllFeedbackToHouseholdQuery, AllFeedbackToHouseholdQueryVariables, AllFeedbackToHouseholdProps<TChildProps>>(AllFeedbackToHouseholdDocument, {
+      alias: 'allFeedbackToHousehold',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllFeedbackToHouseholdQuery__
+ *
+ * To run a query within a React component, call `useAllFeedbackToHouseholdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllFeedbackToHouseholdQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllFeedbackToHouseholdQuery({
+ *   variables: {
+ *      ticket: // value for 'ticket'
+ *   },
+ * });
+ */
+export function useAllFeedbackToHouseholdQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllFeedbackToHouseholdQuery, AllFeedbackToHouseholdQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllFeedbackToHouseholdQuery, AllFeedbackToHouseholdQueryVariables>(AllFeedbackToHouseholdDocument, baseOptions);
+      }
+export function useAllFeedbackToHouseholdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllFeedbackToHouseholdQuery, AllFeedbackToHouseholdQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllFeedbackToHouseholdQuery, AllFeedbackToHouseholdQueryVariables>(AllFeedbackToHouseholdDocument, baseOptions);
+        }
+export type AllFeedbackToHouseholdQueryHookResult = ReturnType<typeof useAllFeedbackToHouseholdQuery>;
+export type AllFeedbackToHouseholdLazyQueryHookResult = ReturnType<typeof useAllFeedbackToHouseholdLazyQuery>;
+export type AllFeedbackToHouseholdQueryResult = ApolloReactCommon.QueryResult<AllFeedbackToHouseholdQuery, AllFeedbackToHouseholdQueryVariables>;
 export const AllGrievanceDashboardChartsDocument = gql`
     query AllGrievanceDashboardCharts($businessAreaSlug: String!) {
   ticketsByType(businessAreaSlug: $businessAreaSlug) {
@@ -15363,6 +15708,10 @@ export const GrievanceTicketDocument = gql`
         }
       }
       roleReassignData
+    }
+    complaintTicketDetails {
+      id
+      approveStatus
     }
     issueType
     ticketNotes {
@@ -19965,6 +20314,10 @@ export type ResolversTypes = {
   TicketReferralDetailsNodeConnection: ResolverTypeWrapper<TicketReferralDetailsNodeConnection>,
   TicketReferralDetailsNodeEdge: ResolverTypeWrapper<TicketReferralDetailsNodeEdge>,
   TicketReferralDetailsNode: ResolverTypeWrapper<TicketReferralDetailsNode>,
+  FeedbackToHouseholdNodeConnection: ResolverTypeWrapper<FeedbackToHouseholdNodeConnection>,
+  FeedbackToHouseholdNodeEdge: ResolverTypeWrapper<FeedbackToHouseholdNodeEdge>,
+  FeedbackToHouseholdNode: ResolverTypeWrapper<FeedbackToHouseholdNode>,
+  FeedbackToHouseholdKind: FeedbackToHouseholdKind,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
@@ -20178,6 +20531,8 @@ export type ResolversTypes = {
   BulkUpdateGrievanceTicketsAssigneesMutation: ResolverTypeWrapper<BulkUpdateGrievanceTicketsAssigneesMutation>,
   CreateTicketNoteInput: CreateTicketNoteInput,
   CreateTicketNoteMutation: ResolverTypeWrapper<CreateTicketNoteMutation>,
+  CreateFeedbackToHouseholdInput: CreateFeedbackToHouseholdInput,
+  CreateFeedbackToHouseholdMutation: ResolverTypeWrapper<CreateFeedbackToHouseholdMutation>,
   IndividualDataChangeApproveMutation: ResolverTypeWrapper<IndividualDataChangeApproveMutation>,
   HouseholdDataChangeApproveMutation: ResolverTypeWrapper<HouseholdDataChangeApproveMutation>,
   SimpleApproveMutation: ResolverTypeWrapper<SimpleApproveMutation>,
@@ -20341,6 +20696,10 @@ export type ResolversParentTypes = {
   TicketReferralDetailsNodeConnection: TicketReferralDetailsNodeConnection,
   TicketReferralDetailsNodeEdge: TicketReferralDetailsNodeEdge,
   TicketReferralDetailsNode: TicketReferralDetailsNode,
+  FeedbackToHouseholdNodeConnection: FeedbackToHouseholdNodeConnection,
+  FeedbackToHouseholdNodeEdge: FeedbackToHouseholdNodeEdge,
+  FeedbackToHouseholdNode: FeedbackToHouseholdNode,
+  FeedbackToHouseholdKind: FeedbackToHouseholdKind,
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
@@ -20554,6 +20913,8 @@ export type ResolversParentTypes = {
   BulkUpdateGrievanceTicketsAssigneesMutation: BulkUpdateGrievanceTicketsAssigneesMutation,
   CreateTicketNoteInput: CreateTicketNoteInput,
   CreateTicketNoteMutation: CreateTicketNoteMutation,
+  CreateFeedbackToHouseholdInput: CreateFeedbackToHouseholdInput,
+  CreateFeedbackToHouseholdMutation: CreateFeedbackToHouseholdMutation,
   IndividualDataChangeApproveMutation: IndividualDataChangeApproveMutation,
   HouseholdDataChangeApproveMutation: HouseholdDataChangeApproveMutation,
   SimpleApproveMutation: SimpleApproveMutation,
@@ -20966,6 +21327,10 @@ export type CreateDashboardReportResolvers<ContextType = any, ParentType extends
   success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
+export type CreateFeedbackToHouseholdMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateFeedbackToHouseholdMutation'] = ResolversParentTypes['CreateFeedbackToHouseholdMutation']> = {
+  feedbackToHousehold?: Resolver<Maybe<ResolversTypes['FeedbackToHouseholdNode']>, ParentType, ContextType>,
+};
+
 export type CreateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateGrievanceTicketMutation'] = ResolversParentTypes['CreateGrievanceTicketMutation']> = {
   grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
 };
@@ -21104,6 +21469,28 @@ export type ExportXlsxCashPlanVerificationResolvers<ContextType = any, ParentTyp
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
+export type FeedbackToHouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FeedbackToHouseholdNode'] = ResolversParentTypes['FeedbackToHouseholdNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  message?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  kind?: Resolver<ResolversTypes['FeedbackToHouseholdKind'], ParentType, ContextType>,
+};
+
+export type FeedbackToHouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FeedbackToHouseholdNodeConnection'] = ResolversParentTypes['FeedbackToHouseholdNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['FeedbackToHouseholdNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type FeedbackToHouseholdNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FeedbackToHouseholdNodeEdge'] = ResolversParentTypes['FeedbackToHouseholdNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['FeedbackToHouseholdNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FieldAttributeNode'] = ResolversParentTypes['FieldAttributeNode']> = {
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -21187,6 +21574,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   positiveFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketPositiveFeedbackDetailsNode']>, ParentType, ContextType>,
   negativeFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNode']>, ParentType, ContextType>,
   referralTicketDetails?: Resolver<Maybe<ResolversTypes['TicketReferralDetailsNode']>, ParentType, ContextType>,
+  feedbackToHousehold?: Resolver<ResolversTypes['FeedbackToHouseholdNodeConnection'], ParentType, ContextType, GrievanceTicketNodeFeedbackToHouseholdArgs>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
@@ -21657,6 +22045,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   positiveFeedbackTicketDetails?: Resolver<ResolversTypes['TicketPositiveFeedbackDetailsNodeConnection'], ParentType, ContextType, IndividualNodePositiveFeedbackTicketDetailsArgs>,
   negativeFeedbackTicketDetails?: Resolver<ResolversTypes['TicketNegativeFeedbackDetailsNodeConnection'], ParentType, ContextType, IndividualNodeNegativeFeedbackTicketDetailsArgs>,
   referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, IndividualNodeReferralTicketDetailsArgs>,
+  feedbackToHousehold?: Resolver<ResolversTypes['FeedbackToHouseholdNodeConnection'], ParentType, ContextType, IndividualNodeFeedbackToHouseholdArgs>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -21797,12 +22186,14 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, MutationsGrievanceStatusChangeArgs>,
   bulkUpdateGrievanceAssignee?: Resolver<Maybe<ResolversTypes['BulkUpdateGrievanceTicketsAssigneesMutation']>, ParentType, ContextType, RequireFields<MutationsBulkUpdateGrievanceAssigneeArgs, 'businessAreaSlug'>>,
   createTicketNote?: Resolver<Maybe<ResolversTypes['CreateTicketNoteMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTicketNoteArgs, 'noteInput'>>,
+  createFeedbackToHousehold?: Resolver<Maybe<ResolversTypes['CreateFeedbackToHouseholdMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackToHouseholdArgs, 'feedback'>>,
   approveIndividualDataChange?: Resolver<Maybe<ResolversTypes['IndividualDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveIndividualDataChangeArgs, 'grievanceTicketId'>>,
   approveHouseholdDataChange?: Resolver<Maybe<ResolversTypes['HouseholdDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveHouseholdDataChangeArgs, 'grievanceTicketId'>>,
   approveAddIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveAddIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveDeleteIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveDeleteHousehold?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteHouseholdArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>,
+  approveComplaint?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveComplaintArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>,
   approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approveStatus' | 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
@@ -21844,7 +22235,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'PaymentVerificationLogEntryNode' | 'TicketNoteNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'FeedbackToHouseholdNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'PaymentVerificationLogEntryNode' | 'TicketNoteNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -22041,6 +22432,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>,
   existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea'>>,
   allTicketNotes?: Resolver<Maybe<ResolversTypes['TicketNoteNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllTicketNotesArgs, 'ticket'>>,
+  allFeedbackToHousehold?: Resolver<Maybe<ResolversTypes['FeedbackToHouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllFeedbackToHouseholdArgs, 'ticket'>>,
   chartGrievances?: Resolver<Maybe<ResolversTypes['ChartGrievanceTicketsNode']>, ParentType, ContextType, RequireFields<QueryChartGrievancesArgs, 'businessAreaSlug' | 'year'>>,
   allAddIndividualsFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
@@ -22699,6 +23091,7 @@ export type TicketComplaintDetailsNodeResolvers<ContextType = any, ParentType ex
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
 };
 
 export type TicketComplaintDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketComplaintDetailsNodeConnection'] = ResolversParentTypes['TicketComplaintDetailsNodeConnection']> = {
@@ -23093,6 +23486,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeCreatedTicketsArgs>,
   assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeAssignedTicketsArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, UserNodeTicketNotesArgs>,
+  feedbackToHousehold?: Resolver<ResolversTypes['FeedbackToHouseholdNodeConnection'], ParentType, ContextType, UserNodeFeedbackToHouseholdArgs>,
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeTargetPopulationsArgs>,
   lockedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeLockedTargetPopulationsArgs>,
@@ -23176,6 +23570,7 @@ export type Resolvers<ContextType = any> = {
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
   CreateDashboardReport?: CreateDashboardReportResolvers<ContextType>,
+  CreateFeedbackToHouseholdMutation?: CreateFeedbackToHouseholdMutationResolvers<ContextType>,
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
   CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
@@ -23200,6 +23595,9 @@ export type Resolvers<ContextType = any> = {
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
   ExportXlsxCashPlanVerification?: ExportXlsxCashPlanVerificationResolvers<ContextType>,
+  FeedbackToHouseholdNode?: FeedbackToHouseholdNodeResolvers<ContextType>,
+  FeedbackToHouseholdNodeConnection?: FeedbackToHouseholdNodeConnectionResolvers<ContextType>,
+  FeedbackToHouseholdNodeEdge?: FeedbackToHouseholdNodeEdgeResolvers<ContextType>,
   FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>,
   FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
   FinishCashPlanVerificationMutation?: FinishCashPlanVerificationMutationResolvers<ContextType>,

@@ -340,6 +340,10 @@ export const GrievanceTicket = gql`
         }
         roleReassignData
       }
+      complaintTicketDetails {
+        id
+        approveStatus
+      }
       issueType
       ticketNotes {
         edges {

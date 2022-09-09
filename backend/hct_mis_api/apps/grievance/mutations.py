@@ -889,7 +889,7 @@ class CreateFeedbackToHouseholdMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, feedback, **kwargs):
-        grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(feedback["feedback_to_household"]))
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(feedback["ticket"]))
         message = feedback["message"]
         created_by = info.context.user
 

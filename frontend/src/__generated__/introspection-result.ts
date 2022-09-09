@@ -96,6 +96,9 @@
             "name": "TicketReferralDetailsNode"
           },
           {
+            "name": "FeedbackToHouseholdNode"
+          },
+          {
             "name": "DocumentNode"
           },
           {

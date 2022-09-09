@@ -20,6 +20,5 @@ def fetch_feedback_to_household_messages(sms_provide: SmsProvider):
                 ticket=feedback.ticket,
                 individual=feedback.individual,
                 message=message.message,
-                created_by=feedback.created_by,
                 kind=FeedbackToHousehold.RESPONSE,
             )
