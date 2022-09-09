@@ -21,3 +21,5 @@ class RuleCommitFactory(factory.django.DjangoModelFactory):
     version = factory.Sequence(lambda n: n)
     affected_fields = ["value"]
     is_release = True
+    enabled = True
+    definition = "result.value=Decimal('1.3')"

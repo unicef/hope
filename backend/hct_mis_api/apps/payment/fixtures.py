@@ -1,17 +1,25 @@
+from uuid import UUID
 import factory
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
 from random import randint
 from factory import fuzzy
 from pytz import utc
 
+from hct_mis_api.apps.targeting.models import (
+    TargetPopulation,
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+)
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
-from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY
+from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY, Individual, MALE
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     FinancialServiceProvider,
@@ -32,6 +40,7 @@ from hct_mis_api.apps.program.fixtures import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class CashPlanPaymentVerificationSummaryFactory(factory.DjangoModelFactory):
@@ -130,10 +139,7 @@ class FinancialServiceProviderXlsxTemplateFactory(factory.DjangoModelFactory):
         model = FinancialServiceProviderXlsxTemplate
 
     name = factory.Faker("name")
-    columns = fuzzy.FuzzyChoice(
-        FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS,
-        getter=lambda c: c,
-    )
+    columns = FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS
 
 
 class FinancialServiceProviderFactory(factory.DjangoModelFactory):
@@ -610,3 +616,179 @@ def generate_real_payment_plans():
         for financial_service_provider in FinancialServiceProvider.objects.all().order_by("?")[:3]:
             financial_service_provider.delivery_mechanisms.append(delivery_mechanism)
             financial_service_provider.save()
+
+
+def generate_payment_plan():
+    # creates a payment plan that has all the necessary data needed to go with it for manual testing
+
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    root = User.objects.get(username="root")
+    now = datetime.now()
+    address = "Ohio"
+
+    rdi_pk = UUID("4d100000-0000-0000-0000-000000000000")
+    rdi = RegistrationDataImport.objects.update_or_create(
+        pk=rdi_pk,
+        name="Test Import",
+        number_of_individuals=3,
+        number_of_households=1,
+        business_area=afghanistan,
+    )[0]
+
+    individual_1_pk = UUID("cc000000-0000-0000-0000-000000000001")
+    individual_1 = Individual.objects.update_or_create(
+        pk=individual_1_pk,
+        birth_date=now - timedelta(days=365 * 30),
+        first_registration_date=now - timedelta(days=365),
+        last_registration_date=now,
+        business_area=afghanistan,
+        full_name="Jan Kowalski",
+        sex=MALE,
+    )[0]
+    payment_channel_1 = PaymentChannelFactory(
+        individual=individual_1,
+        delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+    )
+
+    individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
+    individual_2 = Individual.objects.update_or_create(
+        pk=individual_2_pk,
+        birth_date=now - timedelta(days=365 * 30),
+        first_registration_date=now - timedelta(days=365),
+        last_registration_date=now,
+        business_area=afghanistan,
+        full_name="Adam Nowak",
+        sex=MALE,
+    )[0]
+    payment_channel_2 = PaymentChannelFactory(
+        individual=individual_2,
+        delivery_mechanism=Payment.DELIVERY_TYPE_CASH,
+    )
+
+    household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
+    household_1 = Household.objects.update_or_create(
+        pk=household_1_pk,
+        size=4,
+        head_of_household=individual_1,
+        business_area=afghanistan,
+        registration_data_import=rdi,
+        first_registration_date=now - timedelta(days=365),
+        last_registration_date=now,
+        address=address,
+    )[0]
+    individual_1.household = household_1
+    individual_1.save()
+
+    household_2_pk = UUID("aa000000-0000-0000-0000-000000000002")
+    household_2 = Household.objects.update_or_create(
+        pk=household_2_pk,
+        size=4,
+        head_of_household=individual_2,
+        business_area=afghanistan,
+        registration_data_import=rdi,
+        first_registration_date=now - timedelta(days=365),
+        last_registration_date=now,
+        address=address,
+    )[0]
+    individual_2.household = household_2
+    individual_2.save()
+
+    program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
+    program = Program.objects.update_or_create(
+        pk=program_pk,
+        business_area=afghanistan,
+        name="Test Program",
+        start_date=now,
+        end_date=now + timedelta(days=365),
+        budget=pow(10, 6),
+        cash_plus=True,
+        population_goal=250,
+        status=Program.ACTIVE,
+        frequency_of_payments=Program.ONE_OFF,
+        sector=Program.MULTI_PURPOSE,
+        scope=Program.SCOPE_UNICEF,
+    )[0]
+
+    targeting_criteria_pk = UUID("00000000-0000-0000-0000-feedb00c0000")
+    targeting_criteria = TargetingCriteria.objects.update_or_create(
+        pk=targeting_criteria_pk,
+    )[0]
+
+    targeting_criteria_rule_pk = UUID("00000000-0000-0000-0000-feedb00c0009")
+    targeting_criteria_rule = TargetingCriteriaRule.objects.update_or_create(
+        pk=targeting_criteria_rule_pk,
+        targeting_criteria=targeting_criteria,
+    )[0]
+
+    targeting_criteria_rule_condition_pk = UUID("00000000-0000-0000-0000-feedb00c0008")
+    TargetingCriteriaRuleFilter.objects.update_or_create(
+        pk=targeting_criteria_rule_condition_pk,
+        targeting_criteria_rule=targeting_criteria_rule,
+        comparison_method="EQUALS",
+        field_name="address",
+        arguments=[address],
+    )
+
+    target_population_pk = UUID("00000000-0000-0000-0000-faceb00c0123")
+    target_population = TargetPopulation.objects.update_or_create(
+        pk=target_population_pk,
+        name="Test Target Population",
+        targeting_criteria=targeting_criteria,
+        status=TargetPopulation.STATUS_ASSIGNED,
+        business_area=afghanistan,
+        created_by=root,
+    )[0]
+    target_population.full_rebuild()
+    target_population.save()
+
+    payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
+    payment_plan = PaymentPlan.objects.update_or_create(
+        pk=payment_plan_pk,
+        business_area=afghanistan,
+        target_population=target_population,
+        start_date=now,
+        end_date=now + timedelta(days=30),
+        currency="USD",
+        dispersion_start_date=now,
+        dispersion_end_date=now + timedelta(days=14),
+        status_date=now,
+        created_by=root,
+        program=program,
+    )[0]
+
+    fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
+    fsp_1 = FinancialServiceProvider.objects.update_or_create(
+        pk=fsp_1_pk,
+        name="Test FSP 1",
+        delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
+    )[0]
+
+    payment_1_pk = UUID("10000000-feed-beef-0000-00000badf00d")
+    Payment.objects.update_or_create(
+        pk=payment_1_pk,
+        payment_plan=payment_plan,
+        excluded=False,
+        business_area=afghanistan,
+        household=household_1,
+        collector=individual_1,
+        delivery_type=Payment.DELIVERY_TYPE_CASH,
+        assigned_payment_channel=payment_channel_1,
+        financial_service_provider=fsp_1,
+        status_date=now,
+    )
+
+    payment_2_pk = UUID("20000000-feed-beef-0000-00000badf00d")
+    Payment.objects.update_or_create(
+        pk=payment_2_pk,
+        payment_plan=payment_plan,
+        excluded=False,
+        business_area=afghanistan,
+        household=household_2,
+        collector=individual_2,
+        delivery_type=Payment.DELIVERY_TYPE_CASH,
+        assigned_payment_channel=payment_channel_2,
+        financial_service_provider=fsp_1,
+        status_date=now,
+    )
+
+    payment_plan.update_population_count_fields()
