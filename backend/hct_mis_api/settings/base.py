@@ -801,5 +801,3 @@ if PROFILING:
     INSTALLED_APPS.append("silk")
     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
     SILKY_PYTHON_PROFILER = True
-
-MAX_STORAGE_FILE_SIZE = 30
