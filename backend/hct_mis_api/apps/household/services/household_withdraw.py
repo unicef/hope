@@ -10,12 +10,18 @@ class HouseholdWithdraw:
         self.individuals: QuerySet[Individual] = self.household.individuals.filter(duplicate=False)
         self.documents = None
 
-    def withdraw(self):
+    def withdraw(self, tag=None):
         should_withdraw = not self.household.withdrawn
         self._withdraw_household(should_withdraw)
         self._withdraw_individuals(should_withdraw)
         self._withdraw_documents(should_withdraw)
+        user_fields = self.household.user_fields or {}
+        if should_withdraw and tag:
+            user_fields["withdrawn_tag"] = tag
+        else:
+            user_fields["withdrawn_tag"] = None
 
+        self.household.user_fields = user_fields
         self.household.save()
         Individual.objects.bulk_update(
             self.individuals,
