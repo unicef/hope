@@ -33,7 +33,12 @@ export const SetUpFspButtonActions = ({
         )}
         {step === 1 && <Button onClick={handleBackStep}>{t('Back')}</Button>}
       </Box>
-      <Button variant='contained' color='primary' onClick={submitForm}>
+      <Button
+        data-cy='button-next-save'
+        variant='contained'
+        color='primary'
+        onClick={submitForm}
+      >
         {t(step === 0 ? 'Next' : 'Save')}
       </Button>
     </Box>
