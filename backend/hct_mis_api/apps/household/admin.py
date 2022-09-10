@@ -1,5 +1,6 @@
 import logging
 from itertools import chain
+from typing import Iterable
 
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
@@ -8,10 +9,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import JSONField, Q
 from django.db.transaction import atomic
+from django.forms import Form
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
@@ -35,9 +38,11 @@ from hct_mis_api.apps.household.celery_tasks import (
     update_individuals_iban_from_xlsx_task,
 )
 from hct_mis_api.apps.household.forms import (
+    MassWithdrawForm,
     UpdateByXlsxStage1Form,
     UpdateByXlsxStage2Form,
     UpdateIndividualsIBANFromXlsxForm,
+    WithdrawForm,
 )
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -191,7 +196,7 @@ class HouseholdAdmin(
     def get_ignored_linked_objects(self, request):
         return []
 
-    def _toggle_withdraw_status(self, request, hh: Household, tickets: list = None):
+    def _toggle_withdraw_status(self, request, hh: Household, tickets: Iterable = None, comment=None, tag=None):
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
         if not tickets:
@@ -201,7 +206,7 @@ class HouseholdAdmin(
             else:
                 tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
         service = HouseholdWithdraw(hh)
-        service.withdraw()
+        service.withdraw(tag=tag)
         service.change_tickets_status(tickets)
         if hh.withdrawn:
             message = "{} has been withdrawn"
@@ -219,47 +224,67 @@ class HouseholdAdmin(
 
         return service
 
+    def has_withdrawn_permission(self, request):
+        return request.user.has_perm("household.can_withdrawn")
+
     def mass_withdraw(self, request, qs):
-        with atomic():
-            for hh in qs.filter(withdrawn=False):
-                self._toggle_withdraw_status(request, hh)
+        context = self.get_common_context(request, title="Withdrawn")
+        if request.POST.get("execute"):
+            form = MassWithdrawForm(request.POST)
+            if form.is_valid():
+                with atomic():
+                    for hh in qs.filter(withdrawn=False):
+                        self._toggle_withdraw_status(request, hh, tag=form.cleaned_data["tag"])
+        else:
+            context["form"] = MassWithdrawForm()
+            return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
     mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
 
     def mass_unwithdraw(self, request, qs):
+        context = self.get_common_context(request, title="Withdrawn")
         with atomic():
             for hh in qs.filter(withdrawn=True):
                 self._toggle_withdraw_status(request, hh)
 
-    mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
+    mass_withdraw.allowed_permissions = ["withdrawn"]
 
     @button(permission="household.can_withdrawn")
     def withdraw(self, request, pk):
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
-        context = self.get_common_context(request, pk, title="Withdrawn")
+        context = self.get_common_context(request, pk)
 
         obj: Household = context["original"]
         context["status"] = "" if obj.withdrawn else "checked"
 
         tickets = GrievanceTicket.objects.belong_household(obj)
         if obj.withdrawn:
+            msg = "Household successfully restored"
+            context["title"] = "Restore"
             tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
         else:
+            context["title"] = "Withdrawn"
+            msg = "Household successfully withdrawn"
             tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
 
         if request.method == "POST":
-            try:
-                with atomic():
-                    # service = HouseholdWithdraw(obj)
-                    # service.withdraw()
-                    # service.change_tickets_status(tickets)
-                    service = self._toggle_withdraw_status(request, obj, tickets)
-                    self.message_user(request, "Household successfully withdrawn", messages.SUCCESS)
-                    return HttpResponseRedirect(request.path)
-            except Exception as e:
-                self.message_user(request, str(e), messages.ERROR)
+            form = WithdrawForm(request.POST)
+            if form.is_valid():
+                try:
+                    with atomic():
+                        self._toggle_withdraw_status(request, obj, tickets, tag=form.cleaned_data["tag"])
+                        self.message_user(request, msg, messages.SUCCESS)
+                        return HttpResponseRedirect(request.path)
+                except Exception as e:
+                    self.message_user(request, str(e), messages.ERROR)
+        else:
+            if obj.withdrawn:
+                form = Form()
+            else:
+                form = WithdrawForm(initial={"tag": timezone.now().strftime("%Y%m%d%H%M%S")})
 
+        context["form"] = form
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
 
