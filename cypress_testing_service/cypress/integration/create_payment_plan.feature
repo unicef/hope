@@ -23,7 +23,7 @@ Feature: Create Payment Plan
         Then I see the entitlements input
         When I choose the steficon rule
         And I apply the steficon rule
-        Then I see the entitlements calculated
+        # Then I see the entitlements calculated
         And I am able to set up FSPs
         Then I should see the Set up FSP page
 
