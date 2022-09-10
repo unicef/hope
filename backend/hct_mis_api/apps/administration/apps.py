@@ -38,7 +38,7 @@ class Config(SmartConfig):
             panel_sysinfo,
         )
 
-        from .panels import email
+        from .panels import email, panel_elasticsearch
 
         site.register_panel(panel_migrations)
         site.register_panel(panel_sysinfo)
@@ -46,3 +46,4 @@ class Config(SmartConfig):
         site.register_panel(panel_sentry)
         site.register_panel(panel_error_page)
         site.register_panel(panel_redis)
+        site.register_panel(panel_elasticsearch)
