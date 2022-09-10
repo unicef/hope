@@ -146,12 +146,13 @@ When('I fill out the form fields and save', () => {
   cy.get('[data-cy="button-save-payment-plan"]').click({
     force: true,
   });
+  cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
 });
 
 Then('I should see the Payment Plan details page', () => {
-  // TODO: this wait is needed for some reason
-  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-  // cy.get('[data-cy="page-header-container"]').contains('Payment Plan ID'); // TODO
+  cy.get('[data-cy="page-header-container"]').contains('Payment Plan ID', {
+    timeout: 10000,
+  });
   cy.get('h6').contains('Details');
   cy.get('h6').contains('Results');
   cy.get('h6').contains('Payments List');
@@ -197,4 +198,38 @@ Then('I should see the Set up FSP page', () => {
   cy.get('[data-cy="page-header-container"]').contains('Set up FSP', {
     timeout: 10000,
   });
+});
+
+When('I select only one Delivery Mechanism', () => {
+  cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]', {
+    timeout: 10000,
+  }).click();
+  cy.get('[data-cy="select-option-Mobile Money"]').click();
+  cy.get('[data-cy="button-next-save"]').click({ force: true });
+});
+
+Then('I should see the warning', () => {
+  cy.get('[data-cy="warning-box"]');
+});
+
+When('I select more Delivery Mechanisms', () => {
+  cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]').click();
+  cy.get('[data-cy="select-option-Mobile Money"]').click();
+  cy.get('[data-cy="button-add-delivery-mechanism"]').click();
+  cy.get('[data-cy="select-deliveryMechanisms[1].deliveryMechanism"]').click();
+  cy.get('[data-cy="select-option-Cash"]').click();
+  cy.get('[data-cy="button-add-delivery-mechanism"]').click();
+  cy.get('[data-cy="select-deliveryMechanisms[2].deliveryMechanism"]').click();
+  cy.get('[data-cy="select-option-Deposit to Card"]').click();
+  cy.get('[data-cy="button-add-delivery-mechanism"]').click();
+  cy.get('[data-cy="select-deliveryMechanisms[3].deliveryMechanism"]').click();
+  cy.get('[data-cy="select-option-Voucher"]').click();
+  cy.get('[data-cy="button-add-delivery-mechanism"]').click();
+  cy.get('[data-cy="select-deliveryMechanisms[4].deliveryMechanism"]').click();
+  cy.get('[data-cy="select-option-Referral"]').click();
+  cy.get('[data-cy="button-next-save"]').click({ force: true });
+});
+
+Then('I should be able to assign FSPs', () => {
+  cy.get('[data-cy="select-deliveryMechanisms[0].fsp"]');
 });
