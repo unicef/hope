@@ -1,5 +1,5 @@
 Feature: Create Payment Plan
-    Checks, if creating a payment plan is possible
+    Checks the whole payment plan flow
 
     Background:
         Given I am authenticated
@@ -26,12 +26,17 @@ Feature: Create Payment Plan
         # Then I see the entitlements calculated
         And I am able to set up FSPs
         Then I should see the Set up FSP page
+        When I select only one Delivery Mechanism
+        Then I should see the warning
+        When I select more Delivery Mechanisms
+        Then I should be able to assign FSPs
+
 
 
 
 
 #TODO
-# When I set up the FSPs # (choose dms & fsps)
+
 # Then I see the volumes calculated
 # When I lock the FSPs
 # Then I should see the needed approvals etc
