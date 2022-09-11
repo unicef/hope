@@ -5,6 +5,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 
 import graphene
+from graphql import GraphQLError
 from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -253,6 +254,10 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
 
         cls.validate(status=obj_hct.status)
+
+        if not obj_hct.can_be_merged():
+            raise GraphQLError(f"Can't begin to merge RDI: {obj_hct}")
+
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
         merge_registration_data_import_task.delay(registration_data_import_id=decode_id)
