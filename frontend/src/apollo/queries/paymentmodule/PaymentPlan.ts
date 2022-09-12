@@ -123,9 +123,9 @@ export const PAYMENT_PLAN_QUERY = gql`
           name
         }
       }
-      hasPaymentListXlsxFile
-      xlsxFileImportedDate
-      importedXlsxFileName
+      hasPaymentListExportFile
+      fileImportedDate
+      importedFileName
       totalEntitledQuantityUsd
       paymentsConflictsCount
       deliveryMechanisms {
@@ -149,7 +149,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         volume
         volumeUsd
       }
-      hasPaymentListPerFspZipFile
+      hasPaymentListExportFile
     }
   }
 `;

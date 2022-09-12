@@ -31,7 +31,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
     <Box display='flex' alignItems='center'>
       {canDownloadXlsx && (
         <>
-          {!paymentPlan.hasPaymentListPerFspZipFile ? (
+          {!paymentPlan.hasPaymentListExportFile ? (
             <Box p={2}>
               <LoadingButton
                 loading={loadingExport}

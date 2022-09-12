@@ -195,7 +195,7 @@ export const Entitlement = ({
               alignItems='center'
               flexDirection='column'
             >
-              {paymentPlan.hasPaymentListXlsxFile ? (
+              {paymentPlan.hasPaymentListExportFile ? (
                 <Button
                   color='primary'
                   startIcon={<DownloadIcon />}
@@ -247,14 +247,14 @@ export const Entitlement = ({
               <Box>
                 <ImportXlsxPaymentPlanPaymentList paymentPlan={paymentPlan} />
               </Box>
-              {paymentPlan?.importedXlsxFileName && (
+              {paymentPlan?.importedFileName && (
                 <Box alignItems='center' display='flex'>
                   <SpinaczIconContainer>
                     <AttachFileIcon fontSize='inherit' />
                   </SpinaczIconContainer>
                   <Box mr={1}>
                     <GreyTextSmall>
-                      {paymentPlan?.importedXlsxFileName}
+                      {paymentPlan?.importedFileName}
                     </GreyTextSmall>
                   </Box>
                   <GreyTextSmall>
