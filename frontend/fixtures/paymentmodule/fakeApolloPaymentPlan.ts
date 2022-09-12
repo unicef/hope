@@ -100,7 +100,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   "financeReviewNumberRequired": 1,
   "steficonRule": null,
   "hasPaymentListExportFile": false,
-  "xlsxFileImportedDate": null,
+  "importedFileDate": null,
   "importedFileName": "",
   "totalEntitledQuantityUsd": 376,
   "paymentsConflictsCount": 0,

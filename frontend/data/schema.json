@@ -18191,7 +18191,7 @@
             "deprecationReason": null
           },
           {
-            "name": "fileImportedDate",
+            "name": "importedFileDate",
             "description": null,
             "args": [],
             "type": {
