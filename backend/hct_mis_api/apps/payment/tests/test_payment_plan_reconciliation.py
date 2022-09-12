@@ -129,10 +129,10 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
 """
 
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query PaymentPlan($paymentPlanId: ID!, $deliveryMechanisms: [String!]!) {
+query PaymentPlan($paymentPlanId: ID!, $deliveryMechanisms: [String!]!, $choices: [FspSelection!]!) {
     paymentPlan(id: $paymentPlanId) {
         id
-        availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
+        availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms, choices: $choices) {
             deliveryMechanism
             fsps {
                 id
@@ -430,6 +430,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "paymentPlanId": encoded_payment_plan_id,
                 "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_CASH],
+                "choices": [],
             },
         )
         assert "errors" not in available_fsps_query_response, available_fsps_query_response

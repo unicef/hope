@@ -373,8 +373,10 @@ class TestFSPAssignment(APITestCase):
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
+                "choices": [],
             },
         )
+        assert "errors" not in query_response, query_response
         available_mechs_data = query_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
         assert available_mechs_data is not None, query_response
         assert len(available_mechs_data) == 2
