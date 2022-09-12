@@ -188,10 +188,10 @@ query PaymentPlan($id: ID!) {
 
 
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query PaymentPlan($paymentPlanId: ID!, $deliveryMechanisms: [String!]!) {
+query PaymentPlan($paymentPlanId: ID!, $deliveryMechanisms: [String!]!, $choices: [FspSelection!]!) {
     paymentPlan(id: $paymentPlanId) {
         id
-        availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
+        availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms, choices: $choices) {
             deliveryMechanism
             fsps {
                 id
@@ -1080,6 +1080,7 @@ class TestFSPLimit(APITestCase):
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
+                "choices": [],
             },
         )
         assert "errors" not in available_fsps_response, available_fsps_response
@@ -1171,6 +1172,7 @@ class TestFSPLimit(APITestCase):
             variables={
                 "paymentPlanId": new_encoded_payment_plan_id,
                 "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_VOUCHER],
+                "choices": [],
             },
         )
         assert "errors" not in new_available_fsps_response, new_available_fsps_response

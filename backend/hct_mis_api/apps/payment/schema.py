@@ -375,9 +375,9 @@ class FspChoices(graphene.ObjectType):
     fsps = graphene.List(FspChoice)
 
 
-# class FspSelection(graphene.InputObjectType):
-#     fsp_id = graphene.String()
-#     order = graphene.Int()
+class FspSelection(graphene.InputObjectType):
+    fsp_id = graphene.String()
+    order = graphene.Int()
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -397,8 +397,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
     available_fsps_for_delivery_mechanisms = graphene.List(
-        FspChoices,
-        delivery_mechanisms=graphene.List(graphene.String),  # choices=graphene.List(FspSelection)
+        FspChoices, delivery_mechanisms=graphene.List(graphene.String), choices=graphene.List(FspSelection)
     )
 
     # TODO: maybe no need to pass delivery mechanisms but only choices?
