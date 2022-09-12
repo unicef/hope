@@ -4,6 +4,7 @@ import time
 from io import StringIO
 
 from django import forms
+from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
@@ -57,6 +58,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
+    StorageFile
 )
 from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
@@ -913,3 +915,20 @@ class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
     def alpha3(self, obj):
         return obj.country.countries.alpha3(obj.country.code)
+
+
+@admin.register(StorageFile)
+class StorageFileAdmin(admin.ModelAdmin):
+    list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_add_permission(self, request):
+        return request.user.can_download_storage_files()
