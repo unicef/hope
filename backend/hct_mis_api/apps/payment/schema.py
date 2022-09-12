@@ -438,7 +438,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
                     for choice in processed_choices
                     if choice["fsp"] == fsp
                 )
-
                 return fsp.can_accept_volume(volume_in_payments + volume_in_choices)
 
             def can_be_chosen(fsp):

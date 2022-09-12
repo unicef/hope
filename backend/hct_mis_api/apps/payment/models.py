@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
+import logging
 from typing import Optional
 
 from django.conf import settings
@@ -664,9 +665,9 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
             money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
         )["money"]
 
-        # print(
-        #     f"{self.distribution_limit - used_volume > volume} | limit ({self.distribution_limit}) - used({used_volume}) > vol({volume})",
-        # )
+        logging.error(
+            f"{self.distribution_limit - used_volume > volume} | limit ({self.distribution_limit}) - used({used_volume}) > vol({volume})",
+        )
         return self.distribution_limit - used_volume > volume
 
 

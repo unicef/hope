@@ -185,7 +185,9 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
             scope.set_tag("business_area", payment_plan.business_area)
 
             if not payment_plan.imported_xlsx_file:
-                logger.exception(f"Error import from xlsx, file does not exists for PaymentPlan ID {payment_plan.unicef_id}.")
+                logger.exception(
+                    f"Error import from xlsx, file does not exists for PaymentPlan ID {payment_plan.unicef_id}."
+                )
                 raise
 
             service = XlsxPaymentPlanImportService(payment_plan, payment_plan.imported_xlsx_file.file)
@@ -261,10 +263,14 @@ def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
                 # TODO: not sure how will work steficon function payment_plan or payment need ??
                 result = rule.execute({"household": entry.household, "payment_plan": payment_plan})
                 entry.entitlement_quantity = result.value
-                entry.entitlement_quantity_usd = Decimal(result.value / Decimal(payment_plan.exchange_rate)).quantize(Decimal(".01"))
+                exchange_rate = payment_plan.exchange_rate
+                exchange_rate = 1  # TODO: re-enable exchange rates api
+                entry.entitlement_quantity_usd = Decimal(result.value / Decimal(exchange_rate)).quantize(Decimal(".01"))
                 entry.entitlement_date = timezone.now()
                 updates.append(entry)
-            Payment.objects.bulk_update(updates, ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"])
+            Payment.objects.bulk_update(
+                updates, ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"]
+            )
 
             payment_plan.steficon_applied_date = timezone.now()
             payment_plan.background_action_status_none()
