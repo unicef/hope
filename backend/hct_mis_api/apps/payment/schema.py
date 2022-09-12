@@ -706,9 +706,16 @@ class Query(graphene.ObjectType):
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
-        volume_by_delivery_type = payment_items_qs.values("delivery_type").annotate(
-            volume=Sum("delivered_quantity_usd")
+        volume_by_delivery_type = (
+            payment_items_qs.values("delivery_type")
+            .order_by("delivery_type")
+            .annotate(volume=Sum("delivered_quantity_usd"))
+            .merge_by(
+                "delivery_type",
+                aggregated_fields=["volume"],
+            )
         )
+
         labels = []
         data = []
         for volume_dict in volume_by_delivery_type:
@@ -800,8 +807,7 @@ class Query(graphene.ObjectType):
         payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(year, "global", {}, True)
 
         countries_and_amounts: dict = (
-            payment_items_qs
-            .select_related("business_area")
+            payment_items_qs.select_related("business_area")
             .values("business_area")
             .order_by("business_area")
             .annotate(

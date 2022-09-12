@@ -58,8 +58,4 @@ class Migration(migrations.Migration):
             name='exchange_rate',
             field=models.DecimalField(blank=True, decimal_places=8, max_digits=14, null=True),
         ),
-        migrations.AlterModelOptions(
-            name='payment',
-            options={'ordering': ['unicef_id']},
-        ),
     ]

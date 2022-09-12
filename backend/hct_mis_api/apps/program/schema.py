@@ -9,7 +9,7 @@ from django.db.models import (
     When,
     F,
 )
-from django.db.models.functions import Coalesce, TruncMonth
+from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import relay
@@ -33,7 +33,7 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord, GenericPayment
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
 from hct_mis_api.apps.payment.filters import CashPlanFilter
@@ -157,7 +157,6 @@ class Query(graphene.ObjectType):
                     output_field=IntegerField(),
                 )
             )
-            .annotate(households_count=Coalesce(Sum("cashplan__total_persons_covered"), 0, output_field=IntegerField()))
             .order_by("custom_order", "start_date")
         )
 
@@ -199,7 +198,9 @@ class Query(graphene.ObjectType):
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(year, business_area_slug, filters, True)
+        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+            year, business_area_slug, filters, True
+        )
 
         programs_ids = payment_items_qs.values_list("parent__program__id", flat=True)
         programs = Program.objects.filter(id__in=programs_ids).distinct()
@@ -230,19 +231,21 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_total_transferred_by_month(self, info, business_area_slug, year, **kwargs):
-        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs), True)
+        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
+        )
 
         months_and_amounts = (
             payment_items_qs.annotate(
                 delivery_month=F("delivery_date__month"),
                 total_delivered_cash=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH),
+                    filter=Q(delivery_type__in=GenericPayment.DELIVERY_TYPES_IN_CASH),
                     output_field=DecimalField(),
                 ),
                 total_delivered_voucher=Sum(
                     "delivered_quantity_usd",
-                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER),
+                    filter=Q(delivery_type__in=GenericPayment.DELIVERY_TYPES_IN_VOUCHER),
                     output_field=DecimalField(),
                 ),
             )

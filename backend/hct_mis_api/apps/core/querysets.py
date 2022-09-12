@@ -1,8 +1,7 @@
 import logging
 from typing import List, Optional
 
-from queryset_sequence import QuerySetSequence
-
+from queryset_sequence import QuerySetSequence, ModelIterable
 
 logger = logging.getLogger(__name__)
 
@@ -58,3 +57,11 @@ class ExtendedQuerySetSequence(QuerySetSequence):
             results_list.append(merged_object)
 
         return results_list
+
+    def distinct(self, *fields):
+        clone = super().distinct(*fields)
+
+        if clone._iterable_class != ModelIterable:
+            clone._querysets = [clone._querysets[0].union(*clone._querysets[1:])]
+
+        return clone

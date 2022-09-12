@@ -889,7 +889,6 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 name="payment_plan_and_household",
             )
         ]
-        ordering = ["unicef_id"]
 
 
 class ServiceProvider(TimeStampedUUIDModel):

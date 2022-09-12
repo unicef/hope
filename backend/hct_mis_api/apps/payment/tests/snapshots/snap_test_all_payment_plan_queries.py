@@ -15,41 +15,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                     'node': {
                         'approvalNumberRequired': 2,
                         'approvalProcess': {
-                            'totalCount': 0
-                        },
-                        'authorizationNumberRequired': 2,
-                        'dispersionEndDate': '2020-10-10',
-                        'dispersionStartDate': '2020-10-10',
-                        'endDate': '2020-11-10',
-                        'exchangeRate': 2.0,
-                        'femaleAdultsCount': 1,
-                        'femaleChildrenCount': 0,
-                        'financeReviewNumberRequired': 3,
-                        'maleAdultsCount': 1,
-                        'maleChildrenCount': 0,
-                        'paymentItems': {
-                            'totalCount': 2
-                        },
-                        'paymentsConflictsCount': 0,
-                        'startDate': '2020-09-10',
-                        'status': 'LOCKED',
-                        'totalDeliveredQuantity': 50.0,
-                        'totalDeliveredQuantityUsd': 100.0,
-                        'totalEntitledQuantity': 100.0,
-                        'totalEntitledQuantityRevised': 0.0,
-                        'totalEntitledQuantityRevisedUsd': 0.0,
-                        'totalEntitledQuantityUsd': 200.0,
-                        'totalHouseholdsCount': 1,
-                        'totalIndividualsCount': 2,
-                        'totalUndeliveredQuantity': 50.0,
-                        'totalUndeliveredQuantityUsd': 100.0,
-                        'unicefId': 'PP-02'
-                    }
-                },
-                {
-                    'node': {
-                        'approvalNumberRequired': 2,
-                        'approvalProcess': {
                             'totalCount': 1
                         },
                         'authorizationNumberRequired': 2,
@@ -79,6 +44,41 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'totalUndeliveredQuantity': 50.0,
                         'totalUndeliveredQuantityUsd': 100.0,
                         'unicefId': 'PP-01'
+                    }
+                },
+                {
+                    'node': {
+                        'approvalNumberRequired': 2,
+                        'approvalProcess': {
+                            'totalCount': 0
+                        },
+                        'authorizationNumberRequired': 2,
+                        'dispersionEndDate': '2020-10-10',
+                        'dispersionStartDate': '2020-10-10',
+                        'endDate': '2020-11-10',
+                        'exchangeRate': 2.0,
+                        'femaleAdultsCount': 1,
+                        'femaleChildrenCount': 0,
+                        'financeReviewNumberRequired': 3,
+                        'maleAdultsCount': 1,
+                        'maleChildrenCount': 0,
+                        'paymentItems': {
+                            'totalCount': 2
+                        },
+                        'paymentsConflictsCount': 0,
+                        'startDate': '2020-09-10',
+                        'status': 'LOCKED',
+                        'totalDeliveredQuantity': 50.0,
+                        'totalDeliveredQuantityUsd': 100.0,
+                        'totalEntitledQuantity': 100.0,
+                        'totalEntitledQuantityRevised': 0.0,
+                        'totalEntitledQuantityRevisedUsd': 0.0,
+                        'totalEntitledQuantityUsd': 200.0,
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 2,
+                        'totalUndeliveredQuantity': 50.0,
+                        'totalUndeliveredQuantityUsd': 100.0,
+                        'unicefId': 'PP-02'
                     }
                 }
             ]
@@ -128,20 +128,20 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 3'] = {
             'edges': [
                 {
                     'node': {
-                        'dispersionEndDate': '2020-10-10',
-                        'dispersionStartDate': '2020-10-10',
-                        'status': 'LOCKED',
-                        'totalEntitledQuantity': 100.0,
-                        'unicefId': 'PP-02'
-                    }
-                },
-                {
-                    'node': {
                         'dispersionEndDate': '2020-12-10',
                         'dispersionStartDate': '2020-08-10',
                         'status': 'OPEN',
                         'totalEntitledQuantity': 100.0,
                         'unicefId': 'PP-01'
+                    }
+                },
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-10-10',
+                        'dispersionStartDate': '2020-10-10',
+                        'status': 'LOCKED',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-02'
                     }
                 }
             ]

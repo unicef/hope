@@ -244,9 +244,14 @@ class PaymentPlanFilter(FilterSet):
         fields = tuple()
         model = PaymentPlan
 
+    def filter_queryset(self, queryset):
+        queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
+        if not self.form.cleaned_data.get("order_by"):
+            queryset = queryset.order_by("unicef_id")
+        return super().filter_queryset(queryset)
+
     order_by = OrderingFilter(
         fields=(
-            "id",
             "unicef_id",
             "status",
             "total_households_count",
@@ -275,13 +280,18 @@ class PaymentFilter(FilterSet):
             q &= ~Q(excluded=True)
         return qs.filter(q)
 
+    def filter_queryset(self, queryset):
+        if not self.form.cleaned_data.get("order_by"):
+            queryset = queryset.order_by("unicef_id")
+        return super().filter_queryset(queryset)
+
     class Meta:
         fields = tuple()
         model = Payment
 
     order_by = OrderingFilter(
         fields=(
-            "id",
+            "unicef_id",
             "status",
             "household_id",
             "household__size",
