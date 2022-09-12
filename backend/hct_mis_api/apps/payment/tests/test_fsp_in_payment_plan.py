@@ -921,8 +921,8 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             financial_service_provider=self.bank_of_america_fsp,
             collector=self.individuals_2[0],
             assigned_payment_channel=self.payment_channel_2_cash,
-            entitlement_quantity=100,
-            entitlement_quantity_usd=20,
+            entitlement_quantity=500,
+            entitlement_quantity_usd=100,
             delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
@@ -933,8 +933,8 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             financial_service_provider=self.santander_fsp,
             collector=self.individuals_3[0],
             assigned_payment_channel=self.payment_channel_3_transfer,
-            entitlement_quantity=200,
-            entitlement_quantity_usd=40,
+            entitlement_quantity=1000,
+            entitlement_quantity_usd=200,
             delivery_type=GenericPayment.DELIVERY_TYPE_TRANSFER,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
@@ -1120,8 +1120,8 @@ class TestFSPLimit(APITestCase):
             financial_service_provider=self.bank_of_america_fsp,
             collector=self.individuals_1[0],
             assigned_payment_channel=self.payment_channel_1_voucher,
-            entitlement_quantity=5000,
-            entitlement_quantity_usd=1000,  # max limit
+            entitlement_quantity=1000,  # max limit
+            entitlement_quantity_usd=200,
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_1,
@@ -1205,8 +1205,8 @@ class TestFSPLimit(APITestCase):
             collector=self.individuals_1[0],
             financial_service_provider=None,
             assigned_payment_channel=None,  # none assigned
-            entitlement_quantity=5000,
-            entitlement_quantity_usd=1000,  # max limit for america bank
+            entitlement_quantity=1000,  # max limit for america bank
+            entitlement_quantity_usd=200,
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_1,

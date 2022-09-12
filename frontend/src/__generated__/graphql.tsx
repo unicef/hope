@@ -9772,7 +9772,8 @@ export type AllPaymentPlansForTableQuery = (
 );
 
 export type PaymentPlanQueryVariables = {
-  paymentPlanId: Scalars['ID']
+  paymentPlanId: Scalars['ID'],
+  choices: Array<Maybe<FspSelection>>
 };
 
 
@@ -17676,7 +17677,7 @@ export type AllPaymentPlansForTableQueryHookResult = ReturnType<typeof useAllPay
 export type AllPaymentPlansForTableLazyQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableLazyQuery>;
 export type AllPaymentPlansForTableQueryResult = ApolloReactCommon.QueryResult<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>;
 export const PaymentPlanDocument = gql`
-    query PaymentPlan($paymentPlanId: ID!) {
+    query PaymentPlan($paymentPlanId: ID!, $choices: [FspSelection]!) {
   paymentPlan(id: $paymentPlanId) {
     id
     unicefId
@@ -17824,7 +17825,7 @@ export const PaymentPlanDocument = gql`
       volumeUsd
     }
     hasPaymentListPerFspZipFile
-    availableFspsForDeliveryMechanisms {
+    availableFspsForDeliveryMechanisms(choices: $choices) {
       deliveryMechanism
       fsps {
         id
@@ -17865,6 +17866,7 @@ export function withPaymentPlan<TProps, TChildProps = {}>(operationOptions?: Apo
  * const { data, loading, error } = usePaymentPlanQuery({
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
+ *      choices: // value for 'choices'
  *   },
  * });
  */

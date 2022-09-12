@@ -415,16 +415,16 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         def get_fsps_for_delivery_mechanism(mechanism):
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
 
-            def can_accept_volume(fsp):  # TODO: use not _usd
+            def can_accept_volume(fsp):
                 volume_in_payments = Payment.objects.filter(
                     payment_plan=self, assigned_payment_channel__delivery_mechanism=mechanism
-                ).aggregate(money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)))["money"]
+                ).aggregate(money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))["money"]
 
                 volume_in_choices = sum(
                     Payment.objects.filter(
                         payment_plan=self,
                         head_of_household__paymentchannel__delivery_mechanism=mechanism,
-                    ).aggregate(money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)))["money"]
+                    ).aggregate(money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))["money"]
                     for choice in processed_choices
                     if choice["fsp"] == fsp
                 )
