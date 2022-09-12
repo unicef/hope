@@ -18191,7 +18191,7 @@
             "deprecationReason": null
           },
           {
-            "name": "xlsxFileImportedDate",
+            "name": "fileImportedDate",
             "description": null,
             "args": [],
             "type": {
@@ -18425,7 +18425,7 @@
             "deprecationReason": null
           },
           {
-            "name": "hasPaymentListXlsxFile",
+            "name": "hasPaymentListExportFile",
             "description": null,
             "args": [],
             "type": {
@@ -18437,19 +18437,7 @@
             "deprecationReason": null
           },
           {
-            "name": "hasPaymentListPerFspZipFile",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "importedXlsxFileName",
+            "name": "importedFileName",
             "description": null,
             "args": [],
             "type": {
