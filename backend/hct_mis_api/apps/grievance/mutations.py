@@ -446,6 +446,14 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         if arg("payment_record") is not None:
             payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(arg("payment_record")))
 
+
+        if arg("priority") is not None:
+            grievance_ticket.priority = arg("priority")
+
+
+        if arg("urgency") is not None:
+            grievance_ticket.urgency = arg("urgency")
+
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         business_area = grievance_ticket.business_area
         cls.has_creator_or_owner_permission(

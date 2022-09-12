@@ -1576,7 +1576,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ChoiceObject",
+                "name": "ChoiceObjectInt",
                 "ofType": null
               }
             },
@@ -1592,7 +1592,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ChoiceObject",
+                "name": "ChoiceObjectInt",
                 "ofType": null
               }
             },
@@ -33852,6 +33852,41 @@
                 "name": "ChoiceObject",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ChoiceObjectInt",
+        "description": null,
+        "fields": [
+          {
+            "name": "name",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "value",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

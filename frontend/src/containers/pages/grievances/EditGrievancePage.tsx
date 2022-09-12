@@ -220,7 +220,6 @@ export const EditGrievancePage = (): React.ReactElement => {
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const initialValues: any = prepareInitialValues(ticket);
-
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
@@ -495,7 +494,6 @@ export const EditGrievancePage = (): React.ReactElement => {
                             name='priority'
                             multiline
                             fullWidth
-                            disabled={Boolean(ticket.priority)}
                             variant='outlined'
                             label={t('Priority')}
                             choices={choicesData.grievanceTicketPriorityChoices}
@@ -507,7 +505,6 @@ export const EditGrievancePage = (): React.ReactElement => {
                             name='urgency'
                             multiline
                             fullWidth
-                            disabled={Boolean(ticket.urgency)}
                             variant='outlined'
                             label={t('Urgency')}
                             choices={choicesData.grievanceTicketUrgencyChoices}
