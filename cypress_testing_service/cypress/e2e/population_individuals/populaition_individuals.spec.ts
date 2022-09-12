@@ -1,4 +1,4 @@
-import { When, Then, And, Given } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, And, Given } from "@badeball/cypress-cucumber-preprocessor";
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -35,7 +35,7 @@ Then('I should see the Individuals Page and the table', () => {
 });
 
 When('I click one of the table rows', () => {
-  cy.get('[data-cy="individual-table-row"]').first().click();
+  cy.get('[data-cy="individual-table-row"]').first().click({ force: true });
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
 });
 

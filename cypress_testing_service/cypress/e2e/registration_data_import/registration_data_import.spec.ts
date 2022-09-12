@@ -1,4 +1,4 @@
-import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, And, Given } from "@badeball/cypress-cucumber-preprocessor";
 
 let householdId;
 let individualId;
@@ -54,19 +54,8 @@ When('I select the xlsx file', () => {
     'Test import '.concat(new Date().toISOString()),
   );
 
-  const fileName = 'rdi_import_1_hh_1_ind.xlsx';
-  // cy.get('[data-cy="rdi-file-input"]').selectFile(`cypress/fixtures/${fileName}`, { action: 'drag-drop' });
-  cy.fixture(fileName, 'base64').as('@rdi_import_1_hh_1_ind');
-  cy.get('[data-cy="rdi-file-input"]').selectFile('@rdi_import_1_hh_1_ind', { action: 'drag-drop' });
-  // cy.fixture(fileName, 'base64').then((fileContent) => {
-  //   cy.get('[data-cy="rdi-file-input"]').upload({
-  //     fileContent,
-  //     fileName,
-  //     mimeType:
-  //       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  //     encoding: 'base64',
-  //   });
-  // });
+  cy.fixture('rdi_import_1_hh_1_ind.xlsx', 'base64').as('rdi_import_1_hh_1_ind');
+  cy.get('[data-cy="rdi-file-input"]').selectFile('@rdi_import_1_hh_1_ind', { action: 'drag-drop', force: true });
 });
 
 Then('I see it was chosen', () => {

@@ -1,6 +1,6 @@
-import { When, Then, And } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, And, Given } from "@badeball/cypress-cucumber-preprocessor";
 
-When('I visit /', () => {
+When('I visit the main dashboard', () => {
   cy.visit('/');
 });
 

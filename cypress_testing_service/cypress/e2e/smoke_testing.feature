@@ -2,7 +2,7 @@ Feature: Smoke tests
     Checks, if the main page returns something
 
     Scenario: Visit main page
-        When I visit /
+        When I visit the main dashboard
         Then I should see the AD login page
 
     Scenario: Login via admin panel

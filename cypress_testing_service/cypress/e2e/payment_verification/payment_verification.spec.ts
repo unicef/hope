@@ -1,4 +1,4 @@
-import { When, Then, And, Given } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, And, Given } from "@badeball/cypress-cucumber-preprocessor";
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');

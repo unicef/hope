@@ -1,4 +1,4 @@
-import { When, Then, And, Given } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, And, Given } from "@badeball/cypress-cucumber-preprocessor";
 import { fillProgramForm } from '../../procedures/procedures';
 
 Given('I am authenticated', () => {

@@ -1,4 +1,4 @@
-import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, Given } from "@badeball/cypress-cucumber-preprocessor";
 import {
   fillProgramForm,
   fillTargetingForm,
@@ -32,19 +32,8 @@ Given("There are individuals and households imported", () => {
     'Test import '.concat(new Date().toISOString()),
   );
 
-  const fileName = 'rdi_import_3_hh_3_ind.xlsx';
-  // cy.get('[data-cy="rdi-file-input"]').selectFile(`cypress/fixtures/${fileName}`, { action: 'drag-drop' });
-  cy.fixture(fileName, 'base64').as('@rdi_import_3_hh_3_ind');
-  cy.get('[data-cy="rdi-file-input"]').selectFile('@rdi_import_3_hh_3_ind', { action: 'drag-drop' });
-  // cy.fixture(fileName, 'base64').then((fileContent) => {
-  //   cy.get('[data-cy="rdi-file-input"]').upload({
-  //     fileContent,
-  //     fileName,
-  //     mimeType:
-  //       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  //     encoding: 'base64',
-  //   });
-  // });
+  cy.fixture('rdi_import_3_hh_3_ind.xlsx', 'base64').as('rdi_import_3_hh_3_ind');
+  cy.get('[data-cy="rdi-file-input"]').selectFile('@rdi_import_3_hh_3_ind', { action: 'drag-drop', force: true });
 
   cy.get('[data-cy="button-import-rdi"').click();
 
