@@ -4,8 +4,8 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentChannel
-from hct_mis_api.apps.payment.utils import float_to_decimal
+from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentChannel, PaymentPlan
+from hct_mis_api.apps.payment.utils import float_to_decimal, get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.BaseXlsxImportService import XlsxImportBaseService
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
 
@@ -13,18 +13,17 @@ from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPayme
 class XlsxPaymentPlanImportService(XlsxImportBaseService):
     COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n")
 
-    def __init__(self, payment_plan, file):
+    def __init__(self, payment_plan: PaymentPlan, file):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.all_active_payments
         self.payment_plan_content_type = get_content_type_for_model(payment_plan)
+        self.exchange_rate = self.payment_plan.get_exchange_rate()
         self.file = file
         self.errors = []
-        self.updates = None
         self.payments_dict = {
             str(x.unicef_id): x for x in self.payment_list
         }
-        self.payment_ids = [str(x.unicef_id) for x in self.payment_list]
-
+        self.payment_ids = list(self.payments_dict.keys())
         self.payments_to_save = []
         self.payment_channel_update = False
         self.entitlement_update = False
@@ -47,11 +46,8 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             self._import_row(row)
 
         Payment.objects.bulk_update(
-            self.payments_to_save, ("entitlement_quantity", "entitlement_date", "assigned_payment_channel")
+            self.payments_to_save, ("entitlement_quantity", "entitlement_quantity_usd", "entitlement_date")
         )
-
-        if self.payments_to_save:
-            self.remove_old_export_xlsx_files()
 
     def _validate_headers(self):
         headers_row = self.ws_payments[1]
@@ -131,30 +127,34 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
-        payment_channel = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX].value
+        payment_channels_list = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX].value.split(", ")
         payment_channel_cell = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX]
-        if payment_channel not in [x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]:
-            self.errors.append(
-                (
-                    XlsxPaymentPlanExportService.TITLE,
-                    payment_channel_cell.coordinate,
-                    f"Payment_channel should be one of {[x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]} "
-                    f"but received {payment_channel}",
+        for payment_channel in payment_channels_list:
+            if payment_channel not in [x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]:
+                self.errors.append(
+                    (
+                        XlsxPaymentPlanExportService.TITLE,
+                        payment_channel_cell.coordinate,
+                        f"Payment_channel should be one of {[x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]} "
+                        f"but received {payment_channel}",
+                    )
                 )
+            collectors_payment_channels = list(
+                    payment.collector.payment_channels.all()
+                    .distinct("delivery_mechanism")
+                    .values_list("delivery_mechanism", flat=True)
             )
-
-        if payment.assigned_payment_channel and payment_channel and payment_channel != str(
-                payment.assigned_payment_channel.delivery_mechanism):
-            self.errors.append(
-                (
-                    XlsxPaymentPlanExportService.TITLE,
-                    payment_channel_cell.coordinate,
-                    f"You can't set payment_channel {payment_channel} for Payment with already assigned payment "
-                    f"channel {str(payment.assigned_payment_channel.delivery_mechanism)}",
+            if payment.collector.payment_channels.exists() and payment_channel not in collectors_payment_channels:
+                self.errors.append(
+                    (
+                        XlsxPaymentPlanExportService.TITLE,
+                        payment_channel_cell.coordinate,
+                        f"You can't set payment_channel {payment_channel} for Collector with already assigned payment "
+                        f"channel(s): {', '.join(collectors_payment_channels)}",
+                    )
                 )
-            )
-        if not payment.assigned_payment_channel and payment_channel:
-            self.payment_channel_update = True
+            if not payment.collector.payment_channels.exists() and payment_channel:
+                self.payment_channel_update = True
 
     def _validate_imported_file(self):
         if not self.payment_channel_update and not self.entitlement_update:
@@ -162,7 +162,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                 (
                     XlsxPaymentPlanExportService.TITLE,
                     None,
-                    "Wrong data. There are no any updates in imported file, please add changes and try again",
+                    "There are no any updates in imported file, please add changes and try again",
                 )
             )
 
@@ -178,53 +178,46 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
     def _import_row(self, row):
         payment_id = row[XlsxPaymentPlanExportService.ID_COLUMN_INDEX].value
         entitlement_amount = row[XlsxPaymentPlanExportService.ENTITLEMENT_COLUMN_INDEX].value
-        payment_channel = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX].value
-        payment = self.payments_dict[payment_id]
-        update = False
-        payment_channel_obj = None
+        payment_channels_list = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX].value.split(", ")
+
+        payment = self.payments_dict.get(payment_id)
 
         if payment is None:
             return
 
-        if payment_channel is not None and payment_channel != "" and not payment.assigned_payment_channel:
-            payment_channel_obj = PaymentChannel.objects.create(
-                individual=payment.collector,
-                delivery_mechanism=payment_channel
-            )
+        if not payment.collector.payment_channels.exists():
+            for payment_channel in payment_channels_list:
+                if payment_channel is not None and payment_channel != "":
+                    PaymentChannel.objects.get_or_create(
+                        individual=payment.collector,
+                        delivery_mechanism=payment_channel,
+                    )
 
         if entitlement_amount is not None and entitlement_amount != "":
             entitlement_amount = float_to_decimal(entitlement_amount)
             if entitlement_amount != payment.entitlement_quantity:
                 payment.entitlement_quantity = entitlement_amount
                 payment.entitlement_date = timezone.now()
-                update = True
-        if payment_channel_obj:
-            payment.assigned_payment_channel = payment_channel_obj
-            update = True
+                payment.entitlement_quantity_usd = get_quantity_in_usd(
+                    amount=entitlement_amount,
+                    currency=self.payment_plan.currency,
+                    exchange_rate=self.exchange_rate,
+                    currency_exchange_date=self.payment_plan.currency_exchange_date,
+                )
 
-        if update:
-            self.payments_to_save.append(payment)
+                self.payments_to_save.append(payment)
 
-    def remove_old_export_xlsx_files(self):
-        qs = FileTemp.objects.filter(
-            object_id=self.payment_plan.pk,
-            content_type=self.payment_plan_content_type
-        )
-        for obj in qs:
-            obj.file.delete(save=False)
-            obj.delete()
-
-    def remove_old_and_create_new_import_xlsx(self, user):
+    def create_import_xlsx_file(self, user):
         # remove old imported file
-        if self.payment_plan.imported_xlsx_file:
-            self.payment_plan.imported_xlsx_file.file.delete(save=False)
-            self.payment_plan.imported_xlsx_file.delete()
+        self.payment_plan.remove_imported_file()
 
-        # save new import xlsx file
+        # create new imported xlsx file
         xlsx_file = FileTemp.objects.create(
             object_id=self.payment_plan.pk,
             content_type=self.payment_plan_content_type,
             created_by=user,
             file=self.file,
         )
-        return xlsx_file
+
+        self.payment_plan.imported_xlsx_file = xlsx_file
+        self.payment_plan.save()

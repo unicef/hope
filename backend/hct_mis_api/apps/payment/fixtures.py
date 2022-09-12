@@ -1,9 +1,11 @@
 from uuid import UUID
 import factory
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from random import randint
+
+from django.utils import timezone
 from factory import fuzzy
 from pytz import utc
 
@@ -169,7 +171,7 @@ class PaymentChannelFactory(factory.DjangoModelFactory):
         model = PaymentChannel
 
     individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE)
+    delivery_mechanism = fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
     delivery_data = factory.Faker("json")
 
 
@@ -623,7 +625,7 @@ def generate_payment_plan():
 
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
-    now = datetime.now()
+    now = timezone.now()
     address = "Ohio"
 
     rdi_pk = UUID("4d100000-0000-0000-0000-000000000000")

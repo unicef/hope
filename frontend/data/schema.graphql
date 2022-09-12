@@ -2215,7 +2215,7 @@ type IndividualNode implements Node {
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   bankAccountInfo: BankAccountInfoNode
-  paymentchannelSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentChannelNodeConnection!
+  paymentChannels: [BankAccountInfoNode]
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -2235,7 +2235,6 @@ type IndividualNode implements Node {
   sanctionListLastCheck: DateTime
   phoneNoValid: Boolean
   phoneNoAlternativeValid: Boolean
-  paymentChannels: [BankAccountInfoNode]
 }
 
 type IndividualNodeConnection {
@@ -2555,18 +2554,6 @@ type PaymentChannelNode implements Node {
   individual: IndividualNode!
   deliveryMechanism: PaymentChannelDeliveryMechanism
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-}
-
-type PaymentChannelNodeConnection {
-  pageInfo: PageInfo!
-  edges: [PaymentChannelNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type PaymentChannelNodeEdge {
-  node: PaymentChannelNode
-  cursor: String!
 }
 
 type PaymentConflictDataNode {
