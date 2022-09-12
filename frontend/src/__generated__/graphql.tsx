@@ -4054,7 +4054,7 @@ export type PaymentPlanNode = Node & {
   maleAdultsCount: Scalars['Int'],
   totalHouseholdsCount: Scalars['Int'],
   totalIndividualsCount: Scalars['Int'],
-  fileImportedDate?: Maybe<Scalars['DateTime']>,
+  importedFileDate?: Maybe<Scalars['DateTime']>,
   steficonRule?: Maybe<RuleCommitNode>,
   steficonAppliedDate?: Maybe<Scalars['DateTime']>,
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
@@ -9767,7 +9767,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListExportFile' | 'fileImportedDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListExportFile' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -17833,7 +17833,7 @@ export const PaymentPlanDocument = gql`
       }
     }
     hasPaymentListExportFile
-    fileImportedDate
+    importedFileDate
     importedFileName
     totalEntitledQuantityUsd
     paymentsConflictsCount
@@ -24633,7 +24633,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   maleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalHouseholdsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalIndividualsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  fileImportedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  importedFileDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   steficonRule?: Resolver<Maybe<ResolversTypes['RuleCommitNode']>, ParentType, ContextType>,
   steficonAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,

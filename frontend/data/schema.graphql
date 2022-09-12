@@ -2833,7 +2833,7 @@ type PaymentPlanNode implements Node {
   maleAdultsCount: Int!
   totalHouseholdsCount: Int!
   totalIndividualsCount: Int!
-  fileImportedDate: DateTime
+  importedFileDate: DateTime
   steficonRule: RuleCommitNode
   steficonAppliedDate: DateTime
   deliveryMechanisms: [DeliveryMechanismNode]

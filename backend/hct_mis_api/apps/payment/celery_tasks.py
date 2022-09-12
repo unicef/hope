@@ -193,7 +193,7 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
             try:
                 with transaction.atomic():
                     service.import_payment_list()
-                    payment_plan.file_imported_date = timezone.now()
+                    payment_plan.imported_file_date = timezone.now()
                     payment_plan.background_action_status_none()
                     payment_plan.remove_export_file()
                     payment_plan.save()
