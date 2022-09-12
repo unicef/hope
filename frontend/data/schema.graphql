@@ -467,7 +467,6 @@ input CreateGrievanceTicketInput {
   description: String!
   assignedTo: ID
   category: Int!
-  subCategory: Int
   issueType: Int
   admin: String
   area: String
@@ -787,7 +786,6 @@ type GrievanceTicketNode implements Node {
   assignedTo: UserNode
   status: Int!
   category: Int!
-  subCategory: Int
   issueType: Int
   description: String!
   admin2: AreaNode
@@ -2487,7 +2485,6 @@ type Query {
   allEditHouseholdFieldsAttributes: [FieldAttributeNode]
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
-  grievanceTicketSubCategoryChoices: [ChoiceObject]
   grievanceTicketManualCategoryChoices: [ChoiceObject]
   grievanceTicketSystemCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
@@ -3616,7 +3613,6 @@ input UpdateGrievanceTicketInput {
   household: ID
   individual: ID
   paymentRecord: ID
-  subCategory: Int
   extras: UpdateGrievanceTicketExtrasInput
   priority: Int
   urgency: Int

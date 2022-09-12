@@ -18,7 +18,6 @@ import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_SUB_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import {
@@ -116,9 +115,6 @@ export const EditGrievancePage = (): React.ReactElement => {
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
-  const subCategoryChoices: {
-    [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketSubCategoryChoices);
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
@@ -235,6 +231,13 @@ export const EditGrievancePage = (): React.ReactElement => {
     },
     {},
   );
+  const showIssueType = (values): boolean => {
+    return (
+      values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+      values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
+    );
+  };
   const dataChangeErrors = (errors, touched): React.ReactElement[] =>
     [
       'householdDataUpdateFields',
@@ -332,54 +335,21 @@ export const EditGrievancePage = (): React.ReactElement => {
                           {categoryChoices[ticket.category]}
                         </LabelizedField>
                       </Grid>
-                      {values.category.toString() ===
-                        GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT && (
+                      {showIssueType(values) ? (
                         <Grid item xs={6}>
-                          {ticket.subCategory ? (
-                            <LabelizedField label={t('Issue Type')}>
-                              {subCategoryChoices[ticket.subCategory]}
-                            </LabelizedField>
-                          ) : (
-                            <Field
-                              name='subCategory'
-                              label={t('Issue Type')}
-                              disabled={Boolean(ticket.subCategory)}
-                              onChange={(e) => {
-                                setFieldValue('subCategory', e.target.value);
-                              }}
-                              variant='outlined'
-                              choices={
-                                choicesData.grievanceTicketSubCategoryChoices
-                              }
-                              component={FormikSelectField}
-                            />
-                          )}
+                          <Field
+                            name='issueType'
+                            disabled
+                            label={t('Issue Type*')}
+                            variant='outlined'
+                            choices={
+                              issueTypeDict[values.category.toString()]
+                                .subCategories
+                            }
+                            component={FormikSelectField}
+                          />
                         </Grid>
-                      )}
-                      {values.category.toString() ===
-                        GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-                        (values.category.toString() ===
-                          GRIEVANCE_CATEGORIES.DATA_CHANGE && (
-                          <Grid item xs={6}>
-                            {ticket.issueType ? (
-                              <LabelizedField label={t('Issue Type')}>
-                                {issueType}
-                              </LabelizedField>
-                            ) : (
-                              <Field
-                                name='issueType'
-                                disabled
-                                label={t('Issue Type*')}
-                                variant='outlined'
-                                choices={
-                                  issueTypeDict[values.category.toString()]
-                                    .subCategories
-                                }
-                                component={FormikSelectField}
-                              />
-                            )}
-                          </Grid>
-                        ))}
+                      ) : null}
                       <Grid container xs={12} item>
                         <Grid item xs={3}>
                           <LabelizedField label={t('Household ID')}>
@@ -423,20 +393,6 @@ export const EditGrievancePage = (): React.ReactElement => {
                     </Grid>
                     <BoxPadding>
                       <Grid container spacing={3}>
-                        {ticket.subCategory ===
-                          +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT && (
-                          <Grid item xs={4}>
-                            <Field
-                              name='partner'
-                              fullWidth
-                              disabled={Boolean(ticket.partner)}
-                              variant='outlined'
-                              label={t('Partner')}
-                              choices={userChoices.userPartnerChoices}
-                              component={FormikSelectField}
-                            />
-                          </Grid>
-                        )}
                         <Grid item xs={12}>
                           <Field
                             name='description'
@@ -511,8 +467,8 @@ export const EditGrievancePage = (): React.ReactElement => {
                             component={FormikSelectField}
                           />
                         </Grid>
-                        {+ticket.issueType !==
-                          +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+                        {ticket.issueType.toString() !==
+                          GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL.toString() && (
                           <Grid item xs={6}>
                             <Field
                               name='programme'
@@ -539,10 +495,10 @@ export const EditGrievancePage = (): React.ReactElement => {
                           </Box>
                         </Grid>
                       </BoxWithBorders>
-                      {(ticket.subCategory ===
-                        +GRIEVANCE_SUB_CATEGORIES.PAYMENT_COMPLAINT ||
-                        ticket.subCategory ===
-                          +GRIEVANCE_SUB_CATEGORIES.FSP_COMPLAINT) && (
+                      {(ticket.issueType.toString() ===
+                        GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
+                        ticket.issueType.toString() ===
+                        GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                         <BoxWithBottomBorders>
                           <Grid item xs={6}>
                             <Box py={3}>

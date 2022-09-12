@@ -31,7 +31,6 @@ import {
   GrievanceSteps,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_SUB_CATEGORIES,
 } from '../../../utils/constants';
 import {
   isInvalid,
@@ -211,19 +210,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
     value: edge.node.id,
   }));
 
-  const showSubCategory = (values): boolean => {
-    return values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
-  };
+
   const showIssueType = (values): boolean => {
     return (
       values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+      values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
     );
   };
-
-  const subCategoryChoices: {
-    [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketSubCategoryChoices);
 
   if (
     userDataLoading ||
@@ -580,22 +574,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               />
                             </Grid>
                           )}
-                          {showSubCategory(values) && (
-                            <Grid item xs={6}>
-                              <Field
-                                name='subCategory'
-                                label={t('Issue Type')}
-                                onChange={(e) => {
-                                  setFieldValue('subCategory', e.target.value);
-                                }}
-                                variant='outlined'
-                                choices={
-                                  choicesData.grievanceTicketSubCategoryChoices
-                                }
-                                component={FormikSelectField}
-                              />
-                            </Grid>
-                          )}
                         </Grid>
                       )}
                       {activeStep === GrievanceSteps.Lookup && (
@@ -668,16 +646,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   ),
                                   size: 9,
                                 },
-                                showSubCategory(values) && {
-                                  label: t('Issue Type'),
-                                  value: (
-                                    <span>
-                                      {subCategoryChoices[values.subCategory] ||
-                                        '-'}
-                                    </span>
-                                  ),
-                                  size: 9,
-                                },
                                 {
                                   label: t('HOUSEHOLD ID'),
                                   value: (
@@ -731,7 +699,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           <BoxPadding />
                           <Grid container spacing={3}>
                             {values.subCategory ===
-                              GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT && (
+                              GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT && (
                               <Grid item xs={3}>
                                 <Field
                                   name='partner'
@@ -845,9 +813,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   </Box>
                                 </Grid>
                                 {(values.subCategory ===
-                                  GRIEVANCE_SUB_CATEGORIES.PAYMENT_COMPLAINT ||
+                                  GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                                   values.subCategory ===
-                                    GRIEVANCE_SUB_CATEGORIES.FSP_COMPLAINT) && (
+                                    GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                                   <Grid item xs={6}>
                                     <Box py={3}>
                                       <LookUpPaymentRecord

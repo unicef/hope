@@ -20,33 +20,6 @@ export const fakeGrievancesChoices = {
     { name: 'Sensitive Grievance', value: '3', __typename: 'ChoiceObject' },
     { name: 'System Flagging', value: '9', __typename: 'ChoiceObject' },
   ],
-  grievanceTicketSubCategoryChoices: [
-    {
-      name: 'Payment Related Complaint',
-      value: '1',
-      __typename: 'ChoiceObject',
-    },
-    {
-      name: 'FSP Related Complaint',
-      value: '2',
-      __typename: 'ChoiceObject',
-    },
-    {
-      name: 'Registration Related Complaint',
-      value: '3',
-      __typename: 'ChoiceObject',
-    },
-    {
-      name: 'Other Complaint',
-      value: '4',
-      __typename: 'ChoiceObject',
-    },
-    {
-      name: 'Partner Related Complaint',
-      value: '5',
-      __typename: 'ChoiceObject',
-    },
-  ],
   grievanceTicketManualCategoryChoices: [
     { name: 'Data Change', value: '2', __typename: 'ChoiceObject' },
     { name: 'Grievance Complaint', value: '4', __typename: 'ChoiceObject' },

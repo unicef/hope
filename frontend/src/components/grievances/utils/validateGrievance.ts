@@ -3,7 +3,6 @@ import {
   GrievanceSteps,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_SUB_CATEGORIES,
 } from '../../../utils/constants';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 
@@ -414,8 +413,8 @@ export function validateUsingSteps(
     }
   }
   const householdRequiredGrievanceTypes = [
-    GRIEVANCE_SUB_CATEGORIES.PAYMENT_COMPLAINT,
-    GRIEVANCE_SUB_CATEGORIES.FSP_COMPLAINT,
+    GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT,
+    GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT,
   ];
   if (
     activeStep === GrievanceSteps.Lookup &&
@@ -459,12 +458,12 @@ export function validateUsingSteps(
   }
   if (activeStep === GrievanceSteps.Description) {
     if (
-      values.subCategory === GRIEVANCE_SUB_CATEGORIES.PAYMENT_COMPLAINT &&
+      values.subCategory === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT &&
       !Object.keys(values.selectedPaymentRecords).length
     ) {
       errors.selectedPaymentRecords = 'Payment Records are required';
     } else if (
-      values.subCategory === GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT &&
+      values.subCategory === GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT &&
       !values.partner
     ) {
       errors.partner = 'Partner is required';
