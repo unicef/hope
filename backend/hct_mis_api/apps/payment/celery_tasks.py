@@ -157,7 +157,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
                     payment_plan.background_action_status_none()
                     payment_plan.save()
 
-                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user, per_fsp=True)))
+                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
 
             except Exception:
                 payment_plan.background_action_status_xlsx_export_error()
@@ -193,7 +193,7 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
             try:
                 with transaction.atomic():
                     service.import_payment_list()
-                    payment_plan.xlsx_file_imported_date = timezone.now()
+                    payment_plan.file_imported_date = timezone.now()
                     payment_plan.background_action_status_none()
                     payment_plan.remove_export_file()
                     payment_plan.save()
@@ -226,7 +226,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
                 with transaction.atomic():
                     service.import_payment_list()
                     payment_plan.background_action_status_none()
-                    payment_plan.remove_export_per_fsp_zip_file()
+                    payment_plan.remove_export_file()
                     payment_plan.save()
             except Exception:
                 logger.exception("Unexpected error during xlsx per fsp import")

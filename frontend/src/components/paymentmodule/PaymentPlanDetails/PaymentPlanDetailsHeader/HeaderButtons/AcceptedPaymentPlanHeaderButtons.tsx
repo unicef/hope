@@ -62,7 +62,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
                 component='a'
                 variant='contained'
                 download
-                href={`/api/download-payment-plan-payment-list-per-fsp/${paymentPlan.id}`}
+                href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
               >
                 {t('Download XLSX')}
               </Button>
