@@ -66,11 +66,16 @@ class UpdateIndividualsIBANFromXlsxForm(forms.Form):
 
 
 class WithdrawForm(forms.Form):
-    execute = forms.BooleanField(widget=forms.HiddenInput, initial=True, required=False)
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     reason = forms.CharField(label="Log message", max_length=100, required=False)
     tag = forms.SlugField(
         max_length=100, required=False, help_text="HH will have a user_field with this name with value 'True'"
     )
+
+
+class RestoreForm(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    reason = forms.CharField(label="Log message", max_length=100, required=False)
 
 
 class MassWithdrawForm(WithdrawForm):

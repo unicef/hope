@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
-from elasticsearch_dsl.connections import create_connection, get_connection
+from elasticsearch_dsl.connections import create_connection
 
 from hct_mis_api.apps.household.elasticsearch_utils import (
     populate_all_indexes,
