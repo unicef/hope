@@ -33,15 +33,18 @@ Given("There are individuals and households imported", () => {
   );
 
   const fileName = 'rdi_import_3_hh_3_ind.xlsx';
-  cy.fixture(fileName, 'base64').then((fileContent) => {
-    cy.get('[data-cy="rdi-file-input"]').upload({
-      fileContent,
-      fileName,
-      mimeType:
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      encoding: 'base64',
-    });
-  });
+  // cy.get('[data-cy="rdi-file-input"]').selectFile(`cypress/fixtures/${fileName}`, { action: 'drag-drop' });
+  cy.fixture(fileName, 'base64').as('@rdi_import_3_hh_3_ind');
+  cy.get('[data-cy="rdi-file-input"]').selectFile('@rdi_import_3_hh_3_ind', { action: 'drag-drop' });
+  // cy.fixture(fileName, 'base64').then((fileContent) => {
+  //   cy.get('[data-cy="rdi-file-input"]').upload({
+  //     fileContent,
+  //     fileName,
+  //     mimeType:
+  //       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  //     encoding: 'base64',
+  //   });
+  // });
 
   cy.get('[data-cy="button-import-rdi"').click();
 
@@ -60,7 +63,7 @@ Given("There are individuals and households imported", () => {
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
   cy.get('div').contains('MERGED');
-})
+});
 
 Given('I have an active program', () => {
   cy.visit('/');

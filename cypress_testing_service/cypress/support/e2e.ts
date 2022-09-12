@@ -6,5 +6,4 @@
 // behavior that modifies Cypress.
 // ***********************************************************
 
-import 'cypress-file-upload';
-// import './chai';
+import './commands';
