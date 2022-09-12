@@ -406,6 +406,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
+
+    # TODO: move that out of payment plan, so it can be easily refetched
     available_fsps_for_delivery_mechanisms = graphene.List(FspChoices, fsp_choices=graphene.List(FspSelection))
 
     def resolve_available_fsps_for_delivery_mechanisms(self, info, fsp_choices):
