@@ -1,7 +1,7 @@
 import { gql } from 'apollo-boost';
 
 export const PAYMENT_PLAN_QUERY = gql`
-  query PaymentPlan($paymentPlanId: ID!, $deliveryMechanisms: [String!]!) {
+  query PaymentPlan($paymentPlanId: ID!) {
     paymentPlan(id: $paymentPlanId) {
       id
       unicefId
@@ -149,9 +149,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         volumeUsd
       }
       hasPaymentListPerFspZipFile
-      availableFspsForDeliveryMechanisms(
-        deliveryMechanisms: $deliveryMechanisms
-      ) {
+      availableFspsForDeliveryMechanisms {
         deliveryMechanism
         fsps {
           id

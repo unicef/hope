@@ -18529,14 +18529,14 @@
             "description": null,
             "args": [
               {
-                "name": "deliveryMechanisms",
+                "name": "choices",
                 "description": null,
                 "type": {
                   "kind": "LIST",
                   "name": null,
                   "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
+                    "kind": "INPUT_OBJECT",
+                    "name": "FspSelection",
                     "ofType": null
                   }
                 },
@@ -31237,6 +31237,37 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "FspSelection",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "fspId",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "order",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },

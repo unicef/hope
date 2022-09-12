@@ -1017,6 +1017,11 @@ type FspChoices {
   fsps: [FspChoice]
 }
 
+input FspSelection {
+  fspId: String
+  order: Int
+}
+
 input FullListArguments {
   excludedAdminAreas: [String]
 }
@@ -2861,7 +2866,7 @@ type PaymentPlanNode implements Node {
   importedXlsxFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
-  availableFspsForDeliveryMechanisms(deliveryMechanisms: [String]): [FspChoices]
+  availableFspsForDeliveryMechanisms(choices: [FspSelection]): [FspChoices]
 }
 
 type PaymentPlanNodeConnection {

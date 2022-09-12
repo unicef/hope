@@ -396,13 +396,14 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
-    available_fsps_for_delivery_mechanisms = graphene.List(
-        FspChoices, delivery_mechanisms=graphene.List(graphene.String), choices=graphene.List(FspSelection)
-    )
+    available_fsps_for_delivery_mechanisms = graphene.List(FspChoices, choices=graphene.List(FspSelection))
 
-    # TODO: maybe no need to pass delivery mechanisms but only choices?
-    # DMs are known (DeliveryMechanismForPaymentPlan.objects.filter(payment_plan=payment_plan).values_list("delivery_mechanism", flat=True).order_by("delivery_mechanism_order"))
-    def resolve_available_fsps_for_delivery_mechanisms(self, info, delivery_mechanisms, choices):
+    def resolve_available_fsps_for_delivery_mechanisms(self, info, choices):
+        delivery_mechanisms = (
+            DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self)
+            .values_list("delivery_mechanism", flat=True)
+            .order_by("delivery_mechanism_order")
+        )
         processed_choices = [
             {
                 "fsp": get_object_or_404(FinancialServiceProvider, id=decode_id_string(choice["fsp_id"])),

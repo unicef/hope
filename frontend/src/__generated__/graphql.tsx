@@ -1429,6 +1429,11 @@ export type FspChoices = {
   fsps?: Maybe<Array<Maybe<FspChoice>>>,
 };
 
+export type FspSelection = {
+  fspId?: Maybe<Scalars['String']>,
+  order?: Maybe<Scalars['Int']>,
+};
+
 export type FspToDeliveryMechanismMappingInput = {
   fspId: Scalars['ID'],
   deliveryMechanism: Scalars['String'],
@@ -4116,7 +4121,7 @@ export type PaymentPlanNodeApprovalProcessArgs = {
 
 
 export type PaymentPlanNodeAvailableFspsForDeliveryMechanismsArgs = {
-  deliveryMechanisms?: Maybe<Array<Maybe<Scalars['String']>>>
+  choices?: Maybe<Array<Maybe<FspSelection>>>
 };
 
 export type PaymentPlanNodeConnection = {
@@ -9767,8 +9772,7 @@ export type AllPaymentPlansForTableQuery = (
 );
 
 export type PaymentPlanQueryVariables = {
-  paymentPlanId: Scalars['ID'],
-  deliveryMechanisms: Array<Scalars['String']>
+  paymentPlanId: Scalars['ID']
 };
 
 
@@ -17672,7 +17676,7 @@ export type AllPaymentPlansForTableQueryHookResult = ReturnType<typeof useAllPay
 export type AllPaymentPlansForTableLazyQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableLazyQuery>;
 export type AllPaymentPlansForTableQueryResult = ApolloReactCommon.QueryResult<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>;
 export const PaymentPlanDocument = gql`
-    query PaymentPlan($paymentPlanId: ID!, $deliveryMechanisms: [String!]!) {
+    query PaymentPlan($paymentPlanId: ID!) {
   paymentPlan(id: $paymentPlanId) {
     id
     unicefId
@@ -17820,7 +17824,7 @@ export const PaymentPlanDocument = gql`
       volumeUsd
     }
     hasPaymentListPerFspZipFile
-    availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
+    availableFspsForDeliveryMechanisms {
       deliveryMechanism
       fsps {
         id
@@ -17861,7 +17865,6 @@ export function withPaymentPlan<TProps, TChildProps = {}>(operationOptions?: Apo
  * const { data, loading, error } = usePaymentPlanQuery({
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
- *      deliveryMechanisms: // value for 'deliveryMechanisms'
  *   },
  * });
  */
@@ -22306,6 +22309,7 @@ export type ResolversTypes = {
   FilteredActionsListNode: ResolverTypeWrapper<FilteredActionsListNode>,
   ApprovalNode: ResolverTypeWrapper<ApprovalNode>,
   VolumeByDeliveryMechanismNode: ResolverTypeWrapper<VolumeByDeliveryMechanismNode>,
+  FspSelection: FspSelection,
   FspChoices: ResolverTypeWrapper<FspChoices>,
   FspChoice: ResolverTypeWrapper<FspChoice>,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
@@ -22743,6 +22747,7 @@ export type ResolversParentTypes = {
   FilteredActionsListNode: FilteredActionsListNode,
   ApprovalNode: ApprovalNode,
   VolumeByDeliveryMechanismNode: VolumeByDeliveryMechanismNode,
+  FspSelection: FspSelection,
   FspChoices: FspChoices,
   FspChoice: FspChoice,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,

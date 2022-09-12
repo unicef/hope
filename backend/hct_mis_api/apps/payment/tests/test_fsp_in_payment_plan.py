@@ -188,10 +188,10 @@ query PaymentPlan($id: ID!) {
 
 
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query PaymentPlan($paymentPlanId: ID!, $deliveryMechanisms: [String!]!, $choices: [FspSelection!]!) {
+query PaymentPlan($paymentPlanId: ID!, $choices: [FspSelection!]!) {
     paymentPlan(id: $paymentPlanId) {
         id
-        availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms, choices: $choices) {
+        availableFspsForDeliveryMechanisms(choices: $choices) {
             deliveryMechanism
             fsps {
                 id
@@ -372,7 +372,6 @@ class TestFSPAssignment(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
-                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
                 "choices": [],
             },
         )
@@ -1081,7 +1080,6 @@ class TestFSPLimit(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
-                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_TRANSFER, GenericPayment.DELIVERY_TYPE_VOUCHER],
                 "choices": [],
             },
         )
@@ -1173,7 +1171,6 @@ class TestFSPLimit(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": new_encoded_payment_plan_id,
-                "deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_VOUCHER],
                 "choices": [],
             },
         )
@@ -1224,8 +1221,8 @@ class TestFSPLimit(APITestCase):
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
                     deliveryMechanisms=[
-                        GenericPayment.DELIVERY_TYPE_TRANSFER,
-                        GenericPayment.DELIVERY_TYPE_VOUCHER,
+                        GenericPayment.DELIVERY_TYPE_TRANSFER,  # order 1
+                        GenericPayment.DELIVERY_TYPE_VOUCHER,  # order 2
                         GenericPayment.DELIVERY_TYPE_CASH,
                     ],
                 )
@@ -1238,11 +1235,6 @@ class TestFSPLimit(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
-                "deliveryMechanisms": [
-                    GenericPayment.DELIVERY_TYPE_TRANSFER,
-                    GenericPayment.DELIVERY_TYPE_VOUCHER,
-                    GenericPayment.DELIVERY_TYPE_CASH,
-                ],
                 "choices": [],
             },
         )
@@ -1268,11 +1260,6 @@ class TestFSPLimit(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
-                "deliveryMechanisms": [
-                    GenericPayment.DELIVERY_TYPE_TRANSFER,  # order 1
-                    GenericPayment.DELIVERY_TYPE_VOUCHER,  # order 2
-                    GenericPayment.DELIVERY_TYPE_CASH,
-                ],
                 "choices": [{"fspId": self.encoded_bank_of_america_fsp_id, "order": 2}],
             },
         )
