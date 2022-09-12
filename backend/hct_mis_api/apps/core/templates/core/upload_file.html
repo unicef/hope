@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>File Upload</title>
+    </head>
+    <style>
+      .btn {
+          background-color: #008CBA;
+          font-size: 16px;
+          border-radius: 4px;
+          border: none;
+          padding: 12px 28px;
+          cursor: pointer;
+      }
+      .main {
+          width: 50%;
+      }
+      .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+      }
+      .alert-success {
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+        color: #3c763d;
+      }
+
+    </style>
+    <body>
+
+    {% if messages %}
+        <div class="row" >
+          <div class="col-sm-offset-1" style="width: 50%;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    <p>{{ message }}</p>
+                </div>
+            {% endfor %}
+          </div>
+        </div>
+    {% endif %}
+
+    <section class="main">
+      <form method="post" enctype="multipart/form-data">
+        <fieldset>
+          <legend><h2>Upload File</h2></legend>
+          {% csrf_token %}
+          {{ form.as_p }}
+          <p><button type="submit" value="Upload" class="btn">Upload</button></p>
+        </fieldset>
+      </form>
+    </section>
+
+    </body>
+</html>
