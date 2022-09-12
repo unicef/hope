@@ -1,3 +1,5 @@
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFilterFactory
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -964,7 +966,7 @@ class TestFSPLimit(APITestCase):
         base_setup(cls)
         payment_plan_setup(cls)
 
-    def test_using_fsp_in_multiple_payment_plans_for_no_limnit(self):
+    def test_using_fsp_in_multiple_payment_plans_for_no_limit(self):
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
@@ -1001,14 +1003,25 @@ class TestFSPLimit(APITestCase):
         )
         assert "errors" not in assign_fsps_mutation_response, assign_fsps_mutation_response
 
+        criteria = TargetingCriteriaFactory()
+        rule = TargetingCriteriaRuleFactory(targeting_criteria=criteria)
+        TargetingCriteriaRuleFilterFactory(
+            targeting_criteria_rule=rule,
+            comparison_method="EQUALS",
+            field_name="address",
+            arguments=[self.household_2.address],
+        ),
         new_target_population = TargetPopulationFactory(
             created_by=self.user,
-            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+            targeting_criteria=criteria,
             business_area=self.business_area,
             status=TargetPopulation.STATUS_LOCKED,
         )
-        new_target_population.households.set([self.household_2])  # instead of applying criteria
-        # household_2 supports transfer & cash
+        new_target_population.full_rebuild()
+        new_target_population.save()
+        self.assertEqual(new_target_population.households.count(), 1)
+        self.assertEqual(new_target_population.households.first(), self.household_2)
+
         new_payment_plan = PaymentPlanFactory(
             total_households_count=1, target_population=new_target_population, status=PaymentPlan.Status.LOCKED
         )
@@ -1113,14 +1126,25 @@ class TestFSPLimit(APITestCase):
             excluded=False,
         )
 
+        criteria = TargetingCriteriaFactory()
+        rule = TargetingCriteriaRuleFactory(targeting_criteria=criteria)
+        TargetingCriteriaRuleFilterFactory(
+            targeting_criteria_rule=rule,
+            comparison_method="EQUALS",
+            field_name="address",
+            arguments=[self.household_1.address],
+        ),
         new_target_population = TargetPopulationFactory(
             created_by=self.user,
-            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+            targeting_criteria=criteria,
             business_area=self.business_area,
             status=TargetPopulation.STATUS_LOCKED,
         )
-        new_target_population.households.set([self.household_1])  # instead of applying criteria
-        # household_1 supports cash & voucher
+        new_target_population.full_rebuild()
+        new_target_population.save()
+        self.assertEqual(new_target_population.households.count(), 1)
+        self.assertEqual(new_target_population.households.first(), self.household_1)
+
         new_payment_plan = PaymentPlanFactory(
             total_households_count=1, target_population=new_target_population, status=PaymentPlan.Status.LOCKED
         )
