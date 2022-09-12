@@ -404,6 +404,11 @@ type ChoiceObject {
   value: String
 }
 
+type ChoiceObjectInt {
+  name: String
+  value: Int
+}
+
 type ContentTypeObjectType {
   id: ID!
   appLabel: String!
@@ -2486,8 +2491,8 @@ type Query {
   grievanceTicketManualCategoryChoices: [ChoiceObject]
   grievanceTicketSystemCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
-  grievanceTicketPriorityChoices: [ChoiceObject]
-  grievanceTicketUrgencyChoices: [ChoiceObject]
+  grievanceTicketPriorityChoices: [ChoiceObjectInt]
+  grievanceTicketUrgencyChoices: [ChoiceObjectInt]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   paymentRecordVerification(id: ID!): PaymentVerificationNode
