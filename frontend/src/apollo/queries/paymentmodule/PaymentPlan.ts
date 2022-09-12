@@ -124,7 +124,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         }
       }
       hasPaymentListExportFile
-      fileImportedDate
+      importedFileDate
       importedFileName
       totalEntitledQuantityUsd
       paymentsConflictsCount

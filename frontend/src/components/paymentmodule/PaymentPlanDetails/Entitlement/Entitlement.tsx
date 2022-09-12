@@ -258,9 +258,9 @@ export const Entitlement = ({
                     </GreyTextSmall>
                   </Box>
                   <GreyTextSmall>
-                    {paymentPlan?.xlsxFileImportedDate ? (
+                    {paymentPlan?.importedFileDate ? (
                       <UniversalMoment>
-                        {paymentPlan?.xlsxFileImportedDate}
+                        {paymentPlan?.importedFileDate}
                       </UniversalMoment>
                     ) : null}
                   </GreyTextSmall>
