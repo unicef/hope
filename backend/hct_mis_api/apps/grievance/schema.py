@@ -20,7 +20,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
+from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr, ChoiceObjectInt
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_get_filtered_qs,
@@ -458,8 +458,8 @@ class Query(graphene.ObjectType):
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_system_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
-    grievance_ticket_priority_choices = graphene.List(ChoiceObject)
-    grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
+    grievance_ticket_priority_choices = graphene.List(ChoiceObjectInt)
+    grievance_ticket_urgency_choices = graphene.List(ChoiceObjectInt)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         return (

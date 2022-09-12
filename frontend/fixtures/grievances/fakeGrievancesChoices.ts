@@ -130,29 +130,29 @@ export const fakeGrievancesChoices = {
   grievanceTicketUrgencyChoices: [
     {
       name: 'Very urgent',
-      value: '1',
+      value: 1,
     },
     {
       name: 'Urgent',
-      value: '2',
+      value: 2,
     },
     {
       name: 'Not urgent',
-      value: '3',
+      value: 3,
     },
   ],
   grievanceTicketPriorityChoices: [
     {
       name: 'High',
-      value: '1',
+      value: 1,
     },
     {
       name: 'Medium',
-      value: '2',
+      value: 2,
     },
     {
       name: 'Low',
-      value: '3',
+      value: 3,
     },
   ],
 } as GrievancesChoiceDataQuery;
