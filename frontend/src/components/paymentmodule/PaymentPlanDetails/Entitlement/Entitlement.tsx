@@ -13,9 +13,9 @@ import AttachFileIcon from '@material-ui/icons/AttachFile';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PAYMENT_PLAN_QUERY } from '../../../../apollo/queries/paymentmodule/PaymentPlan';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
+  PaymentPlanDocument,
   PaymentPlanQuery,
   useAllSteficonRulesQuery,
   useExportXlsxPpListMutation,
@@ -99,7 +99,7 @@ export const Entitlement = ({
   const options = {
     refetchQueries: () => [
       {
-        query: PAYMENT_PLAN_QUERY,
+        query: PaymentPlanDocument,
         variables: {
           paymentPlanId: paymentPlan.id,
           fspChoices: [],
