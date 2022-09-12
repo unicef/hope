@@ -1263,7 +1263,6 @@ class TestFSPLimit(APITestCase):
         assert self.encoded_bank_of_europe_fsp_id in cash_ids
         assert self.encoded_santander_fsp_id in cash_ids
 
-        print("NEXT AVAILABLE REQ", "-" * 30)
         new_available_fsps_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
@@ -1279,10 +1278,6 @@ class TestFSPLimit(APITestCase):
         )
         assert "errors" not in new_available_fsps_response, new_available_fsps_response
         new_available_fsps = new_available_fsps_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
-        import pprint
-
-        pprint.pprint(new_available_fsps)
-        print("-" * 50)
         assert len(new_available_fsps) == 3
         new_voucher_ids = [fsp["id"] for fsp in new_available_fsps[1]["fsps"]]
         assert self.encoded_bank_of_america_fsp_id in new_voucher_ids

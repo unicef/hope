@@ -410,37 +410,30 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             }
             for choice in choices
         ]
-        print("resolve_available_fsps_for_delivery_mechanisms", info, processed_choices)
 
         def get_fsps_for_delivery_mechanism(mechanism):
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
 
             def can_accept_volume(fsp):  # TODO: use not _usd
-                print(f"Checking if {fsp} can accept volume")
                 volume_in_payments = Payment.objects.filter(
                     payment_plan=self, assigned_payment_channel__delivery_mechanism=mechanism
                 ).aggregate(money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)))["money"]
 
-                volume_in_choices = 0
-                for choice in processed_choices:
-                    if choice["fsp"] == fsp:
-                        value = Payment.objects.filter(
-                            payment_plan=self,
-                            assigned_payment_channel__delivery_mechanism=delivery_mechanisms[choice["order"] - 1],
-                        ).aggregate(money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)))["money"]
-                        print("OK", value)
-                        volume_in_choices += value
-
-                print(f"Volume in payments: {volume_in_payments}, volume in choices: {volume_in_choices}")
+                volume_in_choices = sum(
+                    Payment.objects.filter(
+                        payment_plan=self,
+                        head_of_household__paymentchannel__delivery_mechanism=mechanism,
+                    ).aggregate(money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)))["money"]
+                    for choice in processed_choices
+                    if choice["fsp"] == fsp
+                )
 
                 return fsp.can_accept_volume(volume_in_payments + volume_in_choices)
 
             def can_be_chosen(fsp):
-                print(f"Checking if {fsp} can be chosen for {mechanism}")
                 mechanism_orders = [index + 1 for index, mech in enumerate(delivery_mechanisms) if mech == mechanism]
                 for order in mechanism_orders:
                     if order in [choice["order"] for choice in processed_choices if choice["fsp"] == fsp]:
-                        print(f"Order {order} is already taken by {fsp}")
                         return True
                 return can_accept_volume(fsp)
 
