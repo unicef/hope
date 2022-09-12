@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 

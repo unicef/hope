@@ -4,6 +4,7 @@ from typing import Iterable
 
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
+from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -22,8 +23,6 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
-    MaxMinFilter,
-    MultiValueFilter,
     RelatedFieldComboFilter,
     ValueFilter,
 )
@@ -39,6 +38,7 @@ from hct_mis_api.apps.household.celery_tasks import (
 )
 from hct_mis_api.apps.household.forms import (
     MassWithdrawForm,
+    RestoreForm,
     UpdateByXlsxStage1Form,
     UpdateByXlsxStage2Form,
     UpdateIndividualsIBANFromXlsxForm,
@@ -114,22 +114,9 @@ class HouseholdAdmin(
     LastSyncDateResetMixin,
     LinkedObjectsMixin,
     PowerQueryMixin,
-    AdminAdvancedFiltersMixin,
     SmartFieldsetMixin,
     HOPEModelAdminBase,
 ):
-    advanced_filter_fields = (
-        "name",
-        "country",
-        "size",
-        "admin_area",
-        "last_registration_date",
-        "registration_data_import",
-        ("business_area__name", "business area"),
-        ("head_of_household__unicef_id", "Head Of Household"),
-        ("admin_area", "Head Of Household"),
-    )
-
     list_display = (
         "unicef_id",
         "country",
@@ -209,10 +196,10 @@ class HouseholdAdmin(
         service.withdraw(tag=tag)
         service.change_tickets_status(tickets)
         if hh.withdrawn:
-            message = "{} has been withdrawn"
+            message = "{} has been withdrawn by {}. {}"
             ticket_message = "Ticket closed due to Household withdrawn"
         else:
-            message = "{} has been restored"
+            message = "{} has been restored by {}. {}"
             ticket_message = "Ticket reopened due to Household restore"
 
         for individual in service.individuals:
@@ -220,7 +207,7 @@ class HouseholdAdmin(
 
         for ticket in tickets:
             self.log_change(request, ticket.ticket, ticket_message)
-        self.log_change(request, hh, message.format("Household"))
+        self.log_change(request, hh, message.format("Household", request.user.username, comment))
 
         return service
 
@@ -229,23 +216,54 @@ class HouseholdAdmin(
 
     def mass_withdraw(self, request, qs):
         context = self.get_common_context(request, title="Withdrawn")
-        if request.POST.get("execute"):
+        context["op"] = "withdraw"
+        context["action"] = "mass_withdraw"
+        context["ticket_operation"] = "close any ticket related to the household or his members"
+        results = 0
+        if "apply" in request.POST:
             form = MassWithdrawForm(request.POST)
             if form.is_valid():
                 with atomic():
                     for hh in qs.filter(withdrawn=False):
-                        self._toggle_withdraw_status(request, hh, tag=form.cleaned_data["tag"])
+                        s = self._toggle_withdraw_status(
+                            request, hh, tag=form.cleaned_data["tag"], comment=form.cleaned_data["reason"]
+                        )
+                        if s.household.withdraw:
+                            results += 1
+                self.message_user(request, f"Changed { results } Households.")
+            else:
+                context["form"] = form
+                return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
         else:
-            context["form"] = MassWithdrawForm()
+            context["form"] = MassWithdrawForm(
+                initial={"_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME), "reason": "", "tag": ""}
+            )
             return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
     mass_withdraw.allowed_permissions = ["household.can_withdrawn"]
 
     def mass_unwithdraw(self, request, qs):
-        context = self.get_common_context(request, title="Withdrawn")
-        with atomic():
-            for hh in qs.filter(withdrawn=True):
-                self._toggle_withdraw_status(request, hh)
+        context = self.get_common_context(request, title="Restore")
+        context["action"] = "mass_unwithdraw"
+        context["op"] = "restore"
+        context["ticket_operation"] = "reopen any previously closed tickets relating to the household or its members"
+        context["queryset"] = qs
+        results = 0
+        if "apply" in request.POST:
+            form = RestoreForm(request.POST)
+            if form.is_valid():
+                with atomic():
+                    for hh in qs.filter(withdrawn=True):
+                        s = self._toggle_withdraw_status(request, hh, comment=form.cleaned_data["reason"])
+                        if not s.household.withdraw:
+                            results += 1
+                self.message_user(request, f"Changed { results } Households.")
+            else:
+                context["form"] = form
+                return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
+        else:
+            context["form"] = RestoreForm(initial={"_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME)})
+            return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
     mass_withdraw.allowed_permissions = ["withdrawn"]
 

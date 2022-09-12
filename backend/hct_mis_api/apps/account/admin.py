@@ -34,7 +34,7 @@ from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_buttons.api import ExtraButtonsMixin, button
-from admin_sync.mixin import GetManyFromRemoteMixin, SyncMixin
+from admin_sync.mixin import GetManyFromRemoteMixin
 from adminactions.export import ForeignKeysCollector
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
