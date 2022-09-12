@@ -154,7 +154,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
         export_service.save_xlsx_file(self.user)
 
-        self.assertTrue(self.payment_plan.has_payment_list_xlsx_file)
+        self.assertTrue(self.payment_plan.has_export_file)
 
         wb = export_service.generate_workbook()
 
@@ -179,15 +179,15 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
         export_service.export_per_fsp(self.user)
 
-        self.assertTrue(self.payment_plan.has_payment_list_per_fsp_zip_file)
-        self.assertIsNotNone(self.payment_plan.xlsx_payment_list_per_fsp_file_link)
+        self.assertTrue(self.payment_plan.has_export_file)
+        self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
         self.assertTrue(
-            self.payment_plan.export_per_fsp_zip_file.file.name.startswith(
+            self.payment_plan.export_file.file.name.startswith(
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
             )
         )
         fsp_ids = export_service.payment_list.values_list("financial_service_provider_id", flat=True)
-        with zipfile.ZipFile(self.payment_plan.export_per_fsp_zip_file.file, mode="r") as zip_file:
+        with zipfile.ZipFile(self.payment_plan.export_file.file, mode="r") as zip_file:
             file_list = zip_file.namelist()
             self.assertEqual(len(fsp_ids), len(file_list))
             fsp_names = FinancialServiceProvider.objects.filter(id__in=fsp_ids).values_list("name", flat=True)
