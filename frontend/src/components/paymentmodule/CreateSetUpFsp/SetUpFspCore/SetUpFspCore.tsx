@@ -11,15 +11,14 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   useAllDeliveryMechanismsQuery,
   useAssignFspToDeliveryMechMutation,
-  useAvailableFspsForDeliveryMechanismsQuery,
   useChooseDeliveryMechForPaymentPlanMutation,
+  usePaymentPlanQuery,
 } from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { DeliveryMechanismWarning } from '../../EditSetUpFsp/DeliveryMechanismWarning';
 import { DeliveryMechanismRow } from '../DeliveryMechanismRow';
 import { SetUpFspButtonActions } from '../SetUpFspButtonActions/SetUpFspButtonActions';
-
 
 export interface FormValues {
   deliveryMechanisms: {
@@ -54,8 +53,11 @@ export const SetUpFspCore = ({
     fetchPolicy: 'network-only',
   });
 
-  const { data: fspsData } = useAvailableFspsForDeliveryMechanismsQuery({
-    variables: { deliveryMechanisms: deliveryMechanismsForQuery },
+  const { data: paymentPlanData } = usePaymentPlanQuery({
+    variables: {
+      paymentPlanId: id,
+      fspChoices: [],
+    },
     fetchPolicy: 'network-only',
     skip: !deliveryMechanismsForQuery.length,
   });
@@ -89,7 +91,9 @@ export const SetUpFspCore = ({
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
-  const handleChooseDeliveryMechanisms = async (values: FormValues): Promise<void> => {
+  const handleChooseDeliveryMechanisms = async (
+    values: FormValues,
+  ): Promise<void> => {
     setWarning('');
     const mappedDeliveryMechanisms = values.deliveryMechanisms.map(
       (el) => el.deliveryMechanism,
@@ -118,7 +122,9 @@ export const SetUpFspCore = ({
     }
   };
 
-  const handleAssignFspToDeliveryMechanism = async (values: FormValues): Promise<void> => {
+  const handleAssignFspToDeliveryMechanism = async (
+    values: FormValues,
+  ): Promise<void> => {
     const mappings = values.deliveryMechanisms.map((el, index) => ({
       fspId: el.fsp,
       deliveryMechanism: el.deliveryMechanism,
@@ -180,37 +186,40 @@ export const SetUpFspCore = ({
                   render={(arrayHelpers) => {
                     return (
                       <>
-                        {values.deliveryMechanisms.map((item, index: number) => {
-                          const mapping =
-                            fspsData?.availableFspsForDeliveryMechanisms[index];
-                          const mappedFsps = mapping?.fsps.map((el) => ({
-                            name: el.name,
-                            value: el.id,
-                          }));
-
-                          const deliveryMechanismsChoices = deliveryMechanismsData.allDeliveryMechanisms.map(
-                            (el) => ({
+                        {values.deliveryMechanisms.map(
+                          (item, index: number) => {
+                            const mapping =
+                              paymentPlanData?.paymentPlan
+                                ?.availableFspsForDeliveryMechanisms[index];
+                            const mappedFsps = mapping?.fsps.map((el) => ({
                               name: el.name,
-                              value: el.value,
-                            }),
-                          );
+                              value: el.id,
+                            }));
 
-                          return (
-                            <DeliveryMechanismRow
-                              /* eslint-disable-next-line react/no-array-index-key */
-                              key={`${item.deliveryMechanism}-${index}`}
-                              index={index}
-                              arrayHelpers={arrayHelpers}
-                              deliveryMechanismsChoices={
-                                deliveryMechanismsChoices
-                              }
-                              fspsChoices={mappedFsps}
-                              step={activeStep}
-                              values={values}
-                              permissions={permissions}
-                            />
-                          );
-                        })}
+                            const deliveryMechanismsChoices = deliveryMechanismsData.allDeliveryMechanisms.map(
+                              (el) => ({
+                                name: el.name,
+                                value: el.value,
+                              }),
+                            );
+
+                            return (
+                              <DeliveryMechanismRow
+                                /* eslint-disable-next-line react/no-array-index-key */
+                                key={`${item.deliveryMechanism}-${index}`}
+                                index={index}
+                                arrayHelpers={arrayHelpers}
+                                deliveryMechanismsChoices={
+                                  deliveryMechanismsChoices
+                                }
+                                fspsChoices={mappedFsps}
+                                step={activeStep}
+                                values={values}
+                                permissions={permissions}
+                              />
+                            );
+                          },
+                        )}
                         {activeStep === 0 && (
                           <Grid container>
                             <Grid item xs={12}>

@@ -65,7 +65,8 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             {
               query: PAYMENT_PLAN_QUERY,
               variables: {
-                id: paymentPlan.id,
+                paymentPlanId: paymentPlan.id,
+                fspChoices: [],
               },
             },
           ],
@@ -123,7 +124,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               }}
             />
             {error?.graphQLErrors?.length || xlsxErrors?.length ? (
-              <Error data-cy="error-list">
+              <Error data-cy='error-list'>
                 <p>Errors</p>
                 {error
                   ? error.graphQLErrors.map((x) => <p>{x.message}</p>)

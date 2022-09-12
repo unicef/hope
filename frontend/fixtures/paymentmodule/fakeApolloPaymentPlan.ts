@@ -186,5 +186,6 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
       "__typename": "VolumeByDeliveryMechanismNode"
     }
   ],
+  "availableFspsForDeliveryMechanisms": [],
   "__typename": "PaymentPlanNode"
 };

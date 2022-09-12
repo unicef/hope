@@ -18529,7 +18529,7 @@
             "description": null,
             "args": [
               {
-                "name": "choices",
+                "name": "fspChoices",
                 "description": null,
                 "type": {
                   "kind": "LIST",

@@ -4121,7 +4121,7 @@ export type PaymentPlanNodeApprovalProcessArgs = {
 
 
 export type PaymentPlanNodeAvailableFspsForDeliveryMechanismsArgs = {
-  choices?: Maybe<Array<Maybe<FspSelection>>>
+  fspChoices?: Maybe<Array<Maybe<FspSelection>>>
 };
 
 export type PaymentPlanNodeConnection = {
@@ -9773,7 +9773,7 @@ export type AllPaymentPlansForTableQuery = (
 
 export type PaymentPlanQueryVariables = {
   paymentPlanId: Scalars['ID'],
-  choices: Array<Maybe<FspSelection>>
+  fspChoices: Array<Maybe<FspSelection>>
 };
 
 
@@ -9781,7 +9781,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'hasPaymentListPerFspZipFile'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'hasPaymentListPerFspZipFile'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -17677,11 +17677,12 @@ export type AllPaymentPlansForTableQueryHookResult = ReturnType<typeof useAllPay
 export type AllPaymentPlansForTableLazyQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableLazyQuery>;
 export type AllPaymentPlansForTableQueryResult = ApolloReactCommon.QueryResult<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>;
 export const PaymentPlanDocument = gql`
-    query PaymentPlan($paymentPlanId: ID!, $choices: [FspSelection]!) {
+    query PaymentPlan($paymentPlanId: ID!, $fspChoices: [FspSelection]!) {
   paymentPlan(id: $paymentPlanId) {
     id
     unicefId
     status
+    backgroundActionStatus
     createdBy {
       id
       firstName
@@ -17825,7 +17826,7 @@ export const PaymentPlanDocument = gql`
       volumeUsd
     }
     hasPaymentListPerFspZipFile
-    availableFspsForDeliveryMechanisms(choices: $choices) {
+    availableFspsForDeliveryMechanisms(fspChoices: $fspChoices) {
       deliveryMechanism
       fsps {
         id
@@ -17866,7 +17867,7 @@ export function withPaymentPlan<TProps, TChildProps = {}>(operationOptions?: Apo
  * const { data, loading, error } = usePaymentPlanQuery({
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
- *      choices: // value for 'choices'
+ *      fspChoices: // value for 'fspChoices'
  *   },
  * });
  */
