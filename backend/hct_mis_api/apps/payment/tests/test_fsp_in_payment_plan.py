@@ -1,3 +1,4 @@
+from hct_mis_api.apps.payment.models import FinancialServiceProvider
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFilterFactory
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 from hct_mis_api.apps.payment.fixtures import PaymentFactory
@@ -1198,22 +1199,19 @@ class TestFSPLimit(APITestCase):
         assert "cannot accept volume" in error_msg, error_msg
 
     def test_observing_changes_in_fsp_choices_when_assigning_fsps_to_delivery_mechanisms(self):
-        print("test_observing_changes_in_fsp_choices_when_assigning_fsps_to_delivery_mechanisms")
-        # self.payment_plan.status = PaymentPlan.Status.OPEN
-        # self.payment_plan.save()
-
         PaymentFactory(
             payment_plan=self.payment_plan,
-            # financial_service_provider=self.bank_of_america_fsp,
             collector=self.individuals_1[0],
-            assigned_payment_channel=self.payment_channel_1_voucher,
+            financial_service_provider=None,
+            assigned_payment_channel=None,  # none assigned
             entitlement_quantity=5000,
-            entitlement_quantity_usd=1000,  # max limit
+            entitlement_quantity_usd=1000,  # max limit for america bank
             delivery_type=GenericPayment.DELIVERY_TYPE_VOUCHER,
             status=GenericPayment.STATUS_NOT_DISTRIBUTED,
             household=self.household_1,
             excluded=False,
         )
+        self.assertEqual(FinancialServiceProvider.objects.count(), 3)
 
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
@@ -1231,7 +1229,6 @@ class TestFSPLimit(APITestCase):
         )
         assert "errors" not in choose_dms_response, choose_dms_response
 
-        print("AVAILABLE REQ")
         available_fsps_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
@@ -1249,17 +1246,12 @@ class TestFSPLimit(APITestCase):
         available_fsps = available_fsps_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
         assert len(available_fsps) == 3
 
-        import pprint
-
-        pprint.pprint(available_fsps)
-
         transfer_ids = [fsp["id"] for fsp in available_fsps[0]["fsps"]]
         assert self.encoded_bank_of_europe_fsp_id in transfer_ids
         assert self.encoded_santander_fsp_id in transfer_ids
 
         voucher_ids = [fsp["id"] for fsp in available_fsps[1]["fsps"]]
-        print("voucher_ids", voucher_ids)
-        assert self.encoded_bank_of_america_fsp_id in voucher_ids  # FAILS #####
+        assert self.encoded_bank_of_america_fsp_id in voucher_ids
         assert self.encoded_bank_of_europe_fsp_id in voucher_ids
 
         cash_ids = [fsp["id"] for fsp in available_fsps[2]["fsps"]]
@@ -1267,7 +1259,7 @@ class TestFSPLimit(APITestCase):
         assert self.encoded_bank_of_europe_fsp_id in cash_ids
         assert self.encoded_santander_fsp_id in cash_ids
 
-        print("NEXT AVAILABLE REQ")
+        print("NEXT AVAILABLE REQ", "-" * 30)
         new_available_fsps_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
@@ -1278,14 +1270,18 @@ class TestFSPLimit(APITestCase):
                     GenericPayment.DELIVERY_TYPE_VOUCHER,  # order 2
                     GenericPayment.DELIVERY_TYPE_CASH,
                 ],
-                "choices": [{"fsp_id": self.encoded_bank_of_america_fsp_id, "order": 2}],
+                "choices": [{"fspId": self.encoded_bank_of_america_fsp_id, "order": 2}],
             },
         )
         assert "errors" not in new_available_fsps_response, new_available_fsps_response
         new_available_fsps = new_available_fsps_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
+        import pprint
+
+        pprint.pprint(new_available_fsps)
+        print("-" * 50)
         assert len(new_available_fsps) == 3
         new_voucher_ids = [fsp["id"] for fsp in new_available_fsps[1]["fsps"]]
-        assert self.bank_of_america_fsp in new_voucher_ids
+        assert self.encoded_bank_of_america_fsp_id in new_voucher_ids
         new_cash_ids = [fsp["id"] for fsp in new_available_fsps[2]["fsps"]]
         assert self.encoded_bank_of_america_fsp_id not in new_cash_ids  # NOT! due to limit exhausted by voucher
 
