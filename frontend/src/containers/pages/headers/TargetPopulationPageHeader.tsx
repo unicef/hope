@@ -1,21 +1,24 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import {
-  TargetPopulationNode,
-  TargetPopulationStatus,
-} from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/core/PageHeader';
+import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
 import { StatusBox } from '../../../components/core/StatusBox';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
+  targetPopulationBuildStatusToColor,
   targetPopulationStatusMapping,
   targetPopulationStatusToColor,
 } from '../../../utils/utils';
-import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
+import {
+  TargetPopulationQuery,
+  TargetPopulationStatus,
+  useBusinessAreaDataQuery,
+} from '../../../__generated__/graphql';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
-import { ApprovedTargetPopulationHeaderButtons } from './ApprovedTargetPopulationHeaderButtons';
+import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
+import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -27,11 +30,13 @@ const HeaderWrapper = styled.div`
 `;
 const StatusWrapper = styled.div`
   width: 140px;
+  display: flex;
+  flex-direction: row;
 `;
 
 export interface ProgramDetailsPageHeaderPropTypes {
   setEditState: Function;
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: TargetPopulationQuery['targetPopulation'];
   canEdit: boolean;
   canRemove: boolean;
   canDuplicate: boolean;
@@ -52,6 +57,12 @@ export const TargetPopulationPageHeader = ({
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
+  const {
+    data: businessAreaData,
+    loading: businessAreaDataLoading,
+  } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Targeting',
@@ -59,12 +70,15 @@ export const TargetPopulationPageHeader = ({
     },
   ];
 
+  if (!businessAreaData) return null;
+  if (businessAreaDataLoading) return <LoadingComponent />;
+
   let buttons;
 
   switch (targetPopulation.status) {
-    case TargetPopulationStatus.Draft:
+    case TargetPopulationStatus.Open:
       buttons = (
-        <InProgressTargetPopulationHeaderButtons
+        <OpenTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           setEditState={setEditState}
           canDuplicate={canDuplicate}
@@ -76,12 +90,15 @@ export const TargetPopulationPageHeader = ({
       break;
     case TargetPopulationStatus.Locked:
     case TargetPopulationStatus.SteficonCompleted:
+    case TargetPopulationStatus.SteficonError:
+    case TargetPopulationStatus.SteficonRun:
       buttons = (
-        <ApprovedTargetPopulationHeaderButtons
+        <LockedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           canDuplicate={canDuplicate}
           canUnlock={canUnlock}
           canSend={canSend}
+          businessAreaData={businessAreaData}
         />
       );
       break;
@@ -91,6 +108,7 @@ export const TargetPopulationPageHeader = ({
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           canDuplicate={canDuplicate}
+          businessAreaData={businessAreaData}
         />
       );
       break;
@@ -106,6 +124,10 @@ export const TargetPopulationPageHeader = ({
                 status={targetPopulation.status}
                 statusToColor={targetPopulationStatusToColor}
                 statusNameMapping={targetPopulationStatusMapping}
+              />
+              <StatusBox
+                status={targetPopulation.buildStatus}
+                statusToColor={targetPopulationBuildStatusToColor}
               />
             </StatusWrapper>
           </HeaderWrapper>

@@ -1,0 +1,188 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/PaymentPlanDetailsResults should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root sc-htpNat cNIMpP MuiPaper-elevation1 MuiPaper-rounded"
+  >
+    <div
+      class="sc-bxivhb lealwS"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6"
+      >
+        Results
+      </h6>
+    </div>
+    <div
+      class="sc-ifAKCX WOpjk"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-container"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        >
+          <div
+            class="sc-EHOje blZqeH"
+            color="#5F02CF"
+          >
+            <div>
+              <span
+                class="sc-bdVaJa kwsjSG"
+                color="textSecondary"
+              >
+                Female Children
+              </span>
+              <div>
+                <span
+                  class="sc-bwzfXH emFVa"
+                  color="textSecondary"
+                >
+                  0
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        >
+          <div
+            class="sc-EHOje gQmscG"
+            color="#DFCCF5"
+          >
+            <div>
+              <span
+                class="sc-bdVaJa kwsjSG"
+                color="textSecondary"
+              >
+                Female Adults
+              </span>
+              <div>
+                <span
+                  class="sc-bwzfXH emFVa"
+                  color="textSecondary"
+                >
+                  1
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        >
+          <div
+            class="sc-EHOje ozjqh"
+            color="#1D6A64"
+          >
+            <div>
+              <span
+                class="sc-bdVaJa kwsjSG"
+                color="textSecondary"
+              >
+                Male Children
+              </span>
+              <div>
+                <span
+                  class="sc-bwzfXH emFVa"
+                  color="textSecondary"
+                >
+                  0
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        >
+          <div
+            class="sc-EHOje ljOEoj"
+            color="#B1E3E0"
+          >
+            <div>
+              <span
+                class="sc-bdVaJa kwsjSG"
+                color="textSecondary"
+              >
+                Male Adults
+              </span>
+              <div>
+                <span
+                  class="sc-bwzfXH emFVa"
+                  color="textSecondary"
+                >
+                  2
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div
+            class="sc-htoDjs iquLtL"
+            data-cy="chart-container"
+          >
+            <canvas
+              class="chartjs-render-monitor"
+              height="0"
+              style="display: block;"
+              width="0"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-justify-xs-flex-end"
+      >
+        <div
+          class="sc-bZQynM fQOsJY"
+        >
+          <div>
+            <span
+              class="sc-bdVaJa kwsjSG"
+              color="textSecondary"
+            >
+              Total Number of Households
+            </span>
+            <div>
+              <div
+                class="sc-gzVnrw kojZPw"
+              >
+                1
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="sc-bZQynM fQOsJY"
+        >
+          <div>
+            <span
+              class="sc-bdVaJa kwsjSG"
+              color="textSecondary"
+            >
+              Targeted Individuals
+            </span>
+            <div>
+              <div
+                class="sc-gzVnrw kojZPw"
+              >
+                3
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

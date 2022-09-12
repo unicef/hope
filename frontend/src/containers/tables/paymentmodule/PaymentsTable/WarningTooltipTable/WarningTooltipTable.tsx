@@ -15,16 +15,15 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { BlackLink } from '../../../../../components/core/BlackLink';
 import { LabelizedField } from '../../../../../components/core/LabelizedField';
 import { StatusBox } from '../../../../../components/core/StatusBox';
 import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../../components/core/UniversalMoment';
-import {
-  decodeIdString,
-  paymentPlanStatusToColor,
-} from '../../../../../utils/utils';
+import { paymentPlanStatusToColor } from '../../../../../utils/utils';
 import {
   AllPaymentsForTableQuery,
+  PaymentConflictDataNode,
   PaymentPlanQuery,
 } from '../../../../../__generated__/graphql';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
@@ -46,12 +45,16 @@ interface WarningTooltipTableProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
   setDialogOpen: (dialogOpen: boolean) => void;
+  businessArea: string;
+  canViewDetails: boolean;
 }
 
 export const WarningTooltipTable = ({
   paymentPlan,
   payment,
   setDialogOpen,
+  businessArea,
+  canViewDetails = false,
 }: WarningTooltipTableProps): React.ReactElement => {
   const { t } = useTranslation();
   if (!payment) return null;
@@ -63,9 +66,17 @@ export const WarningTooltipTable = ({
       paymentPlanSoftConflictedData,
     } = payment;
 
-    const renderRow = (row): React.ReactElement => (
-      <ClickableTableRow hover onClick={undefined}>
-        <TableCell align='left'>{row.paymentPlanId}</TableCell>
+    const renderRow = (row: PaymentConflictDataNode): React.ReactElement => (
+      <ClickableTableRow hover>
+        <TableCell align='left'>
+          {canViewDetails ? (
+            <BlackLink to={`/${businessArea}/payment-module/payment-plans/${row.paymentPlanId}`}>
+              {row.paymentPlanUnicefId}
+            </BlackLink>
+          ) : (
+            row.paymentPlanUnicefId
+          )}
+        </TableCell>
         <TableCell align='left'>
           <UniversalMoment>{row.paymentPlanStartDate}</UniversalMoment>
         </TableCell>
@@ -78,7 +89,7 @@ export const WarningTooltipTable = ({
             statusToColor={paymentPlanStatusToColor}
           />
         </TableCell>
-        <TableCell align='left'>{row.paymentId}</TableCell>
+        <TableCell align='left'>{row.paymentUnicefId}</TableCell>
       </ClickableTableRow>
     );
 
@@ -90,6 +101,7 @@ export const WarningTooltipTable = ({
     }
     return [];
   };
+
   return (
     <Dialog
       open={!!payment}
@@ -103,7 +115,7 @@ export const WarningTooltipTable = ({
       </DialogTitleWrapper>
       <DialogContent>
         <Box mt={4} mb={2} display='flex'>
-          {t('Payment Plan ID')} <Bold>{decodeIdString(paymentPlan.id)}</Bold>{' '}
+          {t('Payment Plan ID')} <Bold>{paymentPlan.unicefId}</Bold>{' '}
           {t('details')}:
         </Box>
         <GreyBox p={3}>

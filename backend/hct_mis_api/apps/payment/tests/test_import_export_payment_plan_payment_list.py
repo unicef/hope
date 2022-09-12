@@ -1,3 +1,5 @@
+import zipfile
+
 from io import BytesIO
 from pathlib import Path
 
@@ -9,18 +11,25 @@ from hct_mis_api.apps.payment.utils import float_to_decimal
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
-from hct_mis_api.apps.payment.models import PaymentPlan, ServiceProvider, PaymentChannel, Payment
+from hct_mis_api.apps.payment.models import (
+    PaymentPlan,
+    ServiceProvider,
+    PaymentChannel,
+    Payment,
+    FinancialServiceProvider,
+)
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.payment.fixtures import (
     ServiceProviderFactory,
     RealProgramFactory,
     PaymentPlanFactory,
-    PaymentFactory
+    PaymentFactory,
 )
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea, XLSXFileTemp
+from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo import models as geo_models
 
 
 def valid_file():
@@ -34,16 +43,16 @@ def invalid_file():
 
 
 class ImportExportPaymentPlanPaymentListTest(APITestCase):
-
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
 
         if not Household.objects.all().count():
             for n in range(1, 4):
                 create_household(
-                    {"size": n, "address": "Lorem Ipsum", "country_origin": "PL"},
+                    {"size": n, "address": "Lorem Ipsum", "country_origin": country_origin},
                 )
 
         if ServiceProvider.objects.count() < 3:
@@ -64,43 +73,41 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             p_ch.delivery_mechanism = "Deposit to Card"
             p_ch.save()
 
-        cls.xlsx_valid_file = XLSXFileTemp.objects.create(
+        cls.xlsx_valid_file = FileTemp.objects.create(
             object_id=cls.payment_plan.pk,
             content_type=get_content_type_for_model(cls.payment_plan),
             created_by=cls.user,
-            type=XLSXFileTemp.IMPORT,
             file=valid_file(),
         ).file
 
-        cls.xlsx_invalid_file = XLSXFileTemp.objects.create(
+        cls.xlsx_invalid_file = FileTemp.objects.create(
             object_id=cls.payment_plan.pk,
             content_type=get_content_type_for_model(cls.payment_plan),
             created_by=cls.user,
-            type=XLSXFileTemp.IMPORT,
             file=invalid_file(),
         ).file
 
     def test_import_invalid_file(self):
         error_msg = [
-            ('Payment Plan - Payment List', 'A2', 'This payment id 123123 is not in Payment Plan Payment List'),
+            ("Payment Plan - Payment List", "A2", "This payment id 123123 is not in Payment Plan Payment List"),
             (
-                'Payment Plan - Payment List',
-                'F3',
+                "Payment Plan - Payment List",
+                "F3",
                 "Payment_channel should be one of ['Cardless cash withdrawal', 'Cash', 'Cash by FSP', 'Cheque', "
                 "'Deposit to Card', 'In Kind', 'Mobile Money', 'Other', 'Pre-paid card', 'Referral', 'Transfer', "
-                "'Transfer to Account', 'Voucher'] but received Invalid"
+                "'Transfer to Account', 'Voucher'] but received Invalid",
             ),
             (
-                'Payment Plan - Payment List',
-                'F3',
+                "Payment Plan - Payment List",
+                "F3",
                 "You can't set payment_channel Invalid for Payment with already assigned "
-                "payment channel Deposit to Card"
-            )
+                "payment channel Deposit to Card",
+            ),
         ]
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_invalid_file)
         wb = service.open_workbook()
         # override imported sheet payment id
-        wb.active["A3"].value = str(self.payment_plan.all_active_payments[1].pk)
+        wb.active["A3"].value = str(self.payment_plan.all_active_payments[1].unicef_id)
 
         service.validate()
         self.assertEqual(service.errors, error_msg)
@@ -108,10 +115,10 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
     def test_import_valid_file(self):
         all_active_payments = self.payment_plan.payments.exclude(excluded=True)
         # override imported payment id
-        payment_id_1 = str(all_active_payments[0].pk)
-        payment_id_2 = str(all_active_payments[1].pk)
-        payment_1 = Payment.objects.get(pk=payment_id_1)
-        payment_2 = Payment.objects.get(pk=payment_id_2)
+        payment_id_1 = str(all_active_payments[0].unicef_id)
+        payment_id_2 = str(all_active_payments[1].unicef_id)
+        payment_1 = Payment.objects.get(unicef_id=payment_id_1)
+        payment_2 = Payment.objects.get(unicef_id=payment_id_2)
 
         payment_2.assigned_payment_channel = None
         payment_2.save()
@@ -139,13 +146,36 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
         export_service.save_xlsx_file(self.user)
 
-        self.assertTrue(self.payment_plan.has_payment_plan_payment_list_xlsx_file)
+        self.assertTrue(self.payment_plan.has_payment_list_xlsx_file)
 
         wb = export_service.generate_workbook()
 
-        self.assertEqual(wb.active["A2"].value, str(self.payment_plan.all_active_payments[0].pk))
+        self.assertEqual(wb.active["A2"].value, str(self.payment_plan.all_active_payments[0].unicef_id))
         self.assertEqual(wb.active["I2"].value, self.payment_plan.all_active_payments[0].entitlement_quantity)
         self.assertEqual(wb.active["J2"].value, self.payment_plan.all_active_payments[0].entitlement_quantity_usd)
         self.assertEqual(
             wb.active["F2"].value, self.payment_plan.all_active_payments[0].assigned_payment_channel.delivery_mechanism
         )
+
+    def test_export_payment_plan_payment_list_per_fsp(self):
+        export_service = XlsxPaymentPlanExportService(self.payment_plan)
+        export_service.export_per_fsp(self.user)
+
+        self.assertTrue(self.payment_plan.has_payment_list_per_fsp_zip_file)
+        self.assertIsNotNone(self.payment_plan.xlsx_payment_list_per_fsp_file_link)
+        self.assertTrue(
+            self.payment_plan.export_per_fsp_zip_file.file.name.startswith(
+                f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
+            )
+        )
+        fsp_ids = export_service.payment_list.values_list("financial_service_provider_id", flat=True)
+        with zipfile.ZipFile(self.payment_plan.export_per_fsp_zip_file.file, mode="r") as zip_file:
+            file_list = zip_file.namelist()
+            self.assertEqual(len(fsp_ids), len(file_list))
+            fsp_names = FinancialServiceProvider.objects.filter(id__in=fsp_ids).values_list("name", flat=True)
+            file_list_fsp = [
+                f.replace(".xlsx", "").replace(f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_", "")
+                for f in file_list
+            ]
+            for fsp_name in fsp_names:
+                self.assertIn(fsp_name, file_list_fsp)

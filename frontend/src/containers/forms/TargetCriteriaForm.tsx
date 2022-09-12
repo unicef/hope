@@ -290,6 +290,7 @@ export function TargetCriteriaForm({
                     }
                     color='primary'
                     startIcon={<AddCircleOutline />}
+                    data-cy='button-household-rule'
                   >
                     ADD HOUSEHOLD RULE
                   </Button>

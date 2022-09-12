@@ -7,20 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("payment", "0046_migration"),
+        ('payment', '0046_migration'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name="cashplanpaymentverification",
-            name="rapid_pro_flow_start_uuids",
-            field=django.contrib.postgres.fields.ArrayField(
-                base_field=models.CharField(blank=True, max_length=255), default=list, size=None
-            ),
+            model_name='cashplanpaymentverification',
+            name='rapid_pro_flow_start_uuids',
+            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(blank=True, max_length=255), default=list, size=None),
         ),
         migrations.AlterField(
-            model_name="cashplanpaymentverification",
-            name="unicef_id",
+            model_name='cashplanpaymentverification',
+            name='unicef_id',
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
     ]

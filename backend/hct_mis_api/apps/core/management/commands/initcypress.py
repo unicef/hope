@@ -5,10 +5,18 @@ from hct_mis_api.apps.core.management.sql import sql_drop_tables
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **options):
-        self._drop_databases()
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--skip-drop",
+            action="store_true",
+            default=False,
+            help="Skip migrating - just reload the data",
+        )
 
-        call_command("migratealldb")
+    def handle(self, *args, **options):
+        if options["skip_drop"] is False:
+            self._drop_databases()
+            call_command("migratealldb")
 
         call_command("flush", "--noinput")
         call_command("flush", "--noinput", database="cash_assist_datahub_mis")
@@ -16,9 +24,12 @@ class Command(BaseCommand):
         call_command("flush", "--noinput", database="cash_assist_datahub_erp")
         call_command("flush", "--noinput", database="registration_datahub")
 
+        call_command("loaddata", "hct_mis_api/apps/geo/fixtures/data.json")
         call_command("loaddata", "hct_mis_api/apps/core/fixtures/data.json")
         call_command("loaddata", "hct_mis_api/apps/account/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/geo/fixtures/data.json")
+        call_command(
+            "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/data.json", database="registration_datahub"
+        )
 
         call_command("search_index", "--rebuild", "-f")
 

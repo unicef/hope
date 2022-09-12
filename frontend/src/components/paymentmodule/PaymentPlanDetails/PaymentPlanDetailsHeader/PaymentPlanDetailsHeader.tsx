@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
+  paymentPlanBackgroundActionStatusMapping,
+  paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
@@ -15,6 +17,7 @@ import { AcceptedPaymentPlanHeaderButtons } from './HeaderButtons/AcceptedPaymen
 import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
 import { InAuthorizationPaymentPlanHeaderButtons } from './HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
 import { InReviewPaymentPlanHeaderButtons } from './HeaderButtons/InReviewPaymentPlanHeaderButtons';
+import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 
@@ -42,9 +45,12 @@ export const PaymentPlanDetailsHeader = ({
     },
   ];
 
+  // TODO: add real values by permissions
+
   const canRemove = true;
   const canEdit = true;
   const canLock = true;
+  const canUnlock = true;
   const canSendForApproval = true;
   const canReject = true;
   const canApprove = true;
@@ -57,73 +63,68 @@ export const PaymentPlanDetailsHeader = ({
   switch (paymentPlan.status) {
     case 'OPEN':
       buttons = (
-        <>
-          <OpenPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canRemove={canRemove}
-            canEdit={canEdit}
-            canLock={canLock}
-          />
-        </>
+        <OpenPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canRemove={canRemove}
+          canEdit={canEdit}
+          canLock={canLock}
+        />
       );
       break;
     case 'LOCKED':
       buttons = (
-        <>
-          <LockedPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canLock={canLock}
-            canSendForApproval={canSendForApproval}
-          />
-        </>
+        <LockedPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canUnlock={canLock}
+        />
+      );
+      break;
+    case 'LOCKED_FSP':
+      buttons = (
+        <LockedFspPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canUnlock={canUnlock}
+          canSendForApproval={canSendForApproval}
+        />
       );
       break;
     case 'IN_APPROVAL':
       buttons = (
-        <>
-          <InApprovalPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canReject={canReject}
-            canApprove={canApprove}
-          />
-        </>
+        <InApprovalPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canReject={canReject}
+          canApprove={canApprove}
+        />
       );
       break;
     case 'IN_AUTHORIZATION':
       buttons = (
-        <>
-          <InAuthorizationPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canReject={canReject}
-            canAuthorize={canAuthorize}
-          />
-        </>
+        <InAuthorizationPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canReject={canReject}
+          canAuthorize={canAuthorize}
+        />
       );
       break;
     case 'IN_REVIEW':
       buttons = (
-        <>
-          <InReviewPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canReject={canReject}
-            canMarkAsReviewed={canMarkAsReviewed}
-          />
-        </>
+        <InReviewPaymentPlanHeaderButtons
+          paymentPlan={paymentPlan}
+          canReject={canReject}
+          canMarkAsReviewed={canMarkAsReviewed}
+        />
       );
       break;
     case 'ACCEPTED':
       buttons = (
-        <>
-          <AcceptedPaymentPlanHeaderButtons
-            paymentPlan={paymentPlan}
-            canDownloadXlsx={canDownloadXlsx}
-            canSendToFsp={canSendToFsp}
-          />
-        </>
+        <AcceptedPaymentPlanHeaderButtons
+          canDownloadXlsx={canDownloadXlsx}
+          canSendToFsp={canSendToFsp}
+          paymentPlan={paymentPlan}
+        />
       );
       break;
     default:
-      buttons = <></>;
       break;
   }
 
@@ -139,6 +140,15 @@ export const PaymentPlanDetailsHeader = ({
               statusNameMapping={paymentPlanStatusMapping}
             />
           </StatusWrapper>
+          {paymentPlan.backgroundActionStatus && (
+            <StatusWrapper>
+              <StatusBox
+                status={paymentPlan.backgroundActionStatus}
+                statusToColor={paymentPlanBackgroundActionStatusToColor}
+                statusNameMapping={paymentPlanBackgroundActionStatusMapping}
+              />
+            </StatusWrapper>
+          )}
         </Box>
       }
       breadCrumbs={

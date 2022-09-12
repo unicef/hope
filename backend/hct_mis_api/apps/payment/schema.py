@@ -1,10 +1,9 @@
 import json
 from decimal import Decimal
 
-from django.db.models.functions import Coalesce
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
-
 
 import graphene
 from graphene import relay
@@ -29,40 +28,40 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_permission_decorator,
     decode_id_string,
-    to_choice_object,
     encode_id_base64,
+    to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
+    CashPlanPaymentVerificationFilter,
+    FinancialServiceProviderFilter,
+    FinancialServiceProviderXlsxReportFilter,
+    FinancialServiceProviderXlsxTemplateFilter,
+    PaymentFilter,
+    PaymentPlanFilter,
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter,
-    FinancialServiceProviderXlsxTemplateFilter,
-    FinancialServiceProviderXlsxReportFilter,
-    FinancialServiceProviderFilter,
-    PaymentPlanFilter,
-    PaymentFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
+    Approval,
+    ApprovalProcess,
     CashPlan,
     CashPlanPaymentVerification,
     CashPlanPaymentVerificationSummary,
+    DeliveryMechanismPerPaymentPlan,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
+    GenericPayment,
+    Payment,
+    PaymentChannel,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FinancialServiceProviderXlsxReport,
-    FinancialServiceProvider,
-    ApprovalProcess,
-    Approval,
-    PaymentPlan,
-    Payment,
-    DeliveryMechanismPerPaymentPlan,
-    GenericPayment,
-    PaymentChannel,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -72,6 +71,11 @@ from hct_mis_api.apps.utils.schema import (
     ChartDetailedDatasetsNode,
     SectionTotalNode,
     TableTotalCashTransferred,
+)
+
+
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+    does_payment_record_have_right_hoh_phone_number,
 )
 
 
@@ -274,6 +278,12 @@ class PaymentConflictDataNode(graphene.ObjectType):
     payment_id = graphene.String()
     payment_unicef_id = graphene.String()
 
+    def resolve_payment_plan_id(self, info):
+        return encode_id_base64(self["payment_plan_id"], "PaymentPlan")
+
+    def resolve_payment_id(self, info):
+        return encode_id_base64(self["payment_id"], "Payment")
+
 
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
@@ -281,6 +291,7 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     payment_plan_hard_conflicted_data = graphene.List(PaymentConflictDataNode)
     payment_plan_soft_conflicted = graphene.Boolean()
     payment_plan_soft_conflicted_data = graphene.List(PaymentConflictDataNode)
+    has_payment_channel = graphene.Boolean()
 
     class Meta:
         model = Payment
@@ -292,6 +303,9 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_payment_plan_soft_conflicted_data(self, info):
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
+
+    def resolve_has_payment_channel(self, info):
+        return self.assigned_payment_channel is not None
 
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data):
@@ -372,6 +386,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     end_date = graphene.Date()
     currency_name = graphene.String()
     has_payment_list_xlsx_file = graphene.Boolean()
+    has_payment_list_per_fsp_zip_file = graphene.Boolean()
     imported_xlsx_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
@@ -426,11 +441,13 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
     def resolve_has_payment_list_xlsx_file(self, info):
-        return self.has_payment_plan_payment_list_xlsx_file
+        return self.has_payment_list_xlsx_file
+
+    def resolve_has_payment_list_per_fsp_zip_file(self, info):
+        return self.has_payment_list_per_fsp_zip_file
 
     def resolve_imported_xlsx_file_name(self, info):
-        import_file_obj = self.get_payment_plan_payment_list_import_xlsx_file_obj()
-        return import_file_obj.file.name if import_file_obj else ""
+        return self.imported_xlsx_file.file.name if self.imported_xlsx_file else ""
 
     def resolve_volume_by_delivery_mechanism(self, info):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
@@ -560,6 +577,20 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
     all_delivery_mechanisms = graphene.List(ChoiceObject)
+    available_fsps_for_delivery_mechanisms = graphene.List(
+        FspChoices, delivery_mechanisms=graphene.List(graphene.String)
+    )
+    payment_plan_background_action_status_choices = graphene.List(ChoiceObject)
+
+    def resolve_available_fsps_for_delivery_mechanisms(self, info, delivery_mechanisms):
+        def get_fsps_for_delivery_mechanism(mechanism):
+            fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
+            return [{"id": fsp.id, "name": fsp.name} for fsp in fsps] if fsps else []
+
+        return [
+            {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
+            for mechanism in delivery_mechanisms  # keeps the same order as the input
+        ]
 
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (
@@ -578,6 +609,14 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info, input, **kwargs):
+        def get_payment_records(cash_plan, payment_verification_plan, verification_channel):
+            kwargs = {}
+            if payment_verification_plan:
+                kwargs["payment_verification_plan"] = payment_verification_plan
+            if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
+                kwargs["extra_validation"] = does_payment_record_have_right_hoh_phone_number
+            return cash_plan.available_payment_records(**kwargs)
+
         cash_plan_id = decode_id_string(input.get("cash_plan_id"))
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
 
@@ -585,7 +624,7 @@ class Query(graphene.ObjectType):
         if payment_verification_plan_id := decode_id_string(input.get("cash_plan_payment_verification_id")):
             payment_verification_plan = get_object_or_404(CashPlanPaymentVerification, id=payment_verification_plan_id)
 
-        payment_records = cash_plan.available_payment_records(payment_verification_plan)
+        payment_records = get_payment_records(cash_plan, payment_verification_plan, input.get("verification_channel"))
         if not payment_records:
             return {
                 "sample_size": 0,
@@ -640,7 +679,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="payment_record__cash_plan__program__id",
-                    administrative_area_path="payment_record__household__admin_area_new",
+                    administrative_area_path="payment_record__household__admin_area",
                 )
             },
             year_filter_path="payment_record__delivery_date",
@@ -732,7 +771,7 @@ class Query(graphene.ObjectType):
         admin_areas = (
             Area.objects.filter(
                 area_type__area_level=2,
-                household__payment_records__in=payment_records,
+                household__paymentrecord__in=payment_records,
             )
             .distinct()
             .annotate(total_transferred=Sum("household__payment_records__delivered_quantity_usd"))
@@ -803,3 +842,6 @@ class Query(graphene.ObjectType):
 
     def resolve_payment_plan_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentPlan.Status.choices)
+
+    def resolve_payment_plan_background_action_status_choices(self, info, **kwargs):
+        return to_choice_object(PaymentPlan.BackgroundActionStatus.choices)

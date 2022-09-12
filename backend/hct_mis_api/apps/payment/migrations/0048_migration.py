@@ -11,66 +11,38 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("payment", "0047_migration"),
+        ('payment', '0047_migration'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name="cashplanpaymentverification",
-            name="xlsx_file_exporting",
+            model_name='cashplanpaymentverification',
+            name='xlsx_file_exporting',
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name="cashplanpaymentverification",
-            name="xlsx_file_imported",
+            model_name='cashplanpaymentverification',
+            name='xlsx_file_imported',
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name="cashplanpaymentverification",
-            name="status",
-            field=models.CharField(
-                choices=[
-                    ("ACTIVE", "Active"),
-                    ("FINISHED", "Finished"),
-                    ("PENDING", "Pending"),
-                    ("INVALID", "Invalid"),
-                ],
-                db_index=True,
-                default="PENDING",
-                max_length=50,
-            ),
+            model_name='cashplanpaymentverification',
+            name='status',
+            field=models.CharField(choices=[('ACTIVE', 'Active'), ('FINISHED', 'Finished'), ('PENDING', 'Pending'), ('INVALID', 'Invalid')], db_index=True, default='PENDING', max_length=50),
         ),
         migrations.CreateModel(
-            name="XlsxCashPlanPaymentVerificationFile",
+            name='XlsxCashPlanPaymentVerificationFile',
             fields=[
-                (
-                    "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
-                ),
-                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
-                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("file", models.FileField(upload_to="")),
-                ("was_downloaded", models.BooleanField(default=False)),
-                (
-                    "cash_plan_payment_verification",
-                    models.OneToOneField(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="xlsx_cashplan_payment_verification_file",
-                        to="payment.cashplanpaymentverification",
-                    ),
-                ),
-                (
-                    "created_by",
-                    models.ForeignKey(
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="+",
-                        to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
+                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
+                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
+                ('file', models.FileField(upload_to='')),
+                ('was_downloaded', models.BooleanField(default=False)),
+                ('cash_plan_payment_verification', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='xlsx_cashplan_payment_verification_file', to='payment.cashplanpaymentverification')),
+                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                "abstract": False,
+                'abstract': False,
             },
         ),
     ]

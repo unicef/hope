@@ -5,13 +5,14 @@ import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
-  ChoiceObject,
+  ChoiceObject, PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
   ProgramStatus,
+  TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
 import {
-  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_CATEGORIES, PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
   PAYMENT_PLAN_STATES,
   TARGETING_STATES,
 } from './constants';
@@ -175,16 +176,32 @@ export function targetPopulationStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [TargetPopulationStatus.Draft]: theme.hctPalette.gray,
+    [TargetPopulationStatus.Open]: theme.hctPalette.gray,
     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
     [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
-    [TargetPopulationStatus.Ready]: theme.hctPalette.green,
+    [TargetPopulationStatus.ReadyForPaymentModule]: theme.hctPalette.green,
     [TargetPopulationStatus.Assigned]: theme.hctPalette.green,
     [TargetPopulationStatus.SteficonWait]: theme.hctPalette.oragne,
     [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
     [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
     [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function targetPopulationBuildStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [TargetPopulationBuildStatus.Ok]: theme.hctPalette.green,
+    [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
+    [TargetPopulationBuildStatus.Building]: theme.hctPalette.oragne,
+    [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -199,16 +216,30 @@ export function paymentPlanStatusToColor(
   const colorsMap = {
     [PaymentPlanStatus.Open]: theme.hctPalette.gray,
     [PaymentPlanStatus.Locked]: theme.hctPalette.oragne,
+    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.oragne,
     [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
     [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
     [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
     [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
-    [PaymentPlanStatus.SteficonWait]: theme.hctPalette.oragne,
-    [PaymentPlanStatus.SteficonRun]: theme.hctPalette.blue,
-    [PaymentPlanStatus.SteficonCompleted]: theme.hctPalette.green,
-    [PaymentPlanStatus.SteficonError]: theme.palette.error.main,
-    [PaymentPlanStatus.XlsxExporting]: theme.hctPalette.green,
-    [PaymentPlanStatus.XlsxImporting]: theme.hctPalette.blue,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function paymentPlanBackgroundActionStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanBackgroundActionStatus.SteficonRun]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.SteficonError]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxExporting]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxExportError]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportError]: theme.palette.error.main,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -432,6 +463,10 @@ export function targetPopulationStatusMapping(status): string {
 
 export function paymentPlanStatusMapping(status): string {
   return PAYMENT_PLAN_STATES[status];
+}
+
+export function paymentPlanBackgroundActionStatusMapping(status): string {
+  return PAYMENT_PLAN_BACKGROUND_ACTION_STATES[status];
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

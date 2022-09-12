@@ -1,14 +1,15 @@
 import {
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
 
 export const TARGETING_STATES = {
   NONE: 'None',
-  [TargetPopulationStatus.Draft]: 'Open',
+  [TargetPopulationStatus.Open]: 'Open',
   [TargetPopulationStatus.Locked]: 'Locked',
   [TargetPopulationStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
-  [TargetPopulationStatus.Ready]: 'Ready',
+  [TargetPopulationStatus.ReadyForPaymentModule]: 'Ready For Payment Module',
   [TargetPopulationStatus.Processing]: 'Processing',
   [TargetPopulationStatus.SteficonWait]: 'Steficon Wait',
   [TargetPopulationStatus.SteficonRun]: 'Steficon Run',
@@ -20,16 +21,21 @@ export const TARGETING_STATES = {
 export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatus.Open]: 'Open',
   [PaymentPlanStatus.Locked]: 'Locked',
+  [PaymentPlanStatus.LockedFsp]: 'FSP Locked',
   [PaymentPlanStatus.InApproval]: 'In Approval',
   [PaymentPlanStatus.InAuthorization]: 'In Authorization',
   [PaymentPlanStatus.InReview]: 'In Review',
   [PaymentPlanStatus.Accepted]: 'Accepted',
-  [PaymentPlanStatus.SteficonWait]: 'Steficon Wait',
-  [PaymentPlanStatus.SteficonRun]: 'Steficon Run',
-  [PaymentPlanStatus.SteficonCompleted]: 'Steficon Completed',
-  [PaymentPlanStatus.SteficonError]: 'Steficon Error',
-  [PaymentPlanStatus.XlsxExporting]: 'XLSX Exporting',
-  [PaymentPlanStatus.XlsxImporting]: 'XLSX Importing',
+};
+
+export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
+  [PaymentPlanBackgroundActionStatus.SteficonRun]: 'Steficon Run',
+  [PaymentPlanBackgroundActionStatus.SteficonError]: 'Steficon Error',
+  [PaymentPlanBackgroundActionStatus.XlsxExporting]: 'XLSX Exporting',
+  [PaymentPlanBackgroundActionStatus.XlsxExportError]: 'XLSX Export Error',
+  [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]: 'XLSX Importing Entitlements',
+  [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]: 'XLSX Importing Reconciliation',
+  [PaymentPlanBackgroundActionStatus.XlsxImportError]: 'XLSX Import Error',
 };
 
 export const PAYMENT_PLAN_ACTIONS = {

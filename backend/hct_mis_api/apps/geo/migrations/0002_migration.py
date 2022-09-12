@@ -2,21 +2,17 @@
 
 from django.db import migrations
 
-from hct_mis_api.apps.geo.utils import initialise_countries
-
 
 def initialise_geo(apps, schema_editor):
-    initialise_countries()
+    pass
 
 
 def rebuild(apps, schema_editor):
-    from hct_mis_api.apps.geo.models import Country
-    Country.objects.rebuild()
+    pass
 
 
 def empty_reverse(apps, schema_editor):
-    Country = apps.get_model("geo", "Country")
-    Country.objects.all().delete()
+    pass
 
 
 class Migration(migrations.Migration):

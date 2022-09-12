@@ -1,0 +1,106 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/FspPlanDetails/FspHeader should render 1`] = `
+<div>
+  <div
+    class="sc-bxivhb ixnywI"
+    data-cy="page-header-container"
+  >
+    <div
+      class="sc-ifAKCX dWpFEd"
+    >
+      <div
+        class="sc-gzVnrw btWNie"
+      >
+        <svg
+          aria-hidden="true"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeLarge"
+          focusable="false"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42a.9959.9959 0 00-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1z"
+          />
+        </svg>
+      </div>
+      <div
+        class="sc-EHOje PMFav"
+      >
+        <div>
+          <div
+            class="sc-htpNat kquAIx"
+          >
+            <span
+              class="sc-bwzfXH fNOhzS"
+            >
+              <a
+                class="sc-bdVaJa eFfWno"
+                href="/afghanistan/payment-module/"
+              >
+                Payment Module
+              </a>
+            </span>
+          </div>
+          <div
+            class="MuiBox-root MuiBox-root-1"
+          >
+            <h5
+              class="MuiTypography-root MuiTypography-h5"
+            >
+              Set up FSP
+            </h5>
+            <div
+              class="MuiBox-root MuiBox-root-2"
+            />
+          </div>
+        </div>
+        <div
+          class="sc-bZQynM jdkaLI"
+        >
+          <div
+            class="MuiBox-root MuiBox-root-3"
+          >
+            <div
+              class="MuiBox-root MuiBox-root-4"
+            >
+              <a
+                aria-disabled="false"
+                class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary"
+                href="/afghanistan/fsp/"
+                role="button"
+                tabindex="0"
+              >
+                <span
+                  class="MuiButton-label"
+                >
+                  <span
+                    class="MuiButton-startIcon MuiButton-iconSizeMedium"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M3 17.46v3.04c0 .28.22.5.5.5h3.04c.13 0 .26-.05.35-.15L17.81 9.94l-3.75-3.75L3.15 17.1c-.1.1-.15.22-.15.36zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                      />
+                    </svg>
+                  </span>
+                  Edit
+                </span>
+                <span
+                  class="MuiTouchRipple-root"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="sc-htoDjs hzwHVL"
+    />
+  </div>
+</div>
+`;

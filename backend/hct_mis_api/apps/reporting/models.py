@@ -27,12 +27,14 @@ class Report(TimeStampedUUIDModel):
     PROGRAM = 7
     INDIVIDUALS_AND_PAYMENT = 8
     GRIEVANCES = 9
+    PAYMENT_PLAN = 10
     REPORT_TYPES = (
         (INDIVIDUALS, _("Individuals")),
         (HOUSEHOLD_DEMOGRAPHICS, _("Households")),
         (CASH_PLAN_VERIFICATION, _("Cash Plan Verification")),
         (PAYMENTS, _("Payments")),
         (PAYMENT_VERIFICATION, _("Payment verification")),
+        (PAYMENT_PLAN, _("Payment Plan")),
         (CASH_PLAN, _("Cash Plan")),
         (PROGRAM, _("Programme")),
         (INDIVIDUALS_AND_PAYMENT, _("Individuals & Payment")),
@@ -55,8 +57,7 @@ class Report(TimeStampedUUIDModel):
         null=True,
         related_name="reports",
     )
-    admin_area = models.ManyToManyField("core.AdminArea", blank=True, related_name="reports")
-    admin_area_new = models.ManyToManyField("geo.Area", blank=True, related_name="reports")
+    admin_area = models.ManyToManyField("geo.Area", blank=True, related_name="reports")
 
     def __str__(self):
         return f"[{self.report_type}] Report for [{self.business_area}]"
@@ -110,13 +111,6 @@ class DashboardReport(TimeStampedUUIDModel):
         related_name="dashboard_reports",
     )
     admin_area = models.ForeignKey(
-        "core.AdminArea",
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        related_name="dashboard_reports",
-    )
-    admin_area_new = models.ForeignKey(
         "geo.Area",
         on_delete=models.CASCADE,
         blank=True,

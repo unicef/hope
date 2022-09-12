@@ -709,5 +709,16 @@
   "Exporting XLSX started. Please check your email.": "Exporting XLSX started. Please check your email.",
   "Delivery Mechanisms have been set": "Delivery Mechanisms have been set",
   "FSPs have been assigned to the delivery mechanisms": "FSPs have been assigned to the delivery mechanisms",
-  "Total Entitled Quantity": "Total Entitled Quantity"
+  "Total Entitled Quantity": "Total Entitled Quantity",
+  "Payment Plan FSP is locked.": "Payment Plan FSP is locked.",
+  "Error during FSP locking in Payment Plan.": "Error during FSP locking in Payment Plan.",
+  "Lock FSP": "Lock FSP",
+  "After you lock the FSP in this Payment Plan, you will be able to send the Payment Plan for approval.": "After you lock the FSP in this Payment Plan, you will be able to send the Payment Plan for approval.",
+  "Error during sending Payment Plan for approval.": "Error during sending Payment Plan for approval.",
+  "Payment Plan FSPs have been unlocked.": "Payment Plan FSPs have been unlocked.",
+  "Unlock FSP": "Unlock FSP",
+  "Are you sure you want to send": "Are you sure you want to send",
+  "households to HOPE? They will be accessible in Payment Module. Target population will not be editable further.": "households to HOPE? They will be accessible in Payment Module. Target population will not be editable further.",
+  "Send to Hope": "Send to Hope",
+  "Send to HOPE": "Send to HOPE"
 }

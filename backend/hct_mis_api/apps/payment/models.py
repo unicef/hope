@@ -4,8 +4,6 @@ from functools import cached_property
 from typing import Optional
 
 from django.conf import settings
-from django.contrib.admin.options import get_content_type_for_model
-from django.contrib.postgres.fields import CICharField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -23,7 +21,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 
-from hct_mis_api.apps.core.models import XLSXFileTemp
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -191,8 +189,16 @@ class GenericPayment(TimeStampedUUIDModel):
     class Meta:
         abstract = True
 
+    @property
+    def is_reconciled(self):
+        return (
+            self.delivered_quantity is not None
+            and self.entitlement_quantity is not None
+            and self.delivered_quantity == self.entitlement_quantity
+        )
 
-class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
+
+class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -210,22 +216,32 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     class Status(models.TextChoices):
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
-        # LOCKED_FSP
+        LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
         IN_APPROVAL = "IN_APPROVAL", "In Approval"
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
-        STEFICON_WAIT = "STEFICON_WAIT", "Waiting for Rule Engine"
+
+    class BackgroundActionStatus(models.TextChoices):
         STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
-        STEFICON_COMPLETED = "STEFICON_COMPLETED", "Rule Engine Completed"
         STEFICON_ERROR = "STEFICON_ERROR", "Rule Engine Errored"
         XLSX_EXPORTING = "XLSX_EXPORTING", "Exporting XLSX file"
-        XLSX_IMPORTING = "XLSX_IMPORTING", "Importing XLSX file"
+        XLSX_EXPORT_ERROR = "XLSX_EXPORT_ERROR", "Export XLSX file Error"
+        XLSX_IMPORT_ERROR = "XLSX_IMPORT_ERROR", "Import XLSX file Error"
+        XLSX_IMPORTING_ENTITLEMENTS = "XLSX_IMPORTING_ENTITLEMENTS", "Importing Entitlements XLSX file"
+        XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"
+
+    BACKGROUND_ACTION_ERROR_STATES = [
+        BackgroundActionStatus.XLSX_EXPORT_ERROR,
+        BackgroundActionStatus.XLSX_IMPORT_ERROR,
+        BackgroundActionStatus.STEFICON_ERROR,
+    ]
 
     class Action(models.TextChoices):
         LOCK = "LOCK", "Lock"
-        # LOCK_FSP
+        LOCK_FSP = "LOCK_FSP", "Lock FSP"
         UNLOCK = "UNLOCK", "Unlock"
+        UNLOCK_FSP = "UNLOCK_FSP", "Unlock FSP"
         SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL", "Send For Approval"
         APPROVE = "APPROVE", "Approve"
         AUTHORIZE = "AUTHORIZE", "Authorize"
@@ -238,7 +254,14 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         related_name="created_payment_plans",
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
+    background_action_status = FSMField(
+        default=None,
+        protected=False,
+        db_index=True,
+        blank=True,
+        null=True,
+        choices=BackgroundActionStatus.choices,
+    )
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
@@ -254,6 +277,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     total_households_count = models.PositiveSmallIntegerField(default=0)
     total_individuals_count = models.PositiveSmallIntegerField(default=0)
     xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
+    imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
+    export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
+    export_per_fsp_zip_file = models.ForeignKey(
+        FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE
+    )
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
@@ -268,8 +296,78 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         ordering = ["created_at"]
 
     @transition(
+        field=background_action_status,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
+        target=BackgroundActionStatus.XLSX_EXPORTING,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
+    )
+    def background_action_status_xlsx_exporting(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=BackgroundActionStatus.XLSX_EXPORTING,
+        target=BackgroundActionStatus.XLSX_EXPORT_ERROR,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
+    )
+    def background_action_status_xlsx_export_error(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
+        target=BackgroundActionStatus.STEFICON_RUN,
+        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
+    )
+    def background_action_status_steficon_run(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[BackgroundActionStatus.STEFICON_RUN],
+        target=BackgroundActionStatus.STEFICON_ERROR,
+        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
+    )
+    def background_action_status_steficon_error(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
+        target=BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
+        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
+    )
+    def background_action_status_xlsx_importing_entitlements(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[None] + BACKGROUND_ACTION_ERROR_STATES,
+        target=BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
+    )
+    def background_action_status_xlsx_importing_reconciliation(self):
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[
+            BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
+            BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
+        ],
+        target=BackgroundActionStatus.XLSX_IMPORT_ERROR,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
+    )
+    def background_action_status_xlsx_import_error(self):
+        pass
+
+    @transition(field=background_action_status, source="*", target=None)
+    def background_action_status_none(self):
+        self.background_action_status = None  # little hack
+
+    @transition(
         field=status,
-        source=[Status.OPEN, Status.XLSX_EXPORTING, Status.XLSX_IMPORTING, Status.STEFICON_ERROR, Status.STEFICON_RUN],
+        source=Status.OPEN,
         target=Status.LOCKED,
     )
     def status_lock(self):
@@ -289,19 +387,37 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         target=Status.OPEN,
     )
     def status_unlock(self):
+        self.background_action_status_none()
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.LOCKED_FSP,
+        target=Status.LOCKED,
+    )
+    def status_unlock_fsp(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.LOCKED,
+        target=Status.LOCKED_FSP,
+    )
+    def status_lock_fsp(self):
+        self.background_action_status_none()
         self.status_date = timezone.now()
 
     @transition(
         field=status,
         source=[Status.IN_APPROVAL, Status.IN_AUTHORIZATION, Status.IN_REVIEW],
-        target=Status.LOCKED,
+        target=Status.LOCKED_FSP,
     )
     def status_reject(self):
         self.status_date = timezone.now()
 
     @transition(
         field=status,
-        source=Status.LOCKED,
+        source=Status.LOCKED_FSP,
         target=Status.IN_APPROVAL,
     )
     def status_send_to_approval(self):
@@ -329,22 +445,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         target=Status.ACCEPTED,
     )
     def status_mark_as_reviewed(self):
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.LOCKED,
-        target=Status.XLSX_EXPORTING,
-    )
-    def status_exporting(self):
-        self.status_date = timezone.now()
-
-    @transition(
-        field=status,
-        source=Status.LOCKED,
-        target=Status.XLSX_IMPORTING,
-    )
-    def status_importing(self):
         self.status_date = timezone.now()
 
     @property
@@ -422,30 +522,30 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
             ]
         )
 
-    def get_payment_plan_payment_list_xlsx_file_obj(self):
-        return XLSXFileTemp.objects.filter(
-            object_id=self.pk, content_type=get_content_type_for_model(self), type=XLSXFileTemp.EXPORT
-        ).first()
+    @property
+    def has_payment_list_xlsx_file(self):
+        return bool(self.export_xlsx_file)
 
     @property
-    def has_payment_plan_payment_list_xlsx_file(self):
-        return bool(self.get_payment_plan_payment_list_xlsx_file_obj())
+    def has_payment_list_per_fsp_zip_file(self):
+        return bool(self.export_per_fsp_zip_file)
 
     @property
-    def xlsx_payment_plan_payment_list_file_link(self):
-        file_obj = self.get_payment_plan_payment_list_xlsx_file_obj()
-        if file_obj:
-            return file_obj.file.url
+    def xlsx_payment_list_file_link(self):
+        if self.export_xlsx_file:
+            return self.export_xlsx_file.file.url
         return None
 
-    def get_payment_plan_payment_list_import_xlsx_file_obj(self):
-        return XLSXFileTemp.objects.filter(
-            object_id=self.pk, content_type=get_content_type_for_model(self), type=XLSXFileTemp.IMPORT
-        ).first()
+    @property
+    def xlsx_payment_list_per_fsp_file_link(self):
+        if self.export_per_fsp_zip_file:
+            return self.export_per_fsp_zip_file.file.url
+        return None
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     # TODO: add/remove fields after finalizing the fields
+    # after updating COLUMNS_TO_CHOOSE please update XlsxPaymentPlanExportService.export_per_fsp as well
     COLUMNS_TO_CHOOSE = (
         ("payment_id", _("Payment ID")),
         ("household_id", _("Household ID")),
@@ -454,6 +554,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("payment_channel", _("Payment Channel (Delivery mechanism)")),
         ("fsp_name", _("FSP Name")),
         ("entitlement_quantity", _("Entitlement Quantity")),
+        ("delivered_quantity", _("Delivered Quantity")),
         ("tbd", _("TBD")),
     )
     DEFAULT_COLUMNS = [
@@ -464,6 +565,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         "payment_channel",
         "fsp_name",
         "entitlement_quantity",
+        "delivered_quantity",
     ]
 
     created_by = models.ForeignKey(
@@ -720,11 +822,9 @@ class CashPlan(GenericPaymentPlan):
     def can_create_payment_verification_plan(self):
         return self.available_payment_records().count() > 0
 
-    def available_payment_records(self, payment_verification_plan: Optional["CashPlanPaymentVerification"] = None):
-        from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
-            does_payment_record_have_right_hoh_phone_number,
-        )
-
+    def available_payment_records(
+        self, payment_verification_plan: Optional["CashPlanPaymentVerification"] = None, extra_validation=None
+    ):
         params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
@@ -736,12 +836,10 @@ class CashPlan(GenericPaymentPlan):
 
         payment_records = self.payment_records.filter(params).distinct()
 
-        valid_payment_records_list = [
-            payment_record.pk
-            for payment_record in payment_records
-            if does_payment_record_have_right_hoh_phone_number(payment_record)
-        ]
-        return PaymentRecord.objects.filter(pk__in=valid_payment_records_list)
+        if extra_validation:
+            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+
+        return PaymentRecord.objects.filter(pk__in=payment_records)
 
     class Meta:
         verbose_name = "Cash Plan"
@@ -789,7 +887,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
     )
 
 
-class Payment(SoftDeletableModel, GenericPayment):
+class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -802,7 +900,6 @@ class Payment(SoftDeletableModel, GenericPayment):
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
     assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
 
     objects = PaymentManager()
 

@@ -39,7 +39,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
 }: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
-  const [fileToImport, setFileToImport] = useState(null);
+  const [fileToImport, setFileToImport] = useState<File | null>(null);
 
   const { t } = useTranslation();
 
@@ -75,8 +75,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           showMessage(t('Your import was successful!'));
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
+        e.graphQLErrors.map((x) => showMessage(x.message));
       }
     }
   };
@@ -99,7 +98,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
         scroll='paper'
         aria-labelledby='form-dialog-title'
       >
-        <DialogTitleWrapper>
+        <DialogTitleWrapper data-cy='dialog-import'>
           <DialogTitle id='scroll-dialog-title'>
             {t('Select File to Import')}
           </DialogTitle>
@@ -124,7 +123,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               }}
             />
             {error?.graphQLErrors?.length || xlsxErrors?.length ? (
-              <Error>
+              <Error data-cy="error-list">
                 <p>Errors</p>
                 {error
                   ? error.graphQLErrors.map((x) => <p>{x.message}</p>)
@@ -134,14 +133,16 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             ) : null}
           </>
           <DialogActions>
-            <Button onClick={() => setOpenImport(false)}>CANCEL</Button>
+            <Button data-cy='close-button' onClick={() => setOpenImport(false)}>
+              CANCEL
+            </Button>
             <Button
               disabled={!fileToImport}
               type='submit'
               color='primary'
               variant='contained'
               onClick={() => handleImport()}
-              data-cy='button-import'
+              data-cy='button-import-submit'
             >
               {t('IMPORT')}
             </Button>

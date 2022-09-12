@@ -6,7 +6,7 @@ exports[`components/paymentmodule/PaymentPlanParameters should render 1`] = `
     class="MuiPaper-root sc-bwzfXH hmuVvZ MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="sc-htpNat hsKYcw"
+      class="sc-htpNat hUqbZq"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
@@ -18,241 +18,393 @@ exports[`components/paymentmodule/PaymentPlanParameters should render 1`] = `
       class="sc-bdVaJa fXEEbM"
     >
       <div
-        class="MuiBox-root MuiBox-root-1 sc-ifAKCX kqqTha"
+        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3"
       >
-        <p
-          class="sc-bxivhb cKgKGX"
-        >
-          Select Target Population
-        </p>
         <div
-          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
         >
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+            class="MuiFormControl-root MuiTextField-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            data-cy="input-start-date"
           >
-            <div
-              class="MuiFormControl-root MuiTextField-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            <label
+              class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-required Mui-required"
+              data-shrink="false"
             >
-              <label
-                class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-marginDense MuiInputLabel-outlined MuiFormLabel-filled Mui-required Mui-required"
-                data-shrink="true"
+              Start Date
+              <span
+                aria-hidden="true"
+                class="MuiFormLabel-asterisk MuiInputLabel-asterisk"
               >
-                Start Date
-                <span
-                  aria-hidden="true"
-                  class="MuiFormLabel-asterisk MuiInputLabel-asterisk"
-                >
-                   
-                  *
-                </span>
-              </label>
-              <div
-                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd MuiOutlinedInput-adornedEnd MuiInputBase-marginDense MuiOutlinedInput-marginDense"
-              >
-                <input
-                  aria-invalid="false"
-                  class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
-                  data-cy="date-input-startDate"
-                  name="startDate"
-                  required=""
-                  type="text"
-                  value="1970-01-01"
-                />
-                <div
-                  class="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-marginDense"
-                >
-                  <button
-                    class="MuiButtonBase-root MuiIconButton-root"
-                    tabindex="0"
-                    type="button"
-                  >
-                    <span
-                      class="MuiIconButton-label"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        class="MuiSvgIcon-root"
-                        focusable="false"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
-                        />
-                        <path
-                          d="M0 0h24v24H0z"
-                          fill="none"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      class="MuiTouchRipple-root"
-                    />
-                  </button>
-                </div>
-                <fieldset
-                  aria-hidden="true"
-                  class="PrivateNotchedOutline-root-2 MuiOutlinedInput-notchedOutline"
-                >
-                  <legend
-                    class="PrivateNotchedOutline-legendLabelled-4 PrivateNotchedOutline-legendNotched-5"
-                  >
-                    <span>
-                      Start Date
-                       *
-                    </span>
-                  </legend>
-                </fieldset>
-              </div>
-            </div>
-          </div>
-          <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
-          >
+                 
+                *
+              </span>
+            </label>
             <div
-              class="MuiFormControl-root MuiTextField-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd MuiOutlinedInput-adornedEnd MuiInputBase-marginDense MuiOutlinedInput-marginDense"
             >
-              <label
-                class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-marginDense MuiInputLabel-outlined Mui-disabled Mui-disabled MuiFormLabel-filled Mui-required Mui-required"
-                data-shrink="true"
-              >
-                End Date
-                <span
-                  aria-hidden="true"
-                  class="MuiFormLabel-asterisk MuiInputLabel-asterisk"
-                >
-                   
-                  *
-                </span>
-              </label>
-              <div
-                class="MuiInputBase-root MuiOutlinedInput-root Mui-disabled Mui-disabled MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd MuiOutlinedInput-adornedEnd MuiInputBase-marginDense MuiOutlinedInput-marginDense"
-              >
-                <input
-                  aria-invalid="false"
-                  class="MuiInputBase-input MuiOutlinedInput-input Mui-disabled Mui-disabled MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
-                  data-cy="date-input-endDate"
-                  disabled=""
-                  name="endDate"
-                  required=""
-                  type="text"
-                  value="1970-01-01"
-                />
-                <div
-                  class="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-marginDense"
-                >
-                  <button
-                    class="MuiButtonBase-root MuiIconButton-root Mui-disabled Mui-disabled"
-                    disabled=""
-                    tabindex="-1"
-                    type="button"
-                  >
-                    <span
-                      class="MuiIconButton-label"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        class="MuiSvgIcon-root"
-                        focusable="false"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
-                        />
-                        <path
-                          d="M0 0h24v24H0z"
-                          fill="none"
-                        />
-                      </svg>
-                    </span>
-                  </button>
-                </div>
-                <fieldset
-                  aria-hidden="true"
-                  class="PrivateNotchedOutline-root-2 MuiOutlinedInput-notchedOutline"
-                >
-                  <legend
-                    class="PrivateNotchedOutline-legendLabelled-4 PrivateNotchedOutline-legendNotched-5"
-                  >
-                    <span>
-                      End Date
-                       *
-                    </span>
-                  </legend>
-                </fieldset>
-              </div>
-            </div>
-          </div>
-          <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
-          >
-            <div
-              choices="[object Object],[object Object]"
-              class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth"
-              label="Currency"
-            >
-              <label
-                class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-required Mui-required"
-                data-shrink="false"
-              >
-                Currency
-                <span
-                  aria-hidden="true"
-                  class="MuiFormLabel-asterisk MuiInputLabel-asterisk"
-                >
-                   
-                  *
-                </span>
-              </label>
-              <div
-                choices="[object Object],[object Object]"
-                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-marginDense MuiOutlinedInput-marginDense"
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
+                data-cy="date-input-startDate"
+                name="startDate"
                 required=""
+                type="text"
+                value=""
+              />
+              <div
+                class="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-marginDense"
               >
-                <div
-                  aria-haspopup="listbox"
-                  aria-labelledby="textField-currency"
-                  class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
-                  data-cy="select-currency"
-                  id="textField-currency"
-                  role="button"
+                <button
+                  class="MuiButtonBase-root MuiIconButton-root"
                   tabindex="0"
+                  type="button"
+                >
+                  <span
+                    class="MuiIconButton-label"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+                      />
+                      <path
+                        d="M0 0h24v24H0z"
+                        fill="none"
+                      />
+                    </svg>
+                  </span>
+                  <span
+                    class="MuiTouchRipple-root"
+                  />
+                </button>
+              </div>
+              <fieldset
+                aria-hidden="true"
+                class="PrivateNotchedOutline-root-1 MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="PrivateNotchedOutline-legendLabelled-3"
                 >
                   <span>
-                    ​
+                    Start Date
+                     *
                   </span>
-                </div>
-                <input
-                  aria-hidden="true"
-                  class="MuiSelect-nativeInput"
-                  name="currency"
-                  required=""
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            data-cy="input-end-date"
+          >
+            <label
+              class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-disabled Mui-disabled Mui-required Mui-required"
+              data-shrink="false"
+            >
+              End Date
+              <span
+                aria-hidden="true"
+                class="MuiFormLabel-asterisk MuiInputLabel-asterisk"
+              >
+                 
+                *
+              </span>
+            </label>
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root Mui-disabled Mui-disabled MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd MuiOutlinedInput-adornedEnd MuiInputBase-marginDense MuiOutlinedInput-marginDense"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input Mui-disabled Mui-disabled MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
+                data-cy="date-input-endDate"
+                disabled=""
+                name="endDate"
+                required=""
+                type="text"
+                value=""
+              />
+              <div
+                class="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-marginDense"
+              >
+                <button
+                  class="MuiButtonBase-root MuiIconButton-root Mui-disabled Mui-disabled"
+                  disabled=""
                   tabindex="-1"
-                  value=""
-                />
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSelect-icon MuiSelect-iconOutlined"
-                  focusable="false"
-                  viewBox="0 0 24 24"
+                  type="button"
                 >
-                  <path
-                    d="M7 10l5 5 5-5z"
-                  />
-                </svg>
-                <fieldset
-                  aria-hidden="true"
-                  class="PrivateNotchedOutline-root-2 MuiOutlinedInput-notchedOutline"
-                >
-                  <legend
-                    class="PrivateNotchedOutline-legendLabelled-4"
+                  <span
+                    class="MuiIconButton-label"
                   >
-                    <span>
-                      Currency
-                    </span>
-                  </legend>
-                </fieldset>
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+                      />
+                      <path
+                        d="M0 0h24v24H0z"
+                        fill="none"
+                      />
+                    </svg>
+                  </span>
+                </button>
               </div>
+              <fieldset
+                aria-hidden="true"
+                class="PrivateNotchedOutline-root-1 MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="PrivateNotchedOutline-legendLabelled-3"
+                >
+                  <span>
+                    End Date
+                     *
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div
+            choices=""
+            class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            data-cy="input-currency"
+            label="Currency"
+          >
+            <label
+              class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-required Mui-required"
+              data-shrink="false"
+            >
+              Currency
+              <span
+                aria-hidden="true"
+                class="MuiFormLabel-asterisk MuiInputLabel-asterisk"
+              >
+                 
+                *
+              </span>
+            </label>
+            <div
+              choices=""
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-marginDense MuiOutlinedInput-marginDense"
+              data-cy="input-currency"
+              required=""
+            >
+              <div
+                aria-haspopup="listbox"
+                aria-labelledby="textField-currency"
+                class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
+                data-cy="select-currency"
+                id="textField-currency"
+                role="button"
+                tabindex="0"
+              >
+                <span>
+                  ​
+                </span>
+              </div>
+              <input
+                aria-hidden="true"
+                class="MuiSelect-nativeInput"
+                name="currency"
+                required=""
+                tabindex="-1"
+                value=""
+              />
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSelect-icon MuiSelect-iconOutlined"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M7 10l5 5 5-5z"
+                />
+              </svg>
+              <fieldset
+                aria-hidden="true"
+                class="PrivateNotchedOutline-root-1 MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="PrivateNotchedOutline-legendLabelled-3"
+                >
+                  <span>
+                    Currency
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            data-cy="input-dispersion-start-date"
+          >
+            <label
+              class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-required Mui-required"
+              data-shrink="false"
+            >
+              Dispersion Start Date
+              <span
+                aria-hidden="true"
+                class="MuiFormLabel-asterisk MuiInputLabel-asterisk"
+              >
+                 
+                *
+              </span>
+            </label>
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd MuiOutlinedInput-adornedEnd MuiInputBase-marginDense MuiOutlinedInput-marginDense"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
+                data-cy="date-input-dispersionStartDate"
+                name="dispersionStartDate"
+                required=""
+                type="text"
+                value=""
+              />
+              <div
+                class="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-marginDense"
+              >
+                <button
+                  class="MuiButtonBase-root MuiIconButton-root"
+                  tabindex="0"
+                  type="button"
+                >
+                  <span
+                    class="MuiIconButton-label"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+                      />
+                      <path
+                        d="M0 0h24v24H0z"
+                        fill="none"
+                      />
+                    </svg>
+                  </span>
+                  <span
+                    class="MuiTouchRipple-root"
+                  />
+                </button>
+              </div>
+              <fieldset
+                aria-hidden="true"
+                class="PrivateNotchedOutline-root-1 MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="PrivateNotchedOutline-legendLabelled-3"
+                >
+                  <span>
+                    Dispersion Start Date
+                     *
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+            data-cy="input-dispersion-end-date"
+          >
+            <label
+              class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-disabled Mui-disabled Mui-required Mui-required"
+              data-shrink="false"
+            >
+              Dispersion End Date
+              <span
+                aria-hidden="true"
+                class="MuiFormLabel-asterisk MuiInputLabel-asterisk"
+              >
+                 
+                *
+              </span>
+            </label>
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root Mui-disabled Mui-disabled MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd MuiOutlinedInput-adornedEnd MuiInputBase-marginDense MuiOutlinedInput-marginDense"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input Mui-disabled Mui-disabled MuiInputBase-inputAdornedEnd MuiOutlinedInput-inputAdornedEnd MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
+                data-cy="date-input-dispersionEndDate"
+                disabled=""
+                name="dispersionEndDate"
+                required=""
+                type="text"
+                value=""
+              />
+              <div
+                class="MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-marginDense"
+              >
+                <button
+                  class="MuiButtonBase-root MuiIconButton-root Mui-disabled Mui-disabled"
+                  disabled=""
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    class="MuiIconButton-label"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+                      />
+                      <path
+                        d="M0 0h24v24H0z"
+                        fill="none"
+                      />
+                    </svg>
+                  </span>
+                </button>
+              </div>
+              <fieldset
+                aria-hidden="true"
+                class="PrivateNotchedOutline-root-1 MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="PrivateNotchedOutline-legendLabelled-3"
+                >
+                  <span>
+                    Dispersion End Date
+                     *
+                  </span>
+                </legend>
+              </fieldset>
             </div>
           </div>
         </div>

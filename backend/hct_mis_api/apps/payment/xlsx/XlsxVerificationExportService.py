@@ -80,8 +80,8 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             str(payment_record_verification.payment_record.ca_id),
             self._to_received_column(payment_record_verification),
             str(head_of_household.full_name) if head_of_household else "",
-            str(household.admin1.title) if household.admin1 else "",
-            str(household.admin2.title) if household.admin2 else "",
+            str(household.admin1.name) if household.admin1 else "",
+            str(household.admin2.name) if household.admin2 else "",
             str(household.village),
             str(household.address),
             str(payment_record_verification.payment_record.household_id),
@@ -115,8 +115,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
             xlsx_obj = XlsxCashPlanPaymentVerificationFile(
-                created_by=user,
-                cash_plan_payment_verification=self.cashplan_payment_verification
+                created_by=user, cash_plan_payment_verification=self.cashplan_payment_verification
             )
             self.wb.save(tmp.name)
             tmp.seek(0)

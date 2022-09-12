@@ -3,10 +3,10 @@
 exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-htpNat cNIMpP MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root sc-ifAKCX lpinpR MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="sc-bxivhb hBcwsJ"
+      class="sc-bxivhb jsIVNl"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
@@ -15,16 +15,16 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
       </h6>
     </div>
     <div
-      class="sc-bwzfXH lfBIaS"
+      class="sc-htpNat eMBxKf"
     >
       <div
         class="MuiBox-root MuiBox-root-1 sc-EHOje YINzU"
       >
-        <p
-          class="sc-ifAKCX kBZPTp"
+        <div
+          class="sc-bdVaJa jiAojl"
         >
           Select Target Population
-        </p>
+        </div>
         <div
           class="MuiGrid-root MuiGrid-container"
         >
@@ -34,6 +34,7 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
             <div
               choices="[object Object]"
               class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+              data-cy="input-target-population"
               label="Target Population"
             >
               <label
@@ -52,14 +53,15 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
               <div
                 choices="[object Object]"
                 class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-marginDense MuiOutlinedInput-marginDense"
+                data-cy="input-target-population"
                 required=""
               >
                 <div
                   aria-haspopup="listbox"
-                  aria-labelledby="textField-targetPopulation"
+                  aria-labelledby="textField-targetingId"
                   class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
-                  data-cy="select-targetPopulation"
-                  id="textField-targetPopulation"
+                  data-cy="select-targetingId"
+                  id="textField-targetingId"
                   role="button"
                   tabindex="0"
                 >
@@ -70,7 +72,7 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
                 <input
                   aria-hidden="true"
                   class="MuiSelect-nativeInput"
-                  name="targetPopulation"
+                  name="targetingId"
                   required=""
                   tabindex="-1"
                   value=""
