@@ -1,3 +1,5 @@
+export const uniqueSeed = Date.now().toString();
+
 export const fillProgramForm = (cy) => {
   cy.get('[data-cy="input-programme-name"]').type(`test program ${uniqueSeed}`);
   cy.get('[data-cy="input-cash-assist-scope"]').first().click();
@@ -35,5 +37,3 @@ export const fillTargetingForm = (cy) => {
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('li').eq(3).click();
 };
-
-export const uniqueSeed = Date.now().toString();
