@@ -13,12 +13,7 @@ from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
-from hct_mis_api.apps.grievance.constants import (
-    PRIORITY_CHOICES,
-    PRIORITY_LOW,
-    URGENCY_CHOICES,
-    URGENCY_NOT_URGENT
-)
+from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, PRIORITY_LOW, URGENCY_CHOICES, URGENCY_NOT_URGENT
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -116,8 +111,6 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     CATEGORY_NEEDS_ADJUDICATION = 8
     CATEGORY_SYSTEM_FLAGGING = 9
 
-
-
     ISSUE_TYPE_DATA_BREACH = 1
     ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK = 2
     ISSUE_TYPE_FRAUD_FORGERY = 3
@@ -166,11 +159,11 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
             ISSUE_TYPE_UNAUTHORIZED_USE: _("Unauthorized use, misuse or waste of UNICEF property or funds"),
         },
         CATEGORY_GRIEVANCE_COMPLAINT: {
-        ISSUE_TYPE_PAYMENT_COMPLAINT: _("Payment Related Complaint"),
-        ISSUE_TYPE_FSP_COMPLAINT: _("FSP Related Complaint"),
-        ISSUE_TYPE_REGISTRATION_COMPLAINT: _("Registration Related Complaint"),
-        ISSUE_TYPE_OTHER_COMPLAINT: _("Other Complaint"),
-        ISSUE_TYPE_PARTNER_COMPLAINT: _("Partner Related Complaint"),
+            ISSUE_TYPE_PAYMENT_COMPLAINT: _("Payment Related Complaint"),
+            ISSUE_TYPE_FSP_COMPLAINT: _("FSP Related Complaint"),
+            ISSUE_TYPE_REGISTRATION_COMPLAINT: _("Registration Related Complaint"),
+            ISSUE_TYPE_OTHER_COMPLAINT: _("Other Complaint"),
+            ISSUE_TYPE_PARTNER_COMPLAINT: _("Partner Related Complaint"),
         },
     }
     ALL_ISSUE_TYPES = [choice for choices_group in ISSUE_TYPES_CHOICES.values() for choice in choices_group.items()]
