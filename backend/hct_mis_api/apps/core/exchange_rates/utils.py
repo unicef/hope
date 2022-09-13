@@ -20,7 +20,7 @@ def fix_exchange_rates(all=None):
 
     for payment_record in all_payment_records:
         exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
-            payment_record.currency, payment_record.cash_plan.dispersion_date
+            payment_record.currency, payment_record.parent.dispersion_date
         )
 
         if exchange_rate is None:

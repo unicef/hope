@@ -33,8 +33,8 @@ class TestPaymentPlanModel(TestCase):
         hoh2 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         hh2 = HouseholdFactory(head_of_household=hoh2)
-        p1 = PaymentFactory(payment_plan=pp, excluded=False, household=hh1, head_of_household=hoh1)
-        p2 = PaymentFactory(payment_plan=pp, excluded=False, household=hh2, head_of_household=hoh2)
+        p1 = PaymentFactory(parent=pp, excluded=False, household=hh1, head_of_household=hoh1)
+        p2 = PaymentFactory(parent=pp, excluded=False, household=hh2, head_of_household=hoh2)
 
         female_child = IndividualFactory(
             household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5)
@@ -63,7 +63,7 @@ class TestPaymentPlanModel(TestCase):
     def test_update_money_fields(self, get_exchange_rate_mock):
         pp = PaymentPlanFactory()
         p1 = PaymentFactory(
-            payment_plan=pp,
+            parent=pp,
             excluded=False,
             entitlement_quantity=100.00,
             entitlement_quantity_usd=200.00,
@@ -71,7 +71,7 @@ class TestPaymentPlanModel(TestCase):
             delivered_quantity_usd=100.00,
         )
         p2 = PaymentFactory(
-            payment_plan=pp,
+            parent=pp,
             excluded=False,
             entitlement_quantity=100.00,
             entitlement_quantity_usd=200.00,
@@ -92,8 +92,8 @@ class TestPaymentPlanModel(TestCase):
 
     def test_all_active_payments(self):
         pp = PaymentPlanFactory()
-        p1 = PaymentFactory(payment_plan=pp, excluded=False)
-        p2 = PaymentFactory(payment_plan=pp, excluded=True)
+        p1 = PaymentFactory(parent=pp, excluded=False)
+        p2 = PaymentFactory(parent=pp, excluded=True)
 
         pp.refresh_from_db()
         self.assertEqual(pp.all_active_payments.count(), 1)
@@ -106,13 +106,13 @@ class TestPaymentPlanModel(TestCase):
         pp1_conflicted = PaymentPlanFactory(
             start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.LOCKED
         )
-        p1 = PaymentFactory(payment_plan=pp1, excluded=False)
-        p1_conflicted = PaymentFactory(payment_plan=pp1_conflicted, household=p1.household, excluded=False)
-        self.assertEqual(pp1.payments.filter(payment_plan_hard_conflicted=True).count(), 1)
+        p1 = PaymentFactory(parent=pp1, excluded=False)
+        p1_conflicted = PaymentFactory(parent=pp1_conflicted, household=p1.household, excluded=False)
+        self.assertEqual(pp1.payment_items.filter(payment_plan_hard_conflicted=True).count(), 1)
         self.assertEqual(pp1.can_be_locked, False)
 
         # create not conflicted payment
-        p2 = PaymentFactory(payment_plan=pp1, excluded=False)
+        p2 = PaymentFactory(parent=pp1, excluded=False)
         self.assertEqual(pp1.can_be_locked, True)
 
 
@@ -132,9 +132,9 @@ class TestPaymentModel(TestCase):
         pp = PaymentPlanFactory()
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        p1 = PaymentFactory(payment_plan=pp, excluded=False, household=hh1)
+        p1 = PaymentFactory(parent=pp, excluded=False, household=hh1)
         with self.assertRaises(IntegrityError):
-            p2 = PaymentFactory(payment_plan=pp, excluded=False, household=hh1)
+            p2 = PaymentFactory(parent=pp, excluded=False, household=hh1)
 
     def test_manager_annotations__pp_conflicts(self):
         pp1 = PaymentPlanFactory()
@@ -144,10 +144,10 @@ class TestPaymentModel(TestCase):
         # create soft conflicted payments
         pp3 = PaymentPlanFactory(start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.OPEN)
         pp4 = PaymentPlanFactory(start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.OPEN)
-        p1 = PaymentFactory(payment_plan=pp1, excluded=False)
-        p2 = PaymentFactory(payment_plan=pp2, household=p1.household, excluded=False)
-        p3 = PaymentFactory(payment_plan=pp3, household=p1.household, excluded=False)
-        p4 = PaymentFactory(payment_plan=pp4, household=p1.household, excluded=False)
+        p1 = PaymentFactory(parent=pp1, excluded=False)
+        p2 = PaymentFactory(parent=pp2, household=p1.household, excluded=False)
+        p3 = PaymentFactory(parent=pp3, household=p1.household, excluded=False)
+        p4 = PaymentFactory(parent=pp4, household=p1.household, excluded=False)
 
         for _ in [pp1, pp2, pp3, pp4, p1, p2, p3, p4]:
             _.refresh_from_db()  # update unicef_id from trigger
@@ -196,7 +196,7 @@ class TestPaymentModel(TestCase):
 
     def test_manager_annotations__payment_channels(self):
         pp1 = PaymentPlanFactory()
-        p1 = PaymentFactory(payment_plan=pp1, excluded=False, assigned_payment_channel=None)
+        p1 = PaymentFactory(parent=pp1, excluded=False, assigned_payment_channel=None)
 
         p1_data = Payment.objects.filter(id=p1.id).values()[0]
         self.assertEqual(p1_data["has_defined_payment_channel"], False)

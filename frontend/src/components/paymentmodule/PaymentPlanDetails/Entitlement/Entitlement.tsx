@@ -142,13 +142,18 @@ export const Entitlement = ({
                 <InputLabel>{t('Entitlement Formula')}</InputLabel>
                 <Select
                   value={steficonRuleValue}
+                  data-cy='input-entitlement-formula'
                   labelWidth={180}
                   onChange={(event) =>
                     setSteficonRuleValue(event.target.value as string)
                   }
                 >
-                  {steficonData.allSteficonRules.edges.map((each) => (
-                    <MenuItem key={each.node.id} value={each.node.id}>
+                  {steficonData.allSteficonRules.edges.map((each, index) => (
+                    <MenuItem
+                      data-cy={`select-option-${index}`}
+                      key={each.node.id}
+                      value={each.node.id}
+                    >
                       {each.node.name}
                     </MenuItem>
                   ))}
@@ -165,6 +170,7 @@ export const Entitlement = ({
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatus.Locked
                   }
+                  data-cy='button-apply-steficon'
                   onClick={async () => {
                     try {
                       await setSteficonRule({
@@ -282,7 +288,9 @@ export const Entitlement = ({
           <>
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
-              <BigValue>USD {paymentPlan.totalEntitledQuantityUsd}</BigValue>
+              <BigValue data-cy='total-entitled-quantity-usd'>
+                USD {paymentPlan.totalEntitledQuantityUsd}
+              </BigValue>
             </LabelizedField>
           </>
         ) : null}

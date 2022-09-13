@@ -61,7 +61,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
             PaymentFactory(
-                payment_plan=cls.payment_plan,
+                parent=cls.payment_plan,
                 household=household,
                 excluded=False,
                 assigned_payment_channel=None
@@ -116,13 +116,13 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(service.errors, error_msg)
 
     def test_import_valid_file(self):
-        all_active_payments = self.payment_plan.payments.exclude(excluded=True)
+        all_active_payments = self.payment_plan.payment_items.exclude(excluded=True)
         # override imported payment id
         payment_id_1 = str(all_active_payments[0].unicef_id)
         payment_id_2 = str(all_active_payments[1].unicef_id)
         payment_1 = all_active_payments[0]
         payment_2 = all_active_payments[1]
-        inf = payment_2.collector.payment_channels.all().delete()
+        payment_2.collector.payment_channels.all().delete()
 
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_valid_file)
         wb = service.open_workbook()
