@@ -764,7 +764,7 @@ def generate_payment_plan():
     payment_1_pk = UUID("10000000-feed-beef-0000-00000badf00d")
     Payment.objects.update_or_create(
         pk=payment_1_pk,
-        payment_plan=payment_plan,
+        parent=payment_plan,
         excluded=False,
         business_area=afghanistan,
         household=household_1,
@@ -778,7 +778,7 @@ def generate_payment_plan():
     payment_2_pk = UUID("20000000-feed-beef-0000-00000badf00d")
     Payment.objects.update_or_create(
         pk=payment_2_pk,
-        payment_plan=payment_plan,
+        parent=payment_plan,
         excluded=False,
         business_area=afghanistan,
         household=household_2,
