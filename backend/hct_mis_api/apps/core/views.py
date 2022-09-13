@@ -14,10 +14,11 @@ from django.views.generic import View
 from graphene_django.settings import graphene_settings
 from graphql.utils import schema_printer
 
-from hct_mis_api.apps.account.permissions import Permissions, UploadFilePermissionMixin
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.forms import StorageFileForm
 from hct_mis_api.apps.core.hope_redirect import get_hope_redirect
 from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.core.permissions_views_mixins import UploadFilePermissionMixin
 from hct_mis_api.apps.reporting.models import DashboardReport
 
 logger = logging.getLogger(__name__)
@@ -81,6 +82,9 @@ def hope_redirect(request):
 
 
 class UploadFile(UploadFilePermissionMixin, View):
+    login_url = '/login'
+    redirect_field_name = 'next'
+
     def get(self, request):
         user = request.user
         return render(request, self.template_name, {"form": StorageFileForm(user=user)})
