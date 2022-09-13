@@ -284,7 +284,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
     )
     steficon_rule = models.ForeignKey(
-        RuleCommit, null=True, on_delete=models.PROTECT, related_name="payment_plans", blank=True,
+        RuleCommit,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
+        blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
 
@@ -655,19 +659,17 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
 
     def can_accept_volume(self, volume):
-        # print("Check can_accept_volume", self.name, volume)
         if self.distribution_limit is None:
-            # print("True")
             return True
 
         # TODO: get payments from locked payment plans
         used_volume = Payment.objects.filter(financial_service_provider=self).aggregate(
-            money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
+            money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0))
         )["money"]
 
-        logging.error(
-            f"{self.distribution_limit - used_volume > volume} | limit ({self.distribution_limit}) - used({used_volume}) > vol({volume})",
-        )
+        # print(
+        #     f"{self.distribution_limit - used_volume > volume} | limit ({self.distribution_limit}) - used({used_volume}) > vol({volume})",
+        # )
         return self.distribution_limit - used_volume > volume
 
 
@@ -920,7 +922,9 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
-    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.PROTECT, null=True)  # TODO: on_delete=CASCADE ?
+    assigned_payment_channel = models.ForeignKey(
+        "payment.PaymentChannel", on_delete=models.PROTECT, null=True
+    )  # TODO: on_delete=CASCADE ?
 
     objects = PaymentManager()
 

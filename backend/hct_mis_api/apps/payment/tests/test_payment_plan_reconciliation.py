@@ -354,6 +354,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH, GenericPayment.DELIVERY_TYPE_TRANSFER],
+            distribution_limit=None,
         )
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
@@ -436,6 +437,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
         assert "errors" not in available_fsps_query_response, available_fsps_query_response
         available_fsps_data = available_fsps_query_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
+        print("available_fsps_data", available_fsps_data)
         assert len(available_fsps_data) == 1
         fsps = available_fsps_data[0]["fsps"]
         assert len(fsps) > 0
