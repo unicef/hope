@@ -1,5 +1,6 @@
 from datetime import timedelta
 from django.utils import timezone
+from django.core.management import call_command
 
 from parameterized import parameterized
 
@@ -48,6 +49,7 @@ class TestReportingMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory()
         create_afghanistan()
+        call_command("loadcountries")
         cls.business_area_slug = "afghanistan"
         cls.business_area = BusinessArea.objects.get(slug=cls.business_area_slug)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
