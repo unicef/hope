@@ -435,7 +435,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
                 volume_in_choices = sum(
                     Payment.objects.filter(
                         payment_plan=self,
-                        head_of_household__paymentchannel__delivery_mechanism=mechanism,
+                        head_of_household__payment_channels__delivery_mechanism=mechanism,
                     ).aggregate(money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))["money"]
                     for choice in processed_choices
                     if choice["fsp"] == fsp

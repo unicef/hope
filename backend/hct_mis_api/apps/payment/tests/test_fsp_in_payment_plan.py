@@ -188,10 +188,10 @@ query PaymentPlan($id: ID!) {
 
 
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query PaymentPlan($paymentPlanId: ID!, $choices: [FspSelection!]!) {
+query PaymentPlan($paymentPlanId: ID!, $fspChoices: [FspSelection!]!) {
     paymentPlan(id: $paymentPlanId) {
         id
-        availableFspsForDeliveryMechanisms(choices: $choices) {
+        availableFspsForDeliveryMechanisms(fspChoices: $fspChoices) {
             deliveryMechanism
             fsps {
                 id
@@ -372,7 +372,7 @@ class TestFSPAssignment(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
-                "choices": [],
+                "fspChoices": [],
             },
         )
         assert "errors" not in query_response, query_response
@@ -954,12 +954,12 @@ class TestVolumeByDeliveryMechanism(APITestCase):
 
         new_data = new_get_volume_by_delivery_mechanism_response["data"]["paymentPlan"]["volumeByDeliveryMechanism"]
         assert len(new_data) == 3
-        self.assertEqual(new_data[0]["volume"], 200)
-        self.assertEqual(new_data[0]["volumeUsd"], 40)
+        self.assertEqual(new_data[0]["volume"], 1000)
+        self.assertEqual(new_data[0]["volumeUsd"], 200)
         self.assertEqual(new_data[1]["volume"], 0)
         self.assertEqual(new_data[1]["volumeUsd"], 0)
-        self.assertEqual(new_data[2]["volume"], 100)
-        self.assertEqual(new_data[2]["volumeUsd"], 20)
+        self.assertEqual(new_data[2]["volume"], 500)
+        self.assertEqual(new_data[2]["volumeUsd"], 100)
 
 
 class TestFSPLimit(APITestCase):
@@ -1080,7 +1080,7 @@ class TestFSPLimit(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
-                "choices": [],
+                "fspChoices": [],
             },
         )
         assert "errors" not in available_fsps_response, available_fsps_response
@@ -1171,7 +1171,7 @@ class TestFSPLimit(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": new_encoded_payment_plan_id,
-                "choices": [],
+                "fspChoices": [],
             },
         )
         assert "errors" not in new_available_fsps_response, new_available_fsps_response
@@ -1199,7 +1199,7 @@ class TestFSPLimit(APITestCase):
         error_msg = new_assign_fsps_mutation_response["errors"][0]["message"]
         assert "cannot accept volume" in error_msg, error_msg
 
-    def test_observing_changes_in_fsp_choices_when_assigning_fsps_to_delivery_mechanisms(self):
+    def test_observing_changes_in_fsp_fspChoices_when_assigning_fsps_to_delivery_mechanisms(self):
         PaymentFactory(
             payment_plan=self.payment_plan,
             collector=self.individuals_1[0],
@@ -1235,7 +1235,7 @@ class TestFSPLimit(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
-                "choices": [],
+                "fspChoices": [],
             },
         )
         assert "errors" not in available_fsps_response, available_fsps_response
@@ -1260,7 +1260,7 @@ class TestFSPLimit(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
-                "choices": [{"fspId": self.encoded_bank_of_america_fsp_id, "order": 2}],
+                "fspChoices": [{"fspId": self.encoded_bank_of_america_fsp_id, "order": 2}],
             },
         )
         assert "errors" not in new_available_fsps_response, new_available_fsps_response
