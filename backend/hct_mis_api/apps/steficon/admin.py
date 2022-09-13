@@ -480,7 +480,7 @@ class RuleCommitAdmin(
     list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
-    readonly_fields = ("updated_by", "rule", "affected_fields", "version")
+    readonly_fields = ("updated_by", "rule")
     change_form_template = None
     change_list_template = None
     resource_class = RuleCommitResource
