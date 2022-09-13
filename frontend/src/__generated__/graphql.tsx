@@ -17859,6 +17859,8 @@ export const PaymentPlanDocument = gql`
       volumeUsd
     }
     hasPaymentListExportFile
+    importedFileName
+    importedFileDate
   }
 }
     `;
