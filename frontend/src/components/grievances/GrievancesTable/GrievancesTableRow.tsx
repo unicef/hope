@@ -61,9 +61,6 @@ export function GrievancesTableRow({
 
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.unicefId);
-  console.log('issueTypeChoicesData\n' +
-    '        .find((el) => el.category === ticket.category.toString())',issueTypeChoicesData
-    .find((el) => el.category === ticket.category.toString()),ticket.category.toString())
   const issueType = ticket.issueType
     ? issueTypeChoicesData
         .find((el) => el.category === ticket.category.toString())

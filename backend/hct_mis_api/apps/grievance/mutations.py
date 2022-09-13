@@ -173,7 +173,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             "not_allowed": ["extras.category.grievance_complaint_ticket_extras"],
         },
         GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: {
-            "required": [],
+            "required": ["issue_type"],
             "not_allowed": ["extras.category.sensitive_grievance_ticket_extras"],
         },
         GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: {
