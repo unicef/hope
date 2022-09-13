@@ -214,19 +214,7 @@ Then('I should see the warning', () => {
 
 When('I select more Delivery Mechanisms', () => {
   cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]').click();
-  cy.get('[data-cy="select-option-Mobile Money"]').click();
-  cy.get('[data-cy="button-add-delivery-mechanism"]').click();
-  cy.get('[data-cy="select-deliveryMechanisms[1].deliveryMechanism"]').click();
-  cy.get('[data-cy="select-option-Cash"]').click();
-  cy.get('[data-cy="button-add-delivery-mechanism"]').click();
-  cy.get('[data-cy="select-deliveryMechanisms[2].deliveryMechanism"]').click();
-  cy.get('[data-cy="select-option-Deposit to Card"]').click();
-  cy.get('[data-cy="button-add-delivery-mechanism"]').click();
-  cy.get('[data-cy="select-deliveryMechanisms[3].deliveryMechanism"]').click();
-  cy.get('[data-cy="select-option-Voucher"]').click();
-  cy.get('[data-cy="button-add-delivery-mechanism"]').click();
-  cy.get('[data-cy="select-deliveryMechanisms[4].deliveryMechanism"]').click();
-  cy.get('[data-cy="select-option-Referral"]').click();
+  cy.get('[data-cy="select-option-Transfer"]').click();
   cy.get('[data-cy="button-next-save"]').click({ force: true });
 });
 
