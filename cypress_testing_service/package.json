@@ -25,7 +25,6 @@
     "mocha-junit-reporter": "^1.23.3",
     "prettier": "^2.0.5"
   },
-  "cypress:open": "cypress open",
   "dependencies": {
     "@cypress/browserify-preprocessor": "^2.2.4",
     "@types/faker": "^4.1.12",
