@@ -1,3 +1,4 @@
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import FinancialServiceProvider
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFilterFactory
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
@@ -296,9 +297,37 @@ class TestFSPSetup(APITestCase):
         payment_plan = PaymentPlanFactory(
             total_households_count=3, target_population=target_population, status=PaymentPlan.Status.LOCKED
         )
-        PaymentFactory(parent=payment_plan, collector=self.individuals_1[0])
-        PaymentFactory(parent=payment_plan, collector=self.individuals_2[0])
-        PaymentFactory(parent=payment_plan, collector=self.individuals_3[0])
+
+        PaymentFactory(
+            parent=payment_plan,
+            collector=self.individuals_1[0],
+            household=self.household_1,
+            financial_service_provider=None,
+            assigned_payment_channel=None,
+            entitlement_quantity=1000,
+            entitlement_quantity_usd=200,
+            excluded=False,
+        )
+        PaymentFactory(
+            parent=payment_plan,
+            collector=self.individuals_2[0],
+            household=self.household_2,
+            financial_service_provider=None,
+            assigned_payment_channel=None,
+            entitlement_quantity=1000,
+            entitlement_quantity_usd=200,
+            excluded=False,
+        )
+        PaymentFactory(
+            parent=payment_plan,
+            collector=self.individuals_3[0],
+            household=self.household_3,
+            financial_service_provider=None,
+            assigned_payment_channel=None,
+            entitlement_quantity=1000,
+            entitlement_quantity_usd=200,
+            excluded=False,
+        )
 
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         choose_dms_mutation_variables_mutation_variables = dict(
@@ -706,6 +735,7 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
     @classmethod
     def setUpTestData(cls):
         base_setup(cls)
+        assert Individual.objects.count() == 3
 
         cls.household_4, cls.individuals_4 = create_household_and_individuals(
             household_data={
@@ -714,6 +744,7 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
             },
             individuals_data=[{}],
         )
+        assert Individual.objects.count() == 4
 
     def test_treating_collector_without_payment_channel_as_a_default_cash_option(self):
         IndividualRoleInHouseholdFactory(
@@ -724,7 +755,16 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
         # no payment channels
 
         payment_plan_setup(self)
-        PaymentFactory(parent=self.payment_plan, collector=self.individuals_4[0])
+        PaymentFactory(
+            parent=self.payment_plan,
+            collector=self.individuals_4[0],
+            household=self.household_4,
+            financial_service_provider=None,
+            assigned_payment_channel=None,
+            entitlement_quantity=1000,
+            entitlement_quantity_usd=200,
+            excluded=False,
+        )
 
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
@@ -772,7 +812,7 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
         )
 
         payment_plan_setup(self)
-        PaymentFactory(parent=self.payment_plan, collector=self.individuals_4[0])
+        PaymentFactory(parent=self.payment_plan, collector=self.individuals_4[0], assigned_payment_channel=None)
 
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
@@ -1122,7 +1162,7 @@ class TestFSPLimit(APITestCase):
 
         # Simulate applying steficon formula
         PaymentFactory(
-            payment_plan=self.payment_plan,
+            parent=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
             collector=self.individuals_1[0],
             assigned_payment_channel=self.payment_channel_1_voucher,
@@ -1209,7 +1249,7 @@ class TestFSPLimit(APITestCase):
 
     def test_observing_changes_in_fsp_fspChoices_when_assigning_fsps_to_delivery_mechanisms(self):
         PaymentFactory(
-            payment_plan=self.payment_plan,
+            parent=self.payment_plan,
             collector=self.individuals_1[0],
             financial_service_provider=None,
             assigned_payment_channel=None,  # none assigned

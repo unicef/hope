@@ -60,9 +60,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         cls.payment_plan = PaymentPlanFactory(program=program, business_area=cls.business_area)
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
-            PaymentFactory(
-                payment_plan=cls.payment_plan, household=household, excluded=False, assigned_payment_channel=None
-            )
+            PaymentFactory(parent=cls.payment_plan, household=household, excluded=False, assigned_payment_channel=None)
 
         cls.user = UserFactory()
         cls.payment_plan = PaymentPlan.objects.all().last()

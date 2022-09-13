@@ -601,12 +601,12 @@ class Query(graphene.ObjectType):
 
             def can_accept_volume(fsp):
                 volume_in_payments = Payment.objects.filter(
-                    payment_plan=payment_plan, assigned_payment_channel__delivery_mechanism=mechanism
+                    parent=payment_plan, assigned_payment_channel__delivery_mechanism=mechanism
                 ).aggregate(money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))["money"]
 
                 volume_in_choices = sum(
                     Payment.objects.filter(
-                        payment_plan=payment_plan,
+                        parent=payment_plan,
                         head_of_household__payment_channels__delivery_mechanism=mechanism,
                     ).aggregate(money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))["money"]
                     for choice in processed_choices

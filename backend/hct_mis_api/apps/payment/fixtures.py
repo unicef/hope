@@ -596,7 +596,7 @@ class PaymentFactory(factory.DjangoModelFactory):
         tzinfo=utc,
     )
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
-    excluded = fuzzy.FuzzyChoice((True, False))
+    excluded = False
     assigned_payment_channel = factory.LazyAttribute(lambda o: PaymentChannelFactory(individual=o.collector))
 
 
