@@ -131,15 +131,12 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
 """
 
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query PaymentPlan($paymentPlanId: ID!, $fspChoices: [FspSelection!]!) {
-    paymentPlan(id: $paymentPlanId) {
-        id
-        availableFspsForDeliveryMechanisms(fspChoices: $fspChoices) {
-            deliveryMechanism
-            fsps {
-                id
-                name
-            }
+query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechanismsInput!) {
+    availableFspsForDeliveryMechanisms(input: $input) {
+        deliveryMechanism
+        fsps {
+            id
+            name
         }
     }
 }
@@ -430,14 +427,15 @@ class TestPaymentPlanReconciliation(APITestCase):
         available_fsps_query_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
-            variables={
-                "paymentPlanId": encoded_payment_plan_id,
-                "fspChoices": [],
-            },
+            variables=dict(
+                input={
+                    "paymentPlanId": encoded_payment_plan_id,
+                    "fspChoices": [],
+                }
+            ),
         )
         assert "errors" not in available_fsps_query_response, available_fsps_query_response
-        available_fsps_data = available_fsps_query_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
-        print("available_fsps_data", available_fsps_data)
+        available_fsps_data = available_fsps_query_response["data"]["availableFspsForDeliveryMechanisms"]
         assert len(available_fsps_data) == 1
         fsps = available_fsps_data[0]["fsps"]
         assert len(fsps) > 0

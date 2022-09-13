@@ -188,15 +188,12 @@ query PaymentPlan($id: ID!) {
 
 
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query PaymentPlan($paymentPlanId: ID!, $fspChoices: [FspSelection!]!) {
-    paymentPlan(id: $paymentPlanId) {
-        id
-        availableFspsForDeliveryMechanisms(fspChoices: $fspChoices) {
-            deliveryMechanism
-            fsps {
-                id
-                name
-            }
+query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechanismsInput!) {
+    availableFspsForDeliveryMechanisms(input: $input) {
+        deliveryMechanism
+        fsps {
+            id
+            name
         }
     }
 }
@@ -370,13 +367,15 @@ class TestFSPAssignment(APITestCase):
         query_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
-            variables={
-                "paymentPlanId": self.encoded_payment_plan_id,
-                "fspChoices": [],
-            },
+            variables=dict(
+                input={
+                    "paymentPlanId": self.encoded_payment_plan_id,
+                    "fspChoices": [],
+                }
+            ),
         )
         assert "errors" not in query_response, query_response
-        available_mechs_data = query_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
+        available_mechs_data = query_response["data"]["availableFspsForDeliveryMechanisms"]
         assert available_mechs_data is not None, query_response
         assert len(available_mechs_data) == 2
         assert available_mechs_data[0]["deliveryMechanism"] == GenericPayment.DELIVERY_TYPE_TRANSFER
@@ -1078,13 +1077,15 @@ class TestFSPLimit(APITestCase):
         available_fsps_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
-            variables={
-                "paymentPlanId": self.encoded_payment_plan_id,
-                "fspChoices": [],
-            },
+            variables=dict(
+                input={
+                    "paymentPlanId": self.encoded_payment_plan_id,
+                    "fspChoices": [],
+                }
+            ),
         )
         assert "errors" not in available_fsps_response, available_fsps_response
-        available_fsps = available_fsps_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
+        available_fsps = available_fsps_response["data"]["availableFspsForDeliveryMechanisms"]
         assert len(available_fsps) == 2
         transfer_ids = [fsp["id"] for fsp in available_fsps[0]["fsps"]]
         assert self.encoded_santander_fsp_id in transfer_ids
@@ -1169,13 +1170,15 @@ class TestFSPLimit(APITestCase):
         new_available_fsps_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
-            variables={
-                "paymentPlanId": new_encoded_payment_plan_id,
-                "fspChoices": [],
-            },
+            variables=dict(
+                input={
+                    "paymentPlanId": new_encoded_payment_plan_id,
+                    "fspChoices": [],
+                }
+            ),
         )
         assert "errors" not in new_available_fsps_response, new_available_fsps_response
-        new_available_fsps = new_available_fsps_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
+        new_available_fsps = new_available_fsps_response["data"]["availableFspsForDeliveryMechanisms"]
         assert len(new_available_fsps) == 1
         new_voucher_ids = [fsp["id"] for fsp in new_available_fsps[0]["fsps"]]
         assert self.encoded_bank_of_america_fsp_id not in new_voucher_ids  # NOT! due to limit
@@ -1233,13 +1236,15 @@ class TestFSPLimit(APITestCase):
         available_fsps_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
-            variables={
-                "paymentPlanId": self.encoded_payment_plan_id,
-                "fspChoices": [],
-            },
+            variables=dict(
+                input={
+                    "paymentPlanId": self.encoded_payment_plan_id,
+                    "fspChoices": [],
+                }
+            ),
         )
         assert "errors" not in available_fsps_response, available_fsps_response
-        available_fsps = available_fsps_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
+        available_fsps = available_fsps_response["data"]["availableFspsForDeliveryMechanisms"]
         assert len(available_fsps) == 3
 
         transfer_ids = [fsp["id"] for fsp in available_fsps[0]["fsps"]]
@@ -1258,13 +1263,15 @@ class TestFSPLimit(APITestCase):
         new_available_fsps_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
-            variables={
-                "paymentPlanId": self.encoded_payment_plan_id,
-                "fspChoices": [{"fspId": self.encoded_bank_of_america_fsp_id, "order": 2}],
-            },
+            variables=dict(
+                input={
+                    "paymentPlanId": self.encoded_payment_plan_id,
+                    "fspChoices": [{"fspId": self.encoded_bank_of_america_fsp_id, "order": 2}],
+                }
+            ),
         )
         assert "errors" not in new_available_fsps_response, new_available_fsps_response
-        new_available_fsps = new_available_fsps_response["data"]["paymentPlan"]["availableFspsForDeliveryMechanisms"]
+        new_available_fsps = new_available_fsps_response["data"]["availableFspsForDeliveryMechanisms"]
         assert len(new_available_fsps) == 3
         new_voucher_ids = [fsp["id"] for fsp in new_available_fsps[1]["fsps"]]
         assert self.encoded_bank_of_america_fsp_id in new_voucher_ids
