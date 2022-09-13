@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -9,9 +10,6 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 logger = logging.getLogger(__name__)
-
-# TODO
-DUMMY_EXCHANGE_RATES = {}
 
 
 class ExchangeRateAPI:
@@ -33,7 +31,9 @@ class ExchangeRateAPI:
 
     def fetch_exchange_rates(self, with_history: bool = True) -> dict:
         if settings.USE_DUMMY_EXCHANGE_RATES is True:
-            return DUMMY_EXCHANGE_RATES
+            exchange_rates_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exchange_rates.json")
+            with open(exchange_rates_file_path, "r") as exchange_rates_file:
+                return json.load(exchange_rates_file)
 
         params = {}
 
