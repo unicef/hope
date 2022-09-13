@@ -11,6 +11,9 @@ from urllib3 import Retry
 
 logger = logging.getLogger(__name__)
 
+# TODO
+DUMMY_EXCHANGE_RATES = {}
+
 
 class ExchangeRateAPI:
     CACHE_KEY = "exchange_rates"
