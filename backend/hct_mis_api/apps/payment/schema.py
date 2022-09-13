@@ -407,55 +407,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
 
-    # TODO: move that out of payment plan, so it can be easily refetched
-    # available_fsps_for_delivery_mechanisms = graphene.List(FspChoices, fsp_choices=graphene.List(FspSelection))
-
-    # def resolve_available_fsps_for_delivery_mechanisms(self, info, fsp_choices):
-    #     delivery_mechanisms = (
-    #         DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self)
-    #         .values_list("delivery_mechanism", flat=True)
-    #         .order_by("delivery_mechanism_order")
-    #     )
-    #     processed_choices = [
-    #         {
-    #             "fsp": get_object_or_404(FinancialServiceProvider, id=decode_id_string(choice["fsp_id"])),
-    #             "order": choice["order"],
-    #         }
-    #         for choice in fsp_choices
-    #     ]
-
-    #     def get_fsps_for_delivery_mechanism(mechanism):
-    #         fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
-
-    #         def can_accept_volume(fsp):
-    #             volume_in_payments = Payment.objects.filter(
-    #                 payment_plan=self, assigned_payment_channel__delivery_mechanism=mechanism
-    #             ).aggregate(money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))["money"]
-
-    #             volume_in_choices = sum(
-    #                 Payment.objects.filter(
-    #                     payment_plan=self,
-    #                     head_of_household__payment_channels__delivery_mechanism=mechanism,
-    #                 ).aggregate(money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))["money"]
-    #                 for choice in processed_choices
-    #                 if choice["fsp"] == fsp
-    #             )
-    #             return fsp.can_accept_volume(volume_in_payments + volume_in_choices)
-
-    #         def can_be_chosen(fsp):
-    #             mechanism_orders = [index + 1 for index, mech in enumerate(delivery_mechanisms) if mech == mechanism]
-    #             for order in mechanism_orders:
-    #                 if order in [choice["order"] for choice in processed_choices if choice["fsp"] == fsp]:
-    #                     return True
-    #             return can_accept_volume(fsp)
-
-    #         return [{"id": fsp.id, "name": fsp.name} for fsp in fsps if can_be_chosen(fsp)] if fsps else []
-
-    #     return [
-    #         {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
-    #         for mechanism in delivery_mechanisms  # keeps the same order as the input
-    #    ]
-
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)
