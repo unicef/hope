@@ -46,7 +46,7 @@ def download_payment_plan_payment_list(request, payment_plan_id):
         logger.error("Permission Denied: User does not have correct permission.")
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
-    if payment_plan.status in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED):
+    if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED):
         logger.error("Export XLSX is possible only for Payment Plan within status LOCK or ACCEPTED.")
         raise GraphQLError("Export XLSX is possible only for Payment Plan within status LOCK or ACCEPTED.")
 

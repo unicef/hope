@@ -16,8 +16,6 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
     def __init__(self, payment_plan: PaymentPlan, file):
         self.payment_plan = payment_plan
         self.payment_list = payment_plan.all_active_payments
-        self.payment_plan_content_type = get_content_type_for_model(payment_plan)
-        self.exchange_rate = self.payment_plan.get_exchange_rate()
         self.file = file
         self.errors = []
         self.payments_dict = {
@@ -40,10 +38,12 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         self._validate_imported_file()
 
     def import_payment_list(self):
+        exchange_rate = self.payment_plan.get_exchange_rate()
+
         for row in self.ws_payments.iter_rows(min_row=2):
             if not any([cell.value for cell in row]):
                 continue
-            self._import_row(row)
+            self._import_row(row, exchange_rate)
 
         Payment.objects.bulk_update(
             self.payments_to_save, ("entitlement_quantity", "entitlement_quantity_usd", "entitlement_date")
@@ -175,7 +175,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             self._validate_entitlement(row)
             self._validate_payment_channel(row)
 
-    def _import_row(self, row):
+    def _import_row(self, row, exchange_rate):
         payment_id = row[XlsxPaymentPlanExportService.ID_COLUMN_INDEX].value
         entitlement_amount = row[XlsxPaymentPlanExportService.ENTITLEMENT_COLUMN_INDEX].value
         payment_channels_list = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX].value.split(", ")
@@ -201,7 +201,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                 payment.entitlement_quantity_usd = get_quantity_in_usd(
                     amount=entitlement_amount,
                     currency=self.payment_plan.currency,
-                    exchange_rate=self.exchange_rate,
+                    exchange_rate=exchange_rate,
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
 
@@ -214,10 +214,10 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         # create new imported xlsx file
         xlsx_file = FileTemp.objects.create(
             object_id=self.payment_plan.pk,
-            content_type=self.payment_plan_content_type,
+            content_type=get_content_type_for_model(self.payment_plan),
             created_by=user,
             file=self.file,
         )
 
-        self.payment_plan.imported_xlsx_file = xlsx_file
+        self.payment_plan.imported_file = xlsx_file
         self.payment_plan.save()
