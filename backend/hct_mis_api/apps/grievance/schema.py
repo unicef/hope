@@ -52,7 +52,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails,
+    TicketSystemFlaggingDetails, GrievanceTicketThrough,
 )
 from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -142,11 +142,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
-        return (
-            GrievanceTicket.objects.exclude(household_unicef_id__isnull=True)
-            .filter(household_unicef_id=grievance_ticket.household_unicef_id)
-            .exclude(pk=grievance_ticket.pk)
-        )
+        return grievance_ticket.linked_tickets.all()
 
     @staticmethod
     def resolve_priority(grievance_ticket: GrievanceTicket, info):
