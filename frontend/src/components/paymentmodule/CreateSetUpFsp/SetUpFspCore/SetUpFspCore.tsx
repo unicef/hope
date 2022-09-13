@@ -9,10 +9,12 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
+  AvailableFspsForDeliveryMechanismsDocument,
+  FspSelection,
   useAllDeliveryMechanismsQuery,
   useAssignFspToDeliveryMechMutation,
+  useAvailableFspsForDeliveryMechanismsQuery,
   useChooseDeliveryMechForPaymentPlanMutation,
-  usePaymentPlanQuery,
 } from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../core/LoadingComponent';
@@ -31,16 +33,16 @@ interface SetUpFspCoreProps {
   businessArea: string;
   permissions: string[];
   initialValues: FormValues;
-  setDeliveryMechanismsForQuery: (deliveryMechanisms: string[]) => void;
-  deliveryMechanismsForQuery: string[];
+  setFspChoicesForQuery: (choices: FspSelection[]) => void;
+  fspChoicesForQuery: FspSelection[];
 }
 
 export const SetUpFspCore = ({
   businessArea,
   permissions,
   initialValues,
-  setDeliveryMechanismsForQuery,
-  deliveryMechanismsForQuery,
+  setFspChoicesForQuery,
+  fspChoicesForQuery,
 }: SetUpFspCoreProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -53,13 +55,14 @@ export const SetUpFspCore = ({
     fetchPolicy: 'network-only',
   });
 
-  const { data: paymentPlanData } = usePaymentPlanQuery({
+  const { data: fspsData } = useAvailableFspsForDeliveryMechanismsQuery({
     variables: {
-      paymentPlanId: id,
-      fspChoices: [],
+      input: {
+        paymentPlanId: id,
+        fspChoices: fspChoicesForQuery,
+      },
     },
     fetchPolicy: 'network-only',
-    skip: !deliveryMechanismsForQuery.length,
   });
 
   const isEdit = location.pathname.indexOf('edit') !== -1;
@@ -98,7 +101,6 @@ export const SetUpFspCore = ({
     const mappedDeliveryMechanisms = values.deliveryMechanisms.map(
       (el) => el.deliveryMechanism,
     );
-    setDeliveryMechanismsForQuery(mappedDeliveryMechanisms);
     try {
       await chooseDeliveryMechanisms({
         variables: {
@@ -107,7 +109,19 @@ export const SetUpFspCore = ({
             deliveryMechanisms: mappedDeliveryMechanisms,
           },
         },
+        refetchQueries: () => [
+          {
+            query: AvailableFspsForDeliveryMechanismsDocument,
+            variables: {
+              input: {
+                paymentPlanId: id,
+                fspChoices: fspChoicesForQuery,
+              },
+            },
+          },
+        ],
       });
+
       showMessage(t('Delivery Mechanisms have been set'));
       handleNextStep();
     } catch (e) {
@@ -130,7 +144,14 @@ export const SetUpFspCore = ({
       deliveryMechanism: el.deliveryMechanism,
       order: index + 1,
     }));
-
+    setFspChoicesForQuery(
+      mappings
+        .filter((el) => el.fspId !== '')
+        .map((el) => ({
+          fspId: el.fspId,
+          order: el.order,
+        })),
+    );
     try {
       await assignFspToDeliveryMechanism({
         variables: {
@@ -189,8 +210,9 @@ export const SetUpFspCore = ({
                         {values.deliveryMechanisms.map(
                           (item, index: number) => {
                             const mapping =
-                              paymentPlanData?.paymentPlan
-                                ?.availableFspsForDeliveryMechanisms[index];
+                              fspsData?.availableFspsForDeliveryMechanisms[
+                                index
+                              ];
                             const mappedFsps = mapping?.fsps.map((el) => ({
                               name: el.name,
                               value: el.id,

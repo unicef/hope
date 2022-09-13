@@ -336,6 +336,11 @@ export type AssignFspToDeliveryMechanismMutation = {
   paymentPlan?: Maybe<PaymentPlanNode>,
 };
 
+export type AvailableFspsForDeliveryMechanismsInput = {
+  paymentPlanId: Scalars['ID'],
+  fspChoices: Array<Maybe<FspSelection>>,
+};
+
 export type BankAccountInfoNode = Node & {
    __typename?: 'BankAccountInfoNode',
   id: Scalars['ID'],
@@ -1430,8 +1435,8 @@ export type FspChoices = {
 };
 
 export type FspSelection = {
-  fspId?: Maybe<Scalars['String']>,
-  order?: Maybe<Scalars['Int']>,
+  fspId: Scalars['String'],
+  order: Scalars['Int'],
 };
 
 export type FspToDeliveryMechanismMappingInput = {
@@ -4074,7 +4079,6 @@ export type PaymentPlanNode = Node & {
   importedXlsxFileName?: Maybe<Scalars['String']>,
   paymentsConflictsCount?: Maybe<Scalars['Int']>,
   volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>,
-  availableFspsForDeliveryMechanisms?: Maybe<Array<Maybe<FspChoices>>>,
 };
 
 
@@ -4093,11 +4097,6 @@ export type PaymentPlanNodeApprovalProcessArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>
-};
-
-
-export type PaymentPlanNodeAvailableFspsForDeliveryMechanismsArgs = {
-  fspChoices?: Maybe<Array<Maybe<FspSelection>>>
 };
 
 export type PaymentPlanNodeConnection = {
@@ -4538,6 +4537,7 @@ export type Query = {
   allPayments?: Maybe<PaymentNodeConnection>,
   allDeliveryMechanisms?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentPlanBackgroundActionStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  availableFspsForDeliveryMechanisms?: Maybe<Array<Maybe<FspChoices>>>,
   businessArea?: Maybe<BusinessAreaNode>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
@@ -4985,6 +4985,11 @@ export type QueryAllPaymentsArgs = {
   businessArea: Scalars['String'],
   paymentPlanId: Scalars['String'],
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAvailableFspsForDeliveryMechanismsArgs = {
+  input?: Maybe<AvailableFspsForDeliveryMechanismsInput>
 };
 
 
@@ -9747,9 +9752,25 @@ export type AllPaymentPlansForTableQuery = (
   )> }
 );
 
+export type AvailableFspsForDeliveryMechanismsQueryVariables = {
+  input: AvailableFspsForDeliveryMechanismsInput
+};
+
+
+export type AvailableFspsForDeliveryMechanismsQuery = (
+  { __typename?: 'Query' }
+  & { availableFspsForDeliveryMechanisms: Maybe<Array<Maybe<(
+    { __typename?: 'FspChoices' }
+    & Pick<FspChoices, 'deliveryMechanism'>
+    & { fsps: Maybe<Array<Maybe<(
+      { __typename?: 'FspChoice' }
+      & Pick<FspChoice, 'id' | 'name'>
+    )>>> }
+  )>>> }
+);
+
 export type PaymentPlanQueryVariables = {
-  paymentPlanId: Scalars['ID'],
-  fspChoices: Array<Maybe<FspSelection>>
+  id: Scalars['ID']
 };
 
 
@@ -9827,7 +9848,7 @@ export type PaymentPlanQuery = (
       )> }
     )>, deliveryMechanisms: Maybe<Array<Maybe<(
       { __typename?: 'DeliveryMechanismNode' }
-      & Pick<DeliveryMechanismNode, 'id' | 'name'>
+      & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order'>
       & { fsp: Maybe<(
         { __typename?: 'FinancialServiceProviderNode' }
         & Pick<FinancialServiceProviderNode, 'id' | 'name'>
@@ -9843,13 +9864,6 @@ export type PaymentPlanQuery = (
           & Pick<FinancialServiceProviderNode, 'id' | 'name'>
         )> }
       )> }
-    )>>>, availableFspsForDeliveryMechanisms: Maybe<Array<Maybe<(
-      { __typename?: 'FspChoices' }
-      & Pick<FspChoices, 'deliveryMechanism'>
-      & { fsps: Maybe<Array<Maybe<(
-        { __typename?: 'FspChoice' }
-        & Pick<FspChoice, 'id' | 'name'>
-      )>>> }
     )>>> }
   )> }
 );
@@ -17652,9 +17666,63 @@ export function useAllPaymentPlansForTableLazyQuery(baseOptions?: ApolloReactHoo
 export type AllPaymentPlansForTableQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableQuery>;
 export type AllPaymentPlansForTableLazyQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableLazyQuery>;
 export type AllPaymentPlansForTableQueryResult = ApolloReactCommon.QueryResult<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>;
+export const AvailableFspsForDeliveryMechanismsDocument = gql`
+    query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechanismsInput!) {
+  availableFspsForDeliveryMechanisms(input: $input) {
+    deliveryMechanism
+    fsps {
+      id
+      name
+    }
+  }
+}
+    `;
+export type AvailableFspsForDeliveryMechanismsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>, 'query'> & ({ variables: AvailableFspsForDeliveryMechanismsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AvailableFspsForDeliveryMechanismsComponent = (props: AvailableFspsForDeliveryMechanismsComponentProps) => (
+      <ApolloReactComponents.Query<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables> query={AvailableFspsForDeliveryMechanismsDocument} {...props} />
+    );
+    
+export type AvailableFspsForDeliveryMechanismsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables> & TChildProps;
+export function withAvailableFspsForDeliveryMechanisms<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AvailableFspsForDeliveryMechanismsQuery,
+  AvailableFspsForDeliveryMechanismsQueryVariables,
+  AvailableFspsForDeliveryMechanismsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables, AvailableFspsForDeliveryMechanismsProps<TChildProps>>(AvailableFspsForDeliveryMechanismsDocument, {
+      alias: 'availableFspsForDeliveryMechanisms',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAvailableFspsForDeliveryMechanismsQuery__
+ *
+ * To run a query within a React component, call `useAvailableFspsForDeliveryMechanismsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAvailableFspsForDeliveryMechanismsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAvailableFspsForDeliveryMechanismsQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useAvailableFspsForDeliveryMechanismsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>(AvailableFspsForDeliveryMechanismsDocument, baseOptions);
+      }
+export function useAvailableFspsForDeliveryMechanismsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>(AvailableFspsForDeliveryMechanismsDocument, baseOptions);
+        }
+export type AvailableFspsForDeliveryMechanismsQueryHookResult = ReturnType<typeof useAvailableFspsForDeliveryMechanismsQuery>;
+export type AvailableFspsForDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAvailableFspsForDeliveryMechanismsLazyQuery>;
+export type AvailableFspsForDeliveryMechanismsQueryResult = ApolloReactCommon.QueryResult<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>;
 export const PaymentPlanDocument = gql`
-    query PaymentPlan($paymentPlanId: ID!, $fspChoices: [FspSelection]!) {
-  paymentPlan(id: $paymentPlanId) {
+    query PaymentPlan($id: ID!) {
+  paymentPlan(id: $id) {
     id
     unicefId
     status
@@ -17783,6 +17851,7 @@ export const PaymentPlanDocument = gql`
     deliveryMechanisms {
       id
       name
+      order
       fsp {
         id
         name
@@ -17802,13 +17871,6 @@ export const PaymentPlanDocument = gql`
       volumeUsd
     }
     hasPaymentListPerFspZipFile
-    availableFspsForDeliveryMechanisms(fspChoices: $fspChoices) {
-      deliveryMechanism
-      fsps {
-        id
-        name
-      }
-    }
   }
 }
     `;
@@ -17842,8 +17904,7 @@ export function withPaymentPlan<TProps, TChildProps = {}>(operationOptions?: Apo
  * @example
  * const { data, loading, error } = usePaymentPlanQuery({
  *   variables: {
- *      paymentPlanId: // value for 'paymentPlanId'
- *      fspChoices: // value for 'fspChoices'
+ *      id: // value for 'id'
  *   },
  * });
  */
@@ -22291,9 +22352,6 @@ export type ResolversTypes = {
   FilteredActionsListNode: ResolverTypeWrapper<FilteredActionsListNode>,
   ApprovalNode: ResolverTypeWrapper<ApprovalNode>,
   VolumeByDeliveryMechanismNode: ResolverTypeWrapper<VolumeByDeliveryMechanismNode>,
-  FspSelection: FspSelection,
-  FspChoices: ResolverTypeWrapper<FspChoices>,
-  FspChoice: ResolverTypeWrapper<FspChoice>,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
   ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
   GrievanceTicketNodeConnection: ResolverTypeWrapper<GrievanceTicketNodeConnection>,
@@ -22416,6 +22474,10 @@ export type ResolversTypes = {
   AgeInput: AgeInput,
   RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
+  AvailableFspsForDeliveryMechanismsInput: AvailableFspsForDeliveryMechanismsInput,
+  FspSelection: FspSelection,
+  FspChoices: ResolverTypeWrapper<FspChoices>,
+  FspChoice: ResolverTypeWrapper<FspChoice>,
   BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
   BusinessAreaNodeConnection: ResolverTypeWrapper<BusinessAreaNodeConnection>,
   BusinessAreaNodeEdge: ResolverTypeWrapper<BusinessAreaNodeEdge>,
@@ -22727,9 +22789,6 @@ export type ResolversParentTypes = {
   FilteredActionsListNode: FilteredActionsListNode,
   ApprovalNode: ApprovalNode,
   VolumeByDeliveryMechanismNode: VolumeByDeliveryMechanismNode,
-  FspSelection: FspSelection,
-  FspChoices: FspChoices,
-  FspChoice: FspChoice,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,
   ServiceProviderNodeEdge: ServiceProviderNodeEdge,
   GrievanceTicketNodeConnection: GrievanceTicketNodeConnection,
@@ -22852,6 +22911,10 @@ export type ResolversParentTypes = {
   AgeInput: AgeInput,
   RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
+  AvailableFspsForDeliveryMechanismsInput: AvailableFspsForDeliveryMechanismsInput,
+  FspSelection: FspSelection,
+  FspChoices: FspChoices,
+  FspChoice: FspChoice,
   BusinessAreaNode: BusinessAreaNode,
   BusinessAreaNodeConnection: BusinessAreaNodeConnection,
   BusinessAreaNodeEdge: BusinessAreaNodeEdge,
@@ -24601,7 +24664,6 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   importedXlsxFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentsConflictsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   volumeByDeliveryMechanism?: Resolver<Maybe<Array<Maybe<ResolversTypes['VolumeByDeliveryMechanismNode']>>>, ParentType, ContextType>,
-  availableFspsForDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoices']>>>, ParentType, ContextType, PaymentPlanNodeAvailableFspsForDeliveryMechanismsArgs>,
 };
 
 export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {
@@ -24831,6 +24893,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allPayments?: Resolver<Maybe<ResolversTypes['PaymentNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentsArgs, 'businessArea' | 'paymentPlanId'>>,
   allDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentPlanBackgroundActionStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  availableFspsForDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoices']>>>, ParentType, ContextType, QueryAvailableFspsForDeliveryMechanismsArgs>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,

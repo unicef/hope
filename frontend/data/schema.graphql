@@ -204,6 +204,11 @@ type AssignFspToDeliveryMechanismMutation {
   paymentPlan: PaymentPlanNode
 }
 
+input AvailableFspsForDeliveryMechanismsInput {
+  paymentPlanId: ID!
+  fspChoices: [FspSelection]!
+}
+
 type BankAccountInfoNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -1018,8 +1023,8 @@ type FspChoices {
 }
 
 input FspSelection {
-  fspId: String
-  order: Int
+  fspId: String!
+  order: Int!
 }
 
 input FullListArguments {
@@ -2853,7 +2858,6 @@ type PaymentPlanNode implements Node {
   importedXlsxFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
-  availableFspsForDeliveryMechanisms(fspChoices: [FspSelection]): [FspChoices]
 }
 
 type PaymentPlanNodeConnection {
@@ -3173,6 +3177,7 @@ type Query {
   allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, orderBy: String): PaymentNodeConnection
   allDeliveryMechanisms: [ChoiceObject]
   paymentPlanBackgroundActionStatusChoices: [ChoiceObject]
+  availableFspsForDeliveryMechanisms(input: AvailableFspsForDeliveryMechanismsInput): [FspChoices]
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String): [FieldAttributeNode]

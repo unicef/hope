@@ -24,8 +24,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const { data, loading } = usePaymentPlanQuery({
     variables: {
-      paymentPlanId: id,
-      fspChoices: [],
+      id,
     },
     fetchPolicy: 'cache-and-network',
   });

@@ -386,8 +386,8 @@ class FspChoices(graphene.ObjectType):
 
 
 class FspSelection(graphene.InputObjectType):
-    fsp_id = graphene.String()
-    order = graphene.Int()
+    fsp_id = graphene.String(required=True)
+    order = graphene.Int(required=True)
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):

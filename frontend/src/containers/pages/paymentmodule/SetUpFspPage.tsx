@@ -7,9 +7,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 export const SetUpFspPage = (): React.ReactElement => {
-  const [deliveryMechanismsForQuery, setDeliveryMechanismsForQuery] = useState(
-    [],
-  );
+  const [fspChoicesForQuery, setFspChoicesForQuery] = useState([]);
 
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -39,8 +37,8 @@ export const SetUpFspPage = (): React.ReactElement => {
         businessArea={businessArea}
         permissions={permissions}
         initialValues={initialValues}
-        deliveryMechanismsForQuery={deliveryMechanismsForQuery}
-        setDeliveryMechanismsForQuery={setDeliveryMechanismsForQuery}
+        fspChoicesForQuery={fspChoicesForQuery}
+        setFspChoicesForQuery={setFspChoicesForQuery}
       />
     </>
   );

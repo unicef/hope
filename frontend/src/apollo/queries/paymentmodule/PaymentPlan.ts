@@ -1,8 +1,8 @@
 import { gql } from 'apollo-boost';
 
 export const PAYMENT_PLAN_QUERY = gql`
-  query PaymentPlan($paymentPlanId: ID!, $fspChoices: [FspSelection]!) {
-    paymentPlan(id: $paymentPlanId) {
+  query PaymentPlan($id: ID!) {
+    paymentPlan(id: $id) {
       id
       unicefId
       status
@@ -131,6 +131,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       deliveryMechanisms {
         id
         name
+        order
         fsp {
           id
           name
@@ -150,13 +151,6 @@ export const PAYMENT_PLAN_QUERY = gql`
         volumeUsd
       }
       hasPaymentListPerFspZipFile
-      availableFspsForDeliveryMechanisms(fspChoices: $fspChoices) {
-        deliveryMechanism
-        fsps {
-          id
-          name
-        }
-      }
     }
   }
 `;

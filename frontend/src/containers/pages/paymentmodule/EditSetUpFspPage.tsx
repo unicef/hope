@@ -17,15 +17,18 @@ export const EditSetUpFspPage = (): React.ReactElement => {
     loading: paymentPlanLoading,
   } = usePaymentPlanQuery({
     variables: {
-      paymentPlanId: id,
-      fspChoices: [],
+      id,
     },
     fetchPolicy: 'cache-and-network',
   });
 
-  const [deliveryMechanismsForQuery, setDeliveryMechanismsForQuery] = useState(
-    paymentPlanData?.paymentPlan?.deliveryMechanisms?.map((el) => el.name) ||
-      [],
+  const [fspChoicesForQuery, setFspChoicesForQuery] = useState(
+    paymentPlanData?.paymentPlan?.deliveryMechanisms
+      ?.filter((el) => el.fsp && el.fsp.id !== '')
+      .map((el) => ({
+        fspId: el.fsp?.id,
+        order: el.order,
+      })) || [],
   );
 
   const businessArea = useBusinessArea();
@@ -60,8 +63,8 @@ export const EditSetUpFspPage = (): React.ReactElement => {
         businessArea={businessArea}
         permissions={permissions}
         initialValues={initialValues}
-        deliveryMechanismsForQuery={deliveryMechanismsForQuery}
-        setDeliveryMechanismsForQuery={setDeliveryMechanismsForQuery}
+        fspChoicesForQuery={fspChoicesForQuery}
+        setFspChoicesForQuery={setFspChoicesForQuery}
       />
     </>
   );

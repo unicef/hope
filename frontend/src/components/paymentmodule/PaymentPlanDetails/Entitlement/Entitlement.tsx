@@ -94,15 +94,14 @@ export const Entitlement = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan?.steficonRule?.rule.id || '',
+    paymentPlan.steficonRule?.rule.id || '',
   );
   const options = {
     refetchQueries: () => [
       {
         query: PaymentPlanDocument,
         variables: {
-          paymentPlanId: paymentPlan.id,
-          fspChoices: [],
+          id: paymentPlan.id,
         },
       },
     ],

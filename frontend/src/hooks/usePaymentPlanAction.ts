@@ -34,7 +34,7 @@ export const usePaymentPlanAction = (
         refetchQueries: () => [
           {
             query: PaymentPlanDocument,
-            variables: { paymentPlanId, fspChoices: [] },
+            variables: { id: paymentPlanId },
           },
           {
             query: AllPaymentsForTableDocument,

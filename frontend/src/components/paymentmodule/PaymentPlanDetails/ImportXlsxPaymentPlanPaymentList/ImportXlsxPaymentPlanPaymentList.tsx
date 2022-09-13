@@ -65,8 +65,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             {
               query: PaymentPlanDocument,
               variables: {
-                paymentPlanId: paymentPlan.id,
-                fspChoices: [],
+                id: paymentPlan.id,
               },
             },
           ],
