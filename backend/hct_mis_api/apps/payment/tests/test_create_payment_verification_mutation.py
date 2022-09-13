@@ -42,7 +42,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         (household, _) = create_household(household_args={"size": 1})
         PaymentRecordFactory.create(
-            cash_plan=self.cash_plan,
+            parent=self.cash_plan,
             business_area=self.cash_plan.business_area,
             delivered_quantity=1000,
             delivered_quantity_usd=None,

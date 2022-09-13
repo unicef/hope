@@ -28,13 +28,13 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         def _annotate_conflict_data(qs):
             return qs.annotate(
                 formatted_pp_start_date=Func(
-                    F("payment_plan__start_date"),
+                    F("parent__start_date"),
                     Value("YYYY-MM-DD"),
                     function="to_char",
                     output_field=models.CharField(),
                 ),
                 formatted_pp_end_date=Func(
-                    F("payment_plan__end_date"),
+                    F("parent__end_date"),
                     Value("YYYY-MM-DD"),
                     function="to_char",
                     output_field=models.CharField(),
@@ -42,15 +42,15 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             ).annotate(
                 conflict_data=Func(
                     Value("payment_plan_unicef_id"),
-                    F("payment_plan__unicef_id"),
+                    F("parent__unicef_id"),
                     Value("payment_plan_id"),
-                    F("payment_plan_id"),
+                    F("parent_id"),
                     Value("payment_plan_start_date"),
                     F("formatted_pp_start_date"),
                     Value("payment_plan_end_date"),
                     F("formatted_pp_end_date"),
                     Value("payment_plan_status"),
-                    F("payment_plan__status"),
+                    F("parent__status"),
                     Value("payment_id"),
                     F("id"),
                     Value("payment_unicef_id"),
@@ -61,26 +61,26 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             )
 
         soft_conflicting_pps = (
-            self.select_related("payment_plan")
+            self.select_related("parent")
             .exclude(id=OuterRef("id"))
-            .exclude(payment_plan__id=OuterRef("payment_plan_id"))
+            .exclude(parent__id=OuterRef("parent_id"))
             .filter(
-                Q(payment_plan__start_date__lte=OuterRef("payment_plan__end_date"))
-                & Q(payment_plan__end_date__gte=OuterRef("payment_plan__start_date")),
-                payment_plan__status=PaymentPlan.Status.OPEN,
+                Q(parent__start_date__lte=OuterRef("parent__end_date"))
+                & Q(parent__end_date__gte=OuterRef("parent__start_date")),
+                parent__status=PaymentPlan.Status.OPEN,
                 household=OuterRef("household"),
             )
         )
         soft_conflicting_pps = _annotate_conflict_data(soft_conflicting_pps)
 
         hard_conflicting_pps = (
-            self.select_related("payment_plan")
+            self.select_related("parent")
             .exclude(id=OuterRef("id"))
-            .exclude(payment_plan__id=OuterRef("payment_plan_id"))
+            .exclude(parent__id=OuterRef("parent_id"))
             .filter(
-                Q(payment_plan__start_date__lte=OuterRef("payment_plan__end_date"))
-                & Q(payment_plan__end_date__gte=OuterRef("payment_plan__start_date")),
-                ~Q(payment_plan__status=PaymentPlan.Status.OPEN),
+                Q(parent__start_date__lte=OuterRef("parent__end_date"))
+                & Q(parent__end_date__gte=OuterRef("parent__start_date")),
+                ~Q(parent__status=PaymentPlan.Status.OPEN),
                 Q(household=OuterRef("household")) & Q(excluded=False),
             )
         )

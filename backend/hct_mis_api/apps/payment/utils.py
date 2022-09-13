@@ -1,14 +1,15 @@
 from decimal import Decimal
 from math import ceil
-import phonenumbers
-import logging
 
 import datetime
+from typing import Optional, List
+
 from django.db.models import Q
 
+from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, Payment, CashPlan, PaymentPlan
 
 
 def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error):
@@ -68,20 +69,20 @@ def calculate_counts(cash_plan_verification):
     ).count()
 
 
-def get_payment_records_for_dashboard(year, business_area_slug, filters, only_with_delivered_quantity=False):
+def get_payment_items_for_dashboard(year, business_area_slug, filters, only_with_delivered_quantity=False):
     additional_filters = {}
     if only_with_delivered_quantity:
         additional_filters["delivered_quantity_usd__gt"] = 0
     return chart_get_filtered_qs(
-        PaymentRecord,
+        get_payment_items_sequence_qs(),
         year,
         business_area_slug_filter={"business_area__slug": business_area_slug},
         additional_filters={
             **additional_filters,
             **chart_create_filter_query(
                 filters,
-                program_id_path="cash_plan__program__id",
-                administrative_area_path="household__admin_area",
+                program_id_path="parent__program__id",
+                administrative_area_path="household__admin_area_new",
             ),
         },
         year_filter_path="delivery_date",
@@ -108,3 +109,11 @@ def get_quantity_in_usd(
         return None
 
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
+
+
+def get_payment_items_sequence_qs() -> ExtendedQuerySetSequence:
+    return ExtendedQuerySetSequence(Payment.objects.all(), PaymentRecord.objects.all())
+
+
+def get_payment_cash_plan_items_sequence_qs() -> ExtendedQuerySetSequence:
+    return ExtendedQuerySetSequence(PaymentPlan.objects.all(), CashPlan.objects.all())

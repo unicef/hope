@@ -67,7 +67,7 @@ class TestXlsxVerificationImport(APITestCase):
             household.programs.add(program)
 
             payment_record = PaymentRecordFactory(
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 household=household,
                 head_of_household=household.head_of_household,
                 target_population=target_population,

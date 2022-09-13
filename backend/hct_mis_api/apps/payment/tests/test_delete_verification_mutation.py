@@ -130,7 +130,7 @@ class TestDeleteVerificationMutation(APITestCase):
             household.programs.add(self.program)
 
             payment_record = PaymentRecordFactory(
-                cash_plan=self.cash_plan,
+                parent=self.cash_plan,
                 household=household,
                 target_population=self.target_population,
             )

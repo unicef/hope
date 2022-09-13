@@ -1,8 +1,12 @@
-import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
+import { When, Then, Given, And } from 'cypress-cucumber-preprocessor/steps';
 import {
   fillProgramForm,
   fillTargetingForm,
+  uniqueSeed,
 } from '../../procedures/procedures';
+
+let programName;
+let targetPopulationName;
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -18,11 +22,13 @@ const clearCache = () => {
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
 };
 
-Given("There are individuals and households imported", () => {
-  cy.exec('yarn run generate-xlsx-files 3');
+Given('There are individuals and households imported', () => {
+  cy.exec(`yarn run generate-xlsx-files 3 --seed ${uniqueSeed}`);
   cy.visit('/');
   clearCache();
-  cy.get('span').contains('Registration Data Import', { timeout: 10000 }).click();
+  cy.get('span')
+    .contains('Registration Data Import', { timeout: 10000 })
+    .click();
   cy.get('button > span').contains('IMPORT').click({ force: true });
 
   cy.get('[data-cy="import-type-select"]').click();
@@ -60,13 +66,13 @@ Given("There are individuals and households imported", () => {
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
   cy.get('div').contains('MERGED');
-})
+});
 
 Given('I have an active program', () => {
   cy.visit('/');
   cy.get('span').contains('Programme Management').click();
   cy.get('[data-cy="button-new-program"]').click({ force: true });
-  fillProgramForm(cy);
+  programName = fillProgramForm(cy);
   cy.get('[data-cy="button-save"]').click({ force: true });
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[data-cy="button-activate-program"]').click({ force: true });
@@ -81,7 +87,7 @@ Given('I have target population in ready status', () => {
   cy.get('[data-cy="button-target-population-create-new"]').click({
     force: true,
   });
-  fillTargetingForm(cy);
+  targetPopulationName = fillTargetingForm(cy, programName, uniqueSeed);
   cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click();
   cy.get(
     '[data-cy=button-target-population-create] > .MuiButton-label',
@@ -129,23 +135,89 @@ Then('I should see the New Payment Plan page', () => {
 When('I fill out the form fields and save', () => {
   cy.get('[data-cy="input-target-population"]').first().click();
   cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.get('[data-cy="select-option-1"]').click();
+  cy.get(`[data-cy="select-option-${targetPopulationName}"]`).click();
+
   cy.get('[data-cy="input-start-date"]').click().type('2022-12-12');
   cy.get('[data-cy="input-end-date"]').click().type('2022-12-23');
   cy.get('[data-cy="input-currency"]').first().click();
-  cy.get('[data-cy="select-option-1"]').click();
+  cy.get('[data-cy="select-option-Afghan afghani"]').click();
   cy.get('[data-cy="input-dispersion-start-date"]').click().type('2023-12-12');
   cy.get('[data-cy="input-dispersion-end-date"]').click().type('2023-12-23');
   cy.get('[data-cy="button-save-payment-plan"]').click({
     force: true,
   });
-  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
 });
 
 Then('I should see the Payment Plan details page', () => {
-  cy.get('[data-cy="page-header-container"]').contains('Payment Plan ID');
+  cy.get('[data-cy="page-header-container"]').contains('Payment Plan ID', {
+    timeout: 10000,
+  });
   cy.get('h6').contains('Details');
   cy.get('h6').contains('Results');
   cy.get('h6').contains('Payments List');
   cy.get('h6').contains('Activity Log');
+});
+
+When('I lock the Payment Plan', () => {
+  cy.get('[data-cy="button-lock-plan"]').click({
+    force: true,
+  });
+  cy.get('[data-cy="button-submit"]').click({
+    force: true,
+  });
+});
+
+Then('I see the entitlements input', () => {
+  cy.get('[data-cy=input-entitlement-formula] > .MuiSelect-root').click({
+    force: true,
+  });
+});
+
+When('I choose the steficon rule', () => {
+  cy.get('[data-cy="select-option-0"]').click();
+});
+
+And('I apply the steficon rule', () => {
+  cy.get('[data-cy="button-apply-steficon"]').click({ force: true });
+  cy.reload();
+});
+
+//TODO: uncomment after https://github.com/unicef/hct-mis/pull/1756 is merged
+// Then('I see the entitlements calculated', () => {
+//   cy.get('[data-cy="total-entitled-quantity-usd"]').contains('$');
+// });
+
+And('I am able to set up FSPs', () => {
+  cy.get('[data-cy="button-set-up-fsp"]', {
+    timeout: 10000,
+  }).click({ force: true });
+});
+
+Then('I should see the Set up FSP page', () => {
+  cy.get('[data-cy="page-header-container"]').contains('Set up FSP', {
+    timeout: 10000,
+  });
+});
+
+When('I select only one Delivery Mechanism', () => {
+  cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]', {
+    timeout: 10000,
+  }).click();
+  cy.get('[data-cy="select-option-Mobile Money"]').click();
+  cy.get('[data-cy="button-next-save"]').click({ force: true });
+});
+
+Then('I should see the warning', () => {
+  cy.get('[data-cy="warning-box"]');
+});
+
+When('I select more Delivery Mechanisms', () => {
+  cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]').click();
+  cy.get('[data-cy="select-option-Transfer"]').click();
+  cy.get('[data-cy="button-next-save"]').click({ force: true });
+});
+
+Then('I should be able to assign FSPs', () => {
+  cy.get('[data-cy="select-deliveryMechanisms[0].fsp"]');
 });
