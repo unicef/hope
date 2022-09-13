@@ -10,6 +10,9 @@ from urllib3 import Retry
 
 logger = logging.getLogger(__name__)
 
+# TODO
+DUMMY_EXCHANGE_RATES = {}
+
 
 class ExchangeRateAPI:
     CACHE_KEY = "exchange_rates"
@@ -29,6 +32,9 @@ class ExchangeRateAPI:
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
     def fetch_exchange_rates(self, with_history: bool = True) -> dict:
+        if settings.USE_DUMMY_EXCHANGE_RATES is True:
+            return DUMMY_EXCHANGE_RATES
+
         params = {}
 
         if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
