@@ -218,13 +218,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess should re
             class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
           />
         </div>
-        <div
-          class="sc-htpNat dDfRcl"
-        >
-          <div
-            class="sc-bxivhb iKaIMo"
-          />
-        </div>
       </div>
     </div>
   </div>

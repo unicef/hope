@@ -150,6 +150,8 @@ export const PAYMENT_PLAN_QUERY = gql`
         volumeUsd
       }
       hasPaymentListExportFile
+      importedFileName
+      importedFileDate
     }
   }
 `;
