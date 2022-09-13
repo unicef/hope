@@ -10,6 +10,9 @@ from urllib3 import Retry
 
 logger = logging.getLogger(__name__)
 
+# TODO
+DUMMY_EXCHANGE_RATES = {}
+
 
 class ExchangeRateAPI:
     CACHE_KEY = "exchange_rates"
@@ -29,24 +32,28 @@ class ExchangeRateAPI:
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
     def fetch_exchange_rates(self, with_history: bool = True) -> dict:
-        # TODO
-        return {}
-        # params = {}
+        if settings.USE_DUMMY_EXCHANGE_RATES is True:
+            return DUMMY_EXCHANGE_RATES
 
-        # if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
-        #     cached_response = cache.get(self.CACHE_KEY)
-        #     if cached_response is not None:
-        #         return cached_response
-        # if with_history is True:
-        #     params["history"] = "yes"
-        # response = self._client.get(self.api_url, params=params)
+        params = {}
 
-        # try:
-        #     response.raise_for_status()
-        # except Exception as e:
-        #     logger.exception(e)
-        #     raise
-        # response_json = response.json()
-        # if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
-        #     cache.set(self.CACHE_KEY, response_json, settings.EXCHANGE_RATE_CACHE_EXPIRY)
-        # return response_json
+        if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
+            cached_response = cache.get(self.CACHE_KEY)
+            if cached_response is not None:
+                return cached_response
+        if with_history is True:
+            params["history"] = "yes"
+        response = self._client.get(self.api_url, params=params)
+
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            logger.exception(e)
+            raise
+        response_json = response.json()
+        if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
+            cache.set(self.CACHE_KEY, response_json, settings.EXCHANGE_RATE_CACHE_EXPIRY)
+        logging.error(f"RESPONSE EXCHANGE RATES: {response_json}")
+        logging.info(f"RESPONSE EXCHANGE RATES: {response_json}")
+        print(f"RESPONSE EXCHANGE RATES: {response_json}")
+        return response_json
