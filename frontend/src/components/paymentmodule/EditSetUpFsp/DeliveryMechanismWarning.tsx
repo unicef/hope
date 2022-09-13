@@ -22,7 +22,14 @@ export const DeliveryMechanismWarning = ({
   warning,
 }: DeliveryMechanismWarningProps): React.ReactElement => {
   return (
-    <WarningBox mt={4} mb={4} p={3} display='flex' alignItems='center'>
+    <WarningBox
+      data-cy='warning-box'
+      mt={4}
+      mb={4}
+      p={3}
+      display='flex'
+      alignItems='center'
+    >
       <ErrorOutline />
       {warning}
     </WarningBox>
