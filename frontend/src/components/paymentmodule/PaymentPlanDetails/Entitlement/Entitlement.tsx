@@ -17,6 +17,7 @@ import { PAYMENT_PLAN_QUERY } from '../../../../apollo/queries/paymentmodule/Pay
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   PaymentPlanQuery,
+  PaymentPlanStatus,
   useAllSteficonRulesQuery,
   useExportXlsxPpListMutation,
   useSetSteficonRuleOnPpListMutation,
@@ -159,7 +160,11 @@ export const Entitlement = ({
                 <Button
                   variant='contained'
                   color='primary'
-                  disabled={loadingSetSteficonRule || !steficonRuleValue}
+                  disabled={
+                    loadingSetSteficonRule ||
+                    !steficonRuleValue ||
+                    paymentPlan.status !== PaymentPlanStatus.Locked
+                  }
                   onClick={async () => {
                     try {
                       await setSteficonRule({
@@ -202,13 +207,17 @@ export const Entitlement = ({
                   component='a'
                   download
                   href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
+                  disabled={paymentPlan.status !== PaymentPlanStatus.Locked}
                 >
                   {t('DOWNLOAD TEMPLATE')}
                 </Button>
               ) : (
                 <LoadingButton
                   loading={loadingExport}
-                  disabled={loadingExport}
+                  disabled={
+                    loadingExport ||
+                    paymentPlan.status !== PaymentPlanStatus.Locked
+                  }
                   color='primary'
                   startIcon={<GetApp />}
                   onClick={async () => {

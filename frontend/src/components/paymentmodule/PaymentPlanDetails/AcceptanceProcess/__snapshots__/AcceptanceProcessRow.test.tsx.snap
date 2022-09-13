@@ -199,13 +199,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
       />
     </div>
-    <div
-      class="sc-bdVaJa iEMqKF"
-    >
-      <div
-        class="sc-bwzfXH hzMut"
-      />
-    </div>
   </div>
 </div>
 `;

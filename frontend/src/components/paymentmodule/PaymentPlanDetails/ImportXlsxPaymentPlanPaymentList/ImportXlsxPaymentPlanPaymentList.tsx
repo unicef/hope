@@ -17,6 +17,7 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   ImportXlsxPpListMutation,
   PaymentPlanQuery,
+  PaymentPlanStatus,
   useImportXlsxPpListMutation,
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
@@ -88,6 +89,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           color='primary'
           data-cy='button-import'
           onClick={() => setOpenImport(true)}
+          disabled={paymentPlan.status !== PaymentPlanStatus.Locked}
         >
           {t('Import XLSX')}
         </Button>

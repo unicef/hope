@@ -6,9 +6,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
     class="MuiBox-root MuiBox-root-1"
   >
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary"
+      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary Mui-disabled Mui-disabled"
       data-cy="button-import"
-      tabindex="0"
+      disabled=""
+      tabindex="-1"
       type="button"
     >
       <span
@@ -30,9 +31,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
         </span>
         Import XLSX
       </span>
-      <span
-        class="MuiTouchRipple-root"
-      />
     </button>
   </div>
 </div>
