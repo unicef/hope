@@ -185,7 +185,7 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
             scope.set_tag("business_area", payment_plan.business_area)
 
             if not payment_plan.imported_file:
-                logger.exception(f"Error import from xlsx, file does not exists for PaymentPlan ID {payment_plan.unicef_id}.")
+                logger.error(f"Error import from xlsx, file does not exists for PaymentPlan ID {payment_plan.unicef_id}.")
                 raise
 
             service = XlsxPaymentPlanImportService(payment_plan, payment_plan.imported_file.file)
