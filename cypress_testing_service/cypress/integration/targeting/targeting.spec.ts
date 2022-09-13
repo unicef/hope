@@ -2,7 +2,10 @@ import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
 import {
   fillProgramForm,
   fillTargetingForm,
+  uniqueSeed,
 } from '../../procedures/procedures';
+
+let programName;
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -15,7 +18,7 @@ Given('I have an active program', () => {
   cy.visit('/');
   cy.get('span').contains('Programme Management').click();
   cy.get('[data-cy="button-new-program"]').click({ force: true });
-  fillProgramForm(cy);
+  programName = fillProgramForm(cy);
   cy.get('[data-cy="button-save"]').click({ force: true });
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[data-cy="button-activate-program"]').click({ force: true });
@@ -54,7 +57,7 @@ Then('I should see the Create Target Population page', () => {
 });
 
 When('I fill out the form fields and save', () => {
-  fillTargetingForm(cy);
+  fillTargetingForm(cy, programName, uniqueSeed);
   cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click();
 });
 
