@@ -67,13 +67,12 @@ export const getIndividualsFromRdiDetails = (cy, expectedNumber) => {
 
   for (let i = 0; i < expectedNumber; i++) {
     cy.get('[data-cy="imported-individuals-table"]')
-      .find(`tbody > tr > td:nth-child(${i + 1})`)
+      .find(`tbody > tr:nth-child(${i + 1}) > td:nth-child(1)`)
       .then(($td) => {
         const individualId = $td.text().split(' (')[0];
         individualIds.push(individualId);
       });
   }
-  cy.log(individualIds);
   return individualIds;
 };
 
