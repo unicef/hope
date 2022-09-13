@@ -139,7 +139,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
     issueType: null,
     priority: 3,
     urgency: 3,
-    subCategory: null,
     partner: null,
     programme: null,
     comments: null,
@@ -551,7 +550,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               label='Category*'
                               onChange={(e) => {
                                 setFieldValue('issueType', null);
-                                setFieldValue('subCategory', null);
                                 handleChange(e);
                               }}
                               variant='outlined'
@@ -698,7 +696,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           <BoxWithBorderBottom />
                           <BoxPadding />
                           <Grid container spacing={3}>
-                            {values.subCategory ===
+                            {values.issueType ===
                               GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT && (
                               <Grid item xs={3}>
                                 <Field
@@ -812,9 +810,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                     />
                                   </Box>
                                 </Grid>
-                                {(values.subCategory ===
+                                {(values.issueType ===
                                   GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
-                                  values.subCategory ===
+                                  values.issueType ===
                                     GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                                   <Grid item xs={6}>
                                     <Box py={3}>
