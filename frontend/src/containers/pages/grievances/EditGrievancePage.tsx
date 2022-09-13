@@ -115,15 +115,6 @@ export const EditGrievancePage = (): React.ReactElement => {
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
-
-  const issueType = ticket.issueType
-    ? choicesData.grievanceTicketIssueTypeChoices
-        .filter((el) => el.category === ticket.category.toString())[0]
-        .subCategories.filter(
-          (el) => el.value === ticket.issueType.toString(),
-        )[0].name
-    : '-';
-
   const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
   const {
@@ -467,7 +458,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                             component={FormikSelectField}
                           />
                         </Grid>
-                        {ticket.issueType.toString() !==
+                        {ticket.issueType?.toString() !==
                           GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL.toString() && (
                           <Grid item xs={6}>
                             <Field
@@ -495,16 +486,16 @@ export const EditGrievancePage = (): React.ReactElement => {
                           </Box>
                         </Grid>
                       </BoxWithBorders>
-                      {(ticket.issueType.toString() ===
+                      {(ticket.issueType?.toString() ===
                         GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
-                        ticket.issueType.toString() ===
-                        GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
+                        ticket.issueType?.toString() ===
+                          GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                         <BoxWithBottomBorders>
                           <Grid item xs={6}>
                             <Box py={3}>
                               <LookUpPaymentRecord
                                 values={values}
-                                disabled={!!ticket.paymentRecord}
+                                disabled={Boolean(ticket.paymentRecord)}
                                 onValueChange={setFieldValue}
                               />
                             </Box>
