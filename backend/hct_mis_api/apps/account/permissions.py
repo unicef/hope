@@ -432,22 +432,4 @@ class PermissionRelayMutation(BaseMutationPermissionMixin, ClientIDMutation):
         return super().mutate_and_get_payload(root, info, **kwargs)
 
 
-class ViewPermissionsMixinBase:
-    def has_permissions(self):
-        return NotImplemented
 
-    def dispatch(self, request, *args, **kwargs):
-        if not self.has_permissions():
-            raise PermissionDenied
-        return super(ViewPermissionsMixinBase, self).dispatch(request, *args, **kwargs)
-
-
-class UploadFilePermissionMixin(ViewPermissionsMixinBase):
-    def has_permissions(self):
-        roles = self.request.user.user_roles.all()
-
-        return self.request.user.is_authenticated and any(
-            self.request.user.has_permission(
-                Permissions.UPLOAD_STORAGE_FILE.name, role.business_area
-            ) for role in roles
-        )
