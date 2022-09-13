@@ -479,7 +479,7 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
         grievance_tickets = chart_get_filtered_qs(
-            GrievanceTicket,
+            GrievanceTicket.objects,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
         )

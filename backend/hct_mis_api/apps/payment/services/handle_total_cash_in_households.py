@@ -6,6 +6,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord, PaymentPlan, Payment
 
 
 def handle_total_cash_in_specific_households(id_list):
+    # TODO MB ExtendedQuerySetSequence
     total_cash_received_payment_record_subquery = Subquery(
         PaymentRecord.objects.filter(household__pk=OuterRef("pk"))
         .values("household__pk")
@@ -19,13 +20,13 @@ def handle_total_cash_in_specific_households(id_list):
         .values("sum_delivered_quantity_usd")[:1]
     )
     total_cash_received_payment_subquery = Subquery(
-        Payment.objects.filter(payment_plan__status=PaymentPlan.Status.ACCEPTED, household__pk=OuterRef("pk"))
+        Payment.objects.filter(parent__status=PaymentPlan.Status.ACCEPTED, household__pk=OuterRef("pk"))
         .values("household__pk")
         .annotate(sum_delivered_quantity=Sum("delivered_quantity"))
         .values("sum_delivered_quantity")[:1]
     )
     total_cash_received_usd_payment_subquery = Subquery(
-        Payment.objects.filter(payment_plan__status=PaymentPlan.Status.ACCEPTED, household__pk=OuterRef("pk"))
+        Payment.objects.filter(parent__status=PaymentPlan.Status.ACCEPTED, household__pk=OuterRef("pk"))
         .values("household__pk")
         .annotate(sum_delivered_quantity_usd=Sum("delivered_quantity_usd"))
         .values("sum_delivered_quantity_usd")[:1]

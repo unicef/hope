@@ -1,8 +1,8 @@
 import json
 from decimal import Decimal
 
-from django.db.models import Case, CharField, Count, Q, Sum, Value, When
 from django.db.models.functions import Coalesce
+from django.db.models import Case, CharField, Count, Q, Sum, Value, When, F
 from django.shortcuts import get_object_or_404
 
 import graphene
@@ -20,6 +20,7 @@ from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.schema import LogEntryNode
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     chart_create_filter_query,
@@ -65,7 +66,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
-from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
+from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -381,6 +382,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
+    background_action_status = graphene.String()
 
     class Meta:
         model = PaymentPlan
@@ -397,7 +399,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.business_area.finance_review_number_required
 
     def resolve_payments_conflicts_count(self, info):
-        return self.payments.filter(payment_plan_hard_conflicted=True).count()
+        return self.payment_items.filter(payment_plan_hard_conflicted=True).count()
 
     def resolve_currency_name(self, info):
         return self.get_currency_display()
@@ -646,16 +648,18 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
+        # TODO MB refactor when PaymentVerification is adjusted to PaymentPlan
+
         filters = chart_filters_decoder(kwargs)
         status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
         payment_verifications = chart_get_filtered_qs(
-            PaymentVerification,
+            PaymentVerification.objects,
             year,
             business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
             additional_filters={
                 **chart_create_filter_query(
                     filters,
-                    program_id_path="payment_record__cash_plan__program__id",
+                    program_id_path="payment_record__parent__program__id",
                     administrative_area_path="payment_record__household__admin_area",
                 )
             },
@@ -678,7 +682,7 @@ class Query(graphene.ObjectType):
         samples_count = payment_verifications.distinct("payment_record").count()
         all_payment_records_for_created_verifications = (
             PaymentRecord.objects.filter(
-                cash_plan__in=payment_verifications.distinct("cash_plan_payment_verification__cash_plan").values_list(
+                parent__in=payment_verifications.distinct("cash_plan_payment_verification__cash_plan").values_list(
                     "cash_plan_payment_verification__cash_plan", flat=True
                 )
             )
@@ -698,10 +702,20 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_volume_by_delivery_mechanism(self, info, business_area_slug, year, **kwargs):
-        payment_records = get_payment_records_for_dashboard(
+        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
-        volume_by_delivery_type = payment_records.values("delivery_type").annotate(volume=Sum("delivered_quantity_usd"))
+
+        volume_by_delivery_type = (
+            payment_items_qs.values("delivery_type")
+            .order_by("delivery_type")
+            .annotate(volume=Sum("delivered_quantity_usd"))
+            .merge_by(
+                "delivery_type",
+                aggregated_fields=["volume"],
+            )
+        )
+
         labels = []
         data = []
         for volume_dict in volume_by_delivery_type:
@@ -713,27 +727,31 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
-        payment_records = get_payment_records_for_dashboard(
+        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs)
-        ).aggregate(
-            successful=Count("id", filter=~Q(status=PaymentRecord.STATUS_ERROR)),
-            unsuccessful=Count("id", filter=Q(status=PaymentRecord.STATUS_ERROR)),
+        )
+        payment_items_dict = payment_items_qs.aggregate(
+            successful=Count("id", filter=~Q(status=GenericPayment.STATUS_ERROR)),
+            unsuccessful=Count("id", filter=Q(status=GenericPayment.STATUS_ERROR)),
         )
 
         dataset = [
             {
                 "data": [
-                    payment_records.get("successful", 0),
-                    payment_records.get("unsuccessful", 0),
+                    payment_items_dict.get("successful", 0),
+                    payment_items_dict.get("unsuccessful", 0),
                 ]
             }
         ]
+
         return {"labels": ["Successful Payments", "Unsuccessful Payments"], "datasets": dataset}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
-        payment_records = get_payment_records_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs))
-        return {"total": payment_records.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
+        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs)
+        )
+        return {"total": payment_items_qs.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
@@ -741,18 +759,24 @@ class Query(graphene.ObjectType):
             return None
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
-        payment_records = get_payment_records_for_dashboard(
+        payment_items_ids = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
-        )
+        ).values_list("id", flat=True)
 
         admin_areas = (
             Area.objects.filter(
+                Q(household__paymentrecord__id__in=payment_items_ids) | Q(household__payment__id__in=payment_items_ids),
                 area_type__area_level=2,
-                household__paymentrecord__in=payment_records,
             )
             .distinct()
-            .annotate(total_transferred=Sum("household__payment_records__delivered_quantity_usd"))
-            .annotate(num_households=Count("household", distinct=True))
+            .annotate(
+                total_transferred_payment_records=Sum("household__paymentrecord__delivered_quantity_usd"),
+                total_transferred_payments=Sum("household__payment__delivered_quantity_usd"),
+            )
+            .annotate(
+                num_households=Count("household", distinct=True),
+                total_transferred=F("total_transferred_payments") + F("total_transferred_payment_records"),
+            )
         )
 
         if order_by:
@@ -775,25 +799,28 @@ class Query(graphene.ObjectType):
             }
             for item in admin_areas
         ]
+
         return {"data": data}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_total_transferred_cash_by_country(self, info, year, **kwargs):
-        payment_records = get_payment_records_for_dashboard(year, "global", {}, True)
+        payment_items_qs: ExtendedQuerySetSequence = get_payment_items_for_dashboard(year, "global", {}, True)
 
-        countries_and_amounts = (
-            payment_records.values("business_area__name")
-            .order_by("business_area__name")
+        countries_and_amounts: dict = (
+            payment_items_qs.select_related("business_area")
+            .values("business_area")
+            .order_by("business_area")
             .annotate(
                 total_delivered_cash=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH)
-                )
-            )
-            .annotate(
+                    "delivered_quantity_usd", filter=Q(delivery_type__in=GenericPayment.DELIVERY_TYPES_IN_CASH)
+                ),
                 total_delivered_voucher=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER)
-                )
+                    "delivered_quantity_usd", filter=Q(delivery_type__in=GenericPayment.DELIVERY_TYPES_IN_VOUCHER)
+                ),
+                business_area_name=F("business_area__name"),
             )
+            .order_by("business_area_name")
+            .merge_by("business_area_name", aggregated_fields=["total_delivered_cash", "total_delivered_voucher"])
         )
 
         labels = []
@@ -801,7 +828,7 @@ class Query(graphene.ObjectType):
         voucher_transferred = []
         total_transferred = []
         for data_dict in countries_and_amounts:
-            labels.append(data_dict.get("business_area__name"))
+            labels.append(data_dict.get("business_area_name"))
             cash_transferred.append(data_dict.get("total_delivered_cash") or 0)
             voucher_transferred.append(data_dict.get("total_delivered_voucher") or 0)
             total_transferred.append(cash_transferred[-1] + voucher_transferred[-1])
