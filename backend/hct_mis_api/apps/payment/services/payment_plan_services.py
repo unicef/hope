@@ -99,7 +99,7 @@ class PaymentPlanService:
         if not self.payment_plan.can_be_locked:
             raise GraphQLError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
-        self.payment_plan.payments.all().filter(payment_plan_hard_conflicted=True).update(excluded=True)
+        self.payment_plan.payment_items.all().filter(payment_plan_hard_conflicted=True).update(excluded=True)
         self.payment_plan.status_lock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
@@ -112,7 +112,7 @@ class PaymentPlanService:
         # TODO: clear FSP
         # TODO: clear entitlements
 
-        self.payment_plan.payments.all().update(excluded=False)
+        self.payment_plan.payment_items.all().update(excluded=False)
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
@@ -224,9 +224,9 @@ class PaymentPlanService:
 
             payments_to_create.append(
                 Payment(
-                    payment_plan=payment_plan,
+                    parent=payment_plan,
                     business_area=payment_plan.business_area,
-                    status=Payment.STATUS_NOT_DISTRIBUTED,  # TODO MB ?
+                    status=Payment.STATUS_NOT_DISTRIBUTED,
                     status_date=timezone.now(),
                     household=household,
                     head_of_household=household.head_of_household,
@@ -336,7 +336,7 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         if recreate_payments:
-            self.payment_plan.payments.all().delete()
+            self.payment_plan.payment_items.all().delete()
             self._create_payments(self.payment_plan)
 
         if recalculate_payments:

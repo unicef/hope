@@ -36,7 +36,7 @@ class PaymentRecordFilter(FilterSet):
 
     class Meta:
         fields = (
-            "cash_plan",
+            "parent",
             "household",
         )
         model = PaymentRecord
@@ -220,7 +220,7 @@ class CashPlanFilter(FilterSet):
     )
 
     def filter_queryset(self, queryset):
-        queryset = queryset.annotate(total_number_of_hh=Count("payment_records"))
+        queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
         return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):
@@ -244,9 +244,14 @@ class PaymentPlanFilter(FilterSet):
         fields = tuple()
         model = PaymentPlan
 
+    def filter_queryset(self, queryset):
+        queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
+        if not self.form.cleaned_data.get("order_by"):
+            queryset = queryset.order_by("unicef_id")
+        return super().filter_queryset(queryset)
+
     order_by = OrderingFilter(
         fields=(
-            "id",
             "unicef_id",
             "status",
             "total_households_count",
@@ -265,16 +270,21 @@ class PaymentPlanFilter(FilterSet):
 
 
 class PaymentFilter(FilterSet):
-    business_area = CharFilter(field_name="payment_plan__business_area__slug", required=True)
+    business_area = CharFilter(field_name="parent__business_area__slug", required=True)
     payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
 
     def payment_plan_id_filter(self, qs, name, value):
         payment_plan_id = decode_id_string(value)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-        q = Q(payment_plan=payment_plan)
+        q = Q(parent=payment_plan)
         if payment_plan.status != PaymentPlan.Status.OPEN:
             q &= ~Q(excluded=True)
         return qs.filter(q)
+
+    def filter_queryset(self, queryset):
+        if not self.form.cleaned_data.get("order_by"):
+            queryset = queryset.order_by("unicef_id")
+        return super().filter_queryset(queryset)
 
     class Meta:
         fields = tuple()
@@ -282,7 +292,7 @@ class PaymentFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
-            "id",
+            "unicef_id",
             "status",
             "household_id",
             "household__size",

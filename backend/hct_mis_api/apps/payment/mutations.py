@@ -800,12 +800,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
         collectors_in_target_population = Individual.objects.filter(
-            # TODO: access that like:
-            # id_in=payment_plan.payments.values_list("collector", flat=True)
-            id__in=IndividualRoleInHousehold.objects.filter(
-                household__in=payment_plan.target_population.households.only("id"),
-                role=ROLE_PRIMARY,
-            ).values_list("individual", flat=True)
+            id__in=payment_plan.payment_items.values_list("collector", flat=True)
         )
 
         query = Q(paymentchannel__delivery_mechanism__in=delivery_mechanisms_in_order)

@@ -1,4 +1,4 @@
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 from django.db.models.functions import Lower
 
 from django_filters import (
@@ -42,12 +42,17 @@ class ProgramFilter(FilterSet):
 
     def filter_queryset(self, queryset):
         queryset = queryset.annotate(
-            total_hh_count=Count(
-                "cashplan__payment_records__household",
-                filter=Q(cashplan__payment_records__delivered_quantity__gte=0),
+            total_payment_plans_hh_count=Count(
+                "cashplan__payment_items__household",
+                filter=Q(cashplan__payment_items__delivered_quantity__gte=0),
+                distinct=True,
+            ),
+            total_cash_plans_hh_count=Count(
+                "paymentplan__payment_items__household",
+                filter=Q(paymentplan__payment_items__delivered_quantity__gte=0),
                 distinct=True,
             )
-        )
+        ).annotate(total_hh_count=F("total_payment_plans_hh_count") + F("total_cash_plans_hh_count"))
         return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):

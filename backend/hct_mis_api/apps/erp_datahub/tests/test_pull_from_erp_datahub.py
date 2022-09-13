@@ -36,7 +36,7 @@ class TestPullDataFromErpDatahub(TestCase):
         cls.cash_plan_4 = CashPlanFactory(funds_commitment="111111", exchange_rate=None)
 
         cls.payment_record_1 = PaymentRecordFactory(
-            cash_plan=cls.cash_plan_1,
+            parent=cls.cash_plan_1,
             business_area=cls.cash_plan_1.business_area,
             entitlement_quantity=1000,
             entitlement_quantity_usd=None,
@@ -45,7 +45,7 @@ class TestPullDataFromErpDatahub(TestCase):
             household=household,
         )
         cls.payment_record_2 = PaymentRecordFactory(
-            cash_plan=cls.cash_plan_2,
+            parent=cls.cash_plan_2,
             business_area=cls.cash_plan_2.business_area,
             entitlement_quantity=2000,
             entitlement_quantity_usd=None,
@@ -54,7 +54,7 @@ class TestPullDataFromErpDatahub(TestCase):
             household=household,
         )
         cls.payment_record_3 = PaymentRecordFactory(
-            cash_plan=cls.cash_plan_3,
+            parent=cls.cash_plan_3,
             business_area=cls.cash_plan_3.business_area,
             entitlement_quantity=3000,
             entitlement_quantity_usd=None,
@@ -63,7 +63,7 @@ class TestPullDataFromErpDatahub(TestCase):
             household=household,
         )
         cls.payment_record_4 = PaymentRecordFactory(
-            cash_plan=cls.cash_plan_4,
+            parent=cls.cash_plan_4,
             business_area=cls.cash_plan_4.business_area,
             entitlement_quantity=1000,
             entitlement_quantity_usd=None,

@@ -67,7 +67,7 @@ class TestActionPaymentPlanMutation(APITestCase):
 
         cls.payment_plan = PaymentPlanFactory.create(business_area=cls.business_area, program=RealProgramFactory())
         cls.payment = PaymentFactory(
-            payment_plan=cls.payment_plan,
+            parent=cls.payment_plan,
         )
 
     @parameterized.expand(
