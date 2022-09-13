@@ -801,3 +801,5 @@ if PROFILING:
     INSTALLED_APPS.append("silk")
     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
     SILKY_PYTHON_PROFILER = True
+
+USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"
