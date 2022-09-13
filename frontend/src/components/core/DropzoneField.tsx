@@ -28,9 +28,13 @@ export function DropzoneField({
   onChange,
   loading,
   dontShowFilename,
+}: {
+  onChange: (acceptedFiles: File[]) => void;
+  loading: boolean;
+  dontShowFilename: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const onDrop = useCallback((acceptedFiles) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
     onChange(acceptedFiles);
   }, []);
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({

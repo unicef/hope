@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional
+from typing import Union
 
 from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
@@ -9,14 +9,13 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Q
-from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
+from hct_mis_api.apps.payment.utils import get_payment_cash_plan_items_sequence_qs
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -147,22 +146,19 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
 
     @staticmethod
-    def get_total_number_of_households_from_payments(payments_qs: models.QuerySet, payment_related_name: str) -> int:
+    def get_total_number_of_households_from_payments(qs: Union[models.QuerySet, ExtendedQuerySetSequence]) -> int:
         return (
-            payments_qs.filter(**{f"{payment_related_name}__delivered_quantity__gt": 0})
-            .distinct(f"{payment_related_name}__household__unicef_id")
-            .values_list(f"{payment_related_name}__household__unicef_id", flat=True)
-            .order_by(f"{payment_related_name}__household__unicef_id")
+            qs.filter(**{f"payment_items__delivered_quantity__gt": 0})
+            .distinct(f"payment_items__household__unicef_id")
+            .values_list(f"payment_items__household__unicef_id", flat=True)
+            .order_by(f"payment_items__household__unicef_id")
             .count()
         )
 
     @property
     def total_number_of_households(self) -> int:
-        if self.cashplan_set.exists():
-            return self.get_total_number_of_households_from_payments(self.cashplan_set.all(), "payment_records")
-        elif self.paymentplan_set.exists():
-            return self.get_total_number_of_households_from_payments(self.paymentplan_set.all(), "payments")
-        return 0
+        qs = ExtendedQuerySetSequence(self.paymentplan_set.all(), self.cashplan_set.all())
+        return self.get_total_number_of_households_from_payments(qs)
 
     @property
     def admin_areas_log(self):

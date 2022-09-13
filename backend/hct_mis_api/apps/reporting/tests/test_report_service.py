@@ -85,13 +85,13 @@ class TestGenerateReportService(TestCase):
             household=self.households[0],
             business_area=self.business_area,
             delivery_date="2020-01-01",
-            cash_plan=self.cash_plan_1,
+            parent=self.cash_plan_1,
         )
         PaymentRecordFactory(
             household=self.households[1],
             business_area=self.business_area,
             delivery_date="2020-01-01",
-            cash_plan=self.cash_plan_2,
+            parent=self.cash_plan_2,
         )
         PaymentVerificationFactory(cash_plan_payment_verification=self.cash_plan_verification_1)
         PaymentVerificationFactory(cash_plan_payment_verification=self.cash_plan_verification_2)

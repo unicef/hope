@@ -213,7 +213,7 @@ class GenerateReportContentHelpers:
 
         return (
             payment.ca_id,
-            payment.cash_plan.ca_id if payment.cash_plan else "",
+            payment.parent.ca_id if payment.parent else "",
             payment.status,
             payment.currency,
             payment.delivered_quantity,
@@ -355,7 +355,7 @@ class GenerateReportContentHelpers:
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
         if report.program:
-            filter_vars["household__paymentrecord__cash_plan__program"] = report.program
+            filter_vars["household__paymentrecord__parent__program"] = report.program
 
         return (
             Individual.objects.filter(**filter_vars)

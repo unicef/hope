@@ -37,8 +37,8 @@ class PullFromErpDatahubTask:
         payment_records_to_update = PaymentRecord.objects.filter(
             Q(delivered_quantity_usd__isnull=True, delivered_quantity__isnull=False)
             | Q(entitlement_quantity_usd__isnull=True, entitlement_quantity__isnull=False),
-            cash_plan__isnull=False,
-            cash_plan__exchange_rate__isnull=False,
+            parent__isnull=False,
+            parent__exchange_rate__isnull=False,
         )
 
         for payment_record in payment_records_to_update:
@@ -50,8 +50,8 @@ class PullFromErpDatahubTask:
                         get_quantity_in_usd(
                             amount=getattr(payment_record, usd_field.removesuffix("_usd")),
                             currency=payment_record.currency,
-                            exchange_rate=payment_record.cash_plan.exchange_rate,
-                            currency_exchange_date=payment_record.cash_plan.currency_exchange_date,
+                            exchange_rate=payment_record.parent.exchange_rate,
+                            currency_exchange_date=payment_record.parent.currency_exchange_date,
                         ),
                     )
 
