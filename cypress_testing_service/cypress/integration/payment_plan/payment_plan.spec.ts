@@ -2,11 +2,13 @@ import { When, Then, Given, And } from 'cypress-cucumber-preprocessor/steps';
 import {
   fillProgramForm,
   fillTargetingForm,
+  getIndividualsFromRdiDetails,
   uniqueSeed,
 } from '../../procedures/procedures';
 
 let programName;
 let targetPopulationName;
+let individualIds;
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -66,6 +68,27 @@ Given('There are individuals and households imported', () => {
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
   cy.get('div').contains('MERGED');
+  cy.get('button > span').contains('Individuals').click({ force: true });
+  individualIds = getIndividualsFromRdiDetails(cy, 3);
+});
+
+Given('Each imported individual has a payment channel', () => {
+  individualIds.forEach((individualId) => {
+    cy.visit('/api/unicorn/payment/paymentchannel/add/');
+    cy.get('#id_individual').select(individualId);
+    cy.get('#id_delivery_mechanism').select('Transfer');
+    cy.get('input[name="_save"]').click();
+  });
+});
+
+Given('There are steficon rules provided', () => {
+  cy.visit('/api/unicorn/steficon/rulecommit/add/');
+  cy.get('#id_definition').clear().type('result.value=100');
+  cy.get('input[name="is_release"]').click();
+  cy.get('input[name="enabled"]').click();
+  cy.get('input[name="version"]').type('1');
+  cy.get('input[name="affected_fields"]').type('[]');
+  cy.get('input[name="_save"]').click();
 });
 
 Given('I have an active program', () => {
