@@ -208,6 +208,25 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'deliveredQuantityUsd': 100.0,
                         'entitlementQuantity': 100.0,
                         'entitlementQuantityUsd': 200.0,
+                        'excluded': False,
+                        'parent': {
+                            'unicefId': 'PP-01'
+                        },
+                        'paymentPlanHardConflicted': False,
+                        'paymentPlanHardConflictedData': [
+                        ],
+                        'paymentPlanSoftConflicted': False,
+                        'paymentPlanSoftConflictedData': [
+                        ],
+                        'unicefId': 'RCPT-0060-20-0.000.001'
+                    }
+                },
+                {
+                    'node': {
+                        'deliveredQuantity': 50.0,
+                        'deliveredQuantityUsd': 100.0,
+                        'entitlementQuantity': 100.0,
+                        'entitlementQuantityUsd': 200.0,
                         'excluded': True,
                         'parent': {
                             'unicefId': 'PP-01'
@@ -224,25 +243,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_open_payment_plan
                         'paymentPlanSoftConflictedData': [
                         ],
                         'unicefId': 'RCPT-0060-20-0.000.002'
-                    }
-                },
-                {
-                    'node': {
-                        'deliveredQuantity': 50.0,
-                        'deliveredQuantityUsd': 100.0,
-                        'entitlementQuantity': 100.0,
-                        'entitlementQuantityUsd': 200.0,
-                        'excluded': False,
-                        'parent': {
-                            'unicefId': 'PP-01'
-                        },
-                        'paymentPlanHardConflicted': False,
-                        'paymentPlanHardConflictedData': [
-                        ],
-                        'paymentPlanSoftConflicted': False,
-                        'paymentPlanSoftConflictedData': [
-                        ],
-                        'unicefId': 'RCPT-0060-20-0.000.001'
                     }
                 }
             ],
