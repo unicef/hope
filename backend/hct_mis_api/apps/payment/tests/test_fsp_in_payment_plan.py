@@ -278,6 +278,9 @@ class TestFSPSetup(APITestCase):
         payment_plan = PaymentPlanFactory(
             total_households_count=3, target_population=target_population, status=PaymentPlan.Status.LOCKED
         )
+        PaymentFactory(parent=payment_plan, collector=self.individuals_1[0])
+        PaymentFactory(parent=payment_plan, collector=self.individuals_2[0])
+        PaymentFactory(parent=payment_plan, collector=self.individuals_3[0])
 
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         choose_dms_mutation_variables_mutation_variables = dict(
@@ -709,6 +712,7 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
         # no payment channels
 
         payment_plan_setup(self)
+        PaymentFactory(parent=self.payment_plan, collector=self.individuals_4[0])
 
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
@@ -756,6 +760,7 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
         )
 
         payment_plan_setup(self)
+        PaymentFactory(parent=self.payment_plan, collector=self.individuals_4[0])
 
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
@@ -899,7 +904,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
         assert data[2]["volumeUsd"] == 0
 
         PaymentFactory(
-            payment_plan=self.payment_plan,
+            parent=self.payment_plan,
             financial_service_provider=self.bank_of_america_fsp,
             collector=self.individuals_2[0],
             assigned_payment_channel=self.payment_channel_2_cash,
@@ -911,7 +916,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             excluded=False,
         )
         PaymentFactory(
-            payment_plan=self.payment_plan,
+            parent=self.payment_plan,
             financial_service_provider=self.santander_fsp,
             collector=self.individuals_3[0],
             assigned_payment_channel=self.payment_channel_3_transfer,

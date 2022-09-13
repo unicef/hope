@@ -49,7 +49,7 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
     def test_sample_size_in_manual_verification_plan(self):
         cash_plan = CashPlanFactory()
         PaymentRecordFactory(
-            cash_plan=cash_plan,
+            parent=cash_plan,
             business_area=self.business_area,
             household=self.household,
             head_of_household_id=self.individuals[0].id,
