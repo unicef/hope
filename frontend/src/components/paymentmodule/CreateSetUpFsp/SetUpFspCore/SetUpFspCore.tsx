@@ -255,6 +255,7 @@ export const SetUpFspCore = ({
                                       fsp: '',
                                     });
                                   }}
+                                  data-cy='button-add-delivery-mechanism'
                                 >
                                   {t('Add Delivery Mechanism')}
                                 </Button>

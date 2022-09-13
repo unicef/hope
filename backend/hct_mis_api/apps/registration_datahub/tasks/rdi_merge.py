@@ -287,9 +287,6 @@ class RdiMergeTask:
                         id=registration_data_import_id,
                     )
 
-                    if not obj_hct.can_be_merged():
-                        return
-
                     obj_hub = RegistrationDataImportDatahub.objects.get(
                         hct_id=registration_data_import_id,
                     )

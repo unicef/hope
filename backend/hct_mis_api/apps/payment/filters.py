@@ -256,6 +256,7 @@ class PaymentPlanFilter(FilterSet):
             "total_undelivered_quantity",
             "dispersion_start_date",
             "dispersion_end_date",
+            "created_at",
         )
     )
 
