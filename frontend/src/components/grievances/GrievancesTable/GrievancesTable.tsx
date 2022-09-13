@@ -106,7 +106,6 @@ export const GrievancesTable = ({
   const issueTypeChoicesData = choicesData.grievanceTicketIssueTypeChoices;
   const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
-  console.log('issueTypeChoicesData',issueTypeChoicesData)
   const currentUserId = currentUserData.me.id;
 
   const getCanViewDetailsOfTicket = (
