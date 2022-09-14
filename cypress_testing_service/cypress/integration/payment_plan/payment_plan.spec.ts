@@ -270,3 +270,24 @@ When("I lock the FSPs", () => {
 Then("I should see that the status is FSP Locked", () => {
   cy.get("[data-cy='status-container']").contains("FSP Locked")
 })
+
+When("I send the Payment Plan for approval", () => {
+
+})
+
+Then("I see the acceptance process stepper", () => {
+
+})
+
+When("I approve the Payment Plan", () => {})
+
+Then("I see the Payment Plan as in authorization", () => {})
+
+When("I authorize the Payment Plan", () => {})
+
+Then("I see the Payment Plan as in review", () => {})
+
+When("I approve the Payment Plan", () => {})
+
+Then("I see the Payment Plan as accepted", () => {})
+  
