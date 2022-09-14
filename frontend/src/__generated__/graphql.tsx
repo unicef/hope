@@ -9989,7 +9989,10 @@ export type AllPaymentsForTableQuery = (
         )>>>, collector: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'fullName'>
-        ) }
+        ), financialServiceProvider: Maybe<(
+          { __typename?: 'FinancialServiceProviderNode' }
+          & Pick<FinancialServiceProviderNode, 'id' | 'name'>
+        )> }
       )> }
     )>> }
   )> }
@@ -18160,6 +18163,10 @@ export const AllPaymentsForTableDocument = gql`
           fullName
         }
         hasPaymentChannel
+        financialServiceProvider {
+          id
+          name
+        }
       }
     }
   }

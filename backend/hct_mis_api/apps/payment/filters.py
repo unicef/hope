@@ -296,6 +296,7 @@ class PaymentFilter(FilterSet):
             "assigned_payment_channel",
             "entitlement_quantity_usd",
             "delivered_quantity",
+            "financial_service_provider__name",
         )
     )
 
@@ -325,7 +326,7 @@ class PaymentFilter(FilterSet):
                 default=Value(""),
                 output_field=CharField(),
             )
-        )
+        ).select_related("financial_service_provider")
         if not self.form.cleaned_data.get("order_by"):
             queryset = queryset.order_by("unicef_id")
 
