@@ -293,7 +293,7 @@ When("I authorize the Payment Plan", () => {
 })
 
 Then("I see the Payment Plan as in review", () => {
-  cy.get('[data-cy="status-container"]').contains('In review');
+  cy.get('[data-cy="status-container"]').contains('In Review');
 })
 
 When("I finalize the Payment Plan", () => {

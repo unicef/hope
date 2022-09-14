@@ -228,6 +228,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Se
         <a
           aria-disabled="false"
           class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+          data-cy="button-set-up-fsp"
           href="/afghanistan/payment-module/payment-plans/undefined/setup-fsp/create"
           role="button"
           tabindex="0"

@@ -1,51 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`] = `
-<div>
-  <div
-    class="sc-bdVaJa ksQzqc"
-  >
-    <div
-      class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
-    >
-      <div
-        class="MuiBox-root MuiBox-root-11 sc-jKJlTe hdnGZH"
-      >
-        <h6
-          class="MuiTypography-root MuiTypography-h6"
-          data-cy="table-title"
-        >
-          Payments List
-        </h6>
-      </div>
-      <div
-        class="sc-ifAKCX dUzfWD"
-        data-cy="loading-container"
-      >
-        <div
-          class="MuiCircularProgress-root MuiCircularProgress-colorPrimary MuiCircularProgress-indeterminate"
-          role="progressbar"
-          style="width: 40px; height: 40px;"
-        >
-          <svg
-            class="MuiCircularProgress-svg"
-            viewBox="22 22 44 44"
-          >
-            <circle
-              class="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate"
-              cx="44"
-              cy="44"
-              fill="none"
-              r="20.2"
-              stroke-width="3.6"
-            />
-          </svg>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-`;
+exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`] = `<div />`;
+
+exports[`containers/tables/paymentmodule/PaymentsTable should render loading 2`] = `<div />`;
 
 exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1`] = `
 <div>
