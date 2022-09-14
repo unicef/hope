@@ -174,7 +174,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         }
         model = GrievanceTicket
 
-    order_by = CustomOrderingFilter(
+    order_by = OrderingFilter(
         fields=(
             "unicef_id",
             "status",
