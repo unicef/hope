@@ -446,10 +446,8 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         if arg("payment_record") is not None:
             payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(arg("payment_record")))
 
-
         if arg("priority") is not None:
             grievance_ticket.priority = arg("priority")
-
 
         if arg("urgency") is not None:
             grievance_ticket.urgency = arg("urgency")

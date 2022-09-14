@@ -53,6 +53,7 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         "priority",
         "urgency",
         "grievance_type",
+        "grievance_status",
         "business_area",
     )
 
