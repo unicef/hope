@@ -140,6 +140,10 @@ class HouseholdFilter(FilterSet):
         return self._search_db(qs, value)
 
     def _search_db(self, qs, value):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(qs)
+        logger.info(value)
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
         else:
@@ -153,7 +157,6 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(head_of_household__middle_name__istartswith=value)
             inner_query |= Q(head_of_household__family_name__istartswith=value)
             inner_query |= Q(residence_status__istartswith=value)
-            inner_query |= Q(admin_area__title__istartswith=value)
             inner_query |= Q(admin_area__name__istartswith=value)
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
