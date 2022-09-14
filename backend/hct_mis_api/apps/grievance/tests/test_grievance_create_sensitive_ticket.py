@@ -67,13 +67,13 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
             household=cls.household,
             full_name=cls.individuals[0].full_name,
             business_area=cls.business_area,
-            cash_plan=cash_plan,
+            parent=cash_plan,
         )
         cls.second_payment_record = PaymentRecordFactory(
             household=cls.household,
             full_name=f"{cls.individuals[0].full_name} second Individual",
             business_area=cls.business_area,
-            cash_plan=cash_plan,
+            parent=cash_plan,
         )
 
     @parameterized.expand(

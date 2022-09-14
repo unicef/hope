@@ -4,9 +4,10 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
-snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_0_with_permission 1'] = {
+snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_with_programs_quantity_0_with_permission 1'] = {
     'data': {
         'household': {
             'programsWithDeliveredQuantity': [
@@ -15,12 +16,12 @@ snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_0
                     'quantity': [
                         {
                             'currency': 'USD',
-                            'totalDeliveredQuantity': '450.00'
+                            'totalDeliveredQuantity': '483.00'
                         },
                         {
                             'currency': 'AFG',
-                            'totalDeliveredQuantity': '900.00',
-                        },
+                            'totalDeliveredQuantity': '1033.00'
+                        }
                     ]
                 },
                 {
@@ -28,17 +29,29 @@ snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_0
                     'quantity': [
                         {
                             'currency': 'USD',
-                            'totalDeliveredQuantity': '900.00',
-                        },
+                            'totalDeliveredQuantity': '1022.00'
+                        }
                     ]
-
+                },
+                {
+                    'name': 'Test program THREE',
+                    'quantity': [
+                        {
+                            'currency': 'USD',
+                            'totalDeliveredQuantity': '166.00'
+                        },
+                        {
+                            'currency': 'PLN',
+                            'totalDeliveredQuantity': '666.00'
+                        }
+                    ]
                 }
             ]
         }
     }
 }
 
-snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_1_without_permission 1'] = {
+snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_with_programs_quantity_1_without_permission 1'] = {
     'data': {
         'household': None
     },

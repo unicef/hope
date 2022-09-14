@@ -201,7 +201,7 @@ class PullFromDatahubTask:
             payment_record_args["service_provider"] = ServiceProvider.objects.get(
                 ca_id=dh_payment_record.service_provider_ca_id
             )
-            payment_record_args["cash_plan"] = CashPlan.objects.get(ca_id=dh_payment_record.cash_plan_ca_id)
+            payment_record_args["parent"] = CashPlan.objects.get(ca_id=dh_payment_record.cash_plan_ca_id)
             (
                 payment_record,
                 created,
@@ -214,8 +214,8 @@ class PullFromDatahubTask:
                         get_quantity_in_usd(
                             amount=getattr(payment_record, usd_field.removesuffix("_usd")),
                             currency=payment_record.currency,
-                            exchange_rate=payment_record.cash_plan.exchange_rate,
-                            currency_exchange_date=payment_record.cash_plan.currency_exchange_date,
+                            exchange_rate=payment_record.parent.exchange_rate,
+                            currency_exchange_date=payment_record.parent.currency_exchange_date,
                             exchange_rates_client=self.exchange_rates_client,
                         ),
                     )
@@ -223,8 +223,8 @@ class PullFromDatahubTask:
             except Exception as e:
                 logger.exception(e)
             household_ids.append(payment_record.household_id)
-            if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
-                payment_record.household.programs.add(payment_record.cash_plan.program)
+            if payment_record.household and payment_record.parent and payment_record.parent.program:
+                payment_record.household.programs.add(payment_record.parent.program)
         handle_total_cash_in_specific_households(household_ids)
 
     def copy_service_providers(self, session):

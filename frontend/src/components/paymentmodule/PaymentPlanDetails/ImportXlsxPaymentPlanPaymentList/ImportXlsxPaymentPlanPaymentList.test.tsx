@@ -14,6 +14,41 @@ describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPayme
         <ImportXlsxPaymentPlanPaymentList paymentPlan={fakeApolloPaymentPlan} />
       </MockedProvider>,
     );
+
+    const buttonImport = container.querySelector('[data-cy="button-import"]');
+    expect(buttonImport).toBeInTheDocument();
+
+    act(() => {
+      buttonImport.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    const inputFile = document.querySelector<HTMLInputElement>('input[type="file"]');
+    const buttonImportSubmit = document.querySelector('[data-cy="button-import-submit"]');
+    const buttonClose = document.querySelector('[data-cy="close-button"]');
+
+    expect(inputFile).toBeInTheDocument();
+    expect(buttonImportSubmit).toBeInTheDocument();
+    expect(buttonClose).toBeInTheDocument();
+
+    const file = new File([new ArrayBuffer(210715200)], 'sample.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    Object.defineProperty(inputFile, 'files', {
+      value: [file],
+    });
+
+    act(() => {
+      inputFile.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    act(() => {
+      buttonImportSubmit.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    act(() => {
+      buttonClose.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
     await act(() => wait(0)); // wait for response
 
     expect(container).toMatchSnapshot();

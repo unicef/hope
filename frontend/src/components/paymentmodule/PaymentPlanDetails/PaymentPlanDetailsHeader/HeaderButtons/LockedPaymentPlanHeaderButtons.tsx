@@ -22,11 +22,8 @@ export const LockedPaymentPlanHeaderButtons = ({
   const {
     mutatePaymentPlanAction: unlock,
     loading: loadingUnlock,
-  } = usePaymentPlanAction(
-    Action.Unlock,
-    id,
-    () => showMessage(t('Payment Plan has been unlocked.')),
-    () => showMessage(t('Error during unlocking Payment Plan.')),
+  } = usePaymentPlanAction(Action.Unlock, id, () =>
+    showMessage(t('Payment Plan has been unlocked.')),
   );
 
   return (

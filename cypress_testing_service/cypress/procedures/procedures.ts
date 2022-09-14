@@ -1,3 +1,5 @@
+export const uniqueSeed = Date.now().toString();
+
 export const fillProgramForm = (cy) => {
   const programName = `test program ${uniqueSeed}`
   cy.get('[data-cy="input-programme-name"]').type(programName);
@@ -61,5 +63,3 @@ export const fillTargetingForm = (cy, programName, seed) => {
 
   return targetPopulationName
 };
-
-export const uniqueSeed = Date.now().toString();

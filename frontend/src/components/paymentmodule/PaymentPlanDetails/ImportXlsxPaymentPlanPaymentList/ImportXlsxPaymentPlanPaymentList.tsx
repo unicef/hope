@@ -17,6 +17,7 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   ImportXlsxPpListMutation,
   PaymentPlanQuery,
+  PaymentPlanStatus,
   useImportXlsxPpListMutation,
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
@@ -39,7 +40,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
 }: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
-  const [fileToImport, setFileToImport] = useState(null);
+  const [fileToImport, setFileToImport] = useState<File | null>(null);
 
   const { t } = useTranslation();
 
@@ -88,6 +89,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           color='primary'
           data-cy='button-import'
           onClick={() => setOpenImport(true)}
+          disabled={paymentPlan.status !== PaymentPlanStatus.Locked}
         >
           {t('Import XLSX')}
         </Button>
@@ -123,7 +125,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               }}
             />
             {error?.graphQLErrors?.length || xlsxErrors?.length ? (
-              <Error>
+              <Error data-cy="error-list">
                 <p>Errors</p>
                 {error
                   ? error.graphQLErrors.map((x) => <p>{x.message}</p>)
