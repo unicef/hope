@@ -830,7 +830,7 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
 
         if grievance_tickets.exists():
             grievance_tickets.update(assigned_to=assigned_to)
-            bulk_update_assigned_to(grievance_tickets)
+            bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id)
 
         return cls(grievance_tickets=GrievanceTicket.objects.filter(id__in=grievance_tickets_ids))
 
