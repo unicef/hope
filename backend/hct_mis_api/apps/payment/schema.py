@@ -299,14 +299,24 @@ class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_payment_plan_hard_conflicted_data(self, info):
+    def resolve_payment_plan_hard_conflicted_data(self, info) -> list:
+        if self.payment_plan.status != PaymentPlan.Status.OPEN:
+            return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_hard_conflicted_data", []))
 
-    def resolve_payment_plan_soft_conflicted_data(self, info):
+    def resolve_payment_plan_soft_conflicted_data(self, info) -> list:
+        if self.payment_plan.status != PaymentPlan.Status.OPEN:
+            return list()
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
 
-    def resolve_has_payment_channel(self, info):
-        return self.assigned_payment_channel is not None
+    def resolve_has_payment_channel(self, info) -> bool:
+        return self.collector.payment_channels.exists()
+
+    def resolve_payment_plan_hard_conflicted(self, info) -> bool:
+        return self.payment_plan.status == PaymentPlan.Status.OPEN and self.payment_plan_hard_conflicted
+
+    def resolve_payment_plan_soft_conflicted(self, info) -> bool:
+        return self.payment_plan.status == PaymentPlan.Status.OPEN and self.payment_plan_soft_conflicted
 
     @classmethod
     def _parse_pp_conflict_data(cls, conflicts_data):
@@ -376,9 +386,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     start_date = graphene.Date()
     end_date = graphene.Date()
     currency_name = graphene.String()
-    has_payment_list_xlsx_file = graphene.Boolean()
-    has_payment_list_per_fsp_zip_file = graphene.Boolean()
-    imported_xlsx_file_name = graphene.String()
+    has_payment_list_export_file = graphene.Boolean()
+    imported_file_name = graphene.String()
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
@@ -407,14 +416,11 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_delivery_mechanisms(self, info):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
-    def resolve_has_payment_list_xlsx_file(self, info):
-        return self.has_payment_list_xlsx_file
+    def resolve_has_payment_list_export_file(self, info):
+        return self.has_export_file
 
-    def resolve_has_payment_list_per_fsp_zip_file(self, info):
-        return self.has_payment_list_per_fsp_zip_file
-
-    def resolve_imported_xlsx_file_name(self, info):
-        return self.imported_xlsx_file.file.name if self.imported_xlsx_file else ""
+    def resolve_imported_file_name(self, info):
+        return self.imported_file.file.name if self.imported_file else ""
 
     def resolve_volume_by_delivery_mechanism(self, info):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")

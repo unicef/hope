@@ -190,7 +190,6 @@ class PaymentPlanAdmin(HOPEModelAdminBase):
 class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = ("unicef_id", "household", "status", "parent")
     list_filter = (
-        ("unicef_id", AutoCompleteFilter),
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("parent", AutoCompleteFilter),
@@ -226,6 +225,7 @@ class PaymentChannelAdmin(HOPEModelAdminBase):
 
     def delivery_mechanism_display_name(self, obj):
         return obj.delivery_mechanism
+
 
 @admin.register(FinancialServiceProviderXlsxTemplate)
 class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):

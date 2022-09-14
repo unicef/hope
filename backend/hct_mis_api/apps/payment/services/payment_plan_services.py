@@ -206,6 +206,9 @@ class PaymentPlanService:
 
             if approval_type == Approval.FINANCE_REVIEW:
                 self.payment_plan.status_mark_as_reviewed()
+                # remove imported and export files
+                self.payment_plan.remove_export_file()
+                self.payment_plan.remove_imported_file()
 
             if approval_type == Approval.REJECT:
                 self.payment_plan.status_reject()
