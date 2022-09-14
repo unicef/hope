@@ -1,6 +1,10 @@
+import logging
+
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from django.conf import settings
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk
 
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.account.models import User
@@ -9,6 +13,27 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.core.models import BusinessArea
 
 from .models import GrievanceTicket
+
+logger = logging.getLogger(__name__)
+
+INDEX = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
+
+
+def bulk_update_assigned_to(grievance_tickets):
+    es = Elasticsearch("http://elasticsearch:9200")
+
+    documents_to_update = []
+    for ticket in grievance_tickets:
+        document = {
+            **GrievanceTicketDocument().prepare(ticket),
+            "_id": ticket.id,
+            "assigned_to": {
+                "id": str(grievance_tickets.assigned_to_id)
+            }
+        }
+        documents_to_update.append(document)
+        bulk(es, documents_to_update, index=INDEX)
+    logger.info("GrievanceDocuments have been updated.")
 
 
 @registry.register_document
@@ -53,7 +78,7 @@ class GrievanceTicketDocument(Document):
         related_models = [Area, BusinessArea, Household, Individual, RegistrationDataImport, User]
 
     class Index:
-        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
+        name = INDEX
         settings = settings.ELASTICSEARCH_BASE_SETTINGS
 
     def get_instances_from_related(self, related_instance):
