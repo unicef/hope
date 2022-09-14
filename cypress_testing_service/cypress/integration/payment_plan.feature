@@ -4,9 +4,10 @@ Feature: Create Payment Plan
     Background:
         Given I am authenticated
         Given There are individuals and households imported
+        Given Each imported individual has a payment channel
         Given I have an active program
         Given I have target population in ready status
-    # Given There are steficon rules provided # via admin panel
+        Given There are steficon rules provided
     # Given I am sure that my business area is payment plan applicable
     # query businessAreaData
 
