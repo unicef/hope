@@ -294,7 +294,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
-        subCategory: values.subCategory,
+        issueType: values.issueType,
         linkedTickets: values.selectedRelatedTickets,
       },
     },
