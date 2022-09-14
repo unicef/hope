@@ -22,23 +22,24 @@ Feature: Create Payment Plan
         Then I should see the Payment Plan details page
         When I lock the Payment Plan
         Then I see the entitlements input
+        # And I see that all individuals have proper payment channels
         When I choose the steficon rule
         And I apply the steficon rule
         Then I see the entitlements calculated
         And I am able to set up FSPs
         Then I should see the Set up FSP page
-        When I select only one Delivery Mechanism
-        Then I should see the warning
-        When I select more Delivery Mechanisms
+        When I select the delivery mechanisms
         Then I should be able to assign FSPs
-
+        When I select the FSPs and save
+        Then I should see volumes by delivery mechanisms
+        When I lock the FSPs
+        Then I should see that the status is FSP Locked
 
 
 
 
 #TODO
 
-# Then I see the volumes calculated
 # When I lock the FSPs
 # Then I should see the needed approvals etc
 # When I approve, review, etc

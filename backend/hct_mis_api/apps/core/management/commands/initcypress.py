@@ -1,7 +1,19 @@
 from django.core.management import BaseCommand, call_command
 from django.db import connections
 
+from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.core.management.sql import sql_drop_tables
+
+
+def create_fsps():
+    for delivery_mechanism in GenericPayment.DELIVERY_TYPE_CHOICE:
+        dm = delivery_mechanism[0]
+        FinancialServiceProviderFactory(
+            name=f"Test FSP {dm}",
+            delivery_mechanisms=[dm],
+            distribution_limit=None,
+        )
 
 
 class Command(BaseCommand):
@@ -30,6 +42,8 @@ class Command(BaseCommand):
         call_command(
             "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/data.json", database="registration_datahub"
         )
+
+        create_fsps()
 
         call_command("search_index", "--rebuild", "-f")
 
