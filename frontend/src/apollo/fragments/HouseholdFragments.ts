@@ -139,7 +139,7 @@ export const householdDetailed = gql`
         node {
           id
           fullName
-          cashPlan {
+          parent {
             id
             totalPersonsCovered
             program {

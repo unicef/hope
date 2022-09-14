@@ -73,7 +73,7 @@ export const CashPlan = gql`
         name
         caId
       }
-      paymentRecords {
+      paymentItems {
         totalCount
         edgeCount
         edges {
