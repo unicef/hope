@@ -5,7 +5,8 @@ import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
-  ChoiceObject, PaymentPlanBackgroundActionStatus,
+  ChoiceObject,
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
