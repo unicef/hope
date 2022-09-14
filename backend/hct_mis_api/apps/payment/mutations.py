@@ -722,8 +722,8 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
     @classmethod
     def export_action(cls, payment_plan: PaymentPlan, user) -> PaymentPlan:
-        if payment_plan.status not in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]:
-            msg = "You can only export Payment List for LOCKED/ACCEPTED Payment Plan"
+        if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
+            msg = "You can only export Payment List for LOCKED Payment Plan"
             logger.error(msg)
             raise GraphQLError(msg)
 
@@ -759,6 +759,11 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             logger.error(msg)
             raise GraphQLError(msg)
 
+        if not payment_plan.all_active_payments:
+            msg = "Export is not impossible because Payment list is empty"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
         return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user=user)
 
 
@@ -773,7 +778,7 @@ def create_insufficient_delivery_mechanisms_message(collectors_that_cant_be_paid
     )
     if (
         GenericPayment.DELIVERY_TYPE_CASH not in delivery_mechanisms_in_order
-        and collectors_that_cant_be_paid.filter(paymentchannel__isnull=True).exists()
+        and collectors_that_cant_be_paid.filter(payment_channels__isnull=True).exists()
     ):
         needed_delivery_mechanisms.append(GenericPayment.DELIVERY_TYPE_CASH)
     return f"Delivery mechanisms that may be needed: {', '.join(needed_delivery_mechanisms)}."
@@ -803,9 +808,9 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             id__in=payment_plan.payment_items.values_list("collector", flat=True)
         )
 
-        query = Q(paymentchannel__delivery_mechanism__in=delivery_mechanisms_in_order)
+        query = Q(payment_channels__delivery_mechanism__in=delivery_mechanisms_in_order)
         if GenericPayment.DELIVERY_TYPE_CASH in delivery_mechanisms_in_order:
-            query |= Q(paymentchannel__isnull=True)
+            query |= Q(payment_channels__isnull=True)
 
         collectors_that_can_be_paid = collectors_in_target_population.filter(query).distinct()
         collectors_that_cant_be_paid = collectors_in_target_population.exclude(id__in=collectors_that_can_be_paid)
@@ -934,11 +939,9 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
         payment_plan.background_action_status_xlsx_importing_entitlements()
         payment_plan.save()
 
-        new_xlsx_file = import_service.remove_old_and_create_new_import_xlsx(info.context.user)
-        payment_plan.imported_xlsx_file = new_xlsx_file
-        payment_plan.save()
+        import_service.create_import_xlsx_file(info.context.user)
 
-        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id, new_xlsx_file.id)
+        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id)
 
         return cls(payment_plan, import_service.errors)
 

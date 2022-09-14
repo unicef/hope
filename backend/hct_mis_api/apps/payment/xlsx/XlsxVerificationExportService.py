@@ -121,7 +121,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
 
-    def get_context(self, user) -> dict:
+    def get_email_context(self, user) -> dict:
         payment_verification_id = encode_id_base64(self.cashplan_payment_verification.pk, "CashPlanPaymentVerification")
         link = self.get_link(reverse("download-cash-plan-payment-verification", args=[payment_verification_id]))
 

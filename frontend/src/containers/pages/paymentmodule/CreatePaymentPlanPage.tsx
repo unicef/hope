@@ -33,6 +33,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     loading: loadingTargetPopulations,
   } = useAllTargetPopulationsQuery({
     variables: { businessArea, paymentPlanApplicable: true },
+    fetchPolicy: 'cache-and-network',
   });
 
   const {
@@ -64,7 +65,9 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
           ),
         '',
       ),
-    currency: Yup.string().nullable().required(t('Currency is required')),
+    currency: Yup.string()
+      .nullable()
+      .required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),

@@ -276,24 +276,20 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     male_adults_count = models.PositiveSmallIntegerField(default=0)
     total_households_count = models.PositiveSmallIntegerField(default=0)
     total_individuals_count = models.PositiveSmallIntegerField(default=0)
-    xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
-    imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-    export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-    export_per_fsp_zip_file = models.ForeignKey(
-        FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE
-    )
+    imported_file_date = models.DateTimeField(blank=True, null=True)
+    imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
+    export_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     steficon_rule = models.ForeignKey(
-        RuleCommit,
-        null=True,
-        on_delete=models.PROTECT,
-        related_name="payment_plans",
-        blank=True,
+        RuleCommit, null=True, on_delete=models.PROTECT, related_name="payment_plans", blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
+
+    def __str__(self):
+        return self.unicef_id
 
     @transition(
         field=background_action_status,
@@ -515,24 +511,26 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         )
 
     @property
-    def has_payment_list_xlsx_file(self):
-        return bool(self.export_xlsx_file)
+    def has_export_file(self):
+        return bool(self.export_file)
 
     @property
-    def has_payment_list_per_fsp_zip_file(self):
-        return bool(self.export_per_fsp_zip_file)
-
-    @property
-    def xlsx_payment_list_file_link(self):
-        if self.export_xlsx_file:
-            return self.export_xlsx_file.file.url
+    def payment_list_export_file_link(self):
+        if self.export_file:
+            return self.export_file.file.url
         return None
 
-    @property
-    def xlsx_payment_list_per_fsp_file_link(self):
-        if self.export_per_fsp_zip_file:
-            return self.export_per_fsp_zip_file.file.url
-        return None
+    def remove_export_file(self):
+        if self.export_file:
+            self.export_file.file.delete(save=False)
+            self.export_file.delete()
+            self.export_file = None
+
+    def remove_imported_file(self):
+        if self.imported_file:
+            self.imported_file.file.delete(save=False)
+            self.imported_file.delete()
+            self.imported_file = None
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
@@ -714,7 +712,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
 
 
 class PaymentChannel(TimeStampedUUIDModel):
-    individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
+    individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="payment_channels")
     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, null=True)
     delivery_data = JSONField(default=dict, blank=True)
 
@@ -877,7 +875,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
-    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
+    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.PROTECT, null=True)  # TODO: on_delete=CASCADE ?
 
     objects = PaymentManager()
 

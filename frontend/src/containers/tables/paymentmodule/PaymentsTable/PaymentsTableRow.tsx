@@ -1,6 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -8,7 +8,11 @@ import { BlackLink } from '../../../../components/core/BlackLink';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { formatCurrency, renderSomethingOrDash } from '../../../../utils/utils';
+import {
+  formatCurrency,
+  formatCurrencyWithSymbol,
+  renderSomethingOrDash,
+} from '../../../../utils/utils';
 import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
 
 const ErrorText = styled.div`
@@ -111,6 +115,14 @@ export const PaymentsTableRow = ({
       <TableCell align='left'>
         {payment.entitlementQuantityUsd > 0
           ? formatCurrency(payment.entitlementQuantityUsd, true)
+          : '-'}
+      </TableCell>
+      <TableCell align='left'>
+        {payment.deliveredQuantity > 0
+          ? formatCurrencyWithSymbol(
+              payment.deliveredQuantity,
+              payment.currency,
+            )
           : '-'}
       </TableCell>
     </ClickableTableRow>

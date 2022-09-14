@@ -23,20 +23,14 @@ export const LockedFspPaymentPlanHeaderButtons = ({
   const {
     mutatePaymentPlanAction: unlock,
     loading: loadingUnlock,
-  } = usePaymentPlanAction(
-    Action.UnlockFsp,
-    id,
-    () => showMessage(t('Payment Plan FSPs have been unlocked.')),
-    () => showMessage(t('Error during unlocking Payment Plan.')),
+  } = usePaymentPlanAction(Action.UnlockFsp, id, () =>
+    showMessage(t('Payment Plan FSPs have been unlocked.')),
   );
   const {
     mutatePaymentPlanAction: sendForApproval,
     loading: loadingSendForApproval,
-  } = usePaymentPlanAction(
-    Action.SendForApproval,
-    id,
-    () => showMessage(t('Payment Plan has been sent for approval.')),
-    () => showMessage(t('Error during sending Payment Plan for approval.')),
+  } = usePaymentPlanAction(Action.SendForApproval, id, () =>
+    showMessage(t('Payment Plan has been sent for approval.')),
   );
 
   return (

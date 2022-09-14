@@ -2869,7 +2869,7 @@ export type IndividualNode = Node & {
   identities: IndividualIdentityNodeConnection,
   householdsAndRoles: Array<IndividualRoleInHouseholdNode>,
   bankAccountInfo?: Maybe<BankAccountInfoNode>,
-  paymentchannelSet: PaymentChannelNodeConnection,
+  paymentChannels?: Maybe<Array<Maybe<BankAccountInfoNode>>>,
   paymentrecordSet: PaymentRecordNodeConnection,
   collectorPayments: PaymentNodeConnection,
   paymentSet: PaymentNodeConnection,
@@ -2889,7 +2889,6 @@ export type IndividualNode = Node & {
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
   phoneNoValid?: Maybe<Scalars['Boolean']>,
   phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
-  paymentChannels?: Maybe<Array<Maybe<BankAccountInfoNode>>>,
 };
 
 
@@ -2912,15 +2911,6 @@ export type IndividualNodeDocumentsArgs = {
 
 
 export type IndividualNodeIdentitiesArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type IndividualNodePaymentchannelSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -3776,20 +3766,6 @@ export type PaymentChannelNodePaymentSetArgs = {
   last?: Maybe<Scalars['Int']>
 };
 
-export type PaymentChannelNodeConnection = {
-   __typename?: 'PaymentChannelNodeConnection',
-  pageInfo: PageInfo,
-  edges: Array<Maybe<PaymentChannelNodeEdge>>,
-  totalCount?: Maybe<Scalars['Int']>,
-  edgeCount?: Maybe<Scalars['Int']>,
-};
-
-export type PaymentChannelNodeEdge = {
-   __typename?: 'PaymentChannelNodeEdge',
-  node?: Maybe<PaymentChannelNode>,
-  cursor: Scalars['String'],
-};
-
 export type PaymentConflictDataNode = {
    __typename?: 'PaymentConflictDataNode',
   paymentPlanId?: Maybe<Scalars['String']>,
@@ -4078,7 +4054,7 @@ export type PaymentPlanNode = Node & {
   maleAdultsCount: Scalars['Int'],
   totalHouseholdsCount: Scalars['Int'],
   totalIndividualsCount: Scalars['Int'],
-  xlsxFileImportedDate?: Maybe<Scalars['DateTime']>,
+  importedFileDate?: Maybe<Scalars['DateTime']>,
   steficonRule?: Maybe<RuleCommitNode>,
   steficonAppliedDate?: Maybe<Scalars['DateTime']>,
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
@@ -4088,9 +4064,8 @@ export type PaymentPlanNode = Node & {
   authorizationNumberRequired?: Maybe<Scalars['Int']>,
   financeReviewNumberRequired?: Maybe<Scalars['Int']>,
   currencyName?: Maybe<Scalars['String']>,
-  hasPaymentListXlsxFile?: Maybe<Scalars['Boolean']>,
-  hasPaymentListPerFspZipFile?: Maybe<Scalars['Boolean']>,
-  importedXlsxFileName?: Maybe<Scalars['String']>,
+  hasPaymentListExportFile?: Maybe<Scalars['Boolean']>,
+  importedFileName?: Maybe<Scalars['String']>,
   paymentsConflictsCount?: Maybe<Scalars['Int']>,
   volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>,
 };
@@ -9792,7 +9767,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListXlsxFile' | 'xlsxFileImportedDate' | 'importedXlsxFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'hasPaymentListPerFspZipFile'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListExportFile' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -9997,7 +9972,7 @@ export type AllPaymentsForTableQuery = (
       & Pick<PaymentNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentNode' }
-        & Pick<PaymentNode, 'id' | 'unicefId' | 'entitlementQuantityUsd' | 'paymentPlanHardConflicted' | 'paymentPlanSoftConflicted' | 'hasPaymentChannel'>
+        & Pick<PaymentNode, 'id' | 'unicefId' | 'entitlementQuantityUsd' | 'currency' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'paymentPlanHardConflicted' | 'paymentPlanSoftConflicted' | 'hasPaymentChannel'>
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
@@ -17857,9 +17832,9 @@ export const PaymentPlanDocument = gql`
         name
       }
     }
-    hasPaymentListXlsxFile
-    xlsxFileImportedDate
-    importedXlsxFileName
+    hasPaymentListExportFile
+    importedFileDate
+    importedFileName
     totalEntitledQuantityUsd
     paymentsConflictsCount
     deliveryMechanisms {
@@ -17883,7 +17858,9 @@ export const PaymentPlanDocument = gql`
       volume
       volumeUsd
     }
-    hasPaymentListPerFspZipFile
+    hasPaymentListExportFile
+    importedFileName
+    importedFileDate
   }
 }
     `;
@@ -18155,6 +18132,9 @@ export const AllPaymentsForTableDocument = gql`
           }
         }
         entitlementQuantityUsd
+        currency
+        deliveredQuantity
+        deliveredQuantityUsd
         paymentPlanHardConflicted
         paymentPlanSoftConflicted
         paymentPlanHardConflictedData {
@@ -22431,8 +22411,6 @@ export type ResolversTypes = {
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>,
-  PaymentChannelNodeConnection: ResolverTypeWrapper<PaymentChannelNodeConnection>,
-  PaymentChannelNodeEdge: ResolverTypeWrapper<PaymentChannelNodeEdge>,
   TicketIndividualDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeConnection>,
   TicketIndividualDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeEdge>,
   TicketDeleteIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeConnection>,
@@ -22868,8 +22846,6 @@ export type ResolversParentTypes = {
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   BankAccountInfoNode: BankAccountInfoNode,
-  PaymentChannelNodeConnection: PaymentChannelNodeConnection,
-  PaymentChannelNodeEdge: PaymentChannelNodeEdge,
   TicketIndividualDataUpdateDetailsNodeConnection: TicketIndividualDataUpdateDetailsNodeConnection,
   TicketIndividualDataUpdateDetailsNodeEdge: TicketIndividualDataUpdateDetailsNodeEdge,
   TicketDeleteIndividualDetailsNodeConnection: TicketDeleteIndividualDetailsNodeConnection,
@@ -24330,7 +24306,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   identities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, IndividualNodeIdentitiesArgs>,
   householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   bankAccountInfo?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>,
-  paymentchannelSet?: Resolver<ResolversTypes['PaymentChannelNodeConnection'], ParentType, ContextType, IndividualNodePaymentchannelSetArgs>,
+  paymentChannels?: Resolver<Maybe<Array<Maybe<ResolversTypes['BankAccountInfoNode']>>>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentrecordSetArgs>,
   collectorPayments?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, IndividualNodeCollectorPaymentsArgs>,
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, IndividualNodePaymentSetArgs>,
@@ -24350,7 +24326,6 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  paymentChannels?: Resolver<Maybe<Array<Maybe<ResolversTypes['BankAccountInfoNode']>>>, ParentType, ContextType>,
 };
 
 export type IndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeConnection'] = ResolversParentTypes['IndividualNodeConnection']> = {
@@ -24569,18 +24544,6 @@ export type PaymentChannelNodeResolvers<ContextType = any, ParentType extends Re
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentChannelNodePaymentSetArgs>,
 };
 
-export type PaymentChannelNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentChannelNodeConnection'] = ResolversParentTypes['PaymentChannelNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentChannelNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type PaymentChannelNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentChannelNodeEdge'] = ResolversParentTypes['PaymentChannelNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['PaymentChannelNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
 export type PaymentConflictDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentConflictDataNode'] = ResolversParentTypes['PaymentConflictDataNode']> = {
   paymentPlanId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentPlanUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -24672,7 +24635,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   maleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalHouseholdsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalIndividualsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  xlsxFileImportedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  importedFileDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   steficonRule?: Resolver<Maybe<ResolversTypes['RuleCommitNode']>, ParentType, ContextType>,
   steficonAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
@@ -24682,9 +24645,8 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   authorizationNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   financeReviewNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   currencyName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  hasPaymentListXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  hasPaymentListPerFspZipFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  importedXlsxFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  hasPaymentListExportFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  importedFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentsConflictsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   volumeByDeliveryMechanism?: Resolver<Maybe<Array<Maybe<ResolversTypes['VolumeByDeliveryMechanismNode']>>>, ParentType, ContextType>,
 };
@@ -26142,8 +26104,6 @@ export type Resolvers<ContextType = any> = {
   PageInfo?: PageInfoResolvers<ContextType>,
   PartnerType?: PartnerTypeResolvers<ContextType>,
   PaymentChannelNode?: PaymentChannelNodeResolvers<ContextType>,
-  PaymentChannelNodeConnection?: PaymentChannelNodeConnectionResolvers<ContextType>,
-  PaymentChannelNodeEdge?: PaymentChannelNodeEdgeResolvers<ContextType>,
   PaymentConflictDataNode?: PaymentConflictDataNodeResolvers<ContextType>,
   PaymentDetailsApproveMutation?: PaymentDetailsApproveMutationResolvers<ContextType>,
   PaymentNode?: PaymentNodeResolvers<ContextType>,

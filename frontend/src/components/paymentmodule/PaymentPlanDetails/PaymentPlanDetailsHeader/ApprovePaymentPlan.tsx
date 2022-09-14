@@ -37,7 +37,6 @@ export const ApprovePaymentPlan = ({
     Action.Approve,
     paymentPlan.id,
     () => showMessage(t('Payment Plan has been approved.')),
-    () => showMessage(t('Error during approving Payment Plan.')),
     () => setApproveDialogOpen(false),
   );
   const initialValues = {

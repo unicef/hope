@@ -94,7 +94,7 @@ export const LockedTargetPopulationHeaderButtons = ({
                   onClick={() => setOpenFinalizePaymentPlan(true)}
                   data-cy='button-target-population-send-to-hope'
                 >
-                  {t('Send to Hope')}
+                  {t('Mark Ready')}
                 </Button>
               </span>
             </Tooltip>

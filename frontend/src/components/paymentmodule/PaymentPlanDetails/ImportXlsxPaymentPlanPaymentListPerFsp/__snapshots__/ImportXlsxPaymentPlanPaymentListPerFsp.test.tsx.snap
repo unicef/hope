@@ -28,7 +28,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
             />
           </svg>
         </span>
-        Import XLSX
+        Upload Reconciliation Info
       </span>
       <span
         class="MuiTouchRipple-root"
