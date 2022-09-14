@@ -3,11 +3,11 @@ Feature: Create Payment Plan
 
     Background:
         Given I am authenticated
+        Given There are steficon rules provided
         Given There are individuals and households imported
         Given Each imported individual has a payment channel
         Given I have an active program
         Given I have target population in ready status
-        Given There are steficon rules provided
     # Given I am sure that my business area is payment plan applicable
     # query businessAreaData
 
@@ -24,7 +24,7 @@ Feature: Create Payment Plan
         Then I see the entitlements input
         When I choose the steficon rule
         And I apply the steficon rule
-        # Then I see the entitlements calculated
+        Then I see the entitlements calculated
         And I am able to set up FSPs
         Then I should see the Set up FSP page
         When I select only one Delivery Mechanism
