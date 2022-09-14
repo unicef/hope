@@ -1,8 +1,84 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`] = `<div />`;
-
-exports[`containers/tables/paymentmodule/PaymentsTable should render loading 2`] = `<div />`;
+exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`] = `
+<div>
+  <div
+    class="sc-bdVaJa ksQzqc"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation1 MuiPaper-rounded"
+    >
+      <div
+        class="MuiBox-root MuiBox-root-12 sc-jKJlTe hdnGZH"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-h6"
+          data-cy="table-title"
+        >
+          Payments List
+        </h6>
+        <div
+          class="MuiBox-root MuiBox-root-13"
+        >
+          <button
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary"
+            data-cy="button-import"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="MuiButton-label"
+            >
+              <span
+                class="MuiButton-startIcon MuiButton-iconSizeMedium"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root sc-gzVnrw daSVHL"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M5 4v2h14V4H5zm0 10h4v6h6v-6h4l-7-7-7 7z"
+                  />
+                </svg>
+              </span>
+              Upload Reconciliation Info
+            </span>
+            <span
+              class="MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+      </div>
+      <div
+        class="sc-ifAKCX dUzfWD"
+        data-cy="loading-container"
+      >
+        <div
+          class="MuiCircularProgress-root MuiCircularProgress-colorPrimary MuiCircularProgress-indeterminate"
+          role="progressbar"
+          style="width: 40px; height: 40px;"
+        >
+          <svg
+            class="MuiCircularProgress-svg"
+            viewBox="22 22 44 44"
+          >
+            <circle
+              class="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate"
+              cx="44"
+              cy="44"
+              fill="none"
+              r="20.2"
+              stroke-width="3.6"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
 
 exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1`] = `
 <div>
@@ -21,24 +97,57 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
         >
           Payments List
         </h6>
+        <div
+          class="MuiBox-root MuiBox-root-2"
+        >
+          <button
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary"
+            data-cy="button-import"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="MuiButton-label"
+            >
+              <span
+                class="MuiButton-startIcon MuiButton-iconSizeMedium"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root sc-gzVnrw daSVHL"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M5 4v2h14V4H5zm0 10h4v6h6v-6h4l-7-7-7 7z"
+                  />
+                </svg>
+              </span>
+              Upload Reconciliation Info
+            </span>
+            <span
+              class="MuiTouchRipple-root"
+            />
+          </button>
+        </div>
       </div>
       <div
-        class="makeStyles-root-2"
+        class="makeStyles-root-3"
       >
         <div
           class="MuiTableContainer-root"
         >
           <div
-            class="MuiBox-root MuiBox-root-8"
+            class="MuiBox-root MuiBox-root-9"
           >
             <div
-              class="MuiBox-root MuiBox-root-9"
+              class="MuiBox-root MuiBox-root-10"
             />
           </div>
           <table
             aria-label="enhanced table"
             aria-labelledby="tableTitle"
-            class="MuiTable-root makeStyles-table-4"
+            class="MuiTable-root makeStyles-table-5"
           >
             <thead
               class="MuiTableHead-root"
@@ -217,6 +326,29 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                     role="button"
                     tabindex="0"
                   >
+                    FSP
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htoDjs ijRZvN"
+                    role="button"
+                    tabindex="0"
+                  >
                     Entitlement (USD)
                     <svg
                       aria-hidden="true"
@@ -268,27 +400,27 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  RCPT-0060-22-0.000.001
+                  RCPT-0060-22-0.000.196
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  HH-20-0000.0001
+                  HH-18-0000.0042
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  4
+                  1
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Achin
+                  Abband
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Agata Kowalska
+                  Daniel Allison
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -307,12 +439,17 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  78.00
+                  -
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  WST 631.00
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  -
                 </td>
               </tr>
               <tr
@@ -325,17 +462,17 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  RCPT-0060-22-0.000.002
+                  RCPT-0060-22-0.000.197
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  HH-20-0000.0002
+                  HH-94-0000.0043
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  4
+                  1
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -345,7 +482,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Jan Romaniak
+                  Tamara Hernandez
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -364,21 +501,88 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  2,693.00
+                  -
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  HTG 3,703.00
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  -
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-gZMcBi Qfbta MuiTableRow-hover"
+                role="checkbox"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                />
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  RCPT-0060-22-0.000.198
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  HH-09-0000.0044
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  1
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Abband
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  Kimberly Smith
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root sc-fjdhpX gzFqeL"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"
+                    />
+                  </svg>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  -
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                >
+                  -
                 </td>
               </tr>
               <tr
                 class="MuiTableRow-root"
-                style="height: 162px;"
+                style="height: 108px;"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body"
-                  colspan="9"
+                  colspan="10"
                 />
               </tr>
             </tbody>
@@ -432,7 +636,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
             <p
               class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
             >
-              1-2 of 2
+              1-3 of 3
             </p>
             <div
               class="MuiTablePagination-actions"
