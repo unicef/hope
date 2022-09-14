@@ -419,7 +419,7 @@ export function validateUsingSteps(
   if (
     activeStep === GrievanceSteps.Lookup &&
     !values.selectedHousehold &&
-    householdRequiredGrievanceTypes.includes(values.subCategory)
+    householdRequiredGrievanceTypes.includes(values.issueType)
   ) {
     errors.selectedHousehold = 'Household is Required';
   }
@@ -458,12 +458,12 @@ export function validateUsingSteps(
   }
   if (activeStep === GrievanceSteps.Description) {
     if (
-      values.subCategory === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT &&
+      values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT &&
       !Object.keys(values.selectedPaymentRecords).length
     ) {
       errors.selectedPaymentRecords = 'Payment Records are required';
     } else if (
-      values.subCategory === GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT &&
+      values.issueType === GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT &&
       !values.partner
     ) {
       errors.partner = 'Partner is required';
