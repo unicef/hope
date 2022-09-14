@@ -5,7 +5,7 @@ export const fakeApolloAllPaymentRecords = [
     request: {
       query: AllPaymentRecordsDocument,
       variables: {
-        parent:
+        cashPlan:
           'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
         businessArea: 'afghanistan',
         first: 5,

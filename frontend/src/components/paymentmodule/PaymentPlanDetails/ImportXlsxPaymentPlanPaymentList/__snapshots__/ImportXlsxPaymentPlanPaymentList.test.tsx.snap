@@ -8,10 +8,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
     class="MuiBox-root MuiBox-root-1"
   >
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary Mui-disabled Mui-disabled"
+      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary"
       data-cy="button-import"
-      disabled=""
-      tabindex="-1"
+      tabindex="0"
       type="button"
     >
       <span
@@ -22,7 +21,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root sc-bZQynM bKNwua"
+            class="MuiSvgIcon-root"
             focusable="false"
             viewBox="0 0 24 24"
           >
@@ -33,6 +32,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
         </span>
         Import XLSX
       </span>
+      <span
+        class="MuiTouchRipple-root"
+      />
     </button>
   </div>
 </div>
