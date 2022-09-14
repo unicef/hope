@@ -25,7 +25,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.core.utils import choices_to_dict
 
 
-class CustomOrderingFilter(OrderingFilter):
+class GrievanceOrderingFilter(OrderingFilter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
