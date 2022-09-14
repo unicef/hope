@@ -34,21 +34,13 @@ Feature: Create Payment Plan
         Then I should see volumes by delivery mechanisms
         When I lock the FSPs
         Then I should see that the status is FSP Locked
+        When I send the Payment Plan for approval
+        Then I see the acceptance process stepper
+        When I approve the Payment Plan
+        Then I see the Payment Plan as in authorization
+        When I authorize the Payment Plan
+        Then I see the Payment Plan as in review
+        When I approve the Payment Plan
+        Then I see the Payment Plan as accepted
+# And I can export xlsx to zip file
 
-
-
-
-#TODO
-
-# When I lock the FSPs
-# Then I should see the needed approvals etc
-# When I approve, review, etc
-# Then I am able to accept the Payment Plan
-# And I am able to upload the reconciliation info
-# When I download the zip archive
-# And I unarchive it
-# Then I should see that there are multiple xlsx files inside the archive
-# When I fill the data in xlsx files with delivered quantities
-# And I upload the xlsx files
-# Then I should see that the delivered quantities are visible in the system
-# And the Payment Plan is reconciled # TODO: show that on FE
