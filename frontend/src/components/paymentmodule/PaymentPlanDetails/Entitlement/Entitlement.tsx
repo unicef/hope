@@ -115,6 +115,7 @@ export const Entitlement = ({
 
   const { data: steficonData, loading } = useAllSteficonRulesQuery({
     variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
+    fetchPolicy: 'network-only',
   });
   const [
     mutateExport,

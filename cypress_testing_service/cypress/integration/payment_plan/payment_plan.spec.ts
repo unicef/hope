@@ -10,6 +10,8 @@ let programName;
 let targetPopulationName;
 let individualIds;
 
+const maxInt = 2147483647;
+
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
   cy.get('input[name="username"]').type(Cypress.env('daUsername'));
@@ -82,13 +84,26 @@ Given('Each imported individual has a payment channel', () => {
 });
 
 Given('There are steficon rules provided', () => {
+  cy.visit('/api/unicorn/steficon/rule/add/')
+  cy.get("#id_name").type(uniqueSeed)
+  cy.get("#id_type").select("Payment Plan")
+  cy.get('#id_definition_container').click().type('result.value=0')
+  cy.get('input[name="enabled"]').click();
+  cy.get('input[name="_save"]').click();
+  cy.get('p').contains('Please correct the error below.').should('not.exist');
+
   cy.visit('/api/unicorn/steficon/rulecommit/add/');
+  cy.get("#id_rule").select(uniqueSeed);
   cy.get('#id_definition').clear().type('result.value=100');
   cy.get('input[name="is_release"]').click();
   cy.get('input[name="enabled"]').click();
-  cy.get('input[name="version"]').type('1');
+  cy.get('input[name="version"]').type((parseInt(uniqueSeed) % maxInt).toString());
   cy.get('input[name="affected_fields"]').type('[]');
   cy.get('input[name="_save"]').click();
+  cy.get('p').contains('Please correct the error below.').should('not.exist');
+
+  cy.visit('/');
+  clearCache();
 });
 
 Given('I have an active program', () => {
@@ -198,7 +213,10 @@ Then('I see the entitlements input', () => {
 });
 
 When('I choose the steficon rule', () => {
-  cy.get('[data-cy="select-option-0"]').click();
+  // cy.get('[data-cy="select-option-0"]').click();
+  cy.get('[data-cy="input-entitlement-formula"]').click({force: true});
+  // cy.get(`[data-cy="select-option-${uniqueSeed}"`).click({force: true});
+  cy.get('li').contains(uniqueSeed).click({force: true});
 });
 
 And('I apply the steficon rule', () => {
@@ -206,10 +224,9 @@ And('I apply the steficon rule', () => {
   cy.reload();
 });
 
-//TODO: uncomment after https://github.com/unicef/hct-mis/pull/1756 is merged
-// Then('I see the entitlements calculated', () => {
-//   cy.get('[data-cy="total-entitled-quantity-usd"]').contains('$');
-// });
+Then('I see the entitlements calculated', () => {
+  cy.get('[data-cy="total-entitled-quantity-usd"]').contains('USD');
+});
 
 And('I am able to set up FSPs', () => {
   cy.get('[data-cy="button-set-up-fsp"]', {
