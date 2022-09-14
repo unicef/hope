@@ -257,8 +257,7 @@ When('I select the FSPs and save', () => {
 })
 
 Then('I should see volumes by delivery mechanisms', () => {
-  // TODO
-  // cy.get("h6").contains("Volume by Delivery Mechanism in USD", {timeout: 10000});
+  cy.contains('Volume by Delivery Mechanism in USD', { timeout: 10000 });
 })
 
 When("I lock the FSPs", () => {
@@ -272,22 +271,37 @@ Then("I should see that the status is FSP Locked", () => {
 })
 
 When("I send the Payment Plan for approval", () => {
-
+  cy.get("[data-cy='button-send-for-approval']").click({ force: true })
 })
 
 Then("I see the acceptance process stepper", () => {
-
+  cy.contains("Acceptance Process")
 })
 
-When("I approve the Payment Plan", () => {})
+When("I approve the Payment Plan", () => {
+  cy.get("[data-cy='button-approve']").click({ force: true })
+  cy.get("[data-cy='button-submit']").click({ force: true })
+})
 
-Then("I see the Payment Plan as in authorization", () => {})
+Then("I see the Payment Plan as in authorization", () => {
+  cy.get('[data-cy="status-container"]').contains('In Authorization');
+})
 
-When("I authorize the Payment Plan", () => {})
+When("I authorize the Payment Plan", () => {
+  cy.get("[data-cy='button-authorize']").click({ force: true })
+  cy.get("[data-cy='button-submit']").click({ force: true })
+})
 
-Then("I see the Payment Plan as in review", () => {})
+Then("I see the Payment Plan as in review", () => {
+  cy.get('[data-cy="status-container"]').contains('In review');
+})
 
-When("I approve the Payment Plan", () => {})
+When("I finalize the Payment Plan", () => {
+  cy.get("[data-cy='button-mark-as-reviewed']").click({ force: true })
+  cy.get("[data-cy='button-submit']").click({ force: true })
+})
 
-Then("I see the Payment Plan as accepted", () => {})
+Then("I see the Payment Plan as accepted", () => {
+  cy.get('[data-cy="status-container"]').contains('Accepted');
+})
   

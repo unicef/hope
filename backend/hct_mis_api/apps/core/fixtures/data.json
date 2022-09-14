@@ -3926,9 +3926,9 @@
       "deduplication_golden_record_duplicates_allowed": 5,
       "screen_beneficiary": false,
       "countries": [],
-      "approval_number_required": 2,
-      "authorization_number_required": 3,
-      "finance_review_number_required": 2,
+      "approval_number_required": 1,
+      "authorization_number_required": 1,
+      "finance_review_number_required": 1,
       "is_payment_plan_applicable": true
     }
   },
