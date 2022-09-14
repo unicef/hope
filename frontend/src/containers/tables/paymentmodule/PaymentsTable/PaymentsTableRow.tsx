@@ -113,18 +113,21 @@ export const PaymentsTableRow = ({
         )}
       </TableCell>
       <TableCell align='left'>
+        {payment.financialServiceProvider
+          ? payment.financialServiceProvider.name
+          : '-'}
+      </TableCell>
+      <TableCell align='left'>
         {payment.entitlementQuantityUsd > 0
           ? formatCurrency(payment.entitlementQuantityUsd, true)
           : '-'}
       </TableCell>
       <TableCell align='left'>
-        {payment.deliveredQuantity > 0
-          ? formatCurrencyWithSymbol(
-              payment.deliveredQuantity,
-              payment.currency,
-            )
+      {payment.deliveredQuantity > 0
+          ? formatCurrency(payment.deliveredQuantity, true)
           : '-'}
       </TableCell>
+
     </ClickableTableRow>
   );
 };
