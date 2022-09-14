@@ -7,6 +7,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+from hct_mis_api.apps.grievance.documents import bulk_update_assigned_to
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.payment.models import PaymentRecord
@@ -828,6 +830,7 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
 
         if grievance_tickets.exists():
             grievance_tickets.update(assigned_to=assigned_to)
+            bulk_update_assigned_to(grievance_tickets)
 
         return cls(grievance_tickets=GrievanceTicket.objects.filter(id__in=grievance_tickets_ids))
 
