@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from django.utils import timezone
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -941,4 +940,6 @@ def close_delete_household_ticket(grievance_ticket, info):
         Q(selected_individual__in=individuals) | Q(golden_records_individual__in=individuals)
     ).exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
 
-    HouseholdWithdraw().execute(household, tickets)
+    service = HouseholdWithdraw(household)
+    service.withdraw()
+    service.change_tickets_status(tickets)
