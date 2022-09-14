@@ -2,6 +2,8 @@ import zipfile
 
 from io import BytesIO
 from pathlib import Path
+from constance.test import override_config
+from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
@@ -137,7 +139,9 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service.validate()
         self.assertEqual(service.errors, [])
 
-        service.import_payment_list()
+        with patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateAPI.fetch_exchange_rates") as mock:
+            mock.return_value = {}
+            service.import_payment_list()
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
 
