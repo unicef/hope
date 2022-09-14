@@ -37,6 +37,7 @@ export const AcceptanceProcessRow = ({
     approvalNumberRequired,
     authorizationNumberRequired,
     financeReviewNumberRequired,
+    approvalProcess,
   } = paymentPlan;
 
   const getRejectedOnString = (stage: string): string => {
@@ -56,10 +57,10 @@ export const AcceptanceProcessRow = ({
   return (
     <StyledBox m={5}>
       <AcceptanceProcessStepper
-        acceptanceProcess={acceptanceProcess}
         approvalNumberRequired={approvalNumberRequired}
         authorizationNumberRequired={authorizationNumberRequired}
         financeReviewNumberRequired={financeReviewNumberRequired}
+        acceptanceProcess={acceptanceProcess}
       />
       <Grid container>
         <Grid item xs={4}>
@@ -127,7 +128,7 @@ export const AcceptanceProcessRow = ({
           </Grid>
         )}
       </Grid>
-      <DividerLine />
+      {approvalProcess.totalCount > 1 && <DividerLine />}
     </StyledBox>
   );
 };

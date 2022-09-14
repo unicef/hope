@@ -78,6 +78,7 @@ export function UniversalTable<T, K>({
   }
   const { edges } = data[queriedObjectName];
   const typedEdges = edges.map((edge) => edge.node as T);
+  console.log(JSON.stringify(edges));
 
   return (
     <TableComponent<T>

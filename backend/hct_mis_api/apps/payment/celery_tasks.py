@@ -1,14 +1,12 @@
 import logging
 import datetime
-import traceback
-import django_fsm
 
+from decimal import Decimal
 from concurrency.api import disable_concurrency
+from sentry_sdk import configure_scope
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.utils import timezone
-from sentry_sdk import configure_scope
-
 from django.contrib.auth import get_user_model
 
 from hct_mis_api.apps.payment.models import XlsxCashPlanPaymentVerificationFile, CashPlanPaymentVerification
@@ -159,7 +157,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
                     payment_plan.background_action_status_none()
                     payment_plan.save()
 
-                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user, per_fsp=True)))
+                    transaction.on_commit(lambda: service.send_email(service.get_email_context(user)))
 
             except Exception:
                 payment_plan.background_action_status_xlsx_export_error()
@@ -175,7 +173,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
+def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -186,19 +184,18 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id, file_id):
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
 
-            try:
-                file = FileTemp.objects.get(pk=file_id).file
-            except FileTemp.DoesNotExist:
-                logger.exception(f"Error import from xlsx, FileTemp object with ID {file_id} not found.")
+            if not payment_plan.imported_file:
+                logger.error(f"Error import from xlsx, file does not exists for PaymentPlan ID {payment_plan.unicef_id}.")
                 raise
 
-            service = XlsxPaymentPlanImportService(payment_plan, file)
+            service = XlsxPaymentPlanImportService(payment_plan, payment_plan.imported_file.file)
             service.open_workbook()
             try:
                 with transaction.atomic():
                     service.import_payment_list()
-                    payment_plan.xlsx_file_imported_date = timezone.now()
+                    payment_plan.imported_file_date = timezone.now()
                     payment_plan.background_action_status_none()
+                    payment_plan.remove_export_file()
                     payment_plan.save()
                     payment_plan.update_money_fields()
             except Exception:
@@ -229,6 +226,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
                 with transaction.atomic():
                     service.import_payment_list()
                     payment_plan.background_action_status_none()
+                    payment_plan.remove_export_file()
                     payment_plan.save()
             except Exception:
                 logger.exception("Unexpected error during xlsx per fsp import")
@@ -264,13 +262,16 @@ def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
                 # TODO: not sure how will work steficon function payment_plan or payment need ??
                 result = rule.execute({"household": entry.household, "payment_plan": payment_plan})
                 entry.entitlement_quantity = result.value
+                entry.entitlement_quantity_usd = Decimal(result.value / Decimal(payment_plan.exchange_rate)).quantize(Decimal(".01"))
                 entry.entitlement_date = timezone.now()
                 updates.append(entry)
-            Payment.objects.bulk_update(updates, ["entitlement_quantity", "entitlement_date"])
+            Payment.objects.bulk_update(updates, ["entitlement_quantity", "entitlement_date", "entitlement_quantity_usd"])
 
             payment_plan.steficon_applied_date = timezone.now()
             payment_plan.background_action_status_none()
             with disable_concurrency(payment_plan):
+                payment_plan.remove_export_file()
+                payment_plan.remove_imported_file()
                 payment_plan.save()
                 payment_plan.update_money_fields()
 

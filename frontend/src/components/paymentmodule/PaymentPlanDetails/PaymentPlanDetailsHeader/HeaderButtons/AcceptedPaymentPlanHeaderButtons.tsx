@@ -1,19 +1,13 @@
 import { Box, Button } from '@material-ui/core';
 import { GetApp } from '@material-ui/icons';
-import styled from 'styled-components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import {
   PaymentPlanQuery,
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
-import { useSnackbar } from '../../../../../hooks/useSnackBar';
-import { ImportXlsxPaymentPlanPaymentListPerFsp } from '../../ImportXlsxPaymentPlanPaymentListPerFsp';
-
-const DownloadIcon = styled(GetApp)`
-  color: #043f91;
-`;
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
@@ -37,13 +31,13 @@ export const AcceptedPaymentPlanHeaderButtons = ({
     <Box display='flex' alignItems='center'>
       {canDownloadXlsx && (
         <>
-          {!paymentPlan.hasPaymentListPerFspZipFile ? (
+          {!paymentPlan.hasPaymentListExportFile ? (
             <Box p={2}>
               <LoadingButton
                 loading={loadingExport}
                 disabled={loadingExport}
                 color='primary'
-                variant='outlined'
+                variant='contained'
                 startIcon={<GetApp />}
                 onClick={async () => {
                   try {
@@ -65,10 +59,10 @@ export const AcceptedPaymentPlanHeaderButtons = ({
             <Box m={2}>
               <Button
                 color='primary'
-                startIcon={<DownloadIcon />}
                 component='a'
+                variant='contained'
                 download
-                href={`/api/download-payment-plan-payment-list-per-fsp/${paymentPlan.id}`}
+                href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
               >
                 {t('Download XLSX')}
               </Button>
@@ -78,7 +72,10 @@ export const AcceptedPaymentPlanHeaderButtons = ({
       )}
       {canSendToFsp && (
         <Box m={2}>
-          <ImportXlsxPaymentPlanPaymentListPerFsp paymentPlan={paymentPlan} />
+          {/*TODO: connect this button*/}
+          <Button color='primary' variant='contained'>
+            {t('Send to FSP')}
+          </Button>
         </Box>
       )}
     </Box>

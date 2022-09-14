@@ -3,6 +3,8 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from freezegun import freeze_time
+from pytz import utc
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -129,8 +131,8 @@ class TestPaymentPlanQueries(APITestCase):
             cls.pp = PaymentPlanFactory(
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
-                start_date=datetime(2020, 9, 10),
-                end_date=datetime(2020, 11, 10),
+                start_date=datetime(2020, 9, 10, tzinfo=utc),
+                end_date=datetime(2020, 11, 10, tzinfo=utc),
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
