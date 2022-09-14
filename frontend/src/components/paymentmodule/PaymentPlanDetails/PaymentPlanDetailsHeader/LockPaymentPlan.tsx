@@ -34,7 +34,6 @@ export const LockPaymentPlan = ({
     Action.Lock,
     paymentPlan.id,
     () => showMessage(t('Payment Plan has been locked.')),
-    () => showMessage(t('Error during locking Payment Plan.')),
     () => setLockDialogOpen(false),
   );
 

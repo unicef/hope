@@ -5,6 +5,8 @@
     "lib": ["dom","es6"],
     "types": ["cypress"],
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
@@ -16,6 +18,7 @@
     "node_modules/cypress",
     "node_modules/cypress-file-upload",
     "node_modules/chai-subset",
-    "cypress"
+    "cypress",
+    ".eslintrc.js"
   ]
 }

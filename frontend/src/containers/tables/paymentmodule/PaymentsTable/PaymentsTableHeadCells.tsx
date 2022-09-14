@@ -2,7 +2,7 @@ import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
 import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
 
 export const headCells: HeadCell<
-AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
+  AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,
@@ -13,43 +13,49 @@ AllPaymentsForTableQuery['allPayments']['edges'][number]['node']
   {
     disablePadding: false,
     label: 'Payment Id',
-    id: 'payment_id',
+    id: 'unicef_id',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Household Id',
-    id: 'payment_household__id',
+    id: 'household_id',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Household Size',
-    id: 'payment_household__size',
+    id: 'household__size',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Administrative Level 2',
-    id: 'payment_household__admin2',
+    id: 'admin2',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Collector',
-    id: 'payment_household__collector_id',
+    id: 'collector_id',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Payment Channel',
-    id: 'payment_channel',
+    id: 'assigned_payment_channel',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Entitlement (USD)',
-    id: 'payment_entitlement',
+    id: 'entitlement_quantity_usd',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Delivered Quantity',
+    id: 'delivered_quantity',
     numeric: false,
   },
 ];

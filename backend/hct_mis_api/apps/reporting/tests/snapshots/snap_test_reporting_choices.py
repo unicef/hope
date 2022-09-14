@@ -7,6 +7,23 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestProgramChoices::test_dashboard_years_choices 1'] = {
+    'data': {
+        'dashboardYearsChoices': [
+            '2021',
+            '2020'
+        ]
+    }
+}
+
+snapshots['TestProgramChoices::test_dashboard_years_choices__no_objects 1'] = {
+    'data': {
+        'dashboardYearsChoices': [
+            '2023'
+        ]
+    }
+}
+
 snapshots['TestProgramChoices::test_report_types_choices 1'] = {
     'data': {
         'reportTypesChoices': [

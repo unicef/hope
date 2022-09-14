@@ -9,13 +9,11 @@ from django.core.files import File
 
 from hct_mis_api.apps.payment.utils import float_to_decimal
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     ServiceProvider,
-    PaymentChannel,
-    Payment,
     FinancialServiceProvider,
 )
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
@@ -25,6 +23,7 @@ from hct_mis_api.apps.payment.fixtures import (
     RealProgramFactory,
     PaymentPlanFactory,
     PaymentFactory,
+    PaymentChannelFactory,
 )
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
@@ -61,7 +60,12 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         cls.payment_plan = PaymentPlanFactory(program=program, business_area=cls.business_area)
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
-            PaymentFactory(payment_plan=cls.payment_plan, household=household, excluded=False)
+            PaymentFactory(
+                parent=cls.payment_plan,
+                household=household,
+                excluded=False,
+                assigned_payment_channel=None
+            )
 
         cls.user = UserFactory()
         cls.payment_plan = PaymentPlan.objects.all().last()
@@ -69,9 +73,8 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         # set Lock status
         cls.payment_plan.status_lock()
         cls.payment_plan.save()
-        for p_ch in PaymentChannel.objects.all():
-            p_ch.delivery_mechanism = "Deposit to Card"
-            p_ch.save()
+        for ind in Individual.objects.all():
+            PaymentChannelFactory(individual=ind, delivery_mechanism="Deposit to Card")
 
         cls.xlsx_valid_file = FileTemp.objects.create(
             object_id=cls.payment_plan.pk,
@@ -100,8 +103,8 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             (
                 "Payment Plan - Payment List",
                 "F3",
-                "You can't set payment_channel Invalid for Payment with already assigned "
-                "payment channel Deposit to Card",
+                "You can't set payment_channel Invalid for Collector with already assigned "
+                "payment channel(s): Deposit to Card",
             ),
         ]
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_invalid_file)
@@ -113,22 +116,27 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(service.errors, error_msg)
 
     def test_import_valid_file(self):
-        all_active_payments = self.payment_plan.payments.exclude(excluded=True)
+        all_active_payments = self.payment_plan.payment_items.exclude(excluded=True)
         # override imported payment id
         payment_id_1 = str(all_active_payments[0].unicef_id)
         payment_id_2 = str(all_active_payments[1].unicef_id)
-        payment_1 = Payment.objects.get(unicef_id=payment_id_1)
-        payment_2 = Payment.objects.get(unicef_id=payment_id_2)
-
-        payment_2.assigned_payment_channel = None
-        payment_2.save()
+        payment_1 = all_active_payments[0]
+        payment_2 = all_active_payments[1]
+        payment_2.collector.payment_channels.all().delete()
 
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_valid_file)
         wb = service.open_workbook()
 
+        payment_1_payment_channels = ", ".join(
+            list(
+                payment_1.collector.payment_channels.all()
+                .distinct("delivery_mechanism")
+                .values_list("delivery_mechanism", flat=True)
+            )
+        )
         wb.active["A2"].value = payment_id_1
         wb.active["A3"].value = payment_id_2
-        wb.active["F2"].value = payment_1.assigned_payment_channel.delivery_mechanism
+        wb.active["F2"].value = payment_1_payment_channels
         wb.active["F3"].value = "Referral"
 
         service.validate()
@@ -140,36 +148,46 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
         self.assertEqual(float_to_decimal(wb.active["I2"].value), payment_1.entitlement_quantity)
         self.assertEqual(float_to_decimal(wb.active["I3"].value), payment_2.entitlement_quantity)
-        self.assertEqual("Referral", payment_2.assigned_payment_channel.delivery_mechanism)
+        self.assertEqual("Referral", payment_2.collector.payment_channels.first().delivery_mechanism)
 
     def test_export_payment_plan_payment_list(self):
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
         export_service.save_xlsx_file(self.user)
 
-        self.assertTrue(self.payment_plan.has_payment_list_xlsx_file)
+        self.assertTrue(self.payment_plan.has_export_file)
 
         wb = export_service.generate_workbook()
 
         self.assertEqual(wb.active["A2"].value, str(self.payment_plan.all_active_payments[0].unicef_id))
         self.assertEqual(wb.active["I2"].value, self.payment_plan.all_active_payments[0].entitlement_quantity)
         self.assertEqual(wb.active["J2"].value, self.payment_plan.all_active_payments[0].entitlement_quantity_usd)
-        self.assertEqual(
-            wb.active["F2"].value, self.payment_plan.all_active_payments[0].assigned_payment_channel.delivery_mechanism
+        payment_channels = ", ".join(
+            list(
+                self.payment_plan.all_active_payments[0].collector.payment_channels.all()
+                .distinct("delivery_mechanism")
+                .values_list("delivery_mechanism", flat=True)
+            )
         )
+        self.assertEqual(wb.active["F2"].value, payment_channels)
 
     def test_export_payment_plan_payment_list_per_fsp(self):
+        # add assigned_payment_channel
+        for p in self.payment_plan.all_active_payments:
+            p.assigned_payment_channel = p.collector.payment_channels.first()
+            p.save()
+
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
         export_service.export_per_fsp(self.user)
 
-        self.assertTrue(self.payment_plan.has_payment_list_per_fsp_zip_file)
-        self.assertIsNotNone(self.payment_plan.xlsx_payment_list_per_fsp_file_link)
+        self.assertTrue(self.payment_plan.has_export_file)
+        self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
         self.assertTrue(
-            self.payment_plan.export_per_fsp_zip_file.file.name.startswith(
+            self.payment_plan.export_file.file.name.startswith(
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
             )
         )
         fsp_ids = export_service.payment_list.values_list("financial_service_provider_id", flat=True)
-        with zipfile.ZipFile(self.payment_plan.export_per_fsp_zip_file.file, mode="r") as zip_file:
+        with zipfile.ZipFile(self.payment_plan.export_file.file, mode="r") as zip_file:
             file_list = zip_file.namelist()
             self.assertEqual(len(fsp_ids), len(file_list))
             fsp_names = FinancialServiceProvider.objects.filter(id__in=fsp_ids).values_list("name", flat=True)

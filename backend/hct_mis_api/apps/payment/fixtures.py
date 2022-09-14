@@ -1,9 +1,11 @@
 from uuid import UUID
 import factory
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from random import randint
+
+from django.utils import timezone
 from factory import fuzzy
 from pytz import utc
 
@@ -169,7 +171,7 @@ class PaymentChannelFactory(factory.DjangoModelFactory):
         model = PaymentChannel
 
     individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE)
+    delivery_mechanism = fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
     delivery_data = factory.Faker("json")
 
 
@@ -198,7 +200,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     )
     ca_id = factory.Iterator(CaIdIterator("PR"))
     ca_hash_id = factory.Faker("uuid4")
-    cash_plan = factory.SubFactory(CashPlanFactory)
+    parent = factory.SubFactory(CashPlanFactory)
     household = factory.SubFactory(HouseholdFactory)
     total_persons_covered = factory.fuzzy.FuzzyInteger(1, 7)
     distribution_modality = factory.Faker(
@@ -265,9 +267,7 @@ class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
 class PaymentVerificationFactory(factory.DjangoModelFactory):
     cash_plan_payment_verification = factory.Iterator(CashPlanPaymentVerification.objects.all())
     payment_record = factory.LazyAttribute(
-        lambda o: PaymentRecord.objects.filter(cash_plan=o.cash_plan_payment_verification.cash_plan)
-        .order_by("?")
-        .first()
+        lambda o: PaymentRecord.objects.filter(parent=o.cash_plan_payment_verification.cash_plan).order_by("?").first()
     )
     status = fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,
@@ -468,11 +468,11 @@ def generate_real_cash_plans():
     for cash_plan in cash_plans:
         RealPaymentRecordFactory.create_batch(
             5,
-            cash_plan=cash_plan,
+            parent=cash_plan,
         )
     program.households.set(
         PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
-        .filter(cash_plan__in=cash_plans)
+        .filter(parent__in=cash_plans)
         .values_list("household__id", flat=True)
     )
 
@@ -485,13 +485,13 @@ def generate_real_cash_plans_for_households(households):
     for cash_plan in cash_plans:
         for hh in households:
             RealPaymentRecordFactory(
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 household=hh,
                 business_area=hh.business_area,
             )
     program.households.set(
         PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
-        .filter(cash_plan__in=cash_plans)
+        .filter(parent__in=cash_plans)
         .values_list("household__id", flat=True)
     )
 
@@ -551,7 +551,7 @@ class PaymentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Payment
 
-    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    parent = factory.SubFactory(PaymentPlanFactory)
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     status = fuzzy.FuzzyChoice(
         PaymentRecord.STATUS_CHOICE,
@@ -609,7 +609,7 @@ def generate_real_payment_plans():
     program.households.set(Household.objects.all().values_list("id", flat=True))
     for payment_plan in payment_plans:
         for household in program.households.all():
-            PaymentFactory(payment_plan=payment_plan, household=household, business_area=afghanistan)
+            PaymentFactory(parent=payment_plan, household=household, business_area=afghanistan)
 
     for delivery_type in PaymentRecord.DELIVERY_TYPE_CHOICE:
         delivery_mechanism = delivery_type[0]
@@ -623,7 +623,7 @@ def generate_payment_plan():
 
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
-    now = datetime.now()
+    now = timezone.now()
     address = "Ohio"
 
     rdi_pk = UUID("4d100000-0000-0000-0000-000000000000")
@@ -766,7 +766,7 @@ def generate_payment_plan():
     payment_1_pk = UUID("10000000-feed-beef-0000-00000badf00d")
     Payment.objects.update_or_create(
         pk=payment_1_pk,
-        payment_plan=payment_plan,
+        parent=payment_plan,
         excluded=False,
         business_area=afghanistan,
         household=household_1,
@@ -780,7 +780,7 @@ def generate_payment_plan():
     payment_2_pk = UUID("20000000-feed-beef-0000-00000badf00d")
     Payment.objects.update_or_create(
         pk=payment_2_pk,
-        payment_plan=payment_plan,
+        parent=payment_plan,
         excluded=False,
         business_area=afghanistan,
         household=household_2,

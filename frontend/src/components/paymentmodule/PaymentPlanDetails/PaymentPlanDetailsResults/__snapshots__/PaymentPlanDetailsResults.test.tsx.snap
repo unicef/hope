@@ -129,6 +129,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
         >
           <div
             class="sc-htoDjs iquLtL"
+            data-cy="chart-container"
           >
             <canvas
               class="chartjs-render-monitor"

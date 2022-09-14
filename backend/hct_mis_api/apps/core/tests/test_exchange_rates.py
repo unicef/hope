@@ -259,7 +259,7 @@ class TestFixExchangeRatesCommand(TestCase):
         )
         for currency, cash_plan in cash_plans_with_currency:
             RealPaymentRecordFactory(
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 currency=currency,
                 delivered_quantity=200,
             )

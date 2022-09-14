@@ -53,13 +53,17 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             household.size,
             str(household.admin2.name) if household.admin2 else "",
             str(payment.collector.full_name) if payment.collector else "",
-            str(payment.assigned_payment_channel.delivery_mechanism) if payment.assigned_payment_channel else "",
-            str(payment.financial_service_provider.name) if payment.financial_service_provider else "",
-            str(payment.currency),
+            self._prepare_list_of_delivery_mechanisms(payment.collector),
+            payment.financial_service_provider.name if payment.financial_service_provider else "",
+            payment.currency,
             payment.entitlement_quantity,
             payment.entitlement_quantity_usd,
         )
         self.ws_export_list.append(payment_row)
+
+    def _prepare_list_of_delivery_mechanisms(self, collector):
+        payment_channels = collector.payment_channels.all().distinct("delivery_mechanism")
+        return ", ".join(list(payment_channels.values_list("delivery_mechanism", flat=True)))
 
     def _add_payment_list(self):
         for payment in self.payment_list:
@@ -90,15 +94,12 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             self.wb.save(tmp.name)
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
-            self.payment_plan.export_xlsx_file = xlsx_obj
+            self.payment_plan.export_file = xlsx_obj
             self.payment_plan.save()
 
-    def get_email_context(self, user, per_fsp=False):
+    def get_email_context(self, user):
         payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
-        if per_fsp:
-            path_name = "download-payment-plan-payment-list-per-fsp"
-        else:
-            path_name = "download-payment-plan-payment-list"
+        path_name = "download-payment-plan-payment-list"
         link = self.get_link(reverse(path_name, args=[payment_verification_id]))
 
         msg = "Payment Plan Payment List xlsx file(s) were generated and below You have the link to download this file."
@@ -129,6 +130,12 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         ]
         fsp_ids = self.payment_list.values_list("financial_service_provider_id", flat=True)
         fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
+        if not fsp_qs:
+            logger.error(
+                f"Not possible to generate export file. "
+                f"There are no any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}."
+            )
+            raise
 
         # create temp zip file
         with NamedTemporaryFile() as tmp_zip:
@@ -168,15 +175,17 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
                         # add xlsx to zip
                         zip_file.writestr(filename, tmp.read())
 
+            zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
             xlsx_obj = FileTemp(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
                 created_by=user,
             )
             tmp_zip.seek(0)
-            zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
+            # remove old file
+            self.payment_plan.remove_export_file()
             xlsx_obj.file.save(zip_file_name, File(tmp_zip))
-            self.payment_plan.export_per_fsp_zip_file = xlsx_obj
+            self.payment_plan.export_file = xlsx_obj
             self.payment_plan.save()
 
     @staticmethod

@@ -123,7 +123,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_ASSIGNED)
         self.assertEqual(pp.total_households_count, 2)
         self.assertEqual(pp.total_individuals_count, 4)
-        self.assertEqual(pp.payments.count(), 2)
+        self.assertEqual(pp.payment_items.count(), 2)
 
     @freeze_time("2020-10-10")
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -178,8 +178,8 @@ class TestPaymentPlanServices(APITestCase):
         pp = PaymentPlanFactory(total_households_count=1)
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        p1 = PaymentFactory(payment_plan=pp, excluded=False, household=hh1)
-        self.assertEqual(pp.payments.count(), 1)
+        p1 = PaymentFactory(parent=pp, excluded=False, household=hh1)
+        self.assertEqual(pp.payment_items.count(), 1)
 
         new_targeting = TargetPopulationFactory()
         new_targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
@@ -203,7 +203,7 @@ class TestPaymentPlanServices(APITestCase):
             )
             updated_pp_1.refresh_from_db()
             self.assertNotEqual(old_pp_updated_at, updated_pp_1.updated_at)
-            self.assertEqual(updated_pp_1.payments.count(), 1)
+            self.assertEqual(updated_pp_1.payment_items.count(), 1)
             self.assertEqual(updated_pp_1.total_households_count, 1)
             self.assertNotEqual(old_pp_start_date, updated_pp_1.start_date)
 
@@ -218,7 +218,7 @@ class TestPaymentPlanServices(APITestCase):
             updated_pp_2.refresh_from_db()
             self.assertNotEqual(old_pp_exchange_rate, updated_pp_2.exchange_rate)
             self.assertEqual(updated_pp_2.total_households_count, 2)
-            self.assertEqual(updated_pp_2.payments.count(), 2)
+            self.assertEqual(updated_pp_2.payment_items.count(), 2)
             self.assertEqual(updated_pp_2.target_population, new_targeting)
             self.assertEqual(updated_pp_2.target_population.status, TargetPopulation.STATUS_ASSIGNED)
             self.assertEqual(updated_pp_2.program, updated_pp_2.target_population.program)

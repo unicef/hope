@@ -19,6 +19,7 @@ const DropzoneContainer = styled.div`
   justify-content: center;
   align-items: center;
   margin-top: ${({ theme }) => theme.spacing(5)}px;
+  padding: ${({ theme }) => theme.spacing(5)}px;
   cursor: pointer;
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
@@ -27,9 +28,13 @@ export function DropzoneField({
   onChange,
   loading,
   dontShowFilename,
+}: {
+  onChange: (acceptedFiles: File[]) => void;
+  loading: boolean;
+  dontShowFilename: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const onDrop = useCallback((acceptedFiles) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
     onChange(acceptedFiles);
   }, []);
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({

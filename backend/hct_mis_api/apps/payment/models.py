@@ -45,7 +45,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     start_date = models.DateTimeField(db_index=True)
     end_date = models.DateTimeField(db_index=True)
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE)
-    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
+    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=14)
 
     total_entitled_quantity = models.DecimalField(
         decimal_places=2,
@@ -276,24 +276,20 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     male_adults_count = models.PositiveSmallIntegerField(default=0)
     total_households_count = models.PositiveSmallIntegerField(default=0)
     total_individuals_count = models.PositiveSmallIntegerField(default=0)
-    xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
-    imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-    export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE)
-    export_per_fsp_zip_file = models.ForeignKey(
-        FileTemp, null=True, blank=True, related_name="+", on_delete=models.CASCADE
-    )
+    imported_file_date = models.DateTimeField(blank=True, null=True)
+    imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
+    export_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     steficon_rule = models.ForeignKey(
-        RuleCommit,
-        null=True,
-        on_delete=models.PROTECT,
-        related_name="payment_plans",
-        blank=True,
+        RuleCommit, null=True, on_delete=models.PROTECT, related_name="payment_plans", blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
+
+    def __str__(self):
+        return self.unicef_id
 
     @transition(
         field=background_action_status,
@@ -446,11 +442,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def all_active_payments(self):
-        return self.payments.exclude(excluded=True)
+        return self.payment_items.exclude(excluded=True)
 
     @property
     def can_be_locked(self) -> bool:
-        return self.payments.filter(payment_plan_hard_conflicted=False).exists()
+        return self.payment_items.filter(payment_plan_hard_conflicted=False).exists()
 
     def update_population_count_fields(self):
         households_ids = self.all_active_payments.values_list("household_id", flat=True)
@@ -515,24 +511,26 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         )
 
     @property
-    def has_payment_list_xlsx_file(self):
-        return bool(self.export_xlsx_file)
+    def has_export_file(self):
+        return bool(self.export_file)
 
     @property
-    def has_payment_list_per_fsp_zip_file(self):
-        return bool(self.export_per_fsp_zip_file)
-
-    @property
-    def xlsx_payment_list_file_link(self):
-        if self.export_xlsx_file:
-            return self.export_xlsx_file.file.url
+    def payment_list_export_file_link(self):
+        if self.export_file:
+            return self.export_file.file.url
         return None
 
-    @property
-    def xlsx_payment_list_per_fsp_file_link(self):
-        if self.export_per_fsp_zip_file:
-            return self.export_per_fsp_zip_file.file.url
-        return None
+    def remove_export_file(self):
+        if self.export_file:
+            self.export_file.file.delete(save=False)
+            self.export_file.delete()
+            self.export_file = None
+
+    def remove_imported_file(self):
+        if self.imported_file:
+            self.imported_file.file.delete(save=False)
+            self.imported_file.delete()
+            self.imported_file = None
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
@@ -714,7 +712,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
 
 
 class PaymentChannel(TimeStampedUUIDModel):
-    individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
+    individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="payment_channels")
     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, null=True)
     delivery_data = JSONField(default=dict, blank=True)
 
@@ -772,24 +770,24 @@ class CashPlan(GenericPaymentPlan):
 
     @property
     def payment_records_count(self):
-        return self.payment_records.count()
+        return self.payment_items.count()
 
     @property
     def bank_reconciliation_success(self):
-        return self.payment_records.filter(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION).count()
+        return self.payment_items.filter(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION).count()
 
     @property
     def bank_reconciliation_error(self):
-        return self.payment_records.filter(status=PaymentRecord.STATUS_ERROR).count()
+        return self.payment_items.filter(status=PaymentRecord.STATUS_ERROR).count()
 
     @cached_property
     def total_number_of_households(self):
         # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/84040
-        return self.payment_records.count()
+        return self.payment_items.count()
 
     @property
     def currency(self):
-        payment_record = self.payment_records.first()
+        payment_record = self.payment_items.first()
         return payment_record.currency if payment_record else None
 
     @property
@@ -812,7 +810,7 @@ class CashPlan(GenericPaymentPlan):
         else:
             params &= Q(verification__isnull=True)
 
-        payment_records = self.payment_records.filter(params).distinct()
+        payment_records = self.payment_items.filter(params).distinct()
 
         if extra_validation:
             payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
@@ -834,10 +832,10 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
 
     ca_id = models.CharField(max_length=255, null=True, db_index=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
-    cash_plan = models.ForeignKey(
+    parent = models.ForeignKey(
         "payment.CashPlan",
         on_delete=models.CASCADE,
-        related_name="payment_records",
+        related_name="payment_items",
         null=True,
     )
 
@@ -866,10 +864,10 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
 
 
 class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
-    payment_plan = models.ForeignKey(
+    parent = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
-        related_name="payments",
+        related_name="payment_items",
     )
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
@@ -877,14 +875,14 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
-    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
+    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.PROTECT, null=True)  # TODO: on_delete=CASCADE ?
 
     objects = PaymentManager()
 
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["payment_plan", "household"],
+                fields=["parent", "household"],
                 condition=Q(is_removed=False),
                 name="payment_plan_and_household",
             )
