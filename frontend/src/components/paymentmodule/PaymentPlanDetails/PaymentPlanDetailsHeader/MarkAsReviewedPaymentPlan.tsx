@@ -39,7 +39,6 @@ export const MarkAsReviewedPaymentPlan = ({
     Action.Review,
     paymentPlan.id,
     () => showMessage(t('Payment Plan has been marked as reviewed.')),
-    () => showMessage(t('Error during marking Payment Plan as reviewed.')),
     () => setMarkAsReviewedDialogOpen(false),
   );
 

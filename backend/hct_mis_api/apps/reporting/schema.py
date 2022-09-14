@@ -18,7 +18,7 @@ from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord, Payment
 from hct_mis_api.apps.reporting.filters import ReportFilter
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
 
@@ -92,6 +92,7 @@ class Query(graphene.ObjectType):
         years_list = [*range(current_year, current_year - 5, -1)]
         models = [
             (PaymentRecord, "delivery_date"),
+            (Payment, "delivery_date"),
             (GrievanceTicket, "created_at"),
         ]
         years_list_from_db = []

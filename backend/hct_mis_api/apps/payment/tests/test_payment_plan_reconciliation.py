@@ -1,10 +1,12 @@
-from datetime import timedelta
 import os
 import tempfile
+
 from zipfile import ZipFile
-from django.utils import timezone
+from datetime import timedelta
 from unittest.mock import patch
 from openpyxl import load_workbook
+
+from django.utils import timezone
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from hct_mis_api.apps.payment.celery_tasks import (
@@ -354,7 +356,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
         payment = PaymentFactory(
-            payment_plan=PaymentPlan.objects.get(id=payment_plan_id),
+            parent=PaymentPlan.objects.get(id=payment_plan_id),
             business_area=self.business_area,
             household=self.household_1,
             collector=self.individual_1,
@@ -550,7 +552,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             create_payment_plan_payment_list_xlsx_per_fsp(*call_args)
 
         payment_plan.refresh_from_db()
-        zip_file = payment_plan.export_per_fsp_zip_file
+        zip_file = payment_plan.export_file
         assert zip_file is not None
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -574,8 +576,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             assert sheet.max_row == 2, sheet.max_row
 
             self.assertEqual(sheet.cell(row=1, column=1).value, "payment_id")
-            assert payment_plan.payments.count() == 1
-            payment = payment_plan.payments.first()
+            assert payment_plan.payment_items.count() == 1
+            payment = payment_plan.payment_items.first()
             self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
 
             self.assertEqual(payment.assigned_payment_channel.delivery_mechanism, "Cash")

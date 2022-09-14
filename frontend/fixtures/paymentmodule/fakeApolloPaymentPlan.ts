@@ -99,9 +99,9 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   "authorizationNumberRequired": 1,
   "financeReviewNumberRequired": 1,
   "steficonRule": null,
-  "hasPaymentListXlsxFile": false,
-  "xlsxFileImportedDate": null,
-  "importedXlsxFileName": "",
+  "hasPaymentListExportFile": false,
+  "importedFileDate": null,
+  "importedFileName": "",
   "totalEntitledQuantityUsd": 376,
   "paymentsConflictsCount": 0,
   "deliveryMechanisms": [

@@ -277,7 +277,6 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     )
     @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_grievance_update_individual_data_change(self, _, permissions):
-        self.maxDiff = None
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         variables = {

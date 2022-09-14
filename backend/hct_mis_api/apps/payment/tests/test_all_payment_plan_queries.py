@@ -3,6 +3,8 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from freezegun import freeze_time
+from pytz import utc
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -51,7 +53,7 @@ class TestPaymentPlanQueries(APITestCase):
             maleAdultsCount
             totalHouseholdsCount
             totalIndividualsCount
-            payments{
+            paymentItems{
               totalCount
             }
             approvalProcess{
@@ -90,11 +92,12 @@ class TestPaymentPlanQueries(APITestCase):
         totalCount
         edges {
           node {
+            unicefId
             entitlementQuantity
             entitlementQuantityUsd
             deliveredQuantity
             deliveredQuantityUsd
-            paymentPlan {
+            parent {
               unicefId
             }
             paymentPlanHardConflicted
@@ -128,8 +131,8 @@ class TestPaymentPlanQueries(APITestCase):
             cls.pp = PaymentPlanFactory(
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
-                start_date=datetime(2020, 9, 10),
-                end_date=datetime(2020, 11, 10),
+                start_date=datetime(2020, 9, 10, tzinfo=utc),
+                end_date=datetime(2020, 11, 10, tzinfo=utc),
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
@@ -139,7 +142,7 @@ class TestPaymentPlanQueries(APITestCase):
             hh1 = HouseholdFactory(head_of_household=hoh1)
             hh2 = HouseholdFactory(head_of_household=hoh2)
             p1 = PaymentFactory(
-                payment_plan=cls.pp,
+                parent=cls.pp,
                 excluded=False,
                 household=hh1,
                 head_of_household=hoh1,
@@ -149,7 +152,7 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity_usd=100.00,
             )
             p2 = PaymentFactory(
-                payment_plan=cls.pp,
+                parent=cls.pp,
                 excluded=True,
                 household=hh2,
                 head_of_household=hoh2,
@@ -171,7 +174,7 @@ class TestPaymentPlanQueries(APITestCase):
             cls.pp_conflicted.save()
 
             p_conflicted = PaymentFactory(
-                payment_plan=cls.pp_conflicted,
+                parent=cls.pp_conflicted,
                 household=p2.household,
                 excluded=False,
                 entitlement_quantity=100.00,
@@ -180,7 +183,7 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity_usd=100.00,
             )
             p_not_conflicted = PaymentFactory(
-                payment_plan=cls.pp_conflicted,
+                parent=cls.pp_conflicted,
                 excluded=True,
                 entitlement_quantity=00.00,
                 entitlement_quantity_usd=00.00,
@@ -217,7 +220,6 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_fetch_all_payment_plans(self):
-        self.maxDiff = None
         self.snapshot_graphql_request(
             request_string=self.ALL_PAYMENT_PLANS_QUERY,
             context={"user": self.user},
