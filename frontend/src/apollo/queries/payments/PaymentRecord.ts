@@ -21,7 +21,7 @@ export const PAYMENT_RECORD_QUERY = gql`
         id
         name
       }
-      cashPlan {
+      parent {
         id
         caId
         program {
