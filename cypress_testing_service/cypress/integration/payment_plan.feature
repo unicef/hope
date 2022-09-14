@@ -40,7 +40,7 @@ Feature: Create Payment Plan
         Then I see the Payment Plan as in authorization
         When I authorize the Payment Plan
         Then I see the Payment Plan as in review
-        When I approve the Payment Plan
+        When I finalize the Payment Plan
         Then I see the Payment Plan as accepted
 # And I can export xlsx to zip file
 
