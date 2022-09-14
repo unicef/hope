@@ -19,21 +19,26 @@ logger = logging.getLogger(__name__)
 INDEX = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
 
 
-def bulk_update_assigned_to(grievance_tickets):
+def bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id):
     es = Elasticsearch("http://elasticsearch:9200")
 
     documents_to_update = []
-    for ticket in grievance_tickets:
+    for ticket_id in grievance_tickets_ids:
         document = {
-            **GrievanceTicketDocument().prepare(ticket),
-            "_id": ticket.id,
-            "assigned_to": {
-                "id": str(grievance_tickets.assigned_to_id)
+            "_op_type": "update",
+            "_index": INDEX,
+            "_id": ticket_id,
+            "_source": {
+                "doc": {
+                    "assigned_to": {
+                        "id": str(assigned_to_id)
+                    }
+                }
             }
         }
         documents_to_update.append(document)
-        bulk(es, documents_to_update, index=INDEX)
-    logger.info("GrievanceDocuments have been updated.")
+        bulk(es, documents_to_update)
+    logger.info(f"GrievanceDocuments with {','.join([str(_id) for _id in grievance_tickets_ids])} have been updated.")
 
 
 @registry.register_document
