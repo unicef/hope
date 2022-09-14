@@ -178,10 +178,11 @@ class DocumentTypeFactory(factory.DjangoModelFactory):
 class DocumentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Document
-        django_get_or_create = ("type",)
+        # django_get_or_create = ("type",)
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
-    type = factory.SubFactory(DocumentTypeFactory)
+    type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by("?").first())
+    # type = factory.SubFactory(DocumentTypeFactory)
     individual = factory.SubFactory(IndividualFactory)
 
 
