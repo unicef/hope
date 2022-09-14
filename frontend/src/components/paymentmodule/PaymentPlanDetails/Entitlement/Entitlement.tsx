@@ -17,6 +17,7 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   PaymentPlanDocument,
   PaymentPlanQuery,
+  PaymentPlanStatus,
   useAllSteficonRulesQuery,
   useExportXlsxPpListMutation,
   useSetSteficonRuleOnPpListMutation,
@@ -164,7 +165,11 @@ export const Entitlement = ({
                 <Button
                   variant='contained'
                   color='primary'
-                  disabled={loadingSetSteficonRule || !steficonRuleValue}
+                  disabled={
+                    loadingSetSteficonRule ||
+                    !steficonRuleValue ||
+                    paymentPlan.status !== PaymentPlanStatus.Locked
+                  }
                   data-cy='button-apply-steficon'
                   onClick={async () => {
                     try {
@@ -201,20 +206,24 @@ export const Entitlement = ({
               alignItems='center'
               flexDirection='column'
             >
-              {paymentPlan.hasPaymentListXlsxFile ? (
+              {paymentPlan.hasPaymentListExportFile ? (
                 <Button
                   color='primary'
                   startIcon={<DownloadIcon />}
                   component='a'
                   download
                   href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
+                  disabled={paymentPlan.status !== PaymentPlanStatus.Locked}
                 >
                   {t('DOWNLOAD TEMPLATE')}
                 </Button>
               ) : (
                 <LoadingButton
                   loading={loadingExport}
-                  disabled={loadingExport}
+                  disabled={
+                    loadingExport ||
+                    paymentPlan.status !== PaymentPlanStatus.Locked
+                  }
                   color='primary'
                   startIcon={<GetApp />}
                   onClick={async () => {
@@ -253,20 +262,20 @@ export const Entitlement = ({
               <Box>
                 <ImportXlsxPaymentPlanPaymentList paymentPlan={paymentPlan} />
               </Box>
-              {paymentPlan?.importedXlsxFileName && (
+              {paymentPlan?.importedFileName && (
                 <Box alignItems='center' display='flex'>
                   <SpinaczIconContainer>
                     <AttachFileIcon fontSize='inherit' />
                   </SpinaczIconContainer>
                   <Box mr={1}>
                     <GreyTextSmall>
-                      {paymentPlan?.importedXlsxFileName}
+                      {paymentPlan?.importedFileName}
                     </GreyTextSmall>
                   </Box>
                   <GreyTextSmall>
-                    {paymentPlan?.xlsxFileImportedDate ? (
+                    {paymentPlan?.importedFileDate ? (
                       <UniversalMoment>
-                        {paymentPlan?.xlsxFileImportedDate}
+                        {paymentPlan?.importedFileDate}
                       </UniversalMoment>
                     ) : null}
                   </GreyTextSmall>

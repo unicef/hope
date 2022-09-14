@@ -36,7 +36,7 @@ class PaymentRecordFilter(FilterSet):
 
     class Meta:
         fields = (
-            "parent",
+            "cash_plan",
             "household",
         )
         model = PaymentRecord
@@ -281,18 +281,12 @@ class PaymentFilter(FilterSet):
             q &= ~Q(excluded=True)
         return qs.filter(q)
 
-    def filter_queryset(self, queryset):
-        if not self.form.cleaned_data.get("order_by"):
-            queryset = queryset.order_by("unicef_id")
-        return super().filter_queryset(queryset)
-
     class Meta:
         fields = tuple()
         model = Payment
 
     order_by = OrderingFilter(
         fields=(
-            "id",
             "unicef_id",
             "status",
             "household_id",
@@ -332,5 +326,7 @@ class PaymentFilter(FilterSet):
                 output_field=CharField(),
             )
         )
+        if not self.form.cleaned_data.get("order_by"):
+            queryset = queryset.order_by("unicef_id")
 
         return super().filter_queryset(queryset)

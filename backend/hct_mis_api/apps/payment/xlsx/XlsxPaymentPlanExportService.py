@@ -94,15 +94,12 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             self.wb.save(tmp.name)
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
-            self.payment_plan.export_xlsx_file = xlsx_obj
+            self.payment_plan.export_file = xlsx_obj
             self.payment_plan.save()
 
-    def get_email_context(self, user, per_fsp=False):
+    def get_email_context(self, user):
         payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
-        if per_fsp:
-            path_name = "download-payment-plan-payment-list-per-fsp"
-        else:
-            path_name = "download-payment-plan-payment-list"
+        path_name = "download-payment-plan-payment-list"
         link = self.get_link(reverse(path_name, args=[payment_verification_id]))
 
         msg = "Payment Plan Payment List xlsx file(s) were generated and below You have the link to download this file."
@@ -186,9 +183,9 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
             )
             tmp_zip.seek(0)
             # remove old file
-            self.payment_plan.remove_export_per_fsp_zip_file()
+            self.payment_plan.remove_export_file()
             xlsx_obj.file.save(zip_file_name, File(tmp_zip))
-            self.payment_plan.export_per_fsp_zip_file = xlsx_obj
+            self.payment_plan.export_file = xlsx_obj
             self.payment_plan.save()
 
     @staticmethod

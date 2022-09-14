@@ -761,6 +761,11 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             logger.error(msg)
             raise GraphQLError(msg)
 
+        if not payment_plan.all_active_payments:
+            msg = "Export is not impossible because Payment list is empty"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
         return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user=user)
 
 

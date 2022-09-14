@@ -277,12 +277,9 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     male_adults_count = models.PositiveSmallIntegerField(default=0)
     total_households_count = models.PositiveSmallIntegerField(default=0)
     total_individuals_count = models.PositiveSmallIntegerField(default=0)
-    xlsx_file_imported_date = models.DateTimeField(blank=True, null=True)
-    imported_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    export_xlsx_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    export_per_fsp_zip_file = models.ForeignKey(
-        FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
-    )
+    imported_file_date = models.DateTimeField(blank=True, null=True)
+    imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
+    export_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
@@ -527,42 +524,26 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         )
 
     @property
-    def has_payment_list_xlsx_file(self):
-        return bool(self.export_xlsx_file)
+    def has_export_file(self):
+        return bool(self.export_file)
 
     @property
-    def has_payment_list_per_fsp_zip_file(self):
-        return bool(self.export_per_fsp_zip_file)
-
-    @property
-    def xlsx_payment_list_file_link(self):
-        if self.export_xlsx_file:
-            return self.export_xlsx_file.file.url
-        return None
-
-    @property
-    def xlsx_payment_list_per_fsp_file_link(self):
-        if self.export_per_fsp_zip_file:
-            return self.export_per_fsp_zip_file.file.url
+    def payment_list_export_file_link(self):
+        if self.export_file:
+            return self.export_file.file.url
         return None
 
     def remove_export_file(self):
-        if self.export_xlsx_file:
-            self.export_xlsx_file.file.delete(save=False)
-            self.export_xlsx_file.delete()
-            self.export_xlsx_file = None
+        if self.export_file:
+            self.export_file.file.delete(save=False)
+            self.export_file.delete()
+            self.export_file = None
 
     def remove_imported_file(self):
-        if self.imported_xlsx_file:
-            self.imported_xlsx_file.file.delete(save=False)
-            self.imported_xlsx_file.delete()
-            self.imported_xlsx_file = None
-
-    def remove_export_per_fsp_zip_file(self):
-        if self.export_per_fsp_zip_file:
-            self.export_per_fsp_zip_file.file.delete(save=False)
-            self.export_per_fsp_zip_file.delete()
-            self.export_per_fsp_zip_file = None
+        if self.imported_file:
+            self.imported_file.file.delete(save=False)
+            self.imported_file.delete()
+            self.imported_file = None
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
