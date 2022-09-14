@@ -240,19 +240,7 @@ Then('I should see the Set up FSP page', () => {
   });
 });
 
-When('I select only one Delivery Mechanism', () => {
-  cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]', {
-    timeout: 10000,
-  }).click();
-  cy.get('[data-cy="select-option-Mobile Money"]').click();
-  cy.get('[data-cy="button-next-save"]').click({ force: true });
-});
-
-Then('I should see the warning', () => {
-  cy.get('[data-cy="warning-box"]');
-});
-
-When('I select more Delivery Mechanisms', () => {
+When('I select the delivery mechanisms', () => {
   cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]').click();
   cy.get('[data-cy="select-option-Transfer"]').click();
   cy.get('[data-cy="button-next-save"]').click({ force: true });
@@ -261,3 +249,23 @@ When('I select more Delivery Mechanisms', () => {
 Then('I should be able to assign FSPs', () => {
   cy.get('[data-cy="select-deliveryMechanisms[0].fsp"]');
 });
+
+When('I select the FSPs and save', () => {
+  cy.get('[data-cy="select-deliveryMechanisms[0].fsp"]').click();
+  cy.get('[data-cy="select-option-Test FSP Transfer"]').click();
+  cy.get('[data-cy="button-next-save"]').click({ force: true });
+})
+
+Then('I should see volumes by delivery mechanisms', () => {
+  cy.get("h6").contains("Volume by Delivery Mechanism in USD")
+})
+
+When("I lock the FSPs", () => {
+  cy.get("[data-cy='button-lock-plan']").click({ force: true })
+  cy.get("[data-cy='button-submit']").click({ force: true })
+
+})
+
+Then("I should see that the status is FSP Locked", () => {
+  cy.get("[data-cy='status-container']").contains("FSP Locked")
+})
