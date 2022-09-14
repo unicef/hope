@@ -3,27 +3,31 @@
 exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`] = `
 <div>
   <div
-    class="sc-bdVaJa iMXEqU"
-    data-cy="loading-container"
+    data-cy="imported-individuals-table"
   >
     <div
-      class="MuiCircularProgress-root MuiCircularProgress-colorPrimary MuiCircularProgress-indeterminate"
-      role="progressbar"
-      style="width: 40px; height: 40px;"
+      class="sc-bdVaJa iMXEqU"
+      data-cy="loading-container"
     >
-      <svg
-        class="MuiCircularProgress-svg"
-        viewBox="22 22 44 44"
+      <div
+        class="MuiCircularProgress-root MuiCircularProgress-colorPrimary MuiCircularProgress-indeterminate"
+        role="progressbar"
+        style="width: 40px; height: 40px;"
       >
-        <circle
-          class="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate"
-          cx="44"
-          cy="44"
-          fill="none"
-          r="20.2"
-          stroke-width="3.6"
-        />
-      </svg>
+        <svg
+          class="MuiCircularProgress-svg"
+          viewBox="22 22 44 44"
+        >
+          <circle
+            class="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate"
+            cx="44"
+            cy="44"
+            fill="none"
+            r="20.2"
+            stroke-width="3.6"
+          />
+        </svg>
+      </div>
     </div>
   </div>
 </div>
@@ -32,369 +36,373 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
 exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 1`] = `
 <div>
   <div
-    class="makeStyles-root-1"
+    data-cy="imported-individuals-table"
   >
     <div
-      class="MuiTableContainer-root"
+      class="makeStyles-root-1"
     >
       <div
-        class="MuiBox-root MuiBox-root-7"
+        class="MuiTableContainer-root"
       >
         <div
-          class="MuiBox-root MuiBox-root-8"
-        />
-      </div>
-      <table
-        aria-label="enhanced table"
-        aria-labelledby="tableTitle"
-        class="MuiTable-root makeStyles-table-3"
-      >
-        <thead
-          class="MuiTableHead-root"
-        >
-          <tr
-            class="MuiTableRow-root MuiTableRow-head"
-          >
-            <th
-              class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-              scope="col"
-            >
-              <span
-                aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                role="button"
-                tabindex="0"
-              >
-                Individual ID
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                  />
-                </svg>
-              </span>
-            </th>
-            <th
-              class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-              scope="col"
-            >
-              <span
-                aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                role="button"
-                tabindex="0"
-              >
-                Individual
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                  />
-                </svg>
-              </span>
-            </th>
-            <th
-              class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-              scope="col"
-            >
-              <span
-                aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                role="button"
-                tabindex="0"
-              >
-                Role
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                  />
-                </svg>
-              </span>
-            </th>
-            <th
-              class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-              scope="col"
-            >
-              <span
-                aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                role="button"
-                tabindex="0"
-              >
-                Relationship to HoH
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                  />
-                </svg>
-              </span>
-            </th>
-            <th
-              class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-              scope="col"
-            >
-              <span
-                aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                role="button"
-                tabindex="0"
-              >
-                Date of Birth
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                  />
-                </svg>
-              </span>
-            </th>
-            <th
-              class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-              scope="col"
-            >
-              <span
-                aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                role="button"
-                tabindex="0"
-              >
-                Gender
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                  />
-                </svg>
-              </span>
-            </th>
-            <th
-              class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-              scope="col"
-            >
-              <span
-                aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                role="button"
-                tabindex="0"
-              >
-                Dedupe within Batch
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                  />
-                </svg>
-              </span>
-            </th>
-            <th
-              class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-              scope="col"
-            >
-              <span
-                aria-disabled="false"
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                role="button"
-                tabindex="0"
-              >
-                Dedupe against Population
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                  />
-                </svg>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="MuiTableBody-root"
-        >
-          <tr
-            class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
-            role="checkbox"
-          >
-            <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-            >
-              <a
-                class="sc-bxivhb iRvpKE"
-                href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozYjcwYzY4MC0xZWI2LTQ0ODAtOWExNS0yMDMwNDFhZTI4NzY="
-              />
-            </td>
-            <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-            >
-              None
-            </td>
-            <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-            >
-              Nephew / Niece
-            </td>
-            <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-            >
-              <time
-                datetime="670377600000"
-              >
-                31 Mar 1991
-              </time>
-            </td>
-            <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-            >
-              Male
-            </td>
-            <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-            >
-              Unique in batch
-            </td>
-            <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-            >
-              Unique
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div
-      class="MuiTablePagination-root"
-    >
-      <div
-        class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
-      >
-        <div
-          class="MuiTablePagination-spacer"
-        />
-        <p
-          class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
-          id="mui-5806"
-        >
-          Rows per page:
-        </p>
-        <div
-          class="MuiInputBase-root MuiTablePagination-input MuiTablePagination-selectRoot"
+          class="MuiBox-root MuiBox-root-7"
         >
           <div
-            aria-haspopup="listbox"
-            aria-labelledby="mui-5806 mui-73230"
-            class="MuiSelect-root MuiSelect-select MuiTablePagination-select MuiSelect-selectMenu MuiInputBase-input"
-            id="mui-73230"
-            role="button"
-            tabindex="0"
-          >
-            10
-          </div>
-          <input
-            aria-hidden="true"
-            class="MuiSelect-nativeInput"
-            tabindex="-1"
-            value="10"
+            class="MuiBox-root MuiBox-root-8"
           />
-          <svg
-            aria-hidden="true"
-            class="MuiSvgIcon-root MuiSelect-icon MuiTablePagination-selectIcon"
-            focusable="false"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M7 10l5 5 5-5z"
-            />
-          </svg>
         </div>
-        <p
-          class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+        <table
+          aria-label="enhanced table"
+          aria-labelledby="tableTitle"
+          class="MuiTable-root makeStyles-table-3"
         >
-          1-10 of 477
-        </p>
+          <thead
+            class="MuiTableHead-root"
+          >
+            <tr
+              class="MuiTableRow-root MuiTableRow-head"
+            >
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  role="button"
+                  tabindex="0"
+                >
+                  Individual ID
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  role="button"
+                  tabindex="0"
+                >
+                  Individual
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  role="button"
+                  tabindex="0"
+                >
+                  Role
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  role="button"
+                  tabindex="0"
+                >
+                  Relationship to HoH
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  role="button"
+                  tabindex="0"
+                >
+                  Date of Birth
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  role="button"
+                  tabindex="0"
+                >
+                  Gender
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  role="button"
+                  tabindex="0"
+                >
+                  Dedupe within Batch
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  role="button"
+                  tabindex="0"
+                >
+                  Dedupe against Population
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="MuiTableBody-root"
+          >
+            <tr
+              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bxivhb iRvpKE"
+                  href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozYjcwYzY4MC0xZWI2LTQ0ODAtOWExNS0yMDMwNDFhZTI4NzY="
+                />
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                None
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Nephew / Niece
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <time
+                  datetime="670377600000"
+                >
+                  31 Mar 1991
+                </time>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Male
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Unique in batch
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Unique
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div
+        class="MuiTablePagination-root"
+      >
         <div
-          class="MuiTablePagination-actions"
+          class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
         >
-          <button
-            aria-label="Previous page"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
-            disabled=""
-            tabindex="-1"
-            title="Previous page"
-            type="button"
+          <div
+            class="MuiTablePagination-spacer"
+          />
+          <p
+            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+            id="mui-5806"
           >
-            <span
-              class="MuiIconButton-label"
-            >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root"
-                focusable="false"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
-                />
-              </svg>
-            </span>
-          </button>
-          <button
-            aria-label="Next page"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit"
-            tabindex="0"
-            title="Next page"
-            type="button"
+            Rows per page:
+          </p>
+          <div
+            class="MuiInputBase-root MuiTablePagination-input MuiTablePagination-selectRoot"
           >
-            <span
-              class="MuiIconButton-label"
+            <div
+              aria-haspopup="listbox"
+              aria-labelledby="mui-5806 mui-73230"
+              class="MuiSelect-root MuiSelect-select MuiTablePagination-select MuiSelect-selectMenu MuiInputBase-input"
+              id="mui-73230"
+              role="button"
+              tabindex="0"
             >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root"
-                focusable="false"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
-                />
-              </svg>
-            </span>
-            <span
-              class="MuiTouchRipple-root"
+              10
+            </div>
+            <input
+              aria-hidden="true"
+              class="MuiSelect-nativeInput"
+              tabindex="-1"
+              value="10"
             />
-          </button>
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiSelect-icon MuiTablePagination-selectIcon"
+              focusable="false"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M7 10l5 5 5-5z"
+              />
+            </svg>
+          </div>
+          <p
+            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+          >
+            1-10 of 477
+          </p>
+          <div
+            class="MuiTablePagination-actions"
+          >
+            <button
+              aria-label="Previous page"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+              disabled=""
+              tabindex="-1"
+              title="Previous page"
+              type="button"
+            >
+              <span
+                class="MuiIconButton-label"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
+                  />
+                </svg>
+              </span>
+            </button>
+            <button
+              aria-label="Next page"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit"
+              tabindex="0"
+              title="Next page"
+              type="button"
+            >
+              <span
+                class="MuiIconButton-label"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
+                  />
+                </svg>
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+          </div>
         </div>
       </div>
     </div>
