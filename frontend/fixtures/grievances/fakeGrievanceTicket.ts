@@ -542,7 +542,7 @@ export const fakeGrievanceTicket = {
             id:
               'UGF5bWVudFJlY29yZE5vZGU6ZGViY2E5YWQtNzBhNS00MDk2LTkxYjctMmU3MGRkZjRhYmMy',
             fullName: 'Brian Morgan',
-            cashPlan: {
+            parent: {
               id:
                 'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
               totalPersonsCovered: 2,
@@ -566,7 +566,7 @@ export const fakeGrievanceTicket = {
             id:
               'UGF5bWVudFJlY29yZE5vZGU6ODZhZmQ4NjQtYmNlNS00N2Q0LWE5YmEtYzlkZTVjZGYwMDJm',
             fullName: 'Jennifer Weber MD',
-            cashPlan: {
+            parent: {
               id:
                 'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
               totalPersonsCovered: 2,
@@ -590,7 +590,7 @@ export const fakeGrievanceTicket = {
             id:
               'UGF5bWVudFJlY29yZE5vZGU6ZDJiMTAzNjUtMDBlMy00ZjMyLTg2MTUtN2UyMDUxM2YyZmQ1',
             fullName: 'Jason Jacobs',
-            cashPlan: {
+            parent: {
               id:
                 'Q2FzaFBsYW5Ob2RlOmUwZGUxMGMyLTMxNWUtNDhjYS1hNDU5LWM2NTQyZDc1MmJlNw==',
               totalPersonsCovered: 3,
@@ -614,7 +614,7 @@ export const fakeGrievanceTicket = {
             id:
               'UGF5bWVudFJlY29yZE5vZGU6NGM4ZGYyYjQtNTI5Ni00YmJhLTgzOTQtNGNkMGI0M2MyZjEy',
             fullName: 'Micheal Massey',
-            cashPlan: {
+            parent: {
               id:
                 'Q2FzaFBsYW5Ob2RlOmUwZGUxMGMyLTMxNWUtNDhjYS1hNDU5LWM2NTQyZDc1MmJlNw==',
               totalPersonsCovered: 3,
@@ -638,7 +638,7 @@ export const fakeGrievanceTicket = {
             id:
               'UGF5bWVudFJlY29yZE5vZGU6YzZlYzMwMDUtZWUzZC00MjI3LWI2YzctM2MxZDcxNzQwYTA4',
             fullName: 'Stephen Smith',
-            cashPlan: {
+            parent: {
               id:
                 'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
               totalPersonsCovered: 4,
@@ -662,7 +662,7 @@ export const fakeGrievanceTicket = {
             id:
               'UGF5bWVudFJlY29yZE5vZGU6OThjMzVmNzEtOWY1Ni00NjMwLWJjNWItOWFlODkxNmU0OThh',
             fullName: 'Jessica Thornton',
-            cashPlan: {
+            parent: {
               id:
                 'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
               totalPersonsCovered: 4,
@@ -686,7 +686,7 @@ export const fakeGrievanceTicket = {
             id:
               'UGF5bWVudFJlY29yZE5vZGU6MDVkNDkyNjctMjhhNy00ZDU5LTllOTgtYmRjMjJjNGRlNzg3',
             fullName: 'Bethany Rodriguez',
-            cashPlan: {
+            parent: {
               id:
                 'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
               totalPersonsCovered: 4,
@@ -710,7 +710,7 @@ export const fakeGrievanceTicket = {
             id:
               'UGF5bWVudFJlY29yZE5vZGU6MjEwMWVmNmUtODZjYi00MDI2LWI1MmUtMzdjMmQyNWQzZmE0',
             fullName: 'Melanie Haley MD',
-            cashPlan: {
+            parent: {
               id:
                 'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
               totalPersonsCovered: 4,
@@ -734,7 +734,7 @@ export const fakeGrievanceTicket = {
             id:
               'UGF5bWVudFJlY29yZE5vZGU6NWRhNGFjZjYtYjc5My00ZThkLWJlYzktMDRiMTI4ZTJkOGNi',
             fullName: 'Greg Cohen',
-            cashPlan: {
+            parent: {
               id:
                 'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
               totalPersonsCovered: 4,
