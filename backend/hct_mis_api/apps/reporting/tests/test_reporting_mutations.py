@@ -71,7 +71,7 @@ class TestReportingMutation(APITestCase):
                 {
                     "size": family_size,
                     "address": "Lorem Ipsum",
-                    "country_origin": "PL",
+                    "country_origin": geo_models.Country.objects.get(name="Poland"),
                     "business_area": cls.business_area,
                     "last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1],
                 },
