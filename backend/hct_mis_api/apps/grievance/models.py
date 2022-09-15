@@ -410,7 +410,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
     def issue_type_to_string(self):
-        if self.category in range(2, 4):
+        if self.category in range(2, 5):
             return self.get_issue_type()
 
     def grievance_type_to_string(self):
