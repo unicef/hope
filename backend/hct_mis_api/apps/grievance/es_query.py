@@ -17,12 +17,12 @@ TERM_FIELDS = (
 )
 
 OBJECT_FIELDS = (
-    "admin",
+    "admin2",
     "registration_data_import",
     "assigned_to",
 )
 
-TERMS_FIELDS = ("status", "admin")
+TERMS_FIELDS = ("status", "admin2")
 
 
 def execute_es_query(query_dict):
@@ -42,6 +42,8 @@ def create_es_query(options):
     query_search = []
     query_term_fields = []
     query_terms_fields = []
+
+    options["admin2"] = options.pop("admin")
 
     grievance_status = options.pop("grievance_status", "active")
     created_at_range = options.pop("created_at_range", None)
@@ -127,10 +129,10 @@ def create_es_query(options):
                 })
 
         if k in TERMS_FIELDS and v not in ([""], [None]):
-            if k == "admin":
+            if k == "admin2":
                 query_terms_fields.append({
                     "terms": {
-                        f"{k}.id.keyword": v
+                        f"{k}.id": v
                     }
                 })
             else:
