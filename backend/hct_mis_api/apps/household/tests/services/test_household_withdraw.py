@@ -38,4 +38,4 @@ class TestHouseholdWithdraw(TestCase):
 
         self.assertEqual(Household.objects.filter(withdrawn=True).count(), 1)
         self.assertEqual(Individual.objects.filter(withdrawn=True).count(), 5)
-        self.assertEqual(Document.objects.filter(status=Document.STATUS_NEED_INVESTIGATION).count(), 40)
+        self.assertEqual(Document.objects.filter(status=Document.STATUS_INVALID).count(), 25)

@@ -2,7 +2,6 @@ import logging
 import re
 from datetime import date
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -15,6 +14,8 @@ from django.db.models import DecimalField, JSONField
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -435,7 +436,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
     def save(self, *args, **kwargs):
-        from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+        from hct_mis_api.apps.targeting.models import (
+            HouseholdSelection,
+            TargetPopulation,
+        )
 
         if self.withdrawn:
             HouseholdSelection.objects.filter(
@@ -861,19 +865,17 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def sanction_list_last_check(self):
         return cache.get("sanction_list_last_check")
 
-    def withdraw(self, save=True):
+    def withdraw(self):
+        self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
+        self.save()
 
-        if save:
-            self.save()
-
-    def unwithdraw(self, save=True):
+    def unwithdraw(self):
+        self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)
         self.withdrawn = False
         self.withdrawn_date = None
-
-        if save:
-            self.save()
+        self.save()
 
     def mark_as_duplicate(self, original_individual=None):
         if original_individual is not None:
