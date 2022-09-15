@@ -122,6 +122,7 @@ newrelic = "^7.10.0"
 djangorestframework = "^3.13.1"
 django-silk = "5.0.1"
 django-reversion = "^5.0.2"
+natural-keys = "^2.0.0"
 
 [tool.poetry.dev-dependencies]
 django-webtest = "^1.9.10"
