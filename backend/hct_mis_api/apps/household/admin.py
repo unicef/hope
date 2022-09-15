@@ -205,7 +205,10 @@ class HouseholdAdmin(
             try:
                 with atomic():
                     service = HouseholdWithdraw(obj)
-                    service.withdraw()
+                    if not obj.withdrawn:
+                        service.withdraw()
+                    else:
+                        service.unwithdraw()
                     service.change_tickets_status(tickets)
 
                     if obj.withdrawn:
