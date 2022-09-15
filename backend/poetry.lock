@@ -1150,6 +1150,14 @@ setproctitle = ["setproctitle"]
 tornado = ["tornado (>=0.2)"]
 
 [[package]]
+name = "html-json-forms"
+version = "1.1.1"
+description = "Implementation of the HTML JSON Forms spec for use with the Django REST Framework."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "idna"
 version = "3.4"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -1358,6 +1366,17 @@ description = "Experimental type system extensions for programs checked with the
 category = "main"
 optional = false
 python-versions = "*"
+
+[[package]]
+name = "natural-keys"
+version = "2.0.0"
+description = "Enhanced support for natural keys in Django and Django REST Framework"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+html-json-forms = ">=1.0.0"
 
 [[package]]
 name = "newrelic"
@@ -2244,7 +2263,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "ba9a4356785fd7b1a8b19deb95c135b245b24338438d57e16ef7dc712feb6f2a"
+content-hash = "4940f7b9d9cf067866ab0bff53cb0cc0cc1ad81083ae699704459ad846079031"
 
 [metadata.files]
 amqp = []
@@ -2334,6 +2353,7 @@ graphql-core = []
 graphql-relay = []
 greenlet = []
 gunicorn = []
+html-json-forms = []
 idna = []
 ipdb = []
 ipython = []
@@ -2349,6 +2369,7 @@ matplotlib-inline = []
 mccabe = []
 msrest = []
 mypy-extensions = []
+natural-keys = []
 newrelic = []
 oauthlib = []
 odfpy = []
