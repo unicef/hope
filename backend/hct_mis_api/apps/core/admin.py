@@ -255,7 +255,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             mail = EmailMessage(
                 f"CashAssist - UNICEF - {obj.name} user updates",
                 f"""Dear GSD,
-                
+
 In CashAssist, please update the users in {environment} UNICEF - {obj.name} business unit as per the attached DOAP.
 Many thanks,
 UNICEF HOPE""",

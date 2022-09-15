@@ -15,6 +15,7 @@ import hct_mis_api.apps.payment.views
 import hct_mis_api.apps.registration_datahub.views
 import hct_mis_api.apps.sanction_list.views
 import hct_mis_api.apps.targeting.views
+from hct_mis_api.apps.ba_admin.site import ba_site
 from hct_mis_api.apps.core.rest_api import all_fields_attributes
 from hct_mis_api.apps.core.views import (
     UploadFile,
@@ -77,6 +78,7 @@ api_patterns = [
         include("hct_mis_api.apps.power_query.urls"),
     ),
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
+    path(f"{settings.BA_PANEL_URL}/", ba_site.urls),
     path("hh-status", hct_mis_api.apps.household.views.HouseholdStatusView.as_view()),
     path("upload-file/", UploadFile.as_view(), name="upload-file"),
 ]

@@ -1,0 +1,31 @@
+{% extends "ba_admin/index.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}
+    {% include "admin/nav_sidebar.html" %}
+{% endblock %}
+{% block select_ba_form %}{% endblock %}
+
+
+{% block content %}
+    <div id="content-main">
+        <form method="post">
+            <table>
+                {% csrf_token %}
+                {{ form }}
+            </table>
+            <input type="submit">
+        </form>
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

@@ -7,7 +7,7 @@ def create_ca_roles(apps, schema_editor):
     Role = apps.get_model('account', 'Role')
     for role in ['Planner/Preparer', 'Approver', 'Authorizer', 'Releaser', 'Card Issuer',
                  'Reconciler', 'Entitlement Formula ', 'Data Exporter', 'Targeting Reader',
-                 'Registration Reader Advanced', 'Cash Assistance Reader',]:
+                 'Registration Reader Advanced', 'Cash Assistance Reader', ]:
         Role.objects.create(name=role, subsystem='CA')
 
 

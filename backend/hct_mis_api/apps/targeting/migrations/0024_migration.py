@@ -7,7 +7,7 @@ def chunk_update(model, callback, fields):
     offset = 0
     chunk_size = 100
 
-    while records := model.objects.all()[offset : offset + chunk_size]:
+    while records:= model.objects.all()[offset : offset + chunk_size]:
         offset += chunk_size
         for record in records:
             callback(record)

@@ -303,7 +303,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     def get_criteria_string(self):
         try:
             return self.targeting_criteria.get_criteria_string()
-        except:
+        except BaseException:
             return ""
 
     @property

@@ -8,7 +8,6 @@ class ViewPermissionsMixinBase(AccessMixin):
     def has_permissions(self):
         return NotImplemented
 
-
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()

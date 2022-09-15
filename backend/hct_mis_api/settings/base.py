@@ -28,6 +28,7 @@ WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
 FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
+BA_PANEL_URL = env("BA_PANEL_URL")
 
 ####
 # Other settings
@@ -215,6 +216,7 @@ TEMPLATES = [
 ]
 PROJECT_APPS = [
     "hct_mis_api.api",
+    "hct_mis_api.apps.ba_admin.apps.Config",
     "hct_mis_api.apps.geo",
     "hct_mis_api.apps.account.apps.AccountConfig",
     "hct_mis_api.apps.core.apps.CoreConfig",

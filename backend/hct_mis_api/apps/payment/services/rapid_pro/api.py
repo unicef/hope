@@ -73,7 +73,7 @@ class RapidProAPI:
                 errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
             return errors
 
-        except:
+        except BaseException:
             return False
 
     def _get_url(self):
@@ -88,7 +88,7 @@ class RapidProAPI:
         # urns - the URNs you want to start in this flow (array of up to 100 strings, optional)
 
         all_urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
-        by_limit = [all_urns[i : i + array_size_limit] for i in range(0, len(all_urns), array_size_limit)]
+        by_limit = [all_urns[i: i + array_size_limit] for i in range(0, len(all_urns), array_size_limit)]
 
         def _start_flow(data):
             try:

@@ -144,7 +144,7 @@ class AbstractSession(models.Model):
 
             err = capture_exception(exc)
             self.sentry_id = err
-        except:
+        except BaseException:
             pass
 
         try:

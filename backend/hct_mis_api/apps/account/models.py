@@ -149,11 +149,13 @@ class Role(TimeStampedUUIDModel):
     HOPE = "HOPE"
     KOBO = "KOBO"
     CA = "CA"
+    MANAGER = "ADMIN"
     SUBSYSTEMS = (
         (HOPE, "HOPE"),
         (KOBO, "Kobo"),
         (CA, "CashAssist"),
         (API, "API"),
+        (MANAGER, "admin"),
     )
 
     name = models.CharField(
