@@ -151,26 +151,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
+  const { data: userChoices } = useUserChoiceDataQuery();
+  const [mutate, { loading }] = useCreateGrievanceMutation();
 
-  const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
-  const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
+  const priorityChoicesData = choicesData?.grievanceTicketPriorityChoices;
+  const urgencyChoicesData = choicesData?.grievanceTicketUrgencyChoices;
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
-
-  const mappedPriorities = Array.from(Array(3).keys()).map((i) => ({
-    name: priorityChoicesData[i]?.name,
-    value: i + 1,
-  }));
-
-  const { data: userChoices } = useUserChoiceDataQuery();
-
-  const mappedUrgencies = Array.from(Array(3).keys()).map((i) => ({
-    name: urgencyChoicesData[i]?.name,
-    value: i + 1,
-  }));
-
-  const [mutate, { loading }] = useCreateGrievanceMutation();
+  } = reduceChoices(choicesData?.grievanceTicketCategoryChoices||[]);
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
@@ -208,7 +196,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
     name: edge.node?.name,
     value: edge.node.id,
   }));
-
 
   const showIssueType = (values): boolean => {
     return (
@@ -770,7 +757,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 fullWidth
                                 variant='outlined'
                                 label={t('Priority')}
-                                choices={mappedPriorities}
+                                choices={priorityChoicesData}
                                 component={FormikSelectField}
                               />
                             </Grid>
@@ -781,7 +768,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                 fullWidth
                                 variant='outlined'
                                 label={t('Urgency')}
-                                choices={mappedUrgencies}
+                                choices={urgencyChoicesData}
                                 component={FormikSelectField}
                               />
                             </Grid>
