@@ -17,6 +17,7 @@ import { PAYMENT_PLAN_QUERY } from '../../../../apollo/queries/paymentmodule/Pay
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   PaymentPlanQuery,
+  PaymentPlanStatus,
   useAllSteficonRulesQuery,
   useExportXlsxPpListMutation,
   useSetSteficonRuleOnPpListMutation,
@@ -141,13 +142,18 @@ export const Entitlement = ({
                 <InputLabel>{t('Entitlement Formula')}</InputLabel>
                 <Select
                   value={steficonRuleValue}
+                  data-cy='input-entitlement-formula'
                   labelWidth={180}
                   onChange={(event) =>
                     setSteficonRuleValue(event.target.value as string)
                   }
                 >
-                  {steficonData.allSteficonRules.edges.map((each) => (
-                    <MenuItem key={each.node.id} value={each.node.id}>
+                  {steficonData.allSteficonRules.edges.map((each, index) => (
+                    <MenuItem
+                      data-cy={`select-option-${index}`}
+                      key={each.node.id}
+                      value={each.node.id}
+                    >
                       {each.node.name}
                     </MenuItem>
                   ))}
@@ -159,7 +165,12 @@ export const Entitlement = ({
                 <Button
                   variant='contained'
                   color='primary'
-                  disabled={loadingSetSteficonRule || !steficonRuleValue}
+                  disabled={
+                    loadingSetSteficonRule ||
+                    !steficonRuleValue ||
+                    paymentPlan.status !== PaymentPlanStatus.Locked
+                  }
+                  data-cy='button-apply-steficon'
                   onClick={async () => {
                     try {
                       await setSteficonRule({
@@ -195,20 +206,24 @@ export const Entitlement = ({
               alignItems='center'
               flexDirection='column'
             >
-              {paymentPlan.hasPaymentListXlsxFile ? (
+              {paymentPlan.hasPaymentListExportFile ? (
                 <Button
                   color='primary'
                   startIcon={<DownloadIcon />}
                   component='a'
                   download
                   href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
+                  disabled={paymentPlan.status !== PaymentPlanStatus.Locked}
                 >
                   {t('DOWNLOAD TEMPLATE')}
                 </Button>
               ) : (
                 <LoadingButton
                   loading={loadingExport}
-                  disabled={loadingExport}
+                  disabled={
+                    loadingExport ||
+                    paymentPlan.status !== PaymentPlanStatus.Locked
+                  }
                   color='primary'
                   startIcon={<GetApp />}
                   onClick={async () => {
@@ -247,20 +262,20 @@ export const Entitlement = ({
               <Box>
                 <ImportXlsxPaymentPlanPaymentList paymentPlan={paymentPlan} />
               </Box>
-              {paymentPlan?.importedXlsxFileName && (
+              {paymentPlan?.importedFileName && (
                 <Box alignItems='center' display='flex'>
                   <SpinaczIconContainer>
                     <AttachFileIcon fontSize='inherit' />
                   </SpinaczIconContainer>
                   <Box mr={1}>
                     <GreyTextSmall>
-                      {paymentPlan?.importedXlsxFileName}
+                      {paymentPlan?.importedFileName}
                     </GreyTextSmall>
                   </Box>
                   <GreyTextSmall>
-                    {paymentPlan?.xlsxFileImportedDate ? (
+                    {paymentPlan?.importedFileDate ? (
                       <UniversalMoment>
-                        {paymentPlan?.xlsxFileImportedDate}
+                        {paymentPlan?.importedFileDate}
                       </UniversalMoment>
                     ) : null}
                   </GreyTextSmall>
@@ -273,7 +288,9 @@ export const Entitlement = ({
           <>
             <Divider />
             <LabelizedField label={t('Total Entitled Quantity')}>
-              <BigValue>USD {paymentPlan.totalEntitledQuantityUsd}</BigValue>
+              <BigValue data-cy='total-entitled-quantity-usd'>
+                USD {paymentPlan.totalEntitledQuantityUsd}
+              </BigValue>
             </LabelizedField>
           </>
         ) : null}

@@ -87,6 +87,7 @@ django-sql-explorer = {extras = ["xls"], version = "^2.4"}
 django-storages = { version = "1.12.3", extras = ["azure"] }
 django-sysinfo = ">=2.6.0"
 django_compressor = ">=4.0"
+django-querysetsequence = "0.16"
 elasticsearch ="<7.14"
 elasticsearch-dsl ="^7.0.0"
 gevent = "21.12.0"

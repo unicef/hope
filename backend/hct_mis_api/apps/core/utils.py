@@ -511,7 +511,7 @@ def chart_map_choices(choices):
 
 
 def chart_get_filtered_qs(
-    obj,
+    qs,
     year,
     business_area_slug_filter: dict = None,
     additional_filters: dict = None,
@@ -525,7 +525,7 @@ def chart_get_filtered_qs(
         year_filter = {f"{year_filter_path}__year": year}
     if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
         business_area_slug_filter = {}
-    return obj.objects.filter(**year_filter, **business_area_slug_filter, **additional_filters)
+    return qs.filter(**year_filter, **business_area_slug_filter, **additional_filters)
 
 
 def parse_list_values_to_int(list_to_parse):

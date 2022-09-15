@@ -32,10 +32,8 @@ export function PaymentPlansTable({
   };
 
   return (
-    <UniversalTable<
-      PaymentPlanNode,
-      AllPaymentPlansForTableQueryVariables
-    >
+    <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
+      defaultOrderBy='-createdAt'
       title={t('Payment Plans')}
       headCells={headCells}
       query={useAllPaymentPlansForTableQuery}

@@ -1,7 +1,8 @@
-import { When, Then, And, Given } from "@badeball/cypress-cucumber-preprocessor";
+import { When, Then, Given } from "@badeball/cypress-cucumber-preprocessor";
 
 let householdId;
 let individualId;
+let individualIds = [];
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -126,4 +127,9 @@ When('I visit the Individuals dashboard', () => {
 Then('I see the newly imported individuals', () => {
   // after 10+ runs, it may fail, because there are 10 rows in this table by default
   cy.get('td').should('contain', individualId);
+  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
+    individualId = $td.text();
+    console.log('individualId');
+    individualIds.push(individualId);
+  });
 });

@@ -1,4 +1,4 @@
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Case, When, Value, CharField, F
 from django.db.models.functions import Lower
 
 from django_filters import (
@@ -36,7 +36,7 @@ class PaymentRecordFilter(FilterSet):
 
     class Meta:
         fields = (
-            "cash_plan",
+            "parent",
             "household",
         )
         model = PaymentRecord
@@ -220,7 +220,7 @@ class CashPlanFilter(FilterSet):
     )
 
     def filter_queryset(self, queryset):
-        queryset = queryset.annotate(total_number_of_hh=Count("payment_records"))
+        queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
         return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):
@@ -244,9 +244,14 @@ class PaymentPlanFilter(FilterSet):
         fields = tuple()
         model = PaymentPlan
 
+    def filter_queryset(self, queryset):
+        queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
+        if not self.form.cleaned_data.get("order_by"):
+            queryset = queryset.order_by("unicef_id")
+        return super().filter_queryset(queryset)
+
     order_by = OrderingFilter(
         fields=(
-            "id",
             "unicef_id",
             "status",
             "total_households_count",
@@ -256,6 +261,7 @@ class PaymentPlanFilter(FilterSet):
             "total_undelivered_quantity",
             "dispersion_start_date",
             "dispersion_end_date",
+            "created_at",
         )
     )
 
@@ -264,13 +270,13 @@ class PaymentPlanFilter(FilterSet):
 
 
 class PaymentFilter(FilterSet):
-    business_area = CharFilter(field_name="payment_plan__business_area__slug", required=True)
+    business_area = CharFilter(field_name="parent__business_area__slug", required=True)
     payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
 
     def payment_plan_id_filter(self, qs, name, value):
         payment_plan_id = decode_id_string(value)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-        q = Q(payment_plan=payment_plan)
+        q = Q(parent=payment_plan)
         if payment_plan.status != PaymentPlan.Status.OPEN:
             q &= ~Q(excluded=True)
         return qs.filter(q)
@@ -281,11 +287,46 @@ class PaymentFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
-            "id",
+            "unicef_id",
             "status",
             "household_id",
             "household__size",
-            "household__admin2__name",
+            "admin2",
+            "collector_id",
+            "assigned_payment_channel",
             "entitlement_quantity_usd",
+            "delivered_quantity",
         )
     )
+
+    def filter_queryset(self, queryset):
+        # household__admin2
+        queryset = queryset.annotate(
+            admin2=Case(
+                When(
+                    household__admin_area__isnull=True,
+                    then=Value(""),
+                ),
+                When(
+                    household__admin_area__isnull=False,
+                    household__admin_area__area_type__area_level__in=(0, 1),
+                    then=Value(""),
+                ),
+                When(
+                    household__admin_area__isnull=False,
+                    household__admin_area__area_type__area_level__lt=2,
+                    household__admin_area__area_type__area_level__gt=2,
+                    then=Lower("household__admin_area__parent__name"),
+                ),
+                When(
+                    household__admin_area__isnull=False,
+                    then=Lower("household__admin_area__name"),
+                ),
+                default=Value(""),
+                output_field=CharField(),
+            )
+        )
+        if not self.form.cleaned_data.get("order_by"):
+            queryset = queryset.order_by("unicef_id")
+
+        return super().filter_queryset(queryset)

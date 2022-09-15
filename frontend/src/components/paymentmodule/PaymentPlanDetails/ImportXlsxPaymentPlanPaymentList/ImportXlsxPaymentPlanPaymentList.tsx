@@ -17,6 +17,7 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   ImportXlsxPpListMutation,
   PaymentPlanQuery,
+  PaymentPlanStatus,
   useImportXlsxPpListMutation,
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
@@ -24,10 +25,6 @@ import { DropzoneField } from '../../../core/DropzoneField';
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
   padding: 20px;
-`;
-
-const UploadIcon = styled(Publish)`
-  color: #043f91;
 `;
 
 interface ImportXlsxPaymentPlanPaymentListProps {
@@ -84,10 +81,11 @@ export const ImportXlsxPaymentPlanPaymentList = ({
     <>
       <Box key='import'>
         <Button
-          startIcon={<UploadIcon />}
+          startIcon={<Publish />}
           color='primary'
           data-cy='button-import'
           onClick={() => setOpenImport(true)}
+          disabled={paymentPlan.status !== PaymentPlanStatus.Locked}
         >
           {t('Import XLSX')}
         </Button>

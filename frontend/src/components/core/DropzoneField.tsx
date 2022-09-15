@@ -19,6 +19,7 @@ const DropzoneContainer = styled.div`
   justify-content: center;
   align-items: center;
   margin-top: ${({ theme }) => theme.spacing(5)}px;
+  padding: ${({ theme }) => theme.spacing(5)}px;
   cursor: pointer;
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
