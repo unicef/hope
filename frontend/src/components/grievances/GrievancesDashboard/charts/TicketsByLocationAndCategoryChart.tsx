@@ -41,9 +41,9 @@ export const TicketsByLocationAndCategoryChart = ({
     categoryPercentage: 0.5,
     label: el.label,
     backgroundColor: categoriesAndColors[index].color,
-    data: matchDataSize(
-      data.datasets[index].data[0] ? data.datasets[index].data : [''],
-    ),
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    data: matchDataSize(data.datasets[index].data).map((item) => item || ''),
     stack: 2,
     maxBarThickness: 15,
   }));
