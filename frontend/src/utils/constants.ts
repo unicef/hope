@@ -97,4 +97,5 @@ export const GrievanceSteps = {
 export const ISSUE_TYPE_CATEGORIES = {
   DATA_CHANGE: 'Data Change',
   SENSITIVE_GRIEVANCE: 'Sensitive Grievance',
+  GRIEVANCE_COMPLAINT: 'Grievance Complaint',
 };

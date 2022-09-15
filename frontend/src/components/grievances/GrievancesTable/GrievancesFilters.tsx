@@ -181,7 +181,8 @@ export function GrievancesFilters({
           </SelectFilter>
         </Grid>
         {(filter.category === ISSUE_TYPE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-          filter.category === ISSUE_TYPE_CATEGORIES.DATA_CHANGE) && (
+          filter.category === ISSUE_TYPE_CATEGORIES.DATA_CHANGE ||
+          filter.category === ISSUE_TYPE_CATEGORIES.GRIEVANCE_COMPLAINT) && (
           <Grid item>
             <SelectFilter
               onChange={(e) => handleFilterChange(e, 'issueType')}
