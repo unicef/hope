@@ -372,7 +372,7 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-admin-extra-buttons"
-version = "1.5.3"
+version = "1.5.4"
 description = "Django mixin to easily add buttons to any ModelAdmin"
 category = "main"
 optional = false
@@ -2263,7 +2263,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "4940f7b9d9cf067866ab0bff53cb0cc0cc1ad81083ae699704459ad846079031"
+content-hash = "8c5facdcc1edb8ad7cd837fc5de735e3eb0f9e5cb58019567a3667e427e80081"
 
 [metadata.files]
 amqp = []

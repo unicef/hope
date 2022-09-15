@@ -60,7 +60,7 @@ black = "^22.3.0"
 celery = {extras = ["redis"], version = "^5.2.7"}
 defusedxml = "0.7.0rc1"
 django-advanced-filters = "2.0.0"
-django-admin-extra-buttons = "^1.5"
+django-admin-extra-buttons = ">=1.5.4"
 django-admin-sync = "*"
 django-adminactions = "^2"
 django-adminfilters = "^2"
