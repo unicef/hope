@@ -193,7 +193,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   role="button"
                   tabindex="0"
                 >
-                  Total Deliverd Quantity
+                  Total Delivered Quantity
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"

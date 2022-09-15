@@ -123,11 +123,10 @@ export const PaymentsTableRow = ({
           : '-'}
       </TableCell>
       <TableCell align='left'>
-      {payment.deliveredQuantity > 0
-          ? formatCurrency(payment.deliveredQuantity, true)
+        {payment.deliveredQuantity > 0
+          ? formatCurrencyWithSymbol(payment.deliveredQuantity)
           : '-'}
       </TableCell>
-
     </ClickableTableRow>
   );
 };
