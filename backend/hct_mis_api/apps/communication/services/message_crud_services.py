@@ -20,15 +20,16 @@ class MessageCrudServices:
         verifier = MessageArgumentVerifier(input_data)
         verifier.verify()
 
-        message = Message()
-        message.created_by = user
-        message.business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
-        message.title = input_data.get("title")
-        message.body = input_data.get("body")
-        message.sampling_type = input_data.get("sampling_type")
         households = cls._get_households(input_data)
+        message = Message(
+            created_by=user,
+            business_area=BusinessArea.objects.get(slug=business_area_slug),
+            title=input_data["title"],
+            body=input_data["body"],
+            sampling_type=input_data["sampling_type"],
+            number_of_recipients=households.count(),
+        )
         message.households.set(households)
-        message.number_of_recipients = households.count()
 
         sampling = Sampling(input_data, message.households)
         sampling.process_sampling(message)
@@ -38,11 +39,7 @@ class MessageCrudServices:
 
     @classmethod
     def _get_households(cls, input_data: dict) -> Optional[QuerySet[Household]]:
-        if (
-            household_ids := [household for household in input_data.get("households")]
-            if input_data.get("households")
-            else []
-        ):
+        if household_ids := [household for household in input_data.get("households", [])]:
             return Household.objects.filter(id__in=household_ids)
         elif trget_population_id := input_data.get("target_population"):
             return Household.objects.filter(selections__target_population__id=trget_population_id)
