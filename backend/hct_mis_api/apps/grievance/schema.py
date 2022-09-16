@@ -20,7 +20,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
+from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr, ChoiceObjectInt
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_get_filtered_qs,
@@ -52,7 +52,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails,
+    TicketSystemFlaggingDetails, GrievanceTicketThrough,
 )
 from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -142,11 +142,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
-        return (
-            GrievanceTicket.objects.exclude(household_unicef_id__isnull=True)
-            .filter(household_unicef_id=grievance_ticket.household_unicef_id)
-            .exclude(pk=grievance_ticket.pk)
-        )
+        return grievance_ticket.linked_tickets.all()
 
     @staticmethod
     def resolve_priority(grievance_ticket: GrievanceTicket, info):
@@ -454,12 +450,11 @@ class Query(graphene.ObjectType):
     all_edit_household_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
-    grievance_ticket_sub_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_system_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
-    grievance_ticket_priority_choices = graphene.List(ChoiceObject)
-    grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
+    grievance_ticket_priority_choices = graphene.List(ChoiceObjectInt)
+    grievance_ticket_urgency_choices = graphene.List(ChoiceObjectInt)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         return (
@@ -483,9 +478,6 @@ class Query(graphene.ObjectType):
 
     def resolve_grievance_ticket_category_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
-
-    def resolve_grievance_ticket_sub_category_choices(self, info, **kwargs):
-        return to_choice_object(GrievanceTicket.SUB_CATEGORY_CHOICES)
 
     def resolve_grievance_ticket_manual_category_choices(self, info, **kwargs):
         return [
