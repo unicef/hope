@@ -3,7 +3,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
-import { choicesToDict, programStatusToColor } from '../../../utils/utils';
+import {
+  choicesToDict,
+  programStatusMapping,
+  programStatusToColor,
+} from '../../../utils/utils';
 import {
   ProgrammeChoiceDataQuery,
   ProgramNode,
@@ -61,6 +65,7 @@ export function ProgramDetails({
             <LabelizedField label={t('status')}>
               <StatusBox
                 status={program.status}
+                statusNameMapping={programStatusMapping}
                 statusToColor={programStatusToColor}
               />
             </LabelizedField>
