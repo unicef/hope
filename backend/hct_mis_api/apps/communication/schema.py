@@ -52,18 +52,6 @@ class MessageNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         connection_class = ExtendedConnection
         filter_fields = []
-        fields = (
-            "id",
-            "unicef_id",
-            "title",
-            "body",
-            "number_of_recipients",
-            "sampling_type",
-            "sample_size",
-            "created_at",
-            "created_by",
-            "updated_at",
-        )
 
 
 class GetMessageSampleSizeObject(graphene.ObjectType):

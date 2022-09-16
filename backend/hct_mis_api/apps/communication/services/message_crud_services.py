@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import Household
 
 from ..models import Message
@@ -41,7 +40,7 @@ class MessageCrudServices:
     def _get_households(cls, input_data: dict) -> Optional[QuerySet[Household]]:
         if household_ids := [household for household in input_data.get("households", [])]:
             return Household.objects.filter(id__in=household_ids)
-        elif trget_population_id := input_data.get("target_population"):
-            return Household.objects.filter(selections__target_population__id=trget_population_id)
+        elif target_population_id := input_data.get("target_population"):
+            return Household.objects.filter(selections__target_population__id=target_population_id)
         elif registration_data_import_id := input_data.get("registration_data_import"):
             return Household.objects.filter(registration_data_import_id=registration_data_import_id)
