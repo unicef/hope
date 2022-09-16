@@ -63,10 +63,10 @@ export function GrievancesTableRow({
   const isItemSelected = isSelected(ticket.unicefId);
   const issueType = ticket.issueType
     ? issueTypeChoicesData
-        .filter((el) => el.category === ticket.category.toString())[0]
-        .subCategories.filter(
+        .find((el) => el.category === ticket.category.toString())
+        .subCategories.find(
           (el) => el.value === ticket.issueType.toString(),
-        )[0].name
+        ).name
     : '-';
 
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();

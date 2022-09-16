@@ -43,7 +43,6 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         grievanceTickets{
           description
           category
-          subCategory
           issueType
           individualDataUpdateTicketDetails{
             individual{
