@@ -116,7 +116,7 @@ Given('I have an active program', () => {
   cy.get('[data-cy="button-activate-program"]').click({ force: true });
   cy.get('[data-cy="button-activate-program-modal"]').click({ force: true });
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.get('[data-cy="status-container"]').contains('ACTIVE');
+  cy.get('[data-cy="status-container"]').contains('Active');
 });
 
 Given('I have target population in ready status', () => {

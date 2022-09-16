@@ -13,8 +13,10 @@ import {
   TargetPopulationStatus,
 } from '../__generated__/graphql';
 import {
-  GRIEVANCE_CATEGORIES, PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
+  GRIEVANCE_CATEGORIES,
+  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
   PAYMENT_PLAN_STATES,
+  PROGRAM_STATES,
   TARGETING_STATES,
 } from './constants';
 
@@ -54,11 +56,11 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'DRAFT':
+    case ProgramStatus.Draft:
       return theme.hctPalette.gray;
-    case 'ACTIVE':
+    case ProgramStatus.Active:
       return theme.hctPalette.green;
-    case 'FINISHED':
+    case ProgramStatus.Finished:
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.oragne;
@@ -237,10 +239,14 @@ export function paymentPlanBackgroundActionStatusToColor(
     [PaymentPlanBackgroundActionStatus.SteficonRun]: theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatus.SteficonError]: theme.palette.error.main,
     [PaymentPlanBackgroundActionStatus.XlsxExporting]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XlsxExportError]: theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XlsxImportError]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxExportError]:
+      theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportError]:
+      theme.palette.error.main,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -460,6 +466,10 @@ export function formatThousands(value: string): string {
 
 export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
+}
+
+export function programStatusMapping(status): string {
+  return PROGRAM_STATES[status];
 }
 
 export function paymentPlanStatusMapping(status): string {
