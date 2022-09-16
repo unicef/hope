@@ -1,6 +1,6 @@
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, FilterSet, UUIDFilter
+from django_filters import CharFilter, FilterSet
 
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household

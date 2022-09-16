@@ -1,5 +1,3 @@
-# import logging
-
 from django.db import transaction
 
 import graphene
@@ -12,8 +10,6 @@ from .inputs import CreateCommunicationMessageInput
 from .models import Message
 from .schema import MessageNode
 from .services.message_crud_services import MessageCrudServices
-
-# logger = logging.getLogger(__name__)
 
 
 class CreateCommunicationMessageMutation(PermissionMutation):
