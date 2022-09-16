@@ -8,7 +8,7 @@ Feature: Create Payment Plan
         Given Each imported individual has a payment channel
         Given I have an active program
         Given I have target population in ready status
-    # Given I am sure that my business area is payment plan applicable
+      # Given I am sure that my business area is payment plan applicable
     # query businessAreaData
 
     Scenario: Create Payment Plan
@@ -43,4 +43,3 @@ Feature: Create Payment Plan
         When I finalize the Payment Plan
         Then I see the Payment Plan as accepted
 # And I can export xlsx to zip file
-
