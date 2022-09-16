@@ -34,10 +34,7 @@ class MessageRecipientMapNode(DjangoObjectType):
         filter_fields = []
         fields = (
             "id",
-            "household__head_of_household",
-            "household__head_of_household__residence_status",
-            "household__size",
-            "household__admin2",
+            "household",
         )
 
 
@@ -92,13 +89,6 @@ class Query(graphene.ObjectType):
         business_area_slug=graphene.String(required=True),
         inputs=GetCommunicationMessageSampleSizeInput(),
     )
-
-    def resolve_messages(self, info, **kwargs):
-        return Message.objects.all()
-
-    def resolve_all_communication_message_recipients(self, info, **kwargs):
-        # return Household.objects.prefetch_related("messages").filter(messages__id=kwargs.get("message_id"))
-        return Household.objects.all()
 
     def resolve_communication_message_sample_size(self, info, business_area_slug: str, inputs: dict, **kwargs):
         verifier = MessageArgumentVerifier(inputs)
