@@ -704,6 +704,12 @@ export type ChoiceObject = {
   value?: Maybe<Scalars['String']>,
 };
 
+export type ChoiceObjectInt = {
+   __typename?: 'ChoiceObjectInt',
+  name?: Maybe<Scalars['String']>,
+  value?: Maybe<Scalars['Int']>,
+};
+
 export type ContentTypeObjectType = {
    __typename?: 'ContentTypeObjectType',
   id: Scalars['ID'],
@@ -776,7 +782,6 @@ export type CreateGrievanceTicketInput = {
   description: Scalars['String'],
   assignedTo?: Maybe<Scalars['ID']>,
   category: Scalars['Int'],
-  subCategory?: Maybe<Scalars['Int']>,
   issueType?: Maybe<Scalars['Int']>,
   admin?: Maybe<Scalars['String']>,
   area?: Maybe<Scalars['String']>,
@@ -1127,7 +1132,6 @@ export type GrievanceTicketNode = Node & {
   assignedTo?: Maybe<UserNode>,
   status: Scalars['Int'],
   category: Scalars['Int'],
-  subCategory?: Maybe<Scalars['Int']>,
   issueType?: Maybe<Scalars['Int']>,
   description: Scalars['String'],
   admin2?: Maybe<AreaNode>,
@@ -3652,12 +3656,11 @@ export type Query = {
   allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  grievanceTicketSubCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketManualCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketSystemCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
-  grievanceTicketPriorityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  grievanceTicketUrgencyChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  grievanceTicketPriorityChoices?: Maybe<Array<Maybe<ChoiceObjectInt>>>,
+  grievanceTicketUrgencyChoices?: Maybe<Array<Maybe<ChoiceObjectInt>>>,
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>,
   paymentRecord?: Maybe<PaymentRecordNode>,
   paymentRecordVerification?: Maybe<PaymentVerificationNode>,
@@ -5771,7 +5774,6 @@ export type UpdateGrievanceTicketInput = {
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
   paymentRecord?: Maybe<Scalars['ID']>,
-  subCategory?: Maybe<Scalars['Int']>,
   extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
@@ -8201,7 +8203,7 @@ export type GrievanceTicketQuery = (
   { __typename?: 'Query' }
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
-    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency' | 'comments'>
+    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency' | 'comments'>
     & { partner: Maybe<(
       { __typename?: 'PartnerType' }
       & Pick<PartnerType, 'id' | 'name'>
@@ -8530,9 +8532,6 @@ export type GrievancesChoiceDataQuery = (
   )>>>, grievanceTicketCategoryChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
-  )>>>, grievanceTicketSubCategoryChoices: Maybe<Array<Maybe<(
-    { __typename?: 'ChoiceObject' }
-    & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, grievanceTicketManualCategoryChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
@@ -8540,11 +8539,11 @@ export type GrievancesChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, grievanceTicketPriorityChoices: Maybe<Array<Maybe<(
-    { __typename?: 'ChoiceObject' }
-    & Pick<ChoiceObject, 'name' | 'value'>
+    { __typename?: 'ChoiceObjectInt' }
+    & Pick<ChoiceObjectInt, 'name' | 'value'>
   )>>>, grievanceTicketUrgencyChoices: Maybe<Array<Maybe<(
-    { __typename?: 'ChoiceObject' }
-    & Pick<ChoiceObject, 'name' | 'value'>
+    { __typename?: 'ChoiceObjectInt' }
+    & Pick<ChoiceObjectInt, 'name' | 'value'>
   )>>>, grievanceTicketIssueTypeChoices: Maybe<Array<Maybe<(
     { __typename?: 'IssueTypesObject' }
     & Pick<IssueTypesObject, 'category' | 'label'>
@@ -15032,7 +15031,6 @@ export const GrievanceTicketDocument = gql`
     unicefId
     status
     category
-    subCategory
     consent
     partner {
       id
@@ -15551,10 +15549,6 @@ export const GrievancesChoiceDataDocument = gql`
     value
   }
   grievanceTicketCategoryChoices {
-    name
-    value
-  }
-  grievanceTicketSubCategoryChoices {
     name
     value
   }
@@ -20072,6 +20066,7 @@ export type ResolversTypes = {
   _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>,
   ChartGrievanceTicketsNode: ResolverTypeWrapper<ChartGrievanceTicketsNode>,
   IssueTypesObject: ResolverTypeWrapper<IssueTypesObject>,
+  ChoiceObjectInt: ResolverTypeWrapper<ChoiceObjectInt>,
   SteficonRuleNodeConnection: ResolverTypeWrapper<SteficonRuleNodeConnection>,
   SteficonRuleNodeEdge: ResolverTypeWrapper<SteficonRuleNodeEdge>,
   ChartPaymentVerification: ResolverTypeWrapper<ChartPaymentVerification>,
@@ -20448,6 +20443,7 @@ export type ResolversParentTypes = {
   _DetailedDatasetsNode: _DetailedDatasetsNode,
   ChartGrievanceTicketsNode: ChartGrievanceTicketsNode,
   IssueTypesObject: IssueTypesObject,
+  ChoiceObjectInt: ChoiceObjectInt,
   SteficonRuleNodeConnection: SteficonRuleNodeConnection,
   SteficonRuleNodeEdge: SteficonRuleNodeEdge,
   ChartPaymentVerification: ChartPaymentVerification,
@@ -20935,6 +20931,11 @@ export type ChoiceObjectResolvers<ContextType = any, ParentType extends Resolver
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type ChoiceObjectIntResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChoiceObjectInt'] = ResolversParentTypes['ChoiceObjectInt']> = {
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  value?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
 export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ContentTypeObjectType'] = ResolversParentTypes['ContentTypeObjectType']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   appLabel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -21154,7 +21155,6 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   assignedTo?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   category?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  subCategory?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   issueType?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
@@ -22046,12 +22046,11 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  grievanceTicketSubCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketManualCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketSystemCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
-  grievanceTicketPriorityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  grievanceTicketUrgencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  grievanceTicketPriorityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObjectInt']>>>, ParentType, ContextType>,
+  grievanceTicketUrgencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObjectInt']>>>, ParentType, ContextType>,
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, QueryAllSteficonRulesArgs>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
   paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>,
@@ -23171,6 +23170,7 @@ export type Resolvers<ContextType = any> = {
   ChartPaymentVerification?: ChartPaymentVerificationResolvers<ContextType>,
   CheckAgainstSanctionListMutation?: CheckAgainstSanctionListMutationResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
+  ChoiceObjectInt?: ChoiceObjectIntResolvers<ContextType>,
   ContentTypeObjectType?: ContentTypeObjectTypeResolvers<ContextType>,
   CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,

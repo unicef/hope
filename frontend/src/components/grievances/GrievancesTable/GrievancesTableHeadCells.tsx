@@ -7,7 +7,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Ticket Id',
-    id: 'ticket-id',
+    id: 'unicef_id',
     numeric: false,
     dataCy: 'ticket-id',
   },

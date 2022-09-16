@@ -6,7 +6,7 @@ from django.db import models
 
 import graphene
 from constance import config
-from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay
+from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay, Int
 from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -34,6 +34,9 @@ class ChoiceObject(graphene.ObjectType):
     name = String()
     value = String()
 
+class ChoiceObjectInt(graphene.ObjectType):
+    name = String()
+    value = Int()
 
 class BusinessAreaNode(DjangoObjectType):
     class Meta:
