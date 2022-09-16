@@ -18,7 +18,7 @@ from .services.sampling import Sampling
 from .services.verifiers import MessageArgumentVerifier
 
 
-class MessageRecipientMapNode(DjangoObjectType):
+class CommunicationMessageRecipientMapNode(DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
             Permissions.COMMUNICATION_MESSAGE_VIEW_LIST,
@@ -38,7 +38,7 @@ class MessageRecipientMapNode(DjangoObjectType):
         )
 
 
-class MessageNode(BaseNodePermissionMixin, DjangoObjectType):
+class CommunicationMessageNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
             Permissions.COMMUNICATION_MESSAGE_VIEW_LIST,
@@ -54,26 +54,32 @@ class MessageNode(BaseNodePermissionMixin, DjangoObjectType):
         filter_fields = []
 
 
-class GetMessageSampleSizeObject(graphene.ObjectType):
+class GetCommunicationMessageSampleSizeObject(BaseNodePermissionMixin, graphene.ObjectType):
+    permission_classes = (
+        hopeOneOfPermissionClass(
+            Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS,
+        ),
+    )
+
     number_of_recipients = graphene.Int()
     sample_size = graphene.Int()
 
 
 class Query(graphene.ObjectType):
-    communication_message = graphene.relay.Node.Field(MessageNode)
+    communication_message = graphene.relay.Node.Field(CommunicationMessageNode)
     all_communication_messages = DjangoPermissionFilterConnectionField(
-        MessageNode,
+        CommunicationMessageNode,
         filterset_class=MessagesFilter,
     )
 
-    communication_message_recipient = graphene.relay.Node.Field(MessageRecipientMapNode)
+    communication_message_recipient = graphene.relay.Node.Field(CommunicationMessageRecipientMapNode)
     all_communication_message_recipients = DjangoPermissionFilterConnectionField(
-        MessageRecipientMapNode,
+        CommunicationMessageRecipientMapNode,
         filterset_class=MessageRecipientsMapFilter,
     )
 
     communication_message_sample_size = graphene.Field(
-        GetMessageSampleSizeObject,
+        GetCommunicationMessageSampleSizeObject,
         business_area_slug=graphene.String(required=True),
         inputs=GetCommunicationMessageSampleSizeInput(),
     )

@@ -8,12 +8,12 @@ from hct_mis_api.apps.core.permissions import is_authenticated
 
 from .inputs import CreateCommunicationMessageInput
 from .models import Message
-from .schema import MessageNode
+from .schema import CommunicationMessageNode
 from .services.message_crud_services import MessageCrudServices
 
 
 class CreateCommunicationMessageMutation(PermissionMutation):
-    message = graphene.Field(MessageNode)
+    message = graphene.Field(CommunicationMessageNode)
 
     class Arguments:
         business_area_slug = graphene.String(required=True)
