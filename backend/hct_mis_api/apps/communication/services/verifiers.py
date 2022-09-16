@@ -1,6 +1,10 @@
+import logging
+
 from graphql import GraphQLError
 
 from ..models import Message
+
+logger = logging.getLogger(__name__)
 
 
 class MessageArgumentVerifier:
@@ -27,9 +31,13 @@ class MessageArgumentVerifier:
         fields = [*only_one_of_these]
         last_1 = fields.pop()
         if not any(inputs):
-            raise GraphQLError(f"Must provide any one of {', '.join(fields)} or {last_1}")
+            err_msg = f"Must provide any one of {', '.join(fields)} or {last_1}"
+            logger.error(err_msg)
+            raise GraphQLError(err_msg)
         if len([value for value in inputs if value]) > 1:
-            raise GraphQLError(f"Must provide only one of {', '.join(fields)} or {last_1}")
+            err_msg = f"Must provide only one of {', '.join(fields)} or {last_1}"
+            logger.error(err_msg)
+            raise GraphQLError(err_msg)
 
         options = self.ARGUMENTS.get("sampling_type")
         for key, value in options.items():
@@ -37,7 +45,11 @@ class MessageArgumentVerifier:
                 continue
             for required in value.get("required"):
                 if self.input_data.get(required) is None:
-                    raise GraphQLError(f"You have to provide {required} in {key}")
+                    err_msg = f"Must provide {required} for {key}"
+                    logger.error(err_msg)
+                    raise GraphQLError(err_msg)
             for not_allowed in value.get("not_allowed"):
                 if self.input_data.get(not_allowed) is not None:
-                    raise GraphQLError(f"You can't provide {not_allowed} in {key}")
+                    err_msg = f"Must not provide {not_allowed} for {key}"
+                    logger.error(err_msg)
+                    raise GraphQLError(err_msg)
