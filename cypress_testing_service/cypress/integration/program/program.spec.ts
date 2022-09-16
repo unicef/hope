@@ -59,5 +59,5 @@ When('I click the activate button in the modal', () => {
 });
 
 Then('I should see the Program is active', () => {
-  cy.get('[data-cy="status-container"]').contains('ACTIVE');
+  cy.get('[data-cy="status-container"]').contains('Active');
 });
