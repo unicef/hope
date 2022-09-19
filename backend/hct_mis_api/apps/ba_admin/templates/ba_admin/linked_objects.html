@@ -1,0 +1,34 @@
+{% extends "admin_extra_buttons/action_page.html" %}{% load static smart %}
+{% block content_title %}<h1>{{ original }}</h1>{% endblock %}
+{% block content %}
+    {% for e in linked %}
+        <fieldset class="module">
+            {% url admin_site.name|add:e.link as changelist_url %}
+            <h2 class="">{{ e.related_name }} ({{ e.field_name }}) | {{ e.count }} records
+                {% if changelist_url %}
+                    <a href="{{ changelist_url }}?{{ e.filter }}">goto</a>
+            {% endif %}
+            </h2>
+            <table>
+                {% for row in e.data %}
+                    <tr>
+{#                        <td><a href="{{ row|get_admin_link }}">{{ row.pk }}</a></td>#}
+                        <td>{% get_admin_href admin_site row 'pk' %}</td>
+                        <td>{{ row }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </fieldset>
+    {% endfor %}
+    <fieldset class="module">
+        <h2 class="">Empty Relationships</h2>
+        <ul>
+            {% for e in empty %}
+                <li>{{ e.related_name }}</li>
+            {% endfor %}
+        </ul>
+    </fieldset>
+{% endblock content %}
+{% block footer %}
+    <div id="footer"></div>
+{% endblock %}

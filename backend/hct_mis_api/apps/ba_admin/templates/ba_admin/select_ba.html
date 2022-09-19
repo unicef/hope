@@ -1,4 +1,4 @@
-{% extends "ba_admin/index.html" %}
+{% extends admin_site.name|add:"/index.html" %}
 {% load i18n static %}
 
 {% block extrastyle %}{{ block.super }}

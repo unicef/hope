@@ -12,16 +12,15 @@ from .forms import SelectBusinessAreaForm
 class BusinessAreaAdminSite(SmartAdminSite):
     site_title = "----"
     site_header = "kkkk"
-    index_title = "ooooo"
+    index_title = "Control Panel"
     enable_nav_sidebar = False
 
     index_template = "ba_admin/index.html"
     ba_cookie_name = "selected_ba"
+    app_index_template = "ba_admin/app_index.html"
 
     def __init__(self, name="ba_admin"):
         super().__init__(name)
-
-    # app_index_template= "ba_admin/app_index.html"
 
     def login(self, request, extra_context=None):
         return super().login(request, extra_context)
@@ -64,17 +63,17 @@ class BusinessAreaAdminSite(SmartAdminSite):
             cookie_value = request.COOKIES.get(self.ba_cookie_name)
             return BusinessArea.objects.get(slug=cookie_value)
         except BusinessArea.DoesNotExist:
-            return None
+            return ""
 
     def each_context(self, request):
         selected_business_area = self.selected_business_area(request)
         ret = super().each_context(request)
         ret["site_title"] = "site_title"
-        ret["site_header"] = f"{selected_business_area} Management"
+        ret["site_header"] = f"{selected_business_area} Control Panel"
         ret["site_name"] = self.name
         ret["site_url"] = "site_url"
         ret["selected_business_area"] = selected_business_area
-        ret["form"] = SelectBusinessAreaForm(initial={"business_area": selected_business_area}, user=request.user)
+        ret["ba_form"] = SelectBusinessAreaForm(initial={"business_area": selected_business_area}, user=request.user)
         return ret
 
     def register(self, admin_class=None, **options):

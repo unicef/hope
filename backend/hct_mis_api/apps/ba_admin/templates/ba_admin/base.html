@@ -51,7 +51,7 @@
                 {% endif %}
                 {% block select_ba_form %}
                 <form id="select_ba_form" method="post" action="{% url "ba_admin:select_ba" %}?next={{ request.path }}">
-                    {% csrf_token %}{{ form }}
+                    {% csrf_token %}{{ ba_form }}
                     <script>
                         document.querySelector('#id_business_area').addEventListener('change',function(){
                             document.getElementById('select_ba_form').submit();
