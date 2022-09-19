@@ -153,6 +153,12 @@ class Permissions(Enum):
     ACTIVITY_LOG_VIEW = auto()
     ACTIVITY_LOG_DOWNLOAD = auto()
 
+    # Communication
+    COMMUNICATION_MESSAGE_VIEW_LIST = auto()
+    COMMUNICATION_MESSAGE_VIEW_DETAILS = auto()
+    COMMUNICATION_MESSAGE_VIEW_CREATE = auto()
+    COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR = auto()
+
     # Django Admin
     # ...
 
