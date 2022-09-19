@@ -603,12 +603,12 @@ class Query(graphene.ObjectType):
                 volume_in_choices = sum(
                     Payment.objects.filter(
                         parent=payment_plan,
-                        head_of_household__payment_channels__delivery_mechanism=mechanism,
+                        head_of_household__payment_channels__delivery_mechanism=mechanism,  # TODO: collector
                     ).aggregate(money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))["money"]
                     for choice in processed_choices
                     if choice["fsp"] == fsp
                 )
-                return fsp.can_accept_volume(volume_in_payments + volume_in_choices)
+                return fsp.can_accept_volume(volume_in_payments + volume_in_choices)  # TODO: skip null-limit
 
             def can_be_chosen(fsp):
                 mechanism_orders = [index + 1 for index, mech in enumerate(delivery_mechanisms) if mech == mechanism]
