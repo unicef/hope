@@ -9,6 +9,8 @@ from .models import Message
 
 
 class MessagesFilter(FilterSet):
+    business_area = CharFilter(field_name="business_area__slug", required=True)
+
     class Meta:
         model = Message
         fields = {
