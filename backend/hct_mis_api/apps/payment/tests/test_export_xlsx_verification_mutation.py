@@ -6,8 +6,8 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.payment.fixtures import CashPlanPaymentVerificationFactory
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
+from hct_mis_api.apps.payment.fixtures import PaymentVerificationPlanFactory
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 
@@ -46,10 +46,10 @@ class TestXlsxVerificationExport(APITestCase):
 
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
-        cls.cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
+        cls.payment_verification_plan = PaymentVerificationPlanFactory(
             cash_plan=cash_plan,
-            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX,
-            status=CashPlanPaymentVerification.STATUS_ACTIVE,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
+            status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
 
     @parameterized.expand(
@@ -66,7 +66,7 @@ class TestXlsxVerificationExport(APITestCase):
             context={"user": self.user},
             variables={
                 "cashPlanVerificationId": self.id_to_base64(
-                    self.cash_plan_payment_verification.id, "CashPlanPaymentVerificationNode"
+                    self.payment_verification_plan.id, "PaymentVerificationPlanNode"
                 ),
             },
         )

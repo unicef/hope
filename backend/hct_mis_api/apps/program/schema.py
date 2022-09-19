@@ -1,3 +1,5 @@
+import graphene
+
 from django.db.models import (
     Case,
     Count,
@@ -9,10 +11,7 @@ from django.db.models import (
     When,
     F,
 )
-from django.db.models.functions import Coalesce
-
-import graphene
-from graphene import relay
+from graphene import relay, ObjectType
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
@@ -33,13 +32,13 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord, GenericPayment
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentRecord, GenericPayment
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
-from hct_mis_api.apps.payment.filters import CashPlanFilter
+from hct_mis_api.apps.payment.filters import CashPlanFilter, CashPlanPaymentPlanFilter
+from hct_mis_api.apps.payment.utils import get_payment_cash_plan_items_sequence_qs
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import CashPlan
-
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
@@ -105,6 +104,47 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         ).count()
 
+class CashPlanPaymentPlanNode(BaseNodePermissionMixin, ObjectType):
+    permission_classes = (
+        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+    )
+
+    id = graphene.String()
+    unicef_id = graphene.String()
+    # TODO: will add more
+    # currency = graphene.String(source="currency")
+    # is_new_payment_plan = graphene.Boolean()
+
+    class Meta:
+        model = CashPlan
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    def resolve_id(self, info, **kwargs):
+        return self.pk
+
+    def resolve_unicef_id(self, info, **kwargs):
+        return self.unicef_id
+
+    def resolve_verification_status(self, info, **kwargs):
+        return self.pk
+
+    def resolve_fsp_name(self, info, **kwargs):
+        return self.pk
+
+    def resolve_delivery_type(self, info, **kwargs):
+        return self.pk
+
+    def resolve_cash_amount(self, info, **kwargs):
+        return self.pk
+
+    def resolve_programme_name(self, info, **kwargs):
+        return self.pk
+
+    def resolve_last_modified_date(self, info, **kwargs):
+        return self.pk
+
 
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
@@ -131,6 +171,7 @@ class Query(graphene.ObjectType):
     )
 
     cash_plan = relay.Node.Field(CashPlanNode)
+    # TODO: will rename this query
     all_cash_plans = DjangoPermissionFilterConnectionField(
         CashPlanNode,
         filterset_class=CashPlanFilter,
@@ -141,6 +182,16 @@ class Query(graphene.ObjectType):
             ),
         ),
     )
+    # all_cash_plans_and_payment_plans = DjangoPermissionFilterConnectionField(
+    #     CashPlanPaymentPlanNode,
+    #     filterset_class=CashPlanPaymentPlanFilter,
+    #     permission_classes=(
+    #         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_LIST),
+    #         hopePermissionClass(
+    #             Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+    #         ),
+    #     ),
+    # )
     program_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
     program_sector_choices = graphene.List(ChoiceObject)
@@ -179,20 +230,45 @@ class Query(graphene.ObjectType):
         return CashPlan.objects.annotate(
             custom_order=Case(
                 When(
-                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_ACTIVE,
+                    payment_verification_summary__status=PaymentVerificationPlan.STATUS_ACTIVE,
                     then=Value(1),
                 ),
                 When(
-                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_PENDING,
+                    payment_verification_summary__status=PaymentVerificationPlan.STATUS_PENDING,
                     then=Value(2),
                 ),
                 When(
-                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_FINISHED,
+                    payment_verification_summary__status=PaymentVerificationPlan.STATUS_FINISHED,
                     then=Value(3),
                 ),
                 output_field=IntegerField(),
             )
         ).order_by("-updated_at", "custom_order")
+
+    def resolve_all_cash_plans_and_payment_plans(self, info, **kwargs):
+        # TODO: annotate statuses for ordering by 'cash_plan_payment_verification_summary__status' > 'payment_verification_summary__status'
+
+        qs = get_payment_cash_plan_items_sequence_qs()
+
+        return qs
+            # return ExtendedQuerySetSequence(PaymentPlan.objects.all(), CashPlan.objects.all())
+        # return CashPlan.objects.annotate(
+        #     custom_order=Case(
+        #         When(
+        #             payment_verification_summary__status=CashPlanPaymentVerification.STATUS_ACTIVE,
+        #             then=Value(1),
+        #         ),
+        #         When(
+        #             payment_verification_summary__status=CashPlanPaymentVerification.STATUS_PENDING,
+        #             then=Value(2),
+        #         ),
+        #         When(
+        #             payment_verification_summary__status=CashPlanPaymentVerification.STATUS_FINISHED,
+        #             then=Value(3),
+        #         ),
+        #         output_field=IntegerField(),
+        #     )
+        # ).order_by("-updated_at", "custom_order")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):

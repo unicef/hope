@@ -35,7 +35,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
-    CashPlanPaymentVerificationFilter,
+    PaymentVerificationPlanFilter,
     FinancialServiceProviderFilter,
     FinancialServiceProviderXlsxReportFilter,
     FinancialServiceProviderXlsxTemplateFilter,
@@ -50,8 +50,8 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     CashPlan,
-    CashPlanPaymentVerification,
-    CashPlanPaymentVerificationSummary,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
@@ -174,15 +174,15 @@ class CashPlanPaymentVerificationNode(DjangoObjectType):
     has_xlsx_file = graphene.Boolean()
 
     class Meta:
-        model = CashPlanPaymentVerification
+        model = PaymentVerificationPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
     def resolve_xlsx_file_was_downloaded(self, info):
-        return self.xlsx_cash_plan_payment_verification_file_was_downloaded
+        return self.xlsx_payment_verification_plan_file_was_downloaded
 
     def resolve_has_xlsx_file(self, info):
-        return self.has_xlsx_cash_plan_payment_verification_file
+        return self.has_xlsx_payment_verification_plan_file
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -196,8 +196,9 @@ class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class CashPlanPaymentVerificationSummaryNode(DjangoObjectType):
+    # TODO: upd node name
     class Meta:
-        model = CashPlanPaymentVerificationSummary
+        model = PaymentVerificationSummary
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -479,7 +480,7 @@ class Query(graphene.ObjectType):
     )
     all_cash_plan_payment_verification = DjangoPermissionFilterConnectionField(
         CashPlanPaymentVerificationNode,
-        filterset_class=CashPlanPaymentVerificationFilter,
+        filterset_class=PaymentVerificationPlanFilter,
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
     )
 
@@ -580,8 +581,8 @@ class Query(graphene.ObjectType):
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (
             PaymentVerification.objects.filter(
-                Q(cash_plan_payment_verification__status=CashPlanPaymentVerification.STATUS_ACTIVE)
-                | Q(cash_plan_payment_verification__status=CashPlanPaymentVerification.STATUS_FINISHED)
+                Q(payment_verification_plan__status=PaymentVerificationPlan.STATUS_ACTIVE)
+                | Q(payment_verification_plan__status=PaymentVerificationPlan.STATUS_FINISHED)
             )
             .annotate(
                 payment_record__household__status=Case(
@@ -598,7 +599,7 @@ class Query(graphene.ObjectType):
             kwargs = {}
             if payment_verification_plan:
                 kwargs["payment_verification_plan"] = payment_verification_plan
-            if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
+            if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
                 kwargs["extra_validation"] = does_payment_record_have_right_hoh_phone_number
             return cash_plan.available_payment_records(**kwargs)
 
@@ -607,7 +608,7 @@ class Query(graphene.ObjectType):
 
         payment_verification_plan = None
         if payment_verification_plan_id := decode_id_string(input.get("cash_plan_payment_verification_id")):
-            payment_verification_plan = get_object_or_404(CashPlanPaymentVerification, id=payment_verification_plan_id)
+            payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
         payment_records = get_payment_records(cash_plan, payment_verification_plan, input.get("verification_channel"))
         if not payment_records:
@@ -638,13 +639,13 @@ class Query(graphene.ObjectType):
         return to_choice_object(PaymentRecord.DELIVERY_TYPE_CHOICE)
 
     def resolve_cash_plan_verification_status_choices(self, info, **kwargs):
-        return to_choice_object(CashPlanPaymentVerification.STATUS_CHOICES)
+        return to_choice_object(PaymentVerificationPlan.STATUS_CHOICES)
 
     def resolve_cash_plan_verification_sampling_choices(self, info, **kwargs):
-        return to_choice_object(CashPlanPaymentVerification.SAMPLING_CHOICES)
+        return to_choice_object(PaymentVerificationPlan.SAMPLING_CHOICES)
 
     def resolve_cash_plan_verification_verification_channel_choices(self, info, **kwargs):
-        return to_choice_object(CashPlanPaymentVerification.VERIFICATION_CHANNEL_CHOICES)
+        return to_choice_object(PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES)
 
     def resolve_payment_verification_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
@@ -688,8 +689,8 @@ class Query(graphene.ObjectType):
         samples_count = payment_verifications.distinct("payment_record").count()
         all_payment_records_for_created_verifications = (
             PaymentRecord.objects.filter(
-                parent__in=payment_verifications.distinct("cash_plan_payment_verification__cash_plan").values_list(
-                    "cash_plan_payment_verification__cash_plan", flat=True
+                parent__in=payment_verifications.distinct("payment_verification_plan__cash_plan").values_list(
+                    "payment_verification_plan__cash_plan", flat=True
                 )
             )
             .filter(status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0)

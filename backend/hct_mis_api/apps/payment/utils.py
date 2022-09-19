@@ -1,8 +1,7 @@
+import datetime
+
 from decimal import Decimal
 from math import ceil
-
-import datetime
-from typing import Optional, List
 
 from django.db.models import Q
 

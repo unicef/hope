@@ -231,21 +231,21 @@ class GenerateReportContentHelpers:
     @staticmethod
     def get_payment_verifications(report: Report):
         filter_vars = {
-            "cash_plan_payment_verification__cash_plan__business_area": report.business_area,
-            "cash_plan_payment_verification__completion_date__isnull": False,
-            "cash_plan_payment_verification__completion_date__date__range": (report.date_from, report.date_to),
+            "payment_verification_plan__cash_plan__business_area": report.business_area,
+            "payment_verification_plan__completion_date__isnull": False,
+            "payment_verification_plan__completion_date__date__range": (report.date_from, report.date_to),
         }
         if report.program:
-            filter_vars["cash_plan_payment_verification__cash_plan__program"] = report.program
+            filter_vars["payment_verification_plan__cash_plan__program"] = report.program
         return PaymentVerification.objects.filter(**filter_vars)
 
     @classmethod
     def format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
         return (
-            payment_verification.cash_plan_payment_verification.id,
+            payment_verification.payment_verification_plan.id,
             payment_verification.payment_record.ca_id,
-            payment_verification.cash_plan_payment_verification.cash_plan.ca_id,
-            self._format_date(payment_verification.cash_plan_payment_verification.completion_date),
+            payment_verification.payment_verification_plan.cash_plan.ca_id,
+            self._format_date(payment_verification.payment_verification_plan.completion_date),
             payment_verification.received_amount,
             payment_verification.status,
             payment_verification.status_date,

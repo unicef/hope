@@ -27,7 +27,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
 )
@@ -191,7 +191,7 @@ class Command(BaseCommand):
                     grievance_ticket = switch_dict.get(grievance_type)()  # noqa: F841
 
                 EntitlementCardFactory(household=household)
-        CashPlanPaymentVerificationFactory.create_batch(1)
+        PaymentVerificationPlanFactory.create_batch(1)
         PaymentVerificationFactory.create_batch(10)
 
     @transaction.atomic
