@@ -21,7 +21,7 @@ class BaseSampling(abc.ABC):
         self.age = data.get("age")
         self.excluded_admin_areas = data.get("excluded_admin_areas", [])
         self.administrative_level = data.get("administrative_level")
-        self.excluded_admin_areas_decoded = [decode_id_string(x) for x in self.excluded_admin_areas if x]
+        self.excluded_admin_areas_decoded = [decode_id_string(x) for x in self.excluded_admin_areas if x and x.strip()]
         self.sample_size = 0
         self.households: Optional[QuerySet[Household]] = None
 
@@ -54,7 +54,7 @@ class BaseSampling(abc.ABC):
         return data
 
     @abc.abstractmethod
-    def sampling(self, recipients: QuerySet):
+    def sampling(self, households: QuerySet[Household]) -> None:
         pass
 
 
@@ -87,18 +87,17 @@ class Sampling:
         self.households = households
 
     def process_sampling(self, message: Message) -> QuerySet[Household]:
-        print("1. Processing sampling", message.sampling_type)
         sampling = self._get_sampling(message.sampling_type)
         sampling.sampling(self.households)
         message.sample_size = sampling.sample_size
         sampling_data = sampling.data()
-        print("2. Processing sampling", sampling_data)
         if message.sampling_type == Message.SamplingChoices.FULL_LIST:
             message.full_list_arguments = sampling_data
         else:
             message.random_sampling_arguments = sampling_data
 
         self.households = sampling.households
+        message.number_of_recipients = self.households.count()
 
         if self.households and sampling.sampling_type == Message.SamplingChoices.RANDOM:
             self.households = self.households.order_by("?")[: sampling.sample_size]
