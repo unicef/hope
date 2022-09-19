@@ -11,7 +11,7 @@ import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { CommunicationFilters } from '../../../../components/accountability/Communication/CommunicationTable/CommunicationFilters';
-import { GrievancesTable } from '../../../../components/grievances/GrievancesTable/GrievancesTable';
+import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
 
 export function CommunicationPage(): React.ReactElement {
   const businessArea = useBusinessArea();
@@ -22,10 +22,6 @@ export function CommunicationPage(): React.ReactElement {
     createdAtRange: '',
     program: '',
     targetPopulation: '',
-
-    search: '',
-    status: '',
-    fsp: '',
   });
 
   const debouncedFilter = useDebounce(filter, 500);
@@ -47,17 +43,16 @@ export function CommunicationPage(): React.ReactElement {
           variant='contained'
           color='primary'
           component={Link}
-          to={`/${businessArea}/target-population/create`}
-          data-cy='button-target-population-create-new'
+          to={`/${businessArea}/accountability/communication/create`}
+          data-cy='button-communication-create-new'
         >
           {t('new message')}
         </Button>
       </PageHeader>
       <CommunicationFilters filter={filter} onFilterChange={setFilter} />
-      <GrievancesTable
+      <CommunicationTable
         filter={debouncedFilter}
         businessArea={businessArea}
-        selectedTab={undefined}
       />
     </>
   );

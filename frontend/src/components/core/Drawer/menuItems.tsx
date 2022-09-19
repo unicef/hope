@@ -123,7 +123,7 @@ export const menuItems = [
     selectedRegexp: /^\/accountability\/communication.*$/,
     icon: <Feedback />,
     collapsable: true,
-    // TODO Update the permissions
+    // TODO: Update the permissions
     permissionModule: 'POPULATION',
     secondaryActions: [
       {
@@ -131,7 +131,7 @@ export const menuItems = [
         href: '/accountability/communication',
         selectedRegexp: /^\/accountability\/communication.*$/,
         icon: <></>,
-        // TODO Update the permissions
+        // TODO: Update the permissions
         permissionModule: 'HOUSEHOLDS',
       },
       {
@@ -139,7 +139,7 @@ export const menuItems = [
         href: '/accountability/feedback',
         selectedRegexp: /^\/accountability\/feedback.*$/,
         icon: <></>,
-        // TODO Update the permissions
+        // TODO: Update the permissions
         permissionModule: 'INDIVIDUALS',
       },
       {
@@ -147,7 +147,7 @@ export const menuItems = [
         href: '/accountability/surveys',
         selectedRegexp: /^\/accountability\/surveys.*$/,
         icon: <></>,
-        // TODO Update the permissions
+        // TODO: Update the permissions
         permissionModule: 'INDIVIDUALS',
       },
     ],
