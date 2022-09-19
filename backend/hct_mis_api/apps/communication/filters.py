@@ -1,15 +1,22 @@
 from django.db.models.functions import Lower
 
 from django_filters import CharFilter, FilterSet
+from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.program.models import Program
 
 from .models import Message
 
 
 class MessagesFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
+    program = CharFilter(method="program_filter")
+    created_at_range = DateTimeRangeFilter(field_name="created_at")
+
+    def program_filter(self, queryset, name, value):
+        return queryset.filter(target_population__program=decode_id_string(value))
 
     class Meta:
         model = Message
@@ -18,6 +25,8 @@ class MessagesFilter(FilterSet):
             "title": ["exact", "icontains", "istartswith"],
             "body": ["icontains", "istartswith"],
             "number_of_recipients": ["exact", "lt", "gt"],
+            "target_population": ["exact"],
+            "created_by": ["exact"],
         }
 
     order_by = CustomOrderingFilter(fields=(Lower("title"),))
