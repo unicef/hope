@@ -4,7 +4,7 @@ import factory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.communication.models import Message
+from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.models import BusinessArea
 
 
