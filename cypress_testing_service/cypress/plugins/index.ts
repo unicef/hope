@@ -9,8 +9,6 @@
 import fs from 'fs';
 const cucumber = require('cypress-cucumber-preprocessor').default;
 const browserify = require('@cypress/browserify-preprocessor');
-const xlsx = require('node-xlsx').default;
-const path = require('path'); // for file path
 
 module.exports = (on) => {
   const options = {
@@ -30,19 +28,5 @@ module.exports = (on) => {
       launchOptions.args.push('--disable-dev-shm-usage');
     }
     return launchOptions;
-  });
-
-  on('task', {
-    readXlsx: xlsx.read,
-    parseXlsx({ filePath }) {
-      return new Promise((resolve, reject) => {
-        try {
-          const jsonData = xlsx.parse(fs.readFileSync(filePath));
-          resolve(jsonData);
-        } catch (e) {
-          reject(e);
-        }
-      });
-    },
   });
 };
