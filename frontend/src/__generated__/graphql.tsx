@@ -10010,6 +10010,37 @@ export type AllSteficonRulesQuery = (
   )> }
 );
 
+export type AllTargetPopulationForChoicesQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>
+};
+
+
+export type AllTargetPopulationForChoicesQuery = (
+  { __typename?: 'Query' }
+  & { allTargetPopulation: Maybe<(
+    { __typename?: 'TargetPopulationNodeConnection' }
+    & Pick<TargetPopulationNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'TargetPopulationNodeEdge' }
+      & Pick<TargetPopulationNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'TargetPopulationNode' }
+        & Pick<TargetPopulationNode, 'id' | 'name'>
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllTargetPopulationsQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
@@ -19431,6 +19462,74 @@ export function useAllSteficonRulesLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRulesQuery>;
 export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
 export type AllSteficonRulesQueryResult = ApolloReactCommon.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
+export const AllTargetPopulationForChoicesDocument = gql`
+    query AllTargetPopulationForChoices($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, numberOfHouseholdsMin: $numberOfHouseholdsMin, numberOfHouseholdsMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program) {
+    edges {
+      node {
+        id
+        name
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type AllTargetPopulationForChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>, 'query'>;
+
+    export const AllTargetPopulationForChoicesComponent = (props: AllTargetPopulationForChoicesComponentProps) => (
+      <ApolloReactComponents.Query<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables> query={AllTargetPopulationForChoicesDocument} {...props} />
+    );
+    
+export type AllTargetPopulationForChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables> & TChildProps;
+export function withAllTargetPopulationForChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllTargetPopulationForChoicesQuery,
+  AllTargetPopulationForChoicesQueryVariables,
+  AllTargetPopulationForChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables, AllTargetPopulationForChoicesProps<TChildProps>>(AllTargetPopulationForChoicesDocument, {
+      alias: 'allTargetPopulationForChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllTargetPopulationForChoicesQuery__
+ *
+ * To run a query within a React component, call `useAllTargetPopulationForChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllTargetPopulationForChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllTargetPopulationForChoicesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
+ *      status: // value for 'status'
+ *      numberOfHouseholdsMin: // value for 'numberOfHouseholdsMin'
+ *      numberOfHouseholdsMax: // value for 'numberOfHouseholdsMax'
+ *      businessArea: // value for 'businessArea'
+ *      program: // value for 'program'
+ *   },
+ * });
+ */
+export function useAllTargetPopulationForChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, baseOptions);
+      }
+export function useAllTargetPopulationForChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, baseOptions);
+        }
+export type AllTargetPopulationForChoicesQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesQuery>;
+export type AllTargetPopulationForChoicesLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesLazyQuery>;
+export type AllTargetPopulationForChoicesQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
     query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
   allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, numberOfHouseholdsMin: $numberOfHouseholdsMin, numberOfHouseholdsMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program) {
