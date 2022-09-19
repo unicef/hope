@@ -6,9 +6,11 @@
 // the project's config changing)
 
 // https://gist.github.com/csuzw/845b589549b61d3a5fe18e49592e166f
-
+import fs from 'fs';
 const cucumber = require('cypress-cucumber-preprocessor').default;
 const browserify = require('@cypress/browserify-preprocessor');
+const xlsx = require('node-xlsx').default;
+const path = require('path'); // for file path
 
 module.exports = (on) => {
   const options = {
@@ -29,15 +31,9 @@ module.exports = (on) => {
     }
     return launchOptions;
   });
-};
 
-const xlsx = require('node-xlsx').default;
-const fs = require('fs'); // for file
-const path = require('path'); // for file path
-
-module.exports = (on, config) => {
-  // `on` is used to hook into various events Cypress emits
   on('task', {
+    readXlsx: xlsx.read,
     parseXlsx({ filePath }) {
       return new Promise((resolve, reject) => {
         try {
@@ -48,11 +44,5 @@ module.exports = (on, config) => {
         }
       });
     },
-  });
-};
-
-module.exports = (on, config) => {
-  on('task', {
-    readXlsx: readXlsx.read,
   });
 };
