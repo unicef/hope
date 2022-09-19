@@ -12810,6 +12810,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "FORCE_FAILED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -44453,6 +44459,33 @@
             "deprecationReason": null
           },
           {
+            "name": "markPaymentRecordAsFailed",
+            "description": null,
+            "args": [
+              {
+                "name": "paymentRecordId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "MarkPaymentRecordAsFailedMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "updatePaymentVerificationReceivedAndReceivedAmount",
             "description": null,
             "args": [
@@ -48850,6 +48883,29 @@
             "type": {
               "kind": "OBJECT",
               "name": "PaymentVerificationNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MarkPaymentRecordAsFailedMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "paymentRecord",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentRecordNode",
               "ofType": null
             },
             "isDeprecated": false,
