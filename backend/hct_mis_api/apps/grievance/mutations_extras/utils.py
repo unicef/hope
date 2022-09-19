@@ -14,7 +14,6 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN, BankAccountInfo
 
 logger = logging.getLogger(__name__)
@@ -626,13 +625,7 @@ def reassign_roles_on_update(individual, role_reassign_data, info=None):
 
 
 def withdraw_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household):
-    from hct_mis_api.apps.household.models import Document
-
     individual_to_remove.withdraw()
-
-    Document.objects.filter(status=Document.STATUS_VALID, individual=individual_to_remove).update(
-        status=Document.STATUS_NEED_INVESTIGATION
-    )
     log_and_withdraw_household_if_needed(
         individual_to_remove,
         info,
