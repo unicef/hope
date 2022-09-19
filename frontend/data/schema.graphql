@@ -326,7 +326,7 @@ type CashPlanNode implements Node {
   validationAlertsCount: Int!
   totalPersonsCovered: Int!
   totalPersonsCoveredRevised: Int!
-  paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
+  paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   verifications(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
   cashPlanPaymentVerificationSummary: CashPlanPaymentVerificationSummaryNode
   bankReconciliationSuccess: Int
@@ -2610,7 +2610,7 @@ type PaymentNode implements Node {
   deliveredQuantityUsd: Float
   deliveryDate: DateTime
   transactionReferenceId: String
-  paymentPlan: PaymentPlanNode!
+  parent: PaymentPlanNode!
   excluded: Boolean!
   entitlementDate: DateTime
   financialServiceProvider: FinancialServiceProviderNode
@@ -2633,16 +2633,6 @@ type PaymentNodeConnection {
 type PaymentNodeEdge {
   node: PaymentNode
   cursor: String!
-}
-
-enum PaymentPlanBackgroundActionStatus {
-  STEFICON_RUN
-  STEFICON_ERROR
-  XLSX_EXPORTING
-  XLSX_EXPORT_ERROR
-  XLSX_IMPORT_ERROR
-  XLSX_IMPORTING_ENTITLEMENTS
-  XLSX_IMPORTING_RECONCILIATION
 }
 
 enum PaymentPlanCurrency {
@@ -2832,7 +2822,7 @@ type PaymentPlanNode implements Node {
   totalUndeliveredQuantityUsd: Float
   createdBy: UserNode!
   status: PaymentPlanStatus!
-  backgroundActionStatus: PaymentPlanBackgroundActionStatus
+  backgroundActionStatus: String
   targetPopulation: TargetPopulationNode!
   currency: PaymentPlanCurrency!
   dispersionStartDate: Date
@@ -2847,7 +2837,7 @@ type PaymentPlanNode implements Node {
   steficonRule: RuleCommitNode
   steficonAppliedDate: DateTime
   deliveryMechanisms: [DeliveryMechanismNode]
-  payments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   approvalNumberRequired: Int
   authorizationNumberRequired: Int
@@ -2922,7 +2912,7 @@ type PaymentRecordNode implements Node {
   transactionReferenceId: String
   caId: String
   caHashId: UUID
-  cashPlan: CashPlanNode
+  parent: CashPlanNode
   fullName: String!
   totalPersonsCovered: Int!
   distributionModality: String!
@@ -3149,7 +3139,7 @@ type Query {
   allFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, name: String, visionVendorNumber: String, deliveryMechanisms: [String], distributionLimit: Float, communicationChannel: String, fspXlsxTemplate: ID, orderBy: String): FinancialServiceProviderNodeConnection
   paymentRecordVerification(id: ID!): PaymentVerificationNode
   cashPlanPaymentVerification(id: ID!): CashPlanPaymentVerificationNode
-  allPaymentRecords(offset: Int, before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
+  allPaymentRecords(offset: Int, before: String, after: String, first: Int, last: Int, parent: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
   allPaymentVerifications(offset: Int, before: String, after: String, first: Int, last: Int, cashPlanPaymentVerification: ID, cashPlanPaymentVerification_CashPlan: ID, status: String, search: String, businessArea: String, verificationChannel: String, orderBy: String): PaymentVerificationNodeConnection
   allCashPlanPaymentVerification(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection
   chartPaymentVerification(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartPaymentVerification

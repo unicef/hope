@@ -2014,7 +2014,7 @@
                 "defaultValue": null
               },
               {
-                "name": "cashPlan",
+                "name": "parent",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -18027,8 +18027,8 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "ENUM",
-              "name": "PaymentPlanBackgroundActionStatus",
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -18239,7 +18239,7 @@
             "deprecationReason": null
           },
           {
-            "name": "payments",
+            "name": "paymentItems",
             "description": null,
             "args": [
               {
@@ -20203,7 +20203,7 @@
             "deprecationReason": null
           },
           {
-            "name": "paymentRecords",
+            "name": "paymentItems",
             "description": null,
             "args": [
               {
@@ -21130,7 +21130,7 @@
             "deprecationReason": null
           },
           {
-            "name": "cashPlan",
+            "name": "parent",
             "description": null,
             "args": [],
             "type": {
@@ -27180,59 +27180,6 @@
       },
       {
         "kind": "ENUM",
-        "name": "PaymentPlanBackgroundActionStatus",
-        "description": null,
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "STEFICON_RUN",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "STEFICON_ERROR",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "XLSX_EXPORTING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "XLSX_EXPORT_ERROR",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "XLSX_IMPORT_ERROR",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "XLSX_IMPORTING_ENTITLEMENTS",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "XLSX_IMPORTING_RECONCILIATION",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
         "name": "PaymentPlanCurrency",
         "description": null,
         "fields": null,
@@ -29943,7 +29890,7 @@
             "deprecationReason": null
           },
           {
-            "name": "paymentPlan",
+            "name": "parent",
             "description": null,
             "args": [],
             "type": {

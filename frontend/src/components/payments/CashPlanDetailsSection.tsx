@@ -34,12 +34,12 @@ export const CashPlanDetailsSection = ({
 
   const bankReconciliationSuccessPercentage = countPercentage(
     cashPlan.bankReconciliationSuccess,
-    cashPlan.paymentRecords.totalCount,
+    cashPlan.paymentItems.totalCount,
   );
 
   const bankReconciliationErrorPercentage = countPercentage(
     cashPlan.bankReconciliationError,
-    cashPlan.paymentRecords.totalCount,
+    cashPlan.paymentItems.totalCount,
   );
 
   return (
