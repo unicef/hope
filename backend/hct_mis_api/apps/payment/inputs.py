@@ -39,6 +39,7 @@ class CreatePaymentVerificationInput(graphene.InputObjectType):
 
 
 class EditCashPlanPaymentVerificationInput(graphene.InputObjectType):
+    # TODO: will upd this one
     cash_plan_payment_verification_id = graphene.ID(required=True)
     sampling = graphene.String(required=True)
     verification_channel = graphene.String(required=True)

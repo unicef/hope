@@ -9,7 +9,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
     CashPlanFactory
@@ -75,10 +75,10 @@ class TestGenerateReportService(TestCase):
             business_area=self.business_area, program=self.program_1, end_date="2020-01-01"
         )
         self.cash_plan_2 = CashPlanFactory(business_area=self.business_area, end_date="2020-01-01")
-        self.cash_plan_verification_1 = CashPlanPaymentVerificationFactory(
+        self.cash_plan_verification_1 = PaymentVerificationPlanFactory(
             cash_plan=self.cash_plan_1, completion_date="2020-01-01"
         )
-        self.cash_plan_verification_2 = CashPlanPaymentVerificationFactory(
+        self.cash_plan_verification_2 = PaymentVerificationPlanFactory(
             cash_plan=self.cash_plan_2, completion_date="2020-01-01"
         )
         PaymentRecordFactory(
@@ -93,8 +93,8 @@ class TestGenerateReportService(TestCase):
             delivery_date="2020-01-01",
             parent=self.cash_plan_2,
         )
-        PaymentVerificationFactory(cash_plan_payment_verification=self.cash_plan_verification_1)
-        PaymentVerificationFactory(cash_plan_payment_verification=self.cash_plan_verification_2)
+        PaymentVerificationFactory(payment_verification_plan=self.cash_plan_verification_1)
+        PaymentVerificationFactory(payment_verification_plan=self.cash_plan_verification_2)
 
     @parameterized.expand(
         [

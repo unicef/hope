@@ -10,12 +10,12 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
@@ -99,9 +99,9 @@ class TestRapidProVerificationTask(TestCase):
             business_area=BusinessArea.objects.first(),
         )
         cash_plan.save()
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
-            status=CashPlanPaymentVerification.STATUS_ACTIVE,
-            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            status=PaymentVerificationPlan.STATUS_ACTIVE,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
             cash_plan=cash_plan,
         )
         for _ in range(payment_record_amount):
@@ -127,7 +127,7 @@ class TestRapidProVerificationTask(TestCase):
             )
 
             PaymentVerificationFactory(
-                cash_plan_payment_verification=cash_plan_payment_verification,
+                payment_verification_plan=payment_verification_plan,
                 payment_record=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )

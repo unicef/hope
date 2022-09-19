@@ -3,12 +3,12 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.hope_redirect import HopeRedirect, get_hope_redirect
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
@@ -64,8 +64,8 @@ class TestHopeRedirect(APITestCase):
             program=program,
             business_area=business_area,
         )
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
-            cash_plan=cash_plan, status=CashPlanPaymentVerification.STATUS_ACTIVE
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            cash_plan=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
         )
 
         target_population = TargetPopulationFactory(
@@ -82,7 +82,7 @@ class TestHopeRedirect(APITestCase):
         )
         PaymentVerificationFactory(
             id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
-            cash_plan_payment_verification=cash_plan_payment_verification,
+            payment_verification_plan=payment_verification_plan,
             payment_record=payment_record,
             status=PaymentVerification.STATUS_PENDING,
         )

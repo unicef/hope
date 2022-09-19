@@ -1,6 +1,6 @@
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
 )
@@ -15,19 +15,19 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
 
 
 def get_payment_records(cash_plan, verification_channel):
-    if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
+    if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
         return cash_plan.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
     return cash_plan.available_payment_records()
 
 
 class VerificationPlanCrudServices:
     @classmethod
-    def create(cls, cash_plan, input_data) -> CashPlanPaymentVerification:
+    def create(cls, cash_plan, input_data) -> PaymentVerificationPlan:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")
 
-        cash_plan_verification = CashPlanPaymentVerification()
+        cash_plan_verification = PaymentVerificationPlan()
         cash_plan_verification.cash_plan = cash_plan
         cash_plan_verification.verification_channel = input_data.get("verification_channel")
 
@@ -44,12 +44,12 @@ class VerificationPlanCrudServices:
         return cash_plan_verification
 
     @classmethod
-    def update(cls, cash_plan_verification, input_data) -> CashPlanPaymentVerification:
+    def update(cls, cash_plan_verification, input_data) -> PaymentVerificationPlan:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")
 
-        if cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
+        if cash_plan_verification.status != PaymentVerificationPlan.STATUS_PENDING:
             raise GraphQLError("You can only edit PENDING Cash Plan Verification")
 
         payment_records = get_payment_records(
@@ -66,7 +66,7 @@ class VerificationPlanCrudServices:
 
     @classmethod
     def delete(cls, cash_plan_verification):
-        if cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
+        if cash_plan_verification.status != PaymentVerificationPlan.STATUS_PENDING:
             raise GraphQLError("You can delete only PENDING verification")
 
         cash_plan_verification.delete()

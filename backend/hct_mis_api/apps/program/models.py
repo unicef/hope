@@ -15,7 +15,6 @@ from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
-from hct_mis_api.apps.payment.utils import get_payment_cash_plan_items_sequence_qs
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,

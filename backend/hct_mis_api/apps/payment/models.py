@@ -221,6 +221,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
+        # TODO: will add to PaymentVerification list if status 'Reconciled'
+        # RECONCILED = "RECONCILED", "Reconciled"
 
     class BackgroundActionStatus(models.TextChoices):
         STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
@@ -799,13 +801,13 @@ class CashPlan(GenericPaymentPlan):
         return self.available_payment_records().count() > 0
 
     def available_payment_records(
-        self, payment_verification_plan: Optional["CashPlanPaymentVerification"] = None, extra_validation=None
+        self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None
     ):
         params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
             params &= Q(
-                Q(verification__isnull=True) | Q(verification__cash_plan_payment_verification=payment_verification_plan)
+                Q(verification__isnull=True) | Q(verification__payment_verification_plan=payment_verification_plan)
             )
         else:
             params &= Q(verification__isnull=True)
@@ -901,7 +903,7 @@ class ServiceProvider(TimeStampedUUIDModel):
         return self.full_name
 
 
-class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
+class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -952,7 +954,15 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     cash_plan = models.ForeignKey(
         "payment.CashPlan",
         on_delete=models.CASCADE,
-        related_name="verifications",
+        related_name="verification_plans",
+        null=True,
+    )
+    # TODO: cash_plan or payment_plan is req
+    payment_plan = models.ForeignKey(
+        "payment.PaymentPlan",
+        on_delete=models.CASCADE,
+        related_name="verification_plans",
+        null=True,
     )
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
@@ -981,34 +991,34 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         return self.cash_plan.business_area
 
     @property
-    def has_xlsx_cash_plan_payment_verification_file(self):
+    def has_xlsx_payment_verification_plan_file(self):
         if all(
             [
                 self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
-                getattr(self, "xlsx_cashplan_payment_verification_file", None),
+                getattr(self, "xlsx_verification_file", None),
             ]
         ):
             return True
         return False
 
     @property
-    def xlsx_cash_plan_payment_verification_file_link(self):
-        if self.has_xlsx_cash_plan_payment_verification_file:
-            return self.xlsx_cashplan_payment_verification_file.file.url
+    def xlsx_payment_verification_plan_file_link(self):
+        if self.has_xlsx_payment_verification_plan_file:
+            return self.xlsx_verification_file.file.url
         return None
 
     @property
-    def xlsx_cash_plan_payment_verification_file_was_downloaded(self):
-        if self.has_xlsx_cash_plan_payment_verification_file:
-            return self.xlsx_cashplan_payment_verification_file.was_downloaded
+    def xlsx_payment_verification_plan_file_was_downloaded(self):
+        if self.has_xlsx_payment_verification_plan_file:
+            return self.xlsx_verification_file.was_downloaded
         return False
 
     def set_active(self):
-        self.status = CashPlanPaymentVerification.STATUS_ACTIVE
+        self.status = PaymentVerificationPlan.STATUS_ACTIVE
         self.activation_date = timezone.now()
 
     def set_pending(self):
-        self.status = CashPlanPaymentVerification.STATUS_PENDING
+        self.status = PaymentVerificationPlan.STATUS_PENDING
         self.responded_count = None
         self.received_count = None
         self.not_received_count = None
@@ -1017,33 +1027,33 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         self.rapid_pro_flow_start_uuids = []
 
 
-class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
+class XlsxPaymentVerificationPlanFile(TimeStampedUUIDModel):
     file = models.FileField()
-    cash_plan_payment_verification = models.OneToOneField(
-        CashPlanPaymentVerification, related_name="xlsx_cashplan_payment_verification_file", on_delete=models.CASCADE
+    payment_verification_plan = models.OneToOneField(
+        PaymentVerificationPlan, related_name="xlsx_verification_file", on_delete=models.CASCADE
     )
     was_downloaded = models.BooleanField(default=False)
     created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
 
 
 def build_summary(cash_plan):
-    active_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE).count()
-    pending_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_PENDING).count()
+    active_count = cash_plan.verifications.filter(status=PaymentVerificationSummary.STATUS_ACTIVE).count()
+    pending_count = cash_plan.verifications.filter(status=PaymentVerificationSummary.STATUS_PENDING).count()
     not_finished_count = cash_plan.verifications.exclude(
-        status=CashPlanPaymentVerificationSummary.STATUS_FINISHED
+        status=PaymentVerificationSummary.STATUS_FINISHED
     ).count()
-    summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=cash_plan)
+    summary = PaymentVerificationSummary.objects.get(cash_plan=cash_plan)
     if active_count >= 1:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_ACTIVE
+        summary.status = PaymentVerificationSummary.STATUS_ACTIVE
         summary.completion_date = None
         if summary.activation_date is None:
             summary.activation_date = timezone.now()
     elif not_finished_count == 0 and pending_count == 0:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_FINISHED
+        summary.status = PaymentVerificationSummary.STATUS_FINISHED
         if summary.completion_date is None:
             summary.completion_date = timezone.now()
     else:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_PENDING
+        summary.status = PaymentVerificationSummary.STATUS_PENDING
         summary.completion_date = None
         summary.activation_date = None
     summary.save()
@@ -1051,7 +1061,7 @@ def build_summary(cash_plan):
 
 @receiver(
     post_save,
-    sender=CashPlanPaymentVerification,
+    sender=PaymentVerificationPlan,
     dispatch_uid="update_verification_status_in_cash_plan",
 )
 def update_verification_status_in_cash_plan(sender, instance, **kwargs):
@@ -1060,7 +1070,7 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs):
 
 @receiver(
     post_delete,
-    sender=CashPlanPaymentVerification,
+    sender=PaymentVerificationPlan,
     dispatch_uid="update_verification_status_in_cash_plan_on_delete",
 )
 def update_verification_status_in_cash_plan_on_delete(sender, instance, **kwargs):
@@ -1070,7 +1080,7 @@ def update_verification_status_in_cash_plan_on_delete(sender, instance, **kwargs
 class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
-            "cash_plan_payment_verification",
+            "payment_verification_plan",
             "payment_record",
             "status",
             "status_date",
@@ -1087,8 +1097,9 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         (STATUS_RECEIVED, "RECEIVED"),
         (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
     )
-    cash_plan_payment_verification = models.ForeignKey(
-        "payment.CashPlanPaymentVerification",
+    # old name 'cash_plan_payment_verification'
+    payment_verification_plan = models.ForeignKey(
+        "payment.PaymentVerificationPlan",
         on_delete=models.CASCADE,
         related_name="payment_record_verifications",
     )
@@ -1107,8 +1118,8 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     @property
     def is_manually_editable(self):
         if (
-            self.cash_plan_payment_verification.verification_channel
-            != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
+            self.payment_verification_plan.verification_channel
+            != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         ):
             return False
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
@@ -1116,7 +1127,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
 
     @property
     def business_area(self):
-        return self.cash_plan_payment_verification.cash_plan.business_area
+        return self.payment_verification_plan.cash_plan.business_area
 
     def set_pending(self):
         self.status_date = timezone.now()
@@ -1124,7 +1135,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         self.received_amount = None
 
 
-class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
+class PaymentVerificationSummary(TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
@@ -1139,7 +1150,11 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
     cash_plan = models.OneToOneField(
-        "payment.CashPlan", on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
+        "payment.CashPlan", on_delete=models.CASCADE, related_name="payment_verification_summary", null=True
+    )
+    # TODO: ? FK or
+    payment_plan = models.OneToOneField(
+        "payment.PaymentPlan", on_delete=models.CASCADE, related_name="payment_verification_summary", null=True
     )
 
 

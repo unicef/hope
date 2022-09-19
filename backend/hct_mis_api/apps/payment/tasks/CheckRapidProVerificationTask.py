@@ -1,7 +1,7 @@
 import logging
 
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
@@ -21,9 +21,9 @@ def does_payment_record_have_right_hoh_phone_number(record):
 
 class CheckRapidProVerificationTask:
     def execute(self):
-        active_rapidpro_verifications = CashPlanPaymentVerification.objects.filter(
-            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
-            status=CashPlanPaymentVerification.STATUS_ACTIVE,
+        active_rapidpro_verifications = PaymentVerificationPlan.objects.filter(
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
+            status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
         for cashplan_payment_verification in active_rapidpro_verifications:
             try:

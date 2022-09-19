@@ -11,7 +11,7 @@ from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
 from hct_mis_api.apps.core.utils import build_arg_dict
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerificationSummary,
+    PaymentVerificationSummary,
     PaymentRecord,
     ServiceProvider,
 )
@@ -157,7 +157,7 @@ class PullFromDatahubTask:
             ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
 
             if created:
-                CashPlanPaymentVerificationSummary.objects.create(cash_plan=cash_plan)
+                PaymentVerificationSummary.objects.create(cash_plan=cash_plan)
 
                 try:
                     if not cash_plan.exchange_rate:

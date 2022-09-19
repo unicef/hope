@@ -15,9 +15,9 @@ from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
     PaymentVerificationFactory,
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
@@ -96,8 +96,8 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             program=program,
             business_area=cls.business_area,
         )
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
-            cash_plan=cash_plan, status=CashPlanPaymentVerification.STATUS_ACTIVE
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            cash_plan=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
         )
 
         target_population = TargetPopulationFactory(
@@ -114,7 +114,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         )
         payment_verification = PaymentVerificationFactory(
             id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
-            cash_plan_payment_verification=cash_plan_payment_verification,
+            payment_verification_plan=payment_verification_plan,
             payment_record=payment_record,
             status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
         )

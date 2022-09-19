@@ -86,7 +86,7 @@ class GrievanceTicketFilter(FilterSet):
     )
     cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
-        lookup_expr="payment_verifications__cash_plan_payment_verification__cash_plan",
+        lookup_expr="payment_verifications__payment_verification_plan__cash_plan",
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")

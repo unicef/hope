@@ -9,7 +9,7 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.models import PaymentVerification, XlsxCashPlanPaymentVerificationFile
+from hct_mis_api.apps.payment.models import PaymentVerification, XlsxPaymentVerificationPlanFile
 
 
 logger = logging.getLogger(__name__)
@@ -44,9 +44,9 @@ class XlsxVerificationExportService(XlsxExportBaseService):
     VERSION = "1.2"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
 
-    def __init__(self, cashplan_payment_verification):
-        self.cashplan_payment_verification = cashplan_payment_verification
-        self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
+    def __init__(self, payment_verification_plan):
+        self.payment_verification_plan = payment_verification_plan
+        self.payment_record_verifications = payment_verification_plan.payment_record_verifications.all()
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
@@ -111,19 +111,19 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         return self.wb
 
     def save_xlsx_file(self, user):
-        filename = f"payment_verification_{self.cashplan_payment_verification.unicef_id}.xlsx"
+        filename = f"payment_verification_{self.payment_verification_plan.unicef_id}.xlsx"
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
-            xlsx_obj = XlsxCashPlanPaymentVerificationFile(
-                created_by=user, cash_plan_payment_verification=self.cashplan_payment_verification
+            xlsx_obj = XlsxPaymentVerificationPlanFile(
+                created_by=user, payment_verification_plan=self.payment_verification_plan
             )
             self.wb.save(tmp.name)
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
 
     def get_email_context(self, user) -> dict:
-        payment_verification_id = encode_id_base64(self.cashplan_payment_verification.pk, "CashPlanPaymentVerification")
-        link = self.get_link(reverse("download-cash-plan-payment-verification", args=[payment_verification_id]))
+        payment_verification_id = encode_id_base64(self.payment_verification_plan.pk, "PaymentVerificationPlan")
+        link = self.get_link(reverse("download-payment-verification-plan", args=[payment_verification_id]))
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
         context = {

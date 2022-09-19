@@ -13,7 +13,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
 )
@@ -51,7 +51,7 @@ class TestXlsxVerificationImport(APITestCase):
         )
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(cash_plan=cash_plan)
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=cls.user, business_area=BusinessArea.objects.first()
@@ -74,13 +74,13 @@ class TestXlsxVerificationImport(APITestCase):
             )
 
             PaymentVerificationFactory(
-                cash_plan_payment_verification=cash_plan_payment_verification,
+                payment_verification_plan=payment_verification_plan,
                 payment_record=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
         cls.cash_plan = cash_plan
-        cls.verification = cash_plan.verifications.first()
+        cls.verification = cash_plan.verification_plans.first()
 
     @parameterized.expand(
         [

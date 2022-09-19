@@ -9,7 +9,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
-from hct_mis_api.apps.payment.models import XlsxCashPlanPaymentVerificationFile, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import XlsxPaymentVerificationPlanFile, PaymentVerificationPlan
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import XlsxPaymentPlanImportPerFspService
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
 from hct_mis_api.apps.core.celery import app
@@ -58,18 +58,18 @@ def fsp_generate_xlsx_report_task(fsp_id):
 def create_cash_plan_payment_verification_xls(cash_plan_payment_verification_id, user_id):
     try:
         user = get_user_model().objects.get(pk=user_id)
-        cash_plan_payment_verification = CashPlanPaymentVerification.objects.get(id=cash_plan_payment_verification_id)
+        payment_verification_plan = PaymentVerificationPlan.objects.get(id=cash_plan_payment_verification_id)
 
         with configure_scope() as scope:
-            scope.set_tag("business_area", cash_plan_payment_verification.business_area)
+            scope.set_tag("business_area", payment_verification_plan.business_area)
 
-            service = XlsxVerificationExportService(cash_plan_payment_verification)
+            service = XlsxVerificationExportService(payment_verification_plan)
             # if no file will start creating it
-            if not getattr(cash_plan_payment_verification, "xlsx_cashplan_payment_verification_file", None):
+            if not getattr(payment_verification_plan, "xlsx_verification_file", None):
                 service.save_xlsx_file(user)
 
-            cash_plan_payment_verification.xlsx_file_exporting = False
-            cash_plan_payment_verification.save()
+            payment_verification_plan.xlsx_file_exporting = False
+            payment_verification_plan.save()
             service.send_email(service.get_email_context(user))
     except Exception as e:
         logger.exception(e)
@@ -83,13 +83,13 @@ def remove_old_cash_plan_payment_verification_xls(past_days=30):
     """Remove old Payment Verification report XLSX files"""
     try:
         days = datetime.datetime.now() - datetime.timedelta(days=past_days)
-        files_qs = XlsxCashPlanPaymentVerificationFile.objects.filter(created_at__lte=days)
+        files_qs = XlsxPaymentVerificationPlanFile.objects.filter(created_at__lte=days)
         if files_qs:
             for obj in files_qs:
                 obj.file.delete(save=False)
                 obj.delete()
 
-            logger.info(f"Removed old XlsxCashPlanPaymentVerificationFile: {files_qs.count()}")
+            logger.info(f"Removed old XlsxPaymentVerificationPlanFile: {files_qs.count()}")
 
     except Exception as e:
         logger.exception(e)
