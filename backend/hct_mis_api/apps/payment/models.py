@@ -374,14 +374,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def status_lock(self):
         self.status_date = timezone.now()
 
-    # @transition(
-    #     field=status,
-    #     source=Status.LOCKED,
-    #     target=Status.LOCKED_FSP
-    # )
-    # def status_lock_fsp(self);
-    #     self.status_date = timezone.now()
-
     @transition(
         field=status,
         source=Status.LOCKED,
@@ -648,9 +640,6 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
             money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0))
         )["money"]
 
-        # print(
-        #     f"{self.distribution_limit - used_volume > volume} | limit ({self.distribution_limit}) - used({used_volume}) > vol({volume})",
-        # )
         return self.distribution_limit - used_volume > volume
 
 
