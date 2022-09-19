@@ -232,7 +232,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.steficon",
     "hct_mis_api.apps.reporting",
     "hct_mis_api.apps.activity_log",
-    "hct_mis_api.apps.communication",
+    "hct_mis_api.apps.accountability",
 ]
 
 DJANGO_APPS = [

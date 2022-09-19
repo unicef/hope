@@ -5,8 +5,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.communication.fixtures import CommunicationMessageFactory
-from hct_mis_api.apps.communication.models import Message
+from hct_mis_api.apps.accountability.fixtures import CommunicationMessageFactory
+from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -64,50 +64,50 @@ class TestActionMessageMutation(APITestCase):
         (
             (
                 "with_list_permission_full_sampling",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_LIST],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
                 {
                     "samplingType": Message.SamplingChoices.FULL_LIST,
                 },
             ),
             (
                 "with_list_permission_random_sampling",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_LIST],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
                 {
                     "samplingType": Message.SamplingChoices.RANDOM,
                 },
             ),
             (
                 "with_list_permission_title",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_LIST],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
                 {
                     "title": "got credit",
                 },
             ),
             (
                 "with_list_permission_title",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_LIST],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
                 {
                     "body": "we have sent you USD",
                 },
             ),
             (
                 "with_list_permission_numberOfRecipients",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_LIST],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
                 {
                     "numberOfRecipients_Gte": 2,
                 },
             ),
             (
                 "with_list_permission_createdBy",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_LIST],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
                 lambda u: {
                     "createdBy": encode_id_base64(u.id, "User"),
                 },
             ),
-            ("with_view_details_permission", [Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS], {}),
+            ("with_view_details_permission", [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS], {}),
             (
                 "with_view_details_as_creator_permission",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
                 {},
             ),
             ("without_permission", [], {}),

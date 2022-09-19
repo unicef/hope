@@ -8,10 +8,9 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.household.models import Household
 
 from .filters import MessageRecipientsMapFilter, MessagesFilter
-from .inputs import GetCommunicationMessageSampleSizeInput
+from .inputs import GetAccountabilityCommunicationMessageSampleSizeInput
 from .models import Message
 from .services.message_crud_services import MessageCrudServices
 from .services.sampling import Sampling
@@ -21,9 +20,9 @@ from .services.verifiers import MessageArgumentVerifier
 class CommunicationMessageRecipientMapNode(DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
-            Permissions.COMMUNICATION_MESSAGE_VIEW_LIST,
-            Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS,
-            Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
         ),
     )
 
@@ -41,9 +40,9 @@ class CommunicationMessageRecipientMapNode(DjangoObjectType):
 class CommunicationMessageNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
-            Permissions.COMMUNICATION_MESSAGE_VIEW_LIST,
-            Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS,
-            Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
         ),
     )
 
@@ -57,7 +56,7 @@ class CommunicationMessageNode(BaseNodePermissionMixin, DjangoObjectType):
 class GetCommunicationMessageSampleSizeObject(BaseNodePermissionMixin, graphene.ObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
-            Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
         ),
     )
 
@@ -66,25 +65,27 @@ class GetCommunicationMessageSampleSizeObject(BaseNodePermissionMixin, graphene.
 
 
 class Query(graphene.ObjectType):
-    communication_message = graphene.relay.Node.Field(CommunicationMessageNode)
-    all_communication_messages = DjangoPermissionFilterConnectionField(
+    accountability_communication_message = graphene.relay.Node.Field(CommunicationMessageNode)
+    all_accountability_communication_messages = DjangoPermissionFilterConnectionField(
         CommunicationMessageNode,
         filterset_class=MessagesFilter,
     )
 
-    communication_message_recipient = graphene.relay.Node.Field(CommunicationMessageRecipientMapNode)
-    all_communication_message_recipients = DjangoPermissionFilterConnectionField(
+    accountability_communication_message_recipient = graphene.relay.Node.Field(CommunicationMessageRecipientMapNode)
+    all_accountability_communication_message_recipients = DjangoPermissionFilterConnectionField(
         CommunicationMessageRecipientMapNode,
         filterset_class=MessageRecipientsMapFilter,
     )
 
-    communication_message_sample_size = graphene.Field(
+    accountability_communication_message_sample_size = graphene.Field(
         GetCommunicationMessageSampleSizeObject,
         business_area_slug=graphene.String(required=True),
-        inputs=GetCommunicationMessageSampleSizeInput(),
+        inputs=GetAccountabilityCommunicationMessageSampleSizeInput(),
     )
 
-    def resolve_communication_message_sample_size(self, info, business_area_slug: str, inputs: dict, **kwargs):
+    def resolve_accountability_communication_message_sample_size(
+        self, info, business_area_slug: str, inputs: dict, **kwargs
+    ):
         verifier = MessageArgumentVerifier(inputs)
         verifier.verify()
 
