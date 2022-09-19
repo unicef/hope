@@ -57,7 +57,7 @@ When('I select the xlsx file', () => {
 
   const fileName = 'rdi_import_1_hh_1_ind.xlsx';
   cy.fixture(fileName, 'base64').then((fileContent) => {
-    cy.get('[data-cy="rdi-file-input"]').upload({
+    cy.get('[data-cy="file-input"]').upload({
       fileContent,
       fileName,
       mimeType:
