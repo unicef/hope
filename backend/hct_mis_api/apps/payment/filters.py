@@ -18,7 +18,7 @@ from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid, dec
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
@@ -68,17 +68,17 @@ class PaymentRecordFilter(FilterSet):
 class PaymentVerificationFilter(FilterSet):
     search = CharFilter(method="search_filter")
     business_area = CharFilter(field_name="payment_record__business_area__slug")
-    verification_channel = CharFilter(field_name="cash_plan_payment_verification__verification_channel")
+    verification_channel = CharFilter(field_name="payment_verification_plan__verification_channel")
 
     class Meta:
-        fields = ("cash_plan_payment_verification", "cash_plan_payment_verification__cash_plan", "status")
+        fields = ("payment_verification_plan", "payment_verification_plan__cash_plan", "status")
         model = PaymentVerification
 
     order_by = OrderingFilter(
         fields=(
             "payment_record__ca_id",
-            "cash_plan_payment_verification__verification_channel",
-            "cash_plan_payment_verification__unicef_id",
+            "payment_verification_plan__verification_channel",
+            "payment_verification_plan__unicef_id",
             "status",
             "payment_record__head_of_household__family_name",
             "payment_record__household__unicef_id",
@@ -95,7 +95,7 @@ class PaymentVerificationFilter(FilterSet):
         q_obj = Q()
         for value in values:
             q_obj |= Q(payment_record__ca_id__istartswith=value)
-            q_obj |= Q(cash_plan_payment_verification__unicef_id__istartswith=value)
+            q_obj |= Q(payment_verification_plan__unicef_id__istartswith=value)
             q_obj |= Q(received_amount__istartswith=value)
             q_obj |= Q(payment_record__household__unicef_id__istartswith=value)
             q_obj |= Q(payment_record__head_of_household__full_name__istartswith=value)
@@ -107,10 +107,10 @@ class PaymentVerificationFilter(FilterSet):
         return qs.filter(q_obj)
 
 
-class CashPlanPaymentVerificationFilter(FilterSet):
+class PaymentVerificationPlanFilter(FilterSet):
     class Meta:
         fields = tuple()
-        model = CashPlanPaymentVerification
+        model = PaymentVerificationPlan
 
 
 class PaymentVerificationLogEntryFilter(LogEntryFilter):
@@ -118,7 +118,7 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
 
     def object_id_filter(self, qs, name, value):
         cash_plan = CashPlan.objects.get(pk=value)
-        verifications_ids = cash_plan.verifications.all().values_list("pk", flat=True)
+        verifications_ids = cash_plan.verification_plans.all().values_list("pk", flat=True)
         return qs.filter(object_id__in=verifications_ids)
 
 
@@ -179,7 +179,7 @@ class CashPlanFilter(FilterSet):
     search = CharFilter(method="search_filter")
     delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE)
     verification_status = MultipleChoiceFilter(
-        field_name="cash_plan_payment_verification_summary__status", choices=CashPlanPaymentVerification.STATUS_CHOICES
+        field_name="payment_verification_summary__status", choices=PaymentVerificationPlan.STATUS_CHOICES
     )
     business_area = CharFilter(
         field_name="business_area__slug",
@@ -202,7 +202,7 @@ class CashPlanFilter(FilterSet):
             "status",
             "total_number_of_hh",
             "total_entitled_quantity",
-            ("cash_plan_payment_verification_summary__status", "verification_status"),
+            ("payment_verification_summary__status", "verification_status"),
             "total_persons_covered",
             "total_delivered_quantity",
             "total_undelivered_quantity",
@@ -330,3 +330,18 @@ class PaymentFilter(FilterSet):
             queryset = queryset.order_by("unicef_id")
 
         return super().filter_queryset(queryset)
+
+
+# TODO need update this one
+class CashPlanPaymentPlanFilter(FilterSet):
+    business_area = CharFilter(field_name="business_area__slug", required=True)
+
+    class Meta:
+        model = CashPlan
+        fields = tuple()
+
+    order_by = OrderingFilter(
+        fields=(
+            "unicef_id",
+        )
+    )

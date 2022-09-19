@@ -23,14 +23,14 @@ from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
 from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY, Individual, MALE
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FinancialServiceProviderXlsxReport,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    CashPlanPaymentVerificationSummary,
+    PaymentVerificationSummary,
     PaymentPlan,
     Payment,
     GenericPayment,
@@ -45,9 +45,9 @@ from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
-class CashPlanPaymentVerificationSummaryFactory(factory.DjangoModelFactory):
+class PaymentVerificationSummaryFactory(factory.DjangoModelFactory):
     class Meta:
-        model = CashPlanPaymentVerificationSummary
+        model = PaymentVerificationSummary
 
 
 class CashPlanFactory(factory.DjangoModelFactory):
@@ -117,11 +117,11 @@ class CashPlanFactory(factory.DjangoModelFactory):
     total_undelivered_quantity_usd = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
     @factory.post_generation
-    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+    def payment_verification_summary(self, create, extracted, **kwargs):
         if not create:
             return
 
-        CashPlanPaymentVerificationSummaryFactory(cash_plan=self)
+        PaymentVerificationSummaryFactory(cash_plan=self)
 
 
 class ServiceProviderFactory(factory.DjangoModelFactory):
@@ -239,17 +239,17 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     registration_ca_id = factory.Faker("uuid4")
 
 
-class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
+class PaymentVerificationPlanFactory(factory.DjangoModelFactory):
     status = fuzzy.FuzzyChoice(
-        ((CashPlanPaymentVerification.STATUS_PENDING, "pending"),),
+        ((PaymentVerificationPlan.STATUS_PENDING, "pending"),),
         getter=lambda c: c[0],
     )
     sampling = fuzzy.FuzzyChoice(
-        CashPlanPaymentVerification.SAMPLING_CHOICES,
+        PaymentVerificationPlan.SAMPLING_CHOICES,
         getter=lambda c: c[0],
     )
     verification_channel = fuzzy.FuzzyChoice(
-        CashPlanPaymentVerification.VERIFICATION_CHANNEL_CHOICES,
+        PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES,
         getter=lambda c: c[0],
     )
     cash_plan = factory.Iterator(CashPlan.objects.all())
@@ -261,13 +261,13 @@ class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
     rapid_pro_flow_start_uuids = factory.LazyFunction(list)
 
     class Meta:
-        model = CashPlanPaymentVerification
+        model = PaymentVerificationPlan
 
 
 class PaymentVerificationFactory(factory.DjangoModelFactory):
-    cash_plan_payment_verification = factory.Iterator(CashPlanPaymentVerification.objects.all())
+    payment_verification_plan = factory.Iterator(PaymentVerificationPlan.objects.all())
     payment_record = factory.LazyAttribute(
-        lambda o: PaymentRecord.objects.filter(parent=o.cash_plan_payment_verification.cash_plan).order_by("?").first()
+        lambda o: PaymentRecord.objects.filter(parent=o.payment_verification_plan.cash_plan).order_by("?").first()
     )
     status = fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,
@@ -396,11 +396,11 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
     @factory.post_generation
-    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+    def payment_verification_summary(self, create, extracted, **kwargs):
         if not create:
             return
 
-        CashPlanPaymentVerificationSummaryFactory(cash_plan=self)
+        PaymentVerificationSummaryFactory(cash_plan=self)
 
 
 class RealPaymentRecordFactory(factory.DjangoModelFactory):

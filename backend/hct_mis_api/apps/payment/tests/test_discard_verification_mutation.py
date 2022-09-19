@@ -8,12 +8,12 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
@@ -72,11 +72,11 @@ class TestDiscardVerificationMutation(APITestCase):
             program=program,
             business_area=cls.business_area,
         )
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
-            cash_plan=cash_plan, verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            cash_plan=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         )
-        cash_plan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
-        cash_plan_payment_verification.save()
+        payment_verification_plan.status = PaymentVerificationPlan.STATUS_ACTIVE
+        payment_verification_plan.save()
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=cls.user, business_area=cls.business_area
@@ -97,13 +97,13 @@ class TestDiscardVerificationMutation(APITestCase):
                 target_population=target_population,
             )
             PaymentVerificationFactory(
-                cash_plan_payment_verification=cash_plan_payment_verification,
+                payment_verification_plan=payment_verification_plan,
                 payment_record=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
         cls.cash_plan = cash_plan
-        cls.verification = cash_plan.verifications.first()
+        cls.verification = cash_plan.verification_plans.first()
 
     @parameterized.expand(
         [

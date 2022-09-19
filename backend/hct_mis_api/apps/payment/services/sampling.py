@@ -7,7 +7,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
 
@@ -18,8 +18,8 @@ class Sampling:
         self.payment_records = payment_records
 
     def process_sampling(
-        self, cash_plan_verification: CashPlanPaymentVerification
-    ) -> Tuple[CashPlanPaymentVerification, List[PaymentRecord]]:
+        self, cash_plan_verification: PaymentVerificationPlan
+    ) -> Tuple[PaymentVerificationPlan, List[PaymentRecord]]:
         if not self.payment_records:
             raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
 
@@ -36,7 +36,7 @@ class Sampling:
 
         self.payment_records = sampling.payment_records
 
-        if sampling.sampling_type == CashPlanPaymentVerification.SAMPLING_RANDOM:
+        if sampling.sampling_type == PaymentVerificationPlan.SAMPLING_RANDOM:
             self.payment_records = self.payment_records.order_by("?")[: sampling.sample_size]
 
         return cash_plan_verification, self.payment_records
@@ -50,7 +50,7 @@ class Sampling:
 
     def _get_sampling(self):
         sampling_type = self.input_data.get("sampling")
-        if sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
+        if sampling_type == PaymentVerificationPlan.SAMPLING_FULL_LIST:
             arguments = self.input_data.get("full_list_arguments")
             return FullListSampling(arguments, sampling_type)
         else:

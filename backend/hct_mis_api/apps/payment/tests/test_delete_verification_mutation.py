@@ -8,12 +8,12 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
@@ -61,7 +61,7 @@ class TestDeleteVerificationMutation(APITestCase):
             program=cls.program,
             business_area=cls.business_area,
         )
-        cls.verification = cls.cash_plan.verifications.first()
+        cls.verification = cls.cash_plan.verification_plans.first()
 
     @parameterized.expand(
         [
@@ -72,14 +72,14 @@ class TestDeleteVerificationMutation(APITestCase):
     def test_delete_pending_verification_plan(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.create_active_payment_verification_plan()
-        cash_plan_payment_verification = self.create_pending_payment_verification_plan()
+        payment_verification_plan = self.create_pending_payment_verification_plan()
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
             context={"user": self.user},
             variables={
                 "cashPlanVerificationId": [
-                    self.id_to_base64(cash_plan_payment_verification.id, "CashPlanPaymentVerificationNode")
+                    self.id_to_base64(payment_verification_plan.id, "CashPlanPaymentVerificationNode")
                 ]
             },
         )
@@ -92,7 +92,7 @@ class TestDeleteVerificationMutation(APITestCase):
     )
     def test_delete_active_verification_plan(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        cash_plan_payment_verification = self.create_active_payment_verification_plan()
+        payment_verification_plan = self.create_active_payment_verification_plan()
         self.create_pending_payment_verification_plan()
 
         self.snapshot_graphql_request(
@@ -100,21 +100,21 @@ class TestDeleteVerificationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "cashPlanVerificationId": [
-                    self.id_to_base64(cash_plan_payment_verification.id, "CashPlanPaymentVerificationNode")
+                    self.id_to_base64(payment_verification_plan.id, "CashPlanPaymentVerificationNode")
                 ]
             },
         )
 
     def create_pending_payment_verification_plan(self):
-        return self.create_payment_verification_plan_with_status(CashPlanPaymentVerification.STATUS_PENDING)
+        return self.create_payment_verification_plan_with_status(PaymentVerificationPlan.STATUS_PENDING)
 
     def create_active_payment_verification_plan(self):
-        return self.create_payment_verification_plan_with_status(CashPlanPaymentVerification.STATUS_ACTIVE)
+        return self.create_payment_verification_plan_with_status(PaymentVerificationPlan.STATUS_ACTIVE)
 
     def create_payment_verification_plan_with_status(self, status):
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=self.cash_plan)
-        cash_plan_payment_verification.status = status
-        cash_plan_payment_verification.save()
+        payment_verification_plan = PaymentVerificationPlanFactory(cash_plan=self.cash_plan)
+        payment_verification_plan.status = status
+        payment_verification_plan.save()
         for _ in range(5):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=self.user, business_area=self.business_area
@@ -136,9 +136,9 @@ class TestDeleteVerificationMutation(APITestCase):
             )
 
             PaymentVerificationFactory(
-                cash_plan_payment_verification=cash_plan_payment_verification,
+                payment_verification_plan=payment_verification_plan,
                 payment_record=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
-        return cash_plan_payment_verification
+        return payment_verification_plan

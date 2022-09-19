@@ -47,9 +47,9 @@ api_patterns = [
         hct_mis_api.apps.account.views.download_exported_users,
     ),
     path(
-        "download-cash-plan-payment-verification/<str:verification_id>",
-        hct_mis_api.apps.payment.views.download_cash_plan_payment_verification,
-        name="download-cash-plan-payment-verification",
+        "download-payment-verification-plan/<str:verification_id>",
+        hct_mis_api.apps.payment.views.download_payment_verification_plan,
+        name="download-payment-verification-plan",
     ),
     path(
         "download-payment-plan-payment-list/<str:payment_plan_id>",

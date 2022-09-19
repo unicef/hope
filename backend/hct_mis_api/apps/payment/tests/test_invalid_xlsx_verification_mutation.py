@@ -13,9 +13,9 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, XlsxCashPlanPaymentVerificationFile
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan, XlsxPaymentVerificationPlanFile
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -53,15 +53,15 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
 
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
-        cls.cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
+        cls.payment_verification_plan = PaymentVerificationPlanFactory(
             cash_plan=cash_plan,
-            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX,
-            status=CashPlanPaymentVerification.STATUS_ACTIVE,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
+            status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
         cls.content = Path(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_updated.xls").read_bytes()
-        cls.xlsx_file = XlsxCashPlanPaymentVerificationFile.objects.create(
+        cls.xlsx_file = XlsxPaymentVerificationPlanFile.objects.create(
             file=File(BytesIO(cls.content), name="flex_updated.xls"),
-            cash_plan_payment_verification=cls.cash_plan_payment_verification,
+            payment_verification_plan=cls.payment_verification_plan,
             created_by=None,
         )
 
@@ -72,7 +72,7 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
             ("without_permission", [], True),
         ]
     )
-    def test_export_xlsx_cash_plan_payment_verification(self, _, permissions, download_status):
+    def test_export_xlsx_payment_verification_plan(self, _, permissions, download_status):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.xlsx_file.was_downloaded = download_status
         self.xlsx_file.save()
@@ -80,9 +80,10 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.INVALID_MUTATION,
             context={"user": self.user},
+            # TODO: upd vars after update intups
             variables={
                 "cashPlanVerificationId": self.id_to_base64(
-                    self.cash_plan_payment_verification.id, "CashPlanPaymentVerificationNode"
+                    self.payment_verification_plan.id, "PaymentVerificationPlanNode"
                 ),
             },
         )

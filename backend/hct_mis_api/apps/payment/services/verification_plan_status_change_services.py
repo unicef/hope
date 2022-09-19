@@ -9,60 +9,61 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 
 
 class VerificationPlanStatusChangeServices:
-    def __init__(self, cash_plan_verification: CashPlanPaymentVerification):
-        self.cash_plan_verification = cash_plan_verification
+    def __init__(self, payment_verification_plan: PaymentVerificationPlan):
+        self.payment_verification_plan = payment_verification_plan
 
-    def discard(self) -> CashPlanPaymentVerification:
-        if self.cash_plan_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+    def discard(self) -> PaymentVerificationPlan:
+        if self.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             raise GraphQLError("You can discard only ACTIVE verification")
-        if self.cash_plan_verification.verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
+        if self.payment_verification_plan.verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
             if (
-                not self.cash_plan_verification.xlsx_cash_plan_payment_verification_file_was_downloaded
-                or self.cash_plan_verification.xlsx_file_imported
+                not self.payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded
+                or self.payment_verification_plan.xlsx_file_imported
             ):
                 raise GraphQLError("You can't discard if xlsx file was downloaded or imported")
             # remove xlsx file
-            if self.cash_plan_verification.has_xlsx_cash_plan_payment_verification_file:
-                self.cash_plan_verification.xlsx_cashplan_payment_verification_file.delete()
+            if self.payment_verification_plan.has_xlsx_payment_verification_plan_file:
+                self.payment_verification_plan.xlsx_verification_file.delete()
 
-        self.cash_plan_verification.set_pending()
-        self.cash_plan_verification.save()
+        self.payment_verification_plan.set_pending()
+        self.payment_verification_plan.save()
 
         self._reset_payment_verifications()
 
-        return self.cash_plan_verification
+        return self.payment_verification_plan
 
-    def mark_invalid(self) -> CashPlanPaymentVerification:
-        if self.cash_plan_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+    def mark_invalid(self) -> PaymentVerificationPlan:
+        if self.payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             raise GraphQLError("You can mark invalid only ACTIVE verification")
-        if self.cash_plan_verification.verification_channel != CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
+        if self.payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
             raise GraphQLError("You can mark invalid only verification when XLSX channel is selected")
 
         if (
-            self.cash_plan_verification.xlsx_cash_plan_payment_verification_file_was_downloaded
-            or self.cash_plan_verification.xlsx_file_imported
+            self.payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded
+            or self.payment_verification_plan.xlsx_file_imported
         ):
-            self.cash_plan_verification.status = CashPlanPaymentVerification.STATUS_INVALID
-            self.cash_plan_verification.save()
+            self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_INVALID
+            self.payment_verification_plan.save()
             self._reset_payment_verifications()
             # remove xlsx file
-            if self.cash_plan_verification.has_xlsx_cash_plan_payment_verification_file:
-                self.cash_plan_verification.xlsx_cashplan_payment_verification_file.delete()
+            if self.payment_verification_plan.has_xlsx_payment_verification_plan_file:
+                self.payment_verification_plan.xlsx_verification_file.file.delete()
+                self.payment_verification_plan.xlsx_verification_file.delete()
 
-            return self.cash_plan_verification
+            return self.payment_verification_plan
         else:
             raise GraphQLError("You can mark invalid if xlsx file was downloaded or imported")
 
     def _reset_payment_verifications(self):
         # payment verifications to reset using for discard and mark_invalid
-        payment_record_verifications = self.cash_plan_verification.payment_record_verifications.all()
+        payment_record_verifications = self.payment_verification_plan.payment_record_verifications.all()
         for payment_record_verification in payment_record_verifications:
             payment_record_verification.set_pending()
 
@@ -70,47 +71,47 @@ class VerificationPlanStatusChangeServices:
             payment_record_verifications, ["status_date", "status", "received_amount"]
         )
 
-    def activate(self) -> CashPlanPaymentVerification:
-        if self.cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
+    def activate(self) -> PaymentVerificationPlan:
+        if self.payment_verification_plan.status != PaymentVerificationPlan.STATUS_PENDING:
             raise GraphQLError("You can activate only PENDING verification")
 
         if self._can_activate_via_rapidpro():
             self._activate_rapidpro()
 
-        self.cash_plan_verification.set_active()
-        self.cash_plan_verification.save()
+        self.payment_verification_plan.set_active()
+        self.payment_verification_plan.save()
 
-        return self.cash_plan_verification
+        return self.payment_verification_plan
 
     def _can_activate_via_rapidpro(self):
         return (
-            self.cash_plan_verification.verification_channel
-            == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO
+            self.payment_verification_plan.verification_channel
+            == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO
         )
 
     def _activate_rapidpro(self):
-        business_area_slug = self.cash_plan_verification.business_area.slug
+        business_area_slug = self.payment_verification_plan.business_area.slug
         api = RapidProAPI(business_area_slug)
-        pv_id = self.cash_plan_verification.id
+        pv_id = self.payment_verification_plan.id
         phone_numbers = list(
             Individual.objects.filter(
-                heading_household__paymentrecord__verification__cash_plan_payment_verification=pv_id
+                heading_household__paymentrecord__verification__payment_verification_plan=pv_id
             ).values_list("phone_no", flat=True)
         )
-        flow_start_info_list = api.start_flow(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)
-        self.cash_plan_verification.rapid_pro_flow_start_uuids = [
+        flow_start_info_list = api.start_flow(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
+        self.payment_verification_plan.rapid_pro_flow_start_uuids = [
             flow_start_info.get("uuid") for flow_start_info in flow_start_info_list
         ]
 
-    def finish(self) -> CashPlanPaymentVerification:
-        self.cash_plan_verification.status = CashPlanPaymentVerification.STATUS_FINISHED
-        self.cash_plan_verification.completion_date = timezone.now()
-        self.cash_plan_verification.save()
-        self._create_grievance_tickets(self.cash_plan_verification)
-        self.cash_plan_verification.payment_record_verifications.filter(
+    def finish(self) -> PaymentVerificationPlan:
+        self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_FINISHED
+        self.payment_verification_plan.completion_date = timezone.now()
+        self.payment_verification_plan.save()
+        self._create_grievance_tickets(self.payment_verification_plan)
+        self.payment_verification_plan.payment_record_verifications.filter(
             status=PaymentVerification.STATUS_PENDING
         ).delete()
-        return self.cash_plan_verification
+        return self.payment_verification_plan
 
     def _create_grievance_ticket_for_status(self, cashplan_payment_verification, status):
         verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
