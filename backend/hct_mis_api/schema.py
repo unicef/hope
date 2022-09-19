@@ -3,6 +3,8 @@ from graphene_django.debug import DjangoDebug
 
 import hct_mis_api.apps.account.schema
 import hct_mis_api.apps.activity_log.schema
+import hct_mis_api.apps.communication.mutations
+import hct_mis_api.apps.communication.schema
 
 # DO NOT DELETE THIS IMPORT
 import hct_mis_api.apps.core.converters
@@ -44,6 +46,7 @@ class Query(
     hct_mis_api.apps.reporting.schema.Query,
     hct_mis_api.apps.activity_log.schema.Query,
     hct_mis_api.apps.geo.schema.Query,
+    hct_mis_api.apps.communication.schema.Query,
     graphene.ObjectType,
 ):
     debug = graphene.Field(DjangoDebug, name="_debug")
@@ -57,6 +60,7 @@ class Mutations(
     hct_mis_api.apps.payment.mutations.Mutations,
     hct_mis_api.apps.grievance.mutations.Mutations,
     hct_mis_api.apps.reporting.mutations.Mutations,
+    hct_mis_api.apps.communication.mutations.Mutations,
     graphene.ObjectType,
 ):
     pass
