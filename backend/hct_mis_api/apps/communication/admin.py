@@ -32,7 +32,6 @@ class MessageRecipientMapInline(admin.TabularInline):
 @admin.register(Message)
 class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     exclude = (
-        "created_by",
         "number_of_recipients",
         "unicef_id",
         "full_list_arguments",
@@ -46,7 +45,6 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "title",
         "body",
         "business_area",
-        "target_population",
         "registration_data_import",
         "sampling_type",
         "sample_size",
@@ -55,6 +53,3 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         ("created_by", AutoCompleteFilter),
         "created_at",
     )
-
-    def has_add_permission(self, request):
-        return False
