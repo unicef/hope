@@ -2,7 +2,7 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.communication.models import Message
+from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -13,8 +13,8 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection
 
 class TestActionMessageMutation(APITestCase):
     MUTATION = """
-    mutation CreateCommunicationMessage($businessArea: String!, $inputs: CreateCommunicationMessageInput!) {
-      createCommunicationMessage(businessAreaSlug: $businessArea, inputs: $inputs) {
+    mutation CreateAccountabilityCommunicationMessage($businessArea: String!, $inputs: CreateAccountabilityCommunicationMessageInput!) {
+      createAccountabilityCommunicationMessage(businessAreaSlug: $businessArea, inputs: $inputs) {
         message {
           title
           unicefId
@@ -40,9 +40,6 @@ class TestActionMessageMutation(APITestCase):
             [HouseholdSelection(household=household, target_population=cls.tp) for household in cls.households]
         )
 
-        for household in cls.households:
-            print("HoH DOB: ", household.head_of_household.birth_date)
-
         cls.sampling_data = {
             Message.SamplingChoices.FULL_LIST: {
                 "fullListArguments": {
@@ -64,37 +61,37 @@ class TestActionMessageMutation(APITestCase):
         (
             (
                 "with_permission_and_full_list_tp",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_CREATE],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
                 Message.SamplingChoices.FULL_LIST,
                 "targetPopulation",
             ),
             (
                 "with_permission_and_random_tp",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_CREATE],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
                 Message.SamplingChoices.RANDOM,
                 "targetPopulation",
             ),
             (
                 "with_permission_and_full_list_households",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_CREATE],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
                 Message.SamplingChoices.FULL_LIST,
                 "households",
             ),
             (
                 "with_permission_and_random_households",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_CREATE],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
                 Message.SamplingChoices.RANDOM,
                 "households",
             ),
             (
                 "with_permission_and_full_list_rdi",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_CREATE],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
                 Message.SamplingChoices.FULL_LIST,
                 "registration_data_import",
             ),
             (
                 "with_permission_and_random_rdi",
-                [Permissions.COMMUNICATION_MESSAGE_VIEW_CREATE],
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
                 Message.SamplingChoices.RANDOM,
                 "registration_data_import",
             ),

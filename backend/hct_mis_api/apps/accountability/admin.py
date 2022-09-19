@@ -13,10 +13,7 @@ from .models import Message
 class MessageRecipientMapInline(admin.TabularInline):
     model = Message.households.through
     extra = 0
-    list_prefetch_related = (
-        "household",
-        "household__head_of_household",
-    )
+    list_prefetch_related = ("household__head_of_household",)
     fields: Optional[Sequence[str]] = ("get_hoh_name",)
     readonly_fields: Optional[Sequence[str]] = ("get_hoh_name",)
 
