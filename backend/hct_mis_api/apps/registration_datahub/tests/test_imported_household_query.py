@@ -11,6 +11,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFact
 
 class TestImportedHouseholdQuery(APITestCase):
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     ALL_IMPORTED_HOUSEHOLD_QUERY = """
     query AllImportedHouseholds{
