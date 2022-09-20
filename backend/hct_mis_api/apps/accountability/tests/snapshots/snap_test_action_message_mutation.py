@@ -30,7 +30,7 @@ snapshots['TestActionMessageMutation::test_create_communication_message_1_with_p
                 'createdBy': {
                     'firstName': 'John'
                 },
-                'numberOfRecipients': 3,
+                'numberOfRecipients': 4,
                 'title': 'RANDOM message title',
                 'unicefId': 'MSG-22-0002'
             }
@@ -62,7 +62,7 @@ snapshots['TestActionMessageMutation::test_create_communication_message_3_with_p
                 'createdBy': {
                     'firstName': 'John'
                 },
-                'numberOfRecipients': 3,
+                'numberOfRecipients': 4,
                 'title': 'RANDOM message title',
                 'unicefId': 'MSG-22-0004'
             }
