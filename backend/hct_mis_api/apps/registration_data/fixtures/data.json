@@ -1,21 +1,21 @@
 [
 {
   "model": "registration_data.registrationdataimport",
-  "pk": "04992dce-154b-4938-8e47-74341541ebcf",
+  "pk": "c749ab01-16dc-48af-a764-5f3a873f0a7d",
   "fields": {
-    "created_at": "2022-03-30 09:22:14.000000-00:00",
-    "updated_at": "2022-03-30 09:54:07.000000-00:00",
-    "version": 1648633101166539,
+    "created_at": "2022-08-10T14:02:02.464Z",
+    "updated_at": "2022-08-10T14:30:11.761Z",
+    "version": 1660140865076616,
     "name": "test",
     "status": "MERGED",
-    "import_date": "2022-03-30 09:22:21.394584-00:00",
+    "import_date": "2022-08-10T14:02:02.464Z",
     "imported_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
     "data_source": "XLS",
     "number_of_individuals": 6,
     "number_of_households": 2,
-    "datahub_id": "c57848bf-a5df-47da-81a3-f30b6b29ae1a",
+    "datahub_id": "f814f78d-6f0d-49d9-961c-79322fa172b9",
     "error_message": "",
-    "sentry_id": "",
+    "sentry_id": null,
     "pull_pictures": true,
     "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
     "screen_beneficiary": false

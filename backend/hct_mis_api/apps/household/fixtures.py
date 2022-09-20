@@ -6,6 +6,7 @@ from faker import Faker
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
     MARITAL_STATUS_CHOICE,
@@ -83,8 +84,8 @@ class HouseholdFactory(factory.DjangoModelFactory):
         RESIDENCE_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    country_origin = factory.Faker("country_code")
-    country = factory.Faker("country_code")
+    country_origin = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
     size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
     registration_data_import = factory.SubFactory(
@@ -178,11 +179,10 @@ class DocumentTypeFactory(factory.DjangoModelFactory):
 class DocumentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Document
-        # django_get_or_create = ("type",)
+        django_get_or_create = ("type",)
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
-    type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by("?").first())
-    # type = factory.SubFactory(DocumentTypeFactory)
+    type = factory.SubFactory(DocumentTypeFactory)
     individual = factory.SubFactory(IndividualFactory)
 
 
@@ -302,7 +302,9 @@ def create_household_and_individuals(household_data=None, individuals_data=None,
 
 
 def create_individual_document(individual, document_type=None):
+    additional_fields = {}
     if document_type:
-        DocumentTypeFactory(type=document_type)
-    document = DocumentFactory(individual=individual)
+        document_type = DocumentTypeFactory(type=document_type)
+        additional_fields["type"] = document_type
+    document = DocumentFactory(individual=individual, **additional_fields)
     return document

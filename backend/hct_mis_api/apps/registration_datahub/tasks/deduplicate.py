@@ -85,7 +85,7 @@ class DeduplicateTask:
         names_queries = cls._prepare_queries_for_names_from_fields(fields)
         documents_queries = cls._prepare_documents_queries_from_fields(fields)
         identities_queries = cls._prepare_identities_queries_from_fields(fields)
-        households_and_roles_queries = cls._prepare_households_and_roles_queries_from_fields(fields)
+        households_and_roles_queries = cls._prepare_households_and_roles_queries_from_fields(fields)  # noqa: F841
         queries_list.extend(names_queries)
         queries_list.extend(documents_queries)
         queries_list.extend(identities_queries)
@@ -213,8 +213,8 @@ class DeduplicateTask:
                     }
                 else:
                     admin_areas = {
-                        "admin1": data.title if data else None,
-                        "admin2": data.children.filter(admin_area_level__admin_level=2).first(),
+                        "admin1": data.name if data else None,
+                        "admin2": data.children.filter(area_type__area_level=2).first(),
                     }
                 queries.extend([{"match": {admin_area: {"query": value}}} for admin_area, value in admin_areas.items()])
             else:
@@ -222,7 +222,7 @@ class DeduplicateTask:
                     {
                         "match": {
                             f"household.{key}": {
-                                "query": data.alpha3 if isinstance(data, Country) else data,
+                                "query": data.alpha3 if isinstance(data, Country) else data.iso_code3,
                                 "boost": 0.4,
                             }
                         }
@@ -254,7 +254,7 @@ class DeduplicateTask:
                         {
                             "match": {
                                 f"{prefix}.country": {
-                                    "query": country.alpha3 if isinstance(country, Country) else country
+                                    "query": country.alpha3 if isinstance(country, Country) else country.iso_code3
                                 }
                             }
                         },

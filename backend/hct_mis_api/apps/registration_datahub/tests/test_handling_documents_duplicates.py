@@ -1,5 +1,6 @@
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
@@ -19,6 +20,7 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):
@@ -100,9 +102,10 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                 },
             ],
         )
-        dt = DocumentType(country="PL", label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country = geo_models.Country.objects.get(iso_code2="PL")
+        dt = DocumentType(country=country, label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
         dt_tax_id = DocumentType.objects.create(
-            country="PL", label=IDENTIFICATION_TYPE_TAX_ID, type=IDENTIFICATION_TYPE_TAX_ID
+            country=country, label=IDENTIFICATION_TYPE_TAX_ID, type=IDENTIFICATION_TYPE_TAX_ID
         )
         dt.save()
         cls.document1 = Document(

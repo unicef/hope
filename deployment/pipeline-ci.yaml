@@ -228,6 +228,7 @@ stages:
               script: |
                mv deployment/docker-compose.tst.yml docker-compose.tst.yml
                mv $(Agent.TempDirectory)/.env-django-test .env
+
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:

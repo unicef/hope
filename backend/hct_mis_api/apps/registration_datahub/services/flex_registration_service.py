@@ -9,10 +9,12 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.transaction import atomic
 from django.forms import modelform_factory
+
 from django_countries.fields import Country
 
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
@@ -200,12 +202,12 @@ class FlexRegistrationService:
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
         household = self._create_object_and_validate(household_data, ImportedHousehold)
-        admin_area1 = AdminArea.objects.filter(p_code=household.admin1).first()
-        admin_area2 = AdminArea.objects.filter(p_code=household.admin2).first()
+        admin_area1 = geo_models.Area.objects.filter(p_code=household.admin1).first()
+        admin_area2 = geo_models.Area.objects.filter(p_code=household.admin2).first()
         if admin_area1:
-            household.admin1_title = admin_area1.title
+            household.admin1_title = admin_area1.name
         if admin_area2:
-            household.admin2_title = admin_area2.title
+            household.admin2_title = admin_area2.name
         household.kobo_asset_id = record.source_id
         household.save(
             update_fields=(

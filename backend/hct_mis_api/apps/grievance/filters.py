@@ -142,7 +142,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def admin_filter(self, qs, name, value):
         if value:
-            return qs.filter(admin2_new__in=[admin.id for admin in value])
+            return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
     def permissions_filter(self, qs, name, value):

@@ -38,7 +38,7 @@ export const AllIndividualsForPopulationTable = gql`
       household_Id: $householdId
       excludedId: $excludedId
       businessArea: $businessArea
-      household_AdminAreaNew: $adminArea
+      household_AdminArea: $adminArea
       withdrawn: $withdrawn
       admin2: $admin2
       flags: $flags

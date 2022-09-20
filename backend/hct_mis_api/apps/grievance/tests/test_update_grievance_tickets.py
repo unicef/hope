@@ -2,18 +2,14 @@ from datetime import date
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 
-from django_countries.fields import Country
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -84,18 +80,11 @@ class TestUpdateGrievanceTickets(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         cls.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123333")
-        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="2343123")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -103,8 +92,8 @@ class TestUpdateGrievanceTickets(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area_1_new = AreaFactory(name="City Test", area_type=area_type, p_code="123333")
-        cls.admin_area_2_new = AreaFactory(name="City Example", area_type=area_type, p_code="2343123")
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123333")
+        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="2343123")
 
         program_one = ProgramFactory(
             name="Test program ONE",
@@ -142,9 +131,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         ]
 
         first_individual = cls.individuals[0]
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country_pl = geo_models.Country.objects.get(iso_code2="PL")
+        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
         birth_certificate_type = DocumentType.objects.get(
-            country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+            country=country_pl, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
         )
         cls.national_id = DocumentFactory(
             type=national_id_type, document_number="789-789-645", individual=first_individual
@@ -160,7 +150,6 @@ class TestUpdateGrievanceTickets(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
             admin2=cls.admin_area_1,
-            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -187,7 +176,6 @@ class TestUpdateGrievanceTickets(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=cls.admin_area_1,
-            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -222,7 +210,6 @@ class TestUpdateGrievanceTickets(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
             admin2=cls.admin_area_1,
-            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -245,11 +232,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             description="",
             language="Spanish",
             admin2=cls.admin_area_2,
-            admin2_new=cls.admin_area_2_new,
         )
         PositiveFeedbackTicketWithoutExtrasFactory(ticket=cls.positive_feedback_grievance_ticket)
 
-        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country="POL")
+        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country=country_pl)
         cls.identity_to_update = IndividualIdentity.objects.create(
             agency=unhcr_agency,
             individual=cls.individuals[0],
@@ -589,7 +575,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         self.household_data_change_grievance_ticket.refresh_from_db()
         result = self.household_data_change_grievance_ticket.household_data_update_ticket_details.household_data
-        expected_result = None
 
         if name == "with_permission":
             expected_result = {
@@ -597,7 +582,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "country": {
                     "value": "AFG",
                     "approve_status": False,
-                    "previous_value": self.household_one.country.alpha3,
+                    "previous_value": self.household_one.country.iso_code3,
                 },
                 "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
                 "flex_fields": {},
@@ -634,7 +619,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "New Description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.admin_area_1_new.p_code,
+                "admin": self.admin_area_1.p_code,
                 "language": "Polish, English",
                 "area": "Example Town",
                 "ticketId": self.id_to_base64(self.positive_feedback_grievance_ticket.id, "GrievanceTicketNode"),
@@ -650,15 +635,13 @@ class TestUpdateGrievanceTickets(APITestCase):
         if name == "with_permission":
             self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
             self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.title, self.admin_area_1.title)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2_new.name, self.admin_area_1_new.name)
+            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.name, self.admin_area_1.name)
             self.assertNotEqual(self.positive_feedback_grievance_ticket.language, "Polish, English")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
         else:
             self.assertEqual(self.positive_feedback_grievance_ticket.description, "")
             self.assertNotEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
             self.assertEqual(self.positive_feedback_grievance_ticket.admin2, self.admin_area_2)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2_new, self.admin_area_2_new)
             self.assertEqual(self.positive_feedback_grievance_ticket.language, "Spanish")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
 
@@ -791,7 +774,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "New Description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.admin_area_1_new.p_code,
+                "admin": self.admin_area_1.p_code,
                 "language": "Polish, English",
                 "area": "Example Town",
                 "ticketId": ticket_id,
