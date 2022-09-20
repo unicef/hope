@@ -38,32 +38,28 @@ class MessagesFilter(FilterSet):
 class MessageRecipientsMapFilter(FilterSet):
     message_id = CharFilter(method="filter_message_id", required=True)
     recipient_id = CharFilter(method="filter_recipient_id")
-    full_name = CharFilter(
-        field_name="household__head_of_household__full_name", lookup_expr=["exact", "icontains", "istartswith"]
-    )
-    phone_no = CharFilter(
-        field_name="household__head_of_household__phone_no", lookup_expr=["exact", "icontains", "istartswith"]
-    )
-    sex = CharFilter(field_name="household__head_of_household__sex")
+    full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr=["exact", "icontains", "istartswith"])
+    phone_no = CharFilter(field_name="head_of_household__phone_no", lookup_expr=["exact", "icontains", "istartswith"])
+    sex = CharFilter(field_name="head_of_household__sex")
 
     def filter_message_id(self, queryset, name, value):
-        return queryset.filter(message_id=decode_id_string(value))
+        return queryset.filter(messages__id=decode_id_string(value))
 
     def filter_recipient_id(self, queryset, name, value):
-        return queryset.filter(id=decode_id_string(value))
+        return queryset.filter(head_of_household_id=decode_id_string(value))
 
     class Meta:
-        model = Message.households.through
+        model = Household
         fields = []
 
     order_by = CustomOrderingFilter(
         fields=(
             "id",
-            Lower("household__head_of_household__first_name"),
-            Lower("household__head_of_household__sex"),
+            Lower("head_of_household__first_name"),
+            Lower("head_of_household__sex"),
             "size",
             Lower("admin2__name"),
             "residence_status",
-            "household__head_of_household__first_registration_date",
+            "head_of_household__first_registration_date",
         )
     )

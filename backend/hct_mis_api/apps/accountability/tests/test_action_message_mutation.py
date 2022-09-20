@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -12,7 +14,7 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection
 
 
 class TestActionMessageMutation(APITestCase):
-    MUTATION = """
+    MUTATION_NEW_MESSAGE = """
     mutation CreateAccountabilityCommunicationMessage($businessArea: String!, $inputs: CreateAccountabilityCommunicationMessageInput!) {
       createAccountabilityCommunicationMessage(businessAreaSlug: $businessArea, inputs: $inputs) {
         message {
@@ -24,6 +26,15 @@ class TestActionMessageMutation(APITestCase):
           }
           numberOfRecipients
         }
+      }
+    }
+    """
+
+    MUTATION_SAMPLE_SIZE = """
+    query AccountabilityCommunicationMessageSampleSize($businessArea: String!, $inputs: GetAccountabilityCommunicationMessageSampleSizeInput!) {
+      accountabilityCommunicationMessageSampleSize(businessAreaSlug: $businessArea, inputs: $inputs) {
+        numberOfRecipients
+        sampleSize
       }
     }
     """
@@ -100,7 +111,7 @@ class TestActionMessageMutation(APITestCase):
         )
     )
     def test_create_communication_message(
-        self, _: str, permissions: list[str], sampling_type: str, look_up_with: str
+        self, _: str, permissions: Sequence[str], sampling_type: str, look_up_with: str
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -118,7 +129,71 @@ class TestActionMessageMutation(APITestCase):
         }
 
         self.snapshot_graphql_request(
-            request_string=self.MUTATION,
+            request_string=self.MUTATION_NEW_MESSAGE,
+            context={"user": self.user},
+            variables=data,
+        )
+
+    @parameterized.expand(
+        (
+            (
+                "with_permission_and_full_list_tp",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+                Message.SamplingChoices.FULL_LIST,
+                "targetPopulation",
+            ),
+            (
+                "with_permission_and_random_tp",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+                Message.SamplingChoices.RANDOM,
+                "targetPopulation",
+            ),
+            (
+                "with_permission_and_full_list_households",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+                Message.SamplingChoices.FULL_LIST,
+                "households",
+            ),
+            (
+                "with_permission_and_random_households",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+                Message.SamplingChoices.RANDOM,
+                "households",
+            ),
+            (
+                "with_permission_and_full_list_rdi",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+                Message.SamplingChoices.FULL_LIST,
+                "registration_data_import",
+            ),
+            (
+                "with_permission_and_random_rdi",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+                Message.SamplingChoices.RANDOM,
+                "registration_data_import",
+            ),
+            ("without_permission_full_list_tp", [], Message.SamplingChoices.FULL_LIST, "targetPopulation"),
+            ("without_permission_random_tp", [], Message.SamplingChoices.RANDOM, "targetPopulation"),
+        )
+    )
+    def test_get_communication_message_sample_size(
+        self, _: str, permissions: Sequence[str], sampling_type: str, look_up_with: str
+    ) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        data = {
+            "businessArea": self.business_area.slug,
+            "inputs": {
+                look_up_with: self.tp.id
+                if look_up_with == "targetPopulation"
+                else [household.id for household in self.households],
+                "samplingType": sampling_type,
+                **self.sampling_data[sampling_type],
+            },
+        }
+
+        self.snapshot_graphql_request(
+            request_string=self.MUTATION_NEW_MESSAGE,
             context={"user": self.user},
             variables=data,
         )

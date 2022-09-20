@@ -1,4 +1,4 @@
-from typing import Callable, Union
+from typing import Callable, Sequence, Union
 
 from parameterized import parameterized
 
@@ -36,6 +36,36 @@ class TestActionMessageMutation(APITestCase):
       }
     }
     """
+
+    QUERY_RECIPIENTS = """
+    query AllAccountabilityCommunicationMessageRecipients (
+        $messageId: String!
+        $recipientId: String
+        $fullName: String
+        $phoneNo: String
+        $sex: String
+        $orderBy: String
+    ) {
+      allAccountabilityCommunicationMessageRecipients (
+        messageId: $messageId
+        recipientId: $recipientId
+        fullName: $fullName
+        phoneNo: $phoneNo
+        sex: $sex
+        orderBy: $orderBy
+      ) {
+        edges {
+          node {
+            id
+            size
+            headOfHousehold {
+              fullName
+            }
+          }
+        }
+      }
+    }
+"""
 
     @classmethod
     def setUpTestData(cls):
@@ -112,7 +142,7 @@ class TestActionMessageMutation(APITestCase):
         )
     )
     def test_list_communication_messages(
-        self, _: str, permissions: list[str], extra_filters: Union[Callable[[User], dict], dict]
+        self, _: str, permissions: Sequence[str], extra_filters: Union[Callable[[User], dict], dict]
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -123,4 +153,50 @@ class TestActionMessageMutation(APITestCase):
                 "businessArea": self.business_area.slug,
                 **(extra_filters(self.user) if callable(extra_filters) else extra_filters),
             },
+        )
+
+    @parameterized.expand(
+        (
+            (
+                "with_view_details_permission",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+                {
+                    "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
+                },
+            ),
+            (
+                "with_view_details_permission",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
+                {
+                    "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
+                },
+            ),
+            (
+                "with_view_details_permission",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+                {
+                    "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
+                    "sex": "MALE",
+                },
+            ),
+            (
+                "without_permission",
+                [],
+                {
+                    "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
+                },
+            ),
+        )
+    )
+    def test_list_communication_messages_recipients(self, _: str, permissions: Sequence[str], variables: dict) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_RECIPIENTS,
+            context={"user": self.user},
+            variables=variables,
         )
