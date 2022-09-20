@@ -38,6 +38,7 @@ import { ReportingPage } from './pages/reporting/ReportingPage';
 import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
+import { FeedbackPage } from './pages/accountability/feedback/FeedbackPage';
 
 const Root = styled.div`
   display: flex;
@@ -128,6 +129,9 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/accountability/communication'>
             <CommunicationPage key='all' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/feedback'>
+            <FeedbackPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/population/household'>
             <PopulationHouseholdPage />
