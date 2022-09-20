@@ -1,7 +1,10 @@
+import logging
 from typing import Optional
 
 from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
+
+from graphql import GraphQLError
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household
@@ -11,6 +14,7 @@ from .sampling import Sampling
 from .verifiers import MessageArgumentVerifier
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class MessageCrudServices:
@@ -26,12 +30,16 @@ class MessageCrudServices:
             title=input_data["title"],
             body=input_data["body"],
             sampling_type=input_data["sampling_type"],
-            number_of_recipients=households.count(),
         )
         message.households.set(households)
 
-        sampling = Sampling(input_data, message.households)
+        sampling = Sampling(input_data, households)
         sampling.process_sampling(message)
+
+        if message.number_of_recipients == 0:
+            err_msg = "No recipients found for the given criteria"
+            logger.error(err_msg)
+            raise GraphQLError(err_msg)
 
         message.save()
         return message

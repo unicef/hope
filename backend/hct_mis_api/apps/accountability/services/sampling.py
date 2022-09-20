@@ -21,7 +21,7 @@ class BaseSampling(abc.ABC):
         self.age = data.get("age")
         self.excluded_admin_areas = data.get("excluded_admin_areas", [])
         self.administrative_level = data.get("administrative_level")
-        self.excluded_admin_areas_decoded = [decode_id_string(x) for x in self.excluded_admin_areas if x]
+        self.excluded_admin_areas_decoded = [decode_id_string(x) for x in self.excluded_admin_areas if x and x.strip()]
         self.sample_size = 0
         self.households: Optional[QuerySet[Household]] = None
 
@@ -54,25 +54,8 @@ class BaseSampling(abc.ABC):
         return data
 
     @abc.abstractmethod
-    def sampling(self, recipients: QuerySet):
+    def sampling(self, households: QuerySet[Household]) -> None:
         pass
-
-
-class RandomSampling(BaseSampling):
-    def sampling(self, households: QuerySet[Household]):
-        if self.sex is not None:
-            households = households.filter(head_of_household__sex=self.sex)
-
-        if self.age is not None:
-            households = filter_age(
-                "head_of_household__birth_date",
-                households,
-                self.age.get("min"),
-                self.age.get("max"),
-            )
-
-        self.households = households.exclude(admin_area__id__in=self.excluded_admin_areas_decoded)
-        self.sample_size = self.calc_sample_size(households.count())
 
 
 class FullListSampling(BaseSampling):
@@ -81,24 +64,39 @@ class FullListSampling(BaseSampling):
         self.sample_size = self.calc_sample_size(households.count())
 
 
+class RandomSampling(FullListSampling):
+    def sampling(self, households: QuerySet[Household]):
+        if self.sex and isinstance(self.sex, str):
+            households = households.filter(head_of_household__sex=self.sex)
+
+        if self.age and isinstance(self.age, dict):
+            households = filter_age(
+                "head_of_household__birth_date",
+                households,
+                self.age.get("min"),
+                self.age.get("max"),
+            )
+
+        super().sampling(households)
+
+
 class Sampling:
     def __init__(self, input_data, households: QuerySet[Household]):
         self.input_data = input_data
         self.households = households
 
     def process_sampling(self, message: Message) -> QuerySet[Household]:
-        print("1. Processing sampling", message.sampling_type)
         sampling = self._get_sampling(message.sampling_type)
         sampling.sampling(self.households)
         message.sample_size = sampling.sample_size
         sampling_data = sampling.data()
-        print("2. Processing sampling", sampling_data)
         if message.sampling_type == Message.SamplingChoices.FULL_LIST:
             message.full_list_arguments = sampling_data
         else:
             message.random_sampling_arguments = sampling_data
 
         self.households = sampling.households
+        message.number_of_recipients = self.households.count()
 
         if self.households and sampling.sampling_type == Message.SamplingChoices.RANDOM:
             self.households = self.households.order_by("?")[: sampling.sample_size]

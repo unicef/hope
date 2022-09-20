@@ -18,7 +18,7 @@
         "name": "Node",
         "possibleTypes": [
           {
-            "name": "MessageNode"
+            "name": "CommunicationMessageNode"
           },
           {
             "name": "UserNode"
@@ -150,7 +150,7 @@
             "name": "TicketNoteNode"
           },
           {
-            "name": "MessageRecipientMapNode"
+            "name": "CommunicationMessageRecipientMapNode"
           },
           {
             "name": "LogEntryNode"

@@ -1,7 +1,7 @@
 import { HeadCell } from '../../../components/core/Table/EnhancedTableHead';
-import { MessageNode } from '../../../__generated__/graphql';
+import { CommunicationMessageNode } from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<MessageNode>[] = [
+export const headCells: HeadCell<CommunicationMessageNode>[] = [
   {
     disablePadding: false,
     label: 'Message ID',
