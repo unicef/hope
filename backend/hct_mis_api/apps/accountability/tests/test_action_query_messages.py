@@ -18,8 +18,8 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection
 
 class TestActionMessageMutation(APITestCase):
     QUERY = """
-    query AllCommunicationMessages($businessArea: String! $title: String, $body: String, $samplingType: String, $createdBy: String, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $orderBy: String,) {
-      allCommunicationMessages (businessArea: $businessArea, title: $title, body: $body, samplingType: $samplingType, createdBy: $createdBy, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, orderBy: $orderBy) {
+    query AllAccountabilityCommunicationMessages($businessArea: String! $title: String, $body: String, $samplingType: String, $createdBy: String, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $orderBy: String,) {
+      allAccountabilityCommunicationMessages (businessArea: $businessArea, title: $title, body: $body, samplingType: $samplingType, createdBy: $createdBy, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, orderBy: $orderBy) {
         edges {
           node {
             id
@@ -49,16 +49,14 @@ class TestActionMessageMutation(APITestCase):
             [HouseholdSelection(household=household, target_population=cls.tp) for household in households]
         )
 
-        CommunicationMessageFactory.create_batch(
-            10, business_area=cls.business_area, target_population=cls.tp, created_by=cls.user
-        )
-        CommunicationMessageFactory(
-            title="You got credit of USD 400",
-            body="Greetings, we have sent you USD 400 in your registered account on 2022-09-19 20:00:00 UTC",
-            business_area=cls.business_area,
-            target_population=cls.tp,
-            created_by=cls.user,
-        )
+        for i in range(1, 11):
+            CommunicationMessageFactory(
+                title=f"You got credit of USD {i}",
+                body=f"Greetings, we have sent you USD {i} in your registered account on 2022-09-19 20:00:00 UTC",
+                business_area=cls.business_area,
+                target_population=cls.tp,
+                created_by=cls.user,
+            )
 
     @parameterized.expand(
         (

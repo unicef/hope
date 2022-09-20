@@ -100,7 +100,7 @@ class TestActionMessageMutation(APITestCase):
         )
     )
     def test_create_communication_message(
-        self, name: str, permissions: list[str], sampling_type: str, look_up_with: str
+        self, _: str, permissions: list[str], sampling_type: str, look_up_with: str
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
