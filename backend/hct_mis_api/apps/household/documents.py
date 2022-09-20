@@ -1,17 +1,12 @@
-import logging
-
 from django.conf import settings
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from elasticsearch import Elasticsearch
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 
 from .elasticsearch_utils import DEFAULT_SCRIPT
 from .models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
-
-logger = logging.getLogger(__name__)
 
 
 @registry.register_document
