@@ -11,7 +11,7 @@ import {
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
 import {
-  CashPlanPaymentVerificationStatus,
+  PaymentVerificationPlanStatus,
   CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
   useExportXlsxCashPlanVerificationMutation,
@@ -237,7 +237,7 @@ export const VerificationPlanDetails = ({
                 {canDiscard &&
                   (verificationPlan.xlsxFileWasDownloaded &&
                   verificationPlan.status ===
-                    CashPlanPaymentVerificationStatus.Active ? (
+                    PaymentVerificationPlanStatus.Active ? (
                     <Box p={2}>
                       <LoadingButton
                         loading={loadingInvalid}

@@ -51,7 +51,7 @@ export const fakeApolloAllCashPlans = [
                 totalDeliveredQuantity: 24029588.26,
                 totalUndeliveredQuantity: 53795776.44,
                 updatedAt: '2022-02-24T09:56:48.875230',
-                cashPlanPaymentVerificationSummary: {
+                paymentVerificationSummary: {
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NGNhNTdkZDUtYmY4ZC00MGIxLWE3NWEtOTM0Yzg4OTc3ZTM4',
                   status: 'PENDING',

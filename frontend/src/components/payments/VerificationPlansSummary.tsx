@@ -17,7 +17,7 @@ export function VerificationPlansSummary({
 }: VerificationPlansSummaryProps): React.ReactElement {
   const { t } = useTranslation();
   const {
-    cashPlanPaymentVerificationSummary: {
+    paymentVerificationSummary: {
       status,
       activationDate,
       completionDate,

@@ -7,7 +7,7 @@ export const AllPaymentVerifications = gql`
     $first: Int
     $last: Int
     $orderBy: String
-    $cashPlanPaymentVerification: ID
+    $paymentVerificationPlan: ID
     $search: String
     $status: String
     $businessArea: String
@@ -20,8 +20,8 @@ export const AllPaymentVerifications = gql`
       first: $first
       last: $last
       orderBy: $orderBy
-      cashPlanPaymentVerification: $cashPlanPaymentVerification
-      cashPlanPaymentVerification_CashPlan: $cashPlanId
+      paymentVerificationPlan: $paymentVerificationPlan
+      paymentVerificationPlan_CashPlan: $cashPlanId
       search: $search
       status: $status
       businessArea: $businessArea
@@ -38,7 +38,7 @@ export const AllPaymentVerifications = gql`
         cursor
         node {
           id
-          cashPlanPaymentVerification {
+          paymentVerificationPlan {
             id
             unicefId
             verificationChannel

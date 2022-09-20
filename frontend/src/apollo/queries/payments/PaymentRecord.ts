@@ -79,7 +79,7 @@ export const PAYMENT_RECORD_QUERY = gql`
           id
           name
         }
-        verifications {
+        verificationPlans {
           edges {
             node {
               id

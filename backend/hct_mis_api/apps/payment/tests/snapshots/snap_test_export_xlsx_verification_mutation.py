@@ -11,7 +11,7 @@ snapshots['TestXlsxVerificationExport::test_export_xlsx_cash_plan_payment_verifi
     'data': {
         'exportXlsxCashPlanVerification': {
             'cashPlan': {
-                'verifications': {
+                'verificationPlans': {
                     'edges': [
                         {
                             'node': {
