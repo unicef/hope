@@ -58,12 +58,18 @@ class BaseSampling(abc.ABC):
         pass
 
 
-class RandomSampling(BaseSampling):
+class FullListSampling(BaseSampling):
     def sampling(self, households: QuerySet[Household]):
-        if self.sex is not None:
+        self.households = households.exclude(admin_area__id__in=self.excluded_admin_areas_decoded)
+        self.sample_size = self.calc_sample_size(households.count())
+
+
+class RandomSampling(FullListSampling):
+    def sampling(self, households: QuerySet[Household]):
+        if self.sex and isinstance(self.sex, str):
             households = households.filter(head_of_household__sex=self.sex)
 
-        if self.age is not None:
+        if self.age and isinstance(self.age, dict):
             households = filter_age(
                 "head_of_household__birth_date",
                 households,
@@ -71,14 +77,7 @@ class RandomSampling(BaseSampling):
                 self.age.get("max"),
             )
 
-        self.households = households.exclude(admin_area__id__in=self.excluded_admin_areas_decoded)
-        self.sample_size = self.calc_sample_size(households.count())
-
-
-class FullListSampling(BaseSampling):
-    def sampling(self, households: QuerySet[Household]):
-        self.households = households.exclude(admin_area__id__in=self.excluded_admin_areas_decoded)
-        self.sample_size = self.calc_sample_size(households.count())
+        super().sampling(households)
 
 
 class Sampling:
