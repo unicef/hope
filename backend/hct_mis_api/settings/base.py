@@ -277,6 +277,7 @@ OTHER_APPS = [
     "explorer",
     "import_export",
     "rest_framework",
+    "drf_yasg",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
