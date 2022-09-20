@@ -13,6 +13,6 @@ class Command(BaseCommand):
     help = "Fix documents status"
 
     def handle(self, *args, **options):
-        self.stdout.write("Start fixing")
+        self.stdout("Start fixing")
         fixed_documents = fix_documents_statuses()
-        self.stdout.write(f"Fixed {fixed_documents} documents")
+        self.stdout(f"Fixed {fixed_documents} documents")

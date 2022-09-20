@@ -153,6 +153,10 @@ class Permissions(Enum):
     ACTIVITY_LOG_VIEW = auto()
     ACTIVITY_LOG_DOWNLOAD = auto()
 
+    # Core
+    UPLOAD_STORAGE_FILE = auto()
+    DOWNLOAD_STORAGE_FILE = auto()
+
     # Django Admin
     # ...
 
@@ -426,3 +430,6 @@ class PermissionRelayMutation(BaseMutationPermissionMixin, ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **kwargs):
         return super().mutate_and_get_payload(root, info, **kwargs)
+
+
+

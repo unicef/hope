@@ -7,12 +7,12 @@ from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
     IDENTIFICATION_TYPE_NATIONAL_ID,
+    IDENTIFICATION_TYPE_TAX_ID,
     MALE,
     SON_DAUGHTER,
     WIFE_HUSBAND,
     Document,
     DocumentType,
-    IDENTIFICATION_TYPE_TAX_ID,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
@@ -147,6 +147,11 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(self.document5.status, Document.STATUS_VALID)
         self.assertEqual(GrievanceTicket.objects.count(), 0)
 
+    def test_should_create_one_ticket(self):
+        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
+        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
+        self.assertEqual(GrievanceTicket.objects.count(), 1)
+
     def test_hard_documents_deduplication_number_of_queries(self):
-        with self.assertNumQueries(13):
+        with self.assertNumQueries(14):
             DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))

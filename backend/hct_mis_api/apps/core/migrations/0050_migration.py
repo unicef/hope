@@ -10,9 +10,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
+        migrations.RemoveField(
             model_name='businessarea',
-            old_name='countries_new',
-            new_name='countries',
+            name='countries',
         ),
     ]
