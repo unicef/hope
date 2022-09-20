@@ -43,7 +43,6 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     RdiBaseCreateTask,
-    is_flex_field_attr,
     logger,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
@@ -134,7 +133,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if field_data_dict is None or field in excluded:
             return
 
-        is_flex_field = is_flex_field_attr(field)
+        is_flex_field = field.endswith(("_i_f", "_h_f"))
 
         if field_data_dict["type"] in complex_fields:
             cast_fn = complex_fields.get(field_data_dict["type"])
