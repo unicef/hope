@@ -73,14 +73,18 @@ class TargetPopulationAdmin(
 
     @button()
     def rerun_steficon(self, request, pk):
-
         def _rerun(request):
             context = self.get_common_context(request, pk)
             target_population_apply_steficon.delay(pk)
             return TemplateResponse(request, "admin/targeting/targetpopulation/rule_change.html", context)
-            
-        return confirm_action(self, request, _rerun, f"Do you want to rerun the steficon rule ?",
-                          "Updating target population in the background with correct scores." )
+
+        return confirm_action(
+            self,
+            request,
+            _rerun,
+            "Do you want to rerun the steficon rule ?",
+            "Updating target population in the background with correct scores.",
+        )
 
 
 @admin.register(HouseholdSelection)
