@@ -2127,7 +2127,7 @@
                 "defaultValue": null
               },
               {
-                "name": "cashPlanPaymentVerification",
+                "name": "paymentVerificationPlan",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -2137,7 +2137,7 @@
                 "defaultValue": null
               },
               {
-                "name": "cashPlanPaymentVerification_CashPlan",
+                "name": "paymentVerificationPlan_CashPlan",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -18310,6 +18310,85 @@
             "deprecationReason": null
           },
           {
+            "name": "verificationPlans",
+            "description": null,
+            "args": [
+              {
+                "name": "offset",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "before",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "after",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "CashPlanPaymentVerificationNodeConnection",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "paymentVerificationSummary",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CashPlanPaymentVerificationSummaryNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "approvalProcess",
             "description": null,
             "args": [
@@ -20274,7 +20353,7 @@
             "deprecationReason": null
           },
           {
-            "name": "verifications",
+            "name": "verificationPlans",
             "description": null,
             "args": [
               {
@@ -20341,7 +20420,7 @@
             "deprecationReason": null
           },
           {
-            "name": "cashPlanPaymentVerificationSummary",
+            "name": "paymentVerificationSummary",
             "description": null,
             "args": [],
             "type": {
@@ -24703,7 +24782,7 @@
             "deprecationReason": null
           },
           {
-            "name": "cashPlanPaymentVerification",
+            "name": "paymentVerificationPlan",
             "description": null,
             "args": [],
             "type": {
@@ -25018,7 +25097,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "CashPlanPaymentVerificationStatus",
+                "name": "PaymentVerificationPlanStatus",
                 "ofType": null
               }
             },
@@ -25030,13 +25109,21 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "CashPlanNode",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "CashPlanNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "paymentPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentPlanNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -25050,7 +25137,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "CashPlanPaymentVerificationSampling",
+                "name": "PaymentVerificationPlanSampling",
                 "ofType": null
               }
             },
@@ -25066,7 +25153,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "CashPlanPaymentVerificationVerificationChannel",
+                "name": "PaymentVerificationPlanVerificationChannel",
                 "ofType": null
               }
             },
@@ -25398,7 +25485,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "CashPlanPaymentVerificationStatus",
+        "name": "PaymentVerificationPlanStatus",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -25433,7 +25520,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "CashPlanPaymentVerificationSampling",
+        "name": "PaymentVerificationPlanSampling",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -25456,7 +25543,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "CashPlanPaymentVerificationVerificationChannel",
+        "name": "PaymentVerificationPlanVerificationChannel",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -26649,7 +26736,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "CashPlanPaymentVerificationSummaryStatus",
+                "name": "PaymentVerificationSummaryStatus",
                 "ofType": null
               }
             },
@@ -26685,13 +26772,21 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "CashPlanNode",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "CashPlanNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "paymentPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentPlanNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -26710,7 +26805,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "CashPlanPaymentVerificationSummaryStatus",
+        "name": "PaymentVerificationSummaryStatus",
         "description": null,
         "fields": null,
         "inputFields": null,

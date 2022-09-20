@@ -29,7 +29,7 @@ export const fakeApolloAllPaymentVerifications = [
               node: {
                 id:
                   'UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6NjgyNmVmZjctZTU4Zi00N2MxLTliMDEtNjIxOWMyZmMyZTcz',
-                cashPlanPaymentVerification: {
+                paymentVerificationPlan: {
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uTm9kZTpmOTY1M2FlNi1iMzVmLTQxZWYtOGU1My0zMjk5MDRjN2JhNmM=',
                   unicefId: 'PVP-14',

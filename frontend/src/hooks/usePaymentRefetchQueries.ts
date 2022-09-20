@@ -21,7 +21,7 @@ export const usePaymentRefetchQueries = (
       variables: {
         cashPlanId,
         businessArea,
-        cashPlanPaymentVerification: null,
+        paymentVerificationPlan: null,
         first: 5,
         orderBy: null,
         search: null,

@@ -31,7 +31,7 @@ class TestDeleteVerificationMutation(APITestCase):
           deleteCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
             cashPlan{
                 name
-                verifications {
+                verificationPlans {
                     edges {
                         node {
                             status

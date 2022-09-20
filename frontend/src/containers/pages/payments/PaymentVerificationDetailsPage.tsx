@@ -19,7 +19,7 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
-  CashPlanPaymentVerificationStatus,
+  PaymentVerificationPlanStatus,
   useCashPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
 } from '../../../__generated__/graphql';
@@ -88,12 +88,12 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     permissions,
   );
 
-  const statesArray = cashPlan.verifications?.edges?.map((v) => v.node.status);
+  const statesArray = cashPlan.verificationPlans?.edges?.map((v) => v.node.status);
 
   const canSeeVerificationRecords = (): boolean => {
     const showTable =
-      statesArray.includes(CashPlanPaymentVerificationStatus.Finished) ||
-      statesArray.includes(CashPlanPaymentVerificationStatus.Active);
+      statesArray.includes(PaymentVerificationPlanStatus.Finished) ||
+      statesArray.includes(PaymentVerificationPlanStatus.Active);
 
     return showTable && statesArray.length > 0;
   };
@@ -106,7 +106,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   };
 
   const isFinished =
-    cashPlan.cashPlanPaymentVerificationSummary.status === 'FINISHED';
+    cashPlan.paymentVerificationSummary.status === 'FINISHED';
 
   const toolbar = (
     <PageHeader

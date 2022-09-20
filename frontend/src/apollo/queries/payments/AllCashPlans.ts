@@ -66,7 +66,7 @@ export const AllCashPlans = gql`
           totalDeliveredQuantity
           totalUndeliveredQuantity
           updatedAt
-          cashPlanPaymentVerificationSummary {
+          paymentVerificationSummary {
             id
             status
           }

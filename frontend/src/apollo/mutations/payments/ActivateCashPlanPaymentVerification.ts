@@ -9,7 +9,7 @@ export const ACTIVATE_CASH_PLAN_PAYMENT_VERIFICATION = gql`
         id
         status
         statusDate
-        verifications {
+        verificationPlans {
           edges {
             node {
               id
@@ -18,7 +18,7 @@ export const ACTIVATE_CASH_PLAN_PAYMENT_VERIFICATION = gql`
             }
           }
         }
-        cashPlanPaymentVerificationSummary {
+        paymentVerificationSummary {
           id
           status
         }

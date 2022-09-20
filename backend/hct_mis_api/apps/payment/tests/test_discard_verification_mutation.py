@@ -32,7 +32,7 @@ class TestDiscardVerificationMutation(APITestCase):
           discardCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
             cashPlan{
                 name
-                verifications {
+                verificationPlans {
                     edges {
                         node {
                             status

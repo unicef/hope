@@ -800,6 +800,10 @@ class CashPlan(GenericPaymentPlan):
     def can_create_payment_verification_plan(self):
         return self.available_payment_records().count() > 0
 
+    @property
+    def unicef_id(self):
+        return getattr(self, "ca_id")
+
     def available_payment_records(
         self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None
     ):
@@ -1037,9 +1041,9 @@ class XlsxPaymentVerificationPlanFile(TimeStampedUUIDModel):
 
 
 def build_summary(cash_plan):
-    active_count = cash_plan.verifications.filter(status=PaymentVerificationSummary.STATUS_ACTIVE).count()
-    pending_count = cash_plan.verifications.filter(status=PaymentVerificationSummary.STATUS_PENDING).count()
-    not_finished_count = cash_plan.verifications.exclude(
+    active_count = cash_plan.verification_plans.filter(status=PaymentVerificationSummary.STATUS_ACTIVE).count()
+    pending_count = cash_plan.verification_plans.filter(status=PaymentVerificationSummary.STATUS_PENDING).count()
+    not_finished_count = cash_plan.verification_plans.exclude(
         status=PaymentVerificationSummary.STATUS_FINISHED
     ).count()
     summary = PaymentVerificationSummary.objects.get(cash_plan=cash_plan)

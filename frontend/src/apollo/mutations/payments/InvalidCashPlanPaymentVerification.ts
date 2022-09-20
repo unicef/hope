@@ -6,7 +6,7 @@ export const InvalidCashPlanPaymentVerification = gql`
     ) {
       cashPlan {
         id
-        verifications {
+        verificationPlans {
           edges {
             node {
               id
