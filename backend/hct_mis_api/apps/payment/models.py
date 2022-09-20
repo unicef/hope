@@ -274,6 +274,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     def set_active(self):
         self.status = CashPlanPaymentVerification.STATUS_ACTIVE
         self.activation_date = timezone.now()
+        self.error = None
 
     def set_pending(self):
         self.status = CashPlanPaymentVerification.STATUS_PENDING

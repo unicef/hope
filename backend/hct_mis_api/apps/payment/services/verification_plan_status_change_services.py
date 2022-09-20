@@ -71,7 +71,10 @@ class VerificationPlanStatusChangeServices:
         )
 
     def activate(self) -> CashPlanPaymentVerification:
-        if self.cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
+        if self.cash_plan_verification.status not in [
+            CashPlanPaymentVerification.STATUS_PENDING,
+            CashPlanPaymentVerification.STATUS_RAPID_PRO_ERROR,
+        ]:
             raise GraphQLError("You can activate only PENDING verification")
 
         if self._can_activate_via_rapidpro():
@@ -93,7 +96,8 @@ class VerificationPlanStatusChangeServices:
         api = RapidProAPI(business_area_slug)
         pv_id = self.cash_plan_verification.id
         individuals = Individual.objects.filter(
-            heading_household__payment_records__verification__cash_plan_payment_verification=pv_id
+            heading_household__payment_records__verification__cash_plan_payment_verification=pv_id,
+            heading_household__payment_records__verification__sent_to_rapid_pro=False,
         )
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
         flow_start_info_list, error = api.start_flows(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)

@@ -130,3 +130,28 @@ class TestPhoneNumberVerification(TestCase):
             ).count(),
             10,
         )
+
+        post_request_mock = MagicMock()
+        post_request_mock.side_effect = [first_flow, create_flow_response()]
+        with patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)
+        ), patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI._handle_post_request", post_request_mock):
+            VerificationPlanStatusChangeServices(self.verification).activate()
+
+        self.verification.refresh_from_db()
+        self.assertEqual(self.verification.status, CashPlanPaymentVerification.STATUS_ACTIVE)
+        self.assertIsNone(self.verification.error)
+
+        self.assertEqual(PaymentVerification.objects.filter(status=PaymentVerification.STATUS_PENDING).count(), 110)
+        self.assertEqual(
+            PaymentVerification.objects.filter(
+                status=PaymentVerification.STATUS_PENDING, sent_to_rapid_pro=True
+            ).count(),
+            110,
+        )
+        self.assertEqual(
+            PaymentVerification.objects.filter(
+                status=PaymentVerification.STATUS_PENDING, sent_to_rapid_pro=False
+            ).count(),
+            0,
+        )
