@@ -308,10 +308,12 @@ class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
+    LOADING = "LOADING"
     NOT_STARTED = "NOT_STARTED"
     STARTED = "STARTED"
     DONE = "DONE"
     IMPORT_DONE_CHOICES = (
+        (LOADING, _("Loading")),
         (NOT_STARTED, _("Not Started")),
         (STARTED, _("Started")),
         (DONE, _("Done")),
