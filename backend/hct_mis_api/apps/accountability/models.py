@@ -55,7 +55,7 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
     sampling_type = models.CharField(max_length=50, choices=SamplingChoices.choices, default=SamplingChoices.FULL_LIST)
     full_list_arguments = models.JSONField(blank=True, null=True)
     random_sampling_arguments = models.JSONField(blank=True, null=True)
-    sample_size = models.PositiveIntegerField(null=True)
+    sample_size = models.PositiveIntegerField(default=0)
 
     def __str__(self) -> str:
         return f"{self.title} ({self.number_of_recipients} recipients)"

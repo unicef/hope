@@ -46,6 +46,23 @@ export type _TableTotalCashTransferredDataNode = {
   totalHouseholds?: Maybe<Scalars['Int']>,
 };
 
+export type AccountabilityCommunicationMessageAgeInput = {
+  min?: Maybe<Scalars['Int']>,
+  max?: Maybe<Scalars['Int']>,
+};
+
+export type AccountabilityCommunicationMessageFullListArguments = {
+  excludedAdminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
+export type AccountabilityCommunicationMessageRandomSamplingArguments = {
+  excludedAdminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
+  confidenceInterval: Scalars['Float'],
+  marginOfError: Scalars['Float'],
+  age?: Maybe<AccountabilityCommunicationMessageAgeInput>,
+  sex?: Maybe<Scalars['String']>,
+};
+
 export type ActivateCashPlanVerificationMutation = {
    __typename?: 'ActivateCashPlanVerificationMutation',
   validationErrors?: Maybe<Scalars['Arg']>,
@@ -336,7 +353,7 @@ export type BusinessAreaNode = Node & {
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   logentrySet: PaymentVerificationLogEntryNodeConnection,
-  messageSet: MessageNodeConnection,
+  messageSet: CommunicationMessageNodeConnection,
 };
 
 
@@ -714,6 +731,69 @@ export type ChoiceObject = {
   value?: Maybe<Scalars['String']>,
 };
 
+export type CommunicationMessageNode = Node & {
+   __typename?: 'CommunicationMessageNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  unicefId?: Maybe<Scalars['String']>,
+  title: Scalars['String'],
+  body: Scalars['String'],
+  createdBy?: Maybe<UserNode>,
+  numberOfRecipients: Scalars['Int'],
+  businessArea: UserBusinessAreaNode,
+  households: HouseholdNodeConnection,
+  targetPopulation?: Maybe<TargetPopulationNode>,
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+  samplingType: MessageSamplingType,
+  fullListArguments?: Maybe<Scalars['JSONString']>,
+  randomSamplingArguments?: Maybe<Scalars['JSONString']>,
+  sampleSize: Scalars['Int'],
+};
+
+
+export type CommunicationMessageNodeHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type CommunicationMessageNodeConnection = {
+   __typename?: 'CommunicationMessageNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<CommunicationMessageNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type CommunicationMessageNodeEdge = {
+   __typename?: 'CommunicationMessageNodeEdge',
+  node?: Maybe<CommunicationMessageNode>,
+  cursor: Scalars['String'],
+};
+
+export type CommunicationMessageRecipientMapNode = Node & {
+   __typename?: 'CommunicationMessageRecipientMapNode',
+  id: Scalars['ID'],
+  household: HouseholdNode,
+};
+
+export type CommunicationMessageRecipientMapNodeConnection = {
+   __typename?: 'CommunicationMessageRecipientMapNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<CommunicationMessageRecipientMapNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type CommunicationMessageRecipientMapNodeEdge = {
+   __typename?: 'CommunicationMessageRecipientMapNodeEdge',
+  node?: Maybe<CommunicationMessageRecipientMapNode>,
+  cursor: Scalars['String'],
+};
+
 export type ContentTypeObjectType = {
    __typename?: 'ContentTypeObjectType',
   id: Scalars['ID'],
@@ -764,20 +844,20 @@ export type CountAndPercentageNode = {
   percentage?: Maybe<Scalars['Float']>,
 };
 
-export type CreateCommunicationMessageInput = {
+export type CreateAccountabilityCommunicationMessageInput = {
   households?: Maybe<Array<Maybe<Scalars['String']>>>,
   targetPopulation?: Maybe<Scalars['String']>,
   registrationDataImport?: Maybe<Scalars['String']>,
   samplingType: SamplingChoices,
-  fullListArguments?: Maybe<MessageFullListArguments>,
-  randomSamplingArguments?: Maybe<MessageRandomSamplingArguments>,
+  fullListArguments?: Maybe<AccountabilityCommunicationMessageFullListArguments>,
+  randomSamplingArguments?: Maybe<AccountabilityCommunicationMessageRandomSamplingArguments>,
   title: Scalars['String'],
   body: Scalars['String'],
 };
 
 export type CreateCommunicationMessageMutation = {
    __typename?: 'CreateCommunicationMessageMutation',
-  message?: Maybe<MessageNode>,
+  message?: Maybe<CommunicationMessageNode>,
 };
 
 export type CreateDashboardReport = {
@@ -1112,6 +1192,15 @@ export type FullListArguments = {
 };
 
 
+export type GetAccountabilityCommunicationMessageSampleSizeInput = {
+  households?: Maybe<Array<Maybe<Scalars['String']>>>,
+  targetPopulation?: Maybe<Scalars['String']>,
+  registrationDataImport?: Maybe<Scalars['String']>,
+  samplingType: SamplingChoices,
+  fullListArguments?: Maybe<AccountabilityCommunicationMessageFullListArguments>,
+  randomSamplingArguments?: Maybe<AccountabilityCommunicationMessageRandomSamplingArguments>,
+};
+
 export type GetCashplanVerificationSampleSizeInput = {
   cashPlanId?: Maybe<Scalars['ID']>,
   cashPlanPaymentVerificationId?: Maybe<Scalars['ID']>,
@@ -1129,17 +1218,8 @@ export type GetCashplanVerificationSampleSizeObject = {
   sampleSize?: Maybe<Scalars['Int']>,
 };
 
-export type GetCommunicationMessageSampleSizeInput = {
-  households?: Maybe<Array<Maybe<Scalars['String']>>>,
-  targetPopulation?: Maybe<Scalars['String']>,
-  registrationDataImport?: Maybe<Scalars['String']>,
-  samplingType: SamplingChoices,
-  fullListArguments?: Maybe<MessageFullListArguments>,
-  randomSamplingArguments?: Maybe<MessageRandomSamplingArguments>,
-};
-
-export type GetMessageSampleSizeObject = {
-   __typename?: 'GetMessageSampleSizeObject',
+export type GetCommunicationMessageSampleSizeObject = {
+   __typename?: 'GetCommunicationMessageSampleSizeObject',
   numberOfRecipients?: Maybe<Scalars['Int']>,
   sampleSize?: Maybe<Scalars['Int']>,
 };
@@ -1373,7 +1453,7 @@ export type HouseholdNode = Node & {
   individuals: IndividualNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
   selections: Array<HouseholdSelection>,
-  messages: MessageNodeConnection,
+  messages: CommunicationMessageNodeConnection,
   adminAreaTitle?: Maybe<Scalars['String']>,
   selection?: Maybe<HouseholdSelection>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
@@ -2916,86 +2996,6 @@ export type MergeRegistrationDataImportMutation = {
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
 };
 
-export type MessageAgeInput = {
-  min?: Maybe<Scalars['Int']>,
-  max?: Maybe<Scalars['Int']>,
-};
-
-export type MessageFullListArguments = {
-  excludedAdminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
-};
-
-export type MessageNode = Node & {
-   __typename?: 'MessageNode',
-  id: Scalars['ID'],
-  createdAt: Scalars['DateTime'],
-  updatedAt: Scalars['DateTime'],
-  unicefId?: Maybe<Scalars['String']>,
-  title: Scalars['String'],
-  body: Scalars['String'],
-  createdBy?: Maybe<UserNode>,
-  numberOfRecipients: Scalars['Int'],
-  businessArea: UserBusinessAreaNode,
-  households: HouseholdNodeConnection,
-  targetPopulation?: Maybe<TargetPopulationNode>,
-  registrationDataImport?: Maybe<RegistrationDataImportNode>,
-  samplingType: MessageSamplingType,
-  fullListArguments?: Maybe<Scalars['JSONString']>,
-  randomSamplingArguments?: Maybe<Scalars['JSONString']>,
-  sampleSize?: Maybe<Scalars['Int']>,
-};
-
-
-export type MessageNodeHouseholdsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-export type MessageNodeConnection = {
-   __typename?: 'MessageNodeConnection',
-  pageInfo: PageInfo,
-  edges: Array<Maybe<MessageNodeEdge>>,
-  totalCount?: Maybe<Scalars['Int']>,
-  edgeCount?: Maybe<Scalars['Int']>,
-};
-
-export type MessageNodeEdge = {
-   __typename?: 'MessageNodeEdge',
-  node?: Maybe<MessageNode>,
-  cursor: Scalars['String'],
-};
-
-export type MessageRandomSamplingArguments = {
-  excludedAdminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
-  confidenceInterval: Scalars['Float'],
-  marginOfError: Scalars['Float'],
-  age?: Maybe<MessageAgeInput>,
-  sex?: Maybe<Scalars['String']>,
-};
-
-export type MessageRecipientMapNode = Node & {
-   __typename?: 'MessageRecipientMapNode',
-  id: Scalars['ID'],
-  household: HouseholdNode,
-};
-
-export type MessageRecipientMapNodeConnection = {
-   __typename?: 'MessageRecipientMapNodeConnection',
-  pageInfo: PageInfo,
-  edges: Array<Maybe<MessageRecipientMapNodeEdge>>,
-  totalCount?: Maybe<Scalars['Int']>,
-  edgeCount?: Maybe<Scalars['Int']>,
-};
-
-export type MessageRecipientMapNodeEdge = {
-   __typename?: 'MessageRecipientMapNodeEdge',
-  node?: Maybe<MessageRecipientMapNode>,
-  cursor: Scalars['String'],
-};
-
 export enum MessageSamplingType {
   FullList = 'FULL_LIST',
   Random = 'RANDOM'
@@ -3003,7 +3003,7 @@ export enum MessageSamplingType {
 
 export type Mutations = {
    __typename?: 'Mutations',
-  createCommunicationMessage?: Maybe<CreateCommunicationMessageMutation>,
+  createAccountabilityCommunicationMessage?: Maybe<CreateCommunicationMessageMutation>,
   createReport?: Maybe<CreateReport>,
   restartCreateReport?: Maybe<RestartCreateReport>,
   createDashboardReport?: Maybe<CreateDashboardReport>,
@@ -3055,9 +3055,9 @@ export type Mutations = {
 };
 
 
-export type MutationsCreateCommunicationMessageArgs = {
+export type MutationsCreateAccountabilityCommunicationMessageArgs = {
   businessAreaSlug: Scalars['String'],
-  inputs: CreateCommunicationMessageInput
+  inputs: CreateAccountabilityCommunicationMessageInput
 };
 
 
@@ -3770,11 +3770,11 @@ export type ProgramsWithDeliveredQuantityNode = {
 
 export type Query = {
    __typename?: 'Query',
-  communicationMessage?: Maybe<MessageNode>,
-  allCommunicationMessages?: Maybe<MessageNodeConnection>,
-  communicationMessageRecipient?: Maybe<MessageRecipientMapNode>,
-  allCommunicationMessageRecipients?: Maybe<MessageRecipientMapNodeConnection>,
-  communicationMessageSampleSize?: Maybe<GetMessageSampleSizeObject>,
+  accountabilityCommunicationMessage?: Maybe<CommunicationMessageNode>,
+  allAccountabilityCommunicationMessages?: Maybe<CommunicationMessageNodeConnection>,
+  accountabilityCommunicationMessageRecipient?: Maybe<CommunicationMessageRecipientMapNode>,
+  allAccountabilityCommunicationMessageRecipients?: Maybe<CommunicationMessageRecipientMapNodeConnection>,
+  accountabilityCommunicationMessageSampleSize?: Maybe<GetCommunicationMessageSampleSizeObject>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
@@ -3899,41 +3899,38 @@ export type Query = {
 };
 
 
-export type QueryCommunicationMessageArgs = {
+export type QueryAccountabilityCommunicationMessageArgs = {
   id: Scalars['ID']
 };
 
 
-export type QueryAllCommunicationMessagesArgs = {
+export type QueryAllAccountabilityCommunicationMessagesArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  id?: Maybe<Scalars['UUID']>,
-  title?: Maybe<Scalars['String']>,
-  title_Icontains?: Maybe<Scalars['String']>,
-  title_Istartswith?: Maybe<Scalars['String']>,
-  body_Icontains?: Maybe<Scalars['String']>,
-  body_Istartswith?: Maybe<Scalars['String']>,
   numberOfRecipients?: Maybe<Scalars['Int']>,
-  numberOfRecipients_Lt?: Maybe<Scalars['Int']>,
-  numberOfRecipients_Gt?: Maybe<Scalars['Int']>,
+  numberOfRecipients_Gte?: Maybe<Scalars['Int']>,
+  numberOfRecipients_Lte?: Maybe<Scalars['Int']>,
   targetPopulation?: Maybe<Scalars['ID']>,
   createdBy?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   program?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
+  title?: Maybe<Scalars['String']>,
+  body?: Maybe<Scalars['String']>,
+  samplingType?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
 
-export type QueryCommunicationMessageRecipientArgs = {
+export type QueryAccountabilityCommunicationMessageRecipientArgs = {
   id: Scalars['ID']
 };
 
 
-export type QueryAllCommunicationMessageRecipientsArgs = {
+export type QueryAllAccountabilityCommunicationMessageRecipientsArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -3943,13 +3940,14 @@ export type QueryAllCommunicationMessageRecipientsArgs = {
   recipientId?: Maybe<Scalars['String']>,
   fullName?: Maybe<Scalars['String']>,
   phoneNo?: Maybe<Scalars['String']>,
+  sex?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
 
-export type QueryCommunicationMessageSampleSizeArgs = {
+export type QueryAccountabilityCommunicationMessageSampleSizeArgs = {
   businessAreaSlug: Scalars['String'],
-  inputs?: Maybe<GetCommunicationMessageSampleSizeInput>
+  inputs?: Maybe<GetAccountabilityCommunicationMessageSampleSizeInput>
 };
 
 
@@ -4788,7 +4786,7 @@ export type RegistrationDataImportNode = Node & {
   grievanceticketSet: GrievanceTicketNodeConnection,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
-  messages: MessageNodeConnection,
+  messages: CommunicationMessageNodeConnection,
   batchDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
   goldenRecordDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
   batchPossibleDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
@@ -5511,7 +5509,7 @@ export type TargetPopulationNode = Node & {
   exclusionReason: Scalars['String'],
   paymentRecords: PaymentRecordNodeConnection,
   selections: Array<HouseholdSelection>,
-  messages: MessageNodeConnection,
+  messages: CommunicationMessageNodeConnection,
   totalHouseholds?: Maybe<Scalars['Int']>,
   totalFamilySize?: Maybe<Scalars['Int']>,
   finalList?: Maybe<HouseholdNodeConnection>,
@@ -6117,7 +6115,7 @@ export type UserBusinessAreaNode = Node & {
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   logentrySet: PaymentVerificationLogEntryNodeConnection,
-  messageSet: MessageNodeConnection,
+  messageSet: CommunicationMessageNodeConnection,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
 
@@ -6304,7 +6302,7 @@ export type UserNode = Node & {
   finalizedTargetPopulations: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   logs: PaymentVerificationLogEntryNodeConnection,
-  messages: MessageNodeConnection,
+  messages: CommunicationMessageNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
 };
 
@@ -7873,44 +7871,41 @@ export type UpdateTpMutation = (
   )> }
 );
 
-export type AllCommunicationMessagesQueryVariables = {
+export type AllAccountabilityCommunicationMessagesQueryVariables = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  id?: Maybe<Scalars['UUID']>,
-  title?: Maybe<Scalars['String']>,
-  title_Icontains?: Maybe<Scalars['String']>,
-  title_Istartswith?: Maybe<Scalars['String']>,
-  body_Icontains?: Maybe<Scalars['String']>,
-  body_Istartswith?: Maybe<Scalars['String']>,
   numberOfRecipients?: Maybe<Scalars['Int']>,
-  numberOfRecipients_Lt?: Maybe<Scalars['Int']>,
-  numberOfRecipients_Gt?: Maybe<Scalars['Int']>,
-  businessArea: Scalars['String'],
-  orderBy?: Maybe<Scalars['String']>,
+  numberOfRecipients_Gte?: Maybe<Scalars['Int']>,
+  numberOfRecipients_Lte?: Maybe<Scalars['Int']>,
   targetPopulation?: Maybe<Scalars['ID']>,
+  createdBy?: Maybe<Scalars['ID']>,
+  businessArea: Scalars['String'],
   program?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
-  createdBy?: Maybe<Scalars['ID']>
+  title?: Maybe<Scalars['String']>,
+  body?: Maybe<Scalars['String']>,
+  samplingType?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
-export type AllCommunicationMessagesQuery = (
+export type AllAccountabilityCommunicationMessagesQuery = (
   { __typename?: 'Query' }
-  & { allCommunicationMessages: Maybe<(
-    { __typename?: 'MessageNodeConnection' }
-    & Pick<MessageNodeConnection, 'totalCount'>
+  & { allAccountabilityCommunicationMessages: Maybe<(
+    { __typename?: 'CommunicationMessageNodeConnection' }
+    & Pick<CommunicationMessageNodeConnection, 'totalCount'>
     & { pageInfo: (
       { __typename?: 'PageInfo' }
       & Pick<PageInfo, 'startCursor' | 'endCursor'>
     ), edges: Array<Maybe<(
-      { __typename?: 'MessageNodeEdge' }
-      & Pick<MessageNodeEdge, 'cursor'>
+      { __typename?: 'CommunicationMessageNodeEdge' }
+      & Pick<CommunicationMessageNodeEdge, 'cursor'>
       & { node: Maybe<(
-        { __typename?: 'MessageNode' }
-        & Pick<MessageNode, 'id' | 'unicefId' | 'title' | 'numberOfRecipients' | 'createdAt'>
+        { __typename?: 'CommunicationMessageNode' }
+        & Pick<CommunicationMessageNode, 'id' | 'unicefId' | 'title' | 'numberOfRecipients' | 'createdAt'>
         & { createdBy: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'firstName' | 'lastName' | 'id'>
@@ -13912,9 +13907,9 @@ export function useUpdateTpMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
 export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
 export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
-export const AllCommunicationMessagesDocument = gql`
-    query allCommunicationMessages($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $id: UUID, $title: String, $title_Icontains: String, $title_Istartswith: String, $body_Icontains: String, $body_Istartswith: String, $numberOfRecipients: Int, $numberOfRecipients_Lt: Int, $numberOfRecipients_Gt: Int, $businessArea: String!, $orderBy: String, $targetPopulation: ID, $program: String, $createdAtRange: String, $createdBy: ID) {
-  allCommunicationMessages(offset: $offset, before: $before, after: $after, first: $first, last: $last, id: $id, title: $title, title_Icontains: $title_Icontains, title_Istartswith: $title_Istartswith, body_Icontains: $body_Icontains, body_Istartswith: $body_Istartswith, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Lt: $numberOfRecipients_Lt, numberOfRecipients_Gt: $numberOfRecipients_Gt, businessArea: $businessArea, orderBy: $orderBy, targetPopulation: $targetPopulation, program: $program, createdAtRange: $createdAtRange, createdBy: $createdBy) {
+export const AllAccountabilityCommunicationMessagesDocument = gql`
+    query allAccountabilityCommunicationMessages($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $targetPopulation: ID, $createdBy: ID, $businessArea: String!, $program: String, $createdAtRange: String, $title: String, $body: String, $samplingType: String, $orderBy: String) {
+  allAccountabilityCommunicationMessages(offset: $offset, before: $before, after: $after, first: $first, last: $last, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, targetPopulation: $targetPopulation, createdBy: $createdBy, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange, title: $title, body: $body, samplingType: $samplingType, orderBy: $orderBy) {
     totalCount
     pageInfo {
       startCursor
@@ -13938,68 +13933,65 @@ export const AllCommunicationMessagesDocument = gql`
   }
 }
     `;
-export type AllCommunicationMessagesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllCommunicationMessagesQuery, AllCommunicationMessagesQueryVariables>, 'query'> & ({ variables: AllCommunicationMessagesQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type AllAccountabilityCommunicationMessagesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>, 'query'> & ({ variables: AllAccountabilityCommunicationMessagesQueryVariables; skip?: boolean; } | { skip: boolean; });
 
-    export const AllCommunicationMessagesComponent = (props: AllCommunicationMessagesComponentProps) => (
-      <ApolloReactComponents.Query<AllCommunicationMessagesQuery, AllCommunicationMessagesQueryVariables> query={AllCommunicationMessagesDocument} {...props} />
+    export const AllAccountabilityCommunicationMessagesComponent = (props: AllAccountabilityCommunicationMessagesComponentProps) => (
+      <ApolloReactComponents.Query<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables> query={AllAccountabilityCommunicationMessagesDocument} {...props} />
     );
     
-export type AllCommunicationMessagesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllCommunicationMessagesQuery, AllCommunicationMessagesQueryVariables> & TChildProps;
-export function withAllCommunicationMessages<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type AllAccountabilityCommunicationMessagesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables> & TChildProps;
+export function withAllAccountabilityCommunicationMessages<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  AllCommunicationMessagesQuery,
-  AllCommunicationMessagesQueryVariables,
-  AllCommunicationMessagesProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, AllCommunicationMessagesQuery, AllCommunicationMessagesQueryVariables, AllCommunicationMessagesProps<TChildProps>>(AllCommunicationMessagesDocument, {
-      alias: 'allCommunicationMessages',
+  AllAccountabilityCommunicationMessagesQuery,
+  AllAccountabilityCommunicationMessagesQueryVariables,
+  AllAccountabilityCommunicationMessagesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables, AllAccountabilityCommunicationMessagesProps<TChildProps>>(AllAccountabilityCommunicationMessagesDocument, {
+      alias: 'allAccountabilityCommunicationMessages',
       ...operationOptions
     });
 };
 
 /**
- * __useAllCommunicationMessagesQuery__
+ * __useAllAccountabilityCommunicationMessagesQuery__
  *
- * To run a query within a React component, call `useAllCommunicationMessagesQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllCommunicationMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `useAllAccountabilityCommunicationMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllAccountabilityCommunicationMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useAllCommunicationMessagesQuery({
+ * const { data, loading, error } = useAllAccountabilityCommunicationMessagesQuery({
  *   variables: {
  *      offset: // value for 'offset'
  *      before: // value for 'before'
  *      after: // value for 'after'
  *      first: // value for 'first'
  *      last: // value for 'last'
- *      id: // value for 'id'
- *      title: // value for 'title'
- *      title_Icontains: // value for 'title_Icontains'
- *      title_Istartswith: // value for 'title_Istartswith'
- *      body_Icontains: // value for 'body_Icontains'
- *      body_Istartswith: // value for 'body_Istartswith'
  *      numberOfRecipients: // value for 'numberOfRecipients'
- *      numberOfRecipients_Lt: // value for 'numberOfRecipients_Lt'
- *      numberOfRecipients_Gt: // value for 'numberOfRecipients_Gt'
- *      businessArea: // value for 'businessArea'
- *      orderBy: // value for 'orderBy'
+ *      numberOfRecipients_Gte: // value for 'numberOfRecipients_Gte'
+ *      numberOfRecipients_Lte: // value for 'numberOfRecipients_Lte'
  *      targetPopulation: // value for 'targetPopulation'
+ *      createdBy: // value for 'createdBy'
+ *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
  *      createdAtRange: // value for 'createdAtRange'
- *      createdBy: // value for 'createdBy'
+ *      title: // value for 'title'
+ *      body: // value for 'body'
+ *      samplingType: // value for 'samplingType'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
-export function useAllCommunicationMessagesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllCommunicationMessagesQuery, AllCommunicationMessagesQueryVariables>) {
-        return ApolloReactHooks.useQuery<AllCommunicationMessagesQuery, AllCommunicationMessagesQueryVariables>(AllCommunicationMessagesDocument, baseOptions);
+export function useAllAccountabilityCommunicationMessagesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>(AllAccountabilityCommunicationMessagesDocument, baseOptions);
       }
-export function useAllCommunicationMessagesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllCommunicationMessagesQuery, AllCommunicationMessagesQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<AllCommunicationMessagesQuery, AllCommunicationMessagesQueryVariables>(AllCommunicationMessagesDocument, baseOptions);
+export function useAllAccountabilityCommunicationMessagesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>(AllAccountabilityCommunicationMessagesDocument, baseOptions);
         }
-export type AllCommunicationMessagesQueryHookResult = ReturnType<typeof useAllCommunicationMessagesQuery>;
-export type AllCommunicationMessagesLazyQueryHookResult = ReturnType<typeof useAllCommunicationMessagesLazyQuery>;
-export type AllCommunicationMessagesQueryResult = ApolloReactCommon.QueryResult<AllCommunicationMessagesQuery, AllCommunicationMessagesQueryVariables>;
+export type AllAccountabilityCommunicationMessagesQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessagesQuery>;
+export type AllAccountabilityCommunicationMessagesLazyQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessagesLazyQuery>;
+export type AllAccountabilityCommunicationMessagesQueryResult = ApolloReactCommon.QueryResult<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>;
 export const AllAdminAreasDocument = gql`
     query AllAdminAreas($name: String, $businessArea: String, $level: Int, $first: Int) {
   allAdminAreas(name_Istartswith: $name, businessArea: $businessArea, first: $first, level: $level) {
@@ -20341,7 +20333,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>,
   ID: ResolverTypeWrapper<Scalars['ID']>,
-  MessageNode: ResolverTypeWrapper<MessageNode>,
+  CommunicationMessageNode: ResolverTypeWrapper<CommunicationMessageNode>,
   Node: ResolverTypeWrapper<Node>,
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
   String: ResolverTypeWrapper<Scalars['String']>,
@@ -20423,8 +20415,8 @@ export type ResolversTypes = {
   RuleCommitNodeEdge: ResolverTypeWrapper<RuleCommitNodeEdge>,
   RuleCommitLanguage: RuleCommitLanguage,
   HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
-  MessageNodeConnection: ResolverTypeWrapper<MessageNodeConnection>,
-  MessageNodeEdge: ResolverTypeWrapper<MessageNodeEdge>,
+  CommunicationMessageNodeConnection: ResolverTypeWrapper<CommunicationMessageNodeConnection>,
+  CommunicationMessageNodeEdge: ResolverTypeWrapper<CommunicationMessageNodeEdge>,
   StatsObjectType: ResolverTypeWrapper<StatsObjectType>,
   ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
@@ -20544,15 +20536,15 @@ export type ResolversTypes = {
   TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
   TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
   MessageSamplingType: MessageSamplingType,
-  MessageRecipientMapNode: ResolverTypeWrapper<MessageRecipientMapNode>,
-  MessageRecipientMapNodeConnection: ResolverTypeWrapper<MessageRecipientMapNodeConnection>,
-  MessageRecipientMapNodeEdge: ResolverTypeWrapper<MessageRecipientMapNodeEdge>,
-  GetCommunicationMessageSampleSizeInput: GetCommunicationMessageSampleSizeInput,
+  CommunicationMessageRecipientMapNode: ResolverTypeWrapper<CommunicationMessageRecipientMapNode>,
+  CommunicationMessageRecipientMapNodeConnection: ResolverTypeWrapper<CommunicationMessageRecipientMapNodeConnection>,
+  CommunicationMessageRecipientMapNodeEdge: ResolverTypeWrapper<CommunicationMessageRecipientMapNodeEdge>,
+  GetAccountabilityCommunicationMessageSampleSizeInput: GetAccountabilityCommunicationMessageSampleSizeInput,
   SamplingChoices: SamplingChoices,
-  MessageFullListArguments: MessageFullListArguments,
-  MessageRandomSamplingArguments: MessageRandomSamplingArguments,
-  MessageAgeInput: MessageAgeInput,
-  GetMessageSampleSizeObject: ResolverTypeWrapper<GetMessageSampleSizeObject>,
+  AccountabilityCommunicationMessageFullListArguments: AccountabilityCommunicationMessageFullListArguments,
+  AccountabilityCommunicationMessageRandomSamplingArguments: AccountabilityCommunicationMessageRandomSamplingArguments,
+  AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput,
+  GetCommunicationMessageSampleSizeObject: ResolverTypeWrapper<GetCommunicationMessageSampleSizeObject>,
   LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
   LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
   LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
@@ -20631,7 +20623,7 @@ export type ResolversTypes = {
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
   Mutations: ResolverTypeWrapper<{}>,
-  CreateCommunicationMessageInput: CreateCommunicationMessageInput,
+  CreateAccountabilityCommunicationMessageInput: CreateAccountabilityCommunicationMessageInput,
   CreateCommunicationMessageMutation: ResolverTypeWrapper<CreateCommunicationMessageMutation>,
   CreateReportInput: CreateReportInput,
   CreateReport: ResolverTypeWrapper<CreateReport>,
@@ -20732,7 +20724,7 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   Query: {},
   ID: Scalars['ID'],
-  MessageNode: MessageNode,
+  CommunicationMessageNode: CommunicationMessageNode,
   Node: Node,
   DateTime: Scalars['DateTime'],
   String: Scalars['String'],
@@ -20814,8 +20806,8 @@ export type ResolversParentTypes = {
   RuleCommitNodeEdge: RuleCommitNodeEdge,
   RuleCommitLanguage: RuleCommitLanguage,
   HouseholdSelection: HouseholdSelection,
-  MessageNodeConnection: MessageNodeConnection,
-  MessageNodeEdge: MessageNodeEdge,
+  CommunicationMessageNodeConnection: CommunicationMessageNodeConnection,
+  CommunicationMessageNodeEdge: CommunicationMessageNodeEdge,
   StatsObjectType: StatsObjectType,
   ReportNodeConnection: ReportNodeConnection,
   ReportNodeEdge: ReportNodeEdge,
@@ -20935,15 +20927,15 @@ export type ResolversParentTypes = {
   TicketNoteNodeEdge: TicketNoteNodeEdge,
   TicketNoteNode: TicketNoteNode,
   MessageSamplingType: MessageSamplingType,
-  MessageRecipientMapNode: MessageRecipientMapNode,
-  MessageRecipientMapNodeConnection: MessageRecipientMapNodeConnection,
-  MessageRecipientMapNodeEdge: MessageRecipientMapNodeEdge,
-  GetCommunicationMessageSampleSizeInput: GetCommunicationMessageSampleSizeInput,
+  CommunicationMessageRecipientMapNode: CommunicationMessageRecipientMapNode,
+  CommunicationMessageRecipientMapNodeConnection: CommunicationMessageRecipientMapNodeConnection,
+  CommunicationMessageRecipientMapNodeEdge: CommunicationMessageRecipientMapNodeEdge,
+  GetAccountabilityCommunicationMessageSampleSizeInput: GetAccountabilityCommunicationMessageSampleSizeInput,
   SamplingChoices: SamplingChoices,
-  MessageFullListArguments: MessageFullListArguments,
-  MessageRandomSamplingArguments: MessageRandomSamplingArguments,
-  MessageAgeInput: MessageAgeInput,
-  GetMessageSampleSizeObject: GetMessageSampleSizeObject,
+  AccountabilityCommunicationMessageFullListArguments: AccountabilityCommunicationMessageFullListArguments,
+  AccountabilityCommunicationMessageRandomSamplingArguments: AccountabilityCommunicationMessageRandomSamplingArguments,
+  AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput,
+  GetCommunicationMessageSampleSizeObject: GetCommunicationMessageSampleSizeObject,
   LogEntryNodeConnection: LogEntryNodeConnection,
   LogEntryNodeEdge: LogEntryNodeEdge,
   LogEntryNode: LogEntryNode,
@@ -21022,7 +21014,7 @@ export type ResolversParentTypes = {
   DjangoDebug: DjangoDebug,
   DjangoDebugSQL: DjangoDebugSql,
   Mutations: {},
-  CreateCommunicationMessageInput: CreateCommunicationMessageInput,
+  CreateAccountabilityCommunicationMessageInput: CreateAccountabilityCommunicationMessageInput,
   CreateCommunicationMessageMutation: CreateCommunicationMessageMutation,
   CreateReportInput: CreateReportInput,
   CreateReport: CreateReport,
@@ -21288,7 +21280,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, BusinessAreaNodeReportsArgs>,
   logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
-  messageSet?: Resolver<ResolversTypes['MessageNodeConnection'], ParentType, ContextType, BusinessAreaNodeMessageSetArgs>,
+  messageSet?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, BusinessAreaNodeMessageSetArgs>,
 };
 
 export type BusinessAreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeConnection'] = ResolversParentTypes['BusinessAreaNodeConnection']> = {
@@ -21447,6 +21439,54 @@ export type ChoiceObjectResolvers<ContextType = any, ParentType extends Resolver
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type CommunicationMessageNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageNode'] = ResolversParentTypes['CommunicationMessageNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  body?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, CommunicationMessageNodeHouseholdsArgs>,
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+  samplingType?: Resolver<ResolversTypes['MessageSamplingType'], ParentType, ContextType>,
+  fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
+  randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
+  sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+};
+
+export type CommunicationMessageNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageNodeConnection'] = ResolversParentTypes['CommunicationMessageNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['CommunicationMessageNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type CommunicationMessageNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageNodeEdge'] = ResolversParentTypes['CommunicationMessageNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['CommunicationMessageNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type CommunicationMessageRecipientMapNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageRecipientMapNode'] = ResolversParentTypes['CommunicationMessageRecipientMapNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+};
+
+export type CommunicationMessageRecipientMapNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageRecipientMapNodeConnection'] = ResolversParentTypes['CommunicationMessageRecipientMapNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['CommunicationMessageRecipientMapNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type CommunicationMessageRecipientMapNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageRecipientMapNodeEdge'] = ResolversParentTypes['CommunicationMessageRecipientMapNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ContentTypeObjectType'] = ResolversParentTypes['ContentTypeObjectType']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   appLabel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -21475,7 +21515,7 @@ export type CountAndPercentageNodeResolvers<ContextType = any, ParentType extend
 };
 
 export type CreateCommunicationMessageMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateCommunicationMessageMutation'] = ResolversParentTypes['CreateCommunicationMessageMutation']> = {
-  message?: Resolver<Maybe<ResolversTypes['MessageNode']>, ParentType, ContextType>,
+  message?: Resolver<Maybe<ResolversTypes['CommunicationMessageNode']>, ParentType, ContextType>,
 };
 
 export type CreateDashboardReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateDashboardReport'] = ResolversParentTypes['CreateDashboardReport']> = {
@@ -21654,7 +21694,7 @@ export type GetCashplanVerificationSampleSizeObjectResolvers<ContextType = any, 
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
-export type GetMessageSampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['GetMessageSampleSizeObject'] = ResolversParentTypes['GetMessageSampleSizeObject']> = {
+export type GetCommunicationMessageSampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['GetCommunicationMessageSampleSizeObject'] = ResolversParentTypes['GetCommunicationMessageSampleSizeObject']> = {
   numberOfRecipients?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
@@ -21828,7 +21868,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
-  messages?: Resolver<ResolversTypes['MessageNodeConnection'], ParentType, ContextType, HouseholdNodeMessagesArgs>,
+  messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, HouseholdNodeMessagesArgs>,
   adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -22310,56 +22350,8 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
-export type MessageNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['MessageNode'] = ResolversParentTypes['MessageNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  body?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
-  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, MessageNodeHouseholdsArgs>,
-  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
-  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-  samplingType?: Resolver<ResolversTypes['MessageSamplingType'], ParentType, ContextType>,
-  fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
-  randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
-  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type MessageNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['MessageNodeConnection'] = ResolversParentTypes['MessageNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['MessageNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type MessageNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['MessageNodeEdge'] = ResolversParentTypes['MessageNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['MessageNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type MessageRecipientMapNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['MessageRecipientMapNode'] = ResolversParentTypes['MessageRecipientMapNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
-};
-
-export type MessageRecipientMapNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['MessageRecipientMapNodeConnection'] = ResolversParentTypes['MessageRecipientMapNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['MessageRecipientMapNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type MessageRecipientMapNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['MessageRecipientMapNodeEdge'] = ResolversParentTypes['MessageRecipientMapNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['MessageRecipientMapNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
-  createCommunicationMessage?: Resolver<Maybe<ResolversTypes['CreateCommunicationMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCommunicationMessageArgs, 'businessAreaSlug' | 'inputs'>>,
+  createAccountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CreateCommunicationMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateAccountabilityCommunicationMessageArgs, 'businessAreaSlug' | 'inputs'>>,
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
   restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>,
   createDashboardReport?: Resolver<Maybe<ResolversTypes['CreateDashboardReport']>, ParentType, ContextType, RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>>,
@@ -22415,7 +22407,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'MessageNode' | 'UserNode' | 'GrievanceTicketNode' | 'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'MessageRecipientMapNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'GrievanceTicketNode' | 'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'CommunicationMessageRecipientMapNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -22592,11 +22584,11 @@ export type ProgramsWithDeliveredQuantityNodeResolvers<ContextType = any, Parent
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  communicationMessage?: Resolver<Maybe<ResolversTypes['MessageNode']>, ParentType, ContextType, RequireFields<QueryCommunicationMessageArgs, 'id'>>,
-  allCommunicationMessages?: Resolver<Maybe<ResolversTypes['MessageNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllCommunicationMessagesArgs, 'businessArea'>>,
-  communicationMessageRecipient?: Resolver<Maybe<ResolversTypes['MessageRecipientMapNode']>, ParentType, ContextType, RequireFields<QueryCommunicationMessageRecipientArgs, 'id'>>,
-  allCommunicationMessageRecipients?: Resolver<Maybe<ResolversTypes['MessageRecipientMapNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllCommunicationMessageRecipientsArgs, 'messageId'>>,
-  communicationMessageSampleSize?: Resolver<Maybe<ResolversTypes['GetMessageSampleSizeObject']>, ParentType, ContextType, RequireFields<QueryCommunicationMessageSampleSizeArgs, 'businessAreaSlug'>>,
+  accountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CommunicationMessageNode']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageArgs, 'id'>>,
+  allAccountabilityCommunicationMessages?: Resolver<Maybe<ResolversTypes['CommunicationMessageNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllAccountabilityCommunicationMessagesArgs, 'businessArea'>>,
+  accountabilityCommunicationMessageRecipient?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNode']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageRecipientArgs, 'id'>>,
+  allAccountabilityCommunicationMessageRecipients?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllAccountabilityCommunicationMessageRecipientsArgs, 'messageId'>>,
+  accountabilityCommunicationMessageSampleSize?: Resolver<Maybe<ResolversTypes['GetCommunicationMessageSampleSizeObject']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageSampleSizeArgs, 'businessAreaSlug'>>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
@@ -22803,7 +22795,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
-  messages?: Resolver<ResolversTypes['MessageNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeMessagesArgs>,
+  messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeMessagesArgs>,
   batchDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
   goldenRecordDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
   batchPossibleDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
@@ -23220,7 +23212,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
-  messages?: Resolver<ResolversTypes['MessageNodeConnection'], ParentType, ContextType, TargetPopulationNodeMessagesArgs>,
+  messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, TargetPopulationNodeMessagesArgs>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   finalList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeFinalListArgs>,
@@ -23632,7 +23624,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeReportsArgs>,
   logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
-  messageSet?: Resolver<ResolversTypes['MessageNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeMessageSetArgs>,
+  messageSet?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeMessageSetArgs>,
   permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
 };
 
@@ -23678,7 +23670,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeFinalizedTargetPopulationsArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserNodeReportsArgs>,
   logs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserNodeLogsArgs>,
-  messages?: Resolver<ResolversTypes['MessageNodeConnection'], ParentType, ContextType, UserNodeMessagesArgs>,
+  messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, UserNodeMessagesArgs>,
   businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, UserNodeBusinessAreasArgs>,
 };
 
@@ -23751,6 +23743,12 @@ export type Resolvers<ContextType = any> = {
   ChartPaymentVerification?: ChartPaymentVerificationResolvers<ContextType>,
   CheckAgainstSanctionListMutation?: CheckAgainstSanctionListMutationResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
+  CommunicationMessageNode?: CommunicationMessageNodeResolvers<ContextType>,
+  CommunicationMessageNodeConnection?: CommunicationMessageNodeConnectionResolvers<ContextType>,
+  CommunicationMessageNodeEdge?: CommunicationMessageNodeEdgeResolvers<ContextType>,
+  CommunicationMessageRecipientMapNode?: CommunicationMessageRecipientMapNodeResolvers<ContextType>,
+  CommunicationMessageRecipientMapNodeConnection?: CommunicationMessageRecipientMapNodeConnectionResolvers<ContextType>,
+  CommunicationMessageRecipientMapNodeEdge?: CommunicationMessageRecipientMapNodeEdgeResolvers<ContextType>,
   ContentTypeObjectType?: ContentTypeObjectTypeResolvers<ContextType>,
   CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
@@ -23787,7 +23785,7 @@ export type Resolvers<ContextType = any> = {
   FlexFieldsScalar?: GraphQLScalarType,
   GeoJSON?: GraphQLScalarType,
   GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<ContextType>,
-  GetMessageSampleSizeObject?: GetMessageSampleSizeObjectResolvers<ContextType>,
+  GetCommunicationMessageSampleSizeObject?: GetCommunicationMessageSampleSizeObjectResolvers<ContextType>,
   GrievanceStatusChangeMutation?: GrievanceStatusChangeMutationResolvers<ContextType>,
   GrievanceTicketNode?: GrievanceTicketNodeResolvers<ContextType>,
   GrievanceTicketNodeConnection?: GrievanceTicketNodeConnectionResolvers<ContextType>,
@@ -23834,12 +23832,6 @@ export type Resolvers<ContextType = any> = {
   LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>,
   LogEntryNodeEdge?: LogEntryNodeEdgeResolvers<ContextType>,
   MergeRegistrationDataImportMutation?: MergeRegistrationDataImportMutationResolvers<ContextType>,
-  MessageNode?: MessageNodeResolvers<ContextType>,
-  MessageNodeConnection?: MessageNodeConnectionResolvers<ContextType>,
-  MessageNodeEdge?: MessageNodeEdgeResolvers<ContextType>,
-  MessageRecipientMapNode?: MessageRecipientMapNodeResolvers<ContextType>,
-  MessageRecipientMapNodeConnection?: MessageRecipientMapNodeConnectionResolvers<ContextType>,
-  MessageRecipientMapNodeEdge?: MessageRecipientMapNodeEdgeResolvers<ContextType>,
   Mutations?: MutationsResolvers<ContextType>,
   NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<ContextType>,
   Node?: NodeResolvers,

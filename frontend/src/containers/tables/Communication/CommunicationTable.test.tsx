@@ -16,8 +16,7 @@ describe('containers/tables//Communication/CommunicationTable', () => {
         <CommunicationTable
           filter={{
             targetPopulation: '',
-            createdBy:
-              '',
+            createdBy: '',
             businessArea: 'afghanistan',
             first: 10,
             orderBy: '-created_at',
@@ -41,8 +40,7 @@ describe('containers/tables//Communication/CommunicationTable', () => {
         <CommunicationTable
           filter={{
             targetPopulation: '',
-            createdBy:
-              '',
+            createdBy: '',
             businessArea: 'afghanistan',
             first: 10,
             orderBy: '-created_at',

@@ -3,6 +3,23 @@ schema {
   mutation: Mutations
 }
 
+input AccountabilityCommunicationMessageAgeInput {
+  min: Int
+  max: Int
+}
+
+input AccountabilityCommunicationMessageFullListArguments {
+  excludedAdminAreas: [String]
+}
+
+input AccountabilityCommunicationMessageRandomSamplingArguments {
+  excludedAdminAreas: [String]
+  confidenceInterval: Float!
+  marginOfError: Float!
+  age: AccountabilityCommunicationMessageAgeInput
+  sex: String
+}
+
 type ActivateCashPlanVerificationMutation {
   validationErrors: Arg
   cashPlan: CashPlanNode
@@ -207,7 +224,7 @@ type BusinessAreaNode implements Node {
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
-  messageSet(offset: Int, before: String, after: String, first: Int, last: Int): MessageNodeConnection!
+  messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
 }
 
 type BusinessAreaNodeConnection {
@@ -405,6 +422,54 @@ type ChoiceObject {
   value: String
 }
 
+type CommunicationMessageNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  unicefId: String
+  title: String!
+  body: String!
+  createdBy: UserNode
+  numberOfRecipients: Int!
+  businessArea: UserBusinessAreaNode!
+  households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  targetPopulation: TargetPopulationNode
+  registrationDataImport: RegistrationDataImportNode
+  samplingType: MessageSamplingType!
+  fullListArguments: JSONString
+  randomSamplingArguments: JSONString
+  sampleSize: Int!
+}
+
+type CommunicationMessageNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CommunicationMessageNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type CommunicationMessageNodeEdge {
+  node: CommunicationMessageNode
+  cursor: String!
+}
+
+type CommunicationMessageRecipientMapNode implements Node {
+  id: ID!
+  household: HouseholdNode!
+}
+
+type CommunicationMessageRecipientMapNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CommunicationMessageRecipientMapNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type CommunicationMessageRecipientMapNodeEdge {
+  node: CommunicationMessageRecipientMapNode
+  cursor: String!
+}
+
 type ContentTypeObjectType {
   id: ID!
   appLabel: String!
@@ -442,19 +507,19 @@ type CountAndPercentageNode {
   percentage: Float
 }
 
-input CreateCommunicationMessageInput {
+input CreateAccountabilityCommunicationMessageInput {
   households: [String]
   targetPopulation: String
   registrationDataImport: String
   samplingType: SamplingChoices!
-  fullListArguments: MessageFullListArguments
-  randomSamplingArguments: MessageRandomSamplingArguments
+  fullListArguments: AccountabilityCommunicationMessageFullListArguments
+  randomSamplingArguments: AccountabilityCommunicationMessageRandomSamplingArguments
   title: String!
   body: String!
 }
 
 type CreateCommunicationMessageMutation {
-  message: MessageNode
+  message: CommunicationMessageNode
 }
 
 type CreateDashboardReport {
@@ -760,6 +825,15 @@ input FullListArguments {
 
 scalar GeoJSON
 
+input GetAccountabilityCommunicationMessageSampleSizeInput {
+  households: [String]
+  targetPopulation: String
+  registrationDataImport: String
+  samplingType: SamplingChoices!
+  fullListArguments: AccountabilityCommunicationMessageFullListArguments
+  randomSamplingArguments: AccountabilityCommunicationMessageRandomSamplingArguments
+}
+
 input GetCashplanVerificationSampleSizeInput {
   cashPlanId: ID
   cashPlanPaymentVerificationId: ID
@@ -776,16 +850,7 @@ type GetCashplanVerificationSampleSizeObject {
   sampleSize: Int
 }
 
-input GetCommunicationMessageSampleSizeInput {
-  households: [String]
-  targetPopulation: String
-  registrationDataImport: String
-  samplingType: SamplingChoices!
-  fullListArguments: MessageFullListArguments
-  randomSamplingArguments: MessageRandomSamplingArguments
-}
-
-type GetMessageSampleSizeObject {
+type GetCommunicationMessageSampleSizeObject {
   numberOfRecipients: Int
   sampleSize: Int
 }
@@ -980,7 +1045,7 @@ type HouseholdNode implements Node {
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelection!]!
-  messages(offset: Int, before: String, after: String, first: Int, last: Int): MessageNodeConnection!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   adminAreaTitle: String
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
@@ -2178,78 +2243,13 @@ type MergeRegistrationDataImportMutation {
   registrationDataImport: RegistrationDataImportNode
 }
 
-input MessageAgeInput {
-  min: Int
-  max: Int
-}
-
-input MessageFullListArguments {
-  excludedAdminAreas: [String]
-}
-
-type MessageNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  unicefId: String
-  title: String!
-  body: String!
-  createdBy: UserNode
-  numberOfRecipients: Int!
-  businessArea: UserBusinessAreaNode!
-  households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  targetPopulation: TargetPopulationNode
-  registrationDataImport: RegistrationDataImportNode
-  samplingType: MessageSamplingType!
-  fullListArguments: JSONString
-  randomSamplingArguments: JSONString
-  sampleSize: Int
-}
-
-type MessageNodeConnection {
-  pageInfo: PageInfo!
-  edges: [MessageNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type MessageNodeEdge {
-  node: MessageNode
-  cursor: String!
-}
-
-input MessageRandomSamplingArguments {
-  excludedAdminAreas: [String]
-  confidenceInterval: Float!
-  marginOfError: Float!
-  age: MessageAgeInput
-  sex: String
-}
-
-type MessageRecipientMapNode implements Node {
-  id: ID!
-  household: HouseholdNode!
-}
-
-type MessageRecipientMapNodeConnection {
-  pageInfo: PageInfo!
-  edges: [MessageRecipientMapNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type MessageRecipientMapNodeEdge {
-  node: MessageRecipientMapNode
-  cursor: String!
-}
-
 enum MessageSamplingType {
   FULL_LIST
   RANDOM
 }
 
 type Mutations {
-  createCommunicationMessage(businessAreaSlug: String!, inputs: CreateCommunicationMessageInput!): CreateCommunicationMessageMutation
+  createAccountabilityCommunicationMessage(businessAreaSlug: String!, inputs: CreateAccountabilityCommunicationMessageInput!): CreateCommunicationMessageMutation
   createReport(reportData: CreateReportInput!): CreateReport
   restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
@@ -2559,11 +2559,11 @@ type ProgramsWithDeliveredQuantityNode {
 }
 
 type Query {
-  communicationMessage(id: ID!): MessageNode
-  allCommunicationMessages(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, title: String, title_Icontains: String, title_Istartswith: String, body_Icontains: String, body_Istartswith: String, numberOfRecipients: Int, numberOfRecipients_Lt: Int, numberOfRecipients_Gt: Int, targetPopulation: ID, createdBy: ID, businessArea: String!, program: String, createdAtRange: String, orderBy: String): MessageNodeConnection
-  communicationMessageRecipient(id: ID!): MessageRecipientMapNode
-  allCommunicationMessageRecipients(offset: Int, before: String, after: String, first: Int, last: Int, messageId: String!, recipientId: String, fullName: String, phoneNo: String, orderBy: String): MessageRecipientMapNodeConnection
-  communicationMessageSampleSize(businessAreaSlug: String!, inputs: GetCommunicationMessageSampleSizeInput): GetMessageSampleSizeObject
+  accountabilityCommunicationMessage(id: ID!): CommunicationMessageNode
+  allAccountabilityCommunicationMessages(offset: Int, before: String, after: String, first: Int, last: Int, numberOfRecipients: Int, numberOfRecipients_Gte: Int, numberOfRecipients_Lte: Int, targetPopulation: ID, createdBy: ID, businessArea: String!, program: String, createdAtRange: String, title: String, body: String, samplingType: String, orderBy: String): CommunicationMessageNodeConnection
+  accountabilityCommunicationMessageRecipient(id: ID!): CommunicationMessageRecipientMapNode
+  allAccountabilityCommunicationMessageRecipients(offset: Int, before: String, after: String, first: Int, last: Int, messageId: String!, recipientId: String, fullName: String, phoneNo: String, sex: String, orderBy: String): CommunicationMessageRecipientMapNodeConnection
+  accountabilityCommunicationMessageSampleSize(businessAreaSlug: String!, inputs: GetAccountabilityCommunicationMessageSampleSizeInput): GetCommunicationMessageSampleSizeObject
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
@@ -2800,7 +2800,7 @@ type RegistrationDataImportNode implements Node {
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
-  messages(offset: Int, before: String, after: String, first: Int, last: Int): MessageNodeConnection!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   batchDuplicatesCountAndPercentage: CountAndPercentageNode
   goldenRecordDuplicatesCountAndPercentage: CountAndPercentageNode
   batchPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
@@ -3235,7 +3235,7 @@ type TargetPopulationNode implements Node {
   exclusionReason: String!
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
-  messages(offset: Int, before: String, after: String, first: Int, last: Int): MessageNodeConnection!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   totalHouseholds: Int
   totalFamilySize: Int
   finalList(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
@@ -3838,7 +3838,7 @@ type UserBusinessAreaNode implements Node {
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
-  messageSet(offset: Int, before: String, after: String, first: Int, last: Int): MessageNodeConnection!
+  messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   permissions: [String]
 }
 
@@ -3884,7 +3884,7 @@ type UserNode implements Node {
   finalizedTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
-  messages(offset: Int, before: String, after: String, first: Int, last: Int): MessageNodeConnection!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
 }
 
