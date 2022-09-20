@@ -19,7 +19,7 @@ export const CommunicationTable = ({
   businessArea,
 }: CommunicationProps): ReactElement => {
   const initialVariables: AllCommunicationMessagesQueryVariables = {
-    createdAtRange: JSON.stringify(filter.createdAtRange),
+    createdAtRange: filter.createdAtRange ? JSON.stringify(filter.createdAtRange) : '',
     program: filter.program,
     targetPopulation: filter.targetPopulation,
     createdBy: filter.createdBy || '',
