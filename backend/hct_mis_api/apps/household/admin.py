@@ -1,17 +1,6 @@
 import logging
 from itertools import chain
 
-from django.contrib import admin, messages
-from django.contrib.admin import TabularInline
-from django.contrib.messages import DEFAULT_TAGS
-from django.db import transaction
-from django.db.models import JSONField, Q
-from django.db.transaction import atomic
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
-from django.template.response import TemplateResponse
-from django.urls import reverse
-
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -24,6 +13,16 @@ from adminfilters.filters import (
 )
 from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+from django.contrib import admin, messages
+from django.contrib.admin import TabularInline
+from django.contrib.messages import DEFAULT_TAGS
+from django.db import transaction
+from django.db.models import JSONField, Q
+from django.db.transaction import atomic
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin

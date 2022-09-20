@@ -22,20 +22,17 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         return None, None
 
     registration_data_import = kwargs.get("registration_data_import", None)
-    if registration_data_import:
-        ticket_details_to_check = TicketNeedsAdjudicationDetails.objects.exclude(
-            ticket__status=GrievanceTicket.STATUS_CLOSED
-        ).filter(ticket__registration_data_import_id=registration_data_import.pk)
 
-        ticket_all_individuals = {main_individual, *possible_duplicates}
+    ticket_all_individuals = {main_individual, *possible_duplicates}
 
-        for ticket_detail in ticket_details_to_check:
-            other_ticket_all_individuals = {
-                ticket_detail.golden_records_individual,
-                *ticket_detail.possible_duplicates.all(),
-            }
-            if set.intersection(ticket_all_individuals, other_ticket_all_individuals):
-                return None, None
+    ticket_already_exists = (
+        TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
+        .filter(golden_records_individual__in=ticket_all_individuals, possible_duplicates__in=ticket_all_individuals)
+        .exists()
+    )
+
+    if ticket_already_exists:
+        return None, None
 
     household = main_individual.household
     admin_level_2 = household.admin2 if household else None
