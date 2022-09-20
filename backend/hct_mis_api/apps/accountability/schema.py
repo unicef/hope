@@ -8,6 +8,7 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.household.models import Household
 
 from .filters import MessageRecipientsMapFilter, MessagesFilter
 from .inputs import GetAccountabilityCommunicationMessageSampleSizeInput
@@ -27,13 +28,14 @@ class CommunicationMessageRecipientMapNode(DjangoObjectType):
     )
 
     class Meta:
-        model = Message.households.through
+        model = Household
         interfaces = (graphene.relay.Node,)
         connection_class = ExtendedConnection
         filter_fields = []
         fields = (
             "id",
-            "household",
+            "size",
+            "head_of_household",
         )
 
 
