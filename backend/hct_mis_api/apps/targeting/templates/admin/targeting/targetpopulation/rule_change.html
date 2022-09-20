@@ -1,0 +1,30 @@
+{% extends "admin_extra_buttons/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
+
+{% block content_title %}
+    <h1>You are running in the background the steficon formula <strong><a href="{% url "admin:steficon_rule_change" original.steficon_rule.rule.pk %}" target="_rule">{{ original.steficon_rule }}</a></strong> for target population:<strong>{{ original }}</strong>.</h1>{% endblock %}
+
+{% block content %}
+        <h3>Previous scores !</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Household Selection</th>
+                    <th>Household </th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for entry in original.selections.all|slice:":100" %}
+                <tr>
+                    <td>
+                        <a target="_hh">{{ entry.pk }}</a>
+                    </td>
+                    <td>
+                        <a target="_hh">{{ entry.household.unicef_id }}</a>
+                    </td>
+                    <td>{{ entry.vulnerability_score }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+{% endblock %}

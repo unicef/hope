@@ -2,6 +2,13 @@ import csv
 import logging
 from io import StringIO
 
+import xlrd
+from admin_extra_buttons.api import ExtraButtonsMixin, button
+from admin_extra_buttons.mixins import confirm_action
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.mixin import AdminFiltersMixin
+from constance import config
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
@@ -23,15 +30,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-
-import xlrd
-from admin_extra_buttons.api import ExtraButtonsMixin, button
-from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminFiltersMixin
-from constance import config
 from jsoneditor.forms import JSONEditor
+from mptt.admin import MPTTModelAdmin
 from xlrd import XLRDError
 
 from hct_mis_api.apps.account.models import Role, User
@@ -46,12 +46,12 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
+    StorageFile,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
 from hct_mis_api.apps.utils.security import is_root
-from mptt.admin import MPTTModelAdmin
 
 logger = logging.getLogger(__name__)
 
@@ -573,3 +573,20 @@ class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
     def alpha3(self, obj):
         return obj.country.iso_code3
+
+
+@admin.register(StorageFile)
+class StorageFileAdmin(admin.ModelAdmin):
+    list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_add_permission(self, request):
+        return request.user.can_download_storage_files()

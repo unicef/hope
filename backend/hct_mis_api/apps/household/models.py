@@ -2,6 +2,7 @@ import logging
 import re
 from datetime import date
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -14,8 +15,6 @@ from django.db.models import DecimalField, JSONField
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-
-from dateutil.relativedelta import relativedelta
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
@@ -444,19 +443,15 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     def status(self):
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, save=True):
+    def withdraw(self):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
+        self.save()
 
-        if save:
-            self.save()
-
-    def unwithdraw(self, save=True):
+    def unwithdraw(self):
         self.withdrawn = False
         self.withdrawn_date = None
-
-        if save:
-            self.save()
+        self.save()
 
     def set_sys_field(self, key, value):
         if "sys" not in self.user_fields:
@@ -836,19 +831,17 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def sanction_list_last_check(self):
         return cache.get("sanction_list_last_check")
 
-    def withdraw(self, save=True):
+    def withdraw(self):
+        self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
+        self.save()
 
-        if save:
-            self.save()
-
-    def unwithdraw(self, save=True):
+    def unwithdraw(self):
+        self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)
         self.withdrawn = False
         self.withdrawn_date = None
-
-        if save:
-            self.save()
+        self.save()
 
     def mark_as_duplicate(self, original_individual=None):
         if original_individual is not None:
