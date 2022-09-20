@@ -1,9 +1,9 @@
-import { AllCommunicationMessagesDocument } from '../../src/__generated__/graphql';
+import { AllAccountabilityCommunicationMessagesDocument } from '../../src/__generated__/graphql';
 
 export const fakeApolloAllCommunicationMessages = [
   {
     request: {
-      query: AllCommunicationMessagesDocument,
+      query: AllAccountabilityCommunicationMessagesDocument,
       variables: {
         createdAtRange: '',
         targetPopulation: '',
@@ -15,7 +15,7 @@ export const fakeApolloAllCommunicationMessages = [
     },
     result: {
       data: {
-        allCommunicationMessages: {
+        allAccountabilityCommunicationMessages: {
           totalCount: 4,
           pageInfo: {
             startCursor: 'YXJyYXljb25uZWN0aW9uOjA=',

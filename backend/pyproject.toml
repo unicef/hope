@@ -38,6 +38,7 @@ known_first_party = [
     "mis_datahub",
     "erp_datahub",
     "sanction_list",
+    "accountability",
 ]
 known_django = "django"
 sections = ["FUTURE","STDLIB","DJANGO","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]

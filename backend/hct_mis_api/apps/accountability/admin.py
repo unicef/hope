@@ -13,10 +13,7 @@ from .models import Message
 class MessageRecipientMapInline(admin.TabularInline):
     model = Message.households.through
     extra = 0
-    list_prefetch_related = (
-        "household",
-        "household__head_of_household",
-    )
+    list_prefetch_related = ("household__head_of_household",)
     fields: Optional[Sequence[str]] = ("get_hoh_name",)
     readonly_fields: Optional[Sequence[str]] = ("get_hoh_name",)
 
@@ -32,7 +29,6 @@ class MessageRecipientMapInline(admin.TabularInline):
 @admin.register(Message)
 class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     exclude = (
-        # "created_by",
         "number_of_recipients",
         "unicef_id",
         "full_list_arguments",
@@ -46,7 +42,6 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "title",
         "body",
         "business_area",
-        # "target_population",
         "registration_data_import",
         "sampling_type",
         "sample_size",
@@ -55,6 +50,3 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         ("created_by", AutoCompleteFilter),
         "created_at",
     )
-
-    # def has_add_permission(self, request):
-    #     return False

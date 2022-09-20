@@ -1,9 +1,9 @@
 import React, { ReactElement } from 'react';
 import { TableWrapper } from '../../../components/core/TableWrapper';
 import {
-  AllCommunicationMessagesQueryVariables,
-  MessageNode,
-  useAllCommunicationMessagesQuery,
+  AllAccountabilityCommunicationMessagesQueryVariables,
+  CommunicationMessageNode,
+  useAllAccountabilityCommunicationMessagesQuery,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';
@@ -18,8 +18,10 @@ export const CommunicationTable = ({
   filter,
   businessArea,
 }: CommunicationProps): ReactElement => {
-  const initialVariables: AllCommunicationMessagesQueryVariables = {
-    createdAtRange: filter.createdAtRange ? JSON.stringify(filter.createdAtRange) : '',
+  const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
+    createdAtRange: filter.createdAtRange
+      ? JSON.stringify(filter.createdAtRange)
+      : '',
     program: filter.program,
     targetPopulation: filter.targetPopulation,
     createdBy: filter.createdBy || '',
@@ -27,19 +29,19 @@ export const CommunicationTable = ({
   };
   return (
     <TableWrapper>
-      <UniversalTable<MessageNode, AllCommunicationMessagesQueryVariables>
+      <UniversalTable<
+        CommunicationMessageNode,
+        AllAccountabilityCommunicationMessagesQueryVariables
+      >
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllCommunicationMessagesQuery}
-        queriedObjectName='allCommunicationMessages'
+        query={useAllAccountabilityCommunicationMessagesQuery}
+        queriedObjectName='allAccountabilityCommunicationMessages'
         defaultOrderBy='createdAt'
         defaultOrderDirection='desc'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <CommunicationTableRow
-            key={row.id}
-            message={row}
-          />
+          <CommunicationTableRow key={row.id} message={row} />
         )}
       />
     </TableWrapper>

@@ -1,15 +1,14 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
-import { MessageNode } from '../../../__generated__/graphql';
+import { CommunicationMessageNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
-import { StatusBox } from '../../../components/core/StatusBox';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../components/core/BlackLink';
 
 interface CommunicationTableRowProps {
-  message: MessageNode;
+  message: CommunicationMessageNode;
   canViewDetails?: boolean;
 }
 
@@ -32,22 +31,15 @@ export function CommunicationTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={messageDetailsPath}>
-            {message.unicefId}
-          </BlackLink>
+          <BlackLink to={messageDetailsPath}>{message.unicefId}</BlackLink>
         ) : (
           message.unicefId
         )}
       </TableCell>
+      <TableCell align='left'>{message.title}</TableCell>
+      <TableCell align='left'>{message.numberOfRecipients}</TableCell>
       <TableCell align='left'>
-        {message.title}
-      </TableCell>
-      <TableCell align='left'>
-        {message.numberOfRecipients}
-      </TableCell>
-      <TableCell align='left'>
-        {message.createdBy?.firstName}{' '}
-        {message.createdBy?.lastName}
+        {message.createdBy?.firstName} {message.createdBy?.lastName}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{message.createdAt}</UniversalMoment>

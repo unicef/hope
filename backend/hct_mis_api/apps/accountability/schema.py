@@ -8,22 +8,21 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.household.models import Household
 
 from .filters import MessageRecipientsMapFilter, MessagesFilter
-from .inputs import GetCommunicationMessageSampleSizeInput
+from .inputs import GetAccountabilityCommunicationMessageSampleSizeInput
 from .models import Message
 from .services.message_crud_services import MessageCrudServices
 from .services.sampling import Sampling
 from .services.verifiers import MessageArgumentVerifier
 
 
-class MessageRecipientMapNode(DjangoObjectType):
+class CommunicationMessageRecipientMapNode(DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
-            Permissions.COMMUNICATION_MESSAGE_VIEW_LIST,
-            Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS,
-            Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
         ),
     )
 
@@ -38,12 +37,12 @@ class MessageRecipientMapNode(DjangoObjectType):
         )
 
 
-class MessageNode(BaseNodePermissionMixin, DjangoObjectType):
+class CommunicationMessageNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
-            Permissions.COMMUNICATION_MESSAGE_VIEW_LIST,
-            Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS,
-            Permissions.COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
         ),
     )
 
@@ -54,31 +53,39 @@ class MessageNode(BaseNodePermissionMixin, DjangoObjectType):
         filter_fields = []
 
 
-class GetMessageSampleSizeObject(graphene.ObjectType):
+class GetCommunicationMessageSampleSizeObject(BaseNodePermissionMixin, graphene.ObjectType):
+    permission_classes = (
+        hopeOneOfPermissionClass(
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+        ),
+    )
+
     number_of_recipients = graphene.Int()
     sample_size = graphene.Int()
 
 
 class Query(graphene.ObjectType):
-    communication_message = graphene.relay.Node.Field(MessageNode)
-    all_communication_messages = DjangoPermissionFilterConnectionField(
-        MessageNode,
+    accountability_communication_message = graphene.relay.Node.Field(CommunicationMessageNode)
+    all_accountability_communication_messages = DjangoPermissionFilterConnectionField(
+        CommunicationMessageNode,
         filterset_class=MessagesFilter,
     )
 
-    communication_message_recipient = graphene.relay.Node.Field(MessageRecipientMapNode)
-    all_communication_message_recipients = DjangoPermissionFilterConnectionField(
-        MessageRecipientMapNode,
+    accountability_communication_message_recipient = graphene.relay.Node.Field(CommunicationMessageRecipientMapNode)
+    all_accountability_communication_message_recipients = DjangoPermissionFilterConnectionField(
+        CommunicationMessageRecipientMapNode,
         filterset_class=MessageRecipientsMapFilter,
     )
 
-    communication_message_sample_size = graphene.Field(
-        GetMessageSampleSizeObject,
+    accountability_communication_message_sample_size = graphene.Field(
+        GetCommunicationMessageSampleSizeObject,
         business_area_slug=graphene.String(required=True),
-        inputs=GetCommunicationMessageSampleSizeInput(),
+        inputs=GetAccountabilityCommunicationMessageSampleSizeInput(),
     )
 
-    def resolve_communication_message_sample_size(self, info, business_area_slug: str, inputs: dict, **kwargs):
+    def resolve_accountability_communication_message_sample_size(
+        self, info, business_area_slug: str, inputs: dict, **kwargs
+    ):
         verifier = MessageArgumentVerifier(inputs)
         verifier.verify()
 
