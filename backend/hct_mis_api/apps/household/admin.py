@@ -193,14 +193,15 @@ class HouseholdAdmin(
             else:
                 tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
         service = HouseholdWithdraw(hh)
-        service.withdraw(tag=tag)
         service.change_tickets_status(tickets)
         if hh.withdrawn:
-            message = "{} has been withdrawn by {}. {}"
-            ticket_message = "Ticket closed due to Household withdrawn"
-        else:
+            hh.withdraw()
             message = "{} has been restored by {}. {}"
             ticket_message = "Ticket reopened due to Household restore"
+        else:
+            hh.withdraw(tag=tag)
+            message = "{} has been withdrawn by {}. {}"
+            ticket_message = "Ticket closed due to Household withdrawn"
 
         for individual in service.individuals:
             self.log_change(request, individual, message.format("Individual"))

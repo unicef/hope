@@ -440,14 +440,15 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
 @sentry_tags
 def deduplicate_documents():
     with locked_cache(key="deduplicate_documents"):
-        with transaction.atomic():
-            grouped_rdi = (
-                Document.objects.filter(status=Document.STATUS_PENDING)
-                .values("individual__registration_data_import")
-                .annotate(count=Count("individual__registration_data_import"))
-            )
-            rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
-            for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
+        grouped_rdi = (
+            Document.objects.filter(status=Document.STATUS_PENDING)
+            .values("individual__registration_data_import")
+            .annotate(count=Count("individual__registration_data_import"))
+        )
+        rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
+        for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
+            print(rdi)
+            with transaction.atomic():
                 documents_query = Document.objects.filter(
                     status=Document.STATUS_PENDING, individual__registration_data_import=rdi
                 )
@@ -455,6 +456,8 @@ def deduplicate_documents():
                     documents_query,
                     registration_data_import=rdi,
                 )
+
+        with transaction.atomic():
             documents_query = Document.objects.filter(
                 status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True
             )

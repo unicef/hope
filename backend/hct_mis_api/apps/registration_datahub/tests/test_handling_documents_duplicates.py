@@ -171,6 +171,11 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(self.document5.status, Document.STATUS_VALID)
         self.assertEqual(GrievanceTicket.objects.count(), 0)
 
+    def test_should_create_one_ticket(self):
+        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
+        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
+        self.assertEqual(GrievanceTicket.objects.count(), 1)
+
     def test_hard_documents_deduplication_number_of_queries(self):
         context = CaptureQueriesContext(connection=connections[DEFAULT_DB_ALIAS])
         with context:
