@@ -27,6 +27,7 @@ class Permissions(Enum):
 
     # API
     API_UPLOAD_RDI = auto()
+    API_CREATE_RDI = auto()
 
     # RDI
     RDI_VIEW_LIST = auto()
