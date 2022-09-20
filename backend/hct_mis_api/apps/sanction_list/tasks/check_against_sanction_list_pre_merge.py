@@ -95,7 +95,8 @@ class CheckAgainstSanctionListPreMergeTask:
             query = document.search().from_dict(query_dict)
             query._index = document._index._name
 
-            for individual_hit in query.scan():
+            results = query.scan()
+            for individual_hit in results:
                 score = individual_hit.meta.score
                 if score >= possible_match_score:
                     marked_individual = Individual.objects.filter(id=individual_hit.id).first()
