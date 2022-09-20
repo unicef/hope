@@ -1,12 +1,17 @@
+import logging
+
 from django.conf import settings
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
+from elasticsearch import Elasticsearch
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 
 from .elasticsearch_utils import DEFAULT_SCRIPT
-from .models import Household, Individual
+from .models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
+
+logger = logging.getLogger(__name__)
 
 
 @registry.register_document
@@ -133,6 +138,14 @@ class IndividualDocument(Document):
             "updated_at",
         ]
 
+        related_models = [Household, Document, IndividualIdentity, IndividualRoleInHousehold]
+
+    def get_instances_from_related(self, related_instance):
+        if isinstance(related_instance, (Document, IndividualIdentity, IndividualRoleInHousehold)):
+            return related_instance.individual
+        if isinstance(related_instance, Household):
+            return related_instance.individuals.all()
+
 
 @registry.register_document
 class HouseholdDocument(Document):
@@ -167,6 +180,12 @@ class HouseholdDocument(Document):
         model = Household
 
         fields = []
+
+        related_models = [Individual]
+
+    def get_instances_from_related(self, related_instance):
+        if isinstance(related_instance, Individual):
+            return related_instance.household
 
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households"
