@@ -9,14 +9,14 @@ import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper'
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useMarkPrAsFailedMutation } from '../../__generated__/graphql';
 
-export interface Props {
+export interface ForceFailedButtonProps {
   paymentRecordId: string;
   disabled?: boolean;
 }
 export function ForceFailedButton({
   paymentRecordId,
   disabled = false,
-}: Props): React.ReactElement {
+}: ForceFailedButtonProps): React.ReactElement {
   const { t } = useTranslation();
   const [isOpenModal, setOpenModal] = useState(false);
   const { showMessage } = useSnackbar();
@@ -37,13 +37,13 @@ export function ForceFailedButton({
   };
 
   return (
-    <div>
+    <Box>
       <Box p={2}>
         <Button
           color='primary'
           variant='contained'
           onClick={() => setOpenModal(true)}
-          data-cy='button-ed-plan'
+          data-cy='button-mark-as-failed'
           disabled={disabled}
         >
           {t('Mark as failed')}
@@ -64,11 +64,9 @@ export function ForceFailedButton({
         <DialogContent>
           <DialogContainer>
             <Box p={5}>
-              <div>
-                {t(
-                  'Are you sure you would like to mark payment record as failed?',
-                )}
-              </div>
+              {t(
+                'Are you sure you would like to mark payment record as failed?',
+              )}
             </Box>
           </DialogContainer>
         </DialogContent>
@@ -88,6 +86,6 @@ export function ForceFailedButton({
           </DialogActions>
         </DialogFooter>
       </Dialog>
-    </div>
+    </Box>
   );
 }

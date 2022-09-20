@@ -6396,6 +6396,44 @@ export type IndividualDetailedFragment = (
   & IndividualMinimalFragment
 );
 
+export type PaymentRecordDetailsFragment = (
+  { __typename?: 'PaymentRecordNode' }
+  & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
+  & { verification: Maybe<(
+    { __typename?: 'PaymentVerificationNode' }
+    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
+  )>, household: (
+    { __typename?: 'HouseholdNode' }
+    & Pick<HouseholdNode, 'id' | 'status' | 'size' | 'unicefId'>
+    & { headOfHousehold: (
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
+    ) }
+  ), targetPopulation: (
+    { __typename?: 'TargetPopulationNode' }
+    & Pick<TargetPopulationNode, 'id' | 'name'>
+  ), cashPlan: Maybe<(
+    { __typename?: 'CashPlanNode' }
+    & Pick<CashPlanNode, 'id' | 'caId'>
+    & { program: (
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name'>
+    ), verifications: (
+      { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNode' }
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
+        )> }
+      )>> }
+    ) }
+  )>, serviceProvider: (
+    { __typename?: 'ServiceProviderNode' }
+    & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
+  ) }
+);
+
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
   & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
@@ -7132,40 +7170,7 @@ export type MarkPrAsFailedMutation = (
     { __typename?: 'MarkPaymentRecordAsFailedMutation' }
     & { paymentRecord: Maybe<(
       { __typename?: 'PaymentRecordNode' }
-      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
-      & { household: (
-        { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'status' | 'size' | 'unicefId'>
-        & { headOfHousehold: (
-          { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
-        ) }
-      ), targetPopulation: (
-        { __typename?: 'TargetPopulationNode' }
-        & Pick<TargetPopulationNode, 'id' | 'name'>
-      ), cashPlan: Maybe<(
-        { __typename?: 'CashPlanNode' }
-        & Pick<CashPlanNode, 'id' | 'caId'>
-        & { program: (
-          { __typename?: 'ProgramNode' }
-          & Pick<ProgramNode, 'id' | 'name'>
-        ), verifications: (
-          { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'CashPlanPaymentVerificationNode' }
-              & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
-            )> }
-          )>> }
-        ) }
-      )>, verification: Maybe<(
-        { __typename?: 'PaymentVerificationNode' }
-        & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
-      )>, serviceProvider: (
-        { __typename?: 'ServiceProviderNode' }
-        & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
-      ) }
+      & PaymentRecordDetailsFragment
     )> }
   )> }
 );
@@ -8709,40 +8714,7 @@ export type PaymentRecordQuery = (
   { __typename?: 'Query' }
   & { paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordNode' }
-    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
-    & { household: (
-      { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'status' | 'size' | 'unicefId'>
-      & { headOfHousehold: (
-        { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
-      ) }
-    ), targetPopulation: (
-      { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name'>
-    ), cashPlan: Maybe<(
-      { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'caId'>
-      & { program: (
-        { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name'>
-      ), verifications: (
-        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
-        & { edges: Array<Maybe<(
-          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
-          & { node: Maybe<(
-            { __typename?: 'CashPlanPaymentVerificationNode' }
-            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
-          )> }
-        )>> }
-      ) }
-    )>, verification: Maybe<(
-      { __typename?: 'PaymentVerificationNode' }
-      & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
-    )>, serviceProvider: (
-      { __typename?: 'ServiceProviderNode' }
-      & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
-    ) }
+    & PaymentRecordDetailsFragment
   )> }
 );
 
@@ -10409,6 +10381,73 @@ export const IndividualDetailedFragmentDoc = gql`
   }
 }
     ${IndividualMinimalFragmentDoc}`;
+export const PaymentRecordDetailsFragmentDoc = gql`
+    fragment paymentRecordDetails on PaymentRecordNode {
+  id
+  status
+  statusDate
+  caId
+  caHashId
+  registrationCaId
+  verification {
+    id
+    status
+    statusDate
+    receivedAmount
+  }
+  household {
+    id
+    status
+    size
+    unicefId
+    headOfHousehold {
+      id
+      phoneNo
+      phoneNoAlternative
+      phoneNoValid
+      phoneNoAlternativeValid
+    }
+  }
+  fullName
+  distributionModality
+  totalPersonsCovered
+  targetPopulation {
+    id
+    name
+  }
+  cashPlan {
+    id
+    caId
+    program {
+      id
+      name
+    }
+    verifications {
+      edges {
+        node {
+          id
+          status
+          verificationChannel
+        }
+      }
+    }
+  }
+  currency
+  entitlementQuantity
+  deliveredQuantity
+  deliveredQuantityUsd
+  deliveryDate
+  deliveryType
+  entitlementCardIssueDate
+  entitlementCardNumber
+  transactionReferenceId
+  serviceProvider {
+    id
+    fullName
+    shortName
+  }
+}
+    `;
 export const RegistrationMinimalFragmentDoc = gql`
     fragment registrationMinimal on RegistrationDataImportNode {
   id
@@ -12145,126 +12184,11 @@ export const MarkPrAsFailedDocument = gql`
     mutation markPRAsFailed($paymentRecordId: ID!) {
   markPaymentRecordAsFailed(paymentRecordId: $paymentRecordId) {
     paymentRecord {
-      id
-      status
-      statusDate
-      caId
-      caHashId
-      registrationCaId
-      household {
-        id
-        status
-        size
-        unicefId
-        headOfHousehold {
-          id
-          phoneNo
-          phoneNoAlternative
-          phoneNoValid
-          phoneNoAlternativeValid
-        }
-      }
-      fullName
-      distributionModality
-      totalPersonsCovered
-      targetPopulation {
-        id
-        name
-      }
-      cashPlan {
-        id
-        caId
-        program {
-          id
-          name
-        }
-        verifications {
-          edges {
-            node {
-              id
-              status
-              verificationChannel
-            }
-          }
-        }
-      }
-      verification {
-        id
-        status
-        statusDate
-        receivedAmount
-      }
-      currency
-      entitlementQuantity
-      deliveredQuantity
-      deliveryDate
-      deliveryDate
-      entitlementCardIssueDate
-      entitlementCardNumber
-      serviceProvider {
-        id
-        fullName
-        shortName
-      }
-      id
-      status
-      statusDate
-      caId
-      household {
-        id
-        size
-        unicefId
-        headOfHousehold {
-          id
-          phoneNo
-          phoneNoAlternative
-          phoneNoValid
-          phoneNoAlternativeValid
-        }
-      }
-      fullName
-      distributionModality
-      totalPersonsCovered
-      targetPopulation {
-        id
-        name
-      }
-      cashPlan {
-        id
-        caId
-        program {
-          id
-          name
-        }
-        verifications {
-          edges {
-            node {
-              id
-              status
-              verificationChannel
-            }
-          }
-        }
-      }
-      currency
-      entitlementQuantity
-      deliveredQuantity
-      deliveredQuantityUsd
-      deliveryDate
-      deliveryDate
-      deliveryType
-      entitlementCardIssueDate
-      entitlementCardNumber
-      transactionReferenceId
-      serviceProvider {
-        id
-        fullName
-        shortName
-      }
+      ...paymentRecordDetails
     }
   }
 }
-    `;
+    ${PaymentRecordDetailsFragmentDoc}`;
 export type MarkPrAsFailedMutationFn = ApolloReactCommon.MutationFunction<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>;
 export type MarkPrAsFailedComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>, 'mutation'>;
 
@@ -16119,125 +16043,10 @@ export type LookUpPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<Look
 export const PaymentRecordDocument = gql`
     query PaymentRecord($id: ID!) {
   paymentRecord(id: $id) {
-    id
-    status
-    statusDate
-    caId
-    caHashId
-    registrationCaId
-    household {
-      id
-      status
-      size
-      unicefId
-      headOfHousehold {
-        id
-        phoneNo
-        phoneNoAlternative
-        phoneNoValid
-        phoneNoAlternativeValid
-      }
-    }
-    fullName
-    distributionModality
-    totalPersonsCovered
-    targetPopulation {
-      id
-      name
-    }
-    cashPlan {
-      id
-      caId
-      program {
-        id
-        name
-      }
-      verifications {
-        edges {
-          node {
-            id
-            status
-            verificationChannel
-          }
-        }
-      }
-    }
-    verification {
-      id
-      status
-      statusDate
-      receivedAmount
-    }
-    currency
-    entitlementQuantity
-    deliveredQuantity
-    deliveryDate
-    deliveryDate
-    entitlementCardIssueDate
-    entitlementCardNumber
-    serviceProvider {
-      id
-      fullName
-      shortName
-    }
-    id
-    status
-    statusDate
-    caId
-    household {
-      id
-      size
-      unicefId
-      headOfHousehold {
-        id
-        phoneNo
-        phoneNoAlternative
-        phoneNoValid
-        phoneNoAlternativeValid
-      }
-    }
-    fullName
-    distributionModality
-    totalPersonsCovered
-    targetPopulation {
-      id
-      name
-    }
-    cashPlan {
-      id
-      caId
-      program {
-        id
-        name
-      }
-      verifications {
-        edges {
-          node {
-            id
-            status
-            verificationChannel
-          }
-        }
-      }
-    }
-    currency
-    entitlementQuantity
-    deliveredQuantity
-    deliveredQuantityUsd
-    deliveryDate
-    deliveryDate
-    deliveryType
-    entitlementCardIssueDate
-    entitlementCardNumber
-    transactionReferenceId
-    serviceProvider {
-      id
-      fullName
-      shortName
-    }
+    ...paymentRecordDetails
   }
 }
-    `;
+    ${PaymentRecordDetailsFragmentDoc}`;
 export type PaymentRecordComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentRecordQuery, PaymentRecordQueryVariables>, 'query'> & ({ variables: PaymentRecordQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const PaymentRecordComponent = (props: PaymentRecordComponentProps) => (
