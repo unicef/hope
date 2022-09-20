@@ -193,6 +193,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
     STATUS_INVALID = "INVALID"
+    STATUS_RAPID_PRO_ERROR = "RAPID_PRO_ERROR"
     SAMPLING_FULL_LIST = "FULL_LIST"
     SAMPLING_RANDOM = "RANDOM"
     VERIFICATION_CHANNEL_RAPIDPRO = "RAPIDPRO"
@@ -203,6 +204,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         (STATUS_FINISHED, "Finished"),
         (STATUS_PENDING, "Pending"),
         (STATUS_INVALID, "Invalid"),
+        (STATUS_RAPID_PRO_ERROR, "RapidPro Error"),
     )
     SAMPLING_CHOICES = (
         (SAMPLING_FULL_LIST, "Full list"),
@@ -237,6 +239,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     completion_date = models.DateTimeField(null=True)
     xlsx_file_exporting = models.BooleanField(default=False)
     xlsx_file_imported = models.BooleanField(default=False)
+    error = models.CharField(max_length=500, null=True, blank=True)
 
     class Meta:
         ordering = ("created_at",)
@@ -361,6 +364,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
     )
+    sent_to_rapid_pro = models.BooleanField(default=False)
 
     @property
     def is_manually_editable(self):
