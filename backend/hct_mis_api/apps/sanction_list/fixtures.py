@@ -1,5 +1,4 @@
 import factory
-from django_countries.fields import Country
 from pytz import utc
 
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
@@ -22,4 +21,4 @@ class SanctionListIndividualFactory(factory.DjangoModelFactory):
     city = factory.Faker("sentence", nb_words=2)
     state_province = factory.Faker("sentence", nb_words=2)
     address_note = factory.Faker("sentence", nb_words=2)
-    country_of_birth = Country(code="IN")
+    country_of_birth = None

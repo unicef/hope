@@ -60,7 +60,7 @@ const CriteriaSetBox = styled.div`
 const CriteriaField = ({ field }): React.ReactElement => {
   const { t } = useTranslation();
   let fieldElement;
-  switch (field.comparisionMethod) {
+  switch (field.comparisonMethod) {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>

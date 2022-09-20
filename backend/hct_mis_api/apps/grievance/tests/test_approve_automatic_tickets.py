@@ -2,17 +2,14 @@ from datetime import datetime
 
 from django.utils import timezone
 
-from django_countries.fields import Country
+from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -84,16 +81,10 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sdfghjuytre2")
-        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="dfghgf3456")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -101,8 +92,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area_1_new = AreaFactory(name="City Test", area_type=area_type, p_code="sdfghjuytre2")
-        cls.admin_area_2_new = AreaFactory(name="City Example", area_type=area_type, p_code="dfghgf3456")
+        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="sdfghjuytre2")
+        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="dfghgf3456")
 
         program_one = ProgramFactory(
             name="Test program ONE",
@@ -168,7 +159,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             "city": "Karachi",
             "state_province": "",
             "address_note": "White House, Near Saudi Mosque, Clifton",
-            "country_of_birth": Country(code="IN"),
+            "country_of_birth": geo_models.Country.objects.get(iso_code2="IN"),
         }
         cls.sanction_list_individual = SanctionListIndividual.objects.create(**sanction_list_individual_data)
 
@@ -177,7 +168,6 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
             issue_type=None,
             admin2=cls.admin_area_1,
-            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
         )
 
@@ -193,7 +183,6 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
             issue_type=None,
             admin2=cls.admin_area_1,
-            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
         )
 

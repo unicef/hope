@@ -14,6 +14,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN, BankAccountInfo
 
 logger = logging.getLogger(__name__)
@@ -36,14 +37,13 @@ def handle_role(role, household, individual):
 
 
 def handle_add_document(document, individual):
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.household.models import Document, DocumentType
 
     type_name = document.get("type")
     country_code = document.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = document.get("number")
     photo = document.get("photo")
     photoraw = document.get("photoraw")
@@ -61,7 +61,6 @@ def handle_add_document(document, individual):
 def handle_edit_document(document_data: dict):
     from django.shortcuts import get_object_or_404
 
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -71,7 +70,7 @@ def handle_edit_document(document_data: dict):
 
     type_name = updated_document.get("type")
     country_code = updated_document.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = updated_document.get("number")
     photo = updated_document.get("photo")
     photoraw = updated_document.get("photoraw")
@@ -120,14 +119,13 @@ def handle_update_payment_channel(payment_channel):
 
 
 def handle_add_identity(identity, individual):
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.household.models import Agency, IndividualIdentity
 
     agency_name = identity.get("agency")
     country_code = identity.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = identity.get("number")
     agency_type, _ = Agency.objects.get_or_create(
         country=country,
@@ -150,7 +148,6 @@ def handle_add_identity(identity, individual):
 def handle_edit_identity(identity_data: dict):
     from django.shortcuts import get_object_or_404
 
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -159,7 +156,7 @@ def handle_edit_identity(identity_data: dict):
     updated_identity = identity_data.get("value", {})
     agency_name = updated_identity.get("agency")
     country_code = updated_identity.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = updated_identity.get("number")
     identity_id = updated_identity.get("id")
 
@@ -203,7 +200,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
             "document_number": document.document_number,
             "individual": encode_id_base64(document.individual.id, "Individual"),
             "type": document.type.type,
-            "country": document.type.country.alpha3,
+            "country": document.type.country.iso_code3,
         }
 
     return previous_documents
@@ -243,7 +240,7 @@ def prepare_edit_documents(documents_to_edit):
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "country": document.type.country.alpha3,
+                    "country": document.type.country.iso_code3,
                     "type": document.type.type,
                     "number": document.document_number,
                     "photo": document.photo.name,
@@ -270,7 +267,7 @@ def prepare_previous_identities(identities_to_remove_with_approve_status):
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
             "agency": identity.agency.type,
-            "country": identity.agency.country.alpha3,
+            "country": identity.agency.country.iso_code3,
         }
 
     return previous_identities
@@ -325,7 +322,7 @@ def prepare_edit_identities(identities):
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "country": identity.agency.country.alpha3,
+                    "country": identity.agency.country.iso_code3,
                     "agency": identity.agency.type,
                     "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": identity.number,
@@ -625,7 +622,13 @@ def reassign_roles_on_update(individual, role_reassign_data, info=None):
 
 
 def withdraw_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household):
+    from hct_mis_api.apps.household.models import Document
+
     individual_to_remove.withdraw()
+
+    Document.objects.filter(status=Document.STATUS_VALID, individual=individual_to_remove).update(
+        status=Document.STATUS_NEED_INVESTIGATION
+    )
     log_and_withdraw_household_if_needed(
         individual_to_remove,
         info,

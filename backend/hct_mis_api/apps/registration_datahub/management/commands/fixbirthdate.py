@@ -12,9 +12,9 @@ def update_birth_date():
         birth_date=datetime(1923, 1, 1)
     )
     print(f"{updated} updated imported individuals")
-    updated = Individual.objects.filter(
-        household__country_new__name="Ukraine", birth_date__lt=datetime(1923, 1, 1)
-    ).update(birth_date=datetime(1923, 1, 1))
+    updated = Individual.objects.filter(household__country__name="Ukraine", birth_date__lt=datetime(1923, 1, 1)).update(
+        birth_date=datetime(1923, 1, 1)
+    )
     print(f"{updated} updated individuals")
 
 

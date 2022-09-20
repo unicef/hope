@@ -36,14 +36,12 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
 
     household = main_individual.household
     admin_level_2 = household.admin2 if household else None
-    admin_level_2_new = household.admin2_new if household else None
     area = household.village if household else ""
 
     ticket = GrievanceTicket.objects.create(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         business_area=business_area,
         admin2=admin_level_2,
-        admin2_new=admin_level_2_new,
         area=area,
         registration_data_import=registration_data_import,
     )
