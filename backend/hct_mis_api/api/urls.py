@@ -1,13 +1,34 @@
 from django.urls import include, path, re_path
 
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+
 from . import endpoints
 from .router import APIRouter
 
 app_name = "api"
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Hope API documentation",
+        default_version='v1',
+        description="Hope API description",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@snippets.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=[permissions.IsAuthenticated],
+)
+
 router = APIRouter()
 
 urlpatterns = [
+    re_path(r'^doc/swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    re_path(r'^doc/swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    re_path(r'^doc/redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
     re_path(r"", include(router.urls)),
     path("rdi/<slug:business_area>/upload/", endpoints.UploadRDIView().as_view(), name="rdi-upload"),
     path("rdi/<slug:business_area>/create/", endpoints.CreateRDIView().as_view(), name="rdi-create"),
