@@ -1,20 +1,28 @@
 from django.forms import model_to_dict
 
-from hct_mis_api.apps.household.models import Individual, Household, HEAD, COUSIN, BROTHER_SISTER, YES
+from freezegun import freeze_time
+
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+from hct_mis_api.apps.household.models import (
+    BROTHER_SISTER,
+    COUSIN,
+    HEAD,
+    YES,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
     ImportedHouseholdFactory,
     ImportedIndividualFactory,
+    RegistrationDataImportDatahubFactory,
 )
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-
-from freezegun import freeze_time
 
 
 class TestRdiMergeTask(BaseElasticSearchTestCase):
     databases = "__all__"
     fixtures = [
+        "hct_mis_api/apps/geo/fixtures/data.json",
         "hct_mis_api/apps/core/fixtures/data.json",
     ]
 

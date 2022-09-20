@@ -16,7 +16,7 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
             numIndividuals: { min: 0, max: 100 },
             status: null,
           }}
-          canViewDetails={true}
+          canViewDetails
         />
       </MockedProvider>,
     );
@@ -38,7 +38,7 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
             numIndividuals: { min: 0, max: 100 },
             status: null,
           }}
-          canViewDetails={true}
+          canViewDetails
         />
       </MockedProvider>,
     );

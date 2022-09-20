@@ -113,11 +113,12 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
               label=''
               onChange={(e) => setImportType(e.target.value)}
               fullWidth
+              data-cy='import-type-select'
             >
-              <MenuItem key='excel' value='excel'>
+              <MenuItem data-cy='excel-menu-item' key='excel' value='excel'>
                 Excel
               </MenuItem>
-              <MenuItem key='kobo' value='kobo'>
+              <MenuItem data-cy='kobo-menu-item' key='kobo' value='kobo'>
                 Kobo
               </MenuItem>
             </ComboBox>
@@ -140,7 +141,7 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
               color='primary'
               variant='contained'
               disabled={submitDisabled}
-              data-cy='button-import'
+              data-cy='button-import-rdi'
               onClick={submitForm}
             >
               {t('IMPORT')}

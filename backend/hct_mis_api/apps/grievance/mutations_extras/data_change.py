@@ -10,8 +10,9 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task,
@@ -323,6 +324,8 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
             current_value = current_value.isoformat()
         if isinstance(current_value, Country):
             current_value = current_value.alpha3
+        if isinstance(current_value, geo_models.Country):
+            current_value = current_value.iso_code3
         household_data_with_approve_status[field]["previous_value"] = current_value
 
     flex_fields_with_approve_status = {
@@ -359,6 +362,8 @@ def update_household_data_update_extras(root, info, input, grievance_ticket, ext
             current_value = current_value.isoformat()
         if isinstance(current_value, Country):
             current_value = current_value.alpha3
+        if isinstance(current_value, geo_models.Country):
+            current_value = current_value.iso_code3
         household_data_with_approve_status[field]["previous_value"] = current_value
     flex_fields_with_approve_status = {
         field: {"value": value, "approve_status": False, "previous_value": household.flex_fields.get(field)}
@@ -867,17 +872,16 @@ def close_update_household_grievance_ticket(grievance_ticket, info):
         if data.get("approve_status") is True
     }
     if country_origin.get("value") is not None:
-        household_data["country_origin"]["value"] = Country(country_origin.get("value"))
+        household_data["country_origin"]["value"] = geo_models.Country.objects.filter(
+            iso_code3=country_origin.get("value")
+        ).first()
 
     if country.get("value") is not None:
-        household_data["country"]["value"] = Country(country.get("value"))
+        household_data["country"]["value"] = geo_models.Country.objects.filter(iso_code3=country.get("value")).first()
 
     if admin_area_title.get("value") is not None:
         household_data["admin_area"] = admin_area_title.copy()
-        household_data["admin_area_new"] = admin_area_title.copy()
-
-        household_data["admin_area"]["value"] = AdminArea.objects.filter(p_code=admin_area_title.get("value")).first()
-        household_data["admin_area_new"]["value"] = Area.objects.filter(p_code=admin_area_title.get("value")).first()
+        household_data["admin_area"]["value"] = Area.objects.filter(p_code=admin_area_title.get("value")).first()
 
     only_approved_data = {
         field: value_and_approve_status.get("value")

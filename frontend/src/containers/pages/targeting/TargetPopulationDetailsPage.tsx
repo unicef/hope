@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
+  TargetPopulationBuildStatus,
+  TargetPopulationStatus,
   useTargetPopulationQuery,
-  TargetPopulationNode,
 } from '../../../__generated__/graphql';
 import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
 import { TargetPopulationCore } from '../../../components/targeting/TargetPopulationCore';
@@ -13,23 +14,38 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
+import { useLazyInterval } from '../../../hooks/useInterval';
 
 export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data, loading, error } = useTargetPopulationQuery({
+  const { data, loading, error, refetch } = useTargetPopulationQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
+  const [
+    startPollingTargetPopulation,
+    stopPollingTargetPopulation,
+  ] = useLazyInterval(() => refetch(), 3000);
+  const buildStatus = data?.targetPopulation?.buildStatus;
+  useEffect(() => {
+    if (buildStatus !== TargetPopulationBuildStatus.Ok) {
+      startPollingTargetPopulation();
+    } else {
+      stopPollingTargetPopulation();
+    }
+    return stopPollingTargetPopulation;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buildStatus]);
   const [isEdit, setEditState] = useState(false);
 
-  if (loading) return <LoadingComponent />;
+  if (loading && !data) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (!data || permissions === null) return null;
 
-  const targetPopulation = data.targetPopulation as TargetPopulationNode;
+  const { targetPopulation } = data;
   const { status } = targetPopulation;
 
   return (
@@ -37,9 +53,6 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
       {isEdit ? (
         <EditTargetPopulation
           targetPopulation={targetPopulation}
-          targetPopulationCriterias={
-            targetPopulation.candidateListTargetingCriteria
-          }
           cancelEdit={() => setEditState(false)}
         />
       ) : (
@@ -63,18 +76,13 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
             )}
             canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
           />
-          {status !== 'DRAFT' && (
+          {status !== TargetPopulationStatus.Open && (
             <TargetPopulationDetails targetPopulation={targetPopulation} />
           )}
           <TargetPopulationCore
             id={targetPopulation.id}
-            status={status}
-            candidateList={targetPopulation.candidateListTargetingCriteria}
             targetPopulation={targetPopulation}
-            canViewHouseholdDetails={hasPermissions(
-              PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
-              permissions,
-            )}
+            permissions={permissions}
           />
         </>
       )}

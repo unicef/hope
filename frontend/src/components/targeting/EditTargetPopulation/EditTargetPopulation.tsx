@@ -1,12 +1,10 @@
 import { Typography } from '@material-ui/core';
-import { Label } from '@material-ui/icons';
-import { Form, Formik, FieldArray } from 'formik';
+import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import * as Yup from 'yup';
-import { TARGET_POPULATION_QUERY } from '../../../apollo/queries/targeting/TargetPopulation';
-import { TargetPopulationHouseholdTable } from '../../../containers/tables/targeting/TargetPopulationHouseholdTable';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
@@ -15,25 +13,26 @@ import {
   handleValidationErrors,
 } from '../../../utils/utils';
 import {
+  TargetPopulationDocument,
   useAllProgramsQuery,
-  useGoldenRecordByTargetingCriteriaQuery,
   useUpdateTpMutation,
 } from '../../../__generated__/graphql';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
-import { Results } from '../Results';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { TargetPopulationProgramme } from '../TargetPopulationProgramme';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 
+const Label = styled.p`
+  color: #b1b1b5;
+`;
+
 interface EditTargetPopulationProps {
-  targetPopulationCriterias?;
   cancelEdit?;
   targetPopulation?;
 }
 
 export function EditTargetPopulation({
-  targetPopulationCriterias,
   cancelEdit,
   targetPopulation,
 }: EditTargetPopulationProps): React.ReactElement {
@@ -42,36 +41,36 @@ export function EditTargetPopulation({
     id: targetPopulation.id,
     name: targetPopulation.name || '',
     program: targetPopulation.program?.id || '',
-    criterias: targetPopulationCriterias.rules || [],
+    targetingCriteria: targetPopulation.targetingCriteria.rules || [],
     excludedIds: targetPopulation.excludedIds || '',
     exclusionReason: targetPopulation.exclusionReason || '',
-    candidateListCriterias:
-      targetPopulation.candidateListTargetingCriteria?.rules || [],
-    targetPopulationCriterias:
-      targetPopulation.finalListTargetingCriteria?.rules || [],
   };
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
   const businessArea = useBusinessArea();
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsQuery({
-      variables: { businessArea, status: ['ACTIVE'] },
-      fetchPolicy: 'cache-and-network',
-    });
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
+  });
 
-  const handleValidate = (values): { candidateListCriterias?: string } => {
-    const { candidateListCriterias } = values;
-    const errors: { candidateListCriterias?: string } = {};
-    if (!candidateListCriterias.length) {
-      errors.candidateListCriterias = t(
+  const handleValidate = (values): { targetingCriteria?: string } => {
+    const { targetingCriteria } = values;
+    const errors: { targetingCriteria?: string } = {};
+    if (!targetingCriteria.length) {
+      errors.targetingCriteria = t(
         'You need to select at least one targeting criteria',
       );
     }
     return errors;
   };
   const validationSchema = Yup.object().shape({
-    name: Yup.string().min(2, 'Too short').max(255, 'Too long'),
+    name: Yup.string()
+      .min(2, 'Too short')
+      .max(255, 'Too long'),
     excludedIds: Yup.string().test(
       'testName',
       'ID is not in the correct format',
@@ -101,13 +100,13 @@ export function EditTargetPopulation({
               name: values.name,
             }),
             ...getTargetingCriteriaVariables({
-              criterias: values.candidateListCriterias,
+              criterias: values.targetingCriteria,
             }),
           },
         },
         refetchQueries: () => [
           {
-            query: TARGET_POPULATION_QUERY,
+            query: TargetPopulationDocument,
             variables: {
               id,
             },
@@ -146,58 +145,46 @@ export function EditTargetPopulation({
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, submitForm }) => (
-        <Form>
-          <EditTargetPopulationHeader
-            handleSubmit={submitForm}
-            cancelEdit={cancelEdit}
-            values={values}
-            loading={loading}
-            businessArea={businessArea}
-            targetPopulation={targetPopulation}
-          />
-          <TargetPopulationProgramme
-            allPrograms={allProgramsData}
-            loading={loadingPrograms}
-            program={values.program}
-          />
-
-          <FieldArray
-            name='candidateListCriterias'
-            render={(arrayHelpers) => (
-              <TargetingCriteria
-                helpers={arrayHelpers}
-                candidateListRules={values.candidateListCriterias}
-                isEdit
-                selectedProgram={selectedProgram(values)}
-              />
-            )}
-          />
-          <Exclusions initialOpen={Boolean(values.excludedIds)} />
-          <Results />
-          {values.candidateListCriterias.length && selectedProgram(values) ? (
-            <TargetPopulationHouseholdTable
-              variables={{
-                ...getTargetingCriteriaVariables({
-                  criterias: values.candidateListCriterias,
-                }),
-                program: selectedProgram(values).id,
-                excludedIds: values.excludedIds,
-                businessArea,
-              }}
-              query={useGoldenRecordByTargetingCriteriaQuery}
-              queryObjectName='goldenRecordByTargetingCriteria'
+      {({ values, submitForm }) => {
+        return (
+          <Form>
+            <EditTargetPopulationHeader
+              handleSubmit={submitForm}
+              cancelEdit={cancelEdit}
+              values={values}
+              loading={loading}
+              businessArea={businessArea}
+              targetPopulation={targetPopulation}
             />
-          ) : (
+            <TargetPopulationProgramme
+              allPrograms={allProgramsData}
+              loading={loadingPrograms}
+              program={values.program}
+            />
+
+            <FieldArray
+              name='targetingCriteria'
+              render={(arrayHelpers) => (
+                <TargetingCriteria
+                  helpers={arrayHelpers}
+                  candidateListRules={values.targetingCriteria}
+                  isEdit
+                  selectedProgram={selectedProgram(values)}
+                />
+              )}
+            />
+            <Exclusions initialOpen={Boolean(values.excludedIds)} />
             <PaperContainer>
               <Typography variant='h6'>
-                {t('Target Population Entries (Households)')}
+                {t('Save to see the list of households')}
               </Typography>
-              <Label>{t('Add targeting criteria to see results.')}</Label>
+              <Label>
+                {t('List of households will be available after save.')}
+              </Label>
             </PaperContainer>
-          )}
-        </Form>
-      )}
+          </Form>
+        );
+      }}
     </Formik>
   );
 }

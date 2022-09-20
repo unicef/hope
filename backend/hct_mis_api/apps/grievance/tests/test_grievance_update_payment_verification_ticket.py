@@ -5,22 +5,27 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import TicketPaymentVerificationDetailsFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentVerificationFactory,
     PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
+    PaymentVerificationFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    PaymentVerification,
+)
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 
 
 class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
@@ -55,12 +60,6 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         call_command("loadcountries")
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        cls.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -68,7 +67,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             country=country,
             area_level=2,
         )
-        AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        cls.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         program = ProgramFactory(id="e6537f1e-27b5-4179-a443-d42498fb0478")
         CashPlanFactory(
@@ -109,7 +108,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         target_population = TargetPopulationFactory(
             id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
             created_by=cls.user,
-            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+            targeting_criteria=(TargetingCriteriaFactory()),
             business_area=cls.business_area,
         )
         payment_record = PaymentRecordFactory(
