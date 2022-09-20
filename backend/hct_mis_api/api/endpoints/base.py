@@ -12,6 +12,6 @@ class SelectedBusinessAreaMixin:
         return BusinessArea.objects.get(slug=self.kwargs["business_area"])
 
 
-class HOPEAPIView(APIView):
+class HOPEAPIView(SelectedBusinessAreaMixin, APIView):
     permission_classes = [HOPEPermission]
-    permission = ""
+    permission = "any"

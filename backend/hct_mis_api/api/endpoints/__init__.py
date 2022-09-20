@@ -1,5 +1,4 @@
 from .area import AreaList, AreaTypeList
-from .country import CountryList
 from .lookups import (
     Country,
     DataCollectingPolicy,
@@ -10,4 +9,5 @@ from .lookups import (
     ResidenceStatus,
     Roles,
 )
+from .rdi import CreateRDIView, PushToRDIView
 from .upload import UploadRDIView

@@ -1,10 +1,9 @@
 import base64
+import logging
 
-from django.core.files import File
-from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.transaction import atomic
 from django.utils import timezone
-from django.utils.functional import cached_property
 
 from django_countries import Countries
 from rest_framework import serializers, status
@@ -13,7 +12,6 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView, SelectedBusinessAreaMixin
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
@@ -26,18 +24,18 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
+    ImportedHousehold,
+    ImportedIndividual,
+    RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.models import ImportedHousehold as Household
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedIndividual as Individual,
-)
-from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 
 DETAILS_POLICY = (
     ["NO", "NO"],
     ["FULL", "FULL"],
     ["PARTIAL", "PARTIAL"],
 )
+
+logger = logging.getLogger(__name__)
 
 
 class MemberSerializer(serializers.ListSerializer):
@@ -89,7 +87,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     documents = DocumentSerializer(many=True, required=False)
 
     class Meta:
-        model = Individual
+        model = ImportedIndividual
         exclude = ["id", "registration_data_import"]
         list_serializer_class = MemberSerializer
 
@@ -128,6 +126,50 @@ def get_photo_from_stream(stream):
     return None
 
 
+class HouseholdListSerializer(serializers.ListSerializer):
+    def save(self, **kwargs):
+        validated_data = [{**attrs, **kwargs} for attrs in self.validated_data]
+        rdi = kwargs.pop("rdi")
+        for i, household_data in enumerate(validated_data):
+            hh_ser = HouseholdSerializer(data=household_data)
+            if hh_ser.is_valid():
+                members: MemberSerializer = hh_ser.members
+                hoh_ser = IndividualSerializer(data=members.head_of_household)
+                if hoh_ser.is_valid(True):
+                    hh: ImportedHousehold = hh_ser.save(head_of_household=None, registration_data_import=rdi)
+                    primary = None
+                    alternate = None
+                    for member_data in members.validated_data:
+                        member_ser = IndividualSerializer(data=member_data)
+                        if member_ser.is_valid():
+                            if member_data["relationship"] in [RELATIONSHIP_UNKNOWN, NON_BENEFICIARY]:
+                                member_of = None
+                            else:
+                                member_of = hh
+                            member = member_ser.save(household=member_of, registration_data_import=rdi)
+                            for doc in member_ser.documents:
+                                ImportedDocument.objects.create(
+                                    document_number=doc["document_number"],
+                                    photo=get_photo_from_stream(doc["image"]),
+                                    doc_date=doc["doc_date"],
+                                    individual=member,
+                                    type=ImportedDocumentType.objects.get(country=doc["country"], type=doc["type"]),
+                                )
+                            if member_data["relationship"] == HEAD:
+                                assert member.household == hh
+                                hh.head_of_household = member
+                                hh.save()
+                            if member_data["role"] == ROLE_PRIMARY:
+                                primary = member
+                            elif member_data["role"] == ROLE_ALTERNATE:
+                                alternate = member
+                    hh.individuals_and_roles.create(individual=primary, role=ROLE_PRIMARY)
+                    if alternate:
+                        hh.individuals_and_roles.create(individual=primary, role=ROLE_ALTERNATE)
+            else:
+                raise ValidationError(hh_ser.errors, code=f"Error validating Household in position #{i}")
+
+
 class HouseholdSerializer(serializers.ModelSerializer):
     unicef_id = serializers.ReadOnlyField()
     first_registration_date = serializers.DateTimeField(default=timezone.now)
@@ -137,8 +179,9 @@ class HouseholdSerializer(serializers.ModelSerializer):
     country_origin = serializers.CharField(allow_blank=True, required=False)
 
     class Meta:
-        model = Household
+        model = ImportedHousehold
         exclude = ["id", "head_of_household", "registration_data_import"]
+        list_serializer_class = HouseholdListSerializer
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -170,51 +213,54 @@ class RDISerializer(serializers.ModelSerializer):
         households = validated_data.pop("households")
         rdi = RegistrationDataImportDatahub.objects.create(**validated_data, business_area_slug=self.business_area.slug)
         try:
-            for i, household_data in enumerate(households):
-                hh_ser = HouseholdSerializer(data=household_data)
-                if hh_ser.is_valid():
-                    members: MemberSerializer = hh_ser.members
-                    hoh_ser = IndividualSerializer(data=members.head_of_household)
-                    if hoh_ser.is_valid(True):
-                        hh: Household = hh_ser.save(head_of_household=None, registration_data_import=rdi)
-                        primary = None
-                        alternate = None
-                        for member_data in members.validated_data:
-                            member_ser = IndividualSerializer(data=member_data)
-                            if member_ser.is_valid():
-                                if member_data["relationship"] in [RELATIONSHIP_UNKNOWN, NON_BENEFICIARY]:
-                                    member_of = None
-                                else:
-                                    member_of = hh
-                                member = member_ser.save(household=member_of, registration_data_import=rdi)
-                                for doc in member_ser.documents:
-                                    ImportedDocument.objects.create(
-                                        document_number=doc["document_number"],
-                                        photo=get_photo_from_stream(doc["image"]),
-                                        doc_date=doc["doc_date"],
-                                        individual=member,
-                                        type=ImportedDocumentType.objects.get(country=doc["country"], type=doc["type"]),
-                                    )
-                                if member_data["relationship"] == HEAD:
-                                    assert member.household == hh
-                                    hh.head_of_household = member
-                                    hh.save()
-                                if member_data["role"] == ROLE_PRIMARY:
-                                    primary = member
-                                elif member_data["role"] == ROLE_ALTERNATE:
-                                    alternate = member
-                        hh.individuals_and_roles.create(individual=primary, role=ROLE_PRIMARY)
-                        if alternate:
-                            hh.individuals_and_roles.create(individual=primary, role=ROLE_ALTERNATE)
-                else:
-                    raise ValidationError(hh_ser.errors, code=f"Error validating Household in position #{i}")
+            mm = HouseholdSerializer(data=households, many=True)
+            mm.is_valid(True)
+            mm.save(rdi=rdi)
+            # for i, household_data in enumerate(households):
+            #     hh_ser = HouseholdSerializer(data=household_data)
+            #     if hh_ser.is_valid():
+            #         members: MemberSerializer = hh_ser.members
+            #         hoh_ser = IndividualSerializer(data=members.head_of_household)
+            #         if hoh_ser.is_valid(True):
+            #             hh: ImportedHousehold = hh_ser.save(head_of_household=None, registration_data_import=rdi)
+            #             primary = None
+            #             alternate = None
+            #             for member_data in members.validated_data:
+            #                 member_ser = IndividualSerializer(data=member_data)
+            #                 if member_ser.is_valid():
+            #                     if member_data["relationship"] in [RELATIONSHIP_UNKNOWN, NON_BENEFICIARY]:
+            #                         member_of = None
+            #                     else:
+            #                         member_of = hh
+            #                     member = member_ser.save(household=member_of, registration_data_import=rdi)
+            #                     for doc in member_ser.documents:
+            #                         ImportedDocument.objects.create(
+            #                             document_number=doc["document_number"],
+            #                             photo=get_photo_from_stream(doc["image"]),
+            #                             doc_date=doc["doc_date"],
+            #                             individual=member,
+            #                             type=ImportedDocumentType.objects.get(country=doc["country"], type=doc["type"]),
+            #                         )
+            #                     if member_data["relationship"] == HEAD:
+            #                         assert member.household == hh
+            #                         hh.head_of_household = member
+            #                         hh.save()
+            #                     if member_data["role"] == ROLE_PRIMARY:
+            #                         primary = member
+            #                     elif member_data["role"] == ROLE_ALTERNATE:
+            #                         alternate = member
+            #             hh.individuals_and_roles.create(individual=primary, role=ROLE_PRIMARY)
+            #             if alternate:
+            #                 hh.individuals_and_roles.create(individual=primary, role=ROLE_ALTERNATE)
+            #     else:
+            #         raise ValidationError(hh_ser.errors, code=f"Error validating Household in position #{i}")
         except Exception as e:
             logger.exception(e)
             raise
         return rdi
 
 
-class UploadRDIView(SelectedBusinessAreaMixin, HOPEAPIView):
+class UploadRDIView(HOPEAPIView):
     permission = Permissions.API_UPLOAD_RDI
 
     def post(self, request, business_area):
