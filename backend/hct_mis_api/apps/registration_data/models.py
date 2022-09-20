@@ -56,12 +56,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     XLS = "XLS"
     KOBO = "KOBO"
     DIIA = "DIIA"
+    API = "API"
     FLEX_REGISTRATION = "FLEX_REGISTRATION"
     DATA_SOURCE_CHOICE = (
         (XLS, "Excel"),
         (KOBO, "KoBo"),
         (DIIA, "DIIA"),
         (FLEX_REGISTRATION, "Flex Registration"),
+        (API, "Flex API"),
     )
     name = CICharField(
         max_length=255,

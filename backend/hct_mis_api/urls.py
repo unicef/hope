@@ -15,6 +15,7 @@ import hct_mis_api.apps.payment.views
 import hct_mis_api.apps.registration_datahub.views
 import hct_mis_api.apps.sanction_list.views
 import hct_mis_api.apps.targeting.views
+from hct_mis_api.apps.core.rest_api import all_fields_attributes
 from hct_mis_api.apps.core.views import (
     homepage,
     hope_redirect,
@@ -23,12 +24,11 @@ from hct_mis_api.apps.core.views import (
     trigger_error,
 )
 
-from hct_mis_api.apps.core.rest_api import all_fields_attributes
-
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])
 
 api_patterns = [
+    path("api/", include("hct_mis_api.api.urls", namespace="api")),
     path("", include("social_django.urls", namespace="social")),
     path("fields_attributes/", all_fields_attributes, name="fields_attributes"),
     path("_health", homepage),
