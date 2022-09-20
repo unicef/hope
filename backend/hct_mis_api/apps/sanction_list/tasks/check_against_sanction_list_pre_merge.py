@@ -69,7 +69,7 @@ class CheckAgainstSanctionListPreMergeTask:
         queries.extend(birth_dates_queries)
 
         query_dict = {
-            "size": 10000,
+            # "size": 10000,
             "query": {
                 "bool": {
                     "minimum_should_match": 1,
@@ -95,8 +95,7 @@ class CheckAgainstSanctionListPreMergeTask:
             query = document.search().from_dict(query_dict)
             query._index = document._index._name
 
-            results = query.execute()
-            for individual_hit in results:
+            for individual_hit in query.scan():
                 score = individual_hit.meta.score
                 if score >= possible_match_score:
                     marked_individual = Individual.objects.filter(id=individual_hit.id).first()
