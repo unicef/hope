@@ -26,7 +26,7 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
         mutation invalidCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
           invalidCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
             cashPlan{
-              verifications{
+              verificationPlans{
                 edges{
                   node{
                     status

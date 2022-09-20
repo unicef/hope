@@ -11,7 +11,7 @@ snapshots['TestDeleteVerificationMutation::test_delete_pending_verification_plan
         'deleteCashPlanPaymentVerification': {
             'cashPlan': {
                 'name': 'TEST',
-                'verifications': {
+                'verificationPlans': {
                     'edges': [
                         {
                             'node': {

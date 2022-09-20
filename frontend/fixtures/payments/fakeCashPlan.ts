@@ -19,7 +19,7 @@ export const fakeCashPlan = {
   bankReconciliationSuccess: 1,
   bankReconciliationError: 3,
   totalNumberOfHouseholds: 5,
-  verifications: {
+  verificationPlans: {
     totalCount: 3,
     edges: [
       {
@@ -100,7 +100,7 @@ export const fakeCashPlan = {
     ],
     __typename: 'CashPlanPaymentVerificationNodeConnection',
   },
-  cashPlanPaymentVerificationSummary: {
+  paymentVerificationSummary: {
     id:
       'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6MTNjY2MxNzMtNzEwZS00N2NkLTg1ZmQtODM4YTFlMjZiNDUy',
     createdAt: '2022-02-17T14:23:02.018701',

@@ -6,7 +6,7 @@ export const ExportXlsxCashPlanVerification = gql`
     ) {
       cashPlan {
         id
-        verifications {
+        verificationPlans {
           edges {
             node {
               id

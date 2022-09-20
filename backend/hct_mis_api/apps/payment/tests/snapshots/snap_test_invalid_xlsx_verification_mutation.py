@@ -31,7 +31,7 @@ snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_cash_plan_payment
     'data': {
         'invalidCashPlanPaymentVerification': {
             'cashPlan': {
-                'verifications': {
+                'verificationPlans': {
                     'edges': [
                         {
                             'node': {

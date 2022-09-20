@@ -49,7 +49,7 @@ export const fakeApolloAllCashPlansPaymentVerification = [
                 totalDeliveredQuantity: 24029588.26,
                 totalUndeliveredQuantity: 53795776.44,
                 updatedAt: '2022-02-24T09:56:48.875230',
-                cashPlanPaymentVerificationSummary: {
+                paymentVerificationSummary: {
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NGNhNTdkZDUtYmY4ZC00MGIxLWE3NWEtOTM0Yzg4OTc3ZTM4',
                   status: 'PENDING',
@@ -86,7 +86,7 @@ export const fakeApolloAllCashPlansPaymentVerification = [
                 totalDeliveredQuantity: 58957757.27,
                 totalUndeliveredQuantity: 65864422.88,
                 updatedAt: '2022-02-24T09:56:48.857869',
-                cashPlanPaymentVerificationSummary: {
+                paymentVerificationSummary: {
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6YzE1M2FmZmYtNTNmOS00ZDRjLWEyMmUtNTJmNmQ2NzczNjVj',
                   status: 'PENDING',
@@ -123,7 +123,7 @@ export const fakeApolloAllCashPlansPaymentVerification = [
                 totalDeliveredQuantity: 13479474.6,
                 totalUndeliveredQuantity: 13013349.03,
                 updatedAt: '2022-02-24T09:56:48.842605',
-                cashPlanPaymentVerificationSummary: {
+                paymentVerificationSummary: {
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NjZlODU1YmQtZDUxMS00OWEzLTljYWItNGIwMmQ1YzQzYzBk',
                   status: 'PENDING',
@@ -160,7 +160,7 @@ export const fakeApolloAllCashPlansPaymentVerification = [
                 totalDeliveredQuantity: 34133204.79,
                 totalUndeliveredQuantity: 35280201.96,
                 updatedAt: '2022-02-24T09:12:49.386140',
-                cashPlanPaymentVerificationSummary: {
+                paymentVerificationSummary: {
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NjdjN2I3YWYtZDU4Zi00NWFlLTliYmQtNjFlYTA1M2IwOWZh',
                   status: 'PENDING',
@@ -197,7 +197,7 @@ export const fakeApolloAllCashPlansPaymentVerification = [
                 totalDeliveredQuantity: 43876864.16,
                 totalUndeliveredQuantity: 88674540.93,
                 updatedAt: '2022-02-24T09:12:49.372607',
-                cashPlanPaymentVerificationSummary: {
+                paymentVerificationSummary: {
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NzRlNWU1NzUtYTgyNi00MTgyLThhYWMtN2EyZjVlOTQ5YWY4',
                   status: 'PENDING',
