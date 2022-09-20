@@ -139,6 +139,7 @@ class UserRole(TimeStampedUUIDModel):
 
 
 class Role(TimeStampedUUIDModel):
+    API = "API"
     HOPE = "HOPE"
     KOBO = "KOBO"
     CA = "CA"
@@ -146,6 +147,7 @@ class Role(TimeStampedUUIDModel):
         (HOPE, "HOPE"),
         (KOBO, "Kobo"),
         (CA, "CashAssist"),
+        (API, "API"),
     )
 
     name = models.CharField(

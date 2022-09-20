@@ -38,11 +38,12 @@ class UserFactory(factory.DjangoModelFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         manager = cls._get_manager(model_class)
-        return manager.create_user(*args, **kwargs)
+        return manager.create_user(*args, password="password", **kwargs)
 
 
 class RoleFactory(factory.DjangoModelFactory):
     subsystem = "HOPE"
+    name = factory.Sequence(lambda o: f"name{o}")
 
     class Meta:
         model = Role
