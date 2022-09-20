@@ -11,6 +11,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import JSONField
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from django_countries.fields import CountryField
@@ -33,17 +34,19 @@ from hct_mis_api.apps.household.models import (
     REGISTRATION_METHOD_CHOICES,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
+    ROLE_ALTERNATE,
     ROLE_CHOICE,
     ROLE_NO_ROLE,
+    ROLE_PRIMARY,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     UNIQUE,
     WORK_STATUS_CHOICE,
     YES_NO_CHOICE,
 )
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
@@ -140,6 +143,17 @@ class ImportedHousehold(TimeStampedUUIDModel):
     @property
     def business_area(self):
         return self.registration_data_import.business_area
+
+    @cached_property
+    def primary_collector(self):
+        return self.individuals_and_roles.get(role=ROLE_PRIMARY).individual
+
+    @cached_property
+    def alternate_collector(self):
+        try:
+            return self.individuals_and_roles.filter(role=ROLE_ALTERNATE).first().individual
+        except AttributeError:
+            return None
 
     def __str__(self):
         return f"Household ID: {self.id}"
@@ -318,6 +332,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
 
     class Meta:
         ordering = ("name",)
+        permissions = (["api_upload", "Can upload"],)
 
     def __str__(self):
         return self.name
@@ -578,7 +593,6 @@ DIIA_DISABILITY_CHOICES = (
         "not disabled",
     ),
 )
-
 
 DIIA_RELATIONSHIP_HEAD = "HEAD"
 DIIA_RELATIONSHIP_SON = "SON"

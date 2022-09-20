@@ -28,7 +28,7 @@ from hct_mis_api.apps.core.views import (
 actions.add_to_site(site, exclude=["export_delete_tree"])
 
 api_patterns = [
-    path("api/", include("hct_mis_api.api.urls", namespace="api")),
+    path("rest/", include("hct_mis_api.api.urls", namespace="api")),
     path("", include("social_django.urls", namespace="social")),
     path("fields_attributes/", all_fields_attributes, name="fields_attributes"),
     path("_health", homepage),
