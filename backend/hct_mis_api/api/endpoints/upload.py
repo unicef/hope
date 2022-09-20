@@ -1,3 +1,7 @@
+import base64
+
+from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
 from django.db.transaction import atomic
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -115,6 +119,15 @@ class IndividualSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+def get_photo_from_stream(stream):
+    if stream:
+        base64_img_bytes = stream.encode("utf-8")
+        decoded_image_data = base64.decodebytes(base64_img_bytes)
+        return SimpleUploadedFile("photo.png", decoded_image_data, content_type="image/png")
+
+    return None
+
+
 class HouseholdSerializer(serializers.ModelSerializer):
     unicef_id = serializers.ReadOnlyField()
     first_registration_date = serializers.DateTimeField(default=timezone.now)
@@ -177,6 +190,7 @@ class RDISerializer(serializers.ModelSerializer):
                                 for doc in member_ser.documents:
                                     ImportedDocument.objects.create(
                                         document_number=doc["document_number"],
+                                        photo=get_photo_from_stream(doc["image"]),
                                         doc_date=doc["doc_date"],
                                         individual=member,
                                         type=ImportedDocumentType.objects.get(country=doc["country"], type=doc["type"]),
