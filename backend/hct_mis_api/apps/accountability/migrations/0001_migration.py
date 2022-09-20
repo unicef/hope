@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-        CREATE OR REPLACE FUNCTION create_message_unicef_id() RETURNS trigger
+        CREATE OR REPLACE FUNCTION create_accountability_communication_message_unicef_id() RETURNS trigger
             LANGUAGE plpgsql
             AS $$
         BEGIN
@@ -60,11 +60,11 @@ class Migration(migrations.Migration):
         END
         $$;
         
-        CREATE TRIGGER create_message_unicef_id BEFORE INSERT ON accountability_message FOR EACH ROW EXECUTE PROCEDURE create_message_unicef_id();
+        CREATE TRIGGER create_accountability_communication_message_unicef_id BEFORE INSERT ON accountability_message FOR EACH ROW EXECUTE PROCEDURE create_accountability_communication_message_unicef_id();
         """,
             reverse_sql="""
-            DROP TRIGGER create_message_unicef_id ON accountability_message;
-            DROP FUNCTION create_message_unicef_id();
+            DROP TRIGGER create_accountability_communication_message_unicef_id ON accountability_message;
+            DROP FUNCTION create_accountability_communication_message_unicef_id();
             """,
         ),
         migrations.RunSQL(
