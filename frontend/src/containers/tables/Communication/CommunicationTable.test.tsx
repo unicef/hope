@@ -6,15 +6,21 @@ import { fakeApolloAllCommunicationMessages } from '../../../../fixtures/communi
 import { ApolloLoadingLink, render } from '../../../testUtils/testUtils';
 import { CommunicationTable } from './CommunicationTable';
 
-describe('containers/tables/targeting/TargetPopulation/CommunicationTable', () => {
+describe('containers/tables//Communication/CommunicationTable', () => {
   it('should render with data', async () => {
     const { container } = render(
-      <MockedProvider addTypename={false} mocks={fakeApolloAllCommunicationMessages}>
+      <MockedProvider
+        addTypename={false}
+        mocks={fakeApolloAllCommunicationMessages}
+      >
         <CommunicationTable
           filter={{
-            name: null,
-            numIndividuals: { min: 0, max: 100 },
-            status: null,
+            targetPopulation: '',
+            createdBy:
+              '',
+            businessArea: 'afghanistan',
+            first: 10,
+            orderBy: '-created_at',
           }}
           businessArea={'afghanistan'}
         />
@@ -34,9 +40,12 @@ describe('containers/tables/targeting/TargetPopulation/CommunicationTable', () =
       >
         <CommunicationTable
           filter={{
-            name: null,
-            numIndividuals: { min: 0, max: 100 },
-            status: null,
+            targetPopulation: '',
+            createdBy:
+              '',
+            businessArea: 'afghanistan',
+            first: 10,
+            orderBy: '-created_at',
           }}
           businessArea={'afghanistan'}
         />

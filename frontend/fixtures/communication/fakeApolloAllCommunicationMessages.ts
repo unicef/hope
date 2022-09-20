@@ -5,8 +5,7 @@ export const fakeApolloAllCommunicationMessages = [
     request: {
       query: AllCommunicationMessagesDocument,
       variables: {
-        createdAtRange: '""',
-        program: '',
+        createdAtRange: '',
         targetPopulation: '',
         createdBy: '',
         businessArea: 'afghanistan',
