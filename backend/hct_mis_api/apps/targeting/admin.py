@@ -3,13 +3,14 @@ from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-from admin_extra_buttons.api import ExtraButtonsMixin, button
+from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, ValueFilter
 from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
 from .models import HouseholdSelection, TargetPopulation
@@ -72,6 +73,21 @@ class TargetPopulationAdmin(
     # @button()
     # def download_xlsx(self, request, pk):
     #     return redirect("admin-download-target-population", target_population_id=pk)
+
+    @button()
+    def rerun_steficon(self, request, pk):
+        def _rerun(request):
+            context = self.get_common_context(request, pk)
+            target_population_apply_steficon.delay(pk)
+            return TemplateResponse(request, "admin/targeting/targetpopulation/rule_change.html", context)
+
+        return confirm_action(
+            self,
+            request,
+            _rerun,
+            "Do you want to rerun the steficon rule ?",
+            "Updating target population in the background with correct scores.",
+        )
 
 
 @admin.register(HouseholdSelection)
