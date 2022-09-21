@@ -42,7 +42,7 @@ DETAILS_POLICY = (
 )
 
 
-class MembersSerializers(serializers.ListSerializer):
+class MembersSerializer(serializers.ListSerializer):
     """List serializer for Individuals (members, collector) which belong to a Household"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -58,11 +58,11 @@ class MembersSerializers(serializers.ListSerializer):
                 self.head_of_household = data
             if data["role"] == ROLE_PRIMARY:
                 if self.primary_collector:
-                    raise ValidationError("Invalid primary_collector number")
+                    raise ValidationError({"primary_collector": "Invalid primary_collector number"})
                 self.primary_collector = data
             elif data["role"] == ROLE_ALTERNATE:
                 if self.alternate_collector:
-                    raise ValidationError("Invalid alternate_collector number")
+                    raise ValidationError({"secondary_collector": "Invalid alternate_collector number"})
                 self.alternate_collector = data
         return attrs
 
@@ -103,7 +103,7 @@ class IndividualSerializer(serializers.ModelSerializer):
             "kobo_asset_id",
             "mis_unicef_id",
         ]
-        list_serializer_class = MembersSerializers
+        list_serializer_class = MembersSerializer
 
     def validate_role(self, value):
         if value in [ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE]:
@@ -154,20 +154,18 @@ class HouseholdListSerializer(serializers.ListSerializer):
         for i, household_data in enumerate(validated_data):
             totals.households += 1
             hh_ser = HouseholdSerializer(data=household_data)
-            hh_ser.is_valid(True)
+            hh_ser.is_valid(raise_exception=True)
             members: MembersSerializer = hh_ser.members
             hoh_ser = IndividualSerializer(data=members.head_of_household)
-            hoh_ser.is_valid(True)
+            hoh_ser.is_valid(raise_exception=True)
             hh: ImportedHousehold = hh_ser.save(head_of_household=None, registration_data_import=rdi)
             primary = None
             alternate = None
             for member_data in members.validated_data:
                 totals.individuals += 1
                 member_ser = IndividualSerializer(data=member_data)
-                member_ser.is_valid(True)
-                if member_data["relationship"] in [RELATIONSHIP_UNKNOWN, NON_BENEFICIARY]:
-                    member_of = None
-                else:
+                member_ser.is_valid(raise_exception=True)
+                if member_data["relationship"] not in [RELATIONSHIP_UNKNOWN, NON_BENEFICIARY]:
                     member_of = hh
                 member = member_ser.save(household=member_of, registration_data_import=rdi)
                 for doc in member_ser.documents:
@@ -186,7 +184,10 @@ class HouseholdListSerializer(serializers.ListSerializer):
                     primary = member
                 elif member_data["role"] == ROLE_ALTERNATE:
                     alternate = member
-            hh.individuals_and_roles.create(individual=primary, role=ROLE_PRIMARY)
+            if primary:
+                hh.individuals_and_roles.create(individual=primary, role=ROLE_PRIMARY)
+            else:
+                raise ValidationError({"primary_collector": "Missing primary collector"})
             if alternate:
                 hh.individuals_and_roles.create(individual=primary, role=ROLE_ALTERNATE)
         return totals
@@ -259,7 +260,7 @@ class RDINestedSerializer(serializers.ModelSerializer):
             )
             rdi.hct_id = r2.pk
             rdi.save()
-        except Exception as e:
+        except BaseException as e:
             logger.exception(e)
             raise
         return dict(id=rdi.pk, **asdict(info))
