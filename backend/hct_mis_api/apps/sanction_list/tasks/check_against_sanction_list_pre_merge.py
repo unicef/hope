@@ -69,13 +69,14 @@ class CheckAgainstSanctionListPreMergeTask:
         queries.extend(birth_dates_queries)
 
         query_dict = {
-            # "size": 10000,
+            "size": 10000,
             "query": {
                 "bool": {
                     "minimum_should_match": 1,
                     "should": queries,
                 },
             },
+            "_source": ["id", "full_name"]
         }
 
         return query_dict
@@ -95,7 +96,7 @@ class CheckAgainstSanctionListPreMergeTask:
             query = document.search().from_dict(query_dict)
             query._index = document._index._name
 
-            results = query.scan()
+            results = query.execute()
             for individual_hit in results:
                 score = individual_hit.meta.score
                 if score >= possible_match_score:
