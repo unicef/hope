@@ -285,6 +285,12 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         self.activation_date = None
         self.rapid_pro_flow_start_uuids = []
 
+    def can_activate(self):
+        return self.status not in [
+            CashPlanPaymentVerification.STATUS_PENDING,
+            CashPlanPaymentVerification.STATUS_RAPID_PRO_ERROR,
+        ]
+
 
 class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
     file = models.FileField()
