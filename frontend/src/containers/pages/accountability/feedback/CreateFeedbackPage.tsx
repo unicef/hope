@@ -2,17 +2,17 @@ import {
   Box,
   Button,
   Grid,
-  GridSize,
   Step,
   StepLabel,
   Stepper,
   Typography,
 } from '@material-ui/core';
 import { Field, Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import * as Yup from 'yup';
 import { HouseholdQuestionnaire } from '../../../../components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '../../../../components/accountability/Feedback/IndividualQuestionnnaire/IndividualQuestionnaire';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
@@ -27,8 +27,7 @@ import { Consent } from '../../../../components/grievances/Consent';
 import { LookUpHouseholdIndividualSelection } from '../../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { LookUpRelatedTickets } from '../../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { prepareVariables } from '../../../../components/grievances/utils/createGrievanceUtils';
-import { validateUsingSteps } from '../../../../components/grievances/utils/validateGrievance';
-import { validationSchemaWithSteps } from '../../../../components/grievances/utils/validationSchema';
+
 import {
   hasPermissionInModule,
   hasPermissions,
@@ -42,15 +41,11 @@ import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdm
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import {
-  FeedbackSteps,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../../../utils/constants';
+import { FeedbackSteps } from '../../../../utils/constants';
 import {
   useAllProgramsQuery,
   useAllUsersQuery,
   useGrievancesChoiceDataQuery,
-  useUserChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 
 const steps = [
@@ -86,9 +81,87 @@ const BoxWithBorders = styled.div`
   padding: 15px 0;
 `;
 
+export const validationSchemaWithSteps = (currentStep: number): unknown => {
+  const datum = {
+    category: Yup.string()
+      .required('Category is required')
+      .nullable(),
+    issueType: Yup.string()
+      .required('Issue Type is required')
+      .nullable(),
+    admin: Yup.string().nullable(),
+    description: Yup.string(),
+    consent: Yup.bool(),
+    area: Yup.string(),
+    language: Yup.string(),
+    selectedPaymentRecords: Yup.array()
+      .of(Yup.string())
+      .nullable(),
+    selectedRelatedTickets: Yup.array()
+      .of(Yup.string())
+      .nullable(),
+  };
+  if (currentStep === FeedbackSteps.Description) {
+    datum.description = Yup.string().required('Description is required');
+  }
+  if (currentStep >= FeedbackSteps.Verification) {
+    datum.consent = Yup.bool().oneOf([true], 'Consent is required');
+  }
+  return Yup.object().shape(datum);
+};
+
+export function validateUsingSteps(
+  values,
+  activeStep,
+  setValidateData,
+): { [key: string]: string | { [key: string]: string } } {
+  const errors: { [key: string]: string | { [key: string]: string } } = {};
+  const verficationStepFields = [
+    'size',
+    'maleChildrenCount',
+    'femaleChildrenCount',
+    'childrenDisabledCount',
+    'headOfHousehold',
+    'countryOrigin',
+    'address',
+    'village',
+    'admin1',
+    'unhcrId',
+    'months_displaced_h_f',
+    'fullName',
+    'birthDate',
+    'phoneNo',
+    'relationship',
+  ];
+
+  if (activeStep === FeedbackSteps.Lookup && !values.selectedHousehold) {
+    errors.selectedHousehold = 'Household is Required';
+  }
+
+  if (activeStep === FeedbackSteps.Lookup) {
+    if (!values.selectedIndividual) {
+      errors.selectedIndividual = 'Individual is Required';
+    } else if (!values.selectedHousehold) {
+      errors.selectedHousehold = 'Household is Required';
+    }
+  }
+  if (
+    activeStep === FeedbackSteps.Verification &&
+    (values.selectedHousehold ||
+      (values.selectedIndividual && !values.verificationRequired))
+  ) {
+    if (
+      verficationStepFields.filter((item) => values[item] === true).length < 5
+    ) {
+      setValidateData(true);
+      errors.verificationRequired = 'Select correctly minimum 5 questions';
+    }
+  }
+  return errors;
+}
+
 export const CreateFeedbackPage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const history = useHistory();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -97,18 +170,18 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   const [validateData, setValidateData] = useState(false);
 
   const initialValues = {
-    description: '',
     category: null,
+    issueType: null,
+    selectedHousehold: null,
+    selectedIndividual: null,
+    description: '',
     language: '',
     consent: false,
     admin: null,
     area: '',
-    selectedHousehold: null,
-    selectedIndividual: null,
     selectedPaymentRecords: [],
     selectedRelatedTickets: [],
     identityVerified: false,
-    issueType: null,
     priority: 3,
     urgency: 3,
     subCategory: null,
@@ -124,8 +197,6 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
-
-  const { data: userChoices } = useUserChoiceDataQuery();
 
   const [mutate, { loading }] = useCreateFeedbackMutation();
 
@@ -165,34 +236,12 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     },
   ];
 
-  const hasCategorySelected = (values): boolean => {
-    return !!values.category;
-  };
-
-  const hasHouseholdSelected = (values): boolean => {
-    return !!values.selectedHousehold?.id;
-  };
-
-  const hasIndividualSelected = (values): boolean => {
-    return !!values.selectedIndividual?.id;
-  };
-
   const handleNext = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const selectedIssueType = (values): string => {
-    return values.issueType
-      ? choicesData.grievanceTicketIssueTypeChoices
-          .filter((el) => el.category === values.category.toString())[0]
-          .subCategories.filter(
-            (el) => el.value === values.issueType.toString(),
-          )[0].name
-      : '-';
   };
 
   return (
@@ -204,9 +253,8 @@ export const CreateFeedbackPage = (): React.ReactElement => {
             const response = await mutate(
               prepareVariables(businessArea, values),
             );
-
-            showMessage(t('Grievance Ticket created.'), {
-              pathname: `/${businessArea}/grievance-and-feedback/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
+            showMessage(t('Feedback created.'), {
+              pathname: `/${businessArea}/accountability/feedback/${response.data.createFeedback.feedback[0].id}`,
               historyMethod: 'push',
             });
           } catch (e) {
@@ -219,26 +267,17 @@ export const CreateFeedbackPage = (): React.ReactElement => {
       }}
       validateOnChange={activeStep < FeedbackSteps.Verification || validateData}
       validateOnBlur={activeStep < FeedbackSteps.Verification || validateData}
+      validationSchema={validationSchemaWithSteps(activeStep)}
       validate={(values) =>
         validateUsingSteps(
           values,
-          allAddIndividualFieldsData,
-          individualFieldsDict,
-          householdFieldsDict,
+
           activeStep,
           setValidateData,
         )
       }
-      validationSchema={validationSchemaWithSteps(activeStep)}
     >
-      {({
-        submitForm,
-        values,
-        setFieldValue,
-        errors,
-        touched,
-        handleChange,
-      }) => {
+      {({ submitForm, values, setFieldValue, errors, touched }) => {
         return (
           <>
             <PageHeader
@@ -279,8 +318,9 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                           <Grid item xs={6}>
                             <Field
                               name='issueType'
-                              label='Issue Type*'
+                              label='Issue Type'
                               variant='outlined'
+                              required
                               choices={
                                 issueTypeDict[values.category].subCategories
                               }
@@ -330,9 +370,10 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                           <Consent />
                           <Field
                             name='consent'
-                            label={t('Received Consent*')}
+                            label={t('Received Consent')}
                             color='primary'
                             fullWidth
+                            required
                             container={false}
                             component={FormikCheckboxField}
                           />
@@ -343,40 +384,21 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                           <OverviewContainer>
                             <Grid container spacing={6}>
                               <LabelizedField label={t('Category')}>
-                                Feedback
+                                {t('Feedback')}
                               </LabelizedField>
                             </Grid>
                           </OverviewContainer>
                           <BoxWithBorderBottom />
                           <BoxPadding />
                           <Grid container spacing={3}>
-                            {values.subCategory ===
-                              GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT && (
-                              <Grid item xs={3}>
-                                <Field
-                                  name='partner'
-                                  fullWidth
-                                  variant='outlined'
-                                  label={t('Partner*')}
-                                  choices={userChoices.userPartnerChoices}
-                                  component={FormikSelectField}
-                                />
-                              </Grid>
-                            )}
                             <Grid item xs={12}>
                               <Field
                                 name='description'
                                 multiline
                                 fullWidth
                                 variant='outlined'
-                                label={
-                                  values.issueType ===
-                                    GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
-                                  values.issueType ===
-                                    GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
-                                    ? t('Withdrawal Reason*')
-                                    : t('Description*')
-                                }
+                                label={t('Description')}
+                                required
                                 component={FormikTextField}
                               />
                             </Grid>
@@ -417,41 +439,16 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 component={FormikTextField}
                               />
                             </Grid>
-                            <Grid item xs={3}>
+                            <Grid item xs={6}>
                               <Field
-                                name='priority'
-                                multiline
+                                name='programme'
                                 fullWidth
                                 variant='outlined'
-                                label={t('Priority')}
-                                choices={mappedPriorities}
+                                label={t('Programme Title')}
+                                choices={mappedPrograms}
                                 component={FormikSelectField}
                               />
                             </Grid>
-                            <Grid item xs={3}>
-                              <Field
-                                name='urgency'
-                                multiline
-                                fullWidth
-                                variant='outlined'
-                                label={t('Urgency')}
-                                choices={mappedUrgencies}
-                                component={FormikSelectField}
-                              />
-                            </Grid>
-                            {+values.issueType !==
-                              +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
-                              <Grid item xs={6}>
-                                <Field
-                                  name='programme'
-                                  fullWidth
-                                  variant='outlined'
-                                  label={t('Programme Title')}
-                                  choices={mappedPrograms}
-                                  component={FormikSelectField}
-                                />
-                              </Grid>
-                            )}
                           </Grid>
                           <Box pt={5}>
                             <BoxWithBorders>
