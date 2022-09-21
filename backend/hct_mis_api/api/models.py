@@ -11,11 +11,11 @@ from ..apps.core.models import BusinessArea
 
 class APIToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    key = models.CharField(_("Key"), max_length=40, primary_key=True)
-    allowed_ips = models.CharField(_("IPs"), max_length=200)
+    key = models.CharField(_("Key"), max_length=40, unique=True, blank=True)
+    allowed_ips = models.CharField(_("IPs"), max_length=200, blank=True, null=True)
     valid_from = models.DateField(default=timezone.now)
     valid_to = models.DateField(blank=True, null=True)
-    valid_for = models.ManyToManyField(BusinessArea)
+    valid_for = models.ManyToManyField(BusinessArea, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.key:
