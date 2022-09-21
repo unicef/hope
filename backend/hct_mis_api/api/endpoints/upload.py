@@ -165,7 +165,9 @@ class HouseholdListSerializer(serializers.ListSerializer):
                 totals.individuals += 1
                 member_ser = IndividualSerializer(data=member_data)
                 member_ser.is_valid(raise_exception=True)
-                if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
+                if member_data["relationship"] in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
+                    member_of = None
+                else:
                     member_of = hh
                 member = member_ser.save(household=member_of, registration_data_import=rdi)
                 for doc in member_ser.documents:
