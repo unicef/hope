@@ -1,7 +1,5 @@
 from django_countries import Countries
-from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView
 from hct_mis_api.apps.household.models import (

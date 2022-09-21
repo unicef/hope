@@ -5,12 +5,13 @@ from pathlib import Path
 from uuid import uuid4
 
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.urls import reverse_lazy
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from smart_admin.utils import match, regex
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
+from smart_admin.utils import match, regex
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 
@@ -212,6 +213,7 @@ TEMPLATES = [
     },
 ]
 PROJECT_APPS = [
+    "hct_mis_api.api",
     "hct_mis_api.apps.geo",
     "hct_mis_api.apps.account.apps.AccountConfig",
     "hct_mis_api.apps.core.apps.CoreConfig",
@@ -802,3 +804,6 @@ if PROFILING:
     INSTALLED_APPS.append("silk")
     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
     SILKY_PYTHON_PROFILER = True
+
+
+SWAGGER_SETTINGS = {"LOGOUT_URL": reverse_lazy("logout"), "LOGIN_URL": "/"}
