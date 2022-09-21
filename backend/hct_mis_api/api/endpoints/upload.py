@@ -1,6 +1,5 @@
 import base64
 import logging
-from collections import namedtuple
 from dataclasses import asdict, dataclass
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -147,6 +146,34 @@ class Totals:
 
 
 class HouseholdListSerializer(serializers.ListSerializer):
+
+    def save_document(self, member, doc):
+        ImportedDocument.objects.create(
+            document_number=doc["document_number"],
+            photo=get_photo_from_stream(doc["image"]),
+            doc_date=doc["doc_date"],
+            individual=member,
+            type=ImportedDocumentType.objects.get(country=doc["country"], type=doc["type"]),
+        )
+
+    def save_member(self, rdi, hh, member_data):
+        member_ser = IndividualSerializer(data=member_data)
+        member_ser.is_valid(raise_exception=True)
+        member_of = None
+        if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
+            member_of = hh
+        member = member_ser.save(household=member_of, registration_data_import=rdi)
+        for doc in member_ser.documents:
+            self.save_document(member, doc)
+        if member_data["relationship"] == HEAD:
+            assert member.household == hh
+            hh.head_of_household = member
+            hh.save()
+        if member_data["role"] == ROLE_PRIMARY:
+            hh.individuals_and_roles.create(individual=member, role=ROLE_PRIMARY)
+        elif member_data["role"] == ROLE_ALTERNATE:
+            hh.individuals_and_roles.create(individual=member, role=ROLE_ALTERNATE)
+
     def save(self, **kwargs):
         validated_data = [{**attrs, **kwargs} for attrs in self.validated_data]
         rdi = kwargs.pop("rdi")
@@ -159,39 +186,11 @@ class HouseholdListSerializer(serializers.ListSerializer):
             hoh_ser = IndividualSerializer(data=members.head_of_household)
             hoh_ser.is_valid(raise_exception=True)
             hh: ImportedHousehold = hh_ser.save(head_of_household=None, registration_data_import=rdi)
-            primary = None
-            alternate = None
             for member_data in members.validated_data:
                 totals.individuals += 1
-                member_ser = IndividualSerializer(data=member_data)
-                member_ser.is_valid(raise_exception=True)
-                if member_data["relationship"] in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
-                    member_of = None
-                else:
-                    member_of = hh
-                member = member_ser.save(household=member_of, registration_data_import=rdi)
-                for doc in member_ser.documents:
-                    ImportedDocument.objects.create(
-                        document_number=doc["document_number"],
-                        photo=get_photo_from_stream(doc["image"]),
-                        doc_date=doc["doc_date"],
-                        individual=member,
-                        type=ImportedDocumentType.objects.get(country=doc["country"], type=doc["type"]),
-                    )
-                if member_data["relationship"] == HEAD:
-                    assert member.household == hh
-                    hh.head_of_household = member
-                    hh.save()
-                if member_data["role"] == ROLE_PRIMARY:
-                    primary = member
-                elif member_data["role"] == ROLE_ALTERNATE:
-                    alternate = member
-            if primary:
-                hh.individuals_and_roles.create(individual=primary, role=ROLE_PRIMARY)
-            else:
+                self.save_member(rdi, hh, member_data)
+            if not hh.individuals_and_roles.filter(role=ROLE_PRIMARY).exists():
                 raise ValidationError({"primary_collector": "Missing primary collector"})
-            if alternate:
-                hh.individuals_and_roles.create(individual=alternate, role=ROLE_ALTERNATE)
         return totals
 
 
