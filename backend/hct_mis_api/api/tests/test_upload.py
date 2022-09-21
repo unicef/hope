@@ -14,11 +14,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     SON_DAUGHTER,
 )
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocumentType,
-    ImportedHousehold,
-    ImportedIndividual,
-)
+from hct_mis_api.apps.registration_datahub.models import ImportedDocumentType, ImportedHousehold, ImportedIndividual
 
 
 class UploadRDITests(HOPEApiTestCase):
