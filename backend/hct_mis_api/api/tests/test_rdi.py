@@ -4,12 +4,6 @@ from pathlib import Path
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.export_users_xlsx import User
-from hct_mis_api.apps.account.fixtures import (
-    BusinessAreaFactory,
-    RoleFactory,
-    UserFactory,
-)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -30,14 +24,12 @@ from .base import HOPEApiTestCase
 
 class CreateRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
+    user_permissions = [Permissions.API_CREATE_RDI]
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
         cls.url = reverse("api:rdi-create", args=[cls.business_area.slug])
-
-    def setUp(self):
-        self.client.login(username=self.user.username, password="password")
 
     def test_create_rdi(self):
         data = {
@@ -54,20 +46,14 @@ class CreateRDITests(HOPEApiTestCase):
 
 class PushToRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
+    user_permissions = [Permissions.API_CREATE_RDI]
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
         ImportedDocumentType.objects.create(country="AF", type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, label="--")
-        cls.business_area = BusinessAreaFactory(name="Afghanistan")
-        cls.user: User = UserFactory()
         cls.rdi = RegistrationDataImportDatahub.objects.create(business_area_slug=cls.business_area.slug)
-        cls.role = RoleFactory(subsystem="API", name="c", permissions=[Permissions.API_CREATE_RDI])
-        cls.user.user_roles.create(role=cls.role, business_area=cls.business_area)
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
-
-    def setUp(self):
-        self.client.login(username=self.user.username, password="password")
 
     def test_push(self):
         image = Path(__file__).parent / "logo.png"
