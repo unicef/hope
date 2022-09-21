@@ -16,6 +16,7 @@ from hct_mis_api.apps.payment.schema import PaymentRecordNode
 
 import graphene
 from graphql import GraphQLError
+from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -1269,6 +1270,23 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         return cls(grievance_ticket=grievance_ticket)
 
 
+class UploadDocumentsMutation(graphene.Mutation):
+    class Arguments:
+        file = Upload(required=True)
+
+    success = graphene.Boolean()
+
+    @classmethod
+    def mutate(cls, root, info, file):
+        logger.info("*******")
+        from .models import GrievanceDocument
+
+        document = GrievanceDocument.objects.create(file=file, business_area_slug="abc")
+        logger.info(document)
+
+        return UploadDocumentsMutation(success=True)
+
+
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
     update_grievance_ticket = UpdateGrievanceTicketMutation.Field()
@@ -1284,3 +1302,4 @@ class Mutations(graphene.ObjectType):
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     approve_payment_details = PaymentDetailsApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()
+    upload_documents = UploadDocumentsMutation.Field()
