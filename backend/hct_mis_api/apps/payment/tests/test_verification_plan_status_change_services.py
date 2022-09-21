@@ -161,3 +161,6 @@ class TestPhoneNumberVerification(TestCase):
             ).count(),
             0,
         )
+
+    def test_not_querying_individuals_from_other_cash_plan_payment_verification(self):
+        pass

@@ -103,7 +103,6 @@ class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HO
                 template="admin_extra_buttons/confirm.html",
             )
 
-    @button(label="Activate")
     def activate(self, request, pk):
         return confirm_action(
             self,
