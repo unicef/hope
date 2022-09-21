@@ -36,7 +36,7 @@ api_patterns = [
     path("hope-redirect", hope_redirect),
     path("graphql", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))),
     path("graphql/schema.graphql", schema),
-    path("logout", logout_view),
+    path("logout", logout_view, name="logout"),
     path("sentry-debug/", trigger_error),
     path(
         "download-template",

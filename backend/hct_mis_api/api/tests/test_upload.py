@@ -1,14 +1,11 @@
 import base64
 from pathlib import Path
-from unittest import TestCase
-from unittest.mock import Mock
 
-from PIL.Image import Image
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
-from hct_mis_api.api.auth import HOPEPermission
+from hct_mis_api.api.tests.base import HOPEApiTestCase
 from hct_mis_api.apps.account.export_users_xlsx import User
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
@@ -25,43 +22,21 @@ from hct_mis_api.apps.household.models import (
     SON_DAUGHTER,
 )
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocument,
-    ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
 )
 
 
-class HOPEPermissionTests(TestCase):
-    def setUp(self):
-        self.user: User = UserFactory()
-        self.business_area = BusinessAreaFactory(name="Afghanistan")
-        self.role = RoleFactory(subsystem="API", permissions=[Permissions.API_UPLOAD_RDI])
-        self.user.user_roles.create(role=self.role, business_area=self.business_area)
-
-    def test_permissions(self):
-        p = HOPEPermission()
-
-        assert p.has_permission(
-            Mock(user=self.user), Mock(selected_business_area=self.business_area, permission=Permissions.API_UPLOAD_RDI)
-        )
-
-
-class UploadRDITests(APITestCase):
+class UploadRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.business_area = BusinessAreaFactory(name="Afghanistan")
-        ImportedDocumentType.objects.create(country="AF", type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, label="--")
-        cls.user: User = UserFactory()
-        cls.role = RoleFactory(subsystem="API", permissions=[Permissions.API_UPLOAD_RDI])
-        cls.user.user_roles.create(role=cls.role, business_area=cls.business_area)
         cls.url = reverse("api:rdi-upload", args=[cls.business_area.slug])
 
-    def setUp(self):
-        self.client.login(username=self.user.username, password="password")
+    # def setUp(self):
+    #     self.client.login(username=self.user.username, password="password")
 
     def test_upload_single_household(self):
         data = {
@@ -101,7 +76,6 @@ class UploadRDITests(APITestCase):
         self.assertTrue(hoh)
         hh: ImportedHousehold = hoh.household
         self.assertEqual(hoh.household.village, "village1")
-        # can we test this ?
         self.assertEqual(hoh.household.primary_collector, hoh)
         self.assertFalse(hoh.household.alternate_collector)
         members = hh.individuals.all()
@@ -269,5 +243,3 @@ class UploadRDITests(APITestCase):
 
         self.assertTrue(hoh.documents.exists())
         self.assertTrue(hoh.documents.first().photo)
-        # Image()
-        # hoh.documents.exists()

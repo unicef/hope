@@ -1,14 +1,9 @@
 import base64
 from pathlib import Path
-from unittest import TestCase
-from unittest.mock import Mock
 
-from PIL.Image import Image
 from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase
 
-from hct_mis_api.api.auth import HOPEPermission
 from hct_mis_api.apps.account.export_users_xlsx import User
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
@@ -22,27 +17,23 @@ from hct_mis_api.apps.household.models import (
     MALE,
     NON_BENEFICIARY,
     ROLE_PRIMARY,
-    SON_DAUGHTER,
 )
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
     RegistrationDataImportDatahub,
 )
 
+from .base import HOPEApiTestCase
 
-class CreateRDITests(APITestCase):
+
+class CreateRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.business_area = BusinessAreaFactory(name="Afghanistan")
-        cls.user: User = UserFactory()
-        cls.role = RoleFactory(subsystem="API", name="c", permissions=[Permissions.API_CREATE_RDI])
-        cls.user.user_roles.create(role=cls.role, business_area=cls.business_area)
         cls.url = reverse("api:rdi-create", args=[cls.business_area.slug])
 
     def setUp(self):
@@ -61,7 +52,7 @@ class CreateRDITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
 
 
-class PushToRDITests(APITestCase):
+class PushToRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
 
     @classmethod
