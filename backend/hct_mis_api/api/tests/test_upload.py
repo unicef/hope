@@ -64,6 +64,10 @@ class UploadRDITests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        data = response.json()
+        self.assertEqual(data["households"], 1)
+        self.assertEqual(data["individuals"], 2)
+
         hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="Jhon Doe", sex=MALE).first()
 
         self.assertTrue(hoh)
@@ -236,3 +240,40 @@ class UploadRDITests(HOPEApiTestCase):
 
         self.assertTrue(hoh.documents.exists())
         self.assertTrue(hoh.documents.first().photo)
+
+    def test_upload_error_too_many_hoh(self):
+        data = {
+            "name": "aaaa",
+            "number_of_households": 1,
+            "number_of_individuals": 1,
+            "households": [
+                {
+                    "residence_status": "",
+                    "village": "village1",
+                    "country": "AF",
+                    "members": [
+                        {
+                            "relationship": HEAD,
+                            "role": ROLE_PRIMARY,
+                            "full_name": "Jhon Doe",
+                            "birth_date": "2000-01-01",
+                            "sex": "MALE",
+                        },
+                        {
+                            "relationship": HEAD,
+                            "full_name": "Mary Doe",
+                            "birth_date": "2000-01-01",
+                            "role": "",
+                            "sex": "FEMALE",
+                        },
+                    ],
+                    "collect_individual_data": "FULL",
+                    "size": 1,
+                }
+            ],
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(
+            response.json(), {"households": [{"members": {"head_of_household": ["Only one HoH allowed"]}}]}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
