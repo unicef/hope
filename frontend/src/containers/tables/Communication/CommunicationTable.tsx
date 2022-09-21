@@ -9,7 +9,7 @@ import { UniversalTable } from '../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';
 import { CommunicationTableRow } from './CommunicationTableRow';
 
-interface CommunicationProps {
+interface CommunicationTableProps {
   filter;
   businessArea: string;
 }
@@ -17,7 +17,7 @@ interface CommunicationProps {
 export const CommunicationTable = ({
   filter,
   businessArea,
-}: CommunicationProps): ReactElement => {
+}: CommunicationTableProps): ReactElement => {
   const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
     createdAtRange: filter.createdAtRange
       ? JSON.stringify(filter.createdAtRange)
