@@ -45,7 +45,7 @@ class UploadRDITests(HOPEApiTestCase):
                         {
                             "relationship": HEAD,
                             "role": ROLE_PRIMARY,
-                            "full_name": "Jhon Doe",
+                            "full_name": "John Doe",
                             "birth_date": "2000-01-01",
                             "sex": "MALE",
                         },
@@ -68,7 +68,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertEqual(data["households"], 1)
         self.assertEqual(data["individuals"], 2)
 
-        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="Jhon Doe", sex=MALE).first()
+        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
 
         self.assertTrue(hoh)
         hh: ImportedHousehold = hoh.household
@@ -91,7 +91,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "members": [
                         {
                             "relationship": HEAD,
-                            "full_name": "Jhon Doe",
+                            "full_name": "John Doe",
                             "birth_date": "2000-01-01",
                             "sex": "MALE",
                             "role": "",
@@ -111,7 +111,7 @@ class UploadRDITests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="Jhon Doe", sex=MALE).first()
+        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
 
         self.assertTrue(hoh)
         hh: ImportedHousehold = hoh.household
@@ -136,7 +136,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "members": [
                         {
                             "relationship": HEAD,
-                            "full_name": "Jhon Doe",
+                            "full_name": "John Doe",
                             "birth_date": "2000-01-01",
                             "sex": "MALE",
                             "role": "",
@@ -165,7 +165,7 @@ class UploadRDITests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="Jhon Doe", sex=MALE).first()
+        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
 
         self.assertTrue(hoh)
         hh: ImportedHousehold = hoh.household
@@ -196,7 +196,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "members": [
                         {
                             "relationship": HEAD,
-                            "full_name": "Jhon Doe",
+                            "full_name": "John Doe",
                             "birth_date": "2000-01-01",
                             "sex": "MALE",
                             "role": "",
@@ -225,7 +225,7 @@ class UploadRDITests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="Jhon Doe", sex=MALE).first()
+        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
 
         self.assertTrue(hoh)
         hh: ImportedHousehold = hoh.household
@@ -255,7 +255,7 @@ class UploadRDITests(HOPEApiTestCase):
                         {
                             "relationship": HEAD,
                             "role": ROLE_PRIMARY,
-                            "full_name": "Jhon Doe",
+                            "full_name": "John Doe",
                             "birth_date": "2000-01-01",
                             "sex": "MALE",
                         },
