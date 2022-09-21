@@ -1,5 +1,7 @@
 import logging
 
+from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 from graphql import GraphQLError
 
 logger = logging.getLogger(__name__)
@@ -28,3 +30,11 @@ class DataChangeValidator:
         if not approve_data_names.issubset(object_data_names):
             logger.error(error)
             raise GraphQLError(error)
+
+
+def validate_file(file):
+    if file.content_type in settings.GRIEVANCE_UPLOAD_CONTENT_TYPES:
+        if file.size > settings.GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE:
+            raise GraphQLError(_(f"File {file.name} of size {file.size} is above max size limit"))
+    else:
+        raise GraphQLError(_("File type not supported"))
