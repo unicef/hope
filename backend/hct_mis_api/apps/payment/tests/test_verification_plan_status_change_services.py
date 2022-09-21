@@ -33,7 +33,7 @@ class TestPhoneNumberVerification(TestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        payment_record_amount = 110
+        cls.payment_record_amount = 110
 
         user = UserFactory()
 
@@ -57,7 +57,7 @@ class TestPhoneNumberVerification(TestCase):
             cash_plan=cash_plan,
         )
         cls.individuals = []
-        for _ in range(payment_record_amount):
+        for _ in range(cls.payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=user, business_area=BusinessArea.objects.first()
             )
@@ -92,7 +92,7 @@ class TestPhoneNumberVerification(TestCase):
     def test_failing_rapid_pro_during_cash_plan_payment_verification(self):
         self.assertEqual(self.verification.status, PaymentVerification.STATUS_PENDING)
         self.assertIsNone(self.verification.error)
-        self.assertEqual(self.verification.payment_record_verifications.count(), 110)
+        self.assertEqual(self.verification.payment_record_verifications.count(), self.payment_record_amount)
 
         def create_flow_response():
             return {
@@ -117,7 +117,10 @@ class TestPhoneNumberVerification(TestCase):
         self.assertEqual(self.verification.status, CashPlanPaymentVerification.STATUS_RAPID_PRO_ERROR)
         self.assertIsNotNone(self.verification.error)
 
-        self.assertEqual(PaymentVerification.objects.filter(status=PaymentVerification.STATUS_PENDING).count(), 110)
+        self.assertEqual(
+            PaymentVerification.objects.filter(status=PaymentVerification.STATUS_PENDING).count(),
+            self.payment_record_amount,
+        )
         self.assertEqual(
             PaymentVerification.objects.filter(
                 status=PaymentVerification.STATUS_PENDING, sent_to_rapid_pro=True
@@ -142,12 +145,15 @@ class TestPhoneNumberVerification(TestCase):
         self.assertEqual(self.verification.status, CashPlanPaymentVerification.STATUS_ACTIVE)
         self.assertIsNone(self.verification.error)
 
-        self.assertEqual(PaymentVerification.objects.filter(status=PaymentVerification.STATUS_PENDING).count(), 110)
+        self.assertEqual(
+            PaymentVerification.objects.filter(status=PaymentVerification.STATUS_PENDING).count(),
+            self.payment_record_amount,
+        )
         self.assertEqual(
             PaymentVerification.objects.filter(
                 status=PaymentVerification.STATUS_PENDING, sent_to_rapid_pro=True
             ).count(),
-            110,
+            self.payment_record_amount,
         )
         self.assertEqual(
             PaymentVerification.objects.filter(

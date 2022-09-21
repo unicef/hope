@@ -103,13 +103,15 @@ class RapidProAPI:
                     raise ValidationError(message={"phone_numbers": errors}) from e
                 raise
 
-        output = []
+        successful_flows = []
         for urns in by_limit:
             try:
-                output.append((_start_flow({"flow": flow_uuid, "urns": urns, "restart_participants": True}), urns))
+                successful_flows.append(
+                    (_start_flow({"flow": flow_uuid, "urns": urns, "restart_participants": True}), urns)
+                )
             except Exception as e:
-                return output, e
-        return output, None
+                return successful_flows, e
+        return successful_flows, None
 
     def get_flow_runs(self):
         return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
