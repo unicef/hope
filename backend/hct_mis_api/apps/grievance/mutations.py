@@ -2,6 +2,7 @@ import logging
 from enum import Enum
 from typing import Union
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
@@ -32,7 +33,7 @@ from hct_mis_api.apps.core.utils import (
     to_snake_case,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
+from hct_mis_api.apps.grievance.models import GrievanceTicket, GrievanceDocument, TicketNote
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     close_add_individual_grievance_ticket,
     close_delete_household_ticket,
@@ -80,7 +81,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
 from hct_mis_api.apps.grievance.utils import get_individual, traverse_sibling_tickets
-from hct_mis_api.apps.grievance.validators import DataChangeValidator
+from hct_mis_api.apps.grievance.validators import DataChangeValidator, validate_file
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -1273,16 +1274,22 @@ class PaymentDetailsApproveMutation(PermissionMutation):
 class UploadDocumentsMutation(graphene.Mutation):
     class Arguments:
         file = Upload(required=True)
+        business_area_slug = graphene.String(required=True)
 
     success = graphene.Boolean()
 
     @classmethod
-    def mutate(cls, root, info, file):
-        logger.info("*******")
-        from .models import GrievanceDocument
+    def mutate(cls, root, info, file, business_area_slug):
+        files = dict(info.context.FILES)["File"]
+        if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
+            raise GraphQLError("Total size of files can not be larger than 15mb.")
 
-        document = GrievanceDocument.objects.create(file=file, business_area_slug="abc")
-        logger.info(document)
+        for file in files:
+            validate_file(file)
+            GrievanceDocument.objects.create(
+                file=file,
+                business_area_slug=business_area_slug
+            )
 
         return UploadDocumentsMutation(success=True)
 

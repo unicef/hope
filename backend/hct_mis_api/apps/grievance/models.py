@@ -764,11 +764,15 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 
 
 class GrievanceDocument(models.Model):
-    file = models.FileField(upload_to="grievance_documents")
+    file = models.FileField(upload_to="grievance_documents", blank=True, null=True)
     business_area_slug = models.CharField(max_length=200, blank=True)
 
+    @property
+    def file_name(self):
+        return self.file.name
+
     def __str__(self):
-        return self.document.name
+        return self.file.name
 
 
 @receiver(post_save, sender=TicketComplaintDetails)
