@@ -12,11 +12,11 @@ app_name = "api"
 schema_view = get_schema_view(
     openapi.Info(
         title="Hope API documentation",
-        default_version='v1',
+        default_version="v1",
         description="Hope API description",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@snippets.local"),
-        license=openapi.License(name="BSD License"),
+        # terms_of_service="",
+        # contact=openapi.Contact(email="contact@snippets.local"),
+        # license=openapi.License(name=""),
     ),
     public=True,
     permission_classes=[permissions.IsAuthenticated],
@@ -25,11 +25,10 @@ schema_view = get_schema_view(
 router = APIRouter()
 
 urlpatterns = [
-    re_path(r'^doc/swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    re_path(r'^doc/swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    re_path(r'^doc/redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-
-    re_path(r"", include(router.urls)),
+    path(r"(<str:format>\.json|\.yaml)", schema_view.without_ui(cache_timeout=0), name="schema-json"),
+    path(r"", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+    # re_path(r'^/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    # re_path(r"", include(router.urls)),
     path("rdi/<slug:business_area>/upload/", endpoints.UploadRDIView().as_view(), name="rdi-upload"),
     path("rdi/<slug:business_area>/create/", endpoints.CreateRDIView().as_view(), name="rdi-create"),
     path("rdi/<slug:business_area>/<slug:rdi>/push/", endpoints.PushToRDIView().as_view(), name="rdi-push"),
