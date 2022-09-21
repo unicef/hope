@@ -96,7 +96,7 @@ class PushToRDITests(HOPEApiTestCase):
         # self.assertTrue(rdi)
         # self.assertEqual(response.json()["id"], str(rdi.id))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="Jhon Doe", sex=MALE).first()
+        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
         self.assertTrue(hoh)
         hh: ImportedHousehold = hoh.household
         self.assertEqual(hoh.household.village, "village1")
