@@ -32,7 +32,7 @@ export function CommunicationPage(): React.ReactElement {
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
+  if (!hasPermissionInModule('ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST', permissions))
     return <PermissionDenied />;
   if (!choicesData) return null;
 
