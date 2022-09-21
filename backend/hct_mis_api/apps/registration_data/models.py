@@ -33,6 +33,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
             "error_message",
         ]
     )
+    LOADING = "LOADING"
     IMPORTING = "IMPORTING"
     IN_REVIEW = "IN_REVIEW"
     MERGING = "MERGING"
@@ -43,6 +44,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     IMPORT_ERROR = "IMPORT_ERROR"
     MERGE_ERROR = "MERGE_ERROR"
     STATUS_CHOICE = (
+        (LOADING, _("Loading")),
         (DEDUPLICATION, _("Deduplication")),
         (DEDUPLICATION_FAILED, _("Deduplication Failed")),
         (IMPORTING, _("Importing")),
