@@ -6,6 +6,7 @@ from django.db.transaction import atomic
 from django.utils import timezone
 
 from django_countries import Countries
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -78,7 +79,6 @@ class DocumentSerializer(serializers.ModelSerializer):
 class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
-    unicef_id = serializers.ReadOnlyField()
     household = serializers.ReadOnlyField()
     role = serializers.CharField(allow_blank=True)
     observed_disability = serializers.CharField(allow_blank=True, required=False)
@@ -88,7 +88,17 @@ class IndividualSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImportedIndividual
-        exclude = ["id", "registration_data_import"]
+        exclude = [
+            "id",
+            "registration_data_import",
+            "deduplication_batch_results",
+            "deduplication_golden_record_results",
+            "deduplication_batch_status",
+            "created_at",
+            "updated_at",
+            "kobo_asset_id",
+            "mis_unicef_id",
+        ]
         list_serializer_class = MemberSerializer
 
     def validate_role(self, value):
@@ -171,7 +181,6 @@ class HouseholdListSerializer(serializers.ListSerializer):
 
 
 class HouseholdSerializer(serializers.ModelSerializer):
-    unicef_id = serializers.ReadOnlyField()
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     collect_individual_data = serializers.CharField()
@@ -180,7 +189,17 @@ class HouseholdSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImportedHousehold
-        exclude = ["id", "head_of_household", "registration_data_import"]
+        exclude = [
+            "id",
+            "head_of_household",
+            "registration_data_import",
+            "mis_unicef_id",
+            "diia_rec_id",
+            "flex_registrations_record",
+            "kobo_submission_uuid",
+            "kobo_asset_id",
+            "kobo_submission_time",
+        ]
         list_serializer_class = HouseholdListSerializer
 
     def __init__(self, *args, **kwargs):
@@ -197,7 +216,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
         return super().save(**kwargs)
 
 
-class RDISerializer(serializers.ModelSerializer):
+class RDINestedSerializer(serializers.ModelSerializer):
     households = HouseholdSerializer(many=True)
 
     class Meta:
@@ -205,7 +224,7 @@ class RDISerializer(serializers.ModelSerializer):
         exclude = ("business_area_slug", "import_data")
 
     def __init__(self, *args, **kwargs):
-        self.business_area = kwargs.pop("business_area")
+        self.business_area = kwargs.pop("business_area", None)
         super().__init__(*args, **kwargs)
 
     @atomic()
@@ -216,44 +235,6 @@ class RDISerializer(serializers.ModelSerializer):
             mm = HouseholdSerializer(data=households, many=True)
             mm.is_valid(True)
             mm.save(rdi=rdi)
-            # for i, household_data in enumerate(households):
-            #     hh_ser = HouseholdSerializer(data=household_data)
-            #     if hh_ser.is_valid():
-            #         members: MemberSerializer = hh_ser.members
-            #         hoh_ser = IndividualSerializer(data=members.head_of_household)
-            #         if hoh_ser.is_valid(True):
-            #             hh: ImportedHousehold = hh_ser.save(head_of_household=None, registration_data_import=rdi)
-            #             primary = None
-            #             alternate = None
-            #             for member_data in members.validated_data:
-            #                 member_ser = IndividualSerializer(data=member_data)
-            #                 if member_ser.is_valid():
-            #                     if member_data["relationship"] in [RELATIONSHIP_UNKNOWN, NON_BENEFICIARY]:
-            #                         member_of = None
-            #                     else:
-            #                         member_of = hh
-            #                     member = member_ser.save(household=member_of, registration_data_import=rdi)
-            #                     for doc in member_ser.documents:
-            #                         ImportedDocument.objects.create(
-            #                             document_number=doc["document_number"],
-            #                             photo=get_photo_from_stream(doc["image"]),
-            #                             doc_date=doc["doc_date"],
-            #                             individual=member,
-            #                             type=ImportedDocumentType.objects.get(country=doc["country"], type=doc["type"]),
-            #                         )
-            #                     if member_data["relationship"] == HEAD:
-            #                         assert member.household == hh
-            #                         hh.head_of_household = member
-            #                         hh.save()
-            #                     if member_data["role"] == ROLE_PRIMARY:
-            #                         primary = member
-            #                     elif member_data["role"] == ROLE_ALTERNATE:
-            #                         alternate = member
-            #             hh.individuals_and_roles.create(individual=primary, role=ROLE_PRIMARY)
-            #             if alternate:
-            #                 hh.individuals_and_roles.create(individual=primary, role=ROLE_ALTERNATE)
-            #     else:
-            #         raise ValidationError(hh_ser.errors, code=f"Error validating Household in position #{i}")
         except Exception as e:
             logger.exception(e)
             raise
@@ -263,8 +244,9 @@ class RDISerializer(serializers.ModelSerializer):
 class UploadRDIView(HOPEAPIView):
     permission = Permissions.API_UPLOAD_RDI
 
+    @swagger_auto_schema(request_body=RDINestedSerializer)
     def post(self, request, business_area):
-        serializer = RDISerializer(data=request.data, business_area=self.selected_business_area)
+        serializer = RDINestedSerializer(data=request.data, business_area=self.selected_business_area)
         if serializer.is_valid():
             serializer.save()
             return Response({}, status=status.HTTP_201_CREATED)
