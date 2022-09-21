@@ -60,7 +60,9 @@ class BaseSampling(abc.ABC):
 
 class FullListSampling(BaseSampling):
     def sampling(self, households: QuerySet[Household]):
-        self.households = households.exclude(admin_area__id__in=self.excluded_admin_areas_decoded)
+        self.households = households.exclude(
+            head_of_household__phone_no__isnull=False, admin_area__id__in=self.excluded_admin_areas_decoded
+        )
         self.sample_size = self.calc_sample_size(households.count())
 
 
