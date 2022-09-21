@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 
 from hct_mis_api.apps.core.models import BusinessArea
 
-from ..auth import HOPEPermission
+from ..auth import HOPEAuthentication, HOPEPermission
 
 
 class SelectedBusinessAreaMixin:
@@ -15,5 +15,5 @@ class SelectedBusinessAreaMixin:
 
 class HOPEAPIView(SelectedBusinessAreaMixin, APIView):
     permission_classes = [HOPEPermission]
-    # authentication_classes = [HOPEAuthentication]
+    authentication_classes = [HOPEAuthentication]
     permission = "any"

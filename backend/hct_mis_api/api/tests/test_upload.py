@@ -3,15 +3,8 @@ from pathlib import Path
 
 from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase
 
 from hct_mis_api.api.tests.base import HOPEApiTestCase
-from hct_mis_api.apps.account.export_users_xlsx import User
-from hct_mis_api.apps.account.fixtures import (
-    BusinessAreaFactory,
-    RoleFactory,
-    UserFactory,
-)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -22,6 +15,7 @@ from hct_mis_api.apps.household.models import (
     SON_DAUGHTER,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
 )
@@ -29,14 +23,13 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 class UploadRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
+    user_permissions = [Permissions.API_UPLOAD_RDI]
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
+        ImportedDocumentType.objects.create(country="AF", type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, label="--")
         cls.url = reverse("api:rdi-upload", args=[cls.business_area.slug])
-
-    # def setUp(self):
-    #     self.client.login(username=self.user.username, password="password")
 
     def test_upload_single_household(self):
         data = {
