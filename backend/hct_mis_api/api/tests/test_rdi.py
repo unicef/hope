@@ -66,7 +66,7 @@ class PushToRDITests(HOPEApiTestCase):
                 "members": [
                     {
                         "relationship": HEAD,
-                        "full_name": "Jhon Doe",
+                        "full_name": "John Doe",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
                         "role": "",

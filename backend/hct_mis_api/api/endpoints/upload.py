@@ -106,7 +106,7 @@ class IndividualSerializer(serializers.ModelSerializer):
         list_serializer_class = MembersSerializer
 
     def validate_role(self, value):
-        if value in [ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE]:
+        if value in (ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE):
             return value
         if not value:
             return ROLE_NO_ROLE
@@ -165,7 +165,7 @@ class HouseholdListSerializer(serializers.ListSerializer):
                 totals.individuals += 1
                 member_ser = IndividualSerializer(data=member_data)
                 member_ser.is_valid(raise_exception=True)
-                if member_data["relationship"] not in [RELATIONSHIP_UNKNOWN, NON_BENEFICIARY]:
+                if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
                     member_of = hh
                 member = member_ser.save(household=member_of, registration_data_import=rdi)
                 for doc in member_ser.documents:
@@ -234,7 +234,7 @@ class RDINestedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RegistrationDataImportDatahub
-        exclude = ("business_area_slug", "import_data")
+        exclude = ("business_area_slug", "import_data", "hct_id")
 
     def __init__(self, *args, **kwargs):
         self.business_area = kwargs.pop("business_area", None)
@@ -246,9 +246,9 @@ class RDINestedSerializer(serializers.ModelSerializer):
         households = validated_data.pop("households")
         rdi = RegistrationDataImportDatahub.objects.create(**validated_data, business_area_slug=self.business_area.slug)
         try:
-            mm = HouseholdSerializer(data=households, many=True)
-            mm.is_valid(True)
-            info: Totals = mm.save(rdi=rdi)
+            hh = HouseholdSerializer(data=households, many=True)
+            hh.is_valid(True)
+            info: Totals = hh.save(rdi=rdi)
             r2 = RegistrationDataImport(
                 **validated_data,
                 imported_by=created_by,
