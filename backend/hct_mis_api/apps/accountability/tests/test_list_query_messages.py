@@ -160,31 +160,24 @@ class TestActionMessageMutation(APITestCase):
             (
                 "with_view_details_permission",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
-                {
-                    "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
-                },
+                {},
             ),
             (
                 "with_view_details_permission",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
-                {
-                    "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
-                },
+                {},
             ),
             (
                 "with_view_details_permission",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
                 {
-                    "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
                     "sex": "MALE",
                 },
             ),
             (
                 "without_permission",
                 [],
-                {
-                    "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
-                },
+                {},
             ),
         )
     )
@@ -198,5 +191,8 @@ class TestActionMessageMutation(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.QUERY_RECIPIENTS,
             context={"user": self.user},
-            variables=variables,
+            variables={
+                "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
+                **variables,
+            },
         )
