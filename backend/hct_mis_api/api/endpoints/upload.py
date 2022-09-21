@@ -189,7 +189,7 @@ class HouseholdListSerializer(serializers.ListSerializer):
             else:
                 raise ValidationError({"primary_collector": "Missing primary collector"})
             if alternate:
-                hh.individuals_and_roles.create(individual=primary, role=ROLE_ALTERNATE)
+                hh.individuals_and_roles.create(individual=alternate, role=ROLE_ALTERNATE)
         return totals
 
 
