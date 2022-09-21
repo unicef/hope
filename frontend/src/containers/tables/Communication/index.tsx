@@ -1,3 +1,1 @@
-import { CommunicationTable } from './CommunicationTable';
-
-export { CommunicationTable };
+export { CommunicationTable } from './CommunicationTable';
