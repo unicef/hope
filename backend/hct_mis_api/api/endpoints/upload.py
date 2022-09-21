@@ -39,7 +39,8 @@ DETAILS_POLICY = (
 logger = logging.getLogger(__name__)
 
 
-class MemberSerializer(serializers.ListSerializer):
+class MembersSerializers(serializers.ListSerializer):
+    """List serializer for Individuals (members, collector) which belong to a Household"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.head_of_household = None
@@ -52,11 +53,11 @@ class MemberSerializer(serializers.ListSerializer):
                 if self.head_of_household:
                     ValidationError("Invalid head_of_households number ")
                 self.head_of_household = data
-            if data["role"] == ROLE_PRIMARY:
+            elif data["role"] == ROLE_PRIMARY:
                 if self.head_of_household:
                     ValidationError("Invalid primary_collector number ")
                 self.primary_collector = data
-            if data["role"] == ROLE_ALTERNATE:
+            elif data["role"] == ROLE_ALTERNATE:
                 if self.head_of_household:
                     ValidationError("Invalid alternate_collector number ")
                 self.alternate_collector = data
@@ -99,7 +100,7 @@ class IndividualSerializer(serializers.ModelSerializer):
             "kobo_asset_id",
             "mis_unicef_id",
         ]
-        list_serializer_class = MemberSerializer
+        list_serializer_class = MembersSerializers
 
     def validate_role(self, value):
         if value in [ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE]:
@@ -118,7 +119,7 @@ class IndividualSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         self.documents = DocumentSerializer(data=attrs.get("documents", []), many=True)
-        self.documents.is_valid(True)
+        self.documents.is_valid(raise_exception=True)
         return super().validate(attrs)
 
     @atomic()
@@ -143,7 +144,7 @@ class HouseholdListSerializer(serializers.ListSerializer):
         for i, household_data in enumerate(validated_data):
             hh_ser = HouseholdSerializer(data=household_data)
             if hh_ser.is_valid():
-                members: MemberSerializer = hh_ser.members
+                members: MembersSerializers = hh_ser.members
                 hoh_ser = IndividualSerializer(data=members.head_of_household)
                 if hoh_ser.is_valid(True):
                     hh: ImportedHousehold = hh_ser.save(head_of_household=None, registration_data_import=rdi)
@@ -235,7 +236,7 @@ class RDINestedSerializer(serializers.ModelSerializer):
             mm = HouseholdSerializer(data=households, many=True)
             mm.is_valid(True)
             mm.save(rdi=rdi)
-        except Exception as e:
+        except BaseException as e:
             logger.exception(e)
             raise
         return rdi
@@ -248,6 +249,6 @@ class UploadRDIView(HOPEAPIView):
     def post(self, request, business_area):
         serializer = RDINestedSerializer(data=request.data, business_area=self.selected_business_area)
         if serializer.is_valid():
-            serializer.save()
-            return Response({}, status=status.HTTP_201_CREATED)
+            instance = serializer.save()
+            return Response({'pk': instance.pk}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

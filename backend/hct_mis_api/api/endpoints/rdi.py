@@ -21,6 +21,7 @@ class RDISerializer(serializers.ModelSerializer):
 
 
 class CreateRDIView(HOPEAPIView, CreateAPIView):
+    """Api to Create RDI for selected business area """
     permission = Permissions.API_CREATE_RDI
     serializer_class = RDISerializer
 
@@ -34,6 +35,7 @@ class CreateRDIView(HOPEAPIView, CreateAPIView):
 
 
 class PushToRDIView(HOPEAPIView):
+    """Api to link Households with selected RDI"""
     permission = Permissions.API_CREATE_RDI
 
     @cached_property
