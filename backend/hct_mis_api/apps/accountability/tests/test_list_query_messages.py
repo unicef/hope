@@ -22,7 +22,6 @@ class TestActionMessageMutation(APITestCase):
       allAccountabilityCommunicationMessages (businessArea: $businessArea, title: $title, body: $body, samplingType: $samplingType, createdBy: $createdBy, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, orderBy: $orderBy) {
         edges {
           node {
-            id
             title
             unicefId
             body
@@ -56,7 +55,6 @@ class TestActionMessageMutation(APITestCase):
       ) {
         edges {
           node {
-            id
             size
             headOfHousehold {
               fullName
