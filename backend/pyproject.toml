@@ -43,7 +43,7 @@ known_first_party = [
 known_django = "django"
 sections = ["FUTURE","STDLIB","DJANGO","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
 include_trailing_comma = true
-skip = "migrations"
+skip = "migrations,snapshots"
 
 [tool.poetry]
 name = "HCT MIS Backend"
