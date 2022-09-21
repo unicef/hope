@@ -10,8 +10,8 @@ import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql'
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { FeedbackFilters } from '../../../../components/accountability/Feedback/FeedbackTable/FeedbackFilters';
 import { FeedbackTable } from '../../../tables/Feedback/FeedbackTable';
+import { FeedbackFilters } from '../../../../components/accountability/Feedback/FeedbackTable/FeedbackFilters';
 
 export const FeedbackPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
