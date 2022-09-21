@@ -11,7 +11,7 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from hct_mis_api.api.endpoints.base import HOPEAPIView, SelectedBusinessAreaMixin
+from hct_mis_api.api.endpoints.base import HOPEAPIView
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.models import (
     HEAD,

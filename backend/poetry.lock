@@ -627,6 +627,25 @@ python-versions = ">=3.6"
 Django = ">=2.2"
 
 [[package]]
+name = "django-front-door"
+version = "0.2.0"
+description = ""
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+django_regex = "*"
+
+[package.extras]
+constance = ["django-constance", "django-picklefield"]
+dev = ["django", "django-constance", "django-picklefield", "django-webtest", "flake8", "isort", "pdbpp", "pytest", "pytest-coverage", "pytest-django", "pytest-echo", "redis", "tox"]
+docs = ["django", "pdbpp"]
+redis = ["redis"]
+test = ["django-constance", "django-constance", "django-picklefield", "django-picklefield", "django-webtest", "django_regex", "flake8", "isort", "pytest", "pytest-coverage", "pytest-django", "pytest-echo", "redis", "redis", "tox", "user_agents"]
+ua = ["user_agents"]
+
+[[package]]
 name = "django-hijack"
 version = "3.2.1"
 description = "django-hijack allows superusers to hijack (=login as) and work on behalf of another user."
@@ -770,6 +789,20 @@ redis = ">=3,<4.0.0 || >4.0.0,<4.0.1 || >4.0.1"
 hiredis = ["redis[hiredis] (>=3,!=4.0.0,!=4.0.1)"]
 
 [[package]]
+name = "django-regex"
+version = "0.5.0"
+description = "Fields and utilities to work with regular expression in Django"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+dev = ["devpi-builder", "flake8", "isort", "pip-tools", "sphinx"]
+extra = ["admin-extra-urls"]
+test = ["admin-extra-urls", "django-webtest", "factory_boy", "isort", "pdbpp", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-isort", "pytest-pep8", "pytest-pythonpath", "tox"]
+tests = ["admin-extra-urls", "django-webtest", "factory_boy", "isort", "pdbpp", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-isort", "pytest-pep8", "pytest-pythonpath", "tox"]
+
+[[package]]
 name = "django-silk"
 version = "5.0.1"
 description = "Silky smooth profiling for the Django Framework"
@@ -881,6 +914,25 @@ python-versions = ">=3.6"
 [package.dependencies]
 django = ">=2.2"
 pytz = "*"
+
+[[package]]
+name = "drf-jwt"
+version = "1.19.2"
+description = "JSON Web Token based authentication for Django REST framework"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
+
+[package.dependencies]
+Django = ">=1.11"
+djangorestframework = ">=3.7"
+PyJWT = {version = ">=1.5.2,<3.0.0", extras = ["crypto"]}
+
+[package.extras]
+dev = ["tox"]
+docs = ["mkdocs (==0.13.2)"]
+lint = ["black", "flake8", "isort"]
+test = ["mock", "pytest (>=3.0)", "pytest-cov", "pytest-django", "pytest-runner", "six"]
 
 [[package]]
 name = "drf-yasg"
@@ -1247,6 +1299,20 @@ python-versions = "*"
 
 [package.dependencies]
 six = "*"
+
+[[package]]
+name = "isort"
+version = "5.10.1"
+description = "A Python utility / library to sort Python imports."
+category = "dev"
+optional = false
+python-versions = ">=3.6.1,<4.0"
+
+[package.extras]
+colors = ["colorama (>=0.4.3,<0.5.0)"]
+pipfile_deprecated_finder = ["pipreqs", "requirementslib"]
+plugins = ["setuptools"]
+requirements_deprecated_finder = ["pip-api", "pipreqs"]
 
 [[package]]
 name = "itypes"
@@ -1662,6 +1728,9 @@ description = "JSON Web Token implementation in Python"
 category = "main"
 optional = false
 python-versions = ">=3.6"
+
+[package.dependencies]
+cryptography = {version = ">=3.3.1", optional = true, markers = "extra == \"crypto\""}
 
 [package.extras]
 crypto = ["cryptography (>=3.3.1)"]
@@ -2333,8 +2402,8 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = "3.9.13"
-content-hash = "54182a920353b1f62d6f53a16bfe1b2b9574690e92b9a79ba2242ed31705575e"
+python-versions = "3.9.12"
+content-hash = "11e70ab09a24f222179a984ac92a7bc3bd9b1fb50cacd7b568cd61205cab5f2b"
 
 [metadata.files]
 amqp = [
@@ -2629,6 +2698,9 @@ django-filter = [
     {file = "django-filter-21.1.tar.gz", hash = "sha256:632a251fa8f1aadb4b8cceff932bb52fe2f826dd7dfe7f3eac40e5c463d6836e"},
     {file = "django_filter-21.1-py3-none-any.whl", hash = "sha256:f4a6737a30104c98d2e2a5fb93043f36dd7978e0c7ddc92f5998e85433ea5063"},
 ]
+django-front-door = [
+    {file = "django-front-door-0.2.0.tar.gz", hash = "sha256:ec551bb31e5e0f5e1ba892257c04327a17834fab99aa2c0923ac4371f3c8d802"},
+]
 django-hijack = [
     {file = "django-hijack-3.2.1.tar.gz", hash = "sha256:8df524fd085a43205a6bb497c53fd94483824b4f3179762fc1c31c1dea58d1ca"},
     {file = "django_hijack-3.2.1-py3-none-any.whl", hash = "sha256:b0723750b247e5b1f69f600a40b1d512404061f33918e0bffb4aa928314ea1db"},
@@ -2673,6 +2745,9 @@ django-redis = [
     {file = "django-redis-5.2.0.tar.gz", hash = "sha256:8a99e5582c79f894168f5865c52bd921213253b7fd64d16733ae4591564465de"},
     {file = "django_redis-5.2.0-py3-none-any.whl", hash = "sha256:1d037dc02b11ad7aa11f655d26dac3fb1af32630f61ef4428860a2e29ff92026"},
 ]
+django-regex = [
+    {file = "django-regex-0.5.0.tar.gz", hash = "sha256:6af1add11ae5232f133a42754c9291f9113996b1294b048305d9f1a427bca27c"},
+]
 django-silk = [
     {file = "django-silk-5.0.1.tar.gz", hash = "sha256:3bdf188256fff00d1ce741f9ffa7cfa1f37f6941f07c23bc85ff26466170eb30"},
     {file = "django_silk-5.0.1-py3-none-any.whl", hash = "sha256:9dad85e783fcaaa1c97bebfa7ea01899428ded55b517d363f25ba87e43b5ce50"},
@@ -2703,6 +2778,10 @@ django-webtest = [
 djangorestframework = [
     {file = "djangorestframework-3.13.1-py3-none-any.whl", hash = "sha256:24c4bf58ed7e85d1fe4ba250ab2da926d263cd57d64b03e8dcef0ac683f8b1aa"},
     {file = "djangorestframework-3.13.1.tar.gz", hash = "sha256:0c33407ce23acc68eca2a6e46424b008c9c02eceb8cf18581921d0092bc1f2ee"},
+]
+drf-jwt = [
+    {file = "drf-jwt-1.19.2.tar.gz", hash = "sha256:660bc66f992065cef59832adcbbdf871847e9738671c19e5121971e773768235"},
+    {file = "drf_jwt-1.19.2-py2.py3-none-any.whl", hash = "sha256:63c3d4ed61a1013958cd63416e2d5c84467d8ae3e6e1be44b1fb58743dbd1582"},
 ]
 drf-yasg = [
     {file = "drf-yasg-1.21.3.tar.gz", hash = "sha256:b2eebb438fa641503a08dac791be24183ea26dbcfe371a9824ea91f6e3a988aa"},
@@ -2887,6 +2966,10 @@ isodate = [
     {file = "isodate-0.6.1-py2.py3-none-any.whl", hash = "sha256:0751eece944162659049d35f4f549ed815792b38793f07cf73381c1c87cbed96"},
     {file = "isodate-0.6.1.tar.gz", hash = "sha256:48c5881de7e8b0a0d648cb024c8062dc84e7b840ed81e864c7614fd3c127bde9"},
 ]
+isort = [
+    {file = "isort-5.10.1-py3-none-any.whl", hash = "sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7"},
+    {file = "isort-5.10.1.tar.gz", hash = "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"},
+]
 itypes = [
     {file = "itypes-1.2.0-py2.py3-none-any.whl", hash = "sha256:03da6872ca89d29aef62773672b2d408f490f80db48b23079a4b194c86dd04c6"},
     {file = "itypes-1.2.0.tar.gz", hash = "sha256:af886f129dea4a2a1e3d36595a2d139589e4dd287f5cab0b40e799ee81570ff1"},
@@ -3061,7 +3144,6 @@ oauthlib = [
     {file = "oauthlib-3.2.0.tar.gz", hash = "sha256:23a8208d75b902797ea29fd31fa80a15ed9dc2c6c16fe73f5d346f83f6fa27a2"},
 ]
 odfpy = [
-    {file = "odfpy-1.4.1-py2.7.egg", hash = "sha256:fc3b8d1bc098eba4a0fda865a76d9d1e577c4ceec771426bcb169a82c5e9dfe0"},
     {file = "odfpy-1.4.1.tar.gz", hash = "sha256:db766a6e59c5103212f3cc92ec8dd50a0f3a02790233ed0b52148b70d3c438ec"},
 ]
 openpyxl = [

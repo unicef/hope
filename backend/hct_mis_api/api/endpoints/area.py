@@ -7,7 +7,7 @@ from hct_mis_api.apps.geo.models import Area, AreaType
 class AreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Area
-        fields = '__all__'
+        fields = "__all__"
 
 
 class AreaList(ListAPIView):
@@ -18,7 +18,7 @@ class AreaList(ListAPIView):
 class AreaTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AreaType
-        fields = '__all__'
+        fields = "__all__"
 
 
 class AreaTypeList(ListAPIView):

@@ -2,8 +2,9 @@ from django.utils.functional import cached_property
 
 from rest_framework.views import APIView
 
-from hct_mis_api.api.auth import HOPEPermission
 from hct_mis_api.apps.core.models import BusinessArea
+
+from ..auth import HOPEPermission
 
 
 class SelectedBusinessAreaMixin:
@@ -14,4 +15,5 @@ class SelectedBusinessAreaMixin:
 
 class HOPEAPIView(SelectedBusinessAreaMixin, APIView):
     permission_classes = [HOPEPermission]
+    # authentication_classes = [HOPEAuthentication]
     permission = "any"

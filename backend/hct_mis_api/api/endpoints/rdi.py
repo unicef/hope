@@ -6,11 +6,9 @@ from rest_framework.response import Response
 
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 
-from .base import HOPEAPIView, SelectedBusinessAreaMixin
-from .upload import HouseholdSerializer
-
-HOPEAPIView
 from ...apps.account.permissions import Permissions
+from .base import HOPEAPIView
+from .upload import HouseholdSerializer
 
 
 class RDISerializer(serializers.ModelSerializer):
