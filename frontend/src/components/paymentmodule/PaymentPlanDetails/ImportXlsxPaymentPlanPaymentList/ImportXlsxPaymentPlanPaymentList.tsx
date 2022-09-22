@@ -27,10 +27,6 @@ const Error = styled.div`
   padding: 20px;
 `;
 
-const UploadIcon = styled(Publish)`
-  color: #043f91;
-`;
-
 interface ImportXlsxPaymentPlanPaymentListProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
@@ -85,7 +81,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
     <>
       <Box key='import'>
         <Button
-          startIcon={<UploadIcon />}
+          startIcon={<Publish />}
           color='primary'
           data-cy='button-import'
           onClick={() => setOpenImport(true)}

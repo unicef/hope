@@ -366,7 +366,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             delivered_quantity=None,
             delivered_quantity_usd=None,
             financial_service_provider=santander_fsp,
-            assigned_payment_channel=self.payment_channel_1_cash,
+            assigned_payment_channel=self.payment_channel_1_cash,  # TODO: not set
             excluded=False,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)

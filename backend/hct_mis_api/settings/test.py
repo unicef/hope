@@ -89,5 +89,9 @@ EXCHANGE_RATE_CACHE_EXPIRY = 0
 del DATABASES["read_only"]
 CELERY_TASK_ALWAYS_EAGER = True
 
+<<<<<<< HEAD
 USE_DUMMY_EXCHANGE_RATES = False
 # so it mocks the usage of the real api
+=======
+USE_DUMMY_EXCHANGE_RATES = False  # so the service needs to be mocked
+>>>>>>> e3e615e7bcf921533f3d396994bd86a6354f0d32
