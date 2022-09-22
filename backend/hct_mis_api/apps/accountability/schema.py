@@ -10,9 +10,9 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.household.models import Household
 
-from .filters import MessageRecipientsMapFilter, MessagesFilter
+from .filters import MessageRecipientsMapFilter, MessagesFilter, FeedbackFilter
 from .inputs import GetAccountabilityCommunicationMessageSampleSizeInput
-from .models import Message
+from .models import Feedback, Message
 from .services.message_crud_services import MessageCrudServices
 from .services.sampling import Sampling
 from .services.verifiers import MessageArgumentVerifier
@@ -55,6 +55,21 @@ class CommunicationMessageNode(BaseNodePermissionMixin, DjangoObjectType):
         filter_fields = []
 
 
+class FeedbackNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopeOneOfPermissionClass(
+            Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_LIST,
+            Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_DETAILS,
+        ),
+    )
+
+    class Meta:
+        model = Feedback
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
+        filter_fields = []
+
+
 class GetCommunicationMessageSampleSizeObject(BaseNodePermissionMixin, graphene.ObjectType):
     permission_classes = (
         hopeOneOfPermissionClass(
@@ -83,6 +98,17 @@ class Query(graphene.ObjectType):
         GetCommunicationMessageSampleSizeObject,
         business_area_slug=graphene.String(required=True),
         inputs=GetAccountabilityCommunicationMessageSampleSizeInput(),
+    )
+
+    all_feedbacks = DjangoPermissionFilterConnectionField(
+        FeedbackNode,
+        # business_area_slug=graphene.String(required=True),
+        filterset_class=FeedbackFilter,
+        permission_classes=(
+            hopeOneOfPermissionClass(
+                Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_LIST,
+            )
+        ),
     )
 
     def resolve_accountability_communication_message_sample_size(

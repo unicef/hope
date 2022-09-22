@@ -6,7 +6,7 @@ from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
 
-from .models import Message
+from .models import Feedback, Message
 
 
 class MessagesFilter(FilterSet):
@@ -63,3 +63,9 @@ class MessageRecipientsMapFilter(FilterSet):
             "head_of_household__first_registration_date",
         )
     )
+
+
+class FeedbackFilter(FilterSet):
+    class Meta:
+        model = Feedback
+        fields = []

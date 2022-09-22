@@ -59,3 +59,19 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
 
     def __str__(self) -> str:
         return f"{self.title} ({self.number_of_recipients} recipients)"
+
+
+class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
+    # TODO
+    # ACTIVITY_LOG_MAPPING =
+
+    POSITIVE_FEEDBACK = 1
+    NEGATIVE_FEEDBACK = 2
+
+    ISSUE_TYPE_CHOICES = (
+        (POSITIVE_FEEDBACK, _("Positive feedback")),
+        (NEGATIVE_FEEDBACK, _("Negative feedback")),
+    )
+
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    issue_type = models.IntegerField(verbose_name=_("Issue type"), choices=ISSUE_TYPE_CHOICES)
