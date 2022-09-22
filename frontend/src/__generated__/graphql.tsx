@@ -2829,6 +2829,11 @@ export type LogEntryNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type MarkPaymentRecordAsFailedMutation = {
+   __typename?: 'MarkPaymentRecordAsFailedMutation',
+  paymentRecord?: Maybe<PaymentRecordNode>,
+};
+
 export type MergeRegistrationDataImportMutation = {
    __typename?: 'MergeRegistrationDataImportMutation',
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
@@ -2862,6 +2867,7 @@ export type Mutations = {
   invalidCashPlanPaymentVerification?: Maybe<InvalidCashPlanVerificationMutation>,
   deleteCashPlanPaymentVerification?: Maybe<DeleteCashPlanVerificationMutation>,
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
+  markPaymentRecordAsFailed?: Maybe<MarkPaymentRecordAsFailedMutation>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
@@ -3063,6 +3069,11 @@ export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
   receivedAmount: Scalars['Decimal'],
   status?: Maybe<PaymentVerificationStatusForUpdate>,
   version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsMarkPaymentRecordAsFailedArgs = {
+  paymentRecordId: Scalars['ID']
 };
 
 
@@ -3327,7 +3338,8 @@ export enum PaymentRecordStatus {
   DistributionSuccessful = 'DISTRIBUTION_SUCCESSFUL',
   NotDistributed = 'NOT_DISTRIBUTED',
   TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
-  TransactionErroneous = 'TRANSACTION_ERRONEOUS'
+  TransactionErroneous = 'TRANSACTION_ERRONEOUS',
+  ForceFailed = 'FORCE_FAILED'
 }
 
 export type PaymentVerificationLogEntryNode = Node & {
@@ -6305,6 +6317,44 @@ export type IndividualDetailedFragment = (
   & IndividualMinimalFragment
 );
 
+export type PaymentRecordDetailsFragment = (
+  { __typename?: 'PaymentRecordNode' }
+  & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
+  & { verification: Maybe<(
+    { __typename?: 'PaymentVerificationNode' }
+    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
+  )>, household: (
+    { __typename?: 'HouseholdNode' }
+    & Pick<HouseholdNode, 'id' | 'status' | 'size' | 'unicefId'>
+    & { headOfHousehold: (
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
+    ) }
+  ), targetPopulation: (
+    { __typename?: 'TargetPopulationNode' }
+    & Pick<TargetPopulationNode, 'id' | 'name'>
+  ), cashPlan: Maybe<(
+    { __typename?: 'CashPlanNode' }
+    & Pick<CashPlanNode, 'id' | 'caId'>
+    & { program: (
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name'>
+    ), verifications: (
+      { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNode' }
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
+        )> }
+      )>> }
+    ) }
+  )>, serviceProvider: (
+    { __typename?: 'ServiceProviderNode' }
+    & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
+  ) }
+);
+
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
   & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
@@ -6974,6 +7024,22 @@ export type InvalidCashPlanPaymentVerificationMutation = (
           )> }
         )>> }
       ) }
+    )> }
+  )> }
+);
+
+export type MarkPrAsFailedMutationVariables = {
+  paymentRecordId: Scalars['ID']
+};
+
+
+export type MarkPrAsFailedMutation = (
+  { __typename?: 'Mutations' }
+  & { markPaymentRecordAsFailed: Maybe<(
+    { __typename?: 'MarkPaymentRecordAsFailedMutation' }
+    & { paymentRecord: Maybe<(
+      { __typename?: 'PaymentRecordNode' }
+      & PaymentRecordDetailsFragment
     )> }
   )> }
 );
@@ -8549,40 +8615,7 @@ export type PaymentRecordQuery = (
   { __typename?: 'Query' }
   & { paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordNode' }
-    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
-    & { household: (
-      { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'status' | 'size' | 'unicefId'>
-      & { headOfHousehold: (
-        { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
-      ) }
-    ), targetPopulation: (
-      { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name'>
-    ), cashPlan: Maybe<(
-      { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'caId'>
-      & { program: (
-        { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name'>
-      ), verifications: (
-        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
-        & { edges: Array<Maybe<(
-          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
-          & { node: Maybe<(
-            { __typename?: 'CashPlanPaymentVerificationNode' }
-            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
-          )> }
-        )>> }
-      ) }
-    )>, verification: Maybe<(
-      { __typename?: 'PaymentVerificationNode' }
-      & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
-    )>, serviceProvider: (
-      { __typename?: 'ServiceProviderNode' }
-      & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
-    ) }
+    & PaymentRecordDetailsFragment
   )> }
 );
 
@@ -10210,6 +10243,73 @@ export const IndividualDetailedFragmentDoc = gql`
   }
 }
     ${IndividualMinimalFragmentDoc}`;
+export const PaymentRecordDetailsFragmentDoc = gql`
+    fragment paymentRecordDetails on PaymentRecordNode {
+  id
+  status
+  statusDate
+  caId
+  caHashId
+  registrationCaId
+  verification {
+    id
+    status
+    statusDate
+    receivedAmount
+  }
+  household {
+    id
+    status
+    size
+    unicefId
+    headOfHousehold {
+      id
+      phoneNo
+      phoneNoAlternative
+      phoneNoValid
+      phoneNoAlternativeValid
+    }
+  }
+  fullName
+  distributionModality
+  totalPersonsCovered
+  targetPopulation {
+    id
+    name
+  }
+  cashPlan {
+    id
+    caId
+    program {
+      id
+      name
+    }
+    verifications {
+      edges {
+        node {
+          id
+          status
+          verificationChannel
+        }
+      }
+    }
+  }
+  currency
+  entitlementQuantity
+  deliveredQuantity
+  deliveredQuantityUsd
+  deliveryDate
+  deliveryType
+  entitlementCardIssueDate
+  entitlementCardNumber
+  transactionReferenceId
+  serviceProvider {
+    id
+    fullName
+    shortName
+  }
+}
+    `;
 export const RegistrationMinimalFragmentDoc = gql`
     fragment registrationMinimal on RegistrationDataImportNode {
   id
@@ -11846,6 +11946,57 @@ export function useInvalidCashPlanPaymentVerificationMutation(baseOptions?: Apol
 export type InvalidCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useInvalidCashPlanPaymentVerificationMutation>;
 export type InvalidCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<InvalidCashPlanPaymentVerificationMutation>;
 export type InvalidCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>;
+export const MarkPrAsFailedDocument = gql`
+    mutation markPRAsFailed($paymentRecordId: ID!) {
+  markPaymentRecordAsFailed(paymentRecordId: $paymentRecordId) {
+    paymentRecord {
+      ...paymentRecordDetails
+    }
+  }
+}
+    ${PaymentRecordDetailsFragmentDoc}`;
+export type MarkPrAsFailedMutationFn = ApolloReactCommon.MutationFunction<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>;
+export type MarkPrAsFailedComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>, 'mutation'>;
+
+    export const MarkPrAsFailedComponent = (props: MarkPrAsFailedComponentProps) => (
+      <ApolloReactComponents.Mutation<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables> mutation={MarkPrAsFailedDocument} {...props} />
+    );
+    
+export type MarkPrAsFailedProps<TChildProps = {}> = ApolloReactHoc.MutateProps<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables> & TChildProps;
+export function withMarkPrAsFailed<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  MarkPrAsFailedMutation,
+  MarkPrAsFailedMutationVariables,
+  MarkPrAsFailedProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables, MarkPrAsFailedProps<TChildProps>>(MarkPrAsFailedDocument, {
+      alias: 'markPrAsFailed',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useMarkPrAsFailedMutation__
+ *
+ * To run a mutation, you first call `useMarkPrAsFailedMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkPrAsFailedMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markPrAsFailedMutation, { data, loading, error }] = useMarkPrAsFailedMutation({
+ *   variables: {
+ *      paymentRecordId: // value for 'paymentRecordId'
+ *   },
+ * });
+ */
+export function useMarkPrAsFailedMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>) {
+        return ApolloReactHooks.useMutation<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>(MarkPrAsFailedDocument, baseOptions);
+      }
+export type MarkPrAsFailedMutationHookResult = ReturnType<typeof useMarkPrAsFailedMutation>;
+export type MarkPrAsFailedMutationResult = ApolloReactCommon.MutationResult<MarkPrAsFailedMutation>;
+export type MarkPrAsFailedMutationOptions = ApolloReactCommon.BaseMutationOptions<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>;
 export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
     mutation updatePaymentVerificationReceivedAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $received: Boolean!) {
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, received: $received) {
@@ -15758,125 +15909,10 @@ export type LookUpPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<Look
 export const PaymentRecordDocument = gql`
     query PaymentRecord($id: ID!) {
   paymentRecord(id: $id) {
-    id
-    status
-    statusDate
-    caId
-    caHashId
-    registrationCaId
-    household {
-      id
-      status
-      size
-      unicefId
-      headOfHousehold {
-        id
-        phoneNo
-        phoneNoAlternative
-        phoneNoValid
-        phoneNoAlternativeValid
-      }
-    }
-    fullName
-    distributionModality
-    totalPersonsCovered
-    targetPopulation {
-      id
-      name
-    }
-    cashPlan {
-      id
-      caId
-      program {
-        id
-        name
-      }
-      verifications {
-        edges {
-          node {
-            id
-            status
-            verificationChannel
-          }
-        }
-      }
-    }
-    verification {
-      id
-      status
-      statusDate
-      receivedAmount
-    }
-    currency
-    entitlementQuantity
-    deliveredQuantity
-    deliveryDate
-    deliveryDate
-    entitlementCardIssueDate
-    entitlementCardNumber
-    serviceProvider {
-      id
-      fullName
-      shortName
-    }
-    id
-    status
-    statusDate
-    caId
-    household {
-      id
-      size
-      unicefId
-      headOfHousehold {
-        id
-        phoneNo
-        phoneNoAlternative
-        phoneNoValid
-        phoneNoAlternativeValid
-      }
-    }
-    fullName
-    distributionModality
-    totalPersonsCovered
-    targetPopulation {
-      id
-      name
-    }
-    cashPlan {
-      id
-      caId
-      program {
-        id
-        name
-      }
-      verifications {
-        edges {
-          node {
-            id
-            status
-            verificationChannel
-          }
-        }
-      }
-    }
-    currency
-    entitlementQuantity
-    deliveredQuantity
-    deliveredQuantityUsd
-    deliveryDate
-    deliveryDate
-    deliveryType
-    entitlementCardIssueDate
-    entitlementCardNumber
-    transactionReferenceId
-    serviceProvider {
-      id
-      fullName
-      shortName
-    }
+    ...paymentRecordDetails
   }
 }
-    `;
+    ${PaymentRecordDetailsFragmentDoc}`;
 export type PaymentRecordComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentRecordQuery, PaymentRecordQueryVariables>, 'query'> & ({ variables: PaymentRecordQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const PaymentRecordComponent = (props: PaymentRecordComponentProps) => (
@@ -19636,6 +19672,7 @@ export type ResolversTypes = {
   DeleteCashPlanVerificationMutation: ResolverTypeWrapper<DeleteCashPlanVerificationMutation>,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
+  MarkPaymentRecordAsFailedMutation: ResolverTypeWrapper<MarkPaymentRecordAsFailedMutation>,
   UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
@@ -20011,6 +20048,7 @@ export type ResolversParentTypes = {
   DeleteCashPlanVerificationMutation: DeleteCashPlanVerificationMutation,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
+  MarkPaymentRecordAsFailedMutation: MarkPaymentRecordAsFailedMutation,
   UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: CreateTargetPopulationMutation,
@@ -21209,6 +21247,10 @@ export type LogEntryNodeEdgeResolvers<ContextType = any, ParentType extends Reso
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type MarkPaymentRecordAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['MarkPaymentRecordAsFailedMutation'] = ResolversParentTypes['MarkPaymentRecordAsFailedMutation']> = {
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+};
+
 export type MergeRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['MergeRegistrationDataImportMutation'] = ResolversParentTypes['MergeRegistrationDataImportMutation']> = {
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
@@ -21240,6 +21282,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   invalidCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['InvalidCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsInvalidCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   deleteCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DeleteCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDeleteCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
+  markPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['MarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsMarkPaymentRecordAsFailedArgs, 'paymentRecordId'>>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
@@ -22648,6 +22691,7 @@ export type Resolvers<ContextType = any> = {
   LogEntryNode?: LogEntryNodeResolvers<ContextType>,
   LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>,
   LogEntryNodeEdge?: LogEntryNodeEdgeResolvers<ContextType>,
+  MarkPaymentRecordAsFailedMutation?: MarkPaymentRecordAsFailedMutationResolvers<ContextType>,
   MergeRegistrationDataImportMutation?: MergeRegistrationDataImportMutationResolvers<ContextType>,
   Mutations?: MutationsResolvers<ContextType>,
   NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<ContextType>,
