@@ -69,6 +69,18 @@ DIIA_SEX_CHOICE = (
 
 logger = logging.getLogger(__name__)
 
+COLLECT_TYPE_UNKNOWN = ""
+COLLECT_TYPE_NONE = "0"
+COLLECT_TYPE_FULL = "1"
+COLLECT_TYPE_PARTIAL = "2"
+
+COLLECT_TYPES = (
+    (COLLECT_TYPE_UNKNOWN, _("Unknown")),
+    (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
+    (COLLECT_TYPE_FULL, _("Full individual collected")),
+    (COLLECT_TYPE_NONE, _("No individual data")),
+)
+
 
 class ImportedHousehold(TimeStampedUUIDModel):
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
@@ -124,7 +136,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
     village = models.CharField(max_length=250, blank=True, default=BLANK)
     registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
-    collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
+    collect_individual_data = models.CharField(max_length=250, choices=COLLECT_TYPES, default=COLLECT_TYPE_UNKNOWN)
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
@@ -342,6 +354,12 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
     @property
     def business_area(self):
         return self.business_area_slug
+
+    @property
+    def linked_rdi(self):
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
+        return RegistrationDataImport.objects.get(datahub_id=self.id)
 
 
 class ImportData(TimeStampedUUIDModel):
