@@ -122,9 +122,10 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock_fsp(self):
-        # TODO: cant lock FSP if no FSP choices
-
-        # set all payments with money expected to be delivered
+        if not self.payment_plan.delivery_mechanisms.filter(financial_service_provider__isnull=False).exists():
+            msg = f"There are no FSP chosen for Payment Plan"
+            logging.exception(msg)
+            raise GraphQLError(msg)
 
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
@@ -144,8 +145,9 @@ class PaymentPlanService:
         # init creation AcceptanceProcess added in send_for_approval()
         approval_process = self.payment_plan.approval_process.first()
         if not approval_process:
-            logging.exception(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
-            raise GraphQLError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
+            msg = f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}"
+            logging.exception(msg)
+            raise GraphQLError(msg)
 
         # validate approval required number
         self.validate_acceptance_process_approval_count(approval_process)

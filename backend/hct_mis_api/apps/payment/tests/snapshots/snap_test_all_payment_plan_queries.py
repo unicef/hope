@@ -281,6 +281,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
             {
                 'name': 'Accepted',
                 'value': 'ACCEPTED'
+            },
+            {
+                'name': 'Reconciled',
+                'value': 'RECONCILED'
             }
         ]
     }

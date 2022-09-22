@@ -347,9 +347,9 @@ class DeliveryMechanismNode(DjangoObjectType):
 def _calculate_volume(delivery_mechanism_per_payment_plan, field):
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
         return None
-    payments = delivery_mechanism_per_payment_plan.payment_plan.all_active_payments.filter(
+    payments = delivery_mechanism_per_payment_plan.payment_plan.not_excluded_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
-        delivery_type=delivery_mechanism_per_payment_plan.delivery_mechanism,
+        assigned_payment_channel__delivery_mechanism=delivery_mechanism_per_payment_plan.delivery_mechanism,
     )
     return payments.aggregate(entitlement_sum=Coalesce(Sum(field), Decimal(0.0)))["entitlement_sum"]
 
@@ -384,11 +384,6 @@ class FspChoices(graphene.ObjectType):
 
     delivery_mechanism = graphene.String()
     fsps = graphene.List(FspChoice)
-
-
-class FspSelection(graphene.InputObjectType):
-    fsp_id = graphene.String(required=True)
-    order = graphene.Int(required=True)
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -453,7 +448,6 @@ class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
-    fsp_choices = graphene.List(FspSelection, required=True)
 
 
 class Query(graphene.ObjectType):
@@ -578,50 +572,23 @@ class Query(graphene.ObjectType):
 
     def resolve_available_fsps_for_delivery_mechanisms(self, info, input, **kwargs):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
-        fsp_choices = input["fsp_choices"]
         delivery_mechanisms = (
             DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan)
             .values_list("delivery_mechanism", flat=True)
             .order_by("delivery_mechanism_order")
         )
-        processed_choices = [
-            {
-                "fsp": get_object_or_404(FinancialServiceProvider, id=decode_id_string(choice["fsp_id"])),
-                "order": choice["order"],
-            }
-            for choice in fsp_choices
-        ]
 
         def get_fsps_for_delivery_mechanism(mechanism):
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
-
-            def can_accept_volume(fsp):
-                volume_in_payments = Payment.objects.filter(
-                    parent=payment_plan, assigned_payment_channel__delivery_mechanism=mechanism
-                ).aggregate(money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))["money"]
-
-                volume_in_choices = sum(
-                    Payment.objects.filter(
-                        parent=payment_plan,
-                        head_of_household__payment_channels__delivery_mechanism=mechanism,
-                    ).aggregate(money=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)))["money"]
-                    for choice in processed_choices
-                    if choice["fsp"] == fsp
-                )
-                return fsp.can_accept_volume(volume_in_payments + volume_in_choices)
-
-            def can_be_chosen(fsp):
-                mechanism_orders = [index + 1 for index, mech in enumerate(delivery_mechanisms) if mech == mechanism]
-                for order in mechanism_orders:
-                    if order in [choice["order"] for choice in processed_choices if choice["fsp"] == fsp]:
-                        return True
-                return can_accept_volume(fsp)
-
-            return [{"id": fsp.id, "name": fsp.name} for fsp in fsps if can_be_chosen(fsp)] if fsps else []
+            return [
+                # This basically checks if FSP can accept ANY additional volume,
+                # more strict validation is performed in AssignFspToDeliveryMechanismMutation
+                {"id": fsp.id, "name": fsp.name} for fsp in fsps if fsp.can_accept_volume()
+            ] if fsps else []
 
         return [
             {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
-            for mechanism in delivery_mechanisms  # keeps the same order as the input
+            for mechanism in delivery_mechanisms
         ]
 
     def resolve_all_payment_verifications(self, info, **kwargs):

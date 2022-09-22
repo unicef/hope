@@ -13,7 +13,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
 )
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentPlan, Payment
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -430,7 +430,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables=dict(
                 input={
                     "paymentPlanId": encoded_payment_plan_id,
-                    "fspChoices": [],
                 }
             ),
         )
@@ -599,7 +598,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
             self.assertEqual(payment.delivered_quantity, None)
-            self.assertEqual(payment.is_reconciled, False)
+            self.assertEqual(payment.status, Payment.STATUS_NOT_DISTRIBUTED)
+            self.assertEqual(payment_plan.is_reconciled, False)
 
             sheet.cell(row=2, column=8).value = 500
             filled_file_name = "filled.xlsx"
@@ -627,4 +627,5 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
             self.assertEqual(payment.delivered_quantity, 500)
-            self.assertEqual(payment.is_reconciled, True)
+            self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
+            self.assertEqual(payment_plan.is_reconciled, True)

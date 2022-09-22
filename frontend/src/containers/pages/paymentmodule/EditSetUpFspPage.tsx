@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React  from 'react';
 import { useParams } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -21,15 +21,6 @@ export const EditSetUpFspPage = (): React.ReactElement => {
     },
     fetchPolicy: 'cache-and-network',
   });
-
-  const [fspChoicesForQuery, setFspChoicesForQuery] = useState(
-    paymentPlanData?.paymentPlan?.deliveryMechanisms
-      ?.filter((el) => el.fsp && el.fsp.id !== '')
-      .map((el) => ({
-        fspId: el.fsp?.id,
-        order: el.order,
-      })) || [],
-  );
 
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -63,8 +54,6 @@ export const EditSetUpFspPage = (): React.ReactElement => {
         businessArea={businessArea}
         permissions={permissions}
         initialValues={initialValues}
-        fspChoicesForQuery={fspChoicesForQuery}
-        setFspChoicesForQuery={setFspChoicesForQuery}
       />
     </>
   );

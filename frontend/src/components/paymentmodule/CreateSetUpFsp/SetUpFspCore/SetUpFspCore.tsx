@@ -10,7 +10,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   AvailableFspsForDeliveryMechanismsDocument,
-  FspSelection,
+  PaymentPlanDocument,
   useAllDeliveryMechanismsQuery,
   useAssignFspToDeliveryMechMutation,
   useAvailableFspsForDeliveryMechanismsQuery,
@@ -33,16 +33,12 @@ interface SetUpFspCoreProps {
   businessArea: string;
   permissions: string[];
   initialValues: FormValues;
-  setFspChoicesForQuery: (choices: FspSelection[]) => void;
-  fspChoicesForQuery: FspSelection[];
 }
 
 export const SetUpFspCore = ({
   businessArea,
   permissions,
   initialValues,
-  setFspChoicesForQuery,
-  fspChoicesForQuery,
 }: SetUpFspCoreProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -59,7 +55,6 @@ export const SetUpFspCore = ({
     variables: {
       input: {
         paymentPlanId: id,
-        fspChoices: fspChoicesForQuery,
       },
     },
     fetchPolicy: 'network-only',
@@ -115,9 +110,14 @@ export const SetUpFspCore = ({
             variables: {
               input: {
                 paymentPlanId: id,
-                fspChoices: fspChoicesForQuery,
               },
             },
+          },
+          {
+            query: PaymentPlanDocument,
+            variables: {
+              id
+            }
           },
         ],
       });
@@ -144,14 +144,6 @@ export const SetUpFspCore = ({
       deliveryMechanism: el.deliveryMechanism,
       order: index + 1,
     }));
-    setFspChoicesForQuery(
-      mappings
-        .filter((el) => el.fspId !== '')
-        .map((el) => ({
-          fspId: el.fspId,
-          order: el.order,
-        })),
-    );
     try {
       await assignFspToDeliveryMechanism({
         variables: {

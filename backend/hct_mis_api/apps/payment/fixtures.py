@@ -574,7 +574,7 @@ class PaymentFactory(factory.DjangoModelFactory):
         ).individual
     )
     delivery_type = fuzzy.FuzzyChoice(
-        PaymentRecord.DELIVERY_TYPE_CHOICE,
+        GenericPayment.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],
     )
     currency = factory.Faker("currency_code")

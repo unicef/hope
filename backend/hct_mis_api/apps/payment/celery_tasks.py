@@ -1,7 +1,6 @@
 import logging
 import datetime
 
-from decimal import Decimal
 from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 from django.contrib.admin.options import get_content_type_for_model
@@ -10,6 +9,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 
 from hct_mis_api.apps.payment.models import XlsxCashPlanPaymentVerificationFile, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import XlsxPaymentPlanImportPerFspService
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
 from hct_mis_api.apps.core.celery import app
@@ -225,8 +225,12 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
                 service.open_workbook()
                 with transaction.atomic():
                     service.import_payment_list()
-                    payment_plan.background_action_status_none()
                     payment_plan.remove_export_file()
+                    payment_plan.background_action_status_none()
+
+                    if payment_plan.is_reconciled:
+                        payment_plan.status_reconciled()
+
                     payment_plan.save()
         except Exception:
             logger.exception("Unexpected error during xlsx per fsp import")
@@ -258,13 +262,16 @@ def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
         updates = []
         with transaction.atomic():
             entry: Payment
-            for entry in payment_plan.all_active_payments:
+            for entry in payment_plan.not_excluded_payments:
                 # TODO: not sure how will work steficon function payment_plan or payment need ??
                 result = rule.execute({"household": entry.household, "payment_plan": payment_plan})
                 entry.entitlement_quantity = result.value
-                exchange_rate = payment_plan.exchange_rate
-                exchange_rate = 1  # TODO: re-enable exchange rates api
-                entry.entitlement_quantity_usd = Decimal(result.value / Decimal(exchange_rate)).quantize(Decimal(".01"))
+                entry.entitlement_quantity_usd = get_quantity_in_usd(
+                    amount=result.value,
+                    currency=payment_plan.currency,
+                    exchange_rate=payment_plan.exchange_rate,
+                    currency_exchange_date=payment_plan.currency_exchange_date,
+                )
                 entry.entitlement_date = timezone.now()
                 updates.append(entry)
             Payment.objects.bulk_update(

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React  from 'react';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { CreateSetUpFspHeader } from '../../../components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader';
 import { SetUpFspCore } from '../../../components/paymentmodule/CreateSetUpFsp/SetUpFspCore/SetUpFspCore';
@@ -7,8 +7,6 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 export const SetUpFspPage = (): React.ReactElement => {
-  const [fspChoicesForQuery, setFspChoicesForQuery] = useState([]);
-
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
@@ -37,8 +35,6 @@ export const SetUpFspPage = (): React.ReactElement => {
         businessArea={businessArea}
         permissions={permissions}
         initialValues={initialValues}
-        fspChoicesForQuery={fspChoicesForQuery}
-        setFspChoicesForQuery={setFspChoicesForQuery}
       />
     </>
   );

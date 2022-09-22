@@ -1,19 +1,19 @@
 import logging
 import math
+
 import graphene
 
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Subquery, OuterRef, F
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold, Individual
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import XlsxPaymentPlanImportPerFspService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -31,7 +31,6 @@ from hct_mis_api.apps.payment.celery_tasks import (
     fsp_generate_xlsx_report_task,
     payment_plan_apply_steficon,
     import_payment_plan_payment_list_from_xlsx,
-    import_payment_plan_payment_list_per_fsp_from_xlsx,
 )
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
@@ -761,7 +760,7 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             logger.error(msg)
             raise GraphQLError(msg)
 
-        if not payment_plan.all_active_payments:
+        if not payment_plan.not_excluded_payments:
             msg = "Export is not impossible because Payment list is empty"
             logger.error(msg)
             raise GraphQLError(msg)
@@ -863,57 +862,76 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
         if payment_plan.status != PaymentPlan.Status.LOCKED:
             raise GraphQLError("Payment plan must be locked to assign FSP to delivery mechanism")
 
-        if len(input.get("mappings", [])) != payment_plan.delivery_mechanisms.count():
+        mappings = input.get("mappings", [])
+
+        if len(mappings) != payment_plan.delivery_mechanisms.count():
             raise GraphQLError("Please assign FSP to all delivery mechanisms before moving to next step")
 
-        payment_plan.delivery_mechanisms.all().update(financial_service_provider=None)
-
-        mappings = input.get("mappings")
         existing_pairs = set()
         for mapping in mappings:
-            key = (
-                mapping.get("fsp_id"),
-                mapping.get("delivery_mechanism"),
-            )
+            key = (mapping["fsp_id"], mapping["delivery_mechanism"])
             if key in existing_pairs:
                 raise GraphQLError("You can't assign the same FSP to the same delivery mechanism more than once")
             existing_pairs.add(key)
 
-        fsp_to_dm_mappings = [
-            {
-                "fsp": get_object_or_404(FinancialServiceProvider, id=decode_id_string(mapping.get("fsp_id"))),
-                "delivery_mechanism_per_payment_plan": get_object_or_404(
+        with transaction.atomic():
+            payment_plan.delivery_mechanisms.all().update(financial_service_provider=None)
+            payment_plan.payment_items.all().update(
+                financial_service_provider=None, assigned_payment_channel=None, delivery_type=None
+            )
+
+            processed_collectors = []
+
+            for mapping in mappings:
+                delivery_mechanism = mapping["delivery_mechanism"]
+                delivery_mechanism_per_payment_plan = get_object_or_404(
                     DeliveryMechanismPerPaymentPlan,
                     payment_plan=payment_plan,
-                    delivery_mechanism=mapping.get("delivery_mechanism"),
-                    delivery_mechanism_order=mapping.get("order"),
-                ),
-            }
-            for mapping in mappings
-        ]
+                    delivery_mechanism=delivery_mechanism,
+                    delivery_mechanism_order=mapping["order"],
+                )
+                fsp = get_object_or_404(FinancialServiceProvider, id=decode_id_string(mapping["fsp_id"]))
 
-        # validation
-        for mapping in fsp_to_dm_mappings:
-            delivery_mechanism_per_payment_plan = mapping.get("delivery_mechanism_per_payment_plan")
-            fsp = mapping.get("fsp")
+                if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms:
+                    raise GraphQLError(
+                        f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
+                        f"by FSP '{fsp.name}'"
+                    )
 
-            if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms:
-                raise GraphQLError(
-                    f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
-                    f"by FSP '{fsp.name}'"
+                payments_for_delivery_mechanism = (
+                    payment_plan.payment_items.filter(
+                        collector__payment_channels__delivery_mechanism=delivery_mechanism_per_payment_plan.delivery_mechanism
+                    )
+                    .exclude(collector__id__in=processed_collectors)
+                    .annotate(
+                        payment_channel=Subquery(
+                            PaymentChannel.objects.filter(
+                                individual=OuterRef("collector"), delivery_mechanism=delivery_mechanism
+                            ).values("id")[:1]
+                        )
+                    )
+                    .distinct()
                 )
 
-            volume_for_delivery_mechanism = Payment.objects.filter(
-                assigned_payment_channel__delivery_mechanism=delivery_mechanism_per_payment_plan.delivery_mechanism,
-            ).aggregate(money=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)))["money"]
-            if not fsp.can_accept_volume(volume_for_delivery_mechanism):
-                raise GraphQLError(f"{fsp} cannot accept volume of {volume_for_delivery_mechanism} USD")
+                collectors_for_delivery_mechanism = payments_for_delivery_mechanism.values_list(
+                    "collector_id", flat=True
+                )
+                processed_collectors += list(collectors_for_delivery_mechanism)
 
-        for mapping in fsp_to_dm_mappings:
-            delivery_mechanism_per_payment_plan = mapping.get("delivery_mechanism_per_payment_plan")
-            fsp = mapping.get("fsp")
-            delivery_mechanism_per_payment_plan.financial_service_provider = fsp
-            delivery_mechanism_per_payment_plan.save()
+                volume_for_delivery_mechanism = payments_for_delivery_mechanism.aggregate(
+                    entitlement_quantity_usd__sum=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
+                )["entitlement_quantity_usd__sum"]
+
+                if not fsp.can_accept_volume(volume_for_delivery_mechanism):
+                    raise GraphQLError(f"{fsp} cannot accept volume of {volume_for_delivery_mechanism} USD")
+
+                delivery_mechanism_per_payment_plan.financial_service_provider = fsp
+                delivery_mechanism_per_payment_plan.save()
+                payments_for_delivery_mechanism.update(
+                    financial_service_provider=fsp,
+                    assigned_payment_channel=F("payment_channel"),
+                    delivery_type=delivery_mechanism,
+                )
 
         return cls(payment_plan=payment_plan)
 
@@ -961,6 +979,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
 
 class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
+    # PaymentPlan Reconciliation
     payment_plan = graphene.Field(PaymentPlanNode)
     errors = graphene.List(XlsxErrorNode)
 
