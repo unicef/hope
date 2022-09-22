@@ -5,6 +5,7 @@ trigger:
     - develop
     - staging
     - master
+    - feature/payment-module
     - ops/*
   paths:
     exclude:
