@@ -37,11 +37,4 @@ export default defineConfig({
     baseUrl: "http://localhost:8082/",
     specPattern: "cypress/e2e/**/*.feature",
   },
-
-  component: {
-    devServer: {
-      framework: "create-react-app",
-      bundler: "webpack",
-    },
-  },
 });
