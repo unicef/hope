@@ -100,12 +100,13 @@ class CompleteRDIView(HOPEAPIView, UpdateAPIView):
     @atomic()
     @atomic(using="registration_datahub")
     def update(self, request, *args, **kwargs):
-        self.selected_rdi.import_done = RegistrationDataImportDatahub.DONE
-        self.selected_rdi.linked_rdi.status = RegistrationDataImport.IN_REVIEW
-        self.selected_rdi.save()
-        self.selected_rdi.linked_rdi.save()
 
-        self.selected_rdi.linked_rdi.refresh_from_db()
+        self.selected_rdi.import_done = RegistrationDataImportDatahub.DONE
+        self.selected_rdi.save()
+
+        sibling = self.selected_rdi.linked_rdi
+        sibling.status = RegistrationDataImport.IN_REVIEW
+        sibling.save()
 
         return Response(
             [
