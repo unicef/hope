@@ -1,6 +1,8 @@
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField
@@ -8,12 +10,15 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.contrib.postgres.fields import ArrayField
 
 from model_utils import Choices
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hct_mis_api.apps.utils.models import (
+    ConcurrencyModel,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 
 class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
@@ -21,13 +26,18 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_ERROR = "Transaction Erroneous"
     STATUS_DISTRIBUTION_SUCCESS = "Distribution Successful"
     STATUS_NOT_DISTRIBUTED = "Not Distributed"
-    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS)
+    STATUS_FORCE_FAILED = "Force failed"
+
     STATUS_CHOICE = (
         (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),
         (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),
         (STATUS_SUCCESS, _("Transaction Successful")),
         (STATUS_ERROR, _("Transaction Erroneous")),
+        (STATUS_FORCE_FAILED, _("Force failed")),
     )
+
+    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS)
+
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
     ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
@@ -148,6 +158,12 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     transaction_reference_id = models.CharField(max_length=255, null=True)
     vision_id = models.CharField(max_length=255, null=True)
     registration_ca_id = models.CharField(max_length=255, null=True)
+
+    def mark_as_failed(self):
+        if self.status is self.STATUS_FORCE_FAILED:
+            raise ValidationError("Status shouldn't be failed")
+        self.status = self.STATUS_FORCE_FAILED
+        self.status_date = timezone.now()
 
 
 class ServiceProvider(TimeStampedUUIDModel):

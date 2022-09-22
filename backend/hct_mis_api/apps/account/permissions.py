@@ -73,6 +73,7 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS = auto()
     PAYMENT_VERIFICATION_DELETE = auto()
     PAYMENT_VERIFICATION_INVALID = auto()
+    PAYMENT_VERIFICATION_MARK_AS_FAILED = auto()
 
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()
@@ -430,6 +431,3 @@ class PermissionRelayMutation(BaseMutationPermissionMixin, ClientIDMutation):
     @classmethod
     def mutate_and_get_payload(cls, root, info, **kwargs):
         return super().mutate_and_get_payload(root, info, **kwargs)
-
-
-
