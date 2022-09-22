@@ -360,13 +360,13 @@ class TestPaymentPlanReconciliation(APITestCase):
             business_area=self.business_area,
             household=self.household_1,
             collector=self.individual_1,
-            delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_type=None,
             entitlement_quantity=1000,
             entitlement_quantity_usd=100,
             delivered_quantity=None,
             delivered_quantity_usd=None,
-            financial_service_provider=santander_fsp,
-            assigned_payment_channel=self.payment_channel_1_cash,  # TODO: not set
+            financial_service_provider=None,
+            assigned_payment_channel=None,
             excluded=False,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
@@ -471,7 +471,22 @@ class TestPaymentPlanReconciliation(APITestCase):
             lock_fsp_in_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
             "LOCKED_FSP",
         )
-        # TODO: observe that payments have received amounts set
+
+        payment_plan.refresh_from_db()
+        assert (
+            payment_plan.delivery_mechanisms.filter(
+                financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+            ).count()
+            == 1
+        )
+        assert (
+            payment_plan.not_excluded_payments.filter(
+                financial_service_provider__isnull=False,
+                assigned_payment_channel__isnull=False,
+                delivery_type__isnull=False,
+            ).count()
+            == 1
+        )
 
         send_for_approval_payment_plan_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,

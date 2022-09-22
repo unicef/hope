@@ -338,7 +338,6 @@ export type AssignFspToDeliveryMechanismMutation = {
 
 export type AvailableFspsForDeliveryMechanismsInput = {
   paymentPlanId: Scalars['ID'],
-  fspChoices: Array<Maybe<FspSelection>>,
 };
 
 export type BankAccountInfoNode = Node & {
@@ -1058,8 +1057,6 @@ export type DeliveryMechanismNode = Node & {
   status: Scalars['String'],
   deliveryMechanism?: Maybe<DeliveryMechanismPerPaymentPlanDeliveryMechanism>,
   deliveryMechanismOrder: Scalars['Int'],
-  entitlementQuantity?: Maybe<Scalars['Float']>,
-  entitlementQuantityUsd?: Maybe<Scalars['Float']>,
   name?: Maybe<Scalars['String']>,
   order?: Maybe<Scalars['Int']>,
   fsp?: Maybe<FinancialServiceProviderNode>,
@@ -1432,11 +1429,6 @@ export type FspChoices = {
    __typename?: 'FspChoices',
   deliveryMechanism?: Maybe<Scalars['String']>,
   fsps?: Maybe<Array<Maybe<FspChoice>>>,
-};
-
-export type FspSelection = {
-  fspId: Scalars['String'],
-  order: Scalars['Int'],
 };
 
 export type FspToDeliveryMechanismMappingInput = {
@@ -4109,7 +4101,8 @@ export enum PaymentPlanStatus {
   InApproval = 'IN_APPROVAL',
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
-  Accepted = 'ACCEPTED'
+  Accepted = 'ACCEPTED',
+  Reconciled = 'RECONCILED'
 }
 
 export enum PaymentRecordDeliveryType {
@@ -22465,7 +22458,6 @@ export type ResolversTypes = {
   RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
   AvailableFspsForDeliveryMechanismsInput: AvailableFspsForDeliveryMechanismsInput,
-  FspSelection: FspSelection,
   FspChoices: ResolverTypeWrapper<FspChoices>,
   FspChoice: ResolverTypeWrapper<FspChoice>,
   BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
@@ -22901,7 +22893,6 @@ export type ResolversParentTypes = {
   RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
   AvailableFspsForDeliveryMechanismsInput: AvailableFspsForDeliveryMechanismsInput,
-  FspSelection: FspSelection,
   FspChoices: FspChoices,
   FspChoice: FspChoice,
   BusinessAreaNode: BusinessAreaNode,
@@ -23569,8 +23560,6 @@ export type DeliveryMechanismNodeResolvers<ContextType = any, ParentType extends
   status?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanDeliveryMechanism']>, ParentType, ContextType>,
   deliveryMechanismOrder?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  entitlementQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  entitlementQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   order?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
