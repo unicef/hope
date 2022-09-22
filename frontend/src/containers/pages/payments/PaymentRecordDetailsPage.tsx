@@ -13,9 +13,11 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   PaymentRecordNode,
+  PaymentRecordStatus,
   useCashAssistUrlPrefixQuery,
   usePaymentRecordQuery,
 } from '../../../__generated__/graphql';
+import { ForceFailedButton } from '../../../components/payments/ForceFailedButton';
 
 export const PaymentRecordDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -62,7 +64,18 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
         title={`Payment ID ${paymentRecord.caId}`}
         breadCrumbs={breadCrumbsItems}
       >
-        <Box m={2}>
+        <>
+          {hasPermissions(
+            PERMISSIONS.PAYMENT_VERIFICATION_MARK_AS_FAILED,
+            permissions,
+          ) && (
+            <ForceFailedButton
+              paymentRecordId={paymentRecord.id}
+              disabled={
+                paymentRecord.status === PaymentRecordStatus.ForceFailed
+              }
+            />
+          )}
           <Button
             variant='contained'
             color='primary'
@@ -74,7 +87,7 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
           >
             {t('Open in CashAssist')}
           </Button>
-        </Box>
+        </>
       </PageHeader>
       <Box display='flex' flexDirection='column'>
         <PaymentRecordDetails
