@@ -291,7 +291,12 @@ class CashPlan(TimeStampedUUIDModel):
         else:
             params &= Q(verification__isnull=True)
 
-        payment_records = self.payment_records.filter(params).distinct()
+        payment_records = (
+            self.payment_records.select_related("head_of_household")
+            .filter(params)
+            .only("pk", "cash_plan", "head_of_household__phone_no", "head_of_household__phone_no_alternative")
+            .distinct()
+        )
 
         if extra_validation:
             payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
