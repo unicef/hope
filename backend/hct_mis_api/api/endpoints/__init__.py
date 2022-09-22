@@ -9,5 +9,5 @@ from .lookups import (
     ResidenceStatus,
     Roles,
 )
-from .rdi import CreateRDIView, PushToRDIView
+from .rdi import CompleteRDIView, CreateRDIView, PushToRDIView
 from .upload import UploadRDIView

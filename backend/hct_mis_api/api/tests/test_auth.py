@@ -6,7 +6,11 @@ from rest_framework.exceptions import AuthenticationFailed
 from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
 from hct_mis_api.api.tests.base import HOPEApiTestCase
 from hct_mis_api.apps.account.export_users_xlsx import User
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 
 
