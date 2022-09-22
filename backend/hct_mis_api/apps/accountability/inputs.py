@@ -31,3 +31,8 @@ class GetAccountabilityCommunicationMessageSampleSizeInput(graphene.InputObjectT
 class CreateAccountabilityCommunicationMessageInput(GetAccountabilityCommunicationMessageSampleSizeInput):
     title = graphene.String(required=True)
     body = graphene.String(required=True)
+
+
+class CreateFeedbackInput(graphene.InputObjectType):
+    business_area_slug = graphene.String(required=True)
+    issue_type = graphene.String(required=True)
