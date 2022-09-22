@@ -1,8 +1,7 @@
-import base64
 import logging
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
+from typing import Optional
 
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.transaction import atomic
 from django.utils import timezone
 
@@ -13,12 +12,14 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView
+from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_PARTIAL,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
-    NON_BENEFICIARY,
-    RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
@@ -26,7 +27,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
-    ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
     RegistrationDataImportDatahub,
@@ -34,35 +34,39 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 logger = logging.getLogger(__name__)
 
-DETAILS_POLICY = (
-    ["NO", "NO"],
-    ["FULL", "FULL"],
-    ["PARTIAL", "PARTIAL"],
-)
+
+def get_principals(people: list[dict]) -> tuple[dict, dict, Optional[dict]]:
+    head_of_household = None
+    alternate_collector = None
+    primary_collector = None
+    for data in people:
+        if data["relationship"] == HEAD:
+            if head_of_household:
+                raise ValidationError({"head_of_household": "Only one HoH allowed"})
+            head_of_household = data
+        if data["role"] == ROLE_PRIMARY:
+            if primary_collector:
+                raise ValidationError({"primary_collector": "Only one primary_collector allowed"})
+            primary_collector = data
+        elif data["role"] == ROLE_ALTERNATE:
+            if alternate_collector:
+                raise ValidationError({"alternate_collector": "Only one alternate_collector allowed"})
+            alternate_collector = data
+    if not head_of_household:
+        raise ValidationError({"head_of_household": "Required"})
+    if not primary_collector:
+        raise ValidationError({"primary_collector": "Required"})
+    return head_of_household, primary_collector, alternate_collector
 
 
 class MembersSerializer(serializers.ListSerializer):
     """List serializer for Individuals (members, collector) which belong to a Household"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.head_of_household = None
-        self.alternate_collector = None
-        self.primary_collector = None
 
     def validate(self, attrs):
-        for data in attrs:
-            if data["relationship"] == HEAD:
-                if self.head_of_household:
-                    raise ValidationError({"head_of_household": "Only one HoH allowed"})
-                self.head_of_household = data
-            if data["role"] == ROLE_PRIMARY:
-                if self.primary_collector:
-                    raise ValidationError({"primary_collector": "Invalid primary_collector number"})
-                self.primary_collector = data
-            elif data["role"] == ROLE_ALTERNATE:
-                if self.alternate_collector:
-                    raise ValidationError({"secondary_collector": "Invalid alternate_collector number"})
-                self.alternate_collector = data
+        get_principals(attrs)
         return attrs
 
 
@@ -79,6 +83,18 @@ class DocumentSerializer(serializers.ModelSerializer):
         ]
 
 
+class CollectDataMixin(serializers.Serializer):
+    collect_individual_data = serializers.CharField(required=False, allow_blank=True)
+
+    def validate_collect_individual_data(self, value):
+        if value in [COLLECT_TYPE_FULL, "FULL", "full"]:
+            return COLLECT_TYPE_FULL
+        if value in [COLLECT_TYPE_PARTIAL, "PARTIAL", "partial"]:
+            return COLLECT_TYPE_PARTIAL
+        if value in [COLLECT_TYPE_NONE, "NO", "N", "no"]:
+            return COLLECT_TYPE_NONE
+
+
 class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
@@ -91,6 +107,7 @@ class IndividualSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImportedIndividual
+        list_serializer_class = MembersSerializer
         exclude = [
             "id",
             "registration_data_import",
@@ -102,7 +119,6 @@ class IndividualSerializer(serializers.ModelSerializer):
             "kobo_asset_id",
             "mis_unicef_id",
         ]
-        list_serializer_class = MembersSerializer
 
     def validate_role(self, value):
         if value in (ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE):
@@ -115,89 +131,10 @@ class IndividualSerializer(serializers.ModelSerializer):
             return ROLE_ALTERNATE
         raise ValidationError(f"Invalid role '{value}'")
 
-    def save(self, **kwargs):
-        self.validated_data.pop("role")
-        return super().save(**kwargs)
 
-    def validate(self, attrs):
-        self.documents = DocumentSerializer(data=attrs.get("documents", []), many=True)
-        self.documents.is_valid(raise_exception=True)
-        return super().validate(attrs)
-
-    @atomic()
-    def create(self, validated_data):
-        self.documents = validated_data.pop("documents", [])
-        return super().create(validated_data)
-
-
-def get_photo_from_stream(stream):
-    if stream:
-        base64_img_bytes = stream.encode("utf-8")
-        decoded_image_data = base64.decodebytes(base64_img_bytes)
-        return SimpleUploadedFile("photo.png", decoded_image_data, content_type="image/png")
-
-    return None
-
-
-@dataclass
-class Totals:
-    individuals: int
-    households: int
-
-
-class HouseholdListSerializer(serializers.ListSerializer):
-
-    def save_document(self, member, doc):
-        ImportedDocument.objects.create(
-            document_number=doc["document_number"],
-            photo=get_photo_from_stream(doc["image"]),
-            doc_date=doc["doc_date"],
-            individual=member,
-            type=ImportedDocumentType.objects.get(country=doc["country"], type=doc["type"]),
-        )
-
-    def save_member(self, rdi, hh, member_data):
-        member_ser = IndividualSerializer(data=member_data)
-        member_ser.is_valid(raise_exception=True)
-        member_of = None
-        if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
-            member_of = hh
-        member = member_ser.save(household=member_of, registration_data_import=rdi)
-        for doc in member_ser.documents:
-            self.save_document(member, doc)
-        if member_data["relationship"] == HEAD:
-            assert member.household == hh
-            hh.head_of_household = member
-            hh.save()
-        if member_data["role"] == ROLE_PRIMARY:
-            hh.individuals_and_roles.create(individual=member, role=ROLE_PRIMARY)
-        elif member_data["role"] == ROLE_ALTERNATE:
-            hh.individuals_and_roles.create(individual=member, role=ROLE_ALTERNATE)
-
-    def save(self, **kwargs):
-        validated_data = [{**attrs, **kwargs} for attrs in self.validated_data]
-        rdi = kwargs.pop("rdi")
-        totals = Totals(0, 0)
-        for i, household_data in enumerate(validated_data):
-            totals.households += 1
-            hh_ser = HouseholdSerializer(data=household_data)
-            hh_ser.is_valid(raise_exception=True)
-            members: MembersSerializer = hh_ser.members
-            hoh_ser = IndividualSerializer(data=members.head_of_household)
-            hoh_ser.is_valid(raise_exception=True)
-            hh: ImportedHousehold = hh_ser.save(head_of_household=None, registration_data_import=rdi)
-            for member_data in members.validated_data:
-                totals.individuals += 1
-                self.save_member(rdi, hh, member_data)
-            if not hh.individuals_and_roles.filter(role=ROLE_PRIMARY).exists():
-                raise ValidationError({"primary_collector": "Missing primary collector"})
-        return totals
-
-
-class HouseholdSerializer(serializers.ModelSerializer):
+class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
-    collect_individual_data = serializers.CharField()
     members = IndividualSerializer(many=True)
     country_origin = serializers.CharField(allow_blank=True, required=False)
 
@@ -214,23 +151,9 @@ class HouseholdSerializer(serializers.ModelSerializer):
             "kobo_asset_id",
             "kobo_submission_time",
         ]
-        list_serializer_class = HouseholdListSerializer
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.members = None
-
-    def validate(self, attrs):
-        self.members = IndividualSerializer(data=attrs["members"], many=True)
-        self.members.is_valid(True)
-        return super().validate(attrs)
-
-    def save(self, **kwargs):
-        self.validated_data.pop("members")
-        return super().save(**kwargs)
 
 
-class RDINestedSerializer(serializers.ModelSerializer):
+class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.ModelSerializer):
     households = HouseholdSerializer(many=True)
 
     class Meta:
@@ -245,32 +168,29 @@ class RDINestedSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         created_by = validated_data.pop("user")
         households = validated_data.pop("households")
+        collect_individual_data = validated_data.pop("collect_individual_data")
+
         rdi = RegistrationDataImportDatahub.objects.create(**validated_data, business_area_slug=self.business_area.slug)
-        try:
-            hh = HouseholdSerializer(data=households, many=True)
-            hh.is_valid(True)
-            info: Totals = hh.save(rdi=rdi)
-            r2 = RegistrationDataImport(
-                **validated_data,
-                imported_by=created_by,
-                data_source=RegistrationDataImport.API,
-                number_of_individuals=info.individuals,
-                number_of_households=info.households,
-                datahub_id=rdi.pk,
-                business_area=self.business_area,
-            )
-            rdi.hct_id = r2.pk
-            rdi.save()
-        except BaseException as e:
-            logger.exception(e)
-            raise
-        return dict(id=rdi.pk, **asdict(info))
+        info = self.save_households(rdi, households, collect_individual_data)
+        r2 = RegistrationDataImport.objects.create(
+            **validated_data,
+            imported_by=created_by,
+            data_source=RegistrationDataImport.API,
+            number_of_individuals=info.individuals,
+            number_of_households=info.households,
+            datahub_id=str(rdi.pk),
+            business_area=self.business_area,
+        )
+
+        return dict(id=rdi.pk, public_id=r2.pk, **asdict(info))
 
 
 class UploadRDIView(HOPEAPIView):
     permission = Permissions.API_UPLOAD_RDI
 
     @swagger_auto_schema(request_body=RDINestedSerializer)
+    @atomic()
+    @atomic(using="registration_datahub")
     def post(self, request, business_area):
         serializer = RDINestedSerializer(data=request.data, business_area=self.selected_business_area)
         if serializer.is_valid():

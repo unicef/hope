@@ -8,17 +8,17 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    MALE,
     NON_BENEFICIARY,
     ROLE_PRIMARY,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    COLLECT_TYPE_FULL,
     ImportedDocumentType,
     ImportedHousehold,
-    ImportedIndividual,
     RegistrationDataImportDatahub,
 )
 
+from ...apps.registration_data.models import RegistrationDataImport
 from .base import HOPEApiTestCase
 
 
@@ -34,13 +34,18 @@ class CreateRDITests(HOPEApiTestCase):
     def test_create_rdi(self):
         data = {
             "name": "aaaa",
-            "number_of_households": 1,
-            "number_of_individuals": 1,
+            # "number_of_households": 1,
+            # "number_of_individuals": 1,
+            "collect_data_policy": "FULL",
         }
         response = self.client.post(self.url, data, format="json")
-        rdi = RegistrationDataImportDatahub.objects.filter(name="aaaa").first()
-        self.assertTrue(rdi)
-        self.assertEqual(response.json()["id"], str(rdi.id))
+        hrdi = RegistrationDataImportDatahub.objects.filter(name="aaaa").first()
+        self.assertTrue(hrdi)
+
+        rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
+        self.assertIsNotNone(rdi)
+
+        self.assertEqual(response.json()["id"], str(hrdi.id))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
 
 
@@ -66,7 +71,7 @@ class PushToRDITests(HOPEApiTestCase):
                 "members": [
                     {
                         "relationship": HEAD,
-                        "full_name": "John Doe",
+                        "full_name": "James Head #1",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
                         "role": "",
@@ -82,30 +87,66 @@ class PushToRDITests(HOPEApiTestCase):
                     },
                     {
                         "relationship": NON_BENEFICIARY,
-                        "full_name": "Mary Doe",
+                        "full_name": "Mary Primary #1",
                         "birth_date": "2000-01-01",
                         "role": ROLE_PRIMARY,
                         "sex": "FEMALE",
                     },
                 ],
-                "collect_individual_data": "FULL",
+                "collect_individual_data": COLLECT_TYPE_FULL,
                 "size": 1,
             }
         ]
         response = self.client.post(self.url, data, format="json")
-        # self.assertTrue(rdi)
-        # self.assertEqual(response.json()["id"], str(rdi.id))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
-        hoh = ImportedIndividual.objects.filter(birth_date="2000-01-01", full_name="John Doe", sex=MALE).first()
-        self.assertTrue(hoh)
-        hh: ImportedHousehold = hoh.household
-        self.assertEqual(hoh.household.village, "village1")
-        # check collectors
-        self.assertNotEqual(hoh.household.primary_collector, hoh)
-        self.assertIsInstance(hoh.household.primary_collector, ImportedIndividual)
-        self.assertIsNone(hoh.household.alternate_collector)
-        members = hh.individuals.all()
-        self.assertEqual(len(members), 1)
 
-        self.assertTrue(hoh.documents.exists())
-        self.assertTrue(hoh.documents.first().photo)
+        data = response.json()
+        hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
+        self.assertIsNotNone(hrdi)
+
+        hh = ImportedHousehold.objects.filter(registration_data_import=hrdi, village="village1").first()
+        self.assertIsNotNone(hh)
+        self.assertIsNotNone(hh.head_of_household)
+        self.assertIsNotNone(hh.primary_collector)
+        self.assertIsNone(hh.alternate_collector)
+        self.assertEqual(hh.collect_individual_data, COLLECT_TYPE_FULL)
+
+        self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")
+        self.assertEqual(hh.head_of_household.full_name, "James Head #1")
+
+        self.assertEqual(data["households"], 1)
+        self.assertEqual(data["individuals"], 2)
+
+
+class CompleteRDITests(HOPEApiTestCase):
+    databases = ["default", "registration_datahub"]
+    user_permissions = [Permissions.API_CREATE_RDI]
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.rdi = RegistrationDataImportDatahub.objects.create(
+            business_area_slug=cls.business_area.slug, import_done=RegistrationDataImport.LOADING
+        )
+        cls.rdi2 = RegistrationDataImport.objects.create(
+            business_area=cls.business_area,
+            number_of_individuals=0,
+            number_of_households=0,
+            datahub_id=cls.rdi.pk,
+            status=RegistrationDataImport.LOADING,
+        )
+        assert cls.rdi.linked_rdi == cls.rdi2
+
+        cls.url = reverse("api:rdi-complete", args=[cls.business_area.slug, str(cls.rdi.id)])
+
+    def test_complete(self):
+        data = {}
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, str(response.json()))
+        data = response.json()
+        self.assertDictEqual(data[0], {"id": str(self.rdi.id), "status": "DONE"})
+        self.assertDictEqual(data[1], {"id": str(self.rdi2.id), "status": "IN_REVIEW"})
+        self.rdi.refresh_from_db()
+        self.rdi2.refresh_from_db()
+        self.assertEqual(self.rdi.import_done, RegistrationDataImportDatahub.DONE)
+        self.assertEqual(self.rdi2.status, RegistrationDataImport.IN_REVIEW)

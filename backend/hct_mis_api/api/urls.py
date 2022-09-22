@@ -32,6 +32,7 @@ urlpatterns = [
     path("rdi/<slug:business_area>/upload/", endpoints.UploadRDIView().as_view(), name="rdi-upload"),
     path("rdi/<slug:business_area>/create/", endpoints.CreateRDIView().as_view(), name="rdi-create"),
     path("rdi/<slug:business_area>/<uuid:rdi>/push/", endpoints.PushToRDIView().as_view(), name="rdi-push"),
+    path("rdi/<slug:business_area>/<uuid:rdi>/completed/", endpoints.CompleteRDIView().as_view(), name="rdi-complete"),
     path("areas/", endpoints.AreaList().as_view(), name="area-list"),
     path("areatypes/", endpoints.AreaTypeList().as_view(), name="areatype-list"),
     path("lookups/document/", endpoints.DocumentType().as_view(), name="document-list"),
