@@ -784,7 +784,7 @@ class GrievanceDocument(UUIDModel):
         return self.file.path
 
     def __str__(self):
-        return self.name
+        return self.file_name
 
 
 @receiver(post_save, sender=TicketComplaintDetails)
