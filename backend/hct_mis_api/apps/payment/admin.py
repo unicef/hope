@@ -10,6 +10,9 @@ from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
+    VerificationPlanStatusChangeServices,
+)
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentRecord,
@@ -99,6 +102,15 @@ class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HO
                 "Successfully executed",
                 template="admin_extra_buttons/confirm.html",
             )
+
+    def activate(self, request, pk):
+        return confirm_action(
+            self,
+            request,
+            lambda _: VerificationPlanStatusChangeServices(CashPlanPaymentVerification.objects.get(pk=pk)).activate(),
+            "This action will trigger Cash Plan Payment Verification activation (also sending messages via Rapid Pro).",
+            "Successfully activated.",
+        )
 
 
 @admin.register(PaymentVerification)
