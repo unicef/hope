@@ -37,8 +37,8 @@ class HOPEAuthentication(TokenAuthentication):
         try:
             token = (
                 APIToken.objects.select_related("user")
-                .filter(valid_from__gte=timezone.now())
-                .filter(Q(valid_from__lte=timezone.now()) | Q(valid_from__isnull=True))
+                .filter(valid_from__lte=timezone.now())
+                .filter(Q(valid_to__gte=timezone.now()) | Q(valid_to__isnull=True))
                 .get(key=key)
             )
         except APIToken.DoesNotExist:
@@ -55,5 +55,5 @@ class HOPEPermission(IsAuthenticated):
         if bool(request.user and request.user.is_authenticated):
             if view.permission == "any":
                 return True
-            return request.user.user_roles.filter(role__permissions__contains=[view.permission]).exists()
+            return request.user.user_roles.filter(role__permissions__contains=[view.permission.name]).exists()
         return False
