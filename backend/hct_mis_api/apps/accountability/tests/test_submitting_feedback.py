@@ -27,6 +27,7 @@ query allFeedbacks($businessAreaSlug: String!) {
         edges {
             node {
                 id
+                householdLookup
             }
         }
     }
@@ -64,6 +65,7 @@ query allFeedbacks($businessAreaSlug: String!) {
             "businessAreaSlug": self.business_area.slug,
             "issueType": Feedback.POSITIVE_FEEDBACK,
             "description": "Test description",
+            "createdBy": encode_id_base64(self.user.pk, "User"),
         }
 
     def create_new_feedback(self, data=None):
@@ -81,7 +83,6 @@ query allFeedbacks($businessAreaSlug: String!) {
 
     def test_getting_all_feedbacks(self):
         self.create_new_feedback()
-        # TODO
         response = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
             context={"user": self.user},
@@ -93,7 +94,30 @@ query allFeedbacks($businessAreaSlug: String!) {
         self.assertEqual(len(response["data"]["allFeedbacks"]["edges"]), 1)
 
     def test_filtering_feedbacks(self):
-        pass  # TODO
+        self.create_new_feedback(
+            data=self.create_dummy_correct_input()
+            | {
+                "householdLookup": encode_id_base64(self.household.pk, "Household"),
+                "individualLookup": encode_id_base64(self.individuals[0].pk, "Individual"),
+                "program": encode_id_base64(self.program.pk, "Program"),
+            }
+        )
+
+        def filter_it(variables):
+            print("X", {"businessAreaSlug": self.business_area.slug} | variables)
+            response = self.graphql_request(
+                request_string=self.ALL_FEEDBACKS_QUERY,
+                context={"user": self.user},
+                variables={"businessAreaSlug": self.business_area.slug} | variables,
+            )
+            assert "errors" not in response, response["errors"]
+            print("RS", response["data"]["allFeedbacks"]["edges"])
+            return response["data"]["allFeedbacks"]["edges"]
+
+        assert len(filter_it({"businessAreaSlug": self.business_area.slug})) == 1
+
+        assert len(filter_it({"householdId": encode_id_base64(self.household.pk, "Household")})) == 1
+        assert len(filter_it({"householdId": encode_id_base64(self.individuals[0].pk, "Individual")})) == 0
 
     def test_failing_to_create_new_feedback(self):
         def expect_failure(data):
