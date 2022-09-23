@@ -64,5 +64,5 @@ class ViewAuthView(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, str(response.json()))
         data = response.json()
         self.assertDictEqual(
-            data, {"detail": "You do not have permission to perform this action. " "Permissions.API_CREATE_RDI"}
+            data, {"detail": "You do not have permission to perform this action. Permissions.API_CREATE_RDI"}
         )
