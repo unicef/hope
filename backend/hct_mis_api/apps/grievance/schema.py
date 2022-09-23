@@ -1,7 +1,6 @@
 import datetime
 import logging
 
-from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db.models import Case, DateField, F, Q, When
 from django.utils import timezone
@@ -52,7 +51,8 @@ from hct_mis_api.apps.grievance.models import (
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails, GrievanceTicketThrough, GrievanceDocument,
+    TicketSystemFlaggingDetails,
+    GrievanceDocument,
 )
 from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -62,6 +62,16 @@ from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
+
+
+class GrievanceDocumentNode(DjangoObjectType):
+    file_size = graphene.String(source='size')
+    file_path = graphene.String(source='path')
+
+    class Meta:
+        model = GrievanceDocument
+        exclude = ("file", )
+        interfaces = (relay.Node, )
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -85,6 +95,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     total_days = graphene.String()
     partner = graphene.Field(PartnerType)
     programme = graphene.Field(ProgramNode)
+    documents = graphene.List(GrievanceDocumentNode)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -159,6 +170,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_programme(grievance_ticket: GrievanceTicket, info):
         return grievance_ticket.programme
+
+    @staticmethod
+    def resolve_documents(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.documents.all()
 
 
 class TicketNoteNode(DjangoObjectType):
@@ -410,21 +425,6 @@ class ChartGrievanceTicketsNode(ChartDatasetNode):
     total_number_of_open_sensitive = graphene.Int()
 
 
-class GrievanceDocumentNode(DjangoObjectType):
-    file_size = graphene.String(source='size')
-    file_path = graphene.String(source='path')
-    business_area_slug = graphene.String()
-
-    class Meta:
-        model = GrievanceDocument
-        exclude = ("file", )
-        interfaces = (relay.Node, )
-
-    @staticmethod
-    def resolve_business_area_slug(grievance_document: GrievanceDocument, info):
-        return grievance_document.grievance_ticket.business_area.slug
-
-
 class Query(graphene.ObjectType):
     grievance_ticket = relay.Node.Field(GrievanceTicketNode)
     all_grievance_ticket = DjangoPermissionFilterConnectionField(
@@ -470,12 +470,12 @@ class Query(graphene.ObjectType):
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
     grievance_ticket_priority_choices = graphene.List(ChoiceObjectInt)
     grievance_ticket_urgency_choices = graphene.List(ChoiceObjectInt)
-    all_grievance_documents = graphene.List(GrievanceDocumentNode)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         return (
             GrievanceTicket.objects
-            .filter(ignored=False).select_related("assigned_to", "created_by")
+            .filter(ignored=False)
+            .select_related("assigned_to", "created_by")
             .annotate(
                 total=Case(
                     When(
@@ -604,6 +604,3 @@ class Query(graphene.ObjectType):
                 category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
             ).count(),
         }
-
-    def resolve_all_grievance_documents(self, info, **kwargs):
-        return GrievanceDocument.objects.all()
