@@ -10,8 +10,8 @@ from hct_mis_api.apps.payment.models import (
 
 
 class CreatePaymentVerifications:
-    def __init__(self, cash_plan_verification: PaymentVerificationPlan, payment_records: List[PaymentRecord]):
-        self.cash_plan_verification = cash_plan_verification
+    def __init__(self, payment_verification_plan: PaymentVerificationPlan, payment_records: List[PaymentRecord]):
+        self.payment_verification_plan = payment_verification_plan
         self.payment_records = payment_records
 
     def create(self):
@@ -19,7 +19,7 @@ class CreatePaymentVerifications:
         for payment_record in self.payment_records:
             payment_record_verification = PaymentVerification(
                 status_date=timezone.now(),
-                payment_verification_plan=self.cash_plan_verification,
+                payment_verification_plan=self.payment_verification_plan,
                 payment_record=payment_record,
             )
             payment_record_verifications_to_create.append(payment_record_verification)

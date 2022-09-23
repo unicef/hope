@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+import django_fsm
 
 
 class Migration(migrations.Migration):
@@ -24,18 +25,6 @@ class Migration(migrations.Migration):
             old_name='cash_plan_payment_verification',
             new_name='payment_verification_plan',
         ),
-        migrations.AddField(
-            model_name='paymentverificationplan',
-            name='payment_plan',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='verification_plans', to='payment.paymentplan'),
-        ),
-        migrations.AddField(
-            model_name='paymentverificationsummary',
-            name='payment_plan',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE,
-                                       related_name='payment_verification_summary', to='payment.paymentplan'),
-        ),
         migrations.AlterField(
             model_name='paymentverificationplan',
             name='cash_plan',
@@ -53,5 +42,14 @@ class Migration(migrations.Migration):
             name='payment_verification_plan',
             field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE,
                                        related_name='xlsx_verification_file', to='payment.paymentverificationplan'),
+        ),
+        migrations.AlterField(
+            model_name='paymentplan',
+            name='status',
+            field=django_fsm.FSMField(choices=[('OPEN', 'Open'), ('LOCKED', 'Locked'), ('LOCKED_FSP', 'Locked FSP'),
+                                               ('IN_APPROVAL', 'In Approval'), ('IN_AUTHORIZATION', 'In Authorization'),
+                                               ('IN_REVIEW', 'In Review'), ('ACCEPTED', 'Accepted'),
+                                               ('RECONCILED', 'Reconciled')], db_index=True, default='OPEN',
+                                      max_length=50),
         ),
     ]

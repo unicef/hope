@@ -3,6 +3,7 @@ import math
 import graphene
 
 from decimal import Decimal
+from base64 import b64decode
 
 from django.db import transaction
 from django.db.models import Q
@@ -11,7 +12,7 @@ from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold, Individual
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import XlsxPaymentPlanImportPerFspService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -29,11 +30,9 @@ from hct_mis_api.apps.payment.celery_tasks import (
     fsp_generate_xlsx_report_task,
     payment_plan_apply_steficon,
     import_payment_plan_payment_list_from_xlsx,
-    import_payment_plan_payment_list_per_fsp_from_xlsx,
 )
 from hct_mis_api.apps.payment.inputs import (
-    CreatePaymentVerificationInput,
-    EditCashPlanPaymentVerificationInput,
+    CreateUpdatePaymentVerificationInput,
     ActionPaymentPlanInput,
     CreateFinancialServiceProviderInput,
     CreatePaymentPlanInput,
@@ -60,7 +59,7 @@ from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
 )
 from hct_mis_api.apps.payment.models import CashPlan
-from hct_mis_api.apps.program.schema import CashPlanNode, PaymentVerificationPlan
+from hct_mis_api.apps.program.schema import CashPlanNode, PaymentVerificationPlan, GenericPaymentPlanNode
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -68,66 +67,72 @@ logger = logging.getLogger(__name__)
 
 
 class CreatePaymentVerificationMutation(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        input = CreatePaymentVerificationInput(required=True)
+        input = CreateUpdatePaymentVerificationInput(required=True)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        cash_plan_id = decode_id_string(input.get("cash_plan_id"))
-        cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
+        payment_plan_id = input.get("payment_plan_id")
+        node_name, obj_id = b64decode(payment_plan_id).decode().split(":")
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, cash_plan.business_area)
+        if node_name == "CashPlanNode":
+            payment_plan_object = get_object_or_404(CashPlan, id=obj_id)
+        else:
+            payment_plan_object = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
-        cash_plan_verification = VerificationPlanCrudServices.create(cash_plan, input)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
+
+        verification_plan = VerificationPlanCrudServices.create(payment_plan_object, input)
 
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
             None,
-            cash_plan_verification,
+            verification_plan,
         )
-        cash_plan.refresh_from_db()
-        return cls(cash_plan=cash_plan)
+        payment_plan_object.refresh_from_db()
+
+        return cls(payment_plan=payment_plan_object)
 
 
 class EditPaymentVerificationMutation(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        input = EditCashPlanPaymentVerificationInput(required=True)
+        input = CreateUpdatePaymentVerificationInput(required=True)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        cash_plan_verification_id = decode_id_string(input.get("cash_plan_payment_verification_id"))
-        cash_plan_verification = get_object_or_404(PaymentVerificationPlan, id=cash_plan_verification_id)
+        payment_verification_id = decode_id_string(input.get("payment_verification_id"))
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_id)
 
-        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_UPDATE, cash_plan_verification.business_area)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_UPDATE, payment_verification_plan.business_area)
 
-        old_cash_plan_verification = copy_model_object(cash_plan_verification)
-        cash_plan_verification.verification_channel = input.get("verification_channel")
-        cash_plan_verification.payment_record_verifications.all().delete()
+        old_payment_verification_plan = copy_model_object(payment_verification_plan)
+        payment_verification_plan.verification_channel = input.get("verification_channel")
+        payment_verification_plan.payment_record_verifications.all().delete()
 
-        cash_plan_verification = VerificationPlanCrudServices.update(cash_plan_verification, input)
+        payment_verification_plan = VerificationPlanCrudServices.update(payment_verification_plan, input)
 
-        cash_plan_verification.cash_plan.refresh_from_db()
+        payment_verification_plan.refresh_from_db()
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            old_cash_plan_verification,
-            cash_plan_verification,
+            old_payment_verification_plan,
+            payment_verification_plan,
         )
-        return cls(cash_plan=cash_plan_verification.cash_plan)
+        return cls(payment_plan=payment_verification_plan)
 
 
 class ActivateCashPlanVerificationMutation(PermissionMutation, ValidationErrorMutationMixin):
@@ -1025,10 +1030,11 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
 
 class Mutations(graphene.ObjectType):
-    create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
+    create_payment_verification = CreatePaymentVerificationMutation.Field()
+    edit_payment_verification = EditPaymentVerificationMutation.Field()
+
     create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
     edit_financial_service_provider = EditFinancialServiceProviderMutation.Field()
-    edit_cash_plan_payment_verification = EditPaymentVerificationMutation.Field()
     export_xlsx_cash_plan_verification = ExportXlsxCashPlanVerification.Field()
     import_xlsx_cash_plan_verification = ImportXlsxCashPlanVerification.Field()
     activate_cash_plan_payment_verification = ActivateCashPlanVerificationMutation.Field()
