@@ -1,4 +1,4 @@
-from unittest import TestCase
+from django.test import TestCase
 from unittest.mock import MagicMock, Mock
 
 from django.urls import reverse
@@ -21,7 +21,7 @@ class HOPEPermissionTest(TestCase):
     def setUp(self):
         self.user: User = UserFactory()
         self.business_area = BusinessAreaFactory(name="Afghanistan")
-        self.role = RoleFactory(subsystem="API", permissions=[Permissions.API_UPLOAD_RDI])
+        self.role = RoleFactory(subsystem="API", permissions=[Permissions.API_UPLOAD_RDI.name])
         self.user.user_roles.create(role=self.role, business_area=self.business_area)
 
     def test_permissions(self):
