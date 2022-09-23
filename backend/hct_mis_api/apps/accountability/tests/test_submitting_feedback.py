@@ -8,6 +8,8 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import CountryFactory
 
 
 class TestFeedback(APITestCase):
@@ -205,11 +207,40 @@ query allFeedbacks(
         self.assertEqual(feedback.comments, "Test comments")
 
     # TODO
-    # def test_optional_linked_grievance
-    # def test_optional_program
-    # def test_optional_language
-    # def test_optional_area
-    # def test_optional_admin2
+    # def test_optional_linked_grievance(self):
+    #     pass
 
+    def test_optional_program(self):
+        data = self.create_dummy_correct_input() | {
+            "program": encode_id_base64(self.program.pk, "Program"),
+        }
+        self.submit_feedback(data)
+        feedback = Feedback.objects.first()
+        self.assertEqual(feedback.program, self.program)
 
-# TODO: parametrize
+    def test_optional_language(self):
+        data = self.create_dummy_correct_input() | {
+            "language": "en",
+        }
+        self.submit_feedback(data)
+        feedback = Feedback.objects.first()
+        self.assertEqual(feedback.language, "en")
+
+    def test_optional_area(self):
+        data = self.create_dummy_correct_input() | {
+            "area": "Test area",
+        }
+        self.submit_feedback(data)
+        feedback = Feedback.objects.first()
+        self.assertEqual(feedback.area, "Test area")
+
+    def test_optional_admin2(self):
+        country = CountryFactory()
+        area_type = geo_models.AreaType.objects.create(name="X", area_level=1, country=country)
+        admin2 = geo_models.Area.objects.create(p_code="SO25", name="SO25", area_type=area_type)
+        data = self.create_dummy_correct_input() | {
+            "admin2": encode_id_base64(admin2.pk, "Area"),
+        }
+        self.submit_feedback(data)
+        feedback = Feedback.objects.first()
+        self.assertEqual(feedback.admin2, admin2)
