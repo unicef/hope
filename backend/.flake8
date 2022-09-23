@@ -15,6 +15,8 @@ exclude =
     build,
     # This contains builds of flake8 that we don't want to check
     dist
+    ~*
+
 ignore =
     # black formatting related
     E203, # whitespace before ':'
@@ -22,7 +24,7 @@ ignore =
     W503, # line break before binary operator
     F405, # may be undefined, or defined from star imports
     E731, # lamda expressions
-    # 
+    #
     W291, # trailing whitespace
     W293, # blank line contains whitespace
     E303, # too many blank lines
