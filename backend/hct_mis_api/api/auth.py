@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import exceptions
-from rest_framework.authentication import TokenAuthentication, get_authorization_header
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from .models import APIToken
