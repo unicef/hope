@@ -66,4 +66,4 @@ class FeedbackFilter(FilterSet):
 
     class Meta:
         model = Feedback
-        fields = "business_area_slug"
+        fields = ("business_area_slug",)
