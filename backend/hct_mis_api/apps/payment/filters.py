@@ -28,7 +28,6 @@ class PaymentRecordFilter(FilterSet):
             "status",
             Lower("name"),
             "status_date",
-            "cash_assist_id",
             Lower("head_of_household__full_name"),
             "total_person_covered",
             "distribution_modality",
