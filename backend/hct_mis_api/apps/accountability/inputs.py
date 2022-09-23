@@ -45,3 +45,4 @@ class CreateFeedbackInput(graphene.InputObjectType):
     language = graphene.String()
     consent = graphene.Boolean()
     program = graphene.ID()
+    created_by = graphene.ID(required=True)
