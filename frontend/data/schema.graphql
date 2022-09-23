@@ -554,6 +554,7 @@ input CreateFeedbackInput {
   language: String
   consent: Boolean
   program: ID
+  createdBy: ID!
 }
 
 type CreateFeedbackMutation {
@@ -842,6 +843,8 @@ type FeedbackNode implements Node {
   language: String!
   consent: Boolean!
   program: ProgramNode
+  createdBy: UserNode
+  linkedGrievance: GrievanceTicketNode
 }
 
 type FeedbackNodeConnection {
@@ -969,6 +972,7 @@ type GrievanceTicketNode implements Node {
   positiveFeedbackTicketDetails: TicketPositiveFeedbackDetailsNode
   negativeFeedbackTicketDetails: TicketNegativeFeedbackDetailsNode
   referralTicketDetails: TicketReferralDetailsNode
+  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   household: HouseholdNode
   individual: IndividualNode
   paymentRecord: PaymentRecordNode
@@ -3948,6 +3952,7 @@ type UserNode implements Node {
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
 }
 
