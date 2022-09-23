@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_SUB_CATEGORIES,
 } from '../../../utils/constants';
 import {
   grievanceTicketBadgeColors,
@@ -51,9 +50,6 @@ export const GrievancesDetails = ({
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
-  const subCategoryChoices: {
-    [id: number]: string;
-  } = reduceChoices(choicesData.grievanceTicketSubCategoryChoices);
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
@@ -63,15 +59,14 @@ export const GrievancesDetails = ({
         )[0].name
     : '-';
 
-  const showSubCategory =
-    ticket.category === +GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
   const showIssueType =
-    ticket.category === +GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    ticket.category === +GRIEVANCE_CATEGORIES.DATA_CHANGE;
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString() ||
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
+  ticket.category.toString() === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString();
   const showProgramme =
     ticket.issueType !== +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
   const showPartner =
-    ticket.subCategory === +GRIEVANCE_SUB_CATEGORIES.PARTNER_COMPLAINT;
+    ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
 
   return (
     <Grid item xs={12}>
@@ -124,13 +119,6 @@ export const GrievancesDetails = ({
                 value: <span>{categoryChoices[ticket.category]}</span>,
                 size: 3,
               },
-              showSubCategory && {
-                label: t('Issue Type'),
-                value: (
-                  <span>{subCategoryChoices[ticket.subCategory] || '-'}</span>
-                ),
-                size: 3,
-              },
               showIssueType && {
                 label: t('Issue Type'),
                 value: <span>{issueType}</span>,
@@ -176,7 +164,7 @@ export const GrievancesDetails = ({
                     )}
                   </span>
                 ),
-                size: showSubCategory || showIssueType ? 3 : 6,
+                size: showIssueType ? 3 : 6,
               },
               {
                 label: t('Payment ID'),

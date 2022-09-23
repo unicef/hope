@@ -7,6 +7,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+from hct_mis_api.apps.grievance.documents import bulk_update_assigned_to
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.payment.models import PaymentRecord
@@ -95,7 +97,6 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     description = graphene.String(required=True)
     assigned_to = graphene.GlobalID(node=UserNode, required=False)
     category = graphene.Int(required=True)
-    sub_category = graphene.Int()
     issue_type = graphene.Int()
     admin = graphene.String()
     area = graphene.String()
@@ -122,7 +123,6 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     household = graphene.GlobalID(node=HouseholdNode, required=False)
     individual = graphene.GlobalID(node=IndividualNode, required=False)
     payment_record = graphene.GlobalID(node=PaymentRecordNode, required=False)
-    sub_category = graphene.Int()
     extras = UpdateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
@@ -175,7 +175,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             "not_allowed": ["extras.category.grievance_complaint_ticket_extras"],
         },
         GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: {
-            "required": [],
+            "required": ["issue_type"],
             "not_allowed": ["extras.category.sensitive_grievance_ticket_extras"],
         },
         GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: {
@@ -445,6 +445,12 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 
         if arg("payment_record") is not None:
             payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(arg("payment_record")))
+
+        if arg("priority") is not None:
+            grievance_ticket.priority = arg("priority")
+
+        if arg("urgency") is not None:
+            grievance_ticket.urgency = arg("urgency")
 
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         business_area = grievance_ticket.business_area
@@ -822,6 +828,7 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
 
         if grievance_tickets.exists():
             grievance_tickets.update(assigned_to=assigned_to)
+            bulk_update_assigned_to(grievance_tickets_ids, assigned_to_id)
 
         return cls(grievance_tickets=GrievanceTicket.objects.filter(id__in=grievance_tickets_ids))
 

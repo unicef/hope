@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from django_filters import (
     CharFilter,
@@ -25,6 +25,21 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.core.utils import choices_to_dict
 
 
+class GrievanceOrderingFilter(OrderingFilter):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.extra['choices'] += [
+            ('linked_tickets', 'Linked tickets'),
+            ('-linked_tickets', 'Linked tickets (descending)'),
+        ]
+
+    def filter(self, qs, value):
+        if any(v in ['linked_tickets', '-linked_tickets'] for v in value):
+            return qs.annotate(linked_tickets_count=Count("linked_tickets")).order_by(f"{value[0]}_count")
+        return super().filter(qs, value)
+
+
 class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
     USE_SPECIFIC_FIELDS_AS_ELASTIC_SEARCH = (
         "search",
@@ -38,6 +53,7 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         "priority",
         "urgency",
         "grievance_type",
+        "grievance_status",
         "business_area",
     )
 
@@ -171,6 +187,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             "household_unicef_id",
             "issue_type",
             "priority",
+            "urgency",
             "total_days",
         )
     )

@@ -13,6 +13,8 @@ import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
 import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
+import Assessment from '@material-ui/icons/Assessment';
+import List from '@material-ui/icons/List';
 import InfoIcon from '@material-ui/icons/Info';
 import React from 'react';
 import { PERMISSIONS } from '../../../config/permissions';
@@ -105,14 +107,14 @@ export const menuItems = [
         name: 'Grievance Tickets',
         href: '/grievance-and-feedback/tickets',
         selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
-        icon: <></>,
+        icon: <List/>,
         permissionModule: 'HOUSEHOLDS'
       },
       {
         name: 'Grievance Dashboard',
         href: '/grievance-and-feedback/dashboard',
         selectedRegexp: /^\/grievance-and-feedback\/dashboard.*$/,
-        icon: <></>,
+        icon: <Assessment/>,
         permissionModule: 'INDIVIDUALS'
       }
     ],
