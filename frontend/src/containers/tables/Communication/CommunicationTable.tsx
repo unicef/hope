@@ -41,7 +41,7 @@ export const CommunicationTable = ({
         defaultOrderDirection='desc'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <CommunicationTableRow key={row.id} message={row} />
+          <CommunicationTableRow key={row.id} message={row} canViewDetails />
         )}
       />
     </TableWrapper>
