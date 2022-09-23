@@ -82,7 +82,7 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
           canViewHouseholdDetails={canViewHouseholdDetails}
           canViewIndividualDetails={canViewIndividualDetails}
         />
-        <Messages messages={ticket.ticketNotes} canAddMessage={canAddMessage} />
+        {/* <Messages messages={ticket.ticketNotes} canAddMessage={canAddMessage} /> */}
         <LinkedGrievance ticket={ticket} />
       </Grid>
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (

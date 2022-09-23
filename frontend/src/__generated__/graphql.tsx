@@ -7088,6 +7088,22 @@ export type TargetPopulationDetailedFragment = (
   )> }
 );
 
+export type CreateFeedbackTicketMutationVariables = {
+  input: CreateFeedbackInput
+};
+
+
+export type CreateFeedbackTicketMutation = (
+  { __typename?: 'Mutations' }
+  & { createFeedback: Maybe<(
+    { __typename?: 'CreateFeedbackMutation' }
+    & { feedback: Maybe<(
+      { __typename?: 'FeedbackNode' }
+      & Pick<FeedbackNode, 'id'>
+    )> }
+  )> }
+);
+
 export type CheckAgainstSanctionListUploadMutationVariables = {
   file: Scalars['Upload']
 };
@@ -11365,6 +11381,57 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   }
 }
     `;
+export const CreateFeedbackTicketDocument = gql`
+    mutation CreateFeedbackTicket($input: CreateFeedbackInput!) {
+  createFeedback(input: $input) {
+    feedback {
+      id
+    }
+  }
+}
+    `;
+export type CreateFeedbackTicketMutationFn = ApolloReactCommon.MutationFunction<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>;
+export type CreateFeedbackTicketComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>, 'mutation'>;
+
+    export const CreateFeedbackTicketComponent = (props: CreateFeedbackTicketComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables> mutation={CreateFeedbackTicketDocument} {...props} />
+    );
+    
+export type CreateFeedbackTicketProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables> & TChildProps;
+export function withCreateFeedbackTicket<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateFeedbackTicketMutation,
+  CreateFeedbackTicketMutationVariables,
+  CreateFeedbackTicketProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables, CreateFeedbackTicketProps<TChildProps>>(CreateFeedbackTicketDocument, {
+      alias: 'createFeedbackTicket',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateFeedbackTicketMutation__
+ *
+ * To run a mutation, you first call `useCreateFeedbackTicketMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateFeedbackTicketMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createFeedbackTicketMutation, { data, loading, error }] = useCreateFeedbackTicketMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateFeedbackTicketMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>(CreateFeedbackTicketDocument, baseOptions);
+      }
+export type CreateFeedbackTicketMutationHookResult = ReturnType<typeof useCreateFeedbackTicketMutation>;
+export type CreateFeedbackTicketMutationResult = ApolloReactCommon.MutationResult<CreateFeedbackTicketMutation>;
+export type CreateFeedbackTicketMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>;
 export const CheckAgainstSanctionListUploadDocument = gql`
     mutation CheckAgainstSanctionListUpload($file: Upload!) {
   checkAgainstSanctionList(file: $file) {
