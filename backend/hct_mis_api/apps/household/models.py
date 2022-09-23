@@ -459,19 +459,15 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     def status(self):
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, save=True):
+    def withdraw(self):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
+        self.save()
 
-        if save:
-            self.save()
-
-    def unwithdraw(self, save=True):
+    def unwithdraw(self):
         self.withdrawn = False
         self.withdrawn_date = None
-
-        if save:
-            self.save()
+        self.save()
 
     def set_sys_field(self, key, value):
         if "sys" not in self.user_fields:
@@ -859,19 +855,17 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def sanction_list_last_check(self):
         return cache.get("sanction_list_last_check")
 
-    def withdraw(self, save=True):
+    def withdraw(self):
+        self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
+        self.save()
 
-        if save:
-            self.save()
-
-    def unwithdraw(self, save=True):
+    def unwithdraw(self):
+        self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)
         self.withdrawn = False
         self.withdrawn_date = None
-
-        if save:
-            self.save()
+        self.save()
 
     def mark_as_duplicate(self, original_individual=None):
         if original_individual is not None:

@@ -6,15 +6,20 @@ import { LOGIN_URL } from '../../../config';
 export function ProfilePage(): React.ReactElement {
   const location = useLocation();
   const { error } = useLoggedCheckerQuery({ fetchPolicy: 'network-only' });
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next') ? params.get('next') : '/';
   useEffect(() => {
     if (error) {
       window.location.replace(
         `${LOGIN_URL}?next=${location.pathname}${location.search}`,
       );
     }
+    if(next && next.startsWith('/api/')){
+      window.location.replace(
+        next,
+      );
+    }
   });
-  const params = new URLSearchParams(location.search);
-  const next = params.get('next') ? params.get('next') : '/';
   if (error) {
     return null;
   }

@@ -807,3 +807,5 @@ if PROFILING:
 
 
 SWAGGER_SETTINGS = {"LOGOUT_URL": reverse_lazy("logout"), "LOGIN_URL": "/"}
+
+MAX_STORAGE_FILE_SIZE = 30

@@ -325,3 +325,31 @@ class CustomModelEntry(ModelEntry):
 
 class CustomDatabaseScheduler(DatabaseScheduler):
     Entry = CustomModelEntry
+
+
+class StorageFile(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Created by"),
+    )
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
+    file = models.FileField(upload_to="files")
+
+    @property
+    def file_name(self):
+        return self.file.name
+
+    @property
+    def file_url(self):
+        return self.file.url
+
+    @property
+    def file_size(self):
+        return self.file.size
+
+    def __str__(self):
+        return self.file.name
