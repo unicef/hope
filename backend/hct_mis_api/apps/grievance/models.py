@@ -11,6 +11,7 @@ from django.db.models import JSONField, Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from model_utils.models import UUIDModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
@@ -764,18 +765,15 @@ class TicketReferralDetails(TimeStampedUUIDModel):
     )
 
 
-class GrievanceDocument(models.Model):
+class GrievanceDocument(UUIDModel):
     created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     grievance_ticket = models.ForeignKey(
         GrievanceTicket, null=True, related_name="documents", on_delete=models.SET_NULL
     )
-    business_area_slug = models.CharField(max_length=200, blank=True, null=True)
     file = models.FileField(upload_to="grievance_documents", blank=True, null=True)
-
-    @property
-    def name(self):
-        return self.file.name
+    file_name = models.CharField(max_length=200, null=False)
+    content_type = models.CharField(max_length=50, null=False)
 
     @property
     def size(self):
@@ -784,10 +782,6 @@ class GrievanceDocument(models.Model):
     @property
     def path(self):
         return self.file.path
-
-    @property
-    def mimetype(self):
-        return self.file.file.content_type
 
     def __str__(self):
         return self.name

@@ -1275,12 +1275,11 @@ class UploadDocumentsMutation(graphene.Mutation):
     success = graphene.Boolean()
 
     class Arguments:
-        business_area_slug = graphene.String(required=True)
         grievance_ticket_id = graphene.NonNull(graphene.ID)
         files = graphene.NonNull(graphene.List(Upload))
 
     @classmethod
-    def mutate(cls, root, info, business_area_slug, grievance_ticket_id, files):
+    def mutate(cls, root, info, grievance_ticket_id, files):
         if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
             raise GraphQLError("Total size of files can not be larger than 25mb.")
 
@@ -1289,9 +1288,10 @@ class UploadDocumentsMutation(graphene.Mutation):
             validate_file(file)
             GrievanceDocument.objects.create(
                 created_by_id=info.context.user.id,
-                business_area_slug=business_area_slug,
                 grievance_ticket_id=decode_id_string(grievance_ticket_id),
-                file=file
+                file=file,
+                content_type=file.content_type,
+                file_name=file.name
             )
 
         return UploadDocumentsMutation(success=True)
