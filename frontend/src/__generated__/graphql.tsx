@@ -4032,7 +4032,7 @@ export type QueryAllAccountabilityCommunicationMessagesArgs = {
   numberOfRecipients_Gte?: Maybe<Scalars['Int']>,
   numberOfRecipients_Lte?: Maybe<Scalars['Int']>,
   targetPopulation?: Maybe<Scalars['ID']>,
-  createdBy?: Maybe<Scalars['String']>,
+  createdBy?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   program?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
@@ -8008,6 +8008,50 @@ export type UpdateTpMutation = (
   )> }
 );
 
+export type AllAccountabilityCommunicationMessagesQueryVariables = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  numberOfRecipients?: Maybe<Scalars['Int']>,
+  numberOfRecipients_Gte?: Maybe<Scalars['Int']>,
+  numberOfRecipients_Lte?: Maybe<Scalars['Int']>,
+  targetPopulation?: Maybe<Scalars['ID']>,
+  createdBy?: Maybe<Scalars['ID']>,
+  businessArea: Scalars['String'],
+  program?: Maybe<Scalars['String']>,
+  createdAtRange?: Maybe<Scalars['String']>,
+  title?: Maybe<Scalars['String']>,
+  body?: Maybe<Scalars['String']>,
+  samplingType?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllAccountabilityCommunicationMessagesQuery = (
+  { __typename?: 'Query' }
+  & { allAccountabilityCommunicationMessages: Maybe<(
+    { __typename?: 'CommunicationMessageNodeConnection' }
+    & Pick<CommunicationMessageNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'CommunicationMessageNodeEdge' }
+      & Pick<CommunicationMessageNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'CommunicationMessageNode' }
+        & Pick<CommunicationMessageNode, 'id' | 'unicefId' | 'title' | 'numberOfRecipients' | 'createdAt'>
+        & { createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'firstName' | 'lastName' | 'id'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllAdminAreasQueryVariables = {
   name?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
@@ -8430,6 +8474,39 @@ export type ImportedIndividualFieldsQuery = (
       )>>> }
     )>>> }
   )>>> }
+);
+
+export type AllFeedbacksQueryVariables = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type AllFeedbacksQuery = (
+  { __typename?: 'Query' }
+  & { allFeedbacks: Maybe<(
+    { __typename?: 'FeedbackNodeConnection' }
+    & Pick<FeedbackNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'FeedbackNodeEdge' }
+      & Pick<FeedbackNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'FeedbackNode' }
+        & Pick<FeedbackNode, 'id' | 'issueType' | 'createdAt'>
+        & { householdLookup: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'unicefId'>
+        )> }
+      )> }
+    )>> }
+  )> }
 );
 
 export type AllGrievanceDashboardChartsQueryVariables = {
@@ -10384,6 +10461,37 @@ export type AllSteficonRulesQuery = (
       & { node: Maybe<(
         { __typename?: 'SteficonRuleNode' }
         & Pick<SteficonRuleNode, 'id' | 'name'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllTargetPopulationForChoicesQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>
+};
+
+
+export type AllTargetPopulationForChoicesQuery = (
+  { __typename?: 'Query' }
+  & { allTargetPopulation: Maybe<(
+    { __typename?: 'TargetPopulationNodeConnection' }
+    & Pick<TargetPopulationNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'TargetPopulationNodeEdge' }
+      & Pick<TargetPopulationNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'TargetPopulationNode' }
+        & Pick<TargetPopulationNode, 'id' | 'name'>
       )> }
     )>> }
   )> }
@@ -13966,6 +14074,91 @@ export function useUpdateTpMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
 export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
 export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
+export const AllAccountabilityCommunicationMessagesDocument = gql`
+    query allAccountabilityCommunicationMessages($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $targetPopulation: ID, $createdBy: ID, $businessArea: String!, $program: String, $createdAtRange: String, $title: String, $body: String, $samplingType: String, $orderBy: String) {
+  allAccountabilityCommunicationMessages(offset: $offset, before: $before, after: $after, first: $first, last: $last, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, targetPopulation: $targetPopulation, createdBy: $createdBy, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange, title: $title, body: $body, samplingType: $samplingType, orderBy: $orderBy) {
+    totalCount
+    pageInfo {
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        unicefId
+        title
+        numberOfRecipients
+        createdBy {
+          firstName
+          lastName
+          id
+        }
+        createdAt
+      }
+    }
+  }
+}
+    `;
+export type AllAccountabilityCommunicationMessagesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>, 'query'> & ({ variables: AllAccountabilityCommunicationMessagesQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllAccountabilityCommunicationMessagesComponent = (props: AllAccountabilityCommunicationMessagesComponentProps) => (
+      <ApolloReactComponents.Query<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables> query={AllAccountabilityCommunicationMessagesDocument} {...props} />
+    );
+    
+export type AllAccountabilityCommunicationMessagesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables> & TChildProps;
+export function withAllAccountabilityCommunicationMessages<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllAccountabilityCommunicationMessagesQuery,
+  AllAccountabilityCommunicationMessagesQueryVariables,
+  AllAccountabilityCommunicationMessagesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables, AllAccountabilityCommunicationMessagesProps<TChildProps>>(AllAccountabilityCommunicationMessagesDocument, {
+      alias: 'allAccountabilityCommunicationMessages',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllAccountabilityCommunicationMessagesQuery__
+ *
+ * To run a query within a React component, call `useAllAccountabilityCommunicationMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllAccountabilityCommunicationMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllAccountabilityCommunicationMessagesQuery({
+ *   variables: {
+ *      offset: // value for 'offset'
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      numberOfRecipients: // value for 'numberOfRecipients'
+ *      numberOfRecipients_Gte: // value for 'numberOfRecipients_Gte'
+ *      numberOfRecipients_Lte: // value for 'numberOfRecipients_Lte'
+ *      targetPopulation: // value for 'targetPopulation'
+ *      createdBy: // value for 'createdBy'
+ *      businessArea: // value for 'businessArea'
+ *      program: // value for 'program'
+ *      createdAtRange: // value for 'createdAtRange'
+ *      title: // value for 'title'
+ *      body: // value for 'body'
+ *      samplingType: // value for 'samplingType'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllAccountabilityCommunicationMessagesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>(AllAccountabilityCommunicationMessagesDocument, baseOptions);
+      }
+export function useAllAccountabilityCommunicationMessagesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>(AllAccountabilityCommunicationMessagesDocument, baseOptions);
+        }
+export type AllAccountabilityCommunicationMessagesQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessagesQuery>;
+export type AllAccountabilityCommunicationMessagesLazyQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessagesLazyQuery>;
+export type AllAccountabilityCommunicationMessagesQueryResult = ApolloReactCommon.QueryResult<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>;
 export const AllAdminAreasDocument = gql`
     query AllAdminAreas($name: String, $businessArea: String, $level: Int, $first: Int) {
   allAdminAreas(name_Istartswith: $name, businessArea: $businessArea, first: $first, level: $level) {
@@ -15121,6 +15314,77 @@ export function useImportedIndividualFieldsLazyQuery(baseOptions?: ApolloReactHo
 export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFieldsQuery>;
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
+export const AllFeedbacksDocument = gql`
+    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $businessAreaSlug: String!) {
+  allFeedbacks(offset: $offset, before: $before, after: $after, first: $first, last: $last, businessAreaSlug: $businessAreaSlug) {
+    totalCount
+    pageInfo {
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        issueType
+        householdLookup {
+          id
+          unicefId
+        }
+        createdAt
+      }
+    }
+  }
+}
+    `;
+export type AllFeedbacksComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllFeedbacksQuery, AllFeedbacksQueryVariables>, 'query'> & ({ variables: AllFeedbacksQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllFeedbacksComponent = (props: AllFeedbacksComponentProps) => (
+      <ApolloReactComponents.Query<AllFeedbacksQuery, AllFeedbacksQueryVariables> query={AllFeedbacksDocument} {...props} />
+    );
+    
+export type AllFeedbacksProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllFeedbacksQuery, AllFeedbacksQueryVariables> & TChildProps;
+export function withAllFeedbacks<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllFeedbacksQuery,
+  AllFeedbacksQueryVariables,
+  AllFeedbacksProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllFeedbacksQuery, AllFeedbacksQueryVariables, AllFeedbacksProps<TChildProps>>(AllFeedbacksDocument, {
+      alias: 'allFeedbacks',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllFeedbacksQuery__
+ *
+ * To run a query within a React component, call `useAllFeedbacksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllFeedbacksQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllFeedbacksQuery({
+ *   variables: {
+ *      offset: // value for 'offset'
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useAllFeedbacksQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllFeedbacksQuery, AllFeedbacksQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllFeedbacksQuery, AllFeedbacksQueryVariables>(AllFeedbacksDocument, baseOptions);
+      }
+export function useAllFeedbacksLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllFeedbacksQuery, AllFeedbacksQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllFeedbacksQuery, AllFeedbacksQueryVariables>(AllFeedbacksDocument, baseOptions);
+        }
+export type AllFeedbacksQueryHookResult = ReturnType<typeof useAllFeedbacksQuery>;
+export type AllFeedbacksLazyQueryHookResult = ReturnType<typeof useAllFeedbacksLazyQuery>;
+export type AllFeedbacksQueryResult = ApolloReactCommon.QueryResult<AllFeedbacksQuery, AllFeedbacksQueryVariables>;
 export const AllGrievanceDashboardChartsDocument = gql`
     query AllGrievanceDashboardCharts($businessAreaSlug: String!) {
   ticketsByType(businessAreaSlug: $businessAreaSlug) {
@@ -19805,6 +20069,74 @@ export function useAllSteficonRulesLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRulesQuery>;
 export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
 export type AllSteficonRulesQueryResult = ApolloReactCommon.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
+export const AllTargetPopulationForChoicesDocument = gql`
+    query AllTargetPopulationForChoices($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, numberOfHouseholdsMin: $numberOfHouseholdsMin, numberOfHouseholdsMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program) {
+    edges {
+      node {
+        id
+        name
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type AllTargetPopulationForChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>, 'query'>;
+
+    export const AllTargetPopulationForChoicesComponent = (props: AllTargetPopulationForChoicesComponentProps) => (
+      <ApolloReactComponents.Query<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables> query={AllTargetPopulationForChoicesDocument} {...props} />
+    );
+    
+export type AllTargetPopulationForChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables> & TChildProps;
+export function withAllTargetPopulationForChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllTargetPopulationForChoicesQuery,
+  AllTargetPopulationForChoicesQueryVariables,
+  AllTargetPopulationForChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables, AllTargetPopulationForChoicesProps<TChildProps>>(AllTargetPopulationForChoicesDocument, {
+      alias: 'allTargetPopulationForChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllTargetPopulationForChoicesQuery__
+ *
+ * To run a query within a React component, call `useAllTargetPopulationForChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllTargetPopulationForChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllTargetPopulationForChoicesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
+ *      status: // value for 'status'
+ *      numberOfHouseholdsMin: // value for 'numberOfHouseholdsMin'
+ *      numberOfHouseholdsMax: // value for 'numberOfHouseholdsMax'
+ *      businessArea: // value for 'businessArea'
+ *      program: // value for 'program'
+ *   },
+ * });
+ */
+export function useAllTargetPopulationForChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, baseOptions);
+      }
+export function useAllTargetPopulationForChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, baseOptions);
+        }
+export type AllTargetPopulationForChoicesQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesQuery>;
+export type AllTargetPopulationForChoicesLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesLazyQuery>;
+export type AllTargetPopulationForChoicesQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
     query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
   allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, numberOfHouseholdsMin: $numberOfHouseholdsMin, numberOfHouseholdsMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program) {

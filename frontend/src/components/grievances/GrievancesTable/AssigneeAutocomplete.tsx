@@ -23,12 +23,14 @@ export const AssigneeAutocomplete = ({
   onFilterChange,
   name,
   value,
+  label,
 }: {
-  disabled?;
+  disabled?: boolean;
   fullWidth?: boolean;
   onFilterChange?;
-  name?;
+  name?: string;
   value?;
+  label?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -83,7 +85,7 @@ export const AssigneeAutocomplete = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          label={t('Assignee')}
+          label={label || t('Assignee')}
           variant='outlined'
           margin='dense'
           value={inputValue}
