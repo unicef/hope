@@ -1,9 +1,9 @@
 import React, { ReactElement } from 'react';
 import { TableWrapper } from '../../../components/core/TableWrapper';
 import {
-  AllAccountabilityCommunicationMessagesQueryVariables,
-  CommunicationMessageNode,
-  useAllAccountabilityCommunicationMessagesQuery,
+  AllFeedbacksQueryVariables,
+  FeedbackNode,
+  useAllFeedbacksQuery,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './FeedbackTableHeadCells';
@@ -18,25 +18,22 @@ export const FeedbackTable = ({
   filter,
   businessArea,
 }: FeedbackTableProps): ReactElement => {
-  const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
-    search: filter.search,
-    status: filter.status,
-    createdBy: filter.createdBy || '',
-    createdAtRange: filter.createdAtRange
-      ? JSON.stringify(filter.createdAtRange)
-      : '',
-    businessArea,
+  const initialVariables: AllFeedbacksQueryVariables = {
+    // search: filter.search,
+    // status: filter.status,
+    // createdBy: filter.createdBy || '',
+    // createdAtRange: filter.createdAtRange
+    //   ? JSON.stringify(filter.createdAtRange)
+    //   : '',
+    businessAreaSlug: businessArea,
   };
   return (
     <TableWrapper>
-      <UniversalTable<
-        CommunicationMessageNode,
-        AllAccountabilityCommunicationMessagesQueryVariables
-      >
+      <UniversalTable<FeedbackNode, AllFeedbacksQueryVariables>
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllAccountabilityCommunicationMessagesQuery}
-        queriedObjectName='allAccountabilityCommunicationMessages'
+        query={useAllFeedbacksQuery}
+        queriedObjectName='allFeedbacks'
         defaultOrderBy='createdAt'
         defaultOrderDirection='desc'
         initialVariables={initialVariables}

@@ -1,7 +1,7 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
-import { CommunicationMessageNode } from '../../../__generated__/graphql';
+import { FeedbackNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
@@ -10,7 +10,7 @@ import { renderUserName } from '../../../utils/utils';
 import { Missing } from '../../../components/core/Missing';
 
 interface FeedbackTableRowProps {
-  feedback: CommunicationMessageNode;
+  feedback: FeedbackNode;
   canViewDetails?: boolean;
 }
 
@@ -21,7 +21,8 @@ export const FeedbackTableRow = ({
   const history = useHistory();
   const businessArea = useBusinessArea();
   const feedbackDetailsPath = `/${businessArea}/accountability/feedback/${feedback.id}`;
-  // const householdDetailsPath = `/${businessArea}/population/households/${feedback.household.id}`;
+  const householdDetailsPath = `/${businessArea}/population/households/${feedback.householdLookup.id}`;
+  // const grievanceDetailsPath = `/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance.id}`;
 
   const handleClick = (): void => {
     history.push(feedbackDetailsPath);
@@ -45,14 +46,24 @@ export const FeedbackTableRow = ({
         <Missing />
       </TableCell>
       <TableCell align='left'>
-        {/* <BlackLink to={feedbackDetailsPath}>
-          {feedback.household.unicefId}
-        </BlackLink> */}
+        <BlackLink to={feedbackDetailsPath}>
+          {feedback.householdLookup.unicefId}
+        </BlackLink>
       </TableCell>
       <TableCell align='left'>
-        {/* {renderSomethingOrDash(feedback.linkedGrievance?.id)} */}
+        {/* {feedback.linkedGrievance.id ? (
+          <BlackLink to={feedbackDetailsPath}>
+            {feedback.householdLookup.unicefId}
+          </BlackLink>
+        ) : (
+          renderSomethingOrDash(feedback.linkedGrievance?.id)
+        )} */}
+        <Missing />
       </TableCell>
-      <TableCell align='left'>{renderUserName(feedback.createdBy)}</TableCell>
+      <TableCell align='left'>
+        {/* {renderUserName(feedback.createdBy)} */}
+        <Missing />
+      </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{feedback.createdAt}</UniversalMoment>
       </TableCell>
