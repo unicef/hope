@@ -1,3 +1,6 @@
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -52,6 +55,14 @@ query allFeedbacks($businessAreaSlug: String!) {
             ],
             cls.business_area,
         )
+        cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
+        cls.household, cls.individuals = create_household_and_individuals(
+            household_data={
+                "registration_data_import": cls.registration_data_import,
+                "business_area": cls.business_area,
+            },
+            individuals_data=[{}],
+        )
 
     def create_dummy_correct_input(self):
         return {
@@ -59,12 +70,12 @@ query allFeedbacks($businessAreaSlug: String!) {
             "issueType": Feedback.POSITIVE_FEEDBACK,
         }
 
-    def create_new_feedback(self):
+    def create_new_feedback(self, data=None):
         current_amount = Feedback.objects.count()
         response = self.graphql_request(
             request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
             context={"user": self.user},
-            variables={"input": self.create_dummy_correct_input()},
+            variables={"input": data if data else self.create_dummy_correct_input()},
         )
         assert "errors" not in response, response["errors"]
         self.assertEqual(Feedback.objects.count(), current_amount + 1)
@@ -112,3 +123,35 @@ query allFeedbacks($businessAreaSlug: String!) {
                 "businessAreaSlug": self.business_area.slug,
             }
         )
+
+    def test_optional_household_lookup(self):
+        self.assertEqual(Feedback.objects.count(), 0)
+        data = self.create_dummy_correct_input() | {
+            "householdLookup": encode_id_base64(self.household.pk, "Household"),
+        }
+        response = self.graphql_request(
+            request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
+            context={"user": self.user},
+            variables={"input": data},
+        )
+        assert "errors" not in response, response
+        self.assertEqual(Feedback.objects.count(), 1)
+
+        feedback = Feedback.objects.first()
+        self.assertEqual(feedback.household_lookup, self.household)
+
+    def test_optional_individual_lookup(self):
+        self.assertEqual(Feedback.objects.count(), 0)
+        data = self.create_dummy_correct_input() | {
+            "individualLookup": encode_id_base64(self.individuals[0].pk, "Individual"),
+        }
+        response = self.graphql_request(
+            request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
+            context={"user": self.user},
+            variables={"input": data},
+        )
+        assert "errors" not in response, response
+        self.assertEqual(Feedback.objects.count(), 1)
+
+        feedback = Feedback.objects.first()
+        self.assertEqual(feedback.individual_lookup, self.individuals[0])
