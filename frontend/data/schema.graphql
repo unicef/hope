@@ -2632,6 +2632,7 @@ type Query {
   allAccountabilityCommunicationMessageRecipients(offset: Int, before: String, after: String, first: Int, last: Int, messageId: String!, recipientId: String, fullName: String, phoneNo: String, sex: String, orderBy: String): CommunicationMessageRecipientMapNodeConnection
   accountabilityCommunicationMessageSampleSize(businessAreaSlug: String!, inputs: GetAccountabilityCommunicationMessageSampleSizeInput): GetCommunicationMessageSampleSizeObject
   allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessAreaSlug: String!, issueType: String, createdBy: String, unicefId: String, createdAtRange: String, feedbackId: String): FeedbackNodeConnection
+  feedbackIssueTypeChoices: [ChoiceObject]
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
