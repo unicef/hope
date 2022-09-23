@@ -45,6 +45,7 @@ import { FeedbackSteps } from '../../../../utils/constants';
 import {
   useAllProgramsQuery,
   useAllUsersQuery,
+  useCreateFeedbackTicketMutation,
   useGrievancesChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 
@@ -198,7 +199,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  const [mutate, { loading }] = useCreateFeedbackMutation();
+  const [mutate, { loading }] = useCreateFeedbackTicketMutation();
 
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
@@ -254,7 +255,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
               prepareVariables(businessArea, values),
             );
             showMessage(t('Feedback created.'), {
-              pathname: `/${businessArea}/accountability/feedback/${response.data.createFeedback.feedback[0].id}`,
+              pathname: `/${businessArea}/accountability/feedback/${response.data.createFeedback.feedback.id}`,
               historyMethod: 'push',
             });
           } catch (e) {
@@ -316,16 +317,16 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                             </LabelizedField>
                           </Grid>
                           <Grid item xs={6}>
-                            <Field
+                            {/* <Field
                               name='issueType'
                               label='Issue Type'
                               variant='outlined'
                               required
                               choices={
-                                issueTypeDict[values.category].subCategories
+                                issueTypeDict[values.category]?.subCategories
                               }
                               component={FormikSelectField}
-                            />
+                            /> */}
                           </Grid>
                         </Grid>
                       )}
