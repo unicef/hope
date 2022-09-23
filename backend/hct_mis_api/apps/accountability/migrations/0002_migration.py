@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "programme",
+                    "program",
                     models.ForeignKey(
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="program.program"
                     ),
