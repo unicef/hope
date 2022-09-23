@@ -131,7 +131,7 @@ export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
               color='primary'
               variant='contained'
               onClick={() => handleImport()}
-              data-cy='button-import'
+              data-cy='button-import-entitlement'
             >
               {t('IMPORT')}
             </Button>

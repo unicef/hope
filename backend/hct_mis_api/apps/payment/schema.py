@@ -346,9 +346,7 @@ class DeliveryMechanismNode(DjangoObjectType):
 
 def _calculate_volume(delivery_mechanism_per_payment_plan, field):
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
-        raise GraphQLError(
-            f"Financial Service Provider is not set for {delivery_mechanism_per_payment_plan.delivery_mechanism}"
-        )
+        return None
     payments = delivery_mechanism_per_payment_plan.payment_plan.all_active_payments.filter(
         financial_service_provider=delivery_mechanism_per_payment_plan.financial_service_provider,
         delivery_type=delivery_mechanism_per_payment_plan.delivery_mechanism,
@@ -391,7 +389,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
-    background_action_status = graphene.String()
 
     class Meta:
         model = PaymentPlan

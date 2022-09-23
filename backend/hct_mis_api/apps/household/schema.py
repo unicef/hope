@@ -234,6 +234,8 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.country.name
 
     def resolve_country_origin(parent, info):
+        if not parent.country_origin:
+            return None
         return parent.country_origin.name
 
     def resolve_selection(parent, info):
