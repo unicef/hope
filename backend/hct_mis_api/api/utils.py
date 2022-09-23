@@ -12,25 +12,28 @@ def humanize_errors(errors):
     >>> humanize_errors(e)
     [{'Household #1': [{'role': ['This field is required.']}]}, {'Household #2': [{'role': ['This field is required.']}]}]
     """
-    errs = []
-    hh = errors.get("households", [])
-    for h, curr_h_errs in enumerate(hh, 1):
-        if curr_h_errs:
-            clean_h_errs = []
-            key1 = f"Household #{h}"
-            xxx = curr_h_errs.get("members")
-            if isinstance(xxx, dict):
-                clean_h_errs.append(xxx)
-            else:
-                for i, curr_i_errs in enumerate(xxx, 1):
-                    if curr_i_errs:
-                        clean_i_errs = []
-                        if isinstance(curr_i_errs, dict):
-                            clean_i_errs.append(curr_i_errs)
-                        elif isinstance(curr_i_errs, (list, tuple)):
-                            clean_i_errs.extend(curr_i_errs)
-                        clean_h_errs.extend(clean_i_errs)
+    try:
+        errs = []
+        hh = errors.get("households", [])
+        for h, curr_h_errs in enumerate(hh, 1):
+            if curr_h_errs:
+                clean_h_errs = []
+                key1 = f"Household #{h}"
+                xxx = curr_h_errs.get("members")
+                if isinstance(xxx, dict):
+                    clean_h_errs.append(xxx)
+                else:
+                    for i, curr_i_errs in enumerate(xxx, 1):
+                        if curr_i_errs:
+                            clean_i_errs = []
+                            if isinstance(curr_i_errs, dict):
+                                clean_i_errs.append(curr_i_errs)
+                            elif isinstance(curr_i_errs, (list, tuple)):
+                                clean_i_errs.extend(curr_i_errs)
+                            clean_h_errs.extend(clean_i_errs)
 
-            if clean_h_errs:
-                errs.append({key1: clean_h_errs})
-    return errs
+                if clean_h_errs:
+                    errs.append({key1: clean_h_errs})
+        return errs
+    except (ValueError, AttributeError):
+        return errors
