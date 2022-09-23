@@ -25,12 +25,14 @@ mutation createFeedback($input: CreateFeedbackInput!) {
 query allFeedbacks(
     $businessAreaSlug: String!,
     $issueType: String,
-    $createdBy: String
+    $createdBy: String,
+    $feedbackId: String,
 ) {
     allFeedbacks(
         businessAreaSlug: $businessAreaSlug,
         issueType: $issueType,
-        createdBy: $createdBy
+        createdBy: $createdBy,
+        feedbackId: $feedbackId,
     ) {
         edges {
             node {
@@ -129,6 +131,9 @@ query allFeedbacks(
         assert len(filter_it({"createdBy": encode_id_base64(self.program.pk, "Program")})) == 0
         assert len(filter_it({"createdBy": encode_id_base64(self.user.pk, "User")})) == 1
 
+        assert len(filter_it({"feedbackId": encode_id_base64(self.program.pk, "Program")})) == 0
+        assert len(filter_it({"feedbackId": encode_id_base64(Feedback.objects.first().unicef_id, "Feedback")})) == 1
+
     def test_failing_to_create_new_feedback(self):
         def expect_failure(data):
             current_amount = Feedback.objects.count()
@@ -198,3 +203,13 @@ query allFeedbacks(
         self.submit_feedback(data)
         feedback = Feedback.objects.first()
         self.assertEqual(feedback.comments, "Test comments")
+
+    # TODO
+    # def test_optional_linked_grievance
+    # def test_optional_program
+    # def test_optional_language
+    # def test_optional_area
+    # def test_optional_admin2
+
+
+# TODO: parametrize
