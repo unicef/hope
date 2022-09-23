@@ -9,16 +9,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 
-# the scenario goes like this:
-# - "save" button (mutation - create)
-# - "edit" button and then save (mutation - update)
-
-# all_feedbacks_query
-# - filters
-# - columns and sorting
-
-# create feedback message - txt, timestamp, user
-
 
 class TestFeedback(APITestCase):
     CREATE_NEW_FEEDBACK_MUTATION = """
