@@ -1,5 +1,5 @@
-from .area import AreaList, AreaTypeList
-from .lookups import (
+from .area import AreaList, AreaTypeList  # noqa: F401
+from .lookups import (  # noqa: F401
     Country,
     DataCollectingPolicy,
     DocumentType,
@@ -9,5 +9,5 @@ from .lookups import (
     ResidenceStatus,
     Roles,
 )
-from .rdi import CompleteRDIView, CreateRDIView, PushToRDIView
-from .upload import UploadRDIView
+from .rdi import CompleteRDIView, CreateRDIView, PushToRDIView  # noqa: F401
+from .upload import UploadRDIView  # noqa: F401
