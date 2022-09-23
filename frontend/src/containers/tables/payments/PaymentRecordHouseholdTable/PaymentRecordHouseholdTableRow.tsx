@@ -56,9 +56,7 @@ export function PaymentRecordHouseholdTableRow({
         />
       </TableCell>
       <TableCell align='left'>{paymentRecord.fullName}</TableCell>
-      <TableCell align='left'>
-        {paymentRecord?.cashPlan?.program?.name}
-      </TableCell>
+      <TableCell align='left'>{paymentRecord?.parent?.program?.name}</TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
           paymentRecord.entitlementQuantity,
