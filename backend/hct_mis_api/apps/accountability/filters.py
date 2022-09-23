@@ -68,10 +68,14 @@ class MessageRecipientsMapFilter(FilterSet):
 class FeedbackFilter(FilterSet):
     business_area_slug = CharFilter(field_name="business_area__slug", required=True)
     household_lookup = CharFilter(method="filter_household_lookup")
+    individual_lookup = CharFilter(method="filter_individual_lookup")
 
     def filter_household_lookup(self, queryset, name, value):
         return queryset.filter(household_lookup_id=decode_id_string(value))
 
+    def filter_individual_lookup(self, queryset, name, value):
+        return queryset.filter(individual_lookup_id=decode_id_string(value))
+
     class Meta:
         model = Feedback
-        fields = ("business_area_slug", "household_lookup")
+        fields = ("business_area_slug", "household_lookup", "individual_lookup")
