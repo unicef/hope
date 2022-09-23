@@ -131,6 +131,19 @@ YES_NO_CHOICE = (
     (YES, _("Yes")),
     (NO, _("No")),
 )
+
+COLLECT_TYPE_UNKNOWN = ""
+COLLECT_TYPE_NONE = "0"
+COLLECT_TYPE_FULL = "1"
+COLLECT_TYPE_PARTIAL = "2"
+
+COLLECT_TYPES = (
+    (COLLECT_TYPE_UNKNOWN, _("Unknown")),
+    (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
+    (COLLECT_TYPE_FULL, _("Full individual collected")),
+    (COLLECT_TYPE_NONE, _("No individual data")),
+)
+
 NOT_PROVIDED = "NOT_PROVIDED"
 WORK_STATUS_CHOICE = (
     (YES, _("Yes")),
@@ -382,6 +395,8 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
         related_name="households",
+        blank=True,
+        null=True,
         on_delete=models.CASCADE,
     )
     programs = models.ManyToManyField(
@@ -405,7 +420,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
     village = models.CharField(max_length=250, blank=True, default=BLANK)
     registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
-    collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
+    collect_individual_data = models.CharField(max_length=250, choices=COLLECT_TYPES, default=COLLECT_TYPE_UNKNOWN)
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
@@ -518,6 +533,14 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     @property
     def active_individuals(self):
         return self.individuals.filter(withdrawn=False, duplicate=False)
+
+    @cached_property
+    def primary_collector(self):
+        return self.representatives.get(households_and_roles__role=ROLE_PRIMARY)
+
+    @cached_property
+    def alternate_collector(self):
+        return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     def __str__(self):
         return f"{self.unicef_id}"
