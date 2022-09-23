@@ -10,7 +10,7 @@ import { renderUserName } from '../../../utils/utils';
 
 interface CommunicationTableRowProps {
   message: CommunicationMessageNode;
-  canViewDetails?: boolean;
+  canViewDetails: boolean;
 }
 
 export function CommunicationTableRow({
