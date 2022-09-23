@@ -102,13 +102,7 @@ class Query(graphene.ObjectType):
 
     all_feedbacks = DjangoPermissionFilterConnectionField(
         FeedbackNode,
-        # business_area_slug=graphene.String(required=True),
         filterset_class=FeedbackFilter,
-        permission_classes=(
-            hopeOneOfPermissionClass(
-                Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_LIST,
-            )
-        ),
     )
 
     def resolve_accountability_communication_message_sample_size(

@@ -92,15 +92,15 @@ query allFeedbacks($businessAreaSlug: String!) {
     def test_getting_all_feedbacks(self):
         self.create_new_feedback()
         # TODO
-        # response = self.graphql_request(
-        #     request_string=self.ALL_FEEDBACKS_QUERY,
-        #     context={"user": self.user},
-        #     variables={
-        #         "businessArea": self.business_area,
-        #     },
-        # )
-        # assert "errors" not in response, response["errors"]
-        # self.assertEqual(len(response["data"]["allFeedbacks"]["edges"]), 1)
+        response = self.graphql_request(
+            request_string=self.ALL_FEEDBACKS_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessAreaSlug": self.business_area.slug,
+            },
+        )
+        assert "errors" not in response, response["errors"]
+        self.assertEqual(len(response["data"]["allFeedbacks"]["edges"]), 1)
 
     def test_filtering_feedbacks(self):
         pass  # TODO
