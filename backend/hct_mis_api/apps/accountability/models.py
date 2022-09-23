@@ -98,3 +98,19 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
     language = models.TextField(blank=True)
     consent = models.BooleanField(default=True)
     program = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="feedbacks",
+        null=True,
+        blank=True,
+        verbose_name=_("Created by"),
+    )
+    linked_grievance = models.ForeignKey(
+        "grievance.GrievanceTicket",
+        on_delete=models.SET_NULL,
+        related_name="feedbacks",
+        null=True,
+        blank=True,
+        verbose_name=_("Linked grievance"),
+    )
