@@ -34,5 +34,6 @@ class FeedbackCrudServices:
             obj.consent = input_data["consent"]
         if input_data.get("program"):
             obj.program = get_object_or_404(Program, id=decode_id_string(input_data["program"]))
+        obj.created_by = user
         obj.save()
         return obj
