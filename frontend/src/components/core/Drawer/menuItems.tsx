@@ -107,16 +107,51 @@ export const menuItems = [
         name: 'Grievance Tickets',
         href: '/grievance-and-feedback/tickets',
         selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
-        icon: <List/>,
-        permissionModule: 'HOUSEHOLDS'
+        icon: <></>,
+        permissionModule: 'HOUSEHOLDS',
       },
       {
         name: 'Grievance Dashboard',
         href: '/grievance-and-feedback/dashboard',
         selectedRegexp: /^\/grievance-and-feedback\/dashboard.*$/,
-        icon: <Assessment/>,
-        permissionModule: 'INDIVIDUALS'
-      }
+        icon: <></>,
+        permissionModule: 'INDIVIDUALS',
+      },
+    ],
+  },
+  {
+    name: 'Accountability',
+    href: '/accountability/communication',
+    selectedRegexp: /^\/accountability\/communication.*$/,
+    icon: <Feedback />,
+    collapsable: true,
+    // TODO: Update the permissions
+    permissionModule: 'POPULATION',
+    secondaryActions: [
+      {
+        name: 'Communication',
+        href: '/accountability/communication',
+        selectedRegexp: /^\/accountability\/communication.*$/,
+        icon: <></>,
+        // TODO: Update the permissions
+        permissionModule: 'HOUSEHOLDS',
+      },
+      {
+        name: 'Feedback',
+        href: '/accountability/feedback',
+        selectedRegexp: /^\/accountability\/feedback.*$/,
+        icon: <></>,
+        // TODO: Update the permissions
+        permissionModule: 'INDIVIDUALS',
+      },
+      {
+        name: 'Surveys',
+        href: '/accountability/surveys',
+        selectedRegexp: /^\/accountability\/surveys.*$/,
+        icon: <></>,
+        // TODO: Update the permissions
+        permissionModule: 'INDIVIDUALS',
+      },
     ],
   },
   {
