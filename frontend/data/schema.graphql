@@ -2125,6 +2125,10 @@ type LogEntryNodeEdge {
   cursor: String!
 }
 
+type MarkPaymentRecordAsFailedMutation {
+  paymentRecord: PaymentRecordNode
+}
+
 type MergeRegistrationDataImportMutation {
   registrationDataImport: RegistrationDataImportNode
 }
@@ -2156,6 +2160,7 @@ type Mutations {
   invalidCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): InvalidCashPlanVerificationMutation
   deleteCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DeleteCashPlanVerificationMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
+  markPaymentRecordAsFailed(paymentRecordId: ID!): MarkPaymentRecordAsFailedMutation
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
@@ -2285,6 +2290,7 @@ enum PaymentRecordStatus {
   NOT_DISTRIBUTED
   TRANSACTION_SUCCESSFUL
   TRANSACTION_ERRONEOUS
+  FORCE_FAILED
 }
 
 type PaymentVerificationLogEntryNode implements Node {
