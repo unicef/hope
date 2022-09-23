@@ -75,3 +75,26 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     issue_type = models.IntegerField(verbose_name=_("Issue type"), choices=ISSUE_TYPE_CHOICES)
+    household_lookup = models.ForeignKey(
+        "household.Household",
+        related_name="feedbacks",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Household lookup"),
+    )
+    individual_lookup = models.ForeignKey(
+        "household.Individual",
+        related_name="feedbacks",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Individual lookup"),
+    )
+    description = models.TextField()
+    comments = models.TextField(blank=True, null=True)
+    admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
+    area = models.CharField(max_length=250, blank=True)
+    language = models.TextField(blank=True)
+    consent = models.BooleanField(default=True)
+    programme = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.CASCADE)
