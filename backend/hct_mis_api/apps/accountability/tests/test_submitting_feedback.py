@@ -23,10 +23,14 @@ mutation createFeedback($input: CreateFeedbackInput!) {
 
     ALL_FEEDBACKS_QUERY = """
 query allFeedbacks(
-    $businessAreaSlug: String!
+    $businessAreaSlug: String!,
+    $issueType: String,
+    $createdBy: String
 ) {
     allFeedbacks(
-        businessAreaSlug: $businessAreaSlug
+        businessAreaSlug: $businessAreaSlug,
+        issueType: $issueType,
+        createdBy: $createdBy
     ) {
         edges {
             node {
@@ -116,8 +120,14 @@ query allFeedbacks(
             assert "errors" not in response, response["errors"]
             return response["data"]["allFeedbacks"]["edges"]
 
-        assert len(filter_it({"businessAreaSlug": self.business_area.slug})) == 1
         assert len(filter_it({"businessAreaSlug": "non-existent"})) == 0
+        assert len(filter_it({"businessAreaSlug": self.business_area.slug})) == 1
+
+        assert len(filter_it({"issueType": Feedback.NEGATIVE_FEEDBACK})) == 0
+        assert len(filter_it({"issueType": Feedback.POSITIVE_FEEDBACK})) == 1
+
+        assert len(filter_it({"createdBy": encode_id_base64(self.program.pk, "Program")})) == 0
+        assert len(filter_it({"createdBy": encode_id_base64(self.user.pk, "User")})) == 1
 
     def test_failing_to_create_new_feedback(self):
         def expect_failure(data):
