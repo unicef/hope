@@ -912,6 +912,7 @@ export type CreateFeedbackInput = {
   language?: Maybe<Scalars['String']>,
   consent?: Maybe<Scalars['Boolean']>,
   program?: Maybe<Scalars['ID']>,
+  createdBy: Scalars['ID'],
 };
 
 export type CreateFeedbackMutation = {
@@ -1229,6 +1230,8 @@ export type FeedbackNode = Node & {
   language: Scalars['String'],
   consent: Scalars['Boolean'],
   program?: Maybe<ProgramNode>,
+  createdBy?: Maybe<UserNode>,
+  linkedGrievance?: Maybe<GrievanceTicketNode>,
 };
 
 export type FeedbackNodeConnection = {
@@ -1363,6 +1366,7 @@ export type GrievanceTicketNode = Node & {
   positiveFeedbackTicketDetails?: Maybe<TicketPositiveFeedbackDetailsNode>,
   negativeFeedbackTicketDetails?: Maybe<TicketNegativeFeedbackDetailsNode>,
   referralTicketDetails?: Maybe<TicketReferralDetailsNode>,
+  feedbacks: FeedbackNodeConnection,
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
   paymentRecord?: Maybe<PaymentRecordNode>,
@@ -1392,6 +1396,15 @@ export type GrievanceTicketNodeLinkedTicketsRelatedArgs = {
 
 
 export type GrievanceTicketNodeTicketNotesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type GrievanceTicketNodeFeedbacksArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -6440,6 +6453,7 @@ export type UserNode = Node & {
   reports: ReportNodeConnection,
   logs: PaymentVerificationLogEntryNodeConnection,
   messages: CommunicationMessageNodeConnection,
+  feedbacks: FeedbackNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
 };
 
@@ -6583,6 +6597,15 @@ export type UserNodeLogsArgs = {
 
 
 export type UserNodeMessagesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeFeedbacksArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -21935,6 +21958,8 @@ export type FeedbackNodeResolvers<ContextType = any, ParentType extends Resolver
   language?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  linkedGrievance?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
 
 export type FeedbackNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FeedbackNodeConnection'] = ResolversParentTypes['FeedbackNodeConnection']> = {
@@ -22036,6 +22061,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   positiveFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketPositiveFeedbackDetailsNode']>, ParentType, ContextType>,
   negativeFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNode']>, ParentType, ContextType>,
   referralTicketDetails?: Resolver<Maybe<ResolversTypes['TicketReferralDetailsNode']>, ParentType, ContextType>,
+  feedbacks?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, GrievanceTicketNodeFeedbacksArgs>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
@@ -23964,6 +23990,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserNodeReportsArgs>,
   logs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserNodeLogsArgs>,
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, UserNodeMessagesArgs>,
+  feedbacks?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, UserNodeFeedbacksArgs>,
   businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, UserNodeBusinessAreasArgs>,
 };
 
