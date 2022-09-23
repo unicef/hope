@@ -608,5 +608,8 @@
   "Please wait or re-generate report.": "Please wait or re-generate report.",
   "Exporting...": "Exporting...",
   "Download Xlsx": "Download Xlsx",
-  "Exporting XLSX started. Please check your email.": "Exporting XLSX started. Please check your email."
+  "Exporting XLSX started. Please check your email.": "Exporting XLSX started. Please check your email.",
+  "Payment record has been marked as failed.": "Payment record has been marked as failed.",
+  "Mark as failed": "Mark as failed",
+  "Are you sure you would like to mark payment record as failed?": "Are you sure you would like to mark payment record as failed?"
 }
