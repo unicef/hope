@@ -4088,7 +4088,12 @@ export type QueryAllFeedbacksArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  businessAreaSlug: Scalars['String']
+  businessAreaSlug: Scalars['String'],
+  issueType?: Maybe<Scalars['String']>,
+  createdBy?: Maybe<Scalars['String']>,
+  unicefId?: Maybe<Scalars['String']>,
+  createdAtRange?: Maybe<Scalars['String']>,
+  feedbackId?: Maybe<Scalars['String']>
 };
 
 
