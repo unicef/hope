@@ -4,6 +4,25 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
+import { ContentLink } from '../../../components/core/ContentLink';
+import { LabelizedField } from '../../../components/core/LabelizedField';
+import { LoadingButton } from '../../../components/core/LoadingButton';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
+import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
+import {
+  dataChangeComponentDict,
+  EmptyComponent,
+  prepareInitialValues,
+  prepareVariables,
+} from '../../../components/grievances/utils/editGrievanceUtils';
+import { validate } from '../../../components/grievances/utils/validateGrievance';
+import { validationSchema } from '../../../components/grievances/utils/validationSchema';
 import {
   hasCreatorOrOwnerPermissions,
   PERMISSIONS,
@@ -37,27 +56,7 @@ import {
   useGrievanceTicketStatusChangeMutation,
   useMeQuery,
   useUpdateGrievanceMutation,
-  useUserChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
-import {
-  dataChangeComponentDict,
-  EmptyComponent,
-  prepareInitialValues,
-  prepareVariables,
-} from '../../../components/grievances/utils/editGrievanceUtils';
-import { validate } from '../../../components/grievances/utils/validateGrievance';
-import { validationSchema } from '../../../components/grievances/utils/validationSchema';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { LabelizedField } from '../../../components/core/LabelizedField';
-import { ContentLink } from '../../../components/core/ContentLink';
-import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 
 const BoxPadding = styled.div`
@@ -135,8 +134,6 @@ export const EditGrievancePage = (): React.ReactElement => {
     'name',
     '*',
   );
-
-  const { data: userChoices } = useUserChoiceDataQuery();
 
   const {
     data: allProgramsData,
