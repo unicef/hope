@@ -41,10 +41,7 @@ class UserFactory(factory.DjangoModelFactory):
         keyword_arguments = kwargs.copy()
         if "password" not in keyword_arguments:
             keyword_arguments["password"] = "password"
-        return manager.create_user(
-            *args,
-            **keyword_arguments
-        )
+        return manager.create_user(*args, **keyword_arguments)
 
 
 class RoleFactory(factory.DjangoModelFactory):
