@@ -1,4 +1,7 @@
 from django.db.models import Sum, F, DecimalField
+from django.db.models.functions import Coalesce
+
+from decimal import Decimal
 
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.household.models import Household
@@ -11,8 +14,10 @@ def programs_with_delivered_quantity(household: Household):
         .values("parent__program")
         .order_by("parent__program")
         .annotate(
-            total_delivered_quantity=Sum("delivered_quantity", output_field=DecimalField()),
-            total_delivered_quantity_usd=Sum("delivered_quantity_usd", output_field=DecimalField()),
+            total_delivered_quantity=Coalesce(Sum("delivered_quantity", output_field=DecimalField()), Decimal(0.0)),
+            total_delivered_quantity_usd=Coalesce(
+                Sum("delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
+            ),
             program_name=F("parent__program__name"),
             currency=F("currency"),
             program_id=F("parent__program__id"),

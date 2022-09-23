@@ -1,4 +1,5 @@
 import { When, Then, Given } from "@badeball/cypress-cucumber-preprocessor";
+import { getIndividualsFromRdiDetails } from '../../procedures/procedures';
 
 let householdId;
 let individualId;
@@ -56,7 +57,7 @@ When('I select the xlsx file', () => {
   );
 
   cy.fixture('rdi_import_1_hh_1_ind.xlsx', 'base64').as('rdi_import_1_hh_1_ind');
-  cy.get('[data-cy="rdi-file-input"]').selectFile('@rdi_import_1_hh_1_ind', { action: 'drag-drop', force: true });
+  cy.get('[data-cy="file-input"]').selectFile('@rdi_import_1_hh_1_ind', { action: 'select', force: true });
 });
 
 Then('I see it was chosen', () => {
@@ -105,9 +106,7 @@ Then('I see that the status is merged', () => {
     householdId = $td.text().split(' (')?.[0];
   });
   cy.get('button > span').contains('Individuals').click({ force: true });
-  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
-    individualId = $td.text().split(' (')?.[0];
-  });
+  individualId = getIndividualsFromRdiDetails(cy, 1)[0];
 });
 
 When('I visit the Households dashboard', () => {

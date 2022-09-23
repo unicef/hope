@@ -74,7 +74,7 @@ export const ApprovePaymentPlan = ({
                 color='primary'
                 variant='contained'
                 onClick={() => setApproveDialogOpen(true)}
-                data-cy='button-lock-plan'
+                data-cy='button-approve'
               >
                 {t('Approve')}
               </Button>

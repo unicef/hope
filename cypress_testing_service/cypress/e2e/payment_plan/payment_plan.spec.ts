@@ -2,11 +2,18 @@ import { When, Then, Given, And } from "@badeball/cypress-cucumber-preprocessor"
 import {
   fillProgramForm,
   fillTargetingForm,
+  getIndividualsFromRdiDetails,
   uniqueSeed,
 } from '../../procedures/procedures';
 
 let programName;
 let targetPopulationName;
+let individualIds;
+let paymentPlanUnicefId;
+const downloadsFolder = Cypress.config('downloadsFolder');
+const fileName = (id) => `payment_plan_payment_list_${id}.xlsx`;
+
+const maxInt = 2147483647;
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -39,7 +46,7 @@ Given('There are individuals and households imported', () => {
   );
 
   cy.fixture('rdi_import_3_hh_3_ind.xlsx', 'base64').as('rdi_import_3_hh_3_ind');
-  cy.get('[data-cy="rdi-file-input"]').selectFile('@rdi_import_3_hh_3_ind', { action: 'drag-drop', force: true });
+  cy.get('[data-cy="file-input"]').selectFile('@rdi_import_3_hh_3_ind', { action: 'drag-drop', force: true });
 
   cy.get('[data-cy="button-import-rdi"').click();
 
@@ -58,12 +65,50 @@ Given('There are individuals and households imported', () => {
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
   cy.get('div').contains('MERGED');
+  cy.get('button > span').contains('Individuals').click({ force: true });
+  individualIds = getIndividualsFromRdiDetails(cy, 3);
+});
+
+Given('Each imported individual has a payment channel', () => {
+  individualIds.forEach((individualId) => {
+    cy.visit('/api/unicorn/payment/paymentchannel/add/');
+    cy.get('#id_individual').select(individualId);
+    cy.get('#id_delivery_mechanism').select('Transfer');
+    cy.get('input[name="_save"]').click();
+  });
+});
+
+Given('There are steficon rules provided', () => {
+  cy.visit('/api/unicorn/steficon/rule/add/');
+  cy.get('#id_name').type(uniqueSeed);
+  cy.get('#id_type').select('Payment Plan');
+  cy.get('#id_definition_container').click().type('result.value=0');
+  cy.get('input[name="enabled"]').click();
+  cy.get('input[name="_save"]').click();
+  cy.get('p').contains('Please correct the error below.').should('not.exist');
+
+  cy.visit('/api/unicorn/steficon/rulecommit/add/');
+  cy.get('#id_rule').select(uniqueSeed);
+  cy.get('#id_definition').clear().type('result.value=100');
+  cy.get('input[name="is_release"]').click();
+  cy.get('input[name="enabled"]').click();
+  cy.get('input[name="version"]').type(
+    (parseInt(uniqueSeed) % maxInt).toString(),
+  );
+  cy.get('input[name="affected_fields"]').type('[]');
+  cy.get('input[name="_save"]').click();
+  cy.get('p').contains('Please correct the error below.').should('not.exist');
+
+  cy.visit('/');
+  clearCache();
 });
 
 Given('I have an active program', () => {
   cy.visit('/');
   cy.get('span').contains('Programme Management').click();
-  cy.get('[data-cy="button-new-program"]').click({ force: true });
+  cy.get('[data-cy="button-new-program"]', { timeout: 10000 }).click({
+    force: true,
+  });
   programName = fillProgramForm(cy);
   cy.get('[data-cy="button-save"]').click({ force: true });
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
@@ -145,6 +190,9 @@ Then('I should see the Payment Plan details page', () => {
   cy.get('[data-cy="page-header-container"]').contains('Payment Plan ID', {
     timeout: 10000,
   });
+  cy.get('[data-cy="pp-unicef-id"]').then(($el) => {
+    paymentPlanUnicefId = $el.text();
+  });
   cy.get('h6').contains('Details');
   cy.get('h6').contains('Results');
   cy.get('h6').contains('Payments List');
@@ -167,7 +215,10 @@ Then('I see the entitlements input', () => {
 });
 
 When('I choose the steficon rule', () => {
-  cy.get('[data-cy="select-option-0"]').click();
+  // cy.get('[data-cy="select-option-0"]').click();
+  cy.get('[data-cy="input-entitlement-formula"]').click({ force: true });
+  // cy.get(`[data-cy="select-option-${uniqueSeed}"`).click({force: true});
+  cy.get('li').contains(uniqueSeed).click({ force: true });
 });
 
 And('I apply the steficon rule', () => {
@@ -175,10 +226,9 @@ And('I apply the steficon rule', () => {
   cy.reload();
 });
 
-//TODO: uncomment after https://github.com/unicef/hct-mis/pull/1756 is merged
-// Then('I see the entitlements calculated', () => {
-//   cy.get('[data-cy="total-entitled-quantity-usd"]').contains('$');
-// });
+Then('I see the entitlements calculated', () => {
+  cy.get('[data-cy="total-entitled-quantity-usd"]').contains('USD');
+});
 
 And('I am able to set up FSPs', () => {
   cy.get('[data-cy="button-set-up-fsp"]', {
@@ -192,19 +242,7 @@ Then('I should see the Set up FSP page', () => {
   });
 });
 
-When('I select only one Delivery Mechanism', () => {
-  cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]', {
-    timeout: 10000,
-  }).click();
-  cy.get('[data-cy="select-option-Mobile Money"]').click();
-  cy.get('[data-cy="button-next-save"]').click({ force: true });
-});
-
-Then('I should see the warning', () => {
-  cy.get('[data-cy="warning-box"]');
-});
-
-When('I select more Delivery Mechanisms', () => {
+When('I select the delivery mechanisms', () => {
   cy.get('[data-cy="select-deliveryMechanisms[0].deliveryMechanism"]').click();
   cy.get('[data-cy="select-option-Transfer"]').click();
   cy.get('[data-cy="button-next-save"]').click({ force: true });
@@ -212,4 +250,84 @@ When('I select more Delivery Mechanisms', () => {
 
 Then('I should be able to assign FSPs', () => {
   cy.get('[data-cy="select-deliveryMechanisms[0].fsp"]');
+});
+
+When('I select the FSPs and save', () => {
+  cy.get('[data-cy="select-deliveryMechanisms[0].fsp"]').click();
+  cy.get('[data-cy="select-option-Test FSP Transfer"]').click();
+  cy.get('[data-cy="button-next-save"]').click({ force: true });
+});
+
+Then('I should see volumes by delivery mechanisms', () => {
+  cy.contains('Volume by Delivery Mechanism in USD', { timeout: 10000 });
+});
+
+When('I lock the FSPs', () => {
+  cy.get("[data-cy='button-lock-plan']").click({ force: true });
+  cy.get("[data-cy='button-submit']").click({ force: true });
+});
+
+Then('I should see that the status is FSP Locked', () => {
+  cy.get("[data-cy='status-container']").contains('FSP Locked');
+});
+
+When('I send the Payment Plan for approval', () => {
+  cy.get("[data-cy='button-send-for-approval']").click({ force: true });
+});
+
+Then('I see the acceptance process stepper', () => {
+  cy.contains('Acceptance Process');
+});
+
+When('I approve the Payment Plan', () => {
+  cy.get("[data-cy='button-approve']").click({ force: true });
+  cy.get("[data-cy='button-submit']").click({ force: true });
+});
+
+Then('I see the Payment Plan as in authorization', () => {
+  cy.get('[data-cy="status-container"]').contains('In Authorization');
+});
+
+When('I authorize the Payment Plan', () => {
+  cy.get("[data-cy='button-authorize']").click({ force: true });
+  cy.get("[data-cy='button-submit']").click({ force: true });
+});
+
+Then('I see the Payment Plan as in review', () => {
+  cy.get('[data-cy="status-container"]').contains('In Review');
+});
+
+When('I finalize the Payment Plan', () => {
+  cy.get("[data-cy='button-mark-as-reviewed']").click({ force: true });
+  cy.get("[data-cy='button-submit']").click({ force: true });
+});
+
+Then('I see the Payment Plan as accepted', () => {
+  cy.get('[data-cy="status-container"]').contains('Accepted');
+});
+
+When('I download the xlsx template', () => {
+  cy.get('[data-cy="button-export-xlsx"]').click({ force: true });
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.reload();
+
+  cy.get('[data-cy="button-download-template"]').click({ force: true });
+});
+
+Then('I fill the xlsx template', () => {
+  const name = fileName(paymentPlanUnicefId);
+  const downloadedFilePath = `${downloadsFolder}/${name}`;
+  cy.exec(`node cypress/scripts/fillXlsx.js ${downloadedFilePath}`);
+});
+
+When('I upload the xlsx template', () => {
+  const name = fileName(paymentPlanUnicefId);
+  const filledFilePath = `out_${name}`;
+  cy.get('[data-cy="button-import"]').click({ force: true });
+  cy.fixture(filledFilePath, 'base64').as('rdi_import_3_hh_3_ind');
+  cy.get('[data-cy="file-input"]').selectFile('@rdi_import_3_hh_3_ind', { action: 'select', force: true });
+  cy.get('[data-cy="button-import-entitlement"').click({ force: true });
+  cy.get('[data-cy="imported-file-name"]').should('exist');
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.reload();
 });

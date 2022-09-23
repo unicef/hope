@@ -1,7 +1,7 @@
 export const uniqueSeed = Date.now().toString();
 
 export const fillProgramForm = (cy) => {
-  const programName = `test program ${uniqueSeed}`
+  const programName = `test program ${uniqueSeed}`;
   cy.get('[data-cy="input-programme-name"]').type(programName);
   cy.get('[data-cy="input-cash-assist-scope"]').first().click();
   cy.get('[data-cy="select-option-Unicef"]').click();
@@ -56,10 +56,24 @@ export const fillTargetingForm = (cy, programName, seed) => {
   //   .click()
   //   .type('given')
   // cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
-  // cy.get("Given name").click(); // TODO 
+  // cy.get("Given name").click(); // TODO
   // cy.get(`[data-cy="${individualFilterSelector}.value"`)
   //   .click()
   //   .type(seed)
 
-  return targetPopulationName
+  return targetPopulationName;
+};
+
+export const getIndividualsFromRdiDetails = (cy, expectedNumber) => {
+  let individualIds = [];
+
+  for (let i = 0; i < expectedNumber; i++) {
+    cy.get('[data-cy="imported-individuals-table"]')
+      .find(`tbody > tr:nth-child(${i + 1}) > td:nth-child(1)`)
+      .then(($td) => {
+        const individualId = $td.text().split(' (')[0];
+        individualIds.push(individualId);
+      });
+  }
+  return individualIds;
 };

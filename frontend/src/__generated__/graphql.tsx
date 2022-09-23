@@ -3845,6 +3845,16 @@ export type PaymentNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum PaymentPlanBackgroundActionStatus {
+  SteficonRun = 'STEFICON_RUN',
+  SteficonError = 'STEFICON_ERROR',
+  XlsxExporting = 'XLSX_EXPORTING',
+  XlsxExportError = 'XLSX_EXPORT_ERROR',
+  XlsxImportError = 'XLSX_IMPORT_ERROR',
+  XlsxImportingEntitlements = 'XLSX_IMPORTING_ENTITLEMENTS',
+  XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION'
+}
+
 export enum PaymentPlanCurrency {
   A = 'A_',
   Aed = 'AED',
@@ -4033,7 +4043,7 @@ export type PaymentPlanNode = Node & {
   totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
   createdBy: UserNode,
   status: PaymentPlanStatus,
-  backgroundActionStatus?: Maybe<Scalars['String']>,
+  backgroundActionStatus?: Maybe<PaymentPlanBackgroundActionStatus>,
   targetPopulation: TargetPopulationNode,
   currency: PaymentPlanCurrency,
   dispersionStartDate?: Maybe<Scalars['Date']>,
@@ -9979,7 +9989,10 @@ export type AllPaymentsForTableQuery = (
         )>>>, collector: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'fullName'>
-        ) }
+        ), financialServiceProvider: Maybe<(
+          { __typename?: 'FinancialServiceProviderNode' }
+          & Pick<FinancialServiceProviderNode, 'id' | 'name'>
+        )> }
       )> }
     )>> }
   )> }
@@ -18150,6 +18163,10 @@ export const AllPaymentsForTableDocument = gql`
           fullName
         }
         hasPaymentChannel
+        financialServiceProvider {
+          id
+          name
+        }
       }
     }
   }
@@ -22302,6 +22319,7 @@ export type ResolversTypes = {
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
   ReportNode: ResolverTypeWrapper<ReportNode>,
   PaymentPlanStatus: PaymentPlanStatus,
+  PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
   PaymentPlanCurrency: PaymentPlanCurrency,
   DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
   FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>,
@@ -22736,6 +22754,7 @@ export type ResolversParentTypes = {
   ReportNodeEdge: ReportNodeEdge,
   ReportNode: ReportNode,
   PaymentPlanStatus: PaymentPlanStatus,
+  PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
   PaymentPlanCurrency: PaymentPlanCurrency,
   DeliveryMechanismNode: DeliveryMechanismNode,
   FinancialServiceProviderNode: FinancialServiceProviderNode,
@@ -24612,7 +24631,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentPlanStatus'], ParentType, ContextType>,
-  backgroundActionStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  backgroundActionStatus?: Resolver<Maybe<ResolversTypes['PaymentPlanBackgroundActionStatus']>, ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
   currency?: Resolver<ResolversTypes['PaymentPlanCurrency'], ParentType, ContextType>,
   dispersionStartDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,

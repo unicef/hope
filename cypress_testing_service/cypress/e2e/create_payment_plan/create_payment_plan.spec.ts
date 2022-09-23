@@ -39,10 +39,9 @@ Given('There are individuals and households imported', () => {
   );
 
   cy.fixture('rdi_import_3_hh_3_ind.xlsx', 'base64').as('rdi_import_3_hh_3_ind');
-  cy.get('[data-cy="rdi-file-input"]').selectFile('@rdi_import_3_hh_3_ind', { action: 'drag-drop', force: true });
+  cy.get('[data-cy="file-input"]').selectFile('@rdi_import_3_hh_3_ind', { action: 'select', force: true });
 
   cy.get('[data-cy="button-import-rdi"').click();
-
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
   cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
