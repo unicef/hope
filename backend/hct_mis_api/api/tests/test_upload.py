@@ -413,7 +413,7 @@ class UploadRDITests(HOPEApiTestCase):
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(
             response.json(),
-            [{"Household #1": [{"head_of_household": ["Only one HoH allowed"]}]}],
+            {"households": [{"Household #1": [{"head_of_household": ["Only one HoH allowed"]}]}]},
             f"""
 ==== RESULT ====
 {str(response.json())}
@@ -498,7 +498,7 @@ class UploadRDITests(HOPEApiTestCase):
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(
             response.json(),
-            [{"Household #2": [{"primary_collector": ["Missing Primary Collector"]}]}],
+            {"households": [{"Household #2": [{"primary_collector": ["Missing Primary Collector"]}]}]},
             f"""
 ==== RESULT ====
 {str(response.json())}
@@ -581,10 +581,12 @@ class UploadRDITests(HOPEApiTestCase):
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(
             response.json(),
-            [
-                {"Household #1": [{"role": ["This field is required."]}]},
-                {"Household #2": [{"role": ["This field is required."]}]},
-            ],
+            {
+                "households": [
+                    {"Household #1": [{"member #1": [{"role": ["This field is required."]}]}]},
+                    {"Household #2": [{"member #1": [{"role": ["This field is required."]}]}]},
+                ]
+            },
             f"""
 ==== RESULT ====
 {str(response.json())}
