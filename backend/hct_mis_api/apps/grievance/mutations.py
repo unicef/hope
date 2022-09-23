@@ -1272,23 +1272,26 @@ class PaymentDetailsApproveMutation(PermissionMutation):
 
 
 class UploadDocumentsMutation(graphene.Mutation):
-    class Arguments:
-        file = Upload(required=True)
-        business_area_slug = graphene.String(required=True)
-
     success = graphene.Boolean()
 
-    @classmethod
-    def mutate(cls, root, info, file, business_area_slug):
-        files = dict(info.context.FILES)["File"]
-        if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
-            raise GraphQLError("Total size of files can not be larger than 15mb.")
+    class Arguments:
+        business_area_slug = graphene.String(required=True)
+        grievance_ticket_id = graphene.NonNull(graphene.ID)
+        files = graphene.NonNull(graphene.List(Upload))
 
+    @classmethod
+    def mutate(cls, root, info, business_area_slug, grievance_ticket_id, files):
+        if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
+            raise GraphQLError("Total size of files can not be larger than 25mb.")
+
+        logger.info(info.context.user)
         for file in files:
             validate_file(file)
             GrievanceDocument.objects.create(
-                file=file,
-                business_area_slug=business_area_slug
+                created_by_id=info.context.user.id,
+                business_area_slug=business_area_slug,
+                grievance_ticket_id=decode_id_string(grievance_ticket_id),
+                file=file
             )
 
         return UploadDocumentsMutation(success=True)
