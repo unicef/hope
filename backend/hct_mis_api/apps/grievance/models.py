@@ -3,6 +3,7 @@ from decimal import Decimal
 from itertools import chain
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -764,15 +765,32 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 
 
 class GrievanceDocument(models.Model):
+    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    grievance_ticket = models.ForeignKey(
+        GrievanceTicket, null=True, related_name="documents", on_delete=models.SET_NULL
+    )
+    business_area_slug = models.CharField(max_length=200, blank=True, null=True)
     file = models.FileField(upload_to="grievance_documents", blank=True, null=True)
-    business_area_slug = models.CharField(max_length=200, blank=True)
 
     @property
-    def file_name(self):
+    def name(self):
         return self.file.name
 
+    @property
+    def size(self):
+        return self.file.size
+
+    @property
+    def path(self):
+        return self.file.path
+
+    @property
+    def mimetype(self):
+        return self.file.file.content_type
+
     def __str__(self):
-        return self.file.name
+        return self.name
 
 
 @receiver(post_save, sender=TicketComplaintDetails)

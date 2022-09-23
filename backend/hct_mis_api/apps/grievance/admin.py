@@ -129,8 +129,8 @@ class TicketReferralDetailsAdmin(HOPEModelAdminBase):
     raw_id_fields = ("ticket", "household", "individual")
 
 
-@admin.register(GrievanceDocument)
-class TicketReferralDetailsAdmin(HOPEModelAdminBase):
-    list_display = (
-        "file_name",
-    )
+# @admin.register(GrievanceDocument)
+# class TicketReferralDetailsAdmin(HOPEModelAdminBase):
+#     list_display = (
+#         "file_name",
+#     )
