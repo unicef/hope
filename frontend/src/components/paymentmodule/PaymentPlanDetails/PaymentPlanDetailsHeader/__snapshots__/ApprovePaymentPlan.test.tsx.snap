@@ -7,7 +7,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Ap
   >
     <button
       class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
-      data-cy="button-lock-plan"
+      data-cy="button-approve"
       tabindex="0"
       type="button"
     >

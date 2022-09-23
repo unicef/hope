@@ -28,7 +28,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
     >
       <button
         class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
-        data-cy="button-lock-plan"
+        data-cy="button-mark-as-reviewed"
         tabindex="0"
         type="button"
       >

@@ -121,7 +121,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               }}
             />
             {error?.graphQLErrors?.length || xlsxErrors?.length ? (
-              <Error data-cy="error-list">
+              <Error data-cy='error-list'>
                 <p>Errors</p>
                 {error
                   ? error.graphQLErrors.map((x) => <p>{x.message}</p>)
@@ -140,7 +140,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               color='primary'
               variant='contained'
               onClick={() => handleImport()}
-              data-cy='button-import-submit'
+              data-cy='button-import-entitlement'
             >
               {t('IMPORT')}
             </Button>

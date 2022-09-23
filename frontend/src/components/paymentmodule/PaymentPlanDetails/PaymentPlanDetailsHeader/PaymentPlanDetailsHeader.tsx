@@ -132,7 +132,8 @@ export const PaymentPlanDetailsHeader = ({
     <PageHeader
       title={
         <Box display='flex' alignItems='center'>
-          {t('Payment Plan')} ID {paymentPlan.unicefId}
+          {t('Payment Plan')} ID{' '}
+          <span data-cy='pp-unicef-id'>{paymentPlan.unicefId}</span>
           <StatusWrapper>
             <StatusBox
               status={paymentPlan.status}
