@@ -97,4 +97,4 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
     area = models.CharField(max_length=250, blank=True)
     language = models.TextField(blank=True)
     consent = models.BooleanField(default=True)
-    programme = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.CASCADE)
