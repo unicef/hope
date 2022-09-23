@@ -38,8 +38,6 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_single_household(self):
         data = {
             "name": "aaaa",
-            "number_of_households": 1,
-            "number_of_individuals": 1,
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -88,8 +86,6 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_external_collector(self):
         data = {
             "name": "aaaa",
-            # "number_of_households": 1,
-            # "number_of_individuals": 1,
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -137,8 +133,6 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_with_documents(self):
         data = {
             "name": "aaaa",
-            # "number_of_households": 1,
-            # "number_of_individuals": 1,
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -197,8 +191,6 @@ class UploadRDITests(HOPEApiTestCase):
 
         data = {
             "name": "aaaa",
-            # "number_of_households": 1,
-            # "number_of_individuals": 1,
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -258,8 +250,6 @@ class UploadRDITests(HOPEApiTestCase):
 
         data = {
             "name": "aaaa",
-            # "number_of_households": 1,
-            # "number_of_individuals": 1,
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -394,8 +384,6 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_error_too_many_hoh(self):
         data = {
             "name": "aaaa",
-            # "number_of_households": 1,
-            # "number_of_individuals": 1,
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -424,6 +412,183 @@ class UploadRDITests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(
-            response.json(), {"households": [{"members": {"head_of_household": ["Only one HoH allowed"]}}]}
+            response.json(),
+            [{"Household #1": [{"head_of_household": ["Only one HoH allowed"]}]}],
+            f"""
+==== RESULT ====
+{str(response.json())}
+================""",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
+
+    def test_upload_error_missing_primary(self):
+        data = {
+            "name": "aaaa",
+            "collect_individual_data": "FULL",
+            "households": [
+                {
+                    "residence_status": "",
+                    "village": "village1",
+                    "country": "AF",
+                    "members": [
+                        {
+                            "relationship": NON_BENEFICIARY,
+                            "full_name": "Jhon Primary #1",
+                            "birth_date": "2000-01-01",
+                            "role": ROLE_PRIMARY,
+                            "sex": "FEMALE",
+                        },
+                        {
+                            "relationship": NON_BENEFICIARY,
+                            "full_name": "Mary Alternate #1",
+                            "birth_date": "2000-01-01",
+                            "role": ROLE_ALTERNATE,
+                            "sex": "MALE",
+                        },
+                        {
+                            "relationship": HEAD,
+                            "full_name": "James Head #1",
+                            "birth_date": "2000-01-01",
+                            "sex": "MALE",
+                            "role": "",
+                            "documents": [
+                                {
+                                    "document_number": 10,
+                                    # "image": base64_encoded_data,
+                                    "doc_date": "2010-01-01",
+                                    "country": "AF",
+                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                }
+                            ],
+                        },
+                        {
+                            "relationship": SON_DAUGHTER,
+                            "full_name": "Mary Son #1",
+                            "birth_date": "2000-01-01",
+                            "role": "",
+                            "sex": "MALE",
+                        },
+                    ],
+                    "size": 1,
+                },
+                {
+                    "residence_status": "",
+                    "village": "village1",
+                    "country": "AF",
+                    "members": [
+                        {
+                            "relationship": HEAD,
+                            "role": ROLE_ALTERNATE,
+                            "full_name": "John Doe",
+                            "birth_date": "2000-01-01",
+                            "sex": "MALE",
+                        },
+                        {
+                            "relationship": SON_DAUGHTER,
+                            "full_name": "Mary Doe",
+                            "birth_date": "2000-01-01",
+                            "role": "",
+                            "sex": "FEMALE",
+                        },
+                    ],
+                    "size": 1,
+                },
+            ],
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(
+            response.json(),
+            [{"Household #2": [{"primary_collector": ["Missing Primary Collector"]}]}],
+            f"""
+==== RESULT ====
+{str(response.json())}
+================
+""",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
+
+    def test_upload_multiple_errors(self):
+        data = {
+            "name": "aaaa",
+            "collect_individual_data": "FULL",
+            "households": [
+                {
+                    "residence_status": "",
+                    "village": "village1",
+                    "country": "AF",
+                    "members": [
+                        {
+                            "relationship": NON_BENEFICIARY,
+                            "full_name": "Jhon Primary #1",
+                            "birth_date": "2000-01-01",
+                            "sex": "FEMALE",
+                        },
+                        {
+                            "relationship": NON_BENEFICIARY,
+                            "full_name": "Mary Alternate #1",
+                            "birth_date": "2000-01-01",
+                            "role": ROLE_ALTERNATE,
+                            "sex": "MALE",
+                        },
+                        {
+                            "relationship": SON_DAUGHTER,
+                            "full_name": "James Head #1",
+                            "birth_date": "2000-01-01",
+                            "sex": "MALE",
+                            "role": ROLE_ALTERNATE,
+                            "documents": [
+                                {
+                                    "document_number": 10,
+                                    # "image": base64_encoded_data,
+                                    "doc_date": "2010-01-01",
+                                    "country": "AF",
+                                    "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                                }
+                            ],
+                        },
+                        {
+                            "relationship": SON_DAUGHTER,
+                            "full_name": "Mary Son #1",
+                            "birth_date": "2000-01-01",
+                            "role": "",
+                            "sex": "MALE",
+                        },
+                    ],
+                    "size": 1,
+                },
+                {
+                    "residence_status": "",
+                    "village": "village1",
+                    "members": [
+                        {
+                            "relationship": HEAD,
+                            "full_name": "John Doe",
+                            "birth_date": "2000-01-01",
+                            "sex": "MALE",
+                        },
+                        {
+                            "relationship": HEAD,
+                            "full_name": "Mary Doe",
+                            "birth_date": "2000-01-01",
+                            "role": "",
+                            "sex": "FEMALE",
+                        },
+                    ],
+                    "size": 1,
+                },
+            ],
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(
+            response.json(),
+            [
+                {"Household #1": [{"role": ["This field is required."]}]},
+                {"Household #2": [{"role": ["This field is required."]}]},
+            ],
+            f"""
+==== RESULT ====
+{str(response.json())}
+================
+""",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))

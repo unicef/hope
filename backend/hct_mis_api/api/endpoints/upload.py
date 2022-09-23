@@ -13,6 +13,7 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView
 from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
+from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
@@ -53,9 +54,9 @@ def get_principals(people: list[dict]) -> tuple[dict, dict, Optional[dict]]:
                 raise ValidationError({"alternate_collector": "Only one alternate_collector allowed"})
             alternate_collector = data
     if not head_of_household:
-        raise ValidationError({"head_of_household": "Required"})
+        raise ValidationError({"head_of_household": "Missing Head Of Household"})
     if not primary_collector:
-        raise ValidationError({"primary_collector": "Required"})
+        raise ValidationError({"primary_collector": "Missing Primary Collector"})
     return head_of_household, primary_collector, alternate_collector
 
 
@@ -152,6 +153,9 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
             "kobo_submission_time",
         ]
 
+    def validate(self, attrs):
+        return attrs
+
 
 class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.ModelSerializer):
     households = HouseholdSerializer(many=True)
@@ -196,4 +200,5 @@ class UploadRDIView(HOPEAPIView):
         if serializer.is_valid():
             info = serializer.save(user=request.user)
             return Response(info, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        errors = humanize_errors(serializer.errors)
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
