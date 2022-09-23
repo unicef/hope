@@ -11,6 +11,9 @@ from django.db.models import (
     When,
     F,
     CharField,
+    OuterRef,
+    Exists,
+    Subquery,
 )
 from graphene import relay, ObjectType
 from graphene_django import DjangoObjectType
@@ -33,7 +36,14 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentRecord, GenericPayment
+from hct_mis_api.apps.payment.models import (
+    PaymentVerificationPlan,
+    PaymentRecord,
+    GenericPayment,
+    DeliveryMechanismPerPaymentPlan,
+    FinancialServiceProvider,
+    ServiceProvider, PaymentPlan
+)
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
 from hct_mis_api.apps.payment.filters import CashPlanFilter, CashPlanPaymentPlanFilter
@@ -105,6 +115,17 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         ).count()
 
+
+class GenericPaymentPlanNode(ObjectType):
+    # TODO: add perms
+    # permission_classes = (
+    #     hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+    #     hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+    # )
+
+    id = graphene.String(source="pk")
+
+
 class CashPlanAndPaymentPlanNode(ObjectType):  # BaseNodePermissionMixin
     """
     for CashPlan and PaymentPlan models
@@ -114,19 +135,19 @@ class CashPlanAndPaymentPlanNode(ObjectType):  # BaseNodePermissionMixin
     #     hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
     # )  # TODO: add Perms
 
-    id = graphene.String(source="pk")
-    unicef_id = graphene.String()
     is_payment_plan = graphene.Boolean()
+    id = graphene.String(source="pk")
+    unicef_id = graphene.String(source="unicef_id")
     verification_status = graphene.String()
     fsp_names = graphene.String()
-    delivery_mechanisms = graphene.String()
-    # currency = graphene.String(source="currency")
+    delivery_mechanisms = graphene.String(source="delivery_type")
+    delivery_types = graphene.String(source="delivery_types")
+    currency = graphene.String(source="currency")
+    total_delivered_quantity = graphene.Float(source="total_delivered_quantity")
+    start_date = graphene.String(source="start_date")
+    end_date = graphene.String(source="end_date")
     programme_name = graphene.String()
-    updated_at = graphene.String()
-    # TODO: will add more
-
-    def resolve_unicef_id(self, info, **kwargs):
-        return getattr(self, "unicef_id", None)
+    updated_at = graphene.String(source="updated_at")
 
     def resolve_is_payment_plan(self, info, **kwargs):
         return self.__class__.__name__ == "PaymentPlan"
@@ -134,21 +155,11 @@ class CashPlanAndPaymentPlanNode(ObjectType):  # BaseNodePermissionMixin
     def resolve_verification_status(self, info, **kwargs):
         return self.payment_verification_summary.status if getattr(self, "payment_verification_summary", None) else None
 
-    def resolve_fsp_names(self, info, **kwargs) -> list:
+    def resolve_fsp_names(self, info, **kwargs):
         return self.fsp_names
-
-    def resolve_delivery_mechanisms(self, info, **kwargs) -> list:
-        # payment_plan.delivery_mechanisms
-        return self.pk
-
-#     def resolve_cash_amount(self, info, **kwargs):
-#         return self.pk
 
     def resolve_programme_name(self, info, **kwargs):
         return self.program.name
-
-    def resolve_updated_at(self, info, **kwargs):
-        return self.updated_at
 
 
 class Query(graphene.ObjectType):
@@ -176,7 +187,7 @@ class Query(graphene.ObjectType):
     )
 
     cash_plan = relay.Node.Field(CashPlanNode)
-    # TODO: deprecated going to use 'all_cash_plans_and_payment_plans'
+    # TODO: maybe deprecated going to use 'all_cash_plans_and_payment_plans'
     all_cash_plans = DjangoPermissionFilterConnectionField(
         CashPlanNode,
         filterset_class=CashPlanFilter,
@@ -190,8 +201,15 @@ class Query(graphene.ObjectType):
     all_cash_plans_and_payment_plans = graphene.List(
         CashPlanAndPaymentPlanNode,
         business_area=graphene.String(required=True),
-
-        order_by=graphene.String(required=False)
+        program=graphene.String(required=False),
+        search=graphene.String(required=False),
+        service_provider=graphene.String(required=False),
+        delivery_type=graphene.String(required=False),
+        verification_status=graphene.String(required=False),
+        start_date_gte=graphene.String(required=False),
+        end_date_lte=graphene.String(required=False),
+        order_by=graphene.String(required=False),
+        first=graphene.Int(required=False),
     )
     program_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
@@ -247,12 +265,23 @@ class Query(graphene.ObjectType):
         ).order_by("-updated_at", "custom_order")
 
     def resolve_all_cash_plans_and_payment_plans(self, info, **kwargs):
+        qs = ExtendedQuerySetSequence(
+            # TODO: added only for tests
+            # PaymentPlan.objects.filter(status=PaymentPlan.Status.RECONCILED),
+            PaymentPlan.objects.all(),
+            CashPlan.objects.all()
+        )
         print("KW== > ", kwargs)
-        # TODO: add filter by Payment 'status' or ?
 
-        fsps = "service_provider__full_name"  #
+        service_provider_qs = ServiceProvider.objects.filter(cash_plans=OuterRef("id")).distinct()
+        cash_plan_qs = CashPlan.objects.filter(id=OuterRef("id")).distinct()
 
-        qs = get_payment_cash_plan_items_sequence_qs().annotate(
+        delivery_mechanisms_per_payment_plan_qs = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=OuterRef('pk'))
+        fsp_ids = delivery_mechanisms_per_payment_plan_qs.values_list("financial_service_provider", flat=True)
+        fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
+
+
+        qs = qs.annotate(
             custom_order=Case(
                 When(
                     payment_verification_summary__isnull=True,
@@ -273,13 +302,35 @@ class Query(graphene.ObjectType):
                 output_field=IntegerField(),
             ),
             fsp_names=Case(
-                # When(
-                #     service_provider__isnull=False,
-                #     then=F("service_provider__full_name")
-                # ),
-                # delivery_mechanisms .distinct("financial_service_provider")
+                When(
+                    Exists(service_provider_qs),
+                    then=Subquery(service_provider_qs.values_list("full_name", flat=True)),
+                ),
+                When(
+                    Exists(delivery_mechanisms_per_payment_plan_qs),
+                    then=Value("FSP qs"),
+                    # TODO: upd query
+                    # then=Subquery(fsp_qs.values_list("name", flat=True)),
+                ),
+                default=Value(""),
                 output_field=CharField(),
             ),
+            # TODO: upd 'delivery_types'
+            delivery_types=Case(
+                When(
+                    Exists(service_provider_qs),
+                    # then=F("delivery_type"),
+                    then=Value("from cash_plan"),
+
+                ),
+                When(
+                    Exists(delivery_mechanisms_per_payment_plan_qs),
+                    then=Value("list form delivery_mechanisms_per_payment_plan")
+                    # then=Subquery(delivery_mechanisms_per_payment_plan_qs.values_list("delivery_mechanism", flat=True)),
+                ),
+                default=Value(""),
+                output_field=CharField(),
+            )
 
         ).order_by("-updated_at", "custom_order")
 
@@ -292,7 +343,7 @@ class Query(graphene.ObjectType):
         if order_by_value:
             reverse = order_by_value.startswith("-")
             order_by = order_by_value[1:] if reverse else order_by_value
-            # unicef_id, verification_status, program__name, updated_at
+            # unicef_id, verification_status, start_date, program__name, updated_at
             if order_by == "verification_status":
                 if reverse:
                     qs = qs.order_by("-custom_order")

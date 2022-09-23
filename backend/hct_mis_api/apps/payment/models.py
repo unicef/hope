@@ -5,6 +5,8 @@ from typing import Optional
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField, Q, Count, Sum, UniqueConstraint
@@ -87,6 +89,8 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     total_undelivered_quantity_usd = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
     )
+    verification_plans = GenericRelation("payment.PaymentVerificationPlan")
+    payment_verification_summary = GenericRelation("payment.PaymentVerificationSummary")
 
     class Meta:
         abstract = True
@@ -96,6 +100,26 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
             exchange_rates_client = ExchangeRates()
 
         return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
+
+    def available_payment_records(
+        self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None
+    ):
+        # TODO: check if works with CPlan and PPlan ??
+        params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
+
+        if payment_verification_plan:
+            params &= Q(
+                Q(verification__isnull=True) | Q(verification__payment_verification_plan=payment_verification_plan)
+            )
+        else:
+            params &= Q(verification__isnull=True)
+
+        payment_records = self.payment_items.filter(params).distinct()
+
+        if extra_validation:
+            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+
+        return PaymentRecord.objects.filter(pk__in=payment_records)
 
 
 class GenericPayment(TimeStampedUUIDModel):
@@ -221,8 +245,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
-        # TODO: will add to PaymentVerification list if status 'Reconciled'
-        # RECONCILED = "RECONCILED", "Reconciled"
+        RECONCILED = "RECONCILED", "Reconciled" # TODO: will add to PaymentVerification list if status is 'Reconciled'
 
     class BackgroundActionStatus(models.TextChoices):
         STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
@@ -436,6 +459,17 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     )
     def status_mark_as_reviewed(self):
         self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.ACCEPTED,
+        target=Status.RECONCILED,
+    )
+    def status_reconciled(self):
+        self.status_date = timezone.now()
+        PaymentVerificationSummary.objects.create(
+            payment_plan=self,
+        )
 
     @property
     def currency_exchange_date(self) -> datetime.date:
@@ -804,25 +838,6 @@ class CashPlan(GenericPaymentPlan):
     def unicef_id(self):
         return getattr(self, "ca_id")
 
-    def available_payment_records(
-        self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None
-    ):
-        params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
-
-        if payment_verification_plan:
-            params &= Q(
-                Q(verification__isnull=True) | Q(verification__payment_verification_plan=payment_verification_plan)
-            )
-        else:
-            params &= Q(verification__isnull=True)
-
-        payment_records = self.payment_items.filter(params).distinct()
-
-        if extra_validation:
-            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
-
-        return PaymentRecord.objects.filter(pk__in=payment_records)
-
     class Meta:
         verbose_name = "Cash Plan"
         ordering = ["created_at"]
@@ -955,19 +970,9 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         (VERIFICATION_CHANNEL_XLSX, "XLSX"),
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
-    cash_plan = models.ForeignKey(
-        "payment.CashPlan",
-        on_delete=models.CASCADE,
-        related_name="verification_plans",
-        null=True,
-    )
-    # TODO: cash_plan or payment_plan is req
-    payment_plan = models.ForeignKey(
-        "payment.PaymentPlan",
-        on_delete=models.CASCADE,
-        related_name="verification_plans",
-        null=True,
-    )
+    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    payment_plan_object_id = models.CharField(max_length=50, null=True)
+    payment_plan = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)
@@ -992,7 +997,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     @property
     def business_area(self):
-        return self.cash_plan.business_area
+        return self.payment_plan.business_area
 
     @property
     def has_xlsx_payment_verification_plan_file(self):
@@ -1032,6 +1037,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
 
 class XlsxPaymentVerificationPlanFile(TimeStampedUUIDModel):
+    # TODO: refactor this one as well, will use 'FileTemp'
     file = models.FileField()
     payment_verification_plan = models.OneToOneField(
         PaymentVerificationPlan, related_name="xlsx_verification_file", on_delete=models.CASCADE
@@ -1040,13 +1046,13 @@ class XlsxPaymentVerificationPlanFile(TimeStampedUUIDModel):
     created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
 
 
-def build_summary(cash_plan):
-    active_count = cash_plan.verification_plans.filter(status=PaymentVerificationSummary.STATUS_ACTIVE).count()
-    pending_count = cash_plan.verification_plans.filter(status=PaymentVerificationSummary.STATUS_PENDING).count()
-    not_finished_count = cash_plan.verification_plans.exclude(
+def build_summary(payment_plan):
+    active_count = payment_plan.verification_plans.filter(status=PaymentVerificationSummary.STATUS_ACTIVE).count()
+    pending_count = payment_plan.verification_plans.filter(status=PaymentVerificationSummary.STATUS_PENDING).count()
+    not_finished_count = payment_plan.verification_plans.exclude(
         status=PaymentVerificationSummary.STATUS_FINISHED
     ).count()
-    summary = PaymentVerificationSummary.objects.get(cash_plan=cash_plan)
+    summary = PaymentVerificationSummary.objects.get(payment_plan=payment_plan)
     if active_count >= 1:
         summary.status = PaymentVerificationSummary.STATUS_ACTIVE
         summary.completion_date = None
@@ -1069,7 +1075,7 @@ def build_summary(cash_plan):
     dispatch_uid="update_verification_status_in_cash_plan",
 )
 def update_verification_status_in_cash_plan(sender, instance, **kwargs):
-    build_summary(instance.cash_plan)
+    build_summary(instance.payment_plan)
 
 
 @receiver(
@@ -1078,7 +1084,7 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs):
     dispatch_uid="update_verification_status_in_cash_plan_on_delete",
 )
 def update_verification_status_in_cash_plan_on_delete(sender, instance, **kwargs):
-    build_summary(instance.cash_plan)
+    build_summary(instance.payment_plan)
 
 
 class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
@@ -1101,7 +1107,6 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         (STATUS_RECEIVED, "RECEIVED"),
         (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
     )
-    # old name 'cash_plan_payment_verification'
     payment_verification_plan = models.ForeignKey(
         "payment.PaymentVerificationPlan",
         on_delete=models.CASCADE,
@@ -1153,13 +1158,9 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
     )
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
-    cash_plan = models.OneToOneField(
-        "payment.CashPlan", on_delete=models.CASCADE, related_name="payment_verification_summary", null=True
-    )
-    # TODO: ? FK or
-    payment_plan = models.OneToOneField(
-        "payment.PaymentPlan", on_delete=models.CASCADE, related_name="payment_verification_summary", null=True
-    )
+    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    payment_plan_object_id = models.CharField(max_length=50, null=True)
+    payment_plan = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
 
 
 class ApprovalProcess(TimeStampedUUIDModel):
