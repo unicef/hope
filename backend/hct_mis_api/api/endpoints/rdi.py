@@ -11,6 +11,7 @@ from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportD
 
 from ...apps.account.permissions import Permissions
 from ...apps.registration_data.models import RegistrationDataImport
+from ..utils import humanize_errors
 from .base import HOPEAPIView
 from .mixin import HouseholdUploadMixin
 from .upload import HouseholdSerializer
@@ -79,7 +80,7 @@ class PushToRDIView(HouseholdUploadMixin, HOPEAPIView):
         if serializer.is_valid():
             totals = self.save_households(self.selected_rdi, serializer.validated_data, "")
             return Response({"id": self.selected_rdi.id, **asdict(totals)}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
 
 class CompleteRDIView(HOPEAPIView, UpdateAPIView):
