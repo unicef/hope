@@ -88,3 +88,5 @@ logging.disable(logging.CRITICAL)
 EXCHANGE_RATE_CACHE_EXPIRY = 0
 del DATABASES["read_only"]
 CELERY_TASK_ALWAYS_EAGER = True
+
+USE_DUMMY_EXCHANGE_RATES = False  # so the service needs to be mocked
