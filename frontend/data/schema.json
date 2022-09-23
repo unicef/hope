@@ -423,20 +423,6 @@
             "description": null,
             "args": [
               {
-                "name": "businessAreaSlug",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "offset",
                 "description": null,
                 "type": {
@@ -483,6 +469,20 @@
                   "kind": "SCALAR",
                   "name": "Int",
                   "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "businessAreaSlug",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               }
@@ -1986,22 +1986,6 @@
             "deprecationReason": null
           },
           {
-            "name": "grievanceTicketSubCategoryChoices",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ChoiceObject",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "grievanceTicketManualCategoryChoices",
             "description": null,
             "args": [],
@@ -2058,7 +2042,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ChoiceObject",
+                "name": "ChoiceObjectInt",
                 "ofType": null
               }
             },
@@ -2074,7 +2058,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ChoiceObject",
+                "name": "ChoiceObjectInt",
                 "ofType": null
               }
             },
@@ -9713,18 +9697,6 @@
                 "name": "Int",
                 "ofType": null
               }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "subCategory",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -36271,6 +36243,41 @@
       },
       {
         "kind": "OBJECT",
+        "name": "ChoiceObjectInt",
+        "description": null,
+        "fields": [
+          {
+            "name": "name",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "value",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "SteficonRuleNodeConnection",
         "description": null,
         "fields": [
@@ -48850,16 +48857,6 @@
             "defaultValue": null
           },
           {
-            "name": "subCategory",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
             "name": "issueType",
             "description": null,
             "type": {
@@ -51273,16 +51270,6 @@
             "type": {
               "kind": "SCALAR",
               "name": "ID",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "subCategory",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
               "ofType": null
             },
             "defaultValue": null

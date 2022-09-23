@@ -424,6 +424,11 @@ type ChoiceObject {
   value: String
 }
 
+type ChoiceObjectInt {
+  name: String
+  value: Int
+}
+
 type CommunicationMessageNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -564,7 +569,6 @@ input CreateGrievanceTicketInput {
   description: String!
   assignedTo: ID
   category: Int!
-  subCategory: Int
   issueType: Int
   admin: String
   area: String
@@ -933,7 +937,6 @@ type GrievanceTicketNode implements Node {
   assignedTo: UserNode
   status: Int!
   category: Int!
-  subCategory: Int
   issueType: Int
   description: String!
   admin2: AreaNode
@@ -2624,7 +2627,7 @@ type Query {
   accountabilityCommunicationMessageRecipient(id: ID!): CommunicationMessageRecipientMapNode
   allAccountabilityCommunicationMessageRecipients(offset: Int, before: String, after: String, first: Int, last: Int, messageId: String!, recipientId: String, fullName: String, phoneNo: String, sex: String, orderBy: String): CommunicationMessageRecipientMapNodeConnection
   accountabilityCommunicationMessageSampleSize(businessAreaSlug: String!, inputs: GetAccountabilityCommunicationMessageSampleSizeInput): GetCommunicationMessageSampleSizeObject
-  allFeedbacks(businessAreaSlug: String!, offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection
+  allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessAreaSlug: String!): FeedbackNodeConnection
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
@@ -2650,12 +2653,11 @@ type Query {
   allEditHouseholdFieldsAttributes: [FieldAttributeNode]
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
-  grievanceTicketSubCategoryChoices: [ChoiceObject]
   grievanceTicketManualCategoryChoices: [ChoiceObject]
   grievanceTicketSystemCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
-  grievanceTicketPriorityChoices: [ChoiceObject]
-  grievanceTicketUrgencyChoices: [ChoiceObject]
+  grievanceTicketPriorityChoices: [ChoiceObjectInt]
+  grievanceTicketUrgencyChoices: [ChoiceObjectInt]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   paymentRecordVerification(id: ID!): PaymentVerificationNode
@@ -3786,7 +3788,6 @@ input UpdateGrievanceTicketInput {
   household: ID
   individual: ID
   paymentRecord: ID
-  subCategory: Int
   extras: UpdateGrievanceTicketExtrasInput
   priority: Int
   urgency: Int
