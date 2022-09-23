@@ -22,12 +22,17 @@ mutation createFeedback($input: CreateFeedbackInput!) {
 """
 
     ALL_FEEDBACKS_QUERY = """
-query allFeedbacks($businessAreaSlug: String!) {
-    allFeedbacks(businessAreaSlug: $businessAreaSlug) {
+query allFeedbacks(
+    $businessAreaSlug: String!,
+    $householdLookup: String,
+) {
+    allFeedbacks(
+        businessAreaSlug: $businessAreaSlug,
+        householdLookup: $householdLookup
+    ) {
         edges {
             node {
                 id
-                householdLookup
             }
         }
     }
@@ -104,20 +109,20 @@ query allFeedbacks($businessAreaSlug: String!) {
         )
 
         def filter_it(variables):
-            print("X", {"businessAreaSlug": self.business_area.slug} | variables)
+            vars = {"businessAreaSlug": self.business_area.slug} | variables
             response = self.graphql_request(
                 request_string=self.ALL_FEEDBACKS_QUERY,
                 context={"user": self.user},
-                variables={"businessAreaSlug": self.business_area.slug} | variables,
+                variables=vars,
             )
             assert "errors" not in response, response["errors"]
-            print("RS", response["data"]["allFeedbacks"]["edges"])
             return response["data"]["allFeedbacks"]["edges"]
 
         assert len(filter_it({"businessAreaSlug": self.business_area.slug})) == 1
+        assert len(filter_it({"businessAreaSlug": "non-existent"})) == 0
 
-        assert len(filter_it({"householdId": encode_id_base64(self.household.pk, "Household")})) == 1
-        assert len(filter_it({"householdId": encode_id_base64(self.individuals[0].pk, "Individual")})) == 0
+        assert len(filter_it({"householdLookup": encode_id_base64(self.household.pk, "Household")})) == 1
+        assert len(filter_it({"householdLookup": encode_id_base64(self.individuals[0].pk, "Individual")})) == 0
 
     def test_failing_to_create_new_feedback(self):
         def expect_failure(data):
