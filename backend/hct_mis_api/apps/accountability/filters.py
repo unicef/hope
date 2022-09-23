@@ -66,6 +66,8 @@ class MessageRecipientsMapFilter(FilterSet):
 
 
 class FeedbackFilter(FilterSet):
+    business_area_slug = CharFilter(field_name="business_area__slug", required=True)
+
     class Meta:
         model = Feedback
         fields = []
