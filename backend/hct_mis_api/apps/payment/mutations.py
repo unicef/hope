@@ -930,18 +930,19 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        import_service = XlsxPaymentPlanImportService(payment_plan, file)
-        import_service.open_workbook()
-        import_service.validate()
-        if import_service.errors:
-            return cls(None, import_service.errors)
+        with transaction.atomic():
+            import_service = XlsxPaymentPlanImportService(payment_plan, file)
+            import_service.open_workbook()
+            import_service.validate()
+            if import_service.errors:
+                return cls(None, import_service.errors)
 
-        payment_plan.background_action_status_xlsx_importing_entitlements()
-        payment_plan.save()
+            payment_plan.background_action_status_xlsx_importing_entitlements()
+            payment_plan.save()
 
-        import_service.create_import_xlsx_file(info.context.user)
+            import_service.create_import_xlsx_file(info.context.user)
 
-        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id)
+            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
 
         return cls(payment_plan, import_service.errors)
 
