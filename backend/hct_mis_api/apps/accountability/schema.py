@@ -8,6 +8,8 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.household.models import Household
 
 from .filters import MessageRecipientsMapFilter, MessagesFilter, FeedbackFilter
@@ -104,6 +106,11 @@ class Query(graphene.ObjectType):
         FeedbackNode,
         filterset_class=FeedbackFilter,
     )
+
+    feedback_issue_type_choices = graphene.List(ChoiceObject)
+
+    def resolve_feedback_issue_type_choices(self, info, **kwargs):
+        return to_choice_object(Feedback.ISSUE_TYPE_CHOICES)
 
     def resolve_accountability_communication_message_sample_size(
         self, info, business_area_slug: str, inputs: dict, **kwargs
