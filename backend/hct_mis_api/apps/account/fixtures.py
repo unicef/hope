@@ -38,7 +38,13 @@ class UserFactory(factory.DjangoModelFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         manager = cls._get_manager(model_class)
-        return manager.create_user(*args, password="password", **kwargs)
+        keyword_arguments = kwargs.copy()
+        if "password" not in keyword_arguments:
+            keyword_arguments["password"] = "password"
+        return manager.create_user(
+            *args,
+            **keyword_arguments
+        )
 
 
 class RoleFactory(factory.DjangoModelFactory):
