@@ -42,7 +42,6 @@ from hct_mis_api.apps.household.models import (
     SEX_CHOICE,
     UNIQUE,
     WORK_STATUS_CHOICE,
-    YES_NO_CHOICE,
 )
 from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
