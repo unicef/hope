@@ -15,7 +15,7 @@ class HOPEApiTestCase(APITestCase):
         cls.token: APIToken = APITokenFactory()
         cls.business_area = BusinessAreaFactory(name="Afghanistan")
 
-        cls.role = RoleFactory(subsystem="API", name="c", permissions=cls.user_permissions)
+        cls.role = RoleFactory(subsystem="API", name="c", permissions=[p.name for p in cls.user_permissions])
         cls.token.user.user_roles.create(role=cls.role, business_area=cls.business_area)
 
     def setUp(self):
