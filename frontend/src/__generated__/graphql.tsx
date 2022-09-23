@@ -4092,7 +4092,6 @@ export type QueryAllFeedbacksArgs = {
   businessAreaSlug: Scalars['String'],
   issueType?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
-  unicefId?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   feedbackId?: Maybe<Scalars['String']>
 };
