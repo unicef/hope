@@ -23,14 +23,10 @@ mutation createFeedback($input: CreateFeedbackInput!) {
 
     ALL_FEEDBACKS_QUERY = """
 query allFeedbacks(
-    $businessAreaSlug: String!,
-    $householdLookup: String,
-    $individualLookup: String,
+    $businessAreaSlug: String!
 ) {
     allFeedbacks(
-        businessAreaSlug: $businessAreaSlug,
-        householdLookup: $householdLookup
-        individualLookup: $individualLookup
+        businessAreaSlug: $businessAreaSlug
     ) {
         edges {
             node {
@@ -122,12 +118,6 @@ query allFeedbacks(
 
         assert len(filter_it({"businessAreaSlug": self.business_area.slug})) == 1
         assert len(filter_it({"businessAreaSlug": "non-existent"})) == 0
-
-        assert len(filter_it({"householdLookup": encode_id_base64(self.household.pk, "Household")})) == 1
-        assert len(filter_it({"householdLookup": encode_id_base64(self.individuals[0].pk, "Individual")})) == 0
-
-        assert len(filter_it({"individualLookup": encode_id_base64(self.individuals[0].pk, "Individual")})) == 1
-        assert len(filter_it({"individualLookup": encode_id_base64(self.household.pk, "Household")})) == 0
 
     def test_failing_to_create_new_feedback(self):
         def expect_failure(data):
