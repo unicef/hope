@@ -174,19 +174,23 @@ class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.Mo
         households = validated_data.pop("households")
         collect_individual_data = validated_data.pop("collect_individual_data")
 
-        rdi = RegistrationDataImportDatahub.objects.create(**validated_data, business_area_slug=self.business_area.slug)
-        info = self.save_households(rdi, households, collect_individual_data)
-        r2 = RegistrationDataImport.objects.create(
+        rdi_datahub = RegistrationDataImportDatahub.objects.create(
+            **validated_data, business_area_slug=self.business_area.slug
+        )
+        info = self.save_households(rdi_datahub, households, collect_individual_data)
+        rdi_mis = RegistrationDataImport.objects.create(
             **validated_data,
             imported_by=created_by,
             data_source=RegistrationDataImport.API,
             number_of_individuals=info.individuals,
             number_of_households=info.households,
-            datahub_id=str(rdi.pk),
+            datahub_id=str(rdi_datahub.pk),
             business_area=self.business_area,
         )
+        rdi_datahub.hct_id = rdi_mis.id
+        rdi_datahub.save()
 
-        return dict(id=rdi.pk, public_id=r2.pk, **asdict(info))
+        return dict(id=rdi_datahub.pk, public_id=rdi_mis.pk, **asdict(info))
 
 
 class UploadRDIView(HOPEAPIView):
