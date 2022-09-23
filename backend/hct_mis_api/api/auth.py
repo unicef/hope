@@ -55,5 +55,5 @@ class HOPEPermission(IsAuthenticated):
         if bool(request.user and request.user.is_authenticated):
             if view.permission == "any":
                 return True
-            return request.user.user_roles.filter(role__permissions__contains=[str(view.permission)]).exists()
+            return request.user.user_roles.filter(role__permissions__contains=[view.permission.name]).exists()
         return False
