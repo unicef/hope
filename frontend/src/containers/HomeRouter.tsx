@@ -127,11 +127,11 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/grievance-and-feedback/:id'>
             <GrievancesDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/accountability/communication'>
-            <CommunicationPage />
-          </SentryRoute>
           <SentryRoute path='/:businessArea/accountability/communication/:id'>
             <CommunicationDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/communication'>
+            <CommunicationPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/population/household'>
             <PopulationHouseholdPage />
