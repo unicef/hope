@@ -1,8 +1,9 @@
 import logging
 from dataclasses import asdict
-from typing import Optional
+from datetime import datetime
 
 from django.db.transaction import atomic
+from django.urls import reverse
 from django.utils import timezone
 
 from django_countries import Countries
@@ -11,7 +12,7 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from hct_mis_api.api.endpoints.base import HOPEAPIView
+from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView
 from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.account.permissions import Permissions
@@ -21,6 +22,7 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
+    RESIDENCE_STATUS_CHOICE,
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
@@ -36,39 +38,42 @@ from hct_mis_api.apps.registration_datahub.models import (
 logger = logging.getLogger(__name__)
 
 
-def get_principals(people: list[dict]) -> tuple[dict, dict, Optional[dict]]:
-    head_of_household = None
-    alternate_collector = None
-    primary_collector = None
-    for data in people:
-        if data["relationship"] == HEAD:
-            if head_of_household:
-                raise ValidationError({"head_of_household": "Only one HoH allowed"})
-            head_of_household = data
-        if data["role"] == ROLE_PRIMARY:
-            if primary_collector:
-                raise ValidationError({"primary_collector": "Only one primary_collector allowed"})
-            primary_collector = data
-        elif data["role"] == ROLE_ALTERNATE:
-            if alternate_collector:
-                raise ValidationError({"alternate_collector": "Only one alternate_collector allowed"})
-            alternate_collector = data
-    if not head_of_household:
-        raise ValidationError({"head_of_household": "Missing Head Of Household"})
-    if not primary_collector:
-        raise ValidationError({"primary_collector": "Missing Primary Collector"})
-    return head_of_household, primary_collector, alternate_collector
+class BirthDateValidator:
+    def __call__(self, value):
+        if value >= datetime.today().date():
+            raise ValidationError("Birth date must be in the past")
 
 
-class MembersSerializer(serializers.ListSerializer):
-    """List serializer for Individuals (members, collector) which belong to a Household"""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def validate(self, attrs):
-        get_principals(attrs)
-        return attrs
+class HouseholdValidator:
+    def __call__(self, value):
+        head_of_household = None
+        alternate_collector = None
+        primary_collector = None
+        members = value.get("members", [])
+        errs = {}
+        if not members:
+            raise ValidationError({"members": "This field is required"})
+        for data in members:
+            rel = data.get("relationship", None)
+            role = data.get("role", None)
+            if rel == HEAD:
+                if head_of_household:
+                    errs["head_of_household"] = "Only one HoH allowed"
+                head_of_household = data
+            if role == ROLE_PRIMARY:
+                if primary_collector:
+                    errs["primary_collector"] = "Only one Primary Collector allowed"
+                primary_collector = data
+            elif role == ROLE_ALTERNATE:
+                if alternate_collector:
+                    errs["alternate_collector"] = "Only one Alternate Collector allowed"
+                alternate_collector = data
+        if not head_of_household:
+            errs["head_of_household"] = "Missing Head Of Household"
+        if not primary_collector:
+            errs["primary_collector"] = "Missing Primary Collector"
+        if errs:
+            raise ValidationError(errs)
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -85,8 +90,6 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 
 class CollectDataMixin(serializers.Serializer):
-    collect_individual_data = serializers.CharField(required=False, allow_blank=True)
-
     def validate_collect_individual_data(self, value):
         if value in [COLLECT_TYPE_FULL, "FULL", "full"]:
             return COLLECT_TYPE_FULL
@@ -94,6 +97,9 @@ class CollectDataMixin(serializers.Serializer):
             return COLLECT_TYPE_PARTIAL
         if value in [COLLECT_TYPE_NONE, "NO", "N", "no"]:
             return COLLECT_TYPE_NONE
+        raise ValidationError(
+            "Invalid value %s. " "Check values at %s" % (value, reverse("api:datacollectingpolicy-list"))
+        )
 
 
 class IndividualSerializer(serializers.ModelSerializer):
@@ -105,10 +111,11 @@ class IndividualSerializer(serializers.ModelSerializer):
     country_origin = serializers.CharField(allow_blank=True, required=False)
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
+    residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE)
+    birth_date = serializers.DateField(validators=[BirthDateValidator()])
 
     class Meta:
         model = ImportedIndividual
-        list_serializer_class = MembersSerializer
         exclude = [
             "id",
             "registration_data_import",
@@ -130,13 +137,13 @@ class IndividualSerializer(serializers.ModelSerializer):
             return ROLE_PRIMARY
         elif value.upper()[0] == "A":
             return ROLE_ALTERNATE
-        raise ValidationError(f"Invalid role '{value}'")
+        raise ValidationError("Invalid value %s. " "Check values at %s" % (value, reverse("api:role-list")))
 
 
 class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
-    members = IndividualSerializer(many=True)
+    members = IndividualSerializer(many=True, required=True)
     country_origin = serializers.CharField(allow_blank=True, required=False)
 
     class Meta:
@@ -152,13 +159,13 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
             "kobo_asset_id",
             "kobo_submission_time",
         ]
-
-    def validate(self, attrs):
-        return attrs
+        validators = [HouseholdValidator()]
 
 
 class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.ModelSerializer):
-    households = HouseholdSerializer(many=True)
+    name = serializers.CharField(required=True)
+    households = HouseholdSerializer(many=True, required=True)
+    collect_individual_data = serializers.CharField()
 
     class Meta:
         model = RegistrationDataImportDatahub
@@ -167,6 +174,16 @@ class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.Mo
     def __init__(self, *args, **kwargs):
         self.business_area = kwargs.pop("business_area", None)
         super().__init__(*args, **kwargs)
+
+    def validate_households(self, value):
+        if not value:
+            raise ValidationError("This field is required.")
+        return value
+
+    # def validate(self, attrs):
+    # if not attrs.get("households", []):
+    #     raise ValidationError("No Households provided")
+    # return super().validate(attrs)
 
     @atomic()
     def create(self, validated_data):
@@ -190,10 +207,10 @@ class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.Mo
         rdi_datahub.hct_id = rdi_mis.id
         rdi_datahub.save()
 
-        return dict(id=rdi_datahub.pk, public_id=rdi_mis.pk, **asdict(info))
+        return dict(id=rdi_datahub.pk, name=rdi_mis.name, public_id=rdi_mis.pk, **asdict(info))
 
 
-class UploadRDIView(HOPEAPIView):
+class UploadRDIView(HOPEAPIBusinessAreaView):
     permission = Permissions.API_UPLOAD_RDI
 
     @swagger_auto_schema(request_body=RDINestedSerializer)
@@ -205,4 +222,5 @@ class UploadRDIView(HOPEAPIView):
             info = serializer.save(user=request.user)
             return Response(info, status=status.HTTP_201_CREATED)
         errors = humanize_errors(serializer.errors)
+        # errors = serializer.errors
         return Response(errors, status=status.HTTP_400_BAD_REQUEST)

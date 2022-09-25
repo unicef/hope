@@ -8,6 +8,7 @@ from .lookups import (  # noqa: F401
     Relationship,
     ResidenceStatus,
     Roles,
+    Sex,
 )
 from .rdi import CompleteRDIView, CreateRDIView, PushToRDIView  # noqa: F401
 from .upload import UploadRDIView  # noqa: F401

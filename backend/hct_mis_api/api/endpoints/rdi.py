@@ -12,8 +12,7 @@ from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportD
 from ...apps.account.permissions import Permissions
 from ...apps.registration_data.models import RegistrationDataImport
 from ..utils import humanize_errors
-from .base import HOPEAPIView
-from .mixin import HouseholdUploadMixin
+from .base import HOPEAPIBusinessAreaView, HOPEAPIView
 from .upload import HouseholdSerializer
 
 
@@ -26,7 +25,7 @@ class RDISerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class CreateRDIView(HOPEAPIView, CreateAPIView):
+class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     """Api to Create RDI for selected business area"""
 
     permission = Permissions.API_CREATE_RDI
@@ -34,6 +33,9 @@ class CreateRDIView(HOPEAPIView, CreateAPIView):
 
     def get_queryset(self):
         return RegistrationDataImportDatahub.objects.filter(business_area=self.selected_business_area)
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     @atomic()
     @atomic(using="registration_datahub")
@@ -58,11 +60,13 @@ class CreateRDIView(HOPEAPIView, CreateAPIView):
         r2 = self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(
-            {"id": serializer.instance.pk, "public_id": r2.pk}, status=status.HTTP_201_CREATED, headers=headers
+            {"id": serializer.instance.pk, "name": r2.name, "public_id": r2.pk},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
         )
 
 
-class PushToRDIView(HouseholdUploadMixin, HOPEAPIView):
+class PushToRDIView(HOPEAPIBusinessAreaView, HOPEAPIView):
     """Api to link Households with selected RDI"""
 
     permission = Permissions.API_CREATE_RDI
@@ -83,7 +87,7 @@ class PushToRDIView(HouseholdUploadMixin, HOPEAPIView):
         return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
 
-class CompleteRDIView(HOPEAPIView, UpdateAPIView):
+class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
     """Api to Create RDI for selected business area"""
 
     permission = Permissions.API_CREATE_RDI
@@ -101,7 +105,6 @@ class CompleteRDIView(HOPEAPIView, UpdateAPIView):
     @atomic()
     @atomic(using="registration_datahub")
     def update(self, request, *args, **kwargs):
-
         self.selected_rdi.import_done = RegistrationDataImportDatahub.DONE
         self.selected_rdi.save()
 
