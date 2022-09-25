@@ -1,7 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-import logging
 from typing import Optional
 
 from django.conf import settings
@@ -639,28 +638,31 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
     def __str__(self):
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
 
-    def can_accept_volume(self, volume: Optional[Decimal] = None):
-        if self.distribution_limit is None:
-            return True
-
-        if self.delivery_mechanisms_per_payment_plan.filter(
-            payment_plan__status__in=[
-                PaymentPlan.Status.LOCKED_FSP,
-                PaymentPlan.Status.IN_APPROVAL,
-                PaymentPlan.Status.IN_AUTHORIZATION,
-                PaymentPlan.Status.IN_REVIEW,
-                PaymentPlan.Status.ACCEPTED,
-            ]
-        ).exists():
+    def can_accept_any_volume(self) -> bool:
+        if (
+            self.distribution_limit is not None
+            and self.delivery_mechanisms_per_payment_plan.filter(
+                payment_plan__status__in=[
+                    PaymentPlan.Status.LOCKED_FSP,
+                    PaymentPlan.Status.IN_APPROVAL,
+                    PaymentPlan.Status.IN_AUTHORIZATION,
+                    PaymentPlan.Status.IN_REVIEW,
+                    PaymentPlan.Status.ACCEPTED,
+                ]
+            ).exists()
+        ):
             return False
 
         if self.distribution_limit == 0.0:
             return False
 
-        if volume:
-            return volume < self.distribution_limit
-        else:
+        return True
+
+    def can_accept_volume(self, volume: Decimal) -> bool:
+        if self.distribution_limit is None:
             return True
+
+        return volume <= self.distribution_limit
 
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):

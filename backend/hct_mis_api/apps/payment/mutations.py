@@ -6,8 +6,7 @@ import graphene
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Q, Sum, Subquery, OuterRef, F
-from django.db.models.functions import Coalesce
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphene_file_upload.scalars import Upload
@@ -806,7 +805,7 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
             if delivery_mechanism not in [choice[0] for choice in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 raise GraphQLError(f"Delivery mechanism '{delivery_mechanism}' is not valid.")
         collectors_in_target_population = Individual.objects.filter(
-            id__in=payment_plan.payment_items.values_list("collector", flat=True)
+            id__in=payment_plan.not_excluded_payments.values_list("collector", flat=True)
         )
 
         query = Q(payment_channels__delivery_mechanism__in=delivery_mechanisms_in_order)
@@ -874,64 +873,26 @@ class AssignFspToDeliveryMechanismMutation(PermissionMutation):
                 raise GraphQLError("You can't assign the same FSP to the same delivery mechanism more than once")
             existing_pairs.add(key)
 
-        with transaction.atomic():
-            payment_plan.delivery_mechanisms.all().update(financial_service_provider=None)
-            payment_plan.payment_items.all().update(
-                financial_service_provider=None, assigned_payment_channel=None, delivery_type=None
-            )
-
-            processed_collectors = []
-
-            for mapping in mappings:
-                delivery_mechanism = mapping["delivery_mechanism"]
-                delivery_mechanism_per_payment_plan = get_object_or_404(
+        dm_to_fsp_mapping = [
+            {
+                "fsp": get_object_or_404(FinancialServiceProvider, id=decode_id_string(mapping["fsp_id"])),
+                "delivery_mechanism_per_payment_plan": get_object_or_404(
                     DeliveryMechanismPerPaymentPlan,
                     payment_plan=payment_plan,
-                    delivery_mechanism=delivery_mechanism,
+                    delivery_mechanism=mapping["delivery_mechanism"],
                     delivery_mechanism_order=mapping["order"],
-                )
-                fsp = get_object_or_404(FinancialServiceProvider, id=decode_id_string(mapping["fsp_id"]))
+                ),
+            }
+            for mapping in mappings
+        ]
 
-                if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms:
-                    raise GraphQLError(
-                        f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
-                        f"by FSP '{fsp.name}'"
-                    )
+        with transaction.atomic():
+            payment_plan.delivery_mechanisms.all().update(financial_service_provider=None)
 
-                payments_for_delivery_mechanism = (
-                    payment_plan.payment_items.filter(
-                        collector__payment_channels__delivery_mechanism=delivery_mechanism_per_payment_plan.delivery_mechanism
-                    )
-                    .exclude(collector__id__in=processed_collectors)
-                    .annotate(
-                        payment_channel=Subquery(
-                            PaymentChannel.objects.filter(
-                                individual=OuterRef("collector"), delivery_mechanism=delivery_mechanism
-                            ).values("id")[:1]
-                        )
-                    )
-                    .distinct()
-                )
-
-                collectors_for_delivery_mechanism = payments_for_delivery_mechanism.values_list(
-                    "collector_id", flat=True
-                )
-                processed_collectors += list(collectors_for_delivery_mechanism)
-
-                volume_for_delivery_mechanism = payments_for_delivery_mechanism.aggregate(
-                    entitlement_quantity_usd__sum=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
-                )["entitlement_quantity_usd__sum"]
-
-                if not fsp.can_accept_volume(volume_for_delivery_mechanism):
-                    raise GraphQLError(f"{fsp} cannot accept volume of {volume_for_delivery_mechanism} USD")
-
-                delivery_mechanism_per_payment_plan.financial_service_provider = fsp
-                delivery_mechanism_per_payment_plan.save()
-                payments_for_delivery_mechanism.update(
-                    financial_service_provider=fsp,
-                    assigned_payment_channel=F("payment_channel"),
-                    delivery_type=delivery_mechanism,
-                )
+            payment_plan_service = PaymentPlanService(payment_plan=payment_plan)
+            payment_plan_service.validate_fsps_per_delivery_mechanisms(
+                dm_to_fsp_mapping, update_dms=True, update_payments=False
+            )
 
         return cls(payment_plan=payment_plan)
 
@@ -962,18 +923,19 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             logger.error(msg)
             raise GraphQLError(msg)
 
-        import_service = XlsxPaymentPlanImportService(payment_plan, file)
-        import_service.open_workbook()
-        import_service.validate()
-        if import_service.errors:
-            return cls(None, import_service.errors)
+        with transaction.atomic():
+            import_service = XlsxPaymentPlanImportService(payment_plan, file)
+            import_service.open_workbook()
+            import_service.validate()
+            if import_service.errors:
+                return cls(None, import_service.errors)
 
-        payment_plan.background_action_status_xlsx_importing_entitlements()
-        payment_plan.save()
+            payment_plan.background_action_status_xlsx_importing_entitlements()
+            payment_plan.save()
 
-        import_service.create_import_xlsx_file(info.context.user)
+            import_service.create_import_xlsx_file(info.context.user)
 
-        import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id)
+            transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
 
         return cls(payment_plan, import_service.errors)
 

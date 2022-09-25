@@ -35,6 +35,7 @@ from hct_mis_api.apps.payment.models import (
     Payment,
     GenericPayment,
     PaymentChannel,
+    DeliveryMechanismPerPaymentPlan,
 )
 from hct_mis_api.apps.program.fixtures import (
     ProgramFactory,
@@ -553,10 +554,7 @@ class PaymentFactory(factory.DjangoModelFactory):
 
     parent = factory.SubFactory(PaymentPlanFactory)
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
-    status = fuzzy.FuzzyChoice(
-        PaymentRecord.STATUS_CHOICE,
-        getter=lambda c: c[0],
-    )
+    status = GenericPayment.STATUS_NOT_DISTRIBUTED
     status_date = factory.Faker(
         "date_time_this_decade",
         before_now=True,
@@ -598,6 +596,27 @@ class PaymentFactory(factory.DjangoModelFactory):
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
     excluded = False
     assigned_payment_channel = factory.LazyAttribute(lambda o: PaymentChannelFactory(individual=o.collector))
+
+
+class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = DeliveryMechanismPerPaymentPlan
+
+    payment_plan = factory.SubFactory(PaymentPlanFactory)
+    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
+    created_by = factory.SubFactory(UserFactory)
+    sent_by = factory.SubFactory(UserFactory)
+    sent_date = factory.Faker(
+        "date_time_this_decade",
+        before_now=True,
+        after_now=False,
+        tzinfo=utc,
+    )
+    delivery_mechanism = fuzzy.FuzzyChoice(
+        GenericPayment.DELIVERY_TYPE_CHOICE,
+        getter=lambda c: c[0],
+    )
+    delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
 
 
 def generate_real_payment_plans():

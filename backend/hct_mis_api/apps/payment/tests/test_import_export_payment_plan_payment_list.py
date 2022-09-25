@@ -113,7 +113,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(service.errors, error_msg)
 
     def test_import_valid_file(self):
-        not_excluded_payments = self.payment_plan.not_excluded_payments()
+        not_excluded_payments = self.payment_plan.not_excluded_payments.all()
         # override imported payment id
         payment_id_1 = str(not_excluded_payments[0].unicef_id)
         payment_id_2 = str(not_excluded_payments[1].unicef_id)
@@ -156,7 +156,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertTrue(self.payment_plan.has_export_file)
 
         wb = export_service.generate_workbook()
-        payment = self.payment_plan.not_excluded_payments.first()
+        payment = self.payment_plan.not_excluded_payments.order_by("unicef_id").first()
         self.assertEqual(wb.active["A2"].value, str(payment.unicef_id))
         self.assertEqual(wb.active["I2"].value, payment.entitlement_quantity)
         self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity_usd)

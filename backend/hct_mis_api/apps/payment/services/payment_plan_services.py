@@ -1,5 +1,10 @@
 import logging
 
+from decimal import Decimal
+
+from django.db import transaction
+from django.db.models import Q, Sum, Subquery, OuterRef, F
+from django.db.models.functions import Coalesce
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from graphql import GraphQLError
@@ -9,7 +14,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     decode_id_string,
 )
-from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProcess, Payment
+from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProcess, Payment, PaymentChannel
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -109,10 +114,7 @@ class PaymentPlanService:
         return self.payment_plan
 
     def unlock(self):
-        # TODO: clear FSP
-        # TODO: clear entitlements
-
-        self.payment_plan.payment_items.all().update(excluded=False)
+        self.payment_plan.delivery_mechanisms.all().delete()
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
@@ -122,10 +124,23 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock_fsp(self):
-        if not self.payment_plan.delivery_mechanisms.filter(financial_service_provider__isnull=False).exists():
-            msg = f"There are no FSP chosen for Payment Plan"
+        if not self.payment_plan.delivery_mechanisms.filter(
+            Q(financial_service_provider__isnull=False) | Q(delivery_mechanism__isnull=False)
+        ).exists():
+            msg = f"There are no Delivery Mechanisms / FSPs chosen for Payment Plan"
             logging.exception(msg)
             raise GraphQLError(msg)
+
+        dm_to_fsp_mapping = [
+            {
+                "fsp": delivery_mechanism_per_payment_plan.financial_service_provider,
+                "delivery_mechanism_per_payment_plan": delivery_mechanism_per_payment_plan,
+            }
+            for delivery_mechanism_per_payment_plan in self.payment_plan.delivery_mechanisms.all().order_by(
+                "delivery_mechanism_order"
+            )
+        ]
+        self.validate_fsps_per_delivery_mechanisms(dm_to_fsp_mapping, update_dms=False, update_payments=True)
 
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
@@ -134,6 +149,9 @@ class PaymentPlanService:
 
     def unlock_fsp(self):
         self.payment_plan.status_unlock_fsp()
+        self.payment_plan.payment_items.all().update(
+            financial_service_provider=None, assigned_payment_channel=None, delivery_type=None
+        )
         self.payment_plan.save()
 
         return self.payment_plan
@@ -371,3 +389,77 @@ class PaymentPlanService:
     def import_xlsx_per_fsp(self, user, file) -> PaymentPlan:
         import_payment_plan_payment_list_per_fsp_from_xlsx.delay(self.payment_plan.pk, user.pk, file)
         return self.payment_plan
+
+    def validate_fsps_per_delivery_mechanisms(self, dm_to_fsp_mapping, update_dms=False, update_payments=False):
+        processed_payments = []
+
+        with transaction.atomic():
+            for idx, mapping in enumerate(dm_to_fsp_mapping):
+
+                delivery_mechanism_per_payment_plan = mapping["delivery_mechanism_per_payment_plan"]
+                delivery_mechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
+                fsp = mapping["fsp"]
+
+                if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms:
+                    raise GraphQLError(
+                        f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
+                        f"by FSP '{fsp.name}'"
+                    )
+
+                if not fsp.can_accept_any_volume():
+                    raise GraphQLError(f"{fsp} cannot accept any volume")
+
+                payments_for_delivery_mechanism = (
+                    self.payment_plan.not_excluded_payments.filter(
+                        collector__payment_channels__delivery_mechanism=delivery_mechanism
+                    )
+                    .exclude(id__in=[processed_payment.id for processed_payment in processed_payments])
+                    .annotate(
+                        payment_channel=Subquery(
+                            PaymentChannel.objects.filter(
+                                individual=OuterRef("collector"), delivery_mechanism=delivery_mechanism
+                            ).values("id")[:1]
+                        )
+                    )
+                    .distinct()
+                    .order_by("unicef_id")
+                )
+
+                total_volume_for_delivery_mechanism = payments_for_delivery_mechanism.aggregate(
+                    entitlement_quantity_usd__sum=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0))
+                )["entitlement_quantity_usd__sum"]
+
+                if fsp.can_accept_volume(total_volume_for_delivery_mechanism):
+                    processed_payments += list(payments_for_delivery_mechanism)
+                    if update_payments:
+                        payments_for_delivery_mechanism.update(
+                            financial_service_provider=fsp,
+                            assigned_payment_channel=F("payment_channel"),
+                            delivery_type=delivery_mechanism,
+                        )
+
+                else:
+                    # Process part of the volume up to the distribution limit
+                    partial_processed_payments = []
+                    partial_total_volume = Decimal(0.0)
+
+                    for payment in payments_for_delivery_mechanism:
+                        if fsp.distribution_limit < (partial_total_volume + payment.entitlement_quantity_usd):
+                            break
+                        partial_total_volume += payment.entitlement_quantity_usd
+                        partial_processed_payments.append(payment)
+
+                    processed_payments += partial_processed_payments
+                    if update_payments:
+                        for payment in partial_processed_payments:
+                            payment.financial_service_provider = fsp
+                            payment.assigned_payment_channel_id = payment.payment_channel
+                            payment.delivery_type = delivery_mechanism
+                            payment.save()
+
+                if update_dms:
+                    delivery_mechanism_per_payment_plan.financial_service_provider = fsp
+                    delivery_mechanism_per_payment_plan.save()
+
+            if set(processed_payments) != set(self.payment_plan.not_excluded_payments):
+                raise GraphQLError(f"Some Payments we're not assigned to selected DeliveryMechanisms/FSPs")

@@ -8,7 +8,6 @@ from django.shortcuts import get_object_or_404
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -580,11 +579,17 @@ class Query(graphene.ObjectType):
 
         def get_fsps_for_delivery_mechanism(mechanism):
             fsps = FinancialServiceProvider.objects.filter(delivery_mechanisms__contains=[mechanism]).distinct()
-            return [
-                # This basically checks if FSP can accept ANY additional volume,
-                # more strict validation is performed in AssignFspToDeliveryMechanismMutation
-                {"id": fsp.id, "name": fsp.name} for fsp in fsps if fsp.can_accept_volume()
-            ] if fsps else []
+            return (
+                [
+                    # This basically checks if FSP can accept ANY additional volume,
+                    # more strict validation is performed in AssignFspToDeliveryMechanismMutation
+                    {"id": fsp.id, "name": fsp.name}
+                    for fsp in fsps
+                    if fsp.can_accept_any_volume()
+                ]
+                if fsps
+                else []
+            )
 
         return [
             {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
