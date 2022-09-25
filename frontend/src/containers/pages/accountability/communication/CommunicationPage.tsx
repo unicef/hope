@@ -2,7 +2,10 @@ import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { hasPermissionInModule } from '../../../../config/permissions';
+import {
+  hasPermissionInModule,
+  PERMISSIONS,
+} from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../../hooks/useDebounce';
 import { usePermissions } from '../../../../hooks/usePermissions';
@@ -32,7 +35,12 @@ export function CommunicationPage(): React.ReactElement {
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissionInModule('ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST', permissions))
+  if (
+    !hasPermissionInModule(
+      PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+      permissions,
+    )
+  )
     return <PermissionDenied />;
   if (!choicesData) return null;
 
