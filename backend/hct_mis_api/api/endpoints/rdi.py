@@ -9,10 +9,11 @@ from rest_framework.response import Response
 
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 
-from ...apps.account.permissions import Permissions
 from ...apps.registration_data.models import RegistrationDataImport
+from ..models import Grant
 from ..utils import humanize_errors
 from .base import HOPEAPIBusinessAreaView, HOPEAPIView
+from .mixin import HouseholdUploadMixin
 from .upload import HouseholdSerializer
 
 
@@ -28,7 +29,7 @@ class RDISerializer(serializers.ModelSerializer):
 class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     """Api to Create RDI for selected business area"""
 
-    permission = Permissions.API_CREATE_RDI
+    permission = Grant.API_CREATE_RDI
     serializer_class = RDISerializer
 
     def get_queryset(self):
@@ -66,10 +67,10 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
         )
 
 
-class PushToRDIView(HOPEAPIBusinessAreaView, HOPEAPIView):
+class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
     """Api to link Households with selected RDI"""
 
-    permission = Permissions.API_CREATE_RDI
+    permission = Grant.API_CREATE_RDI
 
     @cached_property
     def selected_rdi(self):
@@ -90,7 +91,7 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HOPEAPIView):
 class CompleteRDIView(HOPEAPIBusinessAreaView, UpdateAPIView):
     """Api to Create RDI for selected business area"""
 
-    permission = Permissions.API_CREATE_RDI
+    permission = Grant.API_CREATE_RDI
     serializer_class = RDISerializer
 
     @cached_property
