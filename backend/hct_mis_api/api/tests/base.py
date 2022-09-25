@@ -1,23 +1,36 @@
 from rest_framework.test import APITestCase
 
-from hct_mis_api.api.models import APIToken
+from hct_mis_api.api.models import APIToken, Grant
 from hct_mis_api.api.tests.factories import APITokenFactory
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, RoleFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 
 class HOPEApiTestCase(APITestCase):
     databases = ["default", "registration_datahub"]
-    user_permissions = []
+    user_permissions = [
+        Grant.API_CREATE_RDI,
+        Grant.API_UPLOAD_RDI,
+    ]
+    token = None
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.token: APIToken = APITokenFactory()
+        user = UserFactory()
         cls.business_area = BusinessAreaFactory(name="Afghanistan")
-
         cls.role = RoleFactory(subsystem="API", name="c", permissions=[p.name for p in cls.user_permissions])
-        cls.token.user.user_roles.create(role=cls.role, business_area=cls.business_area)
+        user.user_roles.create(role=cls.role, business_area=cls.business_area)
+
+        cls.token: APIToken = APITokenFactory(
+            user=user,
+            grants=[c.name for c in cls.user_permissions],
+        )
+        cls.token.valid_for.set([cls.business_area])
+        # cls.token.user.user_roles.create(role=cls.role, business_area=cls.business_area)
 
     def setUp(self):
-        # self.client.login(username=self.user.username, password="password")
-        self.client.force_authenticate(user=self.token.user)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
