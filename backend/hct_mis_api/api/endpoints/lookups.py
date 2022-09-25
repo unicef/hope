@@ -10,6 +10,7 @@ from hct_mis_api.apps.household.models import (
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
+    SEX_CHOICE,
 )
 
 
@@ -45,9 +46,14 @@ class Relationship(HOPEAPIView):
 
 class DataCollectingPolicy(HOPEAPIView):
     def get(self, request, format=None):
-        return Response(dict(COLLECT_TYPES))
+        return Response(dict(COLLECT_TYPES[1:]))
 
 
 class Roles(HOPEAPIView):
     def get(self, request, format=None):
         return Response(dict(ROLE_CHOICE))
+
+
+class Sex(HOPEAPIView):
+    def get(self, request, format=None):
+        return Response(dict(SEX_CHOICE))
