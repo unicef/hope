@@ -4,8 +4,8 @@ from pathlib import Path
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from hct_mis_api.api.models import Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -27,7 +27,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 class UploadRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
-    user_permissions = [Permissions.API_UPLOAD_RDI]
+    user_permissions = [Grant.API_UPLOAD_RDI]
 
     @classmethod
     def setUpTestData(cls):
@@ -41,7 +41,7 @@ class UploadRDITests(HOPEApiTestCase):
             "collect_individual_data": "FULL",
             "households": [
                 {
-                    "residence_status": "",
+                    "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
                     "members": [
@@ -89,7 +89,7 @@ class UploadRDITests(HOPEApiTestCase):
             "collect_individual_data": "FULL",
             "households": [
                 {
-                    "residence_status": "",
+                    "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
                     "members": [
@@ -136,7 +136,7 @@ class UploadRDITests(HOPEApiTestCase):
             "collect_individual_data": "FULL",
             "households": [
                 {
-                    "residence_status": "",
+                    "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
                     "members": [
@@ -194,7 +194,7 @@ class UploadRDITests(HOPEApiTestCase):
             "collect_individual_data": "FULL",
             "households": [
                 {
-                    "residence_status": "",
+                    "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
                     "members": [
@@ -253,7 +253,7 @@ class UploadRDITests(HOPEApiTestCase):
             "collect_individual_data": "FULL",
             "households": [
                 {
-                    "residence_status": "",
+                    "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
                     "members": [
@@ -521,6 +521,7 @@ class UploadRDITests(HOPEApiTestCase):
                             "relationship": NON_BENEFICIARY,
                             "full_name": "Jhon Primary #1",
                             "birth_date": "2000-01-01",
+                            "role": "",
                             "sex": "FEMALE",
                         },
                         {
@@ -559,11 +560,13 @@ class UploadRDITests(HOPEApiTestCase):
                 {
                     "residence_status": "",
                     "village": "village1",
+                    "country": "AF",
                     "members": [
                         {
                             "relationship": HEAD,
                             "full_name": "John Doe",
                             "birth_date": "2000-01-01",
+                            "role": "",
                             "sex": "MALE",
                         },
                         {
@@ -583,8 +586,23 @@ class UploadRDITests(HOPEApiTestCase):
             response.json(),
             {
                 "households": [
-                    {"Household #1": [{"member #1": [{"role": ["This field is required."]}]}]},
-                    {"Household #2": [{"member #1": [{"role": ["This field is required."]}]}]},
+                    {
+                        "Household #1": [
+                            {
+                                "alternate_collector": ["Only one Alternate Collector allowed"],
+                                "head_of_household": ["Missing Head Of Household"],
+                                "primary_collector": ["Missing Primary Collector"],
+                            }
+                        ]
+                    },
+                    {
+                        "Household #2": [
+                            {
+                                "head_of_household": ["Only one HoH allowed"],
+                                "primary_collector": ["Missing Primary Collector"],
+                            }
+                        ]
+                    },
                 ]
             },
             f"""

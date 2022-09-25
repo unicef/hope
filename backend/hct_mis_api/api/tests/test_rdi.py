@@ -4,7 +4,6 @@ from pathlib import Path
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -19,12 +18,13 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 
 from ...apps.registration_data.models import RegistrationDataImport
+from ..models import Grant
 from .base import HOPEApiTestCase
 
 
 class CreateRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
-    user_permissions = [Permissions.API_CREATE_RDI]
+    user_permissions = [Grant.API_CREATE_RDI]
 
     @classmethod
     def setUpTestData(cls):
@@ -51,7 +51,7 @@ class CreateRDITests(HOPEApiTestCase):
 
 class PushToRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
-    user_permissions = [Permissions.API_CREATE_RDI]
+    user_permissions = [Grant.API_CREATE_RDI]
 
     @classmethod
     def setUpTestData(cls):
@@ -120,7 +120,7 @@ class PushToRDITests(HOPEApiTestCase):
 
 class CompleteRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
-    user_permissions = [Permissions.API_CREATE_RDI]
+    user_permissions = [Grant.API_CREATE_RDI]
 
     @classmethod
     def setUpTestData(cls):

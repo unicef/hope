@@ -14,15 +14,14 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView
 from hct_mis_api.api.endpoints.mixin import HouseholdUploadMixin
+from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
     COLLECT_TYPE_NONE,
     COLLECT_TYPE_PARTIAL,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
-    RESIDENCE_STATUS_CHOICE,
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
@@ -111,7 +110,6 @@ class IndividualSerializer(serializers.ModelSerializer):
     country_origin = serializers.CharField(allow_blank=True, required=False)
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
-    residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
 
     class Meta:
@@ -211,7 +209,7 @@ class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.Mo
 
 
 class UploadRDIView(HOPEAPIBusinessAreaView):
-    permission = Permissions.API_UPLOAD_RDI
+    permission = Grant.API_UPLOAD_RDI
 
     @swagger_auto_schema(request_body=RDINestedSerializer)
     @atomic()
