@@ -3120,6 +3120,7 @@ export type Mutations = {
    __typename?: 'Mutations',
   createAccountabilityCommunicationMessage?: Maybe<CreateCommunicationMessageMutation>,
   createFeedback?: Maybe<CreateFeedbackMutation>,
+  updateFeedback?: Maybe<UpdateFeedbackMutation>,
   createReport?: Maybe<CreateReport>,
   restartCreateReport?: Maybe<RestartCreateReport>,
   createDashboardReport?: Maybe<CreateDashboardReport>,
@@ -3179,6 +3180,11 @@ export type MutationsCreateAccountabilityCommunicationMessageArgs = {
 
 export type MutationsCreateFeedbackArgs = {
   input: CreateFeedbackInput
+};
+
+
+export type MutationsUpdateFeedbackArgs = {
+  input: UpdateFeedbackInput
 };
 
 
@@ -6121,6 +6127,25 @@ export type UnapproveTargetPopulationMutation = {
 
 export type UpdateAddIndividualIssueTypeExtras = {
   individualData: AddIndividualDataObjectType,
+};
+
+export type UpdateFeedbackInput = {
+  feedbackId: Scalars['ID'],
+  issueType?: Maybe<Scalars['String']>,
+  householdLookup?: Maybe<Scalars['ID']>,
+  individualLookup?: Maybe<Scalars['ID']>,
+  description?: Maybe<Scalars['String']>,
+  comments?: Maybe<Scalars['String']>,
+  admin2?: Maybe<Scalars['ID']>,
+  area?: Maybe<Scalars['String']>,
+  language?: Maybe<Scalars['String']>,
+  consent?: Maybe<Scalars['Boolean']>,
+  program?: Maybe<Scalars['ID']>,
+};
+
+export type UpdateFeedbackMutation = {
+   __typename?: 'UpdateFeedbackMutation',
+  feedback?: Maybe<FeedbackNode>,
 };
 
 export type UpdateGrievanceTicketExtrasInput = {
@@ -20960,6 +20985,8 @@ export type ResolversTypes = {
   CreateCommunicationMessageMutation: ResolverTypeWrapper<CreateCommunicationMessageMutation>,
   CreateFeedbackInput: CreateFeedbackInput,
   CreateFeedbackMutation: ResolverTypeWrapper<CreateFeedbackMutation>,
+  UpdateFeedbackInput: UpdateFeedbackInput,
+  UpdateFeedbackMutation: ResolverTypeWrapper<UpdateFeedbackMutation>,
   CreateReportInput: CreateReportInput,
   CreateReport: ResolverTypeWrapper<CreateReport>,
   RestartCreateReportInput: RestartCreateReportInput,
@@ -21358,6 +21385,8 @@ export type ResolversParentTypes = {
   CreateCommunicationMessageMutation: CreateCommunicationMessageMutation,
   CreateFeedbackInput: CreateFeedbackInput,
   CreateFeedbackMutation: CreateFeedbackMutation,
+  UpdateFeedbackInput: UpdateFeedbackInput,
+  UpdateFeedbackMutation: UpdateFeedbackMutation,
   CreateReportInput: CreateReportInput,
   CreateReport: CreateReport,
   RestartCreateReportInput: RestartCreateReportInput,
@@ -22741,6 +22770,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   createAccountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CreateCommunicationMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateAccountabilityCommunicationMessageArgs, 'businessAreaSlug' | 'inputs'>>,
   createFeedback?: Resolver<Maybe<ResolversTypes['CreateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackArgs, 'input'>>,
+  updateFeedback?: Resolver<Maybe<ResolversTypes['UpdateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateFeedbackArgs, 'input'>>,
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
   restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>,
   createDashboardReport?: Resolver<Maybe<ResolversTypes['CreateDashboardReport']>, ParentType, ContextType, RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>>,
@@ -23945,6 +23975,10 @@ export type UnapproveTargetPopulationMutationResolvers<ContextType = any, Parent
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
+export type UpdateFeedbackMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateFeedbackMutation'] = ResolversParentTypes['UpdateFeedbackMutation']> = {
+  feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType>,
+};
+
 export type UpdateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateGrievanceTicketMutation'] = ResolversParentTypes['UpdateGrievanceTicketMutation']> = {
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
@@ -24355,6 +24389,7 @@ export type Resolvers<ContextType = any> = {
   TicketSystemFlaggingDetailsNodeConnection?: TicketSystemFlaggingDetailsNodeConnectionResolvers<ContextType>,
   TicketSystemFlaggingDetailsNodeEdge?: TicketSystemFlaggingDetailsNodeEdgeResolvers<ContextType>,
   UnapproveTargetPopulationMutation?: UnapproveTargetPopulationMutationResolvers<ContextType>,
+  UpdateFeedbackMutation?: UpdateFeedbackMutationResolvers<ContextType>,
   UpdateGrievanceTicketMutation?: UpdateGrievanceTicketMutationResolvers<ContextType>,
   UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType>,
   UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>,

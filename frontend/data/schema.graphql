@@ -2316,6 +2316,7 @@ enum MessageSamplingType {
 type Mutations {
   createAccountabilityCommunicationMessage(businessAreaSlug: String!, inputs: CreateAccountabilityCommunicationMessageInput!): CreateCommunicationMessageMutation
   createFeedback(input: CreateFeedbackInput!): CreateFeedbackMutation
+  updateFeedback(input: UpdateFeedbackInput!): UpdateFeedbackMutation
   createReport(reportData: CreateReportInput!): CreateReport
   restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
@@ -3772,6 +3773,24 @@ type UnapproveTargetPopulationMutation {
 
 input UpdateAddIndividualIssueTypeExtras {
   individualData: AddIndividualDataObjectType!
+}
+
+input UpdateFeedbackInput {
+  feedbackId: ID!
+  issueType: String
+  householdLookup: ID
+  individualLookup: ID
+  description: String
+  comments: String
+  admin2: ID
+  area: String
+  language: String
+  consent: Boolean
+  program: ID
+}
+
+type UpdateFeedbackMutation {
+  feedback: FeedbackNode
 }
 
 input UpdateGrievanceTicketExtrasInput {
