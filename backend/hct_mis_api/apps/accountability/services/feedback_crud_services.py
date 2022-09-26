@@ -37,3 +37,32 @@ class FeedbackCrudServices:
         obj.created_by = user
         obj.save()
         return obj
+
+    @classmethod
+    def update(cls, feedback: Feedback, input_data: dict) -> Feedback:
+        if "issue_type" in input_data:
+            feedback.issue_type = input_data["issue_type"]
+        if "description" in input_data:
+            feedback.description = input_data["description"]
+        if "household_lookup" in input_data:
+            feedback.household_lookup = get_object_or_404(
+                Household, id=decode_id_string(input_data["household_lookup"])
+            )
+        if "individual_lookup" in input_data:
+            feedback.individual_lookup = get_object_or_404(
+                Individual, id=decode_id_string(input_data["individual_lookup"])
+            )
+        if "comments" in input_data:
+            feedback.comments = input_data["comments"]
+        if "admin2" in input_data:
+            feedback.admin2 = get_object_or_404(Area, id=decode_id_string(input_data["admin2"]))
+        if "area" in input_data:
+            feedback.area = input_data["area"]
+        if "language" in input_data:
+            feedback.language = input_data["language"]
+        if "consent" in input_data:
+            feedback.consent = input_data["consent"]
+        if "program" in input_data:
+            feedback.program = get_object_or_404(Program, id=decode_id_string(input_data["program"]))
+        feedback.save()
+        return feedback
