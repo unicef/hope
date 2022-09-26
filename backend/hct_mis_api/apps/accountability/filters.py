@@ -16,13 +16,9 @@ class MessagesFilter(FilterSet):
     title = CharFilter(field_name="title", lookup_expr="icontains")
     body = CharFilter(field_name="body", lookup_expr="icontains")
     sampling_type = ChoiceFilter(field_name="sampling_type", choices=Message.SamplingChoices.choices)
-    created_by = CharFilter(method="filter_created_by")
 
     def filter_program(self, queryset, name, value):
         return queryset.filter(target_population__program=decode_id_string(value))
-
-    def filter_created_by(self, queryset, name, value):
-        return queryset.filter(created_by_id=decode_id_string(value))
 
     class Meta:
         model = Message
@@ -32,7 +28,7 @@ class MessagesFilter(FilterSet):
             "created_by": ["exact"],
         }
 
-    order_by = CustomOrderingFilter(fields=(Lower("title"), "number_of_recipients", "sampling_type"))
+    order_by = CustomOrderingFilter(fields=(Lower("title"), "number_of_recipients", "sampling_type", "created_by", "id", "created_at"))
 
 
 class MessageRecipientsMapFilter(FilterSet):
@@ -55,10 +51,12 @@ class MessageRecipientsMapFilter(FilterSet):
     order_by = CustomOrderingFilter(
         fields=(
             "id",
-            Lower("head_of_household__first_name"),
+            "unicef_id",
+            "withdrawn",
+            Lower("head_of_household__full_name"),
             Lower("head_of_household__sex"),
             "size",
-            Lower("admin2__name"),
+            Lower("admin_area__name"),
             "residence_status",
             "head_of_household__first_registration_date",
         )
