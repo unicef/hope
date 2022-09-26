@@ -251,7 +251,8 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         check_concurrency_version_in_mutation(kwargs.get("version"), obj_hct)
 
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
-
+        if not obj_hct.can_be_merged():
+            raise ValidationError('can\'t merge RDI with this status')
         cls.validate(status=obj_hct.status)
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
