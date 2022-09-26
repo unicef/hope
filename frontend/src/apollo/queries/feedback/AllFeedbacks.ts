@@ -26,12 +26,17 @@ export const AllFeedbacks = gql`
         cursor
         node {
           id
+          unicefId
           issueType
           householdLookup {
             id
             unicefId
           }
           createdAt
+          linkedGrievance {
+            id
+            unicefId
+          }
         }
       }
     }

@@ -554,7 +554,6 @@ input CreateFeedbackInput {
   language: String
   consent: Boolean
   program: ID
-  createdBy: ID!
 }
 
 type CreateFeedbackMutation {
@@ -972,7 +971,7 @@ type GrievanceTicketNode implements Node {
   positiveFeedbackTicketDetails: TicketPositiveFeedbackDetailsNode
   negativeFeedbackTicketDetails: TicketNegativeFeedbackDetailsNode
   referralTicketDetails: TicketReferralDetailsNode
-  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
+  feedback: FeedbackNode
   household: HouseholdNode
   individual: IndividualNode
   paymentRecord: PaymentRecordNode
