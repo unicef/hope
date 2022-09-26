@@ -28,7 +28,7 @@ class MessagesFilter(FilterSet):
             "created_by": ["exact"],
         }
 
-    order_by = CustomOrderingFilter(fields=(Lower("title"), "number_of_recipients", "sampling_type"))
+    order_by = CustomOrderingFilter(fields=(Lower("title"), "number_of_recipients", "sampling_type", "created_by", "id", "created_at"))
 
 
 class MessageRecipientsMapFilter(FilterSet):
