@@ -38,3 +38,8 @@ def validate_file(file):
             raise GraphQLError(_(f"File {file.name} of size {file.size} is above max size limit"))
     else:
         raise GraphQLError(_("File type not supported"))
+
+
+def validate_files_size(files):
+    if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
+        raise GraphQLError("Total size of files can not be larger than 25mb.")
