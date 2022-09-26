@@ -1,7 +1,9 @@
 import base64
 import shutil
+from io import BytesIO
 
 from django.contrib.auth.models import AnonymousUser
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import RequestFactory, TestCase
 
 from elasticsearch_dsl import connections
@@ -103,6 +105,17 @@ class BaseMultipleFilesUploadTestCase(GraphQLFileUploadTestCase, SnapshotTestTes
     @staticmethod
     def id_to_base64(object_id, name):
         return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
+
+    @staticmethod
+    def create_fixture_file(name, size, content_type):
+        return InMemoryUploadedFile(
+            name=name,
+            file=BytesIO(b"xxxxxxxxxxx"),
+            charset=None,
+            field_name="0",
+            size=size,
+            content_type=content_type
+        )
 
     @classmethod
     def tearDownClass(cls):
