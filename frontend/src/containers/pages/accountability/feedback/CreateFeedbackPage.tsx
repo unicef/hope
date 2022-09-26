@@ -26,14 +26,12 @@ import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { Consent } from '../../../../components/grievances/Consent';
 import { LookUpHouseholdIndividualSelection } from '../../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { LookUpRelatedTickets } from '../../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
-import { prepareVariables } from '../../../../components/grievances/utils/createGrievanceUtils';
 
 import {
   hasPermissionInModule,
   hasPermissions,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { useArrayToDict } from '../../../../hooks/useArrayToDict';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
@@ -43,10 +41,11 @@ import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { FeedbackSteps } from '../../../../utils/constants';
 import {
+  CreateFeedbackInput,
   useAllProgramsQuery,
   useAllUsersQuery,
   useCreateFeedbackTicketMutation,
-  useGrievancesChoiceDataQuery,
+  useFeedbackIssueTypeChoicesQuery,
 } from '../../../../__generated__/graphql';
 
 const steps = [
@@ -171,24 +170,16 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   const [validateData, setValidateData] = useState(false);
 
   const initialValues = {
-    category: null,
     issueType: null,
     selectedHousehold: null,
     selectedIndividual: null,
     description: '',
+    comments: '',
+    admin2: '',
+    area: '',
     language: '',
     consent: false,
-    admin: null,
-    area: '',
-    selectedPaymentRecords: [],
-    selectedRelatedTickets: [],
-    identityVerified: false,
-    priority: 3,
-    urgency: 3,
-    subCategory: null,
-    partner: null,
-    programme: null,
-    comments: null,
+    program: '',
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
@@ -197,15 +188,9 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   const {
     data: choicesData,
     loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  } = useFeedbackIssueTypeChoicesQuery();
 
   const [mutate, { loading }] = useCreateFeedbackTicketMutation();
-
-  const issueTypeDict = useArrayToDict(
-    choicesData?.grievanceTicketIssueTypeChoices,
-    'category',
-    '*',
-  );
 
   const {
     data: allProgramsData,
@@ -224,8 +209,12 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   if (userDataLoading || choicesLoading || loadingPrograms)
     return <LoadingComponent />;
   if (permissions === null) return null;
-
-  if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions))
+  if (
+    !hasPermissions(
+      PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE,
+      permissions,
+    )
+  )
     return <PermissionDenied />;
 
   if (!choicesData || !userData) return null;
@@ -245,15 +234,29 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
+  const prepareVariables = (values): CreateFeedbackInput => ({
+    businessAreaSlug: businessArea,
+    issueType: values.issueType,
+    householdLookup: values.selectedHousehold.id,
+    individualLookup: values.selectedIndividual.id,
+    description: values.description,
+    comments: values.comments,
+    admin2: values.admin2,
+    area: values.area,
+    language: values.language,
+    consent: values.consent,
+    program: values.program,
+  });
+
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
         if (activeStep === steps.length - 1) {
           try {
-            const response = await mutate(
-              prepareVariables(businessArea, values),
-            );
+            const response = await mutate({
+              variables: { input: prepareVariables(values) },
+            });
             showMessage(t('Feedback created.'), {
               pathname: `/${businessArea}/accountability/feedback/${response.data.createFeedback.feedback.id}`,
               historyMethod: 'push',
@@ -270,12 +273,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
       validateOnBlur={activeStep < FeedbackSteps.Verification || validateData}
       validationSchema={validationSchemaWithSteps(activeStep)}
       validate={(values) =>
-        validateUsingSteps(
-          values,
-
-          activeStep,
-          setValidateData,
-        )
+        validateUsingSteps(values, activeStep, setValidateData)
       }
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
@@ -284,7 +282,10 @@ export const CreateFeedbackPage = (): React.ReactElement => {
             <PageHeader
               title='New Feedback'
               breadCrumbs={
-                hasPermissionInModule('FEEDBACK_VIEW_LIST', permissions)
+                hasPermissionInModule(
+                  'ACCOUNTABILITY_FEEDBACK_VIEW_LIST',
+                  permissions,
+                )
                   ? breadCrumbsItems
                   : null
               }
@@ -317,16 +318,14 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                             </LabelizedField>
                           </Grid>
                           <Grid item xs={6}>
-                            {/* <Field
+                            <Field
                               name='issueType'
                               label='Issue Type'
                               variant='outlined'
                               required
-                              choices={
-                                issueTypeDict[values.category]?.subCategories
-                              }
+                              choices={choicesData.feedbackIssueTypeChoices}
                               component={FormikSelectField}
-                            /> */}
+                            />
                           </Grid>
                         </Grid>
                       )}
