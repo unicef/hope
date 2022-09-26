@@ -56,6 +56,14 @@ mutation updateFeedback($input: UpdateFeedbackInput!) {
 }
 """
 
+    SINGLE_FEEDBACK_QUERY = """
+query feedback($id: ID!) {
+    feedback(id: $id) {
+        id
+    }
+}
+"""
+
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
@@ -263,3 +271,13 @@ mutation updateFeedback($input: UpdateFeedbackInput!) {
         assert "errors" not in response, response["errors"]
         feedback.refresh_from_db()
         self.assertEqual(feedback.issue_type, Feedback.NEGATIVE_FEEDBACK)
+
+    def test_getting_single_feedback(self):
+        feedback_id = self.create_new_feedback()
+        response = self.graphql_request(
+            request_string=self.SINGLE_FEEDBACK_QUERY,
+            context={"user": self.user},
+            variables={"id": encode_id_base64(feedback_id, "Feedback")},
+        )
+        assert "errors" not in response, response["errors"]
+        self.assertEqual(response["data"]["feedback"]["id"], encode_id_base64(feedback_id, "Feedback"))
