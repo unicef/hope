@@ -2,7 +2,6 @@ import logging
 from enum import Enum
 from typing import Union
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
@@ -16,9 +15,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 
 import graphene
-from graphene_django import DjangoObjectType
 from graphql import GraphQLError
-from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -34,7 +31,7 @@ from hct_mis_api.apps.core.utils import (
     to_snake_case,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import GrievanceTicket, GrievanceDocument, TicketNote
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     close_add_individual_grievance_ticket,
     close_delete_household_ticket,
@@ -92,8 +89,14 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
+from hct_mis_api.apps.utils.schema import Arg
 
 logger = logging.getLogger(__name__)
+
+
+class GrievanceDocumentInput(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    file = Arg()
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
@@ -113,6 +116,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     partner = graphene.Int(node=PartnerType, required=False)
     programme = graphene.ID(node=ProgramNode)
     comments = graphene.String()
+    support_documents = graphene.List(GrievanceDocumentInput)
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -290,6 +294,9 @@ class CreateGrievanceTicketMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
+        logger.info("*************************")
+        logger.info(input)
+
         arg = lambda name, default=None: input.get(name, default)
         cls.has_permission(info, Permissions.GRIEVANCES_CREATE, arg("business_area"))
 
@@ -319,6 +326,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
                 None,
                 grievance,
             )
+
         return cls(grievance_tickets=grievances)
 
     @classmethod
@@ -1272,35 +1280,6 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         return cls(grievance_ticket=grievance_ticket)
 
 
-class CreateGrievanceDocumentsMutation(graphene.Mutation):
-    grievance_documents = graphene.List(GrievanceDocumentNode)
-
-    class Arguments:
-        grievance_ticket_id = graphene.NonNull(graphene.ID)
-        files = graphene.NonNull(graphene.List(Upload))
-
-    @classmethod
-    def mutate(cls, root, info, grievance_ticket_id, files):
-        validate_files_size(files)
-
-        grievance_documents = []
-        for file in files:
-            validate_file(file)
-
-            document = GrievanceDocument(
-                created_by_id=info.context.user.id,
-                grievance_ticket_id=decode_id_string(grievance_ticket_id),
-                file=file,
-                content_type=file.content_type,
-                file_name=file.name,
-                file_size=file.size
-            )
-            grievance_documents.append(document)
-
-        GrievanceDocument.objects.bulk_create(grievance_documents)
-        return CreateGrievanceDocumentsMutation(grievance_documents=grievance_documents)
-
-
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
     update_grievance_ticket = UpdateGrievanceTicketMutation.Field()
@@ -1316,4 +1295,3 @@ class Mutations(graphene.ObjectType):
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     approve_payment_details = PaymentDetailsApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()
-    create_grievance_documents_mutation = CreateGrievanceDocumentsMutation.Field()
