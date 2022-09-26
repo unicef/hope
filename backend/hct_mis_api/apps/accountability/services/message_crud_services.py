@@ -8,6 +8,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 from ..models import Message
 from .sampling import Sampling
@@ -51,4 +52,7 @@ class MessageCrudServices:
         elif target_population_id := input_data.get("target_population"):
             return Household.objects.filter(selections__target_population__id=target_population_id)
         elif registration_data_import_id := input_data.get("registration_data_import"):
-            return Household.objects.filter(registration_data_import_id=registration_data_import_id)
+            return Household.objects.filter(
+                registration_data_import__status=RegistrationDataImport.MERGED,
+                registration_data_import_id=registration_data_import_id,
+            )
