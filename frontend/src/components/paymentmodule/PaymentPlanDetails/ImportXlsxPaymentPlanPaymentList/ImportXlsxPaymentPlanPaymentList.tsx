@@ -140,7 +140,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               color='primary'
               variant='contained'
               onClick={() => handleImport()}
-              data-cy='button-import-submit'
+              data-cy='button-import-entitlement'
             >
               {t('IMPORT')}
             </Button>

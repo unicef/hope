@@ -115,6 +115,7 @@ export const Entitlement = ({
 
   const { data: steficonData, loading } = useAllSteficonRulesQuery({
     variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
+    fetchPolicy: 'network-only',
   });
   const [
     mutateExport,
@@ -212,6 +213,7 @@ export const Entitlement = ({
                   startIcon={<DownloadIcon />}
                   component='a'
                   download
+                  data-cy='button-download-template'
                   href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
                   disabled={paymentPlan.status !== PaymentPlanStatus.Locked}
                 >
@@ -226,6 +228,7 @@ export const Entitlement = ({
                   }
                   color='primary'
                   startIcon={<GetApp />}
+                  data-cy='button-export-xlsx'
                   onClick={async () => {
                     try {
                       await mutateExport({
@@ -268,7 +271,7 @@ export const Entitlement = ({
                     <AttachFileIcon fontSize='inherit' />
                   </SpinaczIconContainer>
                   <Box mr={1}>
-                    <GreyTextSmall>
+                    <GreyTextSmall data-cy='imported-file-name'>
                       {paymentPlan?.importedFileName}
                     </GreyTextSmall>
                   </Box>

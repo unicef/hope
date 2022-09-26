@@ -77,7 +77,7 @@ export const MarkAsReviewedPaymentPlan = ({
                 color='primary'
                 variant='contained'
                 onClick={() => setMarkAsReviewedDialogOpen(true)}
-                data-cy='button-lock-plan'
+                data-cy='button-mark-as-reviewed'
               >
                 {t('Mark as reviewed')}
               </Button>

@@ -13,7 +13,7 @@ variables:
   # ========================================================================
   #                          Mandatory variables 
   # ========================================================================
-  Kubernetes.serviceConnection: "ICTD-HOPE-AKS-DEV-uni-apps-aks-hope-dev-ictd-hope-dev-1614134848610"
+  Kubernetes.serviceConnection: "aks-hope-pm-azure-devops-sa"
   Kubernetes.namespace: "ictd-hope-pm"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
@@ -45,7 +45,7 @@ stages:
               command: 'upgrade'
               chartType: 'FilePath'
               chartPath: '**/deployment/hope'
-              releaseName: 'hope'
+              releaseName: 'hope-pm'
               install: true
               waitForExecution: false
               failOnStderr: false
@@ -79,13 +79,9 @@ stages:
                 frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
                 ingress.host=pm-hope-dev.unitst.org,\
                 ingress.tls=true,\
-                postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
-                registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
-                cashassistdatahubpostgresql.enabled=false,\
-                cashassistdatahubpostgresql.externalDatabase.host=$(CASH_ASSIST_DATAHUB_POSTGRES_HOST),\
-                cashassistdatahubpostgresql.externalDatabase.user=$(CASH_ASSIST_DATAHUB_POSTGRES_USER),\
-                cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
-                cashassistdatahubpostgresql.externalDatabase.db=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
+                postgresql.postgresqlPassword=hope-pm,\
+                registrationdatahubpostgresql.postgresqlPassword=hope-pm,\
+                cashassistdatahubpostgresql.postgresqlPassword=hope-pm,\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH),\
-                backend.replicaCount=$(BACKEND_REPLICA_COUNT),\
-                celery.replicaCount=$(CELERY_REPLICA_COUNT),"
+                backend.replicaCount=1,\
+                celery.replicaCount=1,"

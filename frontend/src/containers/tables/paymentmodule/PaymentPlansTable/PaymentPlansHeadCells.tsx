@@ -2,7 +2,7 @@ import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
 import { AllPaymentPlansForTableQuery } from '../../../../__generated__/graphql';
 
 export const headCells: HeadCell<
-AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][number]['node']
+  AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,
@@ -36,7 +36,7 @@ AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][number]['node']
   },
   {
     disablePadding: false,
-    label: 'Total Deliverd Quantity',
+    label: 'Total Delivered Quantity',
     id: 'totalDeliveredQuantity',
     numeric: true,
   },

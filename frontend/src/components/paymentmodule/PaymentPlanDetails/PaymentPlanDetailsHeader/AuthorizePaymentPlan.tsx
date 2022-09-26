@@ -74,7 +74,7 @@ export const AuthorizePaymentPlan = ({
                 color='primary'
                 variant='contained'
                 onClick={() => setAuthorizeDialogOpen(true)}
-                data-cy='button-lock-plan'
+                data-cy='button-authorize'
               >
                 {t('Authorize')}
               </Button>
