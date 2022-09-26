@@ -766,16 +766,20 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 
 
 class GrievanceDocument(UUIDModel):
-    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=100, null=True)
+    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
     grievance_ticket = models.ForeignKey(
         GrievanceTicket, null=True, related_name="documents", on_delete=models.SET_NULL
     )
     file = models.FileField(upload_to="grievance_documents", blank=True, null=True)
-    file_name = models.CharField(max_length=200, null=False)
     file_size = models.IntegerField(null=True)
     content_type = models.CharField(max_length=50, null=False)
+
+    @property
+    def file_name(self):
+        return self.file.name
 
     @property
     def path(self):
