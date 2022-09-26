@@ -16,6 +16,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 
 import graphene
+from graphene_django import DjangoObjectType
 from graphql import GraphQLError
 from graphene_file_upload.scalars import Upload
 
@@ -79,9 +80,9 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     verify_required_arguments,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
+from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode, GrievanceDocumentNode
 from hct_mis_api.apps.grievance.utils import get_individual, traverse_sibling_tickets
-from hct_mis_api.apps.grievance.validators import DataChangeValidator, validate_file
+from hct_mis_api.apps.grievance.validators import DataChangeValidator, validate_file, validate_files_size
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -1271,8 +1272,8 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         return cls(grievance_ticket=grievance_ticket)
 
 
-class UploadDocumentsMutation(graphene.Mutation):
-    success = graphene.Boolean()
+class CreateGrievanceDocumentsMutation(graphene.Mutation):
+    grievance_documents = graphene.List(GrievanceDocumentNode)
 
     class Arguments:
         grievance_ticket_id = graphene.NonNull(graphene.ID)
@@ -1280,20 +1281,24 @@ class UploadDocumentsMutation(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, grievance_ticket_id, files):
-        if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
-            raise GraphQLError("Total size of files can not be larger than 25mb.")
+        validate_files_size(files)
 
+        grievance_documents = []
         for file in files:
             validate_file(file)
-            GrievanceDocument.objects.create(
+
+            document = GrievanceDocument(
                 created_by_id=info.context.user.id,
                 grievance_ticket_id=decode_id_string(grievance_ticket_id),
                 file=file,
                 content_type=file.content_type,
-                file_name=file.name
+                file_name=file.name,
+                file_size=file.size
             )
+            grievance_documents.append(document)
 
-        return UploadDocumentsMutation(success=True)
+        GrievanceDocument.objects.bulk_create(grievance_documents)
+        return CreateGrievanceDocumentsMutation(grievance_documents=grievance_documents)
 
 
 class Mutations(graphene.ObjectType):
@@ -1311,4 +1316,4 @@ class Mutations(graphene.ObjectType):
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     approve_payment_details = PaymentDetailsApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()
-    upload_documents = UploadDocumentsMutation.Field()
+    create_grievance_documents_mutation = CreateGrievanceDocumentsMutation.Field()

@@ -65,7 +65,6 @@ logger = logging.getLogger(__name__)
 
 
 class GrievanceDocumentNode(DjangoObjectType):
-    file_size = graphene.String(source='size')
     file_path = graphene.String(source='path')
 
     class Meta:
