@@ -37,7 +37,6 @@ import {
   useGrievanceTicketStatusChangeMutation,
   useMeQuery,
   useUpdateGrievanceMutation,
-  useUserChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
@@ -135,8 +134,6 @@ export const EditGrievancePage = (): React.ReactElement => {
     'name',
     '*',
   );
-
-  const { data: userChoices } = useUserChoiceDataQuery();
 
   const {
     data: allProgramsData,
