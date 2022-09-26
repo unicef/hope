@@ -1,23 +1,16 @@
-import base64
-import io
-import shutil
+from io import BytesIO
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import BaseMultipleFilesUploadTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import override_settings
-from graphene_file_upload.django.testing import GraphQLFileUploadTestCase
-from snapshottest.django import TestCase as SnapshotTestTestCase
-
-TEST_DIR = 'test_data'
 
 
-class MutationTestCase(GraphQLFileUploadTestCase, SnapshotTestTestCase):
-    GRAPHQL_URL = "/api/graphql"
-
+class SupportGrievanceTicketDocumentsUploadTestCase(BaseMultipleFilesUploadTestCase):
     UPLOAD_GRIEVANCE_DOCUMENTS = """
         mutation uploadDocuments(
           $files: [Upload]!
@@ -32,10 +25,6 @@ class MutationTestCase(GraphQLFileUploadTestCase, SnapshotTestTestCase):
         }
     """
 
-    @staticmethod
-    def id_to_base64(object_id, name):
-        return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
-
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory()
@@ -48,20 +37,13 @@ class MutationTestCase(GraphQLFileUploadTestCase, SnapshotTestTestCase):
             assigned_to=cls.user
         )
 
-    @classmethod
-    def tearDownClass(cls):
-        try:
-            shutil.rmtree(TEST_DIR)
-        except OSError:
-            pass
-
-    @override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
+    @override_settings(MEDIA_ROOT=(BaseMultipleFilesUploadTestCase.TEST_DIR + '/media'))
     def test_some_mutation(self):
 
         files = {
             "files.0": InMemoryUploadedFile(
                 name="konrad.jpg",
-                file=io.BytesIO(b"xxxxxxxxxxx"),
+                file=BytesIO(b"xxxxxxxxxxx"),
                 charset=None,
                 field_name="0",
                 size=666,
@@ -69,7 +51,7 @@ class MutationTestCase(GraphQLFileUploadTestCase, SnapshotTestTestCase):
             ),
             "files.1": InMemoryUploadedFile(
                 name="konrad.jpg",
-                file=io.BytesIO(b"xxxxxxxxxxx"),
+                file=BytesIO(b"yyyyyyyyyyy"),
                 charset=None,
                 field_name="0",
                 size=666,
@@ -86,8 +68,6 @@ class MutationTestCase(GraphQLFileUploadTestCase, SnapshotTestTestCase):
                 "files": [None, None]
             }
         )
-
-        print(response.json())
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
