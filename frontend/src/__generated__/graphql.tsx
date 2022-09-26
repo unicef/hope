@@ -912,7 +912,6 @@ export type CreateFeedbackInput = {
   language?: Maybe<Scalars['String']>,
   consent?: Maybe<Scalars['Boolean']>,
   program?: Maybe<Scalars['ID']>,
-  createdBy: Scalars['ID'],
 };
 
 export type CreateFeedbackMutation = {
@@ -1366,7 +1365,7 @@ export type GrievanceTicketNode = Node & {
   positiveFeedbackTicketDetails?: Maybe<TicketPositiveFeedbackDetailsNode>,
   negativeFeedbackTicketDetails?: Maybe<TicketNegativeFeedbackDetailsNode>,
   referralTicketDetails?: Maybe<TicketReferralDetailsNode>,
-  feedbacks: FeedbackNodeConnection,
+  feedback?: Maybe<FeedbackNode>,
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
   paymentRecord?: Maybe<PaymentRecordNode>,
@@ -1396,15 +1395,6 @@ export type GrievanceTicketNodeLinkedTicketsRelatedArgs = {
 
 
 export type GrievanceTicketNodeTicketNotesArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type GrievanceTicketNodeFeedbacksArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -8568,14 +8558,28 @@ export type AllFeedbacksQuery = (
       & Pick<FeedbackNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'FeedbackNode' }
-        & Pick<FeedbackNode, 'id' | 'issueType' | 'createdAt'>
+        & Pick<FeedbackNode, 'id' | 'unicefId' | 'issueType' | 'createdAt'>
         & { householdLookup: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
+        )>, linkedGrievance: Maybe<(
+          { __typename?: 'GrievanceTicketNode' }
+          & Pick<GrievanceTicketNode, 'id' | 'unicefId'>
         )> }
       )> }
     )>> }
   )> }
+);
+
+export type FeedbackIssueTypeChoicesQueryVariables = {};
+
+
+export type FeedbackIssueTypeChoicesQuery = (
+  { __typename?: 'Query' }
+  & { feedbackIssueTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
 );
 
 export type AllGrievanceDashboardChartsQueryVariables = {
@@ -15446,12 +15450,17 @@ export const AllFeedbacksDocument = gql`
       cursor
       node {
         id
+        unicefId
         issueType
         householdLookup {
           id
           unicefId
         }
         createdAt
+        linkedGrievance {
+          id
+          unicefId
+        }
       }
     }
   }
@@ -15505,6 +15514,56 @@ export function useAllFeedbacksLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type AllFeedbacksQueryHookResult = ReturnType<typeof useAllFeedbacksQuery>;
 export type AllFeedbacksLazyQueryHookResult = ReturnType<typeof useAllFeedbacksLazyQuery>;
 export type AllFeedbacksQueryResult = ApolloReactCommon.QueryResult<AllFeedbacksQuery, AllFeedbacksQueryVariables>;
+export const FeedbackIssueTypeChoicesDocument = gql`
+    query FeedbackIssueTypeChoices {
+  feedbackIssueTypeChoices {
+    name
+    value
+  }
+}
+    `;
+export type FeedbackIssueTypeChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>, 'query'>;
+
+    export const FeedbackIssueTypeChoicesComponent = (props: FeedbackIssueTypeChoicesComponentProps) => (
+      <ApolloReactComponents.Query<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables> query={FeedbackIssueTypeChoicesDocument} {...props} />
+    );
+    
+export type FeedbackIssueTypeChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables> & TChildProps;
+export function withFeedbackIssueTypeChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FeedbackIssueTypeChoicesQuery,
+  FeedbackIssueTypeChoicesQueryVariables,
+  FeedbackIssueTypeChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables, FeedbackIssueTypeChoicesProps<TChildProps>>(FeedbackIssueTypeChoicesDocument, {
+      alias: 'feedbackIssueTypeChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFeedbackIssueTypeChoicesQuery__
+ *
+ * To run a query within a React component, call `useFeedbackIssueTypeChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFeedbackIssueTypeChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFeedbackIssueTypeChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useFeedbackIssueTypeChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>(FeedbackIssueTypeChoicesDocument, baseOptions);
+      }
+export function useFeedbackIssueTypeChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>(FeedbackIssueTypeChoicesDocument, baseOptions);
+        }
+export type FeedbackIssueTypeChoicesQueryHookResult = ReturnType<typeof useFeedbackIssueTypeChoicesQuery>;
+export type FeedbackIssueTypeChoicesLazyQueryHookResult = ReturnType<typeof useFeedbackIssueTypeChoicesLazyQuery>;
+export type FeedbackIssueTypeChoicesQueryResult = ApolloReactCommon.QueryResult<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>;
 export const AllGrievanceDashboardChartsDocument = gql`
     query AllGrievanceDashboardCharts($businessAreaSlug: String!) {
   ticketsByType(businessAreaSlug: $businessAreaSlug) {
@@ -22162,7 +22221,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   positiveFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketPositiveFeedbackDetailsNode']>, ParentType, ContextType>,
   negativeFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNode']>, ParentType, ContextType>,
   referralTicketDetails?: Resolver<Maybe<ResolversTypes['TicketReferralDetailsNode']>, ParentType, ContextType>,
-  feedbacks?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, GrievanceTicketNodeFeedbacksArgs>,
+  feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,

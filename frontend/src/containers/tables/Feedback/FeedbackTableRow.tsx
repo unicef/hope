@@ -6,12 +6,11 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../components/core/BlackLink';
-import { renderUserName } from '../../../utils/utils';
-import { Missing } from '../../../components/core/Missing';
+import { renderSomethingOrDash, renderUserName } from '../../../utils/utils';
 
 interface FeedbackTableRowProps {
   feedback: FeedbackNode;
-  canViewDetails?: boolean;
+  canViewDetails: boolean;
 }
 
 export const FeedbackTableRow = ({
@@ -22,7 +21,7 @@ export const FeedbackTableRow = ({
   const businessArea = useBusinessArea();
   const feedbackDetailsPath = `/${businessArea}/accountability/feedback/${feedback.id}`;
   const householdDetailsPath = `/${businessArea}/population/households/${feedback.householdLookup.id}`;
-  // const grievanceDetailsPath = `/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance.id}`;
+  const grievanceDetailsPath = `/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance?.id}`;
 
   const handleClick = (): void => {
     history.push(feedbackDetailsPath);
@@ -42,28 +41,25 @@ export const FeedbackTableRow = ({
         )}
       </TableCell>
       <TableCell align='left'>
-        {/* {feedback.issueType} */}
-        <Missing />
+        {feedback.issueType === 'A_1'
+          ? 'Positive Feedback'
+          : 'Negative Feedback'}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={feedbackDetailsPath}>
+        <BlackLink to={householdDetailsPath}>
           {feedback.householdLookup.unicefId}
         </BlackLink>
       </TableCell>
       <TableCell align='left'>
-        {/* {feedback.linkedGrievance.id ? (
-          <BlackLink to={feedbackDetailsPath}>
-            {feedback.householdLookup.unicefId}
+        {feedback.linkedGrievance?.id ? (
+          <BlackLink to={grievanceDetailsPath}>
+            {feedback.linkedGrievance?.unicefId}
           </BlackLink>
         ) : (
-          renderSomethingOrDash(feedback.linkedGrievance?.id)
-        )} */}
-        <Missing />
+          renderSomethingOrDash(feedback.linkedGrievance?.unicefId)
+        )}
       </TableCell>
-      <TableCell align='left'>
-        {/* {renderUserName(feedback.createdBy)} */}
-        <Missing />
-      </TableCell>
+      <TableCell align='left'>{renderUserName(feedback.createdBy)}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{feedback.createdAt}</UniversalMoment>
       </TableCell>
