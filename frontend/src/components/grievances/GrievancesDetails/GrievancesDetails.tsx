@@ -1,4 +1,4 @@
-import { Grid, GridSize, Typography } from '@material-ui/core';
+import { Box, Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,10 +15,12 @@ import {
   GrievancesChoiceDataQuery,
   GrievanceTicketQuery,
 } from '../../../__generated__/graphql';
+import { BlackLink } from '../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';
 import { OverviewContainer } from '../../core/OverviewContainer';
+import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
@@ -50,7 +52,6 @@ export const GrievancesDetails = ({
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
-
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
         .filter((el) => el.category === ticket.category.toString())[0]
@@ -60,13 +61,32 @@ export const GrievancesDetails = ({
     : '-';
 
   const showIssueType =
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString() ||
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
-  ticket.category.toString() === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString();
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString() ||
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString();
   const showProgramme =
     ticket.issueType !== +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
+
+  const mappedDocumentation = (): React.ReactElement => {
+    return (
+      <Box display='flex' flexDirection='column'>
+        {/* TODO: uncomment this */}
+        {/* {ticket.documentation.map((doc) => {
+          if (doc.type === 'photo') {
+            return (
+              <PhotoModal src={doc.src} variant='link' linkText={doc.name} />
+            );
+          }
+          return <BlackLink to={doc.src}>{doc.name}</BlackLink>;
+        })} */}
+      </Box>
+    );
+  };
 
   return (
     <Grid item xs={12}>
@@ -221,6 +241,11 @@ export const GrievancesDetails = ({
               {
                 label: t('Languages Spoken'),
                 value: ticket.language,
+                size: 3,
+              },
+              {
+                label: t('Documentation'),
+                value: mappedDocumentation(),
                 size: 3,
               },
               {
