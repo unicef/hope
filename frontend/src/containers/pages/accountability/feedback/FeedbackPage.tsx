@@ -2,7 +2,10 @@ import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { hasPermissionInModule } from '../../../../config/permissions';
+import {
+  hasPermissionInModule,
+  PERMISSIONS,
+} from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../../hooks/useDebounce';
 import { usePermissions } from '../../../../hooks/usePermissions';
@@ -33,9 +36,18 @@ export const FeedbackPage = (): React.ReactElement => {
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
+  if (
+    !hasPermissionInModule(
+      PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_LIST,
+      permissions,
+    )
+  )
     return <PermissionDenied />;
   if (!choicesData) return null;
+  const canViewDetails = hasPermissionInModule(
+    PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_DETAILS,
+    permissions,
+  );
 
   return (
     <>
@@ -51,7 +63,11 @@ export const FeedbackPage = (): React.ReactElement => {
         </Button>
       </PageHeader>
       <FeedbackFilters filter={filter} onFilterChange={setFilter} />
-      <FeedbackTable filter={debouncedFilter} businessArea={businessArea} />
+      <FeedbackTable
+        filter={debouncedFilter}
+        businessArea={businessArea}
+        canViewDetails={canViewDetails}
+      />
     </>
   );
 };
