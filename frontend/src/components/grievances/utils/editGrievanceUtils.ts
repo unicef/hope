@@ -206,6 +206,8 @@ export function prepareInitialValues(
     selectedRelatedTickets: ticket.relatedTickets.map(
       (relatedTicket) => relatedTicket.id,
     ),
+    //TODO: uncomment documentation
+    // documentation: ticket.documentation || null,
   };
   const prepareInitialValueFunction = thingForSpecificGrievanceType(
     ticket,
@@ -478,6 +480,7 @@ export function prepareVariables(businessArea, values, ticket) {
     comments: values.comments,
     programme: values.programme,
     paymentRecord: values.selectedPaymentRecords[0] || null,
+    documentation: values.documentation || null,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,
