@@ -6,6 +6,7 @@ from pytz import utc
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.models import Household
 
 
 class CommunicationMessageFactory(factory.DjangoModelFactory):
@@ -32,3 +33,13 @@ class CommunicationMessageFactory(factory.DjangoModelFactory):
         else None
     )
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
+
+    @factory.post_generation
+    def cash_plan_payment_verification_summary(obj, create, extracted, **kwargs):
+        if not create:
+            return
+
+        households = Household.objects.all()
+        obj.number_of_recipients = len(households)
+        obj.households.set(households)
+        obj.save()

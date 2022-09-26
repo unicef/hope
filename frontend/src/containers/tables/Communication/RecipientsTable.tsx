@@ -39,7 +39,8 @@ export const RecipientsTable = ({
         renderRow={(row) => (
           <RecipientsTableRow
             key={row.id}
-            household={row.household}
+            household={row.headOfHousehold.household}
+            headOfHousehold={row.headOfHousehold}
             canViewDetails={canViewDetails}
           />
         )}

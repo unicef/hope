@@ -72,7 +72,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         linkedTickets: values.selectedRelatedTickets,
-        subCategory: values.subCategory,
+        issueType: values.issueType,
         extras: {
           category: {
             grievanceComplaintTicketExtras: {
@@ -295,7 +295,7 @@ const grievanceTypeIssueTypeDict = {
   [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
   [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: false,
   [GRIEVANCE_CATEGORIES.REFERRAL]: false,
-  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: false,
+  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: 'IGNORE',
   [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: 'IGNORE',
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
 };

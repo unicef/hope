@@ -1,4 +1,4 @@
-from typing import Callable, Union
+from typing import Callable, Sequence, Union
 
 from parameterized import parameterized
 
@@ -22,7 +22,6 @@ class TestActionMessageMutation(APITestCase):
       allAccountabilityCommunicationMessages (businessArea: $businessArea, title: $title, body: $body, samplingType: $samplingType, createdBy: $createdBy, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, orderBy: $orderBy) {
         edges {
           node {
-            id
             title
             unicefId
             body
@@ -36,6 +35,35 @@ class TestActionMessageMutation(APITestCase):
       }
     }
     """
+
+    QUERY_RECIPIENTS = """
+    query AllAccountabilityCommunicationMessageRecipients (
+        $messageId: String!
+        $recipientId: String
+        $fullName: String
+        $phoneNo: String
+        $sex: String
+        $orderBy: String
+    ) {
+      allAccountabilityCommunicationMessageRecipients (
+        messageId: $messageId
+        recipientId: $recipientId
+        fullName: $fullName
+        phoneNo: $phoneNo
+        sex: $sex
+        orderBy: $orderBy
+      ) {
+        edges {
+          node {
+            size
+            headOfHousehold {
+              fullName
+            }
+          }
+        }
+      }
+    }
+"""
 
     @classmethod
     def setUpTestData(cls):
@@ -112,7 +140,7 @@ class TestActionMessageMutation(APITestCase):
         )
     )
     def test_list_communication_messages(
-        self, _: str, permissions: list[str], extra_filters: Union[Callable[[User], dict], dict]
+        self, _: str, permissions: Sequence[str], extra_filters: Union[Callable[[User], dict], dict]
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -122,5 +150,47 @@ class TestActionMessageMutation(APITestCase):
             variables={
                 "businessArea": self.business_area.slug,
                 **(extra_filters(self.user) if callable(extra_filters) else extra_filters),
+            },
+        )
+
+    @parameterized.expand(
+        (
+            (
+                "with_view_details_permission",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+                {},
+            ),
+            (
+                "with_view_details_permission",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
+                {},
+            ),
+            (
+                "with_view_details_permission",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+                {
+                    "sex": "MALE",
+                },
+            ),
+            (
+                "without_permission",
+                [],
+                {},
+            ),
+        )
+    )
+    def test_list_communication_messages_recipients(self, _: str, permissions: Sequence[str], variables: dict) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_RECIPIENTS,
+            context={"user": self.user},
+            variables={
+                "messageId": encode_id_base64(Message.objects.values("id").first().get("id"), "Message"),
+                **variables,
             },
         )

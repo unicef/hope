@@ -422,6 +422,11 @@ type ChoiceObject {
   value: String
 }
 
+type ChoiceObjectInt {
+  name: String
+  value: Int
+}
+
 type CommunicationMessageNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -455,7 +460,8 @@ type CommunicationMessageNodeEdge {
 
 type CommunicationMessageRecipientMapNode implements Node {
   id: ID!
-  household: HouseholdNode!
+  size: Int!
+  headOfHousehold: IndividualNode!
 }
 
 type CommunicationMessageRecipientMapNodeConnection {
@@ -543,7 +549,6 @@ input CreateGrievanceTicketInput {
   description: String!
   assignedTo: ID
   category: Int!
-  subCategory: Int
   issueType: Int
   admin: String
   area: String
@@ -877,7 +882,6 @@ type GrievanceTicketNode implements Node {
   assignedTo: UserNode
   status: Int!
   category: Int!
-  subCategory: Int
   issueType: Int
   description: String!
   admin2: AreaNode
@@ -960,6 +964,8 @@ input HouseholdDeleteIssueTypeExtras {
 
 type HouseholdNode implements Node {
   id: ID!
+  size: Int!
+  headOfHousehold: IndividualNode!
   createdAt: DateTime!
   updatedAt: DateTime!
   isRemoved: Boolean!
@@ -974,7 +980,6 @@ type HouseholdNode implements Node {
   residenceStatus: HouseholdResidenceStatus!
   countryOrigin: String
   country: String
-  size: Int!
   address: String!
   adminArea: AreaNode
   representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -1012,7 +1017,6 @@ type HouseholdNode implements Node {
   flexFields: FlexFieldsScalar
   firstRegistrationDate: DateTime!
   lastRegistrationDate: DateTime!
-  headOfHousehold: IndividualNode!
   fchildHoh: Boolean
   childHoh: Boolean
   unicefId: String!
@@ -2589,12 +2593,11 @@ type Query {
   allEditHouseholdFieldsAttributes: [FieldAttributeNode]
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
-  grievanceTicketSubCategoryChoices: [ChoiceObject]
   grievanceTicketManualCategoryChoices: [ChoiceObject]
   grievanceTicketSystemCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
-  grievanceTicketPriorityChoices: [ChoiceObject]
-  grievanceTicketUrgencyChoices: [ChoiceObject]
+  grievanceTicketPriorityChoices: [ChoiceObjectInt]
+  grievanceTicketUrgencyChoices: [ChoiceObjectInt]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   paymentRecordVerification(id: ID!): PaymentVerificationNode
@@ -3725,7 +3728,6 @@ input UpdateGrievanceTicketInput {
   household: ID
   individual: ID
   paymentRecord: ID
-  subCategory: Int
   extras: UpdateGrievanceTicketExtrasInput
   priority: Int
   urgency: Int
