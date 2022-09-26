@@ -1,10 +1,12 @@
 import base64
+import shutil
 
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
 
 from elasticsearch_dsl import connections
 from graphene.test import Client
+from graphene_file_upload.django.testing import GraphQLFileUploadTestCase
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.models import Role, UserRole
@@ -92,3 +94,19 @@ class BaseElasticSearchTestCase(TestCase):
     @classmethod
     def rebuild_search_index(cls):
         rebuild_search_index()
+
+
+class BaseMultipleFilesUploadTestCase(GraphQLFileUploadTestCase, SnapshotTestTestCase):
+    TEST_DIR = 'test_data'
+    GRAPHQL_URL = "/api/graphql"
+
+    @staticmethod
+    def id_to_base64(object_id, name):
+        return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
+
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            shutil.rmtree(cls.TEST_DIR)
+        except OSError:
+            pass
