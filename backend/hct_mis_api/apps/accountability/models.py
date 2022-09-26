@@ -106,10 +106,10 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
         blank=True,
         verbose_name=_("Created by"),
     )
-    linked_grievance = models.ForeignKey(
+    linked_grievance = models.OneToOneField(
         "grievance.GrievanceTicket",
         on_delete=models.SET_NULL,
-        related_name="feedbacks",
+        related_name="feedback",
         null=True,
         blank=True,
         verbose_name=_("Linked grievance"),

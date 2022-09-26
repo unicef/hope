@@ -86,11 +86,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "linked_grievance",
-                    models.ForeignKey(
+                    models.OneToOneField(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="feedbacks",
+                        related_name="feedback",
                         to="grievance.grievanceticket",
                         verbose_name="Linked grievance",
                     ),
