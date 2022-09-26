@@ -41,20 +41,9 @@ class SupportGrievanceTicketDocumentsUploadTestCase(BaseMultipleFilesUploadTestC
     def test_some_mutation(self):
 
         files = {
-            "files.0": InMemoryUploadedFile(
-                name="konrad.jpg",
-                file=BytesIO(b"xxxxxxxxxxx"),
-                charset=None,
-                field_name="0",
-                size=666,
-                content_type="image/jpeg"
-            ),
-            "files.1": InMemoryUploadedFile(
-                name="konrad.jpg",
-                file=BytesIO(b"yyyyyyyyyyy"),
-                charset=None,
-                field_name="0",
-                size=666,
+            "files.0": self.create_fixture_file(
+                name="some_file.jpg",
+                size=100,
                 content_type="image/jpeg"
             )
         }
@@ -65,7 +54,7 @@ class SupportGrievanceTicketDocumentsUploadTestCase(BaseMultipleFilesUploadTestC
             files=files,
             variables={
                 "grievanceTicketId": self.id_to_base64(self.grievance_ticket.id, "GrievanceTicketNode"),
-                "files": [None, None]
+                "files": [None]
             }
         )
 
