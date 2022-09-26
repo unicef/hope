@@ -64,15 +64,15 @@ class MessageRecipientsMapFilter(FilterSet):
 class FeedbackFilter(FilterSet):
     business_area_slug = CharFilter(field_name="business_area__slug", required=True)
     issue_type = ChoiceFilter(field_name="issue_type", choices=Feedback.ISSUE_TYPE_CHOICES)
-    created_by = CharFilter(method="filter_created_by")
     created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_by = CharFilter(method="filter_created_by")
     feedback_id = CharFilter(method="filter_feedback_id")
 
     def filter_created_by(self, queryset, name, value):
-        return queryset.filter(created_by__pk=decode_id_string(value))
+        return queryset.filter(created_by__pk=value)
 
     def filter_feedback_id(self, queryset, name, value):
-        return queryset.filter(unicef_id=decode_id_string(value))
+        return queryset.filter(unicef_id=value)
 
     class Meta:
         model = Feedback

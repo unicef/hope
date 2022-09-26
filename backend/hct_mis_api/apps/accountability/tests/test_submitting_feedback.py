@@ -29,11 +29,13 @@ query allFeedbacks(
     $businessAreaSlug: String!,
     $issueType: String,
     $feedbackId: String,
+    $createdBy: String,
 ) {
     allFeedbacks(
         businessAreaSlug: $businessAreaSlug,
         issueType: $issueType,
         feedbackId: $feedbackId,
+        createdBy: $createdBy,
     ) {
         edges {
             node {
@@ -143,12 +145,11 @@ mutation updateFeedback($input: UpdateFeedbackInput!) {
         assert len(filter_it({"issueType": Feedback.NEGATIVE_FEEDBACK})) == 0
         assert len(filter_it({"issueType": Feedback.POSITIVE_FEEDBACK})) == 1
 
-        # TODO
-        # assert len(filter_it({"createdBy": encode_id_base64(self.program.pk, "Program")})) == 0
-        # assert len(filter_it({"createdBy": encode_id_base64(self.user.pk, "User")})) == 1
+        assert len(filter_it({"feedbackId": self.program.pk})) == 0
+        assert len(filter_it({"feedbackId": Feedback.objects.first().unicef_id})) == 1
 
-        assert len(filter_it({"feedbackId": encode_id_base64(self.program.pk, "Program")})) == 0
-        assert len(filter_it({"feedbackId": encode_id_base64(Feedback.objects.first().unicef_id, "Feedback")})) == 1
+        assert len(filter_it({"createdBy": str(self.user.pk)})) == 1
+        assert len(filter_it({"createdBy": str(self.program.pk)})) == 0
 
     def test_failing_to_create_new_feedback(self):
         def expect_failure(data):
