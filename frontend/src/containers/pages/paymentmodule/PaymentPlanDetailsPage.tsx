@@ -23,7 +23,9 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
   const { data, loading } = usePaymentPlanQuery({
-    variables: { id },
+    variables: {
+      id,
+    },
     fetchPolicy: 'cache-and-network',
   });
 
