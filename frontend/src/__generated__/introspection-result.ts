@@ -18,16 +18,28 @@
         "name": "Node",
         "possibleTypes": [
           {
+            "name": "CommunicationMessageNode"
+          },
+          {
+            "name": "UserNode"
+          },
+          {
+            "name": "GrievanceTicketNode"
+          },
+          {
             "name": "AreaNode"
           },
           {
             "name": "AreaTypeNode"
           },
           {
-            "name": "GrievanceTicketNode"
+            "name": "HouseholdNode"
           },
           {
-            "name": "UserNode"
+            "name": "IndividualNode"
+          },
+          {
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "UserBusinessAreaNode"
@@ -42,19 +54,40 @@
             "name": "ProgramNode"
           },
           {
-            "name": "HouseholdNode"
+            "name": "TargetPopulationNode"
           },
           {
-            "name": "IndividualNode"
+            "name": "RuleCommitNode"
           },
           {
-            "name": "RegistrationDataImportNode"
+            "name": "SteficonRuleNode"
+          },
+          {
+            "name": "ReportNode"
+          },
+          {
+            "name": "ServiceProviderNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationNode"
+          },
+          {
+            "name": "PaymentVerificationNode"
+          },
+          {
+            "name": "TicketPaymentVerificationDetailsNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationSummaryNode"
           },
           {
             "name": "TicketComplaintDetailsNode"
           },
           {
             "name": "TicketSensitiveDetailsNode"
+          },
+          {
+            "name": "PaymentVerificationLogEntryNode"
           },
           {
             "name": "TicketIndividualDataUpdateDetailsNode"
@@ -114,37 +147,10 @@
             "name": "TicketDeleteHouseholdDetailsNode"
           },
           {
-            "name": "TargetPopulationNode"
-          },
-          {
-            "name": "RuleCommitNode"
-          },
-          {
-            "name": "SteficonRuleNode"
-          },
-          {
-            "name": "ReportNode"
-          },
-          {
-            "name": "ServiceProviderNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationNode"
-          },
-          {
-            "name": "PaymentVerificationNode"
-          },
-          {
-            "name": "TicketPaymentVerificationDetailsNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationSummaryNode"
-          },
-          {
-            "name": "PaymentVerificationLogEntryNode"
-          },
-          {
             "name": "TicketNoteNode"
+          },
+          {
+            "name": "CommunicationMessageRecipientMapNode"
           },
           {
             "name": "LogEntryNode"
