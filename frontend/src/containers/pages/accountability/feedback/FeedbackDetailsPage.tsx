@@ -38,9 +38,10 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
   const currentUserId = currentUserData?.me?.id;
   const isCreator = currentUserId === ticket?.createdBy?.id;
   const isOwner = currentUserId === ticket?.assignedTo?.id;
-  // TODO: add real permission
-  const canEdit = true;
-  const canAddMessage = true;
+  const canEdit = hasPermissions(
+    PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE,
+    permissions,
+  );
   const canViewHouseholdDetails = hasCreatorOrOwnerPermissions(
     PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS,
     isCreator,
