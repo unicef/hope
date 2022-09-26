@@ -185,7 +185,7 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
 
             if not payment_plan.imported_file:
                 logger.error(
-                    f"Error import from xlsx, file does not exists for PaymentPlan ID {payment_plan.unicef_id}."
+                    f"Error import from xlsx, file does not exist for PaymentPlan ID {payment_plan.unicef_id}."
                 )
                 raise
 

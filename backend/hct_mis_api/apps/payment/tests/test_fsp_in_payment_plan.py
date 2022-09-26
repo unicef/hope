@@ -1086,7 +1086,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         ]
         with self.assertRaisesMessage(
             GraphQLError,
-            f"Delivery mechanism '{dm1.delivery_mechanism}' is not supported by FSP '{self.santander_fsp.name}'",
+            f"Delivery mechanism 'Voucher' is not supported by FSP '{self.santander_fsp}'",
         ):
             PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
                 dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True
@@ -1132,7 +1132,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         ]
         with self.assertRaisesMessage(
             GraphQLError,
-            f"Some Payments we're not assigned to selected DeliveryMechanisms/FSPs",
+            f"Some Payments were not assigned to selected DeliveryMechanisms/FSPs",
         ):
             PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
                 dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True
@@ -1319,7 +1319,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
 
         with self.assertRaisesMessage(
             GraphQLError,
-            f"Some Payments we're not assigned to selected DeliveryMechanisms/FSPs",
+            f"Some Payments were not assigned to selected DeliveryMechanisms/FSPs",
         ):
             PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
                 dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True

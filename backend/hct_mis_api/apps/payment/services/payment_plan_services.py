@@ -403,7 +403,7 @@ class PaymentPlanService:
                 if delivery_mechanism_per_payment_plan.delivery_mechanism not in fsp.delivery_mechanisms:
                     raise GraphQLError(
                         f"Delivery mechanism '{delivery_mechanism_per_payment_plan.delivery_mechanism}' is not supported "
-                        f"by FSP '{fsp.name}'"
+                        f"by FSP '{fsp}'"
                     )
 
                 if not fsp.can_accept_any_volume():
@@ -462,4 +462,4 @@ class PaymentPlanService:
                     delivery_mechanism_per_payment_plan.save()
 
             if set(processed_payments) != set(self.payment_plan.not_excluded_payments):
-                raise GraphQLError(f"Some Payments we're not assigned to selected DeliveryMechanisms/FSPs")
+                raise GraphQLError(f"Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
