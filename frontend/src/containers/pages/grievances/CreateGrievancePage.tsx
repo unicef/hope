@@ -67,6 +67,8 @@ import { ContentLink } from '../../../components/core/ContentLink';
 import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { Title } from '../../../components/core/Title';
+import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
 
 const steps = [
   'Category Selection',
@@ -142,6 +144,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     partner: null,
     programme: null,
     comments: null,
+    documentation: [],
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
@@ -158,7 +161,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const urgencyChoicesData = choicesData?.grievanceTicketUrgencyChoices;
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData?.grievanceTicketCategoryChoices||[]);
+  } = reduceChoices(choicesData?.grievanceTicketCategoryChoices || []);
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
@@ -441,6 +444,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
+        console.log('VALUES', values);
         if (activeStep === steps.length - 1) {
           try {
             const response = await mutate(
@@ -822,10 +826,23 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         </BoxPadding>
                       )}
                       {activeStep === steps.length - 1 && (
-                        <DataChangeComponent
-                          values={values}
-                          setFieldValue={setFieldValue}
-                        />
+                        <>
+                          <Box mt={3}>
+                            <Title>
+                              <Typography variant='h6'>
+                                {t('Documentation')}
+                              </Typography>
+                            </Title>
+                            <NewDocumentationFieldArray
+                              values={values}
+                              setFieldValue={setFieldValue}
+                            />
+                          </Box>
+                          <DataChangeComponent
+                            values={values}
+                            setFieldValue={setFieldValue}
+                          />
+                        </>
                       )}
                       {dataChangeErrors(errors, touched)}
                       <Box pt={3} display='flex' flexDirection='row'>
