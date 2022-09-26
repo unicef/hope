@@ -12,7 +12,7 @@ export const headCells: HeadCell<CommunicationMessageRecipientMapNode>[] = [
   {
     disablePadding: false,
     label: 'Status',
-    id: 'status',
+    id: 'withdrawn',
     numeric: false,
     dataCy: 'status',
   },
@@ -47,7 +47,7 @@ export const headCells: HeadCell<CommunicationMessageRecipientMapNode>[] = [
   {
     disablePadding: false,
     label: 'Registration Date',
-    id: 'firstRegistrationDate',
+    id: 'head_of_household__first_registration_date',
     numeric: true,
     dataCy: 'household-registration-date',
   },

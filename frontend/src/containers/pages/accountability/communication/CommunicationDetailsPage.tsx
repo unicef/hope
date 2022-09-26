@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { Box } from '@material-ui/core';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
@@ -15,14 +15,6 @@ import { CommunicationDetails } from '../../../../components/accountability/Comm
 import { CommunicationMessageDetails } from '../../../../components/accountability/Communication/CommunicationMessageDetails';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { RecipientsTable } from '../../../tables/Communication/RecipientsTable';
-
-const Container = styled.div`
-  && {
-    display: flex;
-    flex-direction: column;
-    min-width: 100%;
-  }
-`;
 
 export function CommunicationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -61,7 +53,7 @@ export function CommunicationDetailsPage(): React.ReactElement {
             : null
         }
       />
-      <Container>
+      <Box display='flex' flexDirection='column'>
         <CommunicationDetails message={message} />
         <CommunicationMessageDetails message={message} />
         <RecipientsTable
@@ -75,7 +67,7 @@ export function CommunicationDetailsPage(): React.ReactElement {
           PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
           permissions,
         ) && <UniversalActivityLogTable objectId={id} />}
-      </Container>
+      </Box>
     </div>
   );
 }

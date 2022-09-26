@@ -51,10 +51,12 @@ class MessageRecipientsMapFilter(FilterSet):
     order_by = CustomOrderingFilter(
         fields=(
             "id",
-            Lower("head_of_household__first_name"),
+            "unicef_id",
+            "withdrawn",
+            Lower("head_of_household__full_name"),
             Lower("head_of_household__sex"),
             "size",
-            Lower("admin2__name"),
+            Lower("admin_area__name"),
             "residence_status",
             "head_of_household__first_registration_date",
         )
