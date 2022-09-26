@@ -102,6 +102,7 @@ class Query(graphene.ObjectType):
         inputs=GetAccountabilityCommunicationMessageSampleSizeInput(),
     )
 
+    feedback = graphene.relay.Node.Field(FeedbackNode)
     all_feedbacks = DjangoPermissionFilterConnectionField(
         FeedbackNode,
         filterset_class=FeedbackFilter,
