@@ -11,16 +11,19 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { choicesToDict, householdStatusToColor } from '../../../utils/utils';
 import {
   HouseholdNode,
+  IndividualNode,
   useHouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
 
 interface RecipientsTableRowProps {
   household: HouseholdNode;
+  headOfHousehold: IndividualNode;
   canViewDetails: boolean;
 }
 
 export function RecipientsTableRow({
   household,
+  headOfHousehold,
   canViewDetails,
 }: RecipientsTableRowProps): React.ReactElement {
   const history = useHistory();
@@ -56,7 +59,7 @@ export function RecipientsTableRow({
           statusToColor={householdStatusToColor}
         />
       </TableCell>
-      <AnonTableCell>{household.headOfHousehold.fullName}</AnonTableCell>
+      <AnonTableCell>{headOfHousehold.fullName}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.admin2?.name || '-'}</TableCell>
       <TableCell align='left'>

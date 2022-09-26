@@ -731,6 +731,12 @@ export type ChoiceObject = {
   value?: Maybe<Scalars['String']>,
 };
 
+export type ChoiceObjectInt = {
+   __typename?: 'ChoiceObjectInt',
+  name?: Maybe<Scalars['String']>,
+  value?: Maybe<Scalars['Int']>,
+};
+
 export type CommunicationMessageNode = Node & {
    __typename?: 'CommunicationMessageNode',
   id: Scalars['ID'],
@@ -777,7 +783,8 @@ export type CommunicationMessageNodeEdge = {
 export type CommunicationMessageRecipientMapNode = Node & {
    __typename?: 'CommunicationMessageRecipientMapNode',
   id: Scalars['ID'],
-  household: HouseholdNode,
+  size: Scalars['Int'],
+  headOfHousehold: IndividualNode,
 };
 
 export type CommunicationMessageRecipientMapNodeConnection = {
@@ -882,7 +889,6 @@ export type CreateGrievanceTicketInput = {
   description: Scalars['String'],
   assignedTo?: Maybe<Scalars['ID']>,
   category: Scalars['Int'],
-  subCategory?: Maybe<Scalars['Int']>,
   issueType?: Maybe<Scalars['Int']>,
   admin?: Maybe<Scalars['String']>,
   area?: Maybe<Scalars['String']>,
@@ -1248,7 +1254,6 @@ export type GrievanceTicketNode = Node & {
   assignedTo?: Maybe<UserNode>,
   status: Scalars['Int'],
   category: Scalars['Int'],
-  subCategory?: Maybe<Scalars['Int']>,
   issueType?: Maybe<Scalars['Int']>,
   description: Scalars['String'],
   admin2?: Maybe<AreaNode>,
@@ -1368,6 +1373,8 @@ export type HouseholdDeleteIssueTypeExtras = {
 export type HouseholdNode = Node & {
    __typename?: 'HouseholdNode',
   id: Scalars['ID'],
+  size: Scalars['Int'],
+  headOfHousehold: IndividualNode,
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
@@ -1382,7 +1389,6 @@ export type HouseholdNode = Node & {
   residenceStatus: HouseholdResidenceStatus,
   countryOrigin?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
-  size: Scalars['Int'],
   address: Scalars['String'],
   adminArea?: Maybe<AreaNode>,
   representatives: IndividualNodeConnection,
@@ -1420,7 +1426,6 @@ export type HouseholdNode = Node & {
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
   firstRegistrationDate: Scalars['DateTime'],
   lastRegistrationDate: Scalars['DateTime'],
-  headOfHousehold: IndividualNode,
   fchildHoh?: Maybe<Scalars['Boolean']>,
   childHoh?: Maybe<Scalars['Boolean']>,
   unicefId: Scalars['String'],
@@ -3800,12 +3805,11 @@ export type Query = {
   allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  grievanceTicketSubCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketManualCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketSystemCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
-  grievanceTicketPriorityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  grievanceTicketUrgencyChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  grievanceTicketPriorityChoices?: Maybe<Array<Maybe<ChoiceObjectInt>>>,
+  grievanceTicketUrgencyChoices?: Maybe<Array<Maybe<ChoiceObjectInt>>>,
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>,
   paymentRecord?: Maybe<PaymentRecordNode>,
   paymentRecordVerification?: Maybe<PaymentVerificationNode>,
@@ -5996,7 +6000,6 @@ export type UpdateGrievanceTicketInput = {
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
   paymentRecord?: Maybe<Scalars['ID']>,
-  subCategory?: Maybe<Scalars['Int']>,
   extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
   urgency?: Maybe<Scalars['Int']>,
@@ -7920,15 +7923,16 @@ export type AllAccountabilityCommunicationMessageRecipientsQuery = (
       & { node: Maybe<(
         { __typename?: 'CommunicationMessageRecipientMapNode' }
         & Pick<CommunicationMessageRecipientMapNode, 'id'>
-        & { household: (
-          { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'status' | 'residenceStatus' | 'lastRegistrationDate'>
-          & { headOfHousehold: (
-            { __typename?: 'IndividualNode' }
-            & Pick<IndividualNode, 'id' | 'fullName'>
-          ), admin2: Maybe<(
-            { __typename?: 'AreaNode' }
-            & Pick<AreaNode, 'id' | 'name'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+          & { household: Maybe<(
+            { __typename?: 'HouseholdNode' }
+            & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'status' | 'residenceStatus' | 'lastRegistrationDate'>
+            & { admin2: Maybe<(
+              { __typename?: 'AreaNode' }
+              & Pick<AreaNode, 'id' | 'name'>
+            )> }
           )> }
         ) }
       )> }
@@ -8555,7 +8559,7 @@ export type GrievanceTicketQuery = (
   { __typename?: 'Query' }
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
-    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency' | 'comments'>
+    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency' | 'comments'>
     & { partner: Maybe<(
       { __typename?: 'PartnerType' }
       & Pick<PartnerType, 'id' | 'name'>
@@ -8884,9 +8888,6 @@ export type GrievancesChoiceDataQuery = (
   )>>>, grievanceTicketCategoryChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
-  )>>>, grievanceTicketSubCategoryChoices: Maybe<Array<Maybe<(
-    { __typename?: 'ChoiceObject' }
-    & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, grievanceTicketManualCategoryChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
@@ -8894,11 +8895,11 @@ export type GrievancesChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, grievanceTicketPriorityChoices: Maybe<Array<Maybe<(
-    { __typename?: 'ChoiceObject' }
-    & Pick<ChoiceObject, 'name' | 'value'>
+    { __typename?: 'ChoiceObjectInt' }
+    & Pick<ChoiceObjectInt, 'name' | 'value'>
   )>>>, grievanceTicketUrgencyChoices: Maybe<Array<Maybe<(
-    { __typename?: 'ChoiceObject' }
-    & Pick<ChoiceObject, 'name' | 'value'>
+    { __typename?: 'ChoiceObjectInt' }
+    & Pick<ChoiceObjectInt, 'name' | 'value'>
   )>>>, grievanceTicketIssueTypeChoices: Maybe<Array<Maybe<(
     { __typename?: 'IssueTypesObject' }
     & Pick<IssueTypesObject, 'category' | 'label'>
@@ -14050,21 +14051,21 @@ export const AllAccountabilityCommunicationMessageRecipientsDocument = gql`
       cursor
       node {
         id
-        household {
+        headOfHousehold {
           id
-          unicefId
-          headOfHousehold {
+          fullName
+          household {
             id
-            fullName
+            unicefId
+            size
+            status
+            admin2 {
+              id
+              name
+            }
+            residenceStatus
+            lastRegistrationDate
           }
-          size
-          status
-          admin2 {
-            id
-            name
-          }
-          residenceStatus
-          lastRegistrationDate
         }
       }
     }
@@ -15654,7 +15655,6 @@ export const GrievanceTicketDocument = gql`
     unicefId
     status
     category
-    subCategory
     consent
     partner {
       id
@@ -16173,10 +16173,6 @@ export const GrievancesChoiceDataDocument = gql`
     value
   }
   grievanceTicketCategoryChoices {
-    name
-    value
-  }
-  grievanceTicketSubCategoryChoices {
     name
     value
   }
@@ -20577,9 +20573,6 @@ export type ResolversTypes = {
   HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
   HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
-  HouseholdResidenceStatus: HouseholdResidenceStatus,
-  IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
-  IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
   IndividualNode: ResolverTypeWrapper<IndividualNode>,
   IndividualSex: IndividualSex,
   Date: ResolverTypeWrapper<Scalars['Date']>,
@@ -20667,6 +20660,8 @@ export type ResolversTypes = {
   TicketSensitiveDetailsNode: ResolverTypeWrapper<TicketSensitiveDetailsNode>,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
   ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
+  IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
+  IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
@@ -20734,6 +20729,7 @@ export type ResolversTypes = {
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>,
+  HouseholdResidenceStatus: HouseholdResidenceStatus,
   GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
   HouseholdOrgEnumerator: HouseholdOrgEnumerator,
   HouseholdRegistrationMethod: HouseholdRegistrationMethod,
@@ -20775,6 +20771,7 @@ export type ResolversTypes = {
   _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>,
   ChartGrievanceTicketsNode: ResolverTypeWrapper<ChartGrievanceTicketsNode>,
   IssueTypesObject: ResolverTypeWrapper<IssueTypesObject>,
+  ChoiceObjectInt: ResolverTypeWrapper<ChoiceObjectInt>,
   SteficonRuleNodeConnection: ResolverTypeWrapper<SteficonRuleNodeConnection>,
   SteficonRuleNodeEdge: ResolverTypeWrapper<SteficonRuleNodeEdge>,
   ChartPaymentVerification: ResolverTypeWrapper<ChartPaymentVerification>,
@@ -20968,9 +20965,6 @@ export type ResolversParentTypes = {
   HouseholdNodeConnection: HouseholdNodeConnection,
   HouseholdNodeEdge: HouseholdNodeEdge,
   HouseholdNode: HouseholdNode,
-  HouseholdResidenceStatus: HouseholdResidenceStatus,
-  IndividualNodeConnection: IndividualNodeConnection,
-  IndividualNodeEdge: IndividualNodeEdge,
   IndividualNode: IndividualNode,
   IndividualSex: IndividualSex,
   Date: Scalars['Date'],
@@ -21058,6 +21052,8 @@ export type ResolversParentTypes = {
   TicketSensitiveDetailsNode: TicketSensitiveDetailsNode,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,
   ServiceProviderNodeEdge: ServiceProviderNodeEdge,
+  IndividualNodeConnection: IndividualNodeConnection,
+  IndividualNodeEdge: IndividualNodeEdge,
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
@@ -21125,6 +21121,7 @@ export type ResolversParentTypes = {
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   BankAccountInfoNode: BankAccountInfoNode,
+  HouseholdResidenceStatus: HouseholdResidenceStatus,
   GeoJSON: Scalars['GeoJSON'],
   HouseholdOrgEnumerator: HouseholdOrgEnumerator,
   HouseholdRegistrationMethod: HouseholdRegistrationMethod,
@@ -21166,6 +21163,7 @@ export type ResolversParentTypes = {
   _DetailedDatasetsNode: _DetailedDatasetsNode,
   ChartGrievanceTicketsNode: ChartGrievanceTicketsNode,
   IssueTypesObject: IssueTypesObject,
+  ChoiceObjectInt: ChoiceObjectInt,
   SteficonRuleNodeConnection: SteficonRuleNodeConnection,
   SteficonRuleNodeEdge: SteficonRuleNodeEdge,
   ChartPaymentVerification: ChartPaymentVerification,
@@ -21656,6 +21654,11 @@ export type ChoiceObjectResolvers<ContextType = any, ParentType extends Resolver
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type ChoiceObjectIntResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChoiceObjectInt'] = ResolversParentTypes['ChoiceObjectInt']> = {
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  value?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
 export type CommunicationMessageNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageNode'] = ResolversParentTypes['CommunicationMessageNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -21689,7 +21692,8 @@ export type CommunicationMessageNodeEdgeResolvers<ContextType = any, ParentType 
 
 export type CommunicationMessageRecipientMapNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageRecipientMapNode'] = ResolversParentTypes['CommunicationMessageRecipientMapNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
 };
 
 export type CommunicationMessageRecipientMapNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CommunicationMessageRecipientMapNodeConnection'] = ResolversParentTypes['CommunicationMessageRecipientMapNodeConnection']> = {
@@ -21932,7 +21936,6 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   assignedTo?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   category?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  subCategory?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   issueType?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
@@ -22000,6 +22003,8 @@ export type HouseholdDataChangeApproveMutationResolvers<ContextType = any, Paren
 
 export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -22014,7 +22019,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
@@ -22052,7 +22056,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   fchildHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   childHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -22831,12 +22834,11 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  grievanceTicketSubCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketManualCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketSystemCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
-  grievanceTicketPriorityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  grievanceTicketUrgencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  grievanceTicketPriorityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObjectInt']>>>, ParentType, ContextType>,
+  grievanceTicketUrgencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObjectInt']>>>, ParentType, ContextType>,
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, QueryAllSteficonRulesArgs>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
   paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>,
@@ -23960,6 +23962,7 @@ export type Resolvers<ContextType = any> = {
   ChartPaymentVerification?: ChartPaymentVerificationResolvers<ContextType>,
   CheckAgainstSanctionListMutation?: CheckAgainstSanctionListMutationResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
+  ChoiceObjectInt?: ChoiceObjectIntResolvers<ContextType>,
   CommunicationMessageNode?: CommunicationMessageNodeResolvers<ContextType>,
   CommunicationMessageNodeConnection?: CommunicationMessageNodeConnectionResolvers<ContextType>,
   CommunicationMessageNodeEdge?: CommunicationMessageNodeEdgeResolvers<ContextType>,

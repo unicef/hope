@@ -10,7 +10,6 @@ import { MiśTheme } from '../../theme';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_SUB_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import {
@@ -308,9 +307,9 @@ export const GrievanceDetailsToolbar = ({
 
   const canCreateDataChange = (): boolean => {
     return [
-      GRIEVANCE_SUB_CATEGORIES.PAYMENT_COMPLAINT,
-      GRIEVANCE_SUB_CATEGORIES.FSP_COMPLAINT,
-    ].includes(ticket.subCategory?.toString());
+      GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT,
+      GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT,
+    ].includes(ticket.issueType?.toString());
   };
 
   return (

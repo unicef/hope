@@ -39,21 +39,21 @@ export const AllAccountabilityCommunicationMessageRecipients = gql`
         cursor
         node {
           id
-          household {
+          headOfHousehold {
             id
-            unicefId
-            headOfHousehold {
+            fullName
+            household {
               id
-              fullName
+              unicefId
+              size
+              status
+              admin2 {
+                id
+                name
+              }
+              residenceStatus
+              lastRegistrationDate
             }
-            size
-            status
-            admin2 {
-              id
-              name
-            }
-            residenceStatus
-            lastRegistrationDate
           }
         }
       }
