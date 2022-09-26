@@ -782,7 +782,7 @@ class GrievanceDocument(UUIDModel):
         return self.file.name
 
     @property
-    def path(self):
+    def file_path(self):
         return self.file.path
 
     def __str__(self):
