@@ -46,3 +46,17 @@ class CreateFeedbackInput(graphene.InputObjectType):
     consent = graphene.Boolean()
     program = graphene.ID()
     created_by = graphene.ID(required=True)
+
+
+class UpdateFeedbackInput(graphene.InputObjectType):
+    feedback_id = graphene.ID(required=True)
+    issue_type = graphene.String()
+    household_lookup = graphene.ID()
+    individual_lookup = graphene.ID()
+    description = graphene.String()
+    comments = graphene.String()
+    admin2 = graphene.ID()
+    area = graphene.String()
+    language = graphene.String()
+    consent = graphene.Boolean()
+    program = graphene.ID()

@@ -1,3 +1,4 @@
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -45,6 +46,16 @@ query allFeedbacks(
 }
 """
 
+    UPDATE_FEEDBACK_MUTATION = """
+mutation updateFeedback($input: UpdateFeedbackInput!) {
+    updateFeedback(input: $input) {
+        feedback {
+            id
+        }
+    }
+}
+"""
+
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
@@ -55,6 +66,7 @@ query allFeedbacks(
             [
                 Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE,
                 Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_LIST,
+                Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE,
             ],
             cls.business_area,
         )
@@ -79,15 +91,19 @@ query allFeedbacks(
             "createdBy": encode_id_base64(self.user.pk, "User"),
         }
 
-    def create_new_feedback(self, data=None):
-        current_amount = Feedback.objects.count()
+    def submit_feedback(self, data):
+        amount = Feedback.objects.count()
         response = self.graphql_request(
             request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
             context={"user": self.user},
-            variables={"input": data if data else self.create_dummy_correct_input()},
+            variables={"input": data},
         )
-        assert "errors" not in response, response["errors"]
-        self.assertEqual(Feedback.objects.count(), current_amount + 1)
+        assert "errors" not in response, response
+        self.assertEqual(Feedback.objects.count(), amount + 1)
+        return decode_id_string(response["data"]["createFeedback"]["feedback"]["id"])
+
+    def create_new_feedback(self, data=None):
+        return self.submit_feedback(data or self.create_dummy_correct_input())
 
     def test_creating_new_feedback(self):
         self.create_new_feedback()
@@ -171,16 +187,6 @@ query allFeedbacks(
             }
         )
 
-    def submit_feedback(self, data):
-        amount = Feedback.objects.count()
-        response = self.graphql_request(
-            request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
-            context={"user": self.user},
-            variables={"input": data},
-        )
-        assert "errors" not in response, response
-        self.assertEqual(Feedback.objects.count(), amount + 1)
-
     def test_optional_household_lookup(self):
         data = self.create_dummy_correct_input() | {
             "householdLookup": encode_id_base64(self.household.pk, "Household"),
@@ -244,3 +250,21 @@ query allFeedbacks(
         self.submit_feedback(data)
         feedback = Feedback.objects.first()
         self.assertEqual(feedback.admin2, admin2)
+
+    def test_updating_feedback(self):
+        feedback_id = self.create_new_feedback()
+        feedback = Feedback.objects.get(id=feedback_id)
+        self.assertEqual(feedback.issue_type, Feedback.POSITIVE_FEEDBACK)
+        response = self.graphql_request(
+            request_string=self.UPDATE_FEEDBACK_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "feedbackId": encode_id_base64(feedback.pk, "Feedback"),
+                    "issueType": Feedback.NEGATIVE_FEEDBACK,
+                }
+            },
+        )
+        assert "errors" not in response, response["errors"]
+        feedback.refresh_from_db()
+        self.assertEqual(feedback.issue_type, Feedback.NEGATIVE_FEEDBACK)
