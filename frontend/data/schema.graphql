@@ -204,6 +204,10 @@ type AssignFspToDeliveryMechanismMutation {
   paymentPlan: PaymentPlanNode
 }
 
+input AvailableFspsForDeliveryMechanismsInput {
+  paymentPlanId: ID!
+}
+
 type BankAccountInfoNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -708,8 +712,6 @@ type DeliveryMechanismNode implements Node {
   status: String!
   deliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism
   deliveryMechanismOrder: Int!
-  entitlementQuantity: Float
-  entitlementQuantityUsd: Float
   name: String
   order: Int
   fsp: FinancialServiceProviderNode
@@ -2869,6 +2871,7 @@ enum PaymentPlanStatus {
   IN_AUTHORIZATION
   IN_REVIEW
   ACCEPTED
+  RECONCILED
 }
 
 enum PaymentRecordDeliveryType {
@@ -3165,8 +3168,8 @@ type Query {
   payment(id: ID!): PaymentNode
   allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, orderBy: String): PaymentNodeConnection
   allDeliveryMechanisms: [ChoiceObject]
-  availableFspsForDeliveryMechanisms(deliveryMechanisms: [String]): [FspChoices]
   paymentPlanBackgroundActionStatusChoices: [ChoiceObject]
+  availableFspsForDeliveryMechanisms(input: AvailableFspsForDeliveryMechanismsInput): [FspChoices]
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String): [FieldAttributeNode]

@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
+  AvailableFspsForDeliveryMechanismsDocument,
+  PaymentPlanDocument,
   useAllDeliveryMechanismsQuery,
   useAssignFspToDeliveryMechMutation,
   useAvailableFspsForDeliveryMechanismsQuery,
@@ -31,16 +33,12 @@ interface SetUpFspCoreProps {
   businessArea: string;
   permissions: string[];
   initialValues: FormValues;
-  setDeliveryMechanismsForQuery: (deliveryMechanisms: string[]) => void;
-  deliveryMechanismsForQuery: string[];
 }
 
 export const SetUpFspCore = ({
   businessArea,
   permissions,
   initialValues,
-  setDeliveryMechanismsForQuery,
-  deliveryMechanismsForQuery,
 }: SetUpFspCoreProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -54,9 +52,12 @@ export const SetUpFspCore = ({
   });
 
   const { data: fspsData } = useAvailableFspsForDeliveryMechanismsQuery({
-    variables: { deliveryMechanisms: deliveryMechanismsForQuery },
+    variables: {
+      input: {
+        paymentPlanId: id,
+      },
+    },
     fetchPolicy: 'network-only',
-    skip: !deliveryMechanismsForQuery.length,
   });
 
   const isEdit = location.pathname.indexOf('edit') !== -1;
@@ -95,7 +96,6 @@ export const SetUpFspCore = ({
     const mappedDeliveryMechanisms = values.deliveryMechanisms.map(
       (el) => el.deliveryMechanism,
     );
-    setDeliveryMechanismsForQuery(mappedDeliveryMechanisms);
     try {
       await chooseDeliveryMechanisms({
         variables: {
@@ -104,7 +104,24 @@ export const SetUpFspCore = ({
             deliveryMechanisms: mappedDeliveryMechanisms,
           },
         },
+        refetchQueries: () => [
+          {
+            query: AvailableFspsForDeliveryMechanismsDocument,
+            variables: {
+              input: {
+                paymentPlanId: id,
+              },
+            },
+          },
+          {
+            query: PaymentPlanDocument,
+            variables: {
+              id
+            }
+          },
+        ],
       });
+
       showMessage(t('Delivery Mechanisms have been set'));
       handleNextStep();
     } catch (e) {
@@ -127,7 +144,6 @@ export const SetUpFspCore = ({
       deliveryMechanism: el.deliveryMechanism,
       order: index + 1,
     }));
-
     try {
       await assignFspToDeliveryMechanism({
         variables: {

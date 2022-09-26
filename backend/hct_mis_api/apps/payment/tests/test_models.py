@@ -90,13 +90,13 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.total_undelivered_quantity, 100.00)
         self.assertEqual(pp.total_undelivered_quantity_usd, 200.00)
 
-    def test_all_active_payments(self):
+    def test_not_excluded_payments(self):
         pp = PaymentPlanFactory()
         p1 = PaymentFactory(parent=pp, excluded=False)
         p2 = PaymentFactory(parent=pp, excluded=True)
 
         pp.refresh_from_db()
-        self.assertEqual(pp.all_active_payments.count(), 1)
+        self.assertEqual(pp.not_excluded_payments.count(), 1)
 
     def test_can_be_locked(self):
         pp1 = PaymentPlanFactory()

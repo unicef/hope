@@ -185,13 +185,8 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payments_for_locked_payment_pl
                         'paymentPlanHardConflicted': False,
                         'paymentPlanHardConflictedData': [
                         ],
-                        'paymentPlanSoftConflicted': True,
+                        'paymentPlanSoftConflicted': False,
                         'paymentPlanSoftConflictedData': [
-                            {
-                                'paymentPlanEndDate': '2020-11-10',
-                                'paymentPlanStartDate': '2020-09-10',
-                                'paymentPlanStatus': 'OPEN'
-                            }
                         ],
                         'unicefId': 'RCPT-0060-20-0.000.003'
                     }
@@ -286,6 +281,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
             {
                 'name': 'Accepted',
                 'value': 'ACCEPTED'
+            },
+            {
+                'name': 'Reconciled',
+                'value': 'RECONCILED'
             }
         ]
     }
