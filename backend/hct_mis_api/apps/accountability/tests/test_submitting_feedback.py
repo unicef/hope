@@ -212,10 +212,6 @@ mutation updateFeedback($input: UpdateFeedbackInput!) {
         feedback = Feedback.objects.first()
         self.assertEqual(feedback.comments, "Test comments")
 
-    # TODO
-    # def test_optional_linked_grievance(self):
-    #     pass
-
     def test_optional_program(self):
         data = self.create_dummy_correct_input() | {
             "program": encode_id_base64(self.program.pk, "Program"),
