@@ -1283,7 +1283,6 @@ class UploadDocumentsMutation(graphene.Mutation):
         if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
             raise GraphQLError("Total size of files can not be larger than 25mb.")
 
-        logger.info(info.context.user)
         for file in files:
             validate_file(file)
             GrievanceDocument.objects.create(
