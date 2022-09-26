@@ -1,19 +1,21 @@
 import logging
-import openpyxl
-
 from tempfile import NamedTemporaryFile
-from django.core.files import File
 
-from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from django.core.files import File
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
+
+import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.models import PaymentVerification, XlsxCashPlanPaymentVerificationFile
-
+from hct_mis_api.apps.payment.models import (
+    PaymentVerification,
+    XlsxCashPlanPaymentVerificationFile,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -87,8 +89,8 @@ class XlsxVerificationExportService:
             str(payment_record_verification.payment_record.ca_id),
             self._to_received_column(payment_record_verification),
             str(head_of_household.full_name) if head_of_household else "",
-            str(household.admin1.title) if household.admin1 else "",
-            str(household.admin2.title) if household.admin2 else "",
+            str(household.admin1.name) if household.admin1 else "",
+            str(household.admin2.name) if household.admin2 else "",
             str(household.village),
             str(household.address),
             str(payment_record_verification.payment_record.household_id),
