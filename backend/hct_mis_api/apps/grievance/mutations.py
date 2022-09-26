@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.grievance.documents import bulk_update_assigned_to
 from hct_mis_api.apps.program.models import Program
@@ -94,7 +95,7 @@ from hct_mis_api.apps.utils.schema import Arg
 logger = logging.getLogger(__name__)
 
 
-class GrievanceDocumentInput(graphene.InputObjectType):
+class SupportDocumentInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     file = Arg()
 
@@ -116,7 +117,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     partner = graphene.Int(node=PartnerType, required=False)
     programme = graphene.ID(node=ProgramNode)
     comments = graphene.String()
-    support_documents = graphene.List(GrievanceDocumentInput)
+    support_documents = graphene.List(SupportDocumentInput)
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -326,7 +327,6 @@ class CreateGrievanceTicketMutation(PermissionMutation):
                 None,
                 grievance,
             )
-
         return cls(grievance_tickets=grievances)
 
     @classmethod
@@ -1280,6 +1280,20 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         return cls(grievance_ticket=grievance_ticket)
 
 
+class CreateGrievanceDocumentsMutation(graphene.Mutation):
+    success = graphene.Boolean()
+
+    class Arguments:
+        documents = graphene.List(SupportDocumentInput)
+
+    @classmethod
+    def mutate(cls, root, info, documents):
+        print(root)
+        print(info)
+        print(documents)
+        return CreateGrievanceDocumentsMutation(success=True)
+
+
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
     update_grievance_ticket = UpdateGrievanceTicketMutation.Field()
@@ -1295,3 +1309,4 @@ class Mutations(graphene.ObjectType):
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     approve_payment_details = PaymentDetailsApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()
+    create_grievance_documents_mutation = CreateGrievanceDocumentsMutation.Field()
