@@ -61,6 +61,10 @@ export function CommunicationPage(): React.ReactElement {
       <CommunicationTable
         filter={debouncedFilter}
         businessArea={businessArea}
+        canViewDetails={hasPermissionInModule(
+          PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+          permissions,
+        )}
       />
     </>
   );

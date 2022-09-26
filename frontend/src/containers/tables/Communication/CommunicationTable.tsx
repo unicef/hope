@@ -12,11 +12,13 @@ import { CommunicationTableRow } from './CommunicationTableRow';
 interface CommunicationTableProps {
   filter;
   businessArea: string;
+  canViewDetails: boolean;
 }
 
 export const CommunicationTable = ({
   filter,
   businessArea,
+  canViewDetails,
 }: CommunicationTableProps): ReactElement => {
   const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
     createdAtRange: filter.createdAtRange
@@ -41,7 +43,11 @@ export const CommunicationTable = ({
         defaultOrderDirection='desc'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <CommunicationTableRow key={row.id} message={row} canViewDetails />
+          <CommunicationTableRow
+            key={row.id}
+            message={row}
+            canViewDetails={canViewDetails}
+          />
         )}
       />
     </TableWrapper>
