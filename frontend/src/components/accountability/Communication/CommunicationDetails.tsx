@@ -29,7 +29,7 @@ export function CommunicationDetails({
         <Grid container spacing={6}>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('created by')}
+              label={t('Created By')}
               value={renderUserName(message.createdBy)}
             />
           </Grid>
@@ -39,12 +39,16 @@ export function CommunicationDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label={t('TARGET POPULATION')}>
-              <BlackLink
-                to={`/${businessArea}/target-population/${message.targetPopulation.id}`}
-              >
-                {message.targetPopulation.name}
-              </BlackLink>
+            <LabelizedField label={t('Target Population')}>
+              {message.targetPopulation ? (
+                <BlackLink
+                  to={`/${businessArea}/target-population/${message.targetPopulation.id}`}
+                >
+                  {message.targetPopulation.name}
+                </BlackLink>
+              ) : (
+                '-'
+              )}
             </LabelizedField>
           </Grid>
         </Grid>
