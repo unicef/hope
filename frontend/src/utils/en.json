@@ -420,6 +420,7 @@
   "Field List": "Field List",
   "Targeting Diagram": "Targeting Diagram",
   "Lock Target Population": "Lock Target Population",
+  "Target Population": "Target Population",
   "After you lock this Target Population, the selected criteria will no longer accept new households that may get merged to Population in the future.": "After you lock this Target Population, the selected criteria will no longer accept new households that may get merged to Population in the future.",
   "Note: You may duplicate the Programme Population target criteria at any time.": "Note: You may duplicate the Programme Population target criteria at any time.",
   "Lock": "Lock",
@@ -648,5 +649,6 @@
   "Documentation": "Documentation",
   "Add another document": "Add another document",
   "Add document": "Add document",
-  "Document Name": "Document Name"
+  "Document Name": "Document Name",
+  "Communication": "Communication"
 }
