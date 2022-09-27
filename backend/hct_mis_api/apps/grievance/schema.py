@@ -95,7 +95,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     total_days = graphene.String()
     partner = graphene.Field(PartnerType)
     programme = graphene.Field(ProgramNode)
-    documents = graphene.List(GrievanceDocumentNode)
+    documentation = graphene.List(GrievanceDocumentNode)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -172,8 +172,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         return grievance_ticket.programme
 
     @staticmethod
-    def resolve_documents(grievance_ticket: GrievanceTicket, info):
-        return grievance_ticket.documents.all()
+    def resolve_documentation(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.support_documents.order_by("-created_at")
 
 
 class TicketNoteNode(DjangoObjectType):
