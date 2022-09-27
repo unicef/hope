@@ -59,7 +59,7 @@ export const FeedbackTableRow = ({
           renderSomethingOrDash(feedback.linkedGrievance?.unicefId)
         )}
       </TableCell>
-      <TableCell align='left'>{renderUserName(feedback.createdBy)}</TableCell>
+      <TableCell align='left'>{feedback.createdBy}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{feedback.createdAt}</UniversalMoment>
       </TableCell>
