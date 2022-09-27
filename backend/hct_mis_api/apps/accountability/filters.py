@@ -79,9 +79,11 @@ class FeedbackFilter(FilterSet):
         fields = ()
 
     order_by = CustomOrderingFilter(
-        "unicef_id",
-        "issue_type",
-        "household_lookup",
-        "created_by",
-        "created_at",
+        fields=(
+            "unicef_id",
+            "issue_type",
+            "household_lookup",
+            "created_by",
+            "created_at",
+        )
     )
