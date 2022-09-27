@@ -8126,7 +8126,7 @@ export type AccountabilityCommunicationMessageQuery = (
     & Pick<CommunicationMessageNode, 'id' | 'unicefId' | 'createdAt' | 'title' | 'body'>
     & { createdBy: Maybe<(
       { __typename?: 'UserNode' }
-      & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
     )>, targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
@@ -8658,7 +8658,8 @@ export type AllFeedbacksQueryVariables = {
   issueType?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
-  feedbackId?: Maybe<Scalars['String']>
+  feedbackId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -8679,6 +8680,9 @@ export type AllFeedbacksQuery = (
         & { householdLookup: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
+        )>, createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
         )>, linkedGrievance: Maybe<(
           { __typename?: 'GrievanceTicketNode' }
           & Pick<GrievanceTicketNode, 'id' | 'unicefId'>
@@ -14450,6 +14454,7 @@ export const AccountabilityCommunicationMessageDocument = gql`
       id
       firstName
       lastName
+      email
     }
     createdAt
     targetPopulation {
@@ -15834,8 +15839,8 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllFeedbacksDocument = gql`
-    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $businessAreaSlug: String!, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String) {
-  allFeedbacks(offset: $offset, before: $before, after: $after, first: $first, last: $last, businessAreaSlug: $businessAreaSlug, issueType: $issueType, createdAtRange: $createdAtRange, createdBy: $createdBy, feedbackId: $feedbackId) {
+    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $businessAreaSlug: String!, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String) {
+  allFeedbacks(offset: $offset, before: $before, after: $after, first: $first, last: $last, businessAreaSlug: $businessAreaSlug, issueType: $issueType, createdAtRange: $createdAtRange, createdBy: $createdBy, feedbackId: $feedbackId, orderBy: $orderBy) {
     totalCount
     pageInfo {
       startCursor
@@ -15852,6 +15857,12 @@ export const AllFeedbacksDocument = gql`
           unicefId
         }
         createdAt
+        createdBy {
+          id
+          firstName
+          lastName
+          email
+        }
         linkedGrievance {
           id
           unicefId
@@ -15901,6 +15912,7 @@ export function withAllFeedbacks<TProps, TChildProps = {}>(operationOptions?: Ap
  *      createdAtRange: // value for 'createdAtRange'
  *      createdBy: // value for 'createdBy'
  *      feedbackId: // value for 'feedbackId'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */

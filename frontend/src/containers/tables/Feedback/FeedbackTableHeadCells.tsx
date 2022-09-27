@@ -5,19 +5,19 @@ export const headCells: HeadCell<FeedbackNode>[] = [
   {
     disablePadding: false,
     label: 'Feedback ID',
-    id: 'id',
+    id: 'unicef_id',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Issue Type',
-    id: 'issueType',
+    id: 'issue_type',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Household ID',
-    id: 'numberOfRecipients',
+    id: 'household_lookup',
     numeric: false,
   },
   {
@@ -35,7 +35,7 @@ export const headCells: HeadCell<FeedbackNode>[] = [
   {
     disablePadding: false,
     label: 'Creation date',
-    id: 'creation_date',
+    id: 'created_at',
     numeric: false,
   },
 ];
