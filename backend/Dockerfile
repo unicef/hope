@@ -12,6 +12,8 @@ RUN apt-get update && \
   python3-gdal \
   gdal-bin \
   curl \
+  graphviz \
+  graphviz-dev \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
