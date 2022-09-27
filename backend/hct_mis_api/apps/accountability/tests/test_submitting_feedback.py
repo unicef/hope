@@ -1,16 +1,16 @@
-from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.fixtures import CountryFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 class TestFeedback(APITestCase):
@@ -75,6 +75,7 @@ query feedback($id: ID!) {
                 Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE,
                 Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_LIST,
                 Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE,
+                Permissions.GRIEVANCES_CREATE,
             ],
             cls.business_area,
         )
@@ -90,6 +91,14 @@ query feedback($id: ID!) {
             business_area=cls.business_area,
             name="Test Program",
         )
+
+        country = geo_models.Country.objects.create(name="Afghanistan")
+        cls.area_type = AreaTypeFactory(
+            name="Test Area Type",
+            country=country,
+            area_level=2,
+        )
+        cls.admin_area = AreaFactory(name="City Test", area_type=cls.area_type, p_code="asdfgfhghkjltr")
 
     def create_dummy_correct_input(self):
         return {
@@ -281,3 +290,47 @@ query feedback($id: ID!) {
         )
         assert "errors" not in response, response["errors"]
         self.assertEqual(response["data"]["feedback"]["id"], encode_id_base64(feedback_id, "Feedback"))
+
+    def test_linking_feedback_to_grievance_ticket(self):
+        feedback_id = self.create_new_feedback()
+
+        create_grievance_mutation = """
+mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
+    createGrievanceTicket(input: $input) {
+        grievanceTickets {
+            id
+            feedback {
+                id
+            }
+        }
+    }
+}
+"""
+        create_grievance_response = self.graphql_request(
+            request_string=create_grievance_mutation,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "description": "Test Feedback",
+                    "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                    "category": GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+                    "admin": self.admin_area.p_code,
+                    "language": "Polish, English",
+                    "consent": True,
+                    "businessArea": "afghanistan",
+                    "linkedFeedbackId": feedback_id,
+                }
+            },
+        )
+        assert "errors" not in create_grievance_response, create_grievance_response["errors"]
+        grievance_data = create_grievance_response["data"]["createGrievanceTicket"]["grievanceTickets"][0]
+        received_grievance_id = decode_id_string(grievance_data["id"])
+        received_feedback_id = decode_id_string(grievance_data["feedback"]["id"])
+        feedback = Feedback.objects.get(id=feedback_id)
+        self.assertEqual(
+            str(
+                feedback.linked_grievance.id,
+            ),
+            received_grievance_id,
+        )
+        self.assertEqual(str(feedback.id), received_feedback_id)
