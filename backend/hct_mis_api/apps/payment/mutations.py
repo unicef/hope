@@ -832,6 +832,17 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
                 created_by=info.context.user,
             )
 
+        cash_fallback_payment_collectors = collectors_that_can_be_paid.filter(payment_channels__isnull=True)
+        payment_channels_to_create = []
+        for collector in cash_fallback_payment_collectors:
+            # TODO handle delivery data
+            payment_channels_to_create.append(
+                PaymentChannel(
+                    individual=collector, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH, is_fallback=True
+                )
+            )
+        PaymentChannel.objects.bulk_create(payment_channels_to_create)
+
         return cls(payment_plan=payment_plan)
 
 
