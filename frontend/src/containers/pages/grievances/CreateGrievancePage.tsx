@@ -125,6 +125,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const selectedHousehold = history.location.state?.selectedHousehold;
   const selectedIndividual = history.location.state?.selectedIndividual;
   const category = history.location.state?.category;
+  const linkedFeedbackId = history.location.state?.linkedFeedbackId;
 
   const initialValues = {
     description: '',
@@ -144,6 +145,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     partner: null,
     programme: null,
     comments: null,
+    linkedFeedbackId: linkedFeedbackId || null,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
@@ -160,7 +162,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const urgencyChoicesData = choicesData?.grievanceTicketUrgencyChoices;
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(choicesData?.grievanceTicketCategoryChoices||[]);
+  } = reduceChoices(choicesData?.grievanceTicketCategoryChoices || []);
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,

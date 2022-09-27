@@ -2,33 +2,40 @@ import { Grid, Typography } from '@material-ui/core';
 import { Title } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { GrievanceTicketQuery } from '../../../../__generated__/graphql';
+import { FeedbackQuery } from '../../../../__generated__/graphql';
+import { BlackLink } from '../../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../../core/LabelizedField';
-import { Missing } from '../../../core/Missing';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 
 interface LinkedGrievanceProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  feedback: FeedbackQuery['feedback'];
+  businessArea: string;
 }
 
 export const LinkedGrievance = ({
-  ticket,
+  feedback,
+  businessArea,
 }: LinkedGrievanceProps): React.ReactElement => {
   const { t } = useTranslation();
-
   return (
     <Grid item xs={4}>
-      <ContainerColumnWithBorder>
-        <Title>
-          <Typography variant='h6'>{t('Linked Grievance')}</Typography>
-        </Title>
-        <OverviewContainer>
-          <LabelizedField label={t('Ticket Id')}>
-            <Missing />
-          </LabelizedField>
-        </OverviewContainer>
-      </ContainerColumnWithBorder>
+      {feedback.linkedGrievance ? (
+        <ContainerColumnWithBorder>
+          <Title>
+            <Typography variant='h6'>{t('Linked Grievance')}</Typography>
+          </Title>
+          <OverviewContainer>
+            <LabelizedField label={t('Ticket Id')}>
+              <BlackLink
+                to={`/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance.id}`}
+              >
+                {feedback.linkedGrievance.unicefId}
+              </BlackLink>
+            </LabelizedField>
+          </OverviewContainer>
+        </ContainerColumnWithBorder>
+      ) : null}
     </Grid>
   );
 };

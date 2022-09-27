@@ -3902,6 +3902,7 @@ export type Query = {
   accountabilityCommunicationMessageRecipient?: Maybe<CommunicationMessageRecipientMapNode>,
   allAccountabilityCommunicationMessageRecipients?: Maybe<CommunicationMessageRecipientMapNodeConnection>,
   accountabilityCommunicationMessageSampleSize?: Maybe<GetCommunicationMessageSampleSizeObject>,
+  feedback?: Maybe<FeedbackNode>,
   allFeedbacks?: Maybe<FeedbackNodeConnection>,
   feedbackIssueTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   adminArea?: Maybe<AreaNode>,
@@ -4079,6 +4080,11 @@ export type QueryAccountabilityCommunicationMessageSampleSizeArgs = {
 };
 
 
+export type QueryFeedbackArgs = {
+  id: Scalars['ID']
+};
+
+
 export type QueryAllFeedbacksArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
@@ -4087,9 +4093,10 @@ export type QueryAllFeedbacksArgs = {
   last?: Maybe<Scalars['Int']>,
   businessAreaSlug: Scalars['String'],
   issueType?: Maybe<Scalars['String']>,
-  createdBy?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
-  feedbackId?: Maybe<Scalars['String']>
+  createdBy?: Maybe<Scalars['String']>,
+  feedbackId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -8568,6 +8575,38 @@ export type AllFeedbacksQuery = (
         )> }
       )> }
     )>> }
+  )> }
+);
+
+export type FeedbackQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type FeedbackQuery = (
+  { __typename?: 'Query' }
+  & { feedback: Maybe<(
+    { __typename?: 'FeedbackNode' }
+    & Pick<FeedbackNode, 'id' | 'unicefId' | 'issueType' | 'createdAt' | 'updatedAt' | 'area' | 'language' | 'description' | 'comments'>
+    & { householdLookup: Maybe<(
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'unicefId'>
+    )>, individualLookup: Maybe<(
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'unicefId'>
+    )>, program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name'>
+    )>, createdBy: Maybe<(
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email'>
+    )>, admin2: Maybe<(
+      { __typename?: 'AreaNode' }
+      & Pick<AreaNode, 'id' | 'name'>
+    )>, linkedGrievance: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'unicefId'>
+    )> }
   )> }
 );
 
@@ -15514,6 +15553,91 @@ export function useAllFeedbacksLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type AllFeedbacksQueryHookResult = ReturnType<typeof useAllFeedbacksQuery>;
 export type AllFeedbacksLazyQueryHookResult = ReturnType<typeof useAllFeedbacksLazyQuery>;
 export type AllFeedbacksQueryResult = ApolloReactCommon.QueryResult<AllFeedbacksQuery, AllFeedbacksQueryVariables>;
+export const FeedbackDocument = gql`
+    query Feedback($id: ID!) {
+  feedback(id: $id) {
+    id
+    unicefId
+    issueType
+    householdLookup {
+      id
+      unicefId
+    }
+    individualLookup {
+      id
+      unicefId
+    }
+    program {
+      id
+      name
+    }
+    createdBy {
+      id
+      firstName
+      lastName
+      username
+      email
+    }
+    createdAt
+    updatedAt
+    admin2 {
+      id
+      name
+    }
+    area
+    language
+    description
+    comments
+    linkedGrievance {
+      id
+      unicefId
+    }
+  }
+}
+    `;
+export type FeedbackComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<FeedbackQuery, FeedbackQueryVariables>, 'query'> & ({ variables: FeedbackQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const FeedbackComponent = (props: FeedbackComponentProps) => (
+      <ApolloReactComponents.Query<FeedbackQuery, FeedbackQueryVariables> query={FeedbackDocument} {...props} />
+    );
+    
+export type FeedbackProps<TChildProps = {}> = ApolloReactHoc.DataProps<FeedbackQuery, FeedbackQueryVariables> & TChildProps;
+export function withFeedback<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FeedbackQuery,
+  FeedbackQueryVariables,
+  FeedbackProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, FeedbackQuery, FeedbackQueryVariables, FeedbackProps<TChildProps>>(FeedbackDocument, {
+      alias: 'feedback',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFeedbackQuery__
+ *
+ * To run a query within a React component, call `useFeedbackQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFeedbackQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFeedbackQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFeedbackQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<FeedbackQuery, FeedbackQueryVariables>) {
+        return ApolloReactHooks.useQuery<FeedbackQuery, FeedbackQueryVariables>(FeedbackDocument, baseOptions);
+      }
+export function useFeedbackLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<FeedbackQuery, FeedbackQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<FeedbackQuery, FeedbackQueryVariables>(FeedbackDocument, baseOptions);
+        }
+export type FeedbackQueryHookResult = ReturnType<typeof useFeedbackQuery>;
+export type FeedbackLazyQueryHookResult = ReturnType<typeof useFeedbackLazyQuery>;
+export type FeedbackQueryResult = ApolloReactCommon.QueryResult<FeedbackQuery, FeedbackQueryVariables>;
 export const FeedbackIssueTypeChoicesDocument = gql`
     query FeedbackIssueTypeChoices {
   feedbackIssueTypeChoices {
@@ -23068,6 +23192,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   accountabilityCommunicationMessageRecipient?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNode']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageRecipientArgs, 'id'>>,
   allAccountabilityCommunicationMessageRecipients?: Resolver<Maybe<ResolversTypes['CommunicationMessageRecipientMapNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllAccountabilityCommunicationMessageRecipientsArgs, 'messageId'>>,
   accountabilityCommunicationMessageSampleSize?: Resolver<Maybe<ResolversTypes['GetCommunicationMessageSampleSizeObject']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageSampleSizeArgs, 'businessAreaSlug'>>,
+  feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType, RequireFields<QueryFeedbackArgs, 'id'>>,
   allFeedbacks?: Resolver<Maybe<ResolversTypes['FeedbackNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllFeedbacksArgs, 'businessAreaSlug'>>,
   feedbackIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
