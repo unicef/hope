@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='apitoken',
             name='grants',
-            field=hct_mis_api.apps.account.models.ChoiceArrayField(base_field=models.CharField(choices=[('API_READ_ONLY', 'API_READ_ONLY'), ('API_UPLOAD_RDI', 'API_UPLOAD_RDI'), ('API_CREATE_RDI', 'API_CREATE_RDI')], max_length=255), default=['API_READ_ONLY'], size=None),
+            field=hct_mis_api.apps.account.models.ChoiceArrayField(base_field=models.CharField(choices=[('API_READ_ONLY', 'API_READ_ONLY'), ('API_RDI_UPLOAD', 'API_RDI_UPLOAD'), ('API_CREATE_RDI', 'API_CREATE_RDI')], max_length=255), default=['API_READ_ONLY'], size=None),
             preserve_default=False,
         ),
         migrations.AlterField(

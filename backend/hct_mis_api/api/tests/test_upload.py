@@ -27,7 +27,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 class UploadRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
-    user_permissions = [Grant.API_UPLOAD_RDI]
+    user_permissions = [Grant.API_RDI_UPLOAD]
 
     @classmethod
     def setUpTestData(cls):

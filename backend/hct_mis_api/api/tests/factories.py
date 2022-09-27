@@ -9,7 +9,7 @@ from ..models import APIToken, Grant
 class APITokenFactory(factory.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     allowed_ips = ""
-    grants = [Grant.API_CREATE_RDI]
+    grants = [Grant.API_RDI_CREATE]
     valid_from = timezone.now
     valid_to = None
 

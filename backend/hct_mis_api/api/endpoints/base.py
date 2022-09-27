@@ -1,12 +1,19 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 from django.http import Http404
 from django.utils.functional import cached_property
 
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSetMixin
 
 from ..auth import HOPEAuthentication, HOPEPermission
 from ..models import APILogEntry
+
+
+class RejectPolicy(models.TextChoices):
+    STRICT = "STRICT", "Strict"
+    LAX = "LAX", "Lax"
 
 
 class SelectedBusinessAreaMixin:
@@ -16,9 +23,6 @@ class SelectedBusinessAreaMixin:
             return self.request.auth.valid_for.all().get(slug=self.kwargs.get("business_area", None))
         except ObjectDoesNotExist:
             raise Http404
-        # return BusinessArea.objects.filter(slug__in=self.request.auth.valid_for.all()).get(
-        #     slug=self.kwargs.get("business_area", None)
-        # )
 
 
 class HOPEAPIView(APIView):
@@ -49,6 +53,13 @@ class HOPEAPIView(APIView):
         return super().handle_exception(exc)
 
 
+class HOPEAPIViewSet(ViewSetMixin, HOPEAPIView):
+    pass
+
+
 class HOPEAPIBusinessAreaView(SelectedBusinessAreaMixin, HOPEAPIView):
-    permission_classes = [HOPEPermission]
-    authentication_classes = [HOPEAuthentication]
+    pass
+
+
+class HOPEAPIBusinessAreaViewSet(SelectedBusinessAreaMixin, HOPEAPIViewSet):
+    pass

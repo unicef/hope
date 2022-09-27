@@ -105,7 +105,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     household = serializers.ReadOnlyField()
-    role = serializers.CharField(allow_blank=True)
+    role = serializers.CharField(allow_blank=True, required=False)
     observed_disability = serializers.CharField(allow_blank=True, required=False)
     country_origin = serializers.CharField(allow_blank=True, required=False)
     marital_status = serializers.CharField(allow_blank=True, required=False)
@@ -144,6 +144,9 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
     members = IndividualSerializer(many=True, required=True)
     country_origin = serializers.CharField(allow_blank=True, required=False)
 
+    # reject_policy = serializers.ChoiceField(choices=RejectPolicy.choices,
+    #                                         default=RejectPolicy.STRICT)
+
     class Meta:
         model = ImportedHousehold
         exclude = [
@@ -156,8 +159,14 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
             "kobo_submission_uuid",
             "kobo_asset_id",
             "kobo_submission_time",
+            "geopoint",
         ]
         validators = [HouseholdValidator()]
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret.pop("members", None)
+        return ret
 
 
 class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.ModelSerializer):
@@ -177,11 +186,6 @@ class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.Mo
         if not value:
             raise ValidationError("This field is required.")
         return value
-
-    # def validate(self, attrs):
-    # if not attrs.get("households", []):
-    #     raise ValidationError("No Households provided")
-    # return super().validate(attrs)
 
     @atomic()
     def create(self, validated_data):
@@ -209,7 +213,7 @@ class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.Mo
 
 
 class UploadRDIView(HOPEAPIBusinessAreaView):
-    permission = Grant.API_UPLOAD_RDI
+    permission = Grant.API_RDI_UPLOAD
 
     @swagger_auto_schema(request_body=RDINestedSerializer)
     @atomic()
@@ -220,5 +224,4 @@ class UploadRDIView(HOPEAPIBusinessAreaView):
             info = serializer.save(user=request.user)
             return Response(info, status=status.HTTP_201_CREATED)
         errors = humanize_errors(serializer.errors)
-        # errors = serializer.errors
         return Response(errors, status=status.HTTP_400_BAD_REQUEST)

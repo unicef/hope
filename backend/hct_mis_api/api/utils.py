@@ -12,7 +12,7 @@ def humanize_errors(errors):
                     if isinstance(members, list) and len(members) == 1 and isinstance(members[0], str):
                         mm_info = members
                     else:
-                        mm_info = {f"Member #{i}": [m] for i, m in enumerate(members, 1)}
+                        mm_info = {f"Member #{i}": [m] for i, m in enumerate(members, 1) if m}
                     if mm_info:
                         h["members"] = mm_info
                 if h:

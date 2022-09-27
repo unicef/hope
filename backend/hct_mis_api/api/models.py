@@ -16,8 +16,10 @@ class Grant(Enum):
         return name
 
     API_READ_ONLY = auto()
-    API_UPLOAD_RDI = auto()
-    API_CREATE_RDI = auto()
+    API_RDI_UPLOAD = auto()
+    API_RDI_CREATE = auto()
+
+    API_PROGRAM_CREATE = auto()
 
     @classmethod
     def choices(cls):
