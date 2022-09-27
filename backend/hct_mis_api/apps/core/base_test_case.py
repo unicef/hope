@@ -8,7 +8,6 @@ from django.test import RequestFactory, TestCase
 
 from elasticsearch_dsl import connections
 from graphene.test import Client
-from graphene_file_upload.django.testing import GraphQLFileUploadTestCase
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.models import Role, UserRole
@@ -98,23 +97,13 @@ class BaseElasticSearchTestCase(TestCase):
         rebuild_search_index()
 
 
-class BaseMultipleFilesUploadTestCase(GraphQLFileUploadTestCase, SnapshotTestTestCase):
-    TEST_DIR = 'test_data'
-    GRAPHQL_URL = "/api/graphql"
-
-    @staticmethod
-    def id_to_base64(object_id, name):
-        return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
+class UploadDocumentsBase(APITestCase):
+    TEST_DIR = "test_data"
 
     @staticmethod
     def create_fixture_file(name, size, content_type):
         return InMemoryUploadedFile(
-            name=name,
-            file=BytesIO(b"xxxxxxxxxxx"),
-            charset=None,
-            field_name="0",
-            size=size,
-            content_type=content_type
+            name=name, file=BytesIO(b"xxxxxxxxxxx"), charset=None, field_name="0", size=size, content_type=content_type
         )
 
     @classmethod

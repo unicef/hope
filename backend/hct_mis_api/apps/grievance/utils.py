@@ -3,7 +3,8 @@ from typing import List
 
 from django.shortcuts import get_object_or_404
 
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails, GrievanceDocument
+from hct_mis_api.apps.grievance.validators import validate_file
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.core.utils import decode_id_string
 
@@ -39,3 +40,35 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
         ticket_individuals = ticket_details.selected_individuals.all()
 
         select_individual(ticket_details, selected_individual, ticket_duplicates, ticket_individuals)
+
+
+def create_grievance_documents(info, grievance_ticket, documents):
+    grievance_documents = []
+    for document in documents:
+        file = document["file"]
+        validate_file(file)
+
+        grievance_document = GrievanceDocument(
+            name=document["name"],
+            file=file,
+            created_by=info.context.user,
+            grievance_ticket=grievance_ticket,
+            file_size=file.size,
+            content_type=file.content_type,
+        )
+        grievance_documents.append(grievance_document)
+    GrievanceDocument.objects.bulk_create(grievance_documents)
+
+
+def update_grievance_documents(documents):
+    for document in documents:
+        ticket_id = document["id"]
+        current_document_qs = GrievanceDocument.objects.filter(id=ticket_id)
+        current_document = current_document_qs.first()
+
+        if current_document:
+            name = document.get("name", current_document.name)
+            file = document.get("file", current_document.file)
+            validate_file(file)
+
+            current_document_qs.update(name=name, file=file, file_size=file.size, content_type=file.content_type)

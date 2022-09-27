@@ -4,6 +4,8 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from graphql import GraphQLError
 
+from hct_mis_api.apps.grievance.models import GrievanceDocument
+
 logger = logging.getLogger(__name__)
 
 
@@ -43,3 +45,33 @@ def validate_file(file):
 def validate_files_size(files):
     if sum(file.size for file in files) > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
         raise GraphQLError("Total size of files can not be larger than 25mb.")
+
+
+def validate_file(file):
+    if file.content_type in settings.GRIEVANCE_UPLOAD_CONTENT_TYPES:
+        if file.size > settings.GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE:
+            raise GraphQLError(_(f"File {file.name} of size {file.size} is above max size limit"))
+    else:
+        raise GraphQLError(_("File type not supported"))
+
+
+def validate_grievance_documents_size(ticket_id, new_documents, is_updated=False):
+    grievance_documents = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id)
+
+    if is_updated:
+        current_documents_size = sum(
+            (
+                grievance_documents.exclude(id__in=[ticket["id"] for ticket in new_documents]).values_list(
+                    "file_size", flat=True
+                )
+            )
+        )
+    else:
+        current_documents_size = sum(grievance_documents.values_list("file_size", flat=True))
+
+    new_documents_size = sum(document["file"].size for document in new_documents)
+
+    if current_documents_size + new_documents_size > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
+        raise GraphQLError("Adding/Updating of new files exceed 25mb maximum size of files")
+
+    return current_documents_size + new_documents_size

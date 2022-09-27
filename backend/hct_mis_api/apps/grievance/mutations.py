@@ -32,7 +32,7 @@ from hct_mis_api.apps.core.utils import (
     to_snake_case,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote, GrievanceDocument
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     close_add_individual_grievance_ticket,
     close_delete_household_ticket,
@@ -79,8 +79,18 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode, GrievanceDocumentNode
-from hct_mis_api.apps.grievance.utils import get_individual, traverse_sibling_tickets
-from hct_mis_api.apps.grievance.validators import DataChangeValidator, validate_file, validate_files_size
+from hct_mis_api.apps.grievance.utils import (
+    get_individual,
+    traverse_sibling_tickets,
+    create_grievance_documents,
+    update_grievance_documents,
+)
+from hct_mis_api.apps.grievance.validators import (
+    DataChangeValidator,
+    validate_file,
+    validate_files_size,
+    validate_grievance_documents_size,
+)
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -95,9 +105,15 @@ from hct_mis_api.apps.utils.schema import Arg
 logger = logging.getLogger(__name__)
 
 
-class SupportDocumentInput(graphene.InputObjectType):
+class GrievanceDocumentInput(graphene.InputObjectType):
     name = graphene.String(required=True)
-    file = Arg()
+    file = Upload(required=True)
+
+
+class GrievanceDocumentUpdateInput(graphene.InputObjectType):
+    id = graphene.Field(graphene.ID, required=True)
+    name = graphene.String(required=False)
+    file = Upload(required=True)
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
@@ -117,7 +133,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     partner = graphene.Int(node=PartnerType, required=False)
     programme = graphene.ID(node=ProgramNode)
     comments = graphene.String()
-    support_documents = graphene.List(SupportDocumentInput)
+    documentation = graphene.List(GrievanceDocumentInput)
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -137,6 +153,9 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     partner = graphene.Int(node=PartnerType, required=False)
     programme = graphene.ID(node=ProgramNode)
     comments = graphene.String()
+    documentation = graphene.List(GrievanceDocumentInput)
+    documentation_to_update = graphene.List(GrievanceDocumentUpdateInput)
+    documentation_to_delete = graphene.List(graphene.ID)
 
 
 class CreateTicketNoteInput(graphene.InputObjectType):
@@ -295,17 +314,20 @@ class CreateGrievanceTicketMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        logger.info("*************************")
-        logger.info(input)
-
         arg = lambda name, default=None: input.get(name, default)
-        cls.has_permission(info, Permissions.GRIEVANCES_CREATE, arg("business_area"))
-
+        business_area = arg("business_area")
+        cls.has_permission(info, Permissions.GRIEVANCES_CREATE, business_area)
         verify_required_arguments(input, "category", cls.CATEGORY_OPTIONS)
         if arg("issue_type"):
             verify_required_arguments(input, "issue_type", cls.ISSUE_TYPE_OPTIONS)
         category = arg("category")
+        documents = input.pop("documentation", None)
         grievance_ticket, extras = cls.save_basic_data(root, info, input, **kwargs)
+        if documents:
+            cls.has_permission(info, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD, business_area)
+            validate_grievance_documents_size(grievance_ticket.id, documents)
+            create_grievance_documents(info, grievance_ticket, documents)
+
         save_extra_methods = {
             GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: save_payment_verification_extras,
             GrievanceTicket.CATEGORY_DATA_CHANGE: save_data_change_extras,
@@ -444,8 +466,9 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
         arg = lambda name, default=None: input.get(name, default)
-        old_grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
-        grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
+        ticket_id = decode_id_string(arg("ticket_id"))
+        old_grievance_ticket = get_object_or_404(GrievanceTicket, id=ticket_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=ticket_id)
         household, individual, payment_record = None, None, None
 
         if arg("household") is not None:
@@ -474,6 +497,21 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             grievance_ticket.assigned_to == info.context.user,
             Permissions.GRIEVANCES_UPDATE_AS_OWNER,
         )
+
+        documents = input.pop("documentation", None)
+        documents_to_update = input.pop("documentation_to_update", None)
+        ids_to_delete = input.pop("documentation_to_delete", None)
+
+        if ids_to_delete:
+            GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id, id__in=ids_to_delete).delete()
+
+        if documents_to_update:
+            validate_grievance_documents_size(ticket_id, documents_to_update, is_updated=True)
+            update_grievance_documents(documents_to_update)
+
+        if documents:
+            validate_grievance_documents_size(ticket_id, documents)
+            create_grievance_documents(info, grievance_ticket, documents)
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
             logger.error("Grievance Ticket on status Closed is not editable")
@@ -1280,20 +1318,6 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         return cls(grievance_ticket=grievance_ticket)
 
 
-class CreateGrievanceDocumentsMutation(graphene.Mutation):
-    success = graphene.Boolean()
-
-    class Arguments:
-        documents = graphene.List(SupportDocumentInput)
-
-    @classmethod
-    def mutate(cls, root, info, documents):
-        print(root)
-        print(info)
-        print(documents)
-        return CreateGrievanceDocumentsMutation(success=True)
-
-
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
     update_grievance_ticket = UpdateGrievanceTicketMutation.Field()
@@ -1309,4 +1333,3 @@ class Mutations(graphene.ObjectType):
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     approve_payment_details = PaymentDetailsApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()
-    create_grievance_documents_mutation = CreateGrievanceDocumentsMutation.Field()
