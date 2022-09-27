@@ -148,5 +148,5 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(GrievanceTicket.objects.count(), 0)
 
     def test_hard_documents_deduplication_number_of_queries(self):
-        with self.assertNumQueries(14):
+        with self.assertNumQueries(15):
             DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))
