@@ -1,12 +1,12 @@
 from rest_framework.reverse import reverse
 
-from ...apps.mis_datahub.models import Program
+from ...apps.program.models import Program
 from ..models import Grant
 from .base import HOPEApiTestCase
 
 
 class CreateProgramTests(HOPEApiTestCase):
-    databases = ["default", "registration_datahub"]
+    databases = ["default"]
     user_permissions = [Grant.API_PROGRAM_CREATE]
 
     @classmethod
