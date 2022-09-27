@@ -1,12 +1,14 @@
 import { gql } from 'apollo-boost';
 
-export const CREATE_CASH_PLAN_PAYMENT_VERIFICATION_MUTATION = gql`
-  mutation createCashPlanPaymentVerification(
-    $input: CreatePaymentVerificationInput!
+export const CREATE_PAYMENT_VERIFICATION_MUTATION = gql`
+  mutation createPaymentVerification(
+    $input: CreateUpdatePaymentVerificationInput!
   ) {
-    createCashPlanPaymentVerification(input: $input) {
-      cashPlan {
-        id
+    createPaymentVerification(input: $input) {
+      paymentPlan {
+        paymentVerificationSummary {
+          id
+        }
       }
     }
   }
