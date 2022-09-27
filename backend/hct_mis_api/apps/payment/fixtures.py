@@ -122,7 +122,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
         if not create:
             return
 
-        PaymentVerificationSummaryFactory(cash_plan=self)
+        PaymentVerificationSummaryFactory(payment_plan=self)
 
 
 class ServiceProviderFactory(factory.DjangoModelFactory):
