@@ -809,3 +809,12 @@ if PROFILING:
 SWAGGER_SETTINGS = {"LOGOUT_URL": reverse_lazy("logout"), "LOGIN_URL": "/"}
 
 MAX_STORAGE_FILE_SIZE = 30
+
+GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
+GRIEVANCE_UPLOAD_CONTENT_TYPES = (
+    "image/jpeg",
+    "image/png",
+    "image/tiff",
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+)

@@ -49,7 +49,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails,
+    TicketSystemFlaggingDetails, GrievanceDocument,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
@@ -57,6 +57,16 @@ from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
+
+
+class GrievanceDocumentNode(DjangoObjectType):
+    file_path = graphene.String(source='file_path')
+    file_name = graphene.String(source='file_name')
+
+    class Meta:
+        model = GrievanceDocument
+        exclude = ("file", )
+        interfaces = (relay.Node, )
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -75,6 +85,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
+    documentation = graphene.List(GrievanceDocumentNode)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -137,6 +148,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
             .filter(household_unicef_id=grievance_ticket.household_unicef_id)
             .exclude(pk=grievance_ticket.pk)
         )
+
+    @staticmethod
+    def resolve_documentation(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.support_documents.order_by("-created_at")
 
 
 class TicketNoteNode(DjangoObjectType):

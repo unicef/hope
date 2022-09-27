@@ -3,6 +3,7 @@ from decimal import Decimal
 from itertools import chain
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -10,6 +11,7 @@ from django.db.models import JSONField, Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from model_utils.models import UUIDModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
@@ -729,6 +731,30 @@ class TicketReferralDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+
+
+class GrievanceDocument(UUIDModel):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=100, null=True)
+    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
+    grievance_ticket = models.ForeignKey(
+        GrievanceTicket, null=True, related_name="support_documents", on_delete=models.SET_NULL
+    )
+    file = models.FileField(upload_to="grievance_documents", blank=True, null=True)
+    file_size = models.IntegerField(null=True)
+    content_type = models.CharField(max_length=100, null=False)
+
+    @property
+    def file_name(self):
+        return self.file.name
+
+    @property
+    def file_path(self):
+        return self.file.path
+
+    def __str__(self):
+        return self.file_name
 
 
 @receiver(post_save, sender=TicketComplaintDetails)

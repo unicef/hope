@@ -1,6 +1,8 @@
 import base64
+from io import BytesIO
 
 from django.contrib.auth.models import AnonymousUser
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import RequestFactory, TestCase
 
 from elasticsearch_dsl import connections
@@ -92,3 +94,25 @@ class BaseElasticSearchTestCase(TestCase):
     @classmethod
     def rebuild_search_index(cls):
         rebuild_search_index()
+
+
+class UploadDocumentsBase(APITestCase):
+    TEST_DIR = 'test_data'
+
+    @staticmethod
+    def create_fixture_file(name, size, content_type):
+        return InMemoryUploadedFile(
+            name=name,
+            file=BytesIO(b"xxxxxxxxxxx"),
+            charset=None,
+            field_name="0",
+            size=size,
+            content_type=content_type
+        )
+
+    # @classmethod
+    # def tearDownClass(cls):
+    #     try:
+    #         shutil.rmtree(cls.TEST_DIR)
+    #     except OSError:
+    #         pass
