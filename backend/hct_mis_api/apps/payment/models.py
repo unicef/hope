@@ -89,8 +89,16 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     total_undelivered_quantity_usd = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
     )
-    verification_plans = GenericRelation("payment.PaymentVerificationPlan")
-    payment_verification_summary = GenericRelation("payment.PaymentVerificationSummary")
+    payment_verification_plans = GenericRelation(
+        "payment.PaymentVerificationPlan",
+        content_type_field='payment_plan_content_type',
+        object_id_field='payment_plan_object_id',
+    )
+    payment_verification_summary = GenericRelation(
+        "payment.PaymentVerificationSummary",
+        content_type_field='payment_plan_content_type',
+        object_id_field='payment_plan_object_id',
+    )
 
     class Meta:
         abstract = True
@@ -100,6 +108,10 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
             exchange_rates_client = ExchangeRates()
 
         return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
+
+    @property
+    def payment_verification_summary_obj(self):
+        return self.payment_verification_summary.first()
 
     def available_payment_records(
         self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None
@@ -1047,9 +1059,9 @@ class XlsxPaymentVerificationPlanFile(TimeStampedUUIDModel):
 
 
 def build_summary(payment_plan):
-    active_count = payment_plan.verification_plans.filter(status=PaymentVerificationSummary.STATUS_ACTIVE).count()
-    pending_count = payment_plan.verification_plans.filter(status=PaymentVerificationSummary.STATUS_PENDING).count()
-    not_finished_count = payment_plan.verification_plans.exclude(
+    active_count = payment_plan.payment_verification_plans.filter(status=PaymentVerificationSummary.STATUS_ACTIVE).count()
+    pending_count = payment_plan.payment_verification_plans.filter(status=PaymentVerificationSummary.STATUS_PENDING).count()
+    not_finished_count = payment_plan.payment_verification_plans.exclude(
         status=PaymentVerificationSummary.STATUS_FINISHED
     ).count()
     summary = PaymentVerificationSummary.objects.get(payment_plan=payment_plan)
@@ -1136,7 +1148,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
 
     @property
     def business_area(self):
-        return self.payment_verification_plan.cash_plan.business_area
+        return self.payment_verification_plan.payment_plan.business_area
 
     def set_pending(self):
         self.status_date = timezone.now()

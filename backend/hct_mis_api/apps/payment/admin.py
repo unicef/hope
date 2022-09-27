@@ -117,8 +117,8 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
 
     list_filter = (
         ("status", ChoicesFieldComboFilter),
-        ("payment_verification_plan__cash_plan", AutoCompleteFilter),
-        ("payment_verification_plan__cash_plan__business_area", AutoCompleteFilter),
+        ("payment_verification_plan__payment_plan", AutoCompleteFilter),
+        ("payment_verification_plan__payment_plan__business_area", AutoCompleteFilter),
         ("payment_record__household__unicef_id", ValueFilter),
     )
     date_hierarchy = "updated_at"
@@ -136,7 +136,7 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
             .get_queryset(request)
             .select_related(
                 "payment_verification_plan",
-                "payment_verification_plan__cash_plan",
+                "payment_verification_plan__payment_plan",
                 "payment_record",
                 "payment_record__household",
             )
@@ -165,7 +165,7 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     search_fields = ("name",)
 
     def verification_status(self, obj):
-        return obj.payment_verification_summary.status
+        return obj.payment_verification_summary_obj.status if obj.payment_verification_summary_obj else None
 
     @button()
     def payments(self, request, pk):

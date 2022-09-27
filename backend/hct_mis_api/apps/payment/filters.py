@@ -71,7 +71,7 @@ class PaymentVerificationFilter(FilterSet):
     verification_channel = CharFilter(field_name="payment_verification_plan__verification_channel")
 
     class Meta:
-        fields = ("payment_verification_plan", "payment_verification_plan__cash_plan", "status")
+        fields = ("payment_verification_plan", "status")  # TODO: add 'payment_verification_plan__payment_plan'
         model = PaymentVerification
 
     order_by = OrderingFilter(
@@ -118,7 +118,7 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
 
     def object_id_filter(self, qs, name, value):
         cash_plan = CashPlan.objects.get(pk=value)
-        verifications_ids = cash_plan.verification_plans.all().values_list("pk", flat=True)
+        verifications_ids = cash_plan.payment_verification_plans.all().values_list("pk", flat=True)
         return qs.filter(object_id__in=verifications_ids)
 
 
