@@ -86,7 +86,13 @@ class GrievanceComplaintTicketFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketComplaintDetails
 
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT)
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=random.choice(
+            list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT].keys())
+        ),
+    )
     household = None
     individual = None
     payment_record = None
@@ -123,7 +129,13 @@ class GrievanceComplaintTicketWithoutExtrasFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketComplaintDetails
 
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT)
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=random.choice(
+            list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT].keys())
+        ),
+    )
     household = None
     individual = None
     payment_record = None
