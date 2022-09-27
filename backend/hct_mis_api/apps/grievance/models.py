@@ -771,11 +771,11 @@ class GrievanceDocument(UUIDModel):
     name = models.CharField(max_length=100, null=True)
     created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
     grievance_ticket = models.ForeignKey(
-        GrievanceTicket, null=True, related_name="documents", on_delete=models.SET_NULL
+        GrievanceTicket, null=True, related_name="support_documents", on_delete=models.SET_NULL
     )
     file = models.FileField(upload_to="grievance_documents", blank=True, null=True)
     file_size = models.IntegerField(null=True)
-    content_type = models.CharField(max_length=50, null=False)
+    content_type = models.CharField(max_length=100, null=False)
 
     @property
     def file_name(self):
