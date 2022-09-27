@@ -226,10 +226,10 @@ class HouseholdAdmin(
             if form.is_valid():
                 with atomic():
                     for hh in qs.filter(withdrawn=False):
-                        s = self._toggle_withdraw_status(
+                        service = self._toggle_withdraw_status(
                             request, hh, tag=form.cleaned_data["tag"], comment=form.cleaned_data["reason"]
                         )
-                        if s.household.withdraw:
+                        if service.household.withdraw:
                             results += 1
                 self.message_user(request, f"Changed { results } Households.")
             else:
@@ -255,8 +255,8 @@ class HouseholdAdmin(
             if form.is_valid():
                 with atomic():
                     for hh in qs.filter(withdrawn=True):
-                        s = self._toggle_withdraw_status(request, hh, comment=form.cleaned_data["reason"])
-                        if not s.household.withdraw:
+                        service = self._toggle_withdraw_status(request, hh, comment=form.cleaned_data["reason"])
+                        if not service.household.withdraw:
                             results += 1
                 self.message_user(request, f"Changed { results } Households.")
             else:

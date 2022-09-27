@@ -52,7 +52,7 @@ authors = ["Tivix"]
 
 [tool.poetry.dependencies]
 python = "3.9.12"
-Django = "^3.2"
+Django = "3.2.15"
 Jinja2 = "3.1.2"
 PyJWT = "^2.4.0"
 PyYAML = "^6.0"
@@ -61,7 +61,7 @@ celery = {extras = ["redis"], version = "^5.2.7"}
 defusedxml = "0.7.0rc1"
 django-advanced-filters = "2.0.0"
 django-admin-extra-buttons = ">=1.5.4"
-django-admin-sync = "*"
+django-admin-sync = ">=0.3"
 django-adminactions = "^2"
 django-adminfilters = "^2"
 django-auditlog = { url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip" }

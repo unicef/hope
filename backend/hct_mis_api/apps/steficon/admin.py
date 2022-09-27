@@ -467,14 +467,15 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
 
     def _get_data(self, record) -> str:
         roles = RuleCommit.objects.filter(rule=record)
-        c = ForeignKeysCollector(None)
+        collector = ForeignKeysCollector(None)
         objs = []
         for qs in [roles]:
             objs.extend(qs)
         objs.extend(Rule.objects.filter(pk=record.pk))
-        c.collect(objs)
+        collector.collect(objs)
         serializer = self.get_serializer("json")
-        return serializer.serialize(c.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3)
+        return serializer.serialize(
+            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3)
 
 
 class RuleCommitResource(ModelResource):
