@@ -46,7 +46,12 @@ from hct_mis_api.apps.payment.models import (
     PaymentChannel,
     FinancialServiceProvider,
 )
-from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode, PaymentPlanNode
+from hct_mis_api.apps.payment.schema import (
+    PaymentVerificationNode,
+    FinancialServiceProviderNode,
+    PaymentPlanNode,
+    GenericPaymentPlanNode
+)
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
@@ -60,7 +65,7 @@ from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
 )
 from hct_mis_api.apps.payment.models import CashPlan
-from hct_mis_api.apps.program.schema import CashPlanNode, PaymentVerificationPlan, GenericPaymentPlanNode
+from hct_mis_api.apps.program.schema import CashPlanNode, PaymentVerificationPlan
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
