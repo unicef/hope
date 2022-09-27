@@ -54,6 +54,7 @@ export const LockedFspPaymentPlanHeaderButtons = ({
             variant='contained'
             color='primary'
             onClick={() => sendForApproval()}
+            data-cy='button-send-for-approval'
           >
             {t('Send For Approval')}
           </LoadingButton>

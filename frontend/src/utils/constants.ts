@@ -1,6 +1,7 @@
 import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
+  ProgramStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
 
@@ -18,6 +19,12 @@ export const TARGETING_STATES = {
   [TargetPopulationStatus.Assigned]: 'Assigned',
 };
 
+export const PROGRAM_STATES = {
+  [ProgramStatus.Active]: 'Active',
+  [ProgramStatus.Draft]: 'Draft',
+  [ProgramStatus.Finished]: 'Finished',
+};
+
 export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatus.Open]: 'Open',
   [PaymentPlanStatus.Locked]: 'Locked',
@@ -33,8 +40,10 @@ export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
   [PaymentPlanBackgroundActionStatus.SteficonError]: 'Steficon Error',
   [PaymentPlanBackgroundActionStatus.XlsxExporting]: 'XLSX Exporting',
   [PaymentPlanBackgroundActionStatus.XlsxExportError]: 'XLSX Export Error',
-  [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]: 'XLSX Importing Entitlements',
-  [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]: 'XLSX Importing Reconciliation',
+  [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
+    'XLSX Importing Entitlements',
+  [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]:
+    'XLSX Importing Reconciliation',
   [PaymentPlanBackgroundActionStatus.XlsxImportError]: 'XLSX Import Error',
 };
 

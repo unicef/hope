@@ -6,7 +6,7 @@
 // the project's config changing)
 
 // https://gist.github.com/csuzw/845b589549b61d3a5fe18e49592e166f
-
+import fs from 'fs';
 const cucumber = require('cypress-cucumber-preprocessor').default;
 const browserify = require('@cypress/browserify-preprocessor');
 

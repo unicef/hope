@@ -131,6 +131,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       deliveryMechanisms {
         id
         name
+        order
         fsp {
           id
           name
