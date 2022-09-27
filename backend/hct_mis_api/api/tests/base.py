@@ -12,8 +12,8 @@ from hct_mis_api.apps.account.fixtures import (
 class HOPEApiTestCase(APITestCase):
     databases = ["default", "registration_datahub"]
     user_permissions = [
-        Grant.API_CREATE_RDI,
-        Grant.API_UPLOAD_RDI,
+        Grant.API_RDI_CREATE,
+        Grant.API_RDI_UPLOAD,
     ]
     token = None
 

@@ -24,7 +24,7 @@ from .base import HOPEApiTestCase
 
 class CreateRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
-    user_permissions = [Grant.API_CREATE_RDI]
+    user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod
     def setUpTestData(cls):
@@ -51,7 +51,7 @@ class CreateRDITests(HOPEApiTestCase):
 
 class PushToRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
-    user_permissions = [Grant.API_CREATE_RDI]
+    user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod
     def setUpTestData(cls):
@@ -120,7 +120,7 @@ class PushToRDITests(HOPEApiTestCase):
 
 class CompleteRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
-    user_permissions = [Grant.API_CREATE_RDI]
+    user_permissions = [Grant.API_RDI_CREATE]
 
     @classmethod
     def setUpTestData(cls):

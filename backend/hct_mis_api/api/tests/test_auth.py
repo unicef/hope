@@ -28,9 +28,9 @@ class HOPEPermissionTest(TestCase):
         self.token: APIToken = APITokenFactory(
             user=user,
             grants=[
-                Grant.API_CREATE_RDI.name,
-                Grant.API_UPLOAD_RDI.name,
-                Grant.API_UPLOAD_RDI.name,
+                Grant.API_RDI_CREATE.name,
+                Grant.API_RDI_UPLOAD.name,
+                Grant.API_RDI_UPLOAD.name,
             ],
         )
         self.token.valid_for.set([self.business_area])
@@ -40,7 +40,7 @@ class HOPEPermissionTest(TestCase):
 
         assert p.has_permission(
             Mock(auth=self.token),
-            Mock(selected_business_area=self.business_area, permission=Grant.API_UPLOAD_RDI),
+            Mock(selected_business_area=self.business_area, permission=Grant.API_RDI_UPLOAD),
         )
 
 
@@ -58,7 +58,7 @@ class HOPEAuthenticationTest(HOPEApiTestCase):
 
 
 class ViewAuthView(HOPEApiTestCase):
-    user_permissions = [Grant.API_UPLOAD_RDI]
+    user_permissions = [Grant.API_RDI_UPLOAD]
 
     @classmethod
     def setUpTestData(cls):
@@ -76,4 +76,4 @@ class ViewAuthView(HOPEApiTestCase):
         response = self.client.post(url, {}, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, str(response.json()))
         data = response.json()
-        self.assertDictEqual(data, {"detail": "You do not have permission to perform this action. API_CREATE_RDI"})
+        self.assertDictEqual(data, {"detail": "You do not have permission to perform this action. API_RDI_CREATE"})
