@@ -10,8 +10,15 @@ let programName;
 let targetPopulationName;
 let individualIds;
 let paymentPlanUnicefId;
+let fspXlsxFilenames;
 const downloadsFolder = Cypress.config('downloadsFolder');
-const fileName = (id) => `payment_plan_payment_list_${id}.xlsx`;
+
+
+const fileName = (id) => `payment_plan_payment_list_${id}`;
+
+const xlsxFileName = (id) => `${fileName(id)}.xlsx`;
+const zipFileName = (id) => `${fileName(id)}.zip`;
+
 
 const maxInt = 2147483647;
 
@@ -45,11 +52,11 @@ Given('There are individuals and households imported', () => {
     'Test import '.concat(new Date().toISOString()),
   );
 
-  const fileName = 'rdi_import_3_hh_3_ind.xlsx';
-  cy.fixture(fileName, 'base64').then((fileContent) => {
+  const rdiFileName = 'rdi_import_3_hh_3_ind.xlsx';
+  cy.fixture(rdiFileName, 'base64').then((fileContent) => {
     cy.get('[data-cy="file-input"]').upload({
       fileContent,
-      fileName,
+      fileName: rdiFileName,
       mimeType:
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       encoding: 'base64',
@@ -242,6 +249,7 @@ And('I apply the steficon rule', () => {
 
 Then('I see the entitlements calculated', () => {
   cy.get('[data-cy="total-entitled-quantity-usd"]').contains('USD');
+  // TODO: check the amount
 });
 
 And('I am able to set up FSPs', () => {
@@ -329,13 +337,13 @@ When('I download the xlsx template', () => {
 });
 
 Then('I fill the xlsx template', () => {
-  const name = fileName(paymentPlanUnicefId);
+  const name = xlsxFileName(paymentPlanUnicefId);
   const downloadedFilePath = `${downloadsFolder}/${name}`;
-  cy.exec(`node cypress/scripts/fillXlsx.js ${downloadedFilePath}`);
+  cy.exec(`node cypress/scripts/fillXlsxEntitlements.js ${downloadedFilePath}`);
 });
 
 When('I upload the xlsx template', () => {
-  const name = fileName(paymentPlanUnicefId);
+  const name = xlsxFileName(paymentPlanUnicefId);
   const filledFilePath = `out_${name}`;
   cy.get('[data-cy="button-import"]').click({ force: true });
   cy.fixture(filledFilePath, 'base64').then((fileContent) => {
@@ -355,4 +363,56 @@ When('I upload the xlsx template', () => {
 
 And("I see that all individuals have proper payment channels", () => {
   cy.get("td").should("not.contain", "Missing");
+})
+
+And("I export xlsx to zip file", () => {
+  cy.get('[data-cy="button-export-xlsx"]').click({ force: true });
+  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.reload();
+  cy.get('[data-cy="button-download-xlsx"]').click({ force: true });
+  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
+})
+
+When("I unarchive the zip file", () => {
+  const name = zipFileName(paymentPlanUnicefId);
+  const downloadedFilePath = `${downloadsFolder}/${name}`;
+  cy.exec(`unzip ${downloadedFilePath} -d ${downloadsFolder}`);
+})
+
+Then('I see the {int} xlsx files', (count) => {
+  const currentRunFileName = fileName(paymentPlanUnicefId);
+  cy.exec(`ls -l ${downloadsFolder} | grep ${currentRunFileName} | grep FSP | awk "{print $9;}"`).then((result) => {
+    fspXlsxFilenames = result.stdout.split("\n");
+    expect(fspXlsxFilenames.length).to.eq(count);
+  })
+})
+
+When('I fill the reconciliation info', () => {
+  const fspFilename = fspXlsxFilenames[0];
+  const downloadedFilePath = `${downloadsFolder}/${fspFilename}`;
+  cy.exec(`node cypress/scripts/fillXlsxReconciliation.js ${downloadedFilePath}`);
+})
+
+And('I upload the reconciliation info', () => {
+  const fspFilename = fspXlsxFilenames[0];
+
+  const filledFilePath = `out_${fspFilename}`;
+  cy.get('[data-cy="button-import"]').click({ force: true });
+  cy.fixture(filledFilePath, 'base64').then((fileContent) => {
+    cy.get('[data-cy="file-input"]').upload({
+      fileContent,
+      fileName: fspFilename,
+      mimeType:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      encoding: 'base64',
+    });
+  });
+  cy.get('[data-cy="file-input"').click({ force: true });
+  cy.get('[data-cy="imported-file-name"]').should('exist');
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.reload();
+})
+
+Then('I see the delivered quantities for each payment', () => {
+  // TODO
 })

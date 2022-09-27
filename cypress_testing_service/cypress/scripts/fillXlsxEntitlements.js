@@ -8,7 +8,7 @@ const rows = jsonData.data;
 
 for (let i = 1; i < rows.length; i++) {
   if (rows[i].length !== 0) {
-    //add entitlement column and write value of 100
+    // add entitlement column and write value of 100
     rows[i].push(100);
   }
 }

@@ -75,4 +75,9 @@ Feature: Create Payment Plan
         Then I see the Payment Plan as in review
         When I finalize the Payment Plan
         Then I see the Payment Plan as accepted
-# And I can export xlsx to zip file
+        And I export xlsx to zip file
+        When I unarchive the zip file
+        Then I see the 1 xlsx files
+        When I fill the reconciliation info
+        And I upload the reconciliation info
+        Then I see the delivered quantities for each payment
