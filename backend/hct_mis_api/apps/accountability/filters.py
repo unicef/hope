@@ -28,7 +28,7 @@ class MessagesFilter(FilterSet):
             "created_by": ["exact"],
         }
 
-    order_by = CustomOrderingFilter(fields=(Lower("title"), "number_of_recipients", "sampling_type"))
+    order_by = CustomOrderingFilter(fields=(Lower("title"), "number_of_recipients", "sampling_type", "created_by", "id", "created_at"))
 
 
 class MessageRecipientsMapFilter(FilterSet):
@@ -51,10 +51,12 @@ class MessageRecipientsMapFilter(FilterSet):
     order_by = CustomOrderingFilter(
         fields=(
             "id",
-            Lower("head_of_household__first_name"),
+            "unicef_id",
+            "withdrawn",
+            Lower("head_of_household__full_name"),
             Lower("head_of_household__sex"),
             "size",
-            Lower("admin2__name"),
+            Lower("admin_area__name"),
             "residence_status",
             "head_of_household__first_registration_date",
         )

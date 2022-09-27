@@ -17,6 +17,7 @@ import { GrievancesDashboardPage } from './pages/grievances/GrievancesDashboardP
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
 import { CommunicationPage } from './pages/accountability/communication/CommunicationPage';
+import { CommunicationDetailsPage } from './pages/accountability/communication/CommunicationDetailsPage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
 import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsPage';
@@ -130,8 +131,11 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/grievance-and-feedback/:id'>
             <GrievancesDetailsPage />
           </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/communication/:id'>
+            <CommunicationDetailsPage />
+          </SentryRoute>
           <SentryRoute path='/:businessArea/accountability/communication'>
-            <CommunicationPage key='all' />
+            <CommunicationPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/accountability/feedback/create'>
             <CreateFeedbackPage />

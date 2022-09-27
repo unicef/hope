@@ -8114,6 +8114,72 @@ export type UpdateTpMutation = (
   )> }
 );
 
+export type AccountabilityCommunicationMessageQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type AccountabilityCommunicationMessageQuery = (
+  { __typename?: 'Query' }
+  & { accountabilityCommunicationMessage: Maybe<(
+    { __typename?: 'CommunicationMessageNode' }
+    & Pick<CommunicationMessageNode, 'id' | 'unicefId' | 'createdAt' | 'title' | 'body'>
+    & { createdBy: Maybe<(
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+    )>, targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name'>
+    )> }
+  )> }
+);
+
+export type AllAccountabilityCommunicationMessageRecipientsQueryVariables = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  messageId: Scalars['String'],
+  recipientId?: Maybe<Scalars['String']>,
+  fullName?: Maybe<Scalars['String']>,
+  phoneNo?: Maybe<Scalars['String']>,
+  sex?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllAccountabilityCommunicationMessageRecipientsQuery = (
+  { __typename?: 'Query' }
+  & { allAccountabilityCommunicationMessageRecipients: Maybe<(
+    { __typename?: 'CommunicationMessageRecipientMapNodeConnection' }
+    & Pick<CommunicationMessageRecipientMapNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'CommunicationMessageRecipientMapNodeEdge' }
+      & Pick<CommunicationMessageRecipientMapNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'CommunicationMessageRecipientMapNode' }
+        & Pick<CommunicationMessageRecipientMapNode, 'id'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+          & { household: Maybe<(
+            { __typename?: 'HouseholdNode' }
+            & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'status' | 'residenceStatus' | 'lastRegistrationDate'>
+            & { admin2: Maybe<(
+              { __typename?: 'AreaNode' }
+              & Pick<AreaNode, 'id' | 'name'>
+            )> }
+          )> }
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllAccountabilityCommunicationMessagesQueryVariables = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
@@ -14375,6 +14441,158 @@ export function useUpdateTpMutation(baseOptions?: ApolloReactHooks.MutationHookO
 export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
 export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
 export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
+export const AccountabilityCommunicationMessageDocument = gql`
+    query AccountabilityCommunicationMessage($id: ID!) {
+  accountabilityCommunicationMessage(id: $id) {
+    id
+    unicefId
+    createdBy {
+      id
+      firstName
+      lastName
+    }
+    createdAt
+    targetPopulation {
+      id
+      name
+    }
+    title
+    body
+  }
+}
+    `;
+export type AccountabilityCommunicationMessageComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>, 'query'> & ({ variables: AccountabilityCommunicationMessageQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AccountabilityCommunicationMessageComponent = (props: AccountabilityCommunicationMessageComponentProps) => (
+      <ApolloReactComponents.Query<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables> query={AccountabilityCommunicationMessageDocument} {...props} />
+    );
+    
+export type AccountabilityCommunicationMessageProps<TChildProps = {}> = ApolloReactHoc.DataProps<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables> & TChildProps;
+export function withAccountabilityCommunicationMessage<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AccountabilityCommunicationMessageQuery,
+  AccountabilityCommunicationMessageQueryVariables,
+  AccountabilityCommunicationMessageProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables, AccountabilityCommunicationMessageProps<TChildProps>>(AccountabilityCommunicationMessageDocument, {
+      alias: 'accountabilityCommunicationMessage',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAccountabilityCommunicationMessageQuery__
+ *
+ * To run a query within a React component, call `useAccountabilityCommunicationMessageQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAccountabilityCommunicationMessageQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAccountabilityCommunicationMessageQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAccountabilityCommunicationMessageQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>) {
+        return ApolloReactHooks.useQuery<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>(AccountabilityCommunicationMessageDocument, baseOptions);
+      }
+export function useAccountabilityCommunicationMessageLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>(AccountabilityCommunicationMessageDocument, baseOptions);
+        }
+export type AccountabilityCommunicationMessageQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageQuery>;
+export type AccountabilityCommunicationMessageLazyQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageLazyQuery>;
+export type AccountabilityCommunicationMessageQueryResult = ApolloReactCommon.QueryResult<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>;
+export const AllAccountabilityCommunicationMessageRecipientsDocument = gql`
+    query AllAccountabilityCommunicationMessageRecipients($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $messageId: String!, $recipientId: String, $fullName: String, $phoneNo: String, $sex: String, $orderBy: String) {
+  allAccountabilityCommunicationMessageRecipients(offset: $offset, before: $before, after: $after, first: $first, last: $last, messageId: $messageId, recipientId: $recipientId, fullName: $fullName, phoneNo: $phoneNo, sex: $sex, orderBy: $orderBy) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edgeCount
+    edges {
+      cursor
+      node {
+        id
+        headOfHousehold {
+          id
+          fullName
+          household {
+            id
+            unicefId
+            size
+            status
+            admin2 {
+              id
+              name
+            }
+            residenceStatus
+            lastRegistrationDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type AllAccountabilityCommunicationMessageRecipientsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>, 'query'> & ({ variables: AllAccountabilityCommunicationMessageRecipientsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllAccountabilityCommunicationMessageRecipientsComponent = (props: AllAccountabilityCommunicationMessageRecipientsComponentProps) => (
+      <ApolloReactComponents.Query<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables> query={AllAccountabilityCommunicationMessageRecipientsDocument} {...props} />
+    );
+    
+export type AllAccountabilityCommunicationMessageRecipientsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables> & TChildProps;
+export function withAllAccountabilityCommunicationMessageRecipients<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllAccountabilityCommunicationMessageRecipientsQuery,
+  AllAccountabilityCommunicationMessageRecipientsQueryVariables,
+  AllAccountabilityCommunicationMessageRecipientsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables, AllAccountabilityCommunicationMessageRecipientsProps<TChildProps>>(AllAccountabilityCommunicationMessageRecipientsDocument, {
+      alias: 'allAccountabilityCommunicationMessageRecipients',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllAccountabilityCommunicationMessageRecipientsQuery__
+ *
+ * To run a query within a React component, call `useAllAccountabilityCommunicationMessageRecipientsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllAccountabilityCommunicationMessageRecipientsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllAccountabilityCommunicationMessageRecipientsQuery({
+ *   variables: {
+ *      offset: // value for 'offset'
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      messageId: // value for 'messageId'
+ *      recipientId: // value for 'recipientId'
+ *      fullName: // value for 'fullName'
+ *      phoneNo: // value for 'phoneNo'
+ *      sex: // value for 'sex'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllAccountabilityCommunicationMessageRecipientsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>(AllAccountabilityCommunicationMessageRecipientsDocument, baseOptions);
+      }
+export function useAllAccountabilityCommunicationMessageRecipientsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>(AllAccountabilityCommunicationMessageRecipientsDocument, baseOptions);
+        }
+export type AllAccountabilityCommunicationMessageRecipientsQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessageRecipientsQuery>;
+export type AllAccountabilityCommunicationMessageRecipientsLazyQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessageRecipientsLazyQuery>;
+export type AllAccountabilityCommunicationMessageRecipientsQueryResult = ApolloReactCommon.QueryResult<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>;
 export const AllAccountabilityCommunicationMessagesDocument = gql`
     query allAccountabilityCommunicationMessages($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $targetPopulation: ID, $createdBy: ID, $businessArea: String!, $program: String, $createdAtRange: String, $title: String, $body: String, $samplingType: String, $orderBy: String) {
   allAccountabilityCommunicationMessages(offset: $offset, before: $before, after: $after, first: $first, last: $last, numberOfRecipients: $numberOfRecipients, numberOfRecipients_Gte: $numberOfRecipients_Gte, numberOfRecipients_Lte: $numberOfRecipients_Lte, targetPopulation: $targetPopulation, createdBy: $createdBy, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange, title: $title, body: $body, samplingType: $samplingType, orderBy: $orderBy) {
