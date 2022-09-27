@@ -1007,14 +1007,15 @@ class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
 
     def _get_data(self, record) -> str:
         roles = Role.objects.all()
-        c = ForeignKeysCollector(None)
+        collector = ForeignKeysCollector(None)
         objs = []
         for qs in [roles]:
             objs.extend(qs)
         objs.extend(account_models.UserRole.objects.filter(pk=record.pk))
-        c.collect(objs)
+        collector.collect(objs)
         serializer = self.get_serializer("json")
-        return serializer.serialize(c.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3)
+        return serializer.serialize(
+            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3)
 
 
 class IncompatibleRoleFilter(SimpleListFilter):
