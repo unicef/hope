@@ -41,6 +41,7 @@ export const AllFeedbacks = gql`
             unicefId
           }
           createdAt
+          createdBy
           linkedGrievance {
             id
             unicefId
