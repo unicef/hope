@@ -1,3 +1,6 @@
+import random
+from unittest.mock import patch
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -39,7 +42,9 @@ class TestUpdateGrievanceTickets(APITestCase):
             language="PL",
             created_by=cls.user,
             business_area=cls.business_area,
-            issue_type=None,
+            issue_type=random.choice(
+                list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT].keys())
+            ),
         )
         cls.grievance_ticket2 = GrievanceTicket.objects.create(
             description="Test 2",
@@ -49,7 +54,9 @@ class TestUpdateGrievanceTickets(APITestCase):
             status=GrievanceTicket.STATUS_NEW,
             created_by=cls.user,
             business_area=cls.business_area,
-            issue_type=None,
+            issue_type=random.choice(
+                list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT].keys())
+            ),
         )
         cls.grievance_ticket3 = GrievanceTicket.objects.create(
             description="Test 3",
@@ -77,8 +84,8 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_bulk_update_grievance_assignee(self, name, permissions):
-        self.maxDiff = None
+    @patch("hct_mis_api.apps.grievance.mutations.bulk_update_assigned_to")
+    def test_bulk_update_grievance_assignee(self, _, permissions, bulk_update_assigned_to_mock):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         input_data = {
             "businessAreaSlug": self.business_area.slug,
