@@ -9,15 +9,17 @@ import { UniversalTable } from '../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';
 import { CommunicationTableRow } from './CommunicationTableRow';
 
-interface CommunicationProps {
+interface CommunicationTableProps {
   filter;
   businessArea: string;
+  canViewDetails: boolean;
 }
 
 export const CommunicationTable = ({
   filter,
   businessArea,
-}: CommunicationProps): ReactElement => {
+  canViewDetails,
+}: CommunicationTableProps): ReactElement => {
   const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
     createdAtRange: filter.createdAtRange
       ? JSON.stringify(filter.createdAtRange)
@@ -41,7 +43,11 @@ export const CommunicationTable = ({
         defaultOrderDirection='desc'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <CommunicationTableRow key={row.id} message={row} />
+          <CommunicationTableRow
+            key={row.id}
+            message={row}
+            canViewDetails={canViewDetails}
+          />
         )}
       />
     </TableWrapper>
