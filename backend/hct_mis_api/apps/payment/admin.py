@@ -1,4 +1,8 @@
+from django import forms
 from django.contrib import admin, messages
+from django.core.exceptions import ValidationError
+from django.db.models import QuerySet, Q
+
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -61,9 +65,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         return obj.parent.name
 
     def get_queryset(self, request):
-        return (
-            super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
-        )
+        return super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
 
 
 @admin.register(CashPlanPaymentVerification)
@@ -252,8 +254,34 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
         return super().save_model(request, obj, form, change)
 
 
+class FinancialServiceProviderAdminForm(forms.ModelForm):
+    @staticmethod
+    def locked_payment_plans_for_fsp(obj: FinancialServiceProvider) -> QuerySet[PaymentPlan]:
+        return PaymentPlan.objects.filter(
+            ~Q(
+                status__in=[
+                    PaymentPlan.Status.OPEN,
+                    PaymentPlan.Status.RECONCILED,
+                ],
+            ),
+            delivery_mechanisms__financial_service_provider=obj,
+        ).distinct()
+
+    def clean(self):
+        if self.instance:
+            payment_plans = self.locked_payment_plans_for_fsp(self.instance)
+            if payment_plans.exists():
+                raise ValidationError(
+                    f"Cannot modify {self.instance}, it is assigned to following Payment Plans: {list(payment_plans)}"
+                )
+
+        return super().clean()
+
+
 @admin.register(FinancialServiceProvider)
 class FinancialServiceProviderAdmin(HOPEModelAdminBase):
+    form = FinancialServiceProviderAdminForm
+
     list_display = (
         "name",
         "created_by",

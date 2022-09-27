@@ -899,7 +899,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
     financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
+        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
     assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
