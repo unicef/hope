@@ -18,7 +18,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 TOKEN_INFO_EMAIL = """
 Dear {friendly_name},
 
-please find below API toke infos
+please find below API token infos
 
 Name: {obj}
 Key: {obj.key}
@@ -30,6 +30,7 @@ Regards
 
 The HOPE Team
 """
+
 TOKEN_CREATED_EMAIL = """
 Dear {friendly_name},
 
@@ -49,7 +50,7 @@ The HOPE Team
 TOKEN_UPDATED_EMAIL = """
 Dear {friendly_name},
 
-your assigned assigned API token {obj} has been updated.
+your assigned API token {obj} has been updated.
 
 Grants: {obj.grants}
 Expires: {expire}
