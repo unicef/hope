@@ -8,6 +8,10 @@ export const AllFeedbacks = gql`
     $first: Int
     $last: Int
     $businessAreaSlug: String!
+    $issueType: String
+    $createdAtRange: String
+    $createdBy: String
+    $feedbackId: String
   ) {
     allFeedbacks(
       offset: $offset
@@ -16,6 +20,10 @@ export const AllFeedbacks = gql`
       first: $first
       last: $last
       businessAreaSlug: $businessAreaSlug
+      issueType: $issueType
+      createdAtRange: $createdAtRange
+      createdBy: $createdBy
+      feedbackId: $feedbackId
     ) {
       totalCount
       pageInfo {

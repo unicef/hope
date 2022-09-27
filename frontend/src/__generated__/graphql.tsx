@@ -941,6 +941,7 @@ export type CreateGrievanceTicketInput = {
   partner?: Maybe<Scalars['Int']>,
   programme?: Maybe<Scalars['ID']>,
   comments?: Maybe<Scalars['String']>,
+  linkedFeedbackId?: Maybe<Scalars['ID']>,
 };
 
 export type CreateGrievanceTicketMutation = {
@@ -7126,6 +7127,45 @@ export type CreateFeedbackTicketMutation = (
   )> }
 );
 
+export type UpdateFeedbackTicketMutationVariables = {
+  input: UpdateFeedbackInput
+};
+
+
+export type UpdateFeedbackTicketMutation = (
+  { __typename?: 'Mutations' }
+  & { updateFeedback: Maybe<(
+    { __typename?: 'UpdateFeedbackMutation' }
+    & { feedback: Maybe<(
+      { __typename?: 'FeedbackNode' }
+      & Pick<FeedbackNode, 'id' | 'unicefId' | 'issueType' | 'createdAt' | 'updatedAt' | 'area' | 'language' | 'description' | 'comments'>
+      & { householdLookup: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+        ) }
+      )>, individualLookup: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'unicefId'>
+      )>, program: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
+      )>, createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email'>
+      )>, admin2: Maybe<(
+        { __typename?: 'AreaNode' }
+        & Pick<AreaNode, 'id' | 'name'>
+      )>, linkedGrievance: Maybe<(
+        { __typename?: 'GrievanceTicketNode' }
+        & Pick<GrievanceTicketNode, 'id' | 'unicefId'>
+      )> }
+    )> }
+  )> }
+);
+
 export type CheckAgainstSanctionListUploadMutationVariables = {
   file: Scalars['Upload']
 };
@@ -8548,7 +8588,11 @@ export type AllFeedbacksQueryVariables = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  businessAreaSlug: Scalars['String']
+  businessAreaSlug: Scalars['String'],
+  issueType?: Maybe<Scalars['String']>,
+  createdAtRange?: Maybe<Scalars['String']>,
+  createdBy?: Maybe<Scalars['String']>,
+  feedbackId?: Maybe<Scalars['String']>
 };
 
 
@@ -8591,6 +8635,10 @@ export type FeedbackQuery = (
     & { householdLookup: Maybe<(
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'unicefId'>
+      & { headOfHousehold: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'fullName'>
+      ) }
     )>, individualLookup: Maybe<(
       { __typename?: 'IndividualNode' }
       & Pick<IndividualNode, 'id' | 'unicefId'>
@@ -11500,6 +11548,96 @@ export function useCreateFeedbackTicketMutation(baseOptions?: ApolloReactHooks.M
 export type CreateFeedbackTicketMutationHookResult = ReturnType<typeof useCreateFeedbackTicketMutation>;
 export type CreateFeedbackTicketMutationResult = ApolloReactCommon.MutationResult<CreateFeedbackTicketMutation>;
 export type CreateFeedbackTicketMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>;
+export const UpdateFeedbackTicketDocument = gql`
+    mutation UpdateFeedbackTicket($input: UpdateFeedbackInput!) {
+  updateFeedback(input: $input) {
+    feedback {
+      id
+      unicefId
+      issueType
+      householdLookup {
+        id
+        unicefId
+        headOfHousehold {
+          id
+          fullName
+        }
+      }
+      individualLookup {
+        id
+        unicefId
+      }
+      program {
+        id
+        name
+      }
+      createdBy {
+        id
+        firstName
+        lastName
+        username
+        email
+      }
+      createdAt
+      updatedAt
+      admin2 {
+        id
+        name
+      }
+      area
+      language
+      description
+      comments
+      linkedGrievance {
+        id
+        unicefId
+      }
+    }
+  }
+}
+    `;
+export type UpdateFeedbackTicketMutationFn = ApolloReactCommon.MutationFunction<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables>;
+export type UpdateFeedbackTicketComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables>, 'mutation'>;
+
+    export const UpdateFeedbackTicketComponent = (props: UpdateFeedbackTicketComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables> mutation={UpdateFeedbackTicketDocument} {...props} />
+    );
+    
+export type UpdateFeedbackTicketProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables> & TChildProps;
+export function withUpdateFeedbackTicket<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdateFeedbackTicketMutation,
+  UpdateFeedbackTicketMutationVariables,
+  UpdateFeedbackTicketProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables, UpdateFeedbackTicketProps<TChildProps>>(UpdateFeedbackTicketDocument, {
+      alias: 'updateFeedbackTicket',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdateFeedbackTicketMutation__
+ *
+ * To run a mutation, you first call `useUpdateFeedbackTicketMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateFeedbackTicketMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateFeedbackTicketMutation, { data, loading, error }] = useUpdateFeedbackTicketMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateFeedbackTicketMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables>(UpdateFeedbackTicketDocument, baseOptions);
+      }
+export type UpdateFeedbackTicketMutationHookResult = ReturnType<typeof useUpdateFeedbackTicketMutation>;
+export type UpdateFeedbackTicketMutationResult = ApolloReactCommon.MutationResult<UpdateFeedbackTicketMutation>;
+export type UpdateFeedbackTicketMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables>;
 export const CheckAgainstSanctionListUploadDocument = gql`
     mutation CheckAgainstSanctionListUpload($file: Upload!) {
   checkAgainstSanctionList(file: $file) {
@@ -15478,8 +15616,8 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllFeedbacksDocument = gql`
-    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $businessAreaSlug: String!) {
-  allFeedbacks(offset: $offset, before: $before, after: $after, first: $first, last: $last, businessAreaSlug: $businessAreaSlug) {
+    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $businessAreaSlug: String!, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String) {
+  allFeedbacks(offset: $offset, before: $before, after: $after, first: $first, last: $last, businessAreaSlug: $businessAreaSlug, issueType: $issueType, createdAtRange: $createdAtRange, createdBy: $createdBy, feedbackId: $feedbackId) {
     totalCount
     pageInfo {
       startCursor
@@ -15541,6 +15679,10 @@ export function withAllFeedbacks<TProps, TChildProps = {}>(operationOptions?: Ap
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      issueType: // value for 'issueType'
+ *      createdAtRange: // value for 'createdAtRange'
+ *      createdBy: // value for 'createdBy'
+ *      feedbackId: // value for 'feedbackId'
  *   },
  * });
  */
@@ -15562,6 +15704,10 @@ export const FeedbackDocument = gql`
     householdLookup {
       id
       unicefId
+      headOfHousehold {
+        id
+        fullName
+      }
     }
     individualLookup {
       id

@@ -13,6 +13,7 @@ import {
   useMeQuery,
   useCreateGrievanceTicketNoteMutation,
   GrievanceTicketDocument,
+  FeedbackQuery,
 } from '../../../../__generated__/graphql';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { OverviewContainerColumn } from '../../../core/OverviewContainerColumn';
@@ -37,7 +38,8 @@ const StyledBox = styled(Paper)`
 `;
 
 interface MessagesProps {
-  messages: GrievanceTicketQuery['grievanceTicket']['ticketNotes'];
+  messages;
+  // messages: FeedbackQuery['feedback']['messages'];
   canAddMessage: boolean;
 }
 
