@@ -35,7 +35,7 @@ class ValidatorTest(TestCase):
         res = self._run(post_data)
         self.assertDictEqual(res, expected)
 
-    def test_1(self):
+    def test_empty_post(self):
         self.assertErrors(
             {},
             {
@@ -45,11 +45,11 @@ class ValidatorTest(TestCase):
             },
         )
 
-    def test_2(self):
+    def test_empty_households(self):
         data = {"households": [], "collect_individual_data": "N", "name": "Test1"}
         self.assertErrors(data, {"households": ["This field is required."]})
 
-    def test_3(self):
+    def test_empty_household_value(self):
         data = {"households": [{}], "collect_individual_data": "N", "name": "Test1"}
         self.assertErrors(
             data,
@@ -69,7 +69,7 @@ class ValidatorTest(TestCase):
             },
         )
 
-    def test_4(self):
+    def test_empty_members(self):
         data = {
             "households": [
                 {"country": "AF", "residence_status": "IDP", "size": 1, "members": []},
@@ -79,7 +79,7 @@ class ValidatorTest(TestCase):
         }
         self.assertErrors(data, {"households": [{"Household #1": [{"members": ["This field is required"]}]}]})
 
-    def test_5(self):
+    def test_double_entries(self):
         h1 = dict(**HOUSEHOLD)
         h1["members"] = [MEMBER, MEMBER]
 
@@ -100,7 +100,7 @@ class ValidatorTest(TestCase):
             },
         )
 
-    def test_6(self):
+    def test_double_entry_multiple_hh(self):
         h1 = dict(**HOUSEHOLD)
         h1["members"] = [MEMBER, MEMBER]
         data = {"collect_individual_data": "N", "name": "Test1", "households": [HOUSEHOLD, HOUSEHOLD, h1]}
