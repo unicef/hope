@@ -1,42 +1,29 @@
 import { Grid, GridSize, Typography } from '@material-ui/core';
-import { Title } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { reduceChoices, renderUserName } from '../../../../utils/utils';
-import {
-  GrievanceTicketQuery,
-  GrievancesChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+import { renderUserName } from '../../../../utils/utils';
+import { FeedbackQuery } from '../../../../__generated__/graphql';
+import { BlackLink } from '../../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { ContentLink } from '../../../core/ContentLink';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
+import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 
 interface FeedbackDetailsProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
-  choicesData: GrievancesChoiceDataQuery;
+  feedback: FeedbackQuery['feedback'];
   businessArea: string;
   canViewHouseholdDetails: boolean;
   canViewIndividualDetails: boolean;
 }
 
 export const FeedbackDetails = ({
-  ticket,
-  choicesData,
+  feedback,
   businessArea,
   canViewHouseholdDetails,
   canViewIndividualDetails,
 }: FeedbackDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
-
-  const issueType = ticket.issueType
-    ? choicesData.grievanceTicketIssueTypeChoices
-        .filter((el) => el.category === ticket.category.toString())[0]
-        .subCategories.filter(
-          (el) => el.value === ticket.issueType.toString(),
-        )[0].name
-    : '-';
 
   return (
     <Grid item xs={12}>
@@ -54,23 +41,29 @@ export const FeedbackDetails = ({
               },
               {
                 label: t('Issue Type'),
-                value: <span>{issueType}</span>,
+                value: (
+                  <span>
+                    {feedback.issueType === 'A_1'
+                      ? 'Positive Feedback'
+                      : 'Negative Feedback'}
+                  </span>
+                ),
                 size: 3,
               },
               {
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {ticket.household?.id ? (
-                      <ContentLink
-                        href={
+                    {feedback.householdLookup?.id ? (
+                      <BlackLink
+                        to={
                           canViewHouseholdDetails
-                            ? `/${businessArea}/population/household/${ticket.household.id}`
+                            ? `/${businessArea}/population/household/${feedback.householdLookup.id}`
                             : undefined
                         }
                       >
-                        {ticket.household.unicefId}
-                      </ContentLink>
+                        {feedback.householdLookup.unicefId}
+                      </BlackLink>
                     ) : (
                       '-'
                     )}
@@ -82,16 +75,16 @@ export const FeedbackDetails = ({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {ticket.individual?.id ? (
-                      <ContentLink
-                        href={
+                    {feedback.individualLookup?.id ? (
+                      <BlackLink
+                        to={
                           canViewIndividualDetails
-                            ? `/${businessArea}/population/individuals/${ticket.individual.id}`
+                            ? `/${businessArea}/population/individuals/${feedback.individualLookup.id}`
                             : undefined
                         }
                       >
-                        {ticket.individual.unicefId}
-                      </ContentLink>
+                        {feedback.individualLookup.unicefId}
+                      </BlackLink>
                     ) : (
                       '-'
                     )}
@@ -101,47 +94,47 @@ export const FeedbackDetails = ({
               },
               {
                 label: t('Programme'),
-                value: ticket.programme?.name,
+                value: feedback.program?.name,
                 size: 3,
               },
               {
                 label: t('Created By'),
-                value: renderUserName(ticket.createdBy),
+                value: renderUserName(feedback.createdBy),
                 size: 3,
               },
               {
                 label: t('Date Created'),
-                value: <UniversalMoment>{ticket.createdAt}</UniversalMoment>,
+                value: <UniversalMoment>{feedback.createdAt}</UniversalMoment>,
                 size: 3,
               },
               {
                 label: t('Last Modified Date'),
-                value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
+                value: <UniversalMoment>{feedback.updatedAt}</UniversalMoment>,
                 size: 3,
               },
               {
                 label: t('Administrative Level 2'),
-                value: ticket.admin,
+                value: feedback.admin2?.name,
                 size: 3,
               },
               {
                 label: t('Area / Village / Pay point'),
-                value: ticket.area,
+                value: feedback.area,
                 size: 3,
               },
               {
                 label: t('Languages Spoken'),
-                value: ticket.language,
+                value: feedback.language,
                 size: 3,
               },
               {
                 label: t('Description'),
-                value: ticket.description,
+                value: feedback.description,
                 size: 12,
               },
               {
                 label: t('Comments'),
-                value: ticket.comments,
+                value: feedback.comments,
                 size: 12,
               },
             ]

@@ -170,6 +170,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   const [validateData, setValidateData] = useState(false);
 
   const initialValues = {
+    category: 'Feedback',
     issueType: null,
     selectedHousehold: null,
     selectedIndividual: null,
@@ -241,7 +242,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     individualLookup: values.selectedIndividual.id,
     description: values.description,
     comments: values.comments,
-    admin2: values.admin2,
+    admin2: values.admin2.node.id,
     area: values.area,
     language: values.language,
     consent: values.consent,
@@ -414,7 +415,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                             </Grid>
                             <Grid item xs={6}>
                               <Field
-                                name='admin'
+                                name='admin2'
                                 label={t('Administrative Level 2')}
                                 variant='outlined'
                                 component={FormikAdminAreaAutocomplete}
@@ -441,7 +442,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                             </Grid>
                             <Grid item xs={6}>
                               <Field
-                                name='programme'
+                                name='program'
                                 fullWidth
                                 variant='outlined'
                                 label={t('Programme Title')}
@@ -450,20 +451,6 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                               />
                             </Grid>
                           </Grid>
-                          <Box pt={5}>
-                            <BoxWithBorders>
-                              <Grid container spacing={4}>
-                                <Grid item xs={6}>
-                                  <Box py={3}>
-                                    <LookUpRelatedTickets
-                                      values={values}
-                                      onValueChange={setFieldValue}
-                                    />
-                                  </Box>
-                                </Grid>
-                              </Grid>
-                            </BoxWithBorders>
-                          </Box>
                         </BoxPadding>
                       )}
                       <Box pt={3} display='flex' flexDirection='row'>
