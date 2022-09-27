@@ -7,8 +7,7 @@ Feature: Create Payment Plan
         Given Each imported individual has a payment channel
         Given I have an active program
         Given I have target population in ready status
-      # Given I am sure that my business area is payment plan applicable
-    # query businessAreaData
+        Given Business area is payment plan applicable
 
 #    Scenario: Create Payment Plan with steficon
 #        Given There are steficon rules provided

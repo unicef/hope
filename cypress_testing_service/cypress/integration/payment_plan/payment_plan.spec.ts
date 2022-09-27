@@ -150,6 +150,12 @@ Given('I have target population in ready status', () => {
   cy.get('[data-cy="status-container"]').contains('Ready');
 });
 
+Given("Business area is payment plan applicable", () => {
+  cy.visit('/api/unicorn/core/businessarea/');
+  cy.get('th').contains('Afghanistan').parent().find('a').click();
+  cy.get('#id_is_payment_plan_applicable').should('be.checked');
+})
+
 When('I visit the main dashboard', () => {
   cy.visit('/');
 });
