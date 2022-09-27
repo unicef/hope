@@ -41,7 +41,7 @@ export function ImportedIndividualsTable({
   };
 
   return (
-    <>
+    <div data-cy='imported-individuals-table'>
       {showCheckbox && (
         <Grid container justify='flex-end' spacing={3}>
           <Grid item>
@@ -79,6 +79,6 @@ export function ImportedIndividualsTable({
           />
         )}
       />
-    </>
+    </div>
   );
 }

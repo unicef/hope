@@ -36,7 +36,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
 
   const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
   const verification =
-    paymentVerification.paymentRecord?.cashPlan?.verifications?.edges[0].node;
+    paymentVerification.paymentRecord?.parent?.verifications?.edges[0].node;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [

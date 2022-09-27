@@ -1,5 +1,5 @@
 import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
-
+import { getIndividualsFromRdiDetails } from '../../procedures/procedures';
 let householdId;
 let individualId;
 let individualIds = [];
@@ -57,7 +57,7 @@ When('I select the xlsx file', () => {
 
   const fileName = 'rdi_import_1_hh_1_ind.xlsx';
   cy.fixture(fileName, 'base64').then((fileContent) => {
-    cy.get('[data-cy="rdi-file-input"]').upload({
+    cy.get('[data-cy="file-input"]').upload({
       fileContent,
       fileName,
       mimeType:
@@ -113,9 +113,7 @@ Then('I see that the status is merged', () => {
     householdId = $td.text().split(' (')[0];
   });
   cy.get('button > span').contains('Individuals').click({ force: true });
-  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
-    individualId = $td.text().split(' (')[0];
-  });
+  individualId = getIndividualsFromRdiDetails(cy, 1)[0];
 });
 
 When('I visit the Households dashboard', () => {

@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -9,7 +10,6 @@ from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 logger = logging.getLogger(__name__)
-
 
 class ExchangeRateAPI:
     CACHE_KEY = "exchange_rates"
@@ -29,6 +29,11 @@ class ExchangeRateAPI:
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
     def fetch_exchange_rates(self, with_history: bool = True) -> dict:
+        if settings.USE_DUMMY_EXCHANGE_RATES is True:
+            exchange_rates_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exchange_rates.json")
+            with open(exchange_rates_file_path, "r") as exchange_rates_file:
+                return json.load(exchange_rates_file)
+
         params = {}
 
         if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:

@@ -60,10 +60,10 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
                     class="sc-iwsKbI dUmvrG"
                   >
                     <div
-                      class="sc-gZMcBi iKWapA"
+                      class="sc-gZMcBi gdYFKs"
                       data-cy="status-container"
                     >
-                      In Authorization
+                      Locked
                     </div>
                   </div>
                 </div>

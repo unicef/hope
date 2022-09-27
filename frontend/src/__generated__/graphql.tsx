@@ -336,6 +336,10 @@ export type AssignFspToDeliveryMechanismMutation = {
   paymentPlan?: Maybe<PaymentPlanNode>,
 };
 
+export type AvailableFspsForDeliveryMechanismsInput = {
+  paymentPlanId: Scalars['ID'],
+};
+
 export type BankAccountInfoNode = Node & {
    __typename?: 'BankAccountInfoNode',
   id: Scalars['ID'],
@@ -1031,8 +1035,6 @@ export type DeliveryMechanismNode = Node & {
   status: Scalars['String'],
   deliveryMechanism?: Maybe<DeliveryMechanismPerPaymentPlanDeliveryMechanism>,
   deliveryMechanismOrder: Scalars['Int'],
-  entitlementQuantity?: Maybe<Scalars['Float']>,
-  entitlementQuantityUsd?: Maybe<Scalars['Float']>,
   name?: Maybe<Scalars['String']>,
   order?: Maybe<Scalars['Int']>,
   fsp?: Maybe<FinancialServiceProviderNode>,
@@ -3823,6 +3825,16 @@ export type PaymentNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum PaymentPlanBackgroundActionStatus {
+  SteficonRun = 'STEFICON_RUN',
+  SteficonError = 'STEFICON_ERROR',
+  XlsxExporting = 'XLSX_EXPORTING',
+  XlsxExportError = 'XLSX_EXPORT_ERROR',
+  XlsxImportError = 'XLSX_IMPORT_ERROR',
+  XlsxImportingEntitlements = 'XLSX_IMPORTING_ENTITLEMENTS',
+  XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION'
+}
+
 export enum PaymentPlanCurrency {
   A = 'A_',
   Aed = 'AED',
@@ -4011,7 +4023,7 @@ export type PaymentPlanNode = Node & {
   totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
   createdBy: UserNode,
   status: PaymentPlanStatus,
-  backgroundActionStatus?: Maybe<Scalars['String']>,
+  backgroundActionStatus?: Maybe<PaymentPlanBackgroundActionStatus>,
   targetPopulation: TargetPopulationNode,
   currency: PaymentPlanCurrency,
   dispersionStartDate?: Maybe<Scalars['Date']>,
@@ -4088,7 +4100,8 @@ export enum PaymentPlanStatus {
   InApproval = 'IN_APPROVAL',
   InAuthorization = 'IN_AUTHORIZATION',
   InReview = 'IN_REVIEW',
-  Accepted = 'ACCEPTED'
+  Accepted = 'ACCEPTED',
+  Reconciled = 'RECONCILED'
 }
 
 export enum PaymentRecordDeliveryType {
@@ -4528,8 +4541,8 @@ export type Query = {
   payment?: Maybe<PaymentNode>,
   allPayments?: Maybe<PaymentNodeConnection>,
   allDeliveryMechanisms?: Maybe<Array<Maybe<ChoiceObject>>>,
-  availableFspsForDeliveryMechanisms?: Maybe<Array<Maybe<FspChoices>>>,
   paymentPlanBackgroundActionStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  availableFspsForDeliveryMechanisms?: Maybe<Array<Maybe<FspChoices>>>,
   businessArea?: Maybe<BusinessAreaNode>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
@@ -4981,7 +4994,7 @@ export type QueryAllPaymentsArgs = {
 
 
 export type QueryAvailableFspsForDeliveryMechanismsArgs = {
-  deliveryMechanisms?: Maybe<Array<Maybe<Scalars['String']>>>
+  input?: Maybe<AvailableFspsForDeliveryMechanismsInput>
 };
 
 
@@ -9745,7 +9758,7 @@ export type AllPaymentPlansForTableQuery = (
 );
 
 export type AvailableFspsForDeliveryMechanismsQueryVariables = {
-  deliveryMechanisms: Array<Scalars['String']>
+  input: AvailableFspsForDeliveryMechanismsInput
 };
 
 
@@ -9840,7 +9853,7 @@ export type PaymentPlanQuery = (
       )> }
     )>, deliveryMechanisms: Maybe<Array<Maybe<(
       { __typename?: 'DeliveryMechanismNode' }
-      & Pick<DeliveryMechanismNode, 'id' | 'name'>
+      & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order'>
       & { fsp: Maybe<(
         { __typename?: 'FinancialServiceProviderNode' }
         & Pick<FinancialServiceProviderNode, 'id' | 'name'>
@@ -9992,7 +10005,10 @@ export type AllPaymentsForTableQuery = (
         )>>>, collector: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'fullName'>
-        ) }
+        ), financialServiceProvider: Maybe<(
+          { __typename?: 'FinancialServiceProviderNode' }
+          & Pick<FinancialServiceProviderNode, 'id' | 'name'>
+        )> }
       )> }
     )>> }
   )> }
@@ -17659,8 +17675,8 @@ export type AllPaymentPlansForTableQueryHookResult = ReturnType<typeof useAllPay
 export type AllPaymentPlansForTableLazyQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableLazyQuery>;
 export type AllPaymentPlansForTableQueryResult = ApolloReactCommon.QueryResult<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>;
 export const AvailableFspsForDeliveryMechanismsDocument = gql`
-    query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
-  availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
+    query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechanismsInput!) {
+  availableFspsForDeliveryMechanisms(input: $input) {
     deliveryMechanism
     fsps {
       id
@@ -17699,7 +17715,7 @@ export function withAvailableFspsForDeliveryMechanisms<TProps, TChildProps = {}>
  * @example
  * const { data, loading, error } = useAvailableFspsForDeliveryMechanismsQuery({
  *   variables: {
- *      deliveryMechanisms: // value for 'deliveryMechanisms'
+ *      input: // value for 'input'
  *   },
  * });
  */
@@ -17843,6 +17859,7 @@ export const PaymentPlanDocument = gql`
     deliveryMechanisms {
       id
       name
+      order
       fsp {
         id
         name
@@ -18163,6 +18180,10 @@ export const AllPaymentsForTableDocument = gql`
           fullName
         }
         hasPaymentChannel
+        financialServiceProvider {
+          id
+          name
+        }
       }
     }
   }
@@ -22315,6 +22336,7 @@ export type ResolversTypes = {
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
   ReportNode: ResolverTypeWrapper<ReportNode>,
   PaymentPlanStatus: PaymentPlanStatus,
+  PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
   PaymentPlanCurrency: PaymentPlanCurrency,
   DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
   FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>,
@@ -22466,6 +22488,7 @@ export type ResolversTypes = {
   AgeInput: AgeInput,
   RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
+  AvailableFspsForDeliveryMechanismsInput: AvailableFspsForDeliveryMechanismsInput,
   FspChoices: ResolverTypeWrapper<FspChoices>,
   FspChoice: ResolverTypeWrapper<FspChoice>,
   BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
@@ -22749,6 +22772,7 @@ export type ResolversParentTypes = {
   ReportNodeEdge: ReportNodeEdge,
   ReportNode: ReportNode,
   PaymentPlanStatus: PaymentPlanStatus,
+  PaymentPlanBackgroundActionStatus: PaymentPlanBackgroundActionStatus,
   PaymentPlanCurrency: PaymentPlanCurrency,
   DeliveryMechanismNode: DeliveryMechanismNode,
   FinancialServiceProviderNode: FinancialServiceProviderNode,
@@ -22900,6 +22924,7 @@ export type ResolversParentTypes = {
   AgeInput: AgeInput,
   RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
+  AvailableFspsForDeliveryMechanismsInput: AvailableFspsForDeliveryMechanismsInput,
   FspChoices: FspChoices,
   FspChoice: FspChoice,
   BusinessAreaNode: BusinessAreaNode,
@@ -23569,8 +23594,6 @@ export type DeliveryMechanismNodeResolvers<ContextType = any, ParentType extends
   status?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanDeliveryMechanism']>, ParentType, ContextType>,
   deliveryMechanismOrder?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  entitlementQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  entitlementQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   order?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
@@ -24627,7 +24650,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentPlanStatus'], ParentType, ContextType>,
-  backgroundActionStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  backgroundActionStatus?: Resolver<Maybe<ResolversTypes['PaymentPlanBackgroundActionStatus']>, ParentType, ContextType>,
   targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
   currency?: Resolver<ResolversTypes['PaymentPlanCurrency'], ParentType, ContextType>,
   dispersionStartDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
@@ -24882,8 +24905,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   payment?: Resolver<Maybe<ResolversTypes['PaymentNode']>, ParentType, ContextType, RequireFields<QueryPaymentArgs, 'id'>>,
   allPayments?: Resolver<Maybe<ResolversTypes['PaymentNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentsArgs, 'businessArea' | 'paymentPlanId'>>,
   allDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  availableFspsForDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoices']>>>, ParentType, ContextType, QueryAvailableFspsForDeliveryMechanismsArgs>,
   paymentPlanBackgroundActionStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  availableFspsForDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoices']>>>, ParentType, ContextType, QueryAvailableFspsForDeliveryMechanismsArgs>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,

@@ -13,7 +13,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
 )
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentPlan, Payment
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -130,10 +130,9 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
 }
 """
 
-# TODO: make this in payment plan scope
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query AvailableFspsForDeliveryMechanisms($deliveryMechanisms: [String!]!) {
-    availableFspsForDeliveryMechanisms(deliveryMechanisms: $deliveryMechanisms) {
+query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechanismsInput!) {
+    availableFspsForDeliveryMechanisms(input: $input) {
         deliveryMechanism
         fsps {
             id
@@ -352,6 +351,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH, GenericPayment.DELIVERY_TYPE_TRANSFER],
+            distribution_limit=None,
         )
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
@@ -360,13 +360,13 @@ class TestPaymentPlanReconciliation(APITestCase):
             business_area=self.business_area,
             household=self.household_1,
             collector=self.individual_1,
-            delivery_type=GenericPayment.DELIVERY_TYPE_CASH,
+            delivery_type=None,
             entitlement_quantity=1000,
             entitlement_quantity_usd=100,
             delivered_quantity=None,
             delivered_quantity_usd=None,
-            financial_service_provider=santander_fsp,
-            assigned_payment_channel=self.payment_channel_1_cash,
+            financial_service_provider=None,
+            assigned_payment_channel=None,
             excluded=False,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
@@ -427,7 +427,11 @@ class TestPaymentPlanReconciliation(APITestCase):
         available_fsps_query_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
-            variables={"deliveryMechanisms": [GenericPayment.DELIVERY_TYPE_CASH]},
+            variables=dict(
+                input={
+                    "paymentPlanId": encoded_payment_plan_id,
+                }
+            ),
         )
         assert "errors" not in available_fsps_query_response, available_fsps_query_response
         available_fsps_data = available_fsps_query_response["data"]["availableFspsForDeliveryMechanisms"]
@@ -467,7 +471,22 @@ class TestPaymentPlanReconciliation(APITestCase):
             lock_fsp_in_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
             "LOCKED_FSP",
         )
-        # TODO: observe that payments have received amounts set
+
+        payment_plan.refresh_from_db()
+        assert (
+            payment_plan.delivery_mechanisms.filter(
+                financial_service_provider=santander_fsp, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+            ).count()
+            == 1
+        )
+        assert (
+            payment_plan.not_excluded_payments.filter(
+                financial_service_provider__isnull=False,
+                assigned_payment_channel__isnull=False,
+                delivery_type__isnull=False,
+            ).count()
+            == 1
+        )
 
         send_for_approval_payment_plan_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
@@ -594,7 +613,8 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
             self.assertEqual(payment.delivered_quantity, None)
-            self.assertEqual(payment.is_reconciled, False)
+            self.assertEqual(payment.status, Payment.STATUS_NOT_DISTRIBUTED)
+            self.assertEqual(payment_plan.is_reconciled, False)
 
             sheet.cell(row=2, column=8).value = 500
             filled_file_name = "filled.xlsx"
@@ -622,4 +642,5 @@ class TestPaymentPlanReconciliation(APITestCase):
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
             self.assertEqual(payment.delivered_quantity, 500)
-            self.assertEqual(payment.is_reconciled, True)
+            self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
+            self.assertEqual(payment_plan.is_reconciled, True)

@@ -225,14 +225,6 @@ class GenericPayment(TimeStampedUUIDModel):
     class Meta:
         abstract = True
 
-    @property
-    def is_reconciled(self):
-        return (
-            self.delivered_quantity is not None
-            and self.entitlement_quantity is not None
-            and self.delivered_quantity == self.entitlement_quantity
-        )
-
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -257,7 +249,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         IN_AUTHORIZATION = "IN_AUTHORIZATION", "In Authorization"
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
-        RECONCILED = "RECONCILED", "Reconciled" # TODO: will add to PaymentVerification list if status is 'Reconciled'
+        RECONCILED = "RECONCILED", "Reconciled"
 
     class BackgroundActionStatus(models.TextChoices):
         STEFICON_RUN = "STEFICON_RUN", "Rule Engine Running"
@@ -317,7 +309,11 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     imported_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     export_file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
     steficon_rule = models.ForeignKey(
-        RuleCommit, null=True, on_delete=models.PROTECT, related_name="payment_plans", blank=True,
+        RuleCommit,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
+        blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
 
@@ -489,7 +485,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return self.dispersion_end_date if self.dispersion_end_date < now else now
 
     @property
-    def all_active_payments(self):
+    def not_excluded_payments(self):
         return self.payment_items.exclude(excluded=True)
 
     @property
@@ -497,7 +493,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         return self.payment_items.filter(payment_plan_hard_conflicted=False).exists()
 
     def update_population_count_fields(self):
-        households_ids = self.all_active_payments.values_list("household_id", flat=True)
+        households_ids = self.not_excluded_payments.values_list("household_id", flat=True)
 
         delta18 = relativedelta(years=+18)
         date18ago = datetime.now() - delta18
@@ -531,7 +527,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     def update_money_fields(self):
         self.exchange_rate = self.get_exchange_rate()
-        payments = self.all_active_payments.aggregate(
+        payments = self.not_excluded_payments.aggregate(
             total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
             total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
             total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
@@ -567,6 +563,13 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         if self.export_file:
             return self.export_file.file.url
         return None
+
+    @property
+    def is_reconciled(self):
+        return (
+            self.not_excluded_payments.filter(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS).count()
+            == self.not_excluded_payments.count()
+        )
 
     def remove_export_file(self):
         if self.export_file:
@@ -652,7 +655,8 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.00"))],
         null=True,
-        help_text="The maximum amount of money that can be distributed or unlimited if 0",
+        blank=True,
+        help_text="The maximum amount of money in USD that can be distributed or unlimited if null",
         db_index=True,
     )
     communication_channel = models.CharField(max_length=6, choices=COMMUNICATION_CHANNEL_CHOICES, db_index=True)
@@ -672,6 +676,32 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
 
     def __str__(self):
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
+
+    def can_accept_any_volume(self) -> bool:
+        if (
+            self.distribution_limit is not None
+            and self.delivery_mechanisms_per_payment_plan.filter(
+                payment_plan__status__in=[
+                    PaymentPlan.Status.LOCKED_FSP,
+                    PaymentPlan.Status.IN_APPROVAL,
+                    PaymentPlan.Status.IN_AUTHORIZATION,
+                    PaymentPlan.Status.IN_REVIEW,
+                    PaymentPlan.Status.ACCEPTED,
+                ]
+            ).exists()
+        ):
+            return False
+
+        if self.distribution_limit == 0.0:
+            return False
+
+        return True
+
+    def can_accept_volume(self, volume: Decimal) -> bool:
+        if self.distribution_limit is None:
+            return True
+
+        return volume <= self.distribution_limit
 
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
@@ -728,18 +758,6 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, db_index=True, null=True
     )
     delivery_mechanism_order = models.PositiveIntegerField()
-    # TODO: can be removed
-    # entitlement_quantity* is calculated dynamically during `_calculate_volume` in schema
-    entitlement_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-        db_index=True,
-        null=True,
-    )  # TODO MB count from related payments per delivery mechanism
-    entitlement_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
-    )  # TODO MB calculate
 
     class Meta:
         constraints = [
@@ -908,7 +926,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
-    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.PROTECT, null=True)  # TODO: on_delete=CASCADE ?
+    assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
 
     objects = PaymentManager()
 

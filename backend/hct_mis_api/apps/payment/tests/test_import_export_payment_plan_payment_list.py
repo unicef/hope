@@ -2,6 +2,8 @@ import zipfile
 
 from io import BytesIO
 from pathlib import Path
+from constance.test import override_config
+from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
@@ -60,12 +62,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         cls.payment_plan = PaymentPlanFactory(program=program, business_area=cls.business_area)
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():
-            PaymentFactory(
-                parent=cls.payment_plan,
-                household=household,
-                excluded=False,
-                assigned_payment_channel=None
-            )
+            PaymentFactory(parent=cls.payment_plan, household=household, excluded=False, assigned_payment_channel=None)
 
         cls.user = UserFactory()
         cls.payment_plan = PaymentPlan.objects.all().last()
@@ -110,18 +107,18 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_invalid_file)
         wb = service.open_workbook()
         # override imported sheet payment id
-        wb.active["A3"].value = str(self.payment_plan.all_active_payments[1].unicef_id)
+        wb.active["A3"].value = str(self.payment_plan.not_excluded_payments[1].unicef_id)
 
         service.validate()
         self.assertEqual(service.errors, error_msg)
 
     def test_import_valid_file(self):
-        all_active_payments = self.payment_plan.payment_items.exclude(excluded=True)
+        not_excluded_payments = self.payment_plan.not_excluded_payments.all()
         # override imported payment id
-        payment_id_1 = str(all_active_payments[0].unicef_id)
-        payment_id_2 = str(all_active_payments[1].unicef_id)
-        payment_1 = all_active_payments[0]
-        payment_2 = all_active_payments[1]
+        payment_id_1 = str(not_excluded_payments[0].unicef_id)
+        payment_id_2 = str(not_excluded_payments[1].unicef_id)
+        payment_1 = not_excluded_payments[0]
+        payment_2 = not_excluded_payments[1]
         payment_2.collector.payment_channels.all().delete()
 
         service = XlsxPaymentPlanImportService(self.payment_plan, self.xlsx_valid_file)
@@ -142,7 +139,9 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service.validate()
         self.assertEqual(service.errors, [])
 
-        service.import_payment_list()
+        with patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateAPI.fetch_exchange_rates") as mock:
+            mock.return_value = {}
+            service.import_payment_list()
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
 
@@ -157,13 +156,14 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertTrue(self.payment_plan.has_export_file)
 
         wb = export_service.generate_workbook()
-
-        self.assertEqual(wb.active["A2"].value, str(self.payment_plan.all_active_payments[0].unicef_id))
-        self.assertEqual(wb.active["I2"].value, self.payment_plan.all_active_payments[0].entitlement_quantity)
-        self.assertEqual(wb.active["J2"].value, self.payment_plan.all_active_payments[0].entitlement_quantity_usd)
+        payment = self.payment_plan.not_excluded_payments.order_by("unicef_id").first()
+        self.assertEqual(wb.active["A2"].value, str(payment.unicef_id))
+        self.assertEqual(wb.active["I2"].value, payment.entitlement_quantity)
+        self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity_usd)
         payment_channels = ", ".join(
             list(
-                self.payment_plan.all_active_payments[0].collector.payment_channels.all()
+                self.payment_plan.not_excluded_payments.first()
+                .collector.payment_channels.all()
                 .distinct("delivery_mechanism")
                 .values_list("delivery_mechanism", flat=True)
             )
@@ -172,7 +172,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
 
     def test_export_payment_plan_payment_list_per_fsp(self):
         # add assigned_payment_channel
-        for p in self.payment_plan.all_active_payments:
+        for p in self.payment_plan.not_excluded_payments.all():
             p.assigned_payment_channel = p.collector.payment_channels.first()
             p.save()
 
