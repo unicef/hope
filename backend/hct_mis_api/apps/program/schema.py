@@ -15,7 +15,7 @@ from django.db.models import (
     Exists,
     Subquery,
 )
-from graphene import relay, ObjectType
+from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
@@ -46,13 +46,10 @@ from hct_mis_api.apps.payment.models import (
     ServiceProvider,
     PaymentPlan,
     PaymentVerificationSummary,
-    GenericPaymentPlan
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
-from hct_mis_api.apps.payment.filters import CashPlanFilter, CashPlanPaymentPlanFilter
-from hct_mis_api.apps.payment.utils import get_payment_cash_plan_items_sequence_qs
-from hct_mis_api.apps.payment.schema import CashPlanPaymentVerificationSummaryNode
+from hct_mis_api.apps.payment.filters import CashPlanFilter
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
@@ -121,68 +118,6 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         ).count()
 
 
-class PaginatedType(graphene.ObjectType):
-    page = graphene.Int()
-    pages = graphene.Int()
-    page_size = graphene.Int()
-    total_count = graphene.Int()
-    has_next = graphene.Boolean()
-    has_prev = graphene.Boolean()
-
-class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, ObjectType):
-    """
-    for CashPlan and PaymentPlan models
-    """
-    permission_classes = (
-        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
-    )
-
-    obj_type = graphene.String()
-    id = graphene.String(source="pk")
-    unicef_id = graphene.String(source="unicef_id")
-    verification_status = graphene.String()
-    fsp_names = graphene.String()
-    delivery_mechanisms = graphene.String(source="delivery_type")
-    delivery_types = graphene.String(source="delivery_types")
-    currency = graphene.String(source="currency")
-    total_delivered_quantity = graphene.Float(source="total_delivered_quantity")
-    start_date = graphene.String(source="start_date")
-    end_date = graphene.String(source="end_date")
-    programme_name = graphene.String()
-    updated_at = graphene.String(source="updated_at")
-
-    def resolve_obj_type(self, info, **kwargs):
-        return self.__class__.__name__
-
-    def resolve_verification_status(self, info, **kwargs):
-        return self.payment_verification_summary_obj.status if self.payment_verification_summary_obj else None
-
-    def resolve_fsp_names(self, info, **kwargs):
-        return self.fsp_names
-
-    def resolve_programme_name(self, info, **kwargs):
-        return self.program.name
-
-
-class PaginatedCashPlanAndPaymentPlanNode(PaginatedType):
-    objects = graphene.List(CashPlanAndPaymentPlanNode)
-
-
-class GenericPaymentPlanNode(ObjectType):
-    # TODO: add perms
-    # permission_classes = (
-    #     hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-    #     hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
-    # )
-
-    payment_verification_summary = graphene.Field(CashPlanPaymentVerificationSummaryNode)
-
-
-    def resolve_payment_verification_summary(self):
-        return self.payment_verification_summary_obj
-
-
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
     all_programs = DjangoPermissionFilterConnectionField(
@@ -218,21 +153,6 @@ class Query(graphene.ObjectType):
                 Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
             ),
         ),
-    )
-    all_cash_plans_and_payment_plans = graphene.Field(
-        # CashPlanAndPaymentPlanNode,
-        PaginatedCashPlanAndPaymentPlanNode,
-        business_area=graphene.String(required=True),
-        program=graphene.String(required=False),
-        search=graphene.String(required=False),
-        service_provider=graphene.String(required=False),
-        delivery_type=graphene.String(required=False),
-        verification_status=graphene.String(required=False),
-        start_date_gte=graphene.String(required=False),
-        end_date_lte=graphene.String(required=False),
-        order_by=graphene.String(required=False),
-        page=graphene.Int(required=False),
-        page_size=graphene.Int(required=False),
     )
     program_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
@@ -286,102 +206,6 @@ class Query(graphene.ObjectType):
                 output_field=IntegerField(),
             )
         ).order_by("-updated_at", "custom_order")
-
-    def resolve_all_cash_plans_and_payment_plans(self, info, page_size=5, page=1, **kwargs):
-
-        qs = ExtendedQuerySetSequence(
-            # TODO: added only for tests
-            # PaymentPlan.objects.filter(status=PaymentPlan.Status.RECONCILED),
-            PaymentPlan.objects.all(),
-            CashPlan.objects.all()
-        )
-        print("KW== > ", kwargs)
-
-        payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(payment_plan_object_id=str(OuterRef('id')))
-        service_provider_qs = ServiceProvider.objects.filter(cash_plans=OuterRef("id")).distinct()
-        cash_plan_qs = CashPlan.objects.filter(id=OuterRef("id")).distinct()
-
-        delivery_mechanisms_per_payment_plan_qs = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=OuterRef('pk'))
-        fsp_ids = delivery_mechanisms_per_payment_plan_qs.values_list("financial_service_provider", flat=True)
-        fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
-
-
-        qs = qs.annotate(
-            custom_order=Case(
-                When(
-                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_ACTIVE)),
-                    then=Value(1),
-                ),
-                When(
-                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_PENDING)),
-                    then=Value(2),
-                ),
-                When(
-                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_FINISHED)),
-                    then=Value(3),
-                ),
-                output_field=IntegerField(),
-                default=Value(0),
-            ),
-            fsp_names=Case(
-                When(
-                    Exists(service_provider_qs),
-                    then=Subquery(service_provider_qs.values_list("full_name", flat=True)),
-                ),
-                When(
-                    Exists(delivery_mechanisms_per_payment_plan_qs),
-                    then=Value("FSP qs"),
-                    # TODO: upd query
-                    # then=Subquery(fsp_qs.values_list("name", flat=True)),
-                ),
-                default=Value(""),
-                output_field=CharField(),
-            ),
-            # TODO: upd 'delivery_types'
-            delivery_types=Case(
-                When(
-                    Exists(service_provider_qs),
-                    # then=F("delivery_type"),
-                    then=Value("from cash_plan"),
-
-                ),
-                When(
-                    Exists(delivery_mechanisms_per_payment_plan_qs),
-                    then=Value("list form delivery_mechanisms_per_payment_plan")
-                    # then=Subquery(delivery_mechanisms_per_payment_plan_qs.values_list("delivery_mechanism", flat=True)),
-                ),
-                default=Value(""),
-                output_field=CharField(),
-            )
-
-        ).order_by("-updated_at", "custom_order")
-
-        business_area = kwargs.get("business_area")
-        if business_area:
-            qs = qs.filter(business_area__slug=business_area)
-
-        order_by_value = kwargs.get("order_by")
-
-        if order_by_value:
-            reverse = order_by_value.startswith("-")
-            order_by = order_by_value[1:] if reverse else order_by_value
-            # unicef_id, verification_status, start_date, program__name, updated_at
-            if order_by == "verification_status":
-                if reverse:
-                    qs = qs.order_by("-custom_order")
-                else:
-                    qs = qs.order_by("custom_order")
-
-            elif order_by == "unicef_id":
-                qs = sorted(qs, key=lambda o: o.unicef_id, reverse=reverse)
-
-            else:
-                if reverse:
-                    qs = qs.order_by(f"-{order_by}")
-                else:
-                    qs = qs.order_by(order_by)
-
-        return get_paginator(qs, page_size, page, PaginatedCashPlanAndPaymentPlanNode)
 
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
