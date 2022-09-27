@@ -100,16 +100,16 @@ export const fakeCashPlan = {
     ],
     __typename: 'CashPlanPaymentVerificationNodeConnection',
   },
-  paymentVerificationSummary: {
-    id:
-      'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6MTNjY2MxNzMtNzEwZS00N2NkLTg1ZmQtODM4YTFlMjZiNDUy',
-    createdAt: '2022-02-17T14:23:02.018701',
-    updatedAt: '2022-02-17T14:23:02.018730',
-    status: 'PENDING',
-    activationDate: null,
-    completionDate: null,
-    __typename: 'CashPlanPaymentVerificationSummaryNode',
-  },
+  // paymentVerificationSummary: {
+  //   id:
+  //     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6MTNjY2MxNzMtNzEwZS00N2NkLTg1ZmQtODM4YTFlMjZiNDUy',
+  //   createdAt: '2022-02-17T14:23:02.018701',
+  //   updatedAt: '2022-02-17T14:23:02.018730',
+  //   status: 'PENDING',
+  //   activationDate: null,
+  //   completionDate: null,
+  //   __typename: 'PaymentVerificationSummaryNode',
+  // },
   program: {
     id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
     name: 'Surface campaign practice actually about about will what.',
