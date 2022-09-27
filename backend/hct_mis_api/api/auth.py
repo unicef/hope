@@ -34,5 +34,6 @@ class HOPEPermission(IsAuthenticated):
         if bool(request.auth):
             if view.permission == "any":
                 return True
-            return view.permission.name in request.auth.grants
+            elif view.permission:
+                return view.permission.name in request.auth.grants
         return False
