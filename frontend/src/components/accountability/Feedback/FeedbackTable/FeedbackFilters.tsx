@@ -12,6 +12,7 @@ import { LoadingComponent } from '../../../core/LoadingComponent';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { AssigneeAutocomplete } from '../../../grievances/GrievancesTable/AssigneeAutocomplete';
+import { SearchTextField } from '../../../core/SearchTextField';
 
 interface FeedbackFiltersProps {
   onFilterChange;
@@ -50,6 +51,15 @@ export const FeedbackFilters = ({
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
+        <Grid xs={4}>
+          <SearchTextField
+            value={filter.feedbackId || ''}
+            label='Search'
+            onChange={(e) => handleFilterChange(e, 'feedbackId')}
+            data-cy='filters-search'
+            fullWidth
+          />
+        </Grid>
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'program')}

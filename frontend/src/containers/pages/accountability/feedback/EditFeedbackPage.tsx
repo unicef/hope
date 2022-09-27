@@ -11,7 +11,7 @@ import {
 import { Field, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { HouseholdQuestionnaire } from '../../../../components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
@@ -40,11 +40,12 @@ import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { FeedbackSteps } from '../../../../utils/constants';
 import {
-  CreateFeedbackInput,
+  UpdateFeedbackInput,
   useAllProgramsQuery,
   useAllUsersQuery,
-  useCreateFeedbackTicketMutation,
   useFeedbackIssueTypeChoicesQuery,
+  useFeedbackQuery,
+  useUpdateFeedbackTicketMutation,
 } from '../../../../__generated__/graphql';
 
 const steps = [
@@ -159,29 +160,22 @@ export function validateUsingSteps(
   return errors;
 }
 
-export const CreateFeedbackPage = (): React.ReactElement => {
+export const EditFeedbackPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const { id } = useParams();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+  const { data: feedbackData, loading: feedbackDataLoading } = useFeedbackQuery(
+    {
+      variables: { id },
+      fetchPolicy: 'network-only',
+    },
+  );
 
   const [activeStep, setActiveStep] = useState(FeedbackSteps.Selection);
   const [validateData, setValidateData] = useState(false);
 
-  const initialValues = {
-    category: 'Feedback',
-    issueType: null,
-    selectedHousehold: null,
-    selectedIndividual: null,
-    description: '',
-    comments: '',
-    admin2: '',
-    area: '',
-    language: '',
-    consent: false,
-    program: '',
-    verificationRequired: false,
-  };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
@@ -191,7 +185,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     loading: choicesLoading,
   } = useFeedbackIssueTypeChoicesQuery();
 
-  const [mutate, { loading }] = useCreateFeedbackTicketMutation();
+  const [mutate, { loading }] = useUpdateFeedbackTicketMutation();
 
   const {
     data: allProgramsData,
@@ -207,7 +201,12 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     value: edge.node.id,
   }));
 
-  if (userDataLoading || choicesLoading || loadingPrograms)
+  if (
+    userDataLoading ||
+    choicesLoading ||
+    loadingPrograms ||
+    feedbackDataLoading
+  )
     return <LoadingComponent />;
   if (permissions === null) return null;
   if (
@@ -218,12 +217,12 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   )
     return <PermissionDenied />;
 
-  if (!choicesData || !userData) return null;
+  if (!choicesData || !userData || !feedbackData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Feedback'),
-      to: `/${businessArea}/accountability/feedback/`,
+      to: `/${businessArea}/accountability/feedback/${id}`,
     },
   ];
 
@@ -235,14 +234,31 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const prepareVariables = (values): CreateFeedbackInput => ({
-    businessAreaSlug: businessArea,
+  const { feedback } = feedbackData;
+
+  const initialValues = {
+    category: 'Feedback',
+    issueType: feedback.issueType === 'A_1' ? 1 : 2,
+    selectedHousehold: feedback.householdLookup || null,
+    selectedIndividual: feedback.individualLookup || null,
+    description: feedback.description || null,
+    comments: feedback.comments || null,
+    admin2: feedback.admin2?.name || null,
+    area: feedback.area || null,
+    language: feedback.language || null,
+    consent: false,
+    program: feedback.program?.id || null,
+    verificationRequired: false,
+  };
+
+  const prepareVariables = (values): UpdateFeedbackInput => ({
+    feedbackId: id,
     issueType: values.issueType,
     householdLookup: values.selectedHousehold.id,
     individualLookup: values.selectedIndividual.id,
     description: values.description,
     comments: values.comments,
-    admin2: values.admin2.node.id,
+    admin2: values.admin2?.node.id,
     area: values.area,
     language: values.language,
     consent: values.consent,
@@ -258,8 +274,8 @@ export const CreateFeedbackPage = (): React.ReactElement => {
             const response = await mutate({
               variables: { input: prepareVariables(values) },
             });
-            showMessage(t('Feedback created'), {
-              pathname: `/${businessArea}/accountability/feedback/${response.data.createFeedback.feedback.id}`,
+            showMessage(t('Feedback updated'), {
+              pathname: `/${businessArea}/accountability/feedback/${response.data.updateFeedback.feedback.id}`,
               historyMethod: 'push',
             });
           } catch (e) {
@@ -281,7 +297,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
         return (
           <>
             <PageHeader
-              title='New Feedback'
+              title={`Edit Feedback #${feedback.unicefId}`}
               breadCrumbs={
                 hasPermissionInModule(
                   'ACCOUNTABILITY_FEEDBACK_VIEW_LIST',

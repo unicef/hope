@@ -11,7 +11,7 @@ export const Feedback = gql`
         unicefId
         headOfHousehold {
           id
-          fullname
+          fullName
         }
       }
       individualLookup {

@@ -1,11 +1,9 @@
 import React, { ReactElement } from 'react';
 import { TableWrapper } from '../../../components/core/TableWrapper';
-import { choicesToDict } from '../../../utils/utils';
 import {
   AllFeedbacksQueryVariables,
   FeedbackNode,
   useAllFeedbacksQuery,
-  useFeedbackIssueTypeChoicesQuery,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './FeedbackTableHeadCells';
@@ -23,12 +21,11 @@ export const FeedbackTable = ({
   canViewDetails,
 }: FeedbackTableProps): ReactElement => {
   const initialVariables: AllFeedbacksQueryVariables = {
-    // search: filter.search,
-    // status: filter.status,
-    // createdBy: filter.createdBy || '',
-    // createdAtRange: filter.createdAtRange
-    //   ? JSON.stringify(filter.createdAtRange)
-    //   : '',
+    feedbackId: filter.feedbackId,
+    createdBy: filter.createdBy || '',
+    createdAtRange: filter.createdAtRange
+      ? JSON.stringify(filter.createdAtRange)
+      : '',
     businessAreaSlug: businessArea,
   };
   return (
