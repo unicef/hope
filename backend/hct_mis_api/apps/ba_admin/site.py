@@ -1,6 +1,5 @@
 from functools import update_wrapper
 
-from django.contrib.admin import AdminSite
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 

@@ -1,3 +1,3 @@
-from .business_area import BusinessAreaAdmin
-from .session import *
-from .user import UserAdmin
+from .business_area import BusinessAreaAdmin  # noqa
+from .session import *  # noqa
+from .user import UserAdmin  # noqa

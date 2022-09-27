@@ -5,9 +5,9 @@ class Config(AppConfig):
     name = "hct_mis_api.apps.ba_admin"
 
     def ready(self):
-        from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.core.models import BusinessArea  # noqa
 
-        from .models import BusinessAreaAdmin
+        from .models import BusinessAreaAdmin  # noqa
         from .options import model_admin_registry
         from .site import ba_site
 

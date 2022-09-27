@@ -2,7 +2,6 @@ from adminfilters.combo import ChoicesFieldComboFilter
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.ba_admin.options import BAModelAdmin
-from hct_mis_api.apps.core.models import BusinessArea
 
 
 class UserAdmin(BAModelAdmin):
