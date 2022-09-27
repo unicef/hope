@@ -52,7 +52,8 @@ from hct_mis_api.apps.grievance.models import (
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails, GrievanceTicketThrough,
+    TicketSystemFlaggingDetails,
+    GrievanceTicketThrough,
 )
 from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -458,8 +459,8 @@ class Query(graphene.ObjectType):
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         return (
-            GrievanceTicket.objects
-            .filter(ignored=False).select_related("assigned_to", "created_by")
+            GrievanceTicket.objects.filter(ignored=False)
+            .select_related("assigned_to", "created_by")
             .annotate(
                 total=Case(
                     When(
@@ -484,6 +485,11 @@ class Query(graphene.ObjectType):
             {"name": name, "value": value}
             for value, name in GrievanceTicket.CATEGORY_CHOICES
             if value in GrievanceTicket.MANUAL_CATEGORIES
+            and value
+            not in (
+                GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+                GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            )  # feedback tickets are not available anymore via grievance ticket
         ]
 
     def resolve_grievance_ticket_system_category_choices(self, info, **kwargs):
