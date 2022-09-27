@@ -246,11 +246,18 @@ class CreateGrievanceTicketMutation(PermissionMutation):
     def mutate(cls, root, info, input, **kwargs):
         arg = lambda name, default=None: input.get(name, default)
         cls.has_permission(info, Permissions.GRIEVANCES_CREATE, arg("business_area"))
-
         verify_required_arguments(input, "category", cls.CATEGORY_OPTIONS)
         if arg("issue_type"):
             verify_required_arguments(input, "issue_type", cls.ISSUE_TYPE_OPTIONS)
         category = arg("category")
+
+        # TODO
+        # if category in (
+        #     GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+        #     GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+        # ):
+        #     raise GraphQLError("Feedback tickets are not allowed to be created through this mutation.")
+
         grievance_ticket, extras = cls.save_basic_data(root, info, input, **kwargs)
         save_extra_methods = {
             GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: save_payment_verification_extras,
