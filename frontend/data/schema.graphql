@@ -582,6 +582,7 @@ input CreateGrievanceTicketInput {
   partner: Int
   programme: ID
   comments: String
+  linkedFeedbackId: ID
 }
 
 type CreateGrievanceTicketMutation {

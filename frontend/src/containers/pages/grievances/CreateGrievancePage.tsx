@@ -33,6 +33,7 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import {
+  decodeIdString,
   isInvalid,
   reduceChoices,
   thingForSpecificGrievanceType,
@@ -145,7 +146,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
     partner: null,
     programme: null,
     comments: null,
-    linkedFeedbackId: linkedFeedbackId || null,
+    linkedFeedbackId: linkedFeedbackId
+      ? decodeIdString(linkedFeedbackId)
+      : null,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },

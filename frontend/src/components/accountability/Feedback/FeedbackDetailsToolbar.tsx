@@ -28,7 +28,6 @@ export const FeedbackDetailsToolbar = ({
       to: `/${businessArea}/accountability/feedback`,
     },
   ];
-  console.log('feedback', feedback);
 
   return (
     <PageHeader
@@ -42,7 +41,7 @@ export const FeedbackDetailsToolbar = ({
               color='primary'
               variant='outlined'
               component={Link}
-              to={`/${businessArea}/feedback/edit-ticket/${id}`}
+              to={`/${businessArea}/accountability/feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
             >
               {t('Edit')}
