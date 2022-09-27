@@ -689,8 +689,8 @@ class Query(graphene.ObjectType):
         samples_count = payment_verifications.distinct("payment_record").count()
         all_payment_records_for_created_verifications = (
             PaymentRecord.objects.filter(
-                parent__in=payment_verifications.distinct("payment_verification_plan__cash_plan").values_list(
-                    "payment_verification_plan__cash_plan", flat=True
+                parent__in=payment_verifications.distinct("payment_verification_plan__payment_plan").values_list(
+                    "payment_verification_plan__payment_plan", flat=True
                 )
             )
             .filter(status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0)
