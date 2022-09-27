@@ -35,6 +35,7 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_permission_decorator,
     to_choice_object,
+    get_paginator,
 )
 from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
@@ -42,12 +43,16 @@ from hct_mis_api.apps.payment.models import (
     GenericPayment,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
-    ServiceProvider, PaymentPlan
+    ServiceProvider,
+    PaymentPlan,
+    PaymentVerificationSummary,
+    GenericPaymentPlan
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
 from hct_mis_api.apps.payment.filters import CashPlanFilter, CashPlanPaymentPlanFilter
 from hct_mis_api.apps.payment.utils import get_payment_cash_plan_items_sequence_qs
+from hct_mis_api.apps.payment.schema import CashPlanPaymentVerificationSummaryNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
@@ -116,26 +121,24 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         ).count()
 
 
-class GenericPaymentPlanNode(ObjectType):
-    # TODO: add perms
-    # permission_classes = (
-    #     hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-    #     hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
-    # )
+class PaginatedType(graphene.ObjectType):
+    page = graphene.Int()
+    pages = graphene.Int()
+    page_size = graphene.Int()
+    total_count = graphene.Int()
+    has_next = graphene.Boolean()
+    has_prev = graphene.Boolean()
 
-    id = graphene.String(source="pk")
-
-
-class CashPlanAndPaymentPlanNode(ObjectType):  # BaseNodePermissionMixin
+class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, ObjectType):
     """
     for CashPlan and PaymentPlan models
     """
-    # permission_classes = (
-    #     hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-    #     hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
-    # )  # TODO: add Perms
+    permission_classes = (
+        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+    )
 
-    is_payment_plan = graphene.Boolean()
+    obj_type = graphene.String()
     id = graphene.String(source="pk")
     unicef_id = graphene.String(source="unicef_id")
     verification_status = graphene.String()
@@ -149,17 +152,35 @@ class CashPlanAndPaymentPlanNode(ObjectType):  # BaseNodePermissionMixin
     programme_name = graphene.String()
     updated_at = graphene.String(source="updated_at")
 
-    def resolve_is_payment_plan(self, info, **kwargs):
-        return self.__class__.__name__ == "PaymentPlan"
+    def resolve_obj_type(self, info, **kwargs):
+        return self.__class__.__name__
 
     def resolve_verification_status(self, info, **kwargs):
-        return self.payment_verification_summary.status if getattr(self, "payment_verification_summary", None) else None
+        return self.payment_verification_summary_obj.status if self.payment_verification_summary_obj else None
 
     def resolve_fsp_names(self, info, **kwargs):
         return self.fsp_names
 
     def resolve_programme_name(self, info, **kwargs):
         return self.program.name
+
+
+class PaginatedCashPlanAndPaymentPlanNode(PaginatedType):
+    objects = graphene.List(CashPlanAndPaymentPlanNode)
+
+
+class GenericPaymentPlanNode(ObjectType):
+    # TODO: add perms
+    # permission_classes = (
+    #     hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+    #     hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+    # )
+
+    payment_verification_summary = graphene.Field(CashPlanPaymentVerificationSummaryNode)
+
+
+    def resolve_payment_verification_summary(self):
+        return self.payment_verification_summary_obj
 
 
 class Query(graphene.ObjectType):
@@ -198,8 +219,9 @@ class Query(graphene.ObjectType):
             ),
         ),
     )
-    all_cash_plans_and_payment_plans = graphene.List(
-        CashPlanAndPaymentPlanNode,
+    all_cash_plans_and_payment_plans = graphene.Field(
+        # CashPlanAndPaymentPlanNode,
+        PaginatedCashPlanAndPaymentPlanNode,
         business_area=graphene.String(required=True),
         program=graphene.String(required=False),
         search=graphene.String(required=False),
@@ -209,7 +231,8 @@ class Query(graphene.ObjectType):
         start_date_gte=graphene.String(required=False),
         end_date_lte=graphene.String(required=False),
         order_by=graphene.String(required=False),
-        first=graphene.Int(required=False),
+        page=graphene.Int(required=False),
+        page_size=graphene.Int(required=False),
     )
     program_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
@@ -264,7 +287,8 @@ class Query(graphene.ObjectType):
             )
         ).order_by("-updated_at", "custom_order")
 
-    def resolve_all_cash_plans_and_payment_plans(self, info, **kwargs):
+    def resolve_all_cash_plans_and_payment_plans(self, info, page_size=5, page=1, **kwargs):
+
         qs = ExtendedQuerySetSequence(
             # TODO: added only for tests
             # PaymentPlan.objects.filter(status=PaymentPlan.Status.RECONCILED),
@@ -273,6 +297,7 @@ class Query(graphene.ObjectType):
         )
         print("KW== > ", kwargs)
 
+        payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(payment_plan_object_id=str(OuterRef('id')))
         service_provider_qs = ServiceProvider.objects.filter(cash_plans=OuterRef("id")).distinct()
         cash_plan_qs = CashPlan.objects.filter(id=OuterRef("id")).distinct()
 
@@ -284,22 +309,19 @@ class Query(graphene.ObjectType):
         qs = qs.annotate(
             custom_order=Case(
                 When(
-                    payment_verification_summary__isnull=True,
-                    then=Value(0),
-                ),
-                When(
-                    payment_verification_summary__status=PaymentVerificationPlan.STATUS_ACTIVE,
+                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_ACTIVE)),
                     then=Value(1),
                 ),
                 When(
-                    payment_verification_summary__status=PaymentVerificationPlan.STATUS_PENDING,
+                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_PENDING)),
                     then=Value(2),
                 ),
                 When(
-                    payment_verification_summary__status=PaymentVerificationPlan.STATUS_FINISHED,
+                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_FINISHED)),
                     then=Value(3),
                 ),
                 output_field=IntegerField(),
+                default=Value(0),
             ),
             fsp_names=Case(
                 When(
@@ -359,7 +381,7 @@ class Query(graphene.ObjectType):
                 else:
                     qs = qs.order_by(order_by)
 
-        return qs
+        return get_paginator(qs, page_size, page, PaginatedCashPlanAndPaymentPlanNode)
 
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
