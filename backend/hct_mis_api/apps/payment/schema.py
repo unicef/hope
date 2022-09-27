@@ -1025,22 +1025,16 @@ class Query(graphene.ObjectType):
         order_by_value = kwargs.get("order_by")
 
         if order_by_value:
-            reverse = order_by_value.startswith("-")
+            reverse = "-" if order_by_value.startswith("-") else ""
             order_by = order_by_value[1:] if reverse else order_by_value
             # unicef_id, verification_status, start_date, program__name, updated_at
             if order_by == "verification_status":
-                if reverse:
-                    qs = qs.order_by("-custom_order")
-                else:
-                    qs = qs.order_by("custom_order")
+                qs = qs.order_by(reverse + "custom_order")
 
             elif order_by == "unicef_id":
-                qs = sorted(qs, key=lambda o: o.unicef_id, reverse=reverse)
+                qs = sorted(qs, key=lambda o: o.unicef_id, reverse=bool(reverse))
 
             else:
-                if reverse:
-                    qs = qs.order_by(f"-{order_by}")
-                else:
-                    qs = qs.order_by(order_by)
+                qs = qs.order_by(reverse + order_by)
 
         return get_paginator(qs, page_size, page, PaginatedCashPlanAndPaymentPlanNode)
