@@ -22,19 +22,14 @@ export const FeedbackPage = (): React.ReactElement => {
   const { t } = useTranslation();
 
   const [filter, setFilter] = useState({
-    search: '',
-    status: '',
+    feedbackId: '',
+    issueType: '',
     createdBy: '',
     createdAtRange: '',
   });
 
   const debouncedFilter = useDebounce(filter, 500);
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
 
-  if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (
     !hasPermissionInModule(
@@ -43,7 +38,6 @@ export const FeedbackPage = (): React.ReactElement => {
     )
   )
     return <PermissionDenied />;
-  if (!choicesData) return null;
   const canViewDetails = hasPermissionInModule(
     PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_DETAILS,
     permissions,
