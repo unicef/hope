@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import { TableWrapper } from '../../../components/core/TableWrapper';
+import { decodeIdString } from '../../../utils/utils';
 import {
   AllFeedbacksQueryVariables,
   FeedbackNode,
@@ -22,7 +23,8 @@ export const FeedbackTable = ({
 }: FeedbackTableProps): ReactElement => {
   const initialVariables: AllFeedbacksQueryVariables = {
     feedbackId: filter.feedbackId,
-    createdBy: filter.createdBy || '',
+    issueType: filter.issueType || '',
+    createdBy: decodeIdString(filter.createdBy) || '',
     createdAtRange: filter.createdAtRange
       ? JSON.stringify(filter.createdAtRange)
       : '',
