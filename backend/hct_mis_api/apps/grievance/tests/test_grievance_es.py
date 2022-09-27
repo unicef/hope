@@ -337,7 +337,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                     "slug": cls.grievance_ticket_1.business_area.name.lower()
                 },
                 "unicef_id": cls.grievance_ticket_1.unicef_id,
-                "admin": {
+                "admin2": {
                     "id": cls.grievance_ticket_1.admin2.id
                 },
                 "registration_data_import": {
@@ -393,7 +393,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                     "slug": cls.grievance_ticket_2.business_area.name.lower()
                 },
                 "unicef_id": cls.grievance_ticket_2.unicef_id,
-                "admin": {
+                "admin2": {
                     "id": cls.grievance_ticket_2.admin2.id
                 },
                 "registration_data_import": {
@@ -448,7 +448,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                     "slug": cls.grievance_ticket_3.business_area.name.lower()
                 },
                 "unicef_id": cls.grievance_ticket_3.unicef_id,
-                "admin": {
+                "admin2": {
                     "id": cls.grievance_ticket_3.admin2.id
                 },
                 "registration_data_import": {
