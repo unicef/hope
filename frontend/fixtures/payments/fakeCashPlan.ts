@@ -116,7 +116,7 @@ export const fakeCashPlan = {
     caId: '123-21-PRG-00001',
     __typename: 'ProgramNode',
   },
-  paymentRecords: {
+  paymentItems: {
     totalCount: 5,
     edgeCount: 5,
     edges: [

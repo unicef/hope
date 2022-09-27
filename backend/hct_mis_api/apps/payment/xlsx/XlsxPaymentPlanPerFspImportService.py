@@ -11,7 +11,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def __init__(self, payment_plan, file):
         self.payment_plan = payment_plan
-        self.payment_list = payment_plan.all_active_payments
+        self.payment_list = payment_plan.not_excluded_payments
         self.file = file
         self.errors = []
         self.payments_dict = {str(x.unicef_id): x for x in self.payment_list}
@@ -34,10 +34,13 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         for row in self.ws_payments.iter_rows(min_row=2):
             self._import_row(row)
 
-        Payment.objects.bulk_update(self.payments_to_save, ("delivered_quantity",))
+        Payment.objects.bulk_update(self.payments_to_save, ("delivered_quantity", "status"))
 
     def _import_row(self, row):
         payment_id = row[XlsxPaymentPlanExportService.ID_COLUMN_INDEX].value
         payment = self.payments_dict[payment_id]
-        payment.delivered_quantity = row[self.DELIVERED_QUANTITY_COLUMN_INDEX].value
+        delivered_quantity = row[self.DELIVERED_QUANTITY_COLUMN_INDEX].value
+        payment.delivered_quantity = delivered_quantity
+        if delivered_quantity:
+            payment.status = Payment.STATUS_DISTRIBUTION_SUCCESS
         self.payments_to_save.append(payment)

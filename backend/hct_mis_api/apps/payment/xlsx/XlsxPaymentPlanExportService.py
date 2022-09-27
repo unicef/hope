@@ -42,7 +42,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
 
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
-        self.payment_list = payment_plan.all_active_payments
+        self.payment_list = payment_plan.not_excluded_payments.order_by("unicef_id")
 
     def _add_payment_row(self, payment: Payment):
         household = payment.household
@@ -131,11 +131,12 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
         fsp_ids = self.payment_list.values_list("financial_service_provider_id", flat=True)
         fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
         if not fsp_qs:
-            logger.error(
+            msg = (
                 f"Not possible to generate export file. "
                 f"There are no any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}."
             )
-            raise
+            logger.error(msg)
+            raise GraphQLError(msg)
 
         # create temp zip file
         with NamedTemporaryFile() as tmp_zip:

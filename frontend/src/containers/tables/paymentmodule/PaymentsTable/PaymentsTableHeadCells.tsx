@@ -48,6 +48,12 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
+    label: 'FSP',
+    id: 'financial_service_provider__name',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Entitlement (USD)',
     id: 'entitlement_quantity_usd',
     numeric: false,

@@ -15,7 +15,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
 
     def __init__(self, payment_plan: PaymentPlan, file):
         self.payment_plan = payment_plan
-        self.payment_list = payment_plan.all_active_payments
+        self.payment_list = payment_plan.not_excluded_payments
         self.file = file
         self.errors = []
         self.payments_dict = {

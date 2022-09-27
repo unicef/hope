@@ -10,12 +10,12 @@ import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PAYMENT_PLAN_QUERY } from '../../../../apollo/queries/paymentmodule/PaymentPlan';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { ImportErrors } from '../../../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   ImportXlsxPpListMutation,
+  PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
   useImportXlsxPpListMutation,
@@ -60,7 +60,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           },
           refetchQueries: () => [
             {
-              query: PAYMENT_PLAN_QUERY,
+              query: PaymentPlanDocument,
               variables: {
                 id: paymentPlan.id,
               },
@@ -121,7 +121,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               }}
             />
             {error?.graphQLErrors?.length || xlsxErrors?.length ? (
-              <Error data-cy="error-list">
+              <Error data-cy='error-list'>
                 <p>Errors</p>
                 {error
                   ? error.graphQLErrors.map((x) => <p>{x.message}</p>)
@@ -140,7 +140,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               color='primary'
               variant='contained'
               onClick={() => handleImport()}
-              data-cy='button-import-submit'
+              data-cy='button-import-entitlement'
             >
               {t('IMPORT')}
             </Button>
