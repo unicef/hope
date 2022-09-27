@@ -142,7 +142,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
-        return grievance_ticket.linked_tickets.all()
+        return grievance_ticket.existing_tickets
 
     @staticmethod
     def resolve_priority(grievance_ticket: GrievanceTicket, info):

@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Q, Count
+from django.db.models import Q, Count, F, Window
 
 from django_filters import (
     CharFilter,
@@ -26,17 +26,34 @@ from hct_mis_api.apps.core.utils import choices_to_dict
 
 
 class GrievanceOrderingFilter(OrderingFilter):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.extra['choices'] += [
-            ('linked_tickets', 'Linked tickets'),
-            ('-linked_tickets', 'Linked tickets (descending)'),
+        self.extra["choices"] += [
+            ("linked_tickets", "Linked tickets"),
+            ("-linked_tickets", "Linked tickets (descending)"),
         ]
 
     def filter(self, qs, value):
-        if any(v in ['linked_tickets', '-linked_tickets'] for v in value):
-            return qs.annotate(linked_tickets_count=Count("linked_tickets")).order_by(f"{value[0]}_count")
+        if any(v in ["linked_tickets", "-linked_tickets"] for v in value):
+            qs = (
+                GrievanceTicket.objects.all()
+                .annotate(linked=Count("linked_tickets"))
+                .annotate(linked_related=Count("linked_tickets_related"))
+                .annotate(total_linked=F("linked") + F("linked_related"))
+                .annotate(
+                    household_unicef_id_count=Window(
+                        expression=Count("household_unicef_id"),
+                        partition_by=[F("household_unicef_id")],
+                        order_by=["household_unicef_id"],
+                    )
+                )
+                .order_by(F("total_linked") + F("household_unicef_id_count") - 1, "unicef_id")
+            )
+
+            if value == ["-linked_tickets"]:
+                return qs.reverse()
+            return qs
+
         return super().filter(qs, value)
 
 
@@ -175,7 +192,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         }
         model = GrievanceTicket
 
-    order_by = OrderingFilter(
+    order_by = GrievanceOrderingFilter(
         fields=(
             "unicef_id",
             "status",
