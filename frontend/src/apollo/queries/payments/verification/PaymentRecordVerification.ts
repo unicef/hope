@@ -42,15 +42,15 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
             id
             name
           }
-          verificationPlans {
-            edges {
-              node {
-                id
-                status
-                verificationChannel
-              }
-            }
-          }
+          # verificationPlans {
+          #   edges {
+          #     node {
+          #       id
+          #       status
+          #       verificationChannel
+          #     }
+          #   }
+          # }
         }
         currency
         entitlementQuantity

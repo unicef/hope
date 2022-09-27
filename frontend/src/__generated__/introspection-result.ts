@@ -69,6 +69,12 @@
             "name": "CashPlanPaymentVerificationNode"
           },
           {
+            "name": "CashPlanPaymentVerificationSummaryNode"
+          },
+          {
+            "name": "PaymentVerificationLogEntryNode"
+          },
+          {
             "name": "TicketPaymentVerificationDetailsNode"
           },
           {
@@ -76,9 +82,6 @@
           },
           {
             "name": "TicketSensitiveDetailsNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationSummaryNode"
           },
           {
             "name": "ReportNode"
@@ -160,9 +163,6 @@
           },
           {
             "name": "TicketReferralDetailsNode"
-          },
-          {
-            "name": "PaymentVerificationLogEntryNode"
           },
           {
             "name": "DocumentNode"

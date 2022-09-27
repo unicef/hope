@@ -1,4 +1,5 @@
 import { gql } from 'apollo-boost';
+
 export const InvalidCashPlanPaymentVerification = gql`
   mutation InvalidCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
     invalidCashPlanPaymentVerification(
@@ -6,17 +7,17 @@ export const InvalidCashPlanPaymentVerification = gql`
     ) {
       cashPlan {
         id
-        verificationPlans {
-          edges {
-            node {
-              id
-              xlsxFileExporting
-              hasXlsxFile
-              xlsxFileWasDownloaded
-              xlsxFileImported
-            }
-          }
-        }
+        # verificationPlans {
+        #   edges {
+        #     node {
+        #       id
+        #       xlsxFileExporting
+        #       hasXlsxFile
+        #       xlsxFileWasDownloaded
+        #       xlsxFileImported
+        #     }
+        #   }
+        # }
       }
     }
   }

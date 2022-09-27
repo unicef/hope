@@ -4,10 +4,10 @@ export const query = gql`
   query CashPlanPaymentVerification($id: ID!) {
     cashPlanPaymentVerification(id: $id) {
       id
-      cashPlan{
-        id
-        caHashId
-      }
+      # cashPlan{
+      #   id
+      #   caHashId
+      # }
     }
   }
 `;
