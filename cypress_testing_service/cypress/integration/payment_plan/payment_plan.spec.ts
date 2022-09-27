@@ -352,3 +352,7 @@ When('I upload the xlsx template', () => {
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
 });
+
+And("I see that all individuals have proper payment channels", () => {
+  cy.get("td").should("not.contain", "Missing");
+})
