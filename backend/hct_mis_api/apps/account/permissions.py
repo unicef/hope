@@ -25,10 +25,6 @@ class Permissions(Enum):
     def _generate_next_value_(name, *args):
         return name
 
-    # API
-    API_UPLOAD_RDI = auto()
-    API_CREATE_RDI = auto()
-
     # RDI
     RDI_VIEW_LIST = auto()
     RDI_VIEW_DETAILS = auto()
