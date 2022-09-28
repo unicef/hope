@@ -1,21 +1,22 @@
-import { Button, Grid } from '@material-ui/core';
+import { Button, FormHelperText, Grid } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DocumentationField } from './DocumentationField';
 
-export interface NewDocumentationFieldArrayProps {
+export interface DocumentationFieldArrayProps {
   values;
   setFieldValue;
+  errors;
 }
 
-export const NewDocumentationFieldArray = ({
+export const DocumentationFieldArray = ({
   values,
   setFieldValue,
-}: NewDocumentationFieldArrayProps): React.ReactElement => {
+  errors,
+}: DocumentationFieldArrayProps): React.ReactElement => {
   const { t } = useTranslation();
-
   return (
     <Grid container spacing={3}>
       <FieldArray
@@ -50,6 +51,9 @@ export const NewDocumentationFieldArray = ({
                   )}
                 </Button>
               </Grid>
+              {errors?.documentation && (
+                <FormHelperText error>{errors?.documentation}</FormHelperText>
+              )}
             </>
           );
         }}

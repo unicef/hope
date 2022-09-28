@@ -68,7 +68,7 @@ import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/Loo
 import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { Title } from '../../../components/core/Title';
-import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
+import { DocumentationFieldArray } from '../../../components/grievances/Documentation/DocumentationFieldArray';
 
 const steps = [
   'Category Selection',
@@ -449,7 +449,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
-        console.log('VALUES', values);
         if (activeStep === steps.length - 1) {
           try {
             const response = await mutate(
@@ -839,9 +838,10 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   {t('Documentation')}
                                 </Typography>
                               </Title>
-                              <NewDocumentationFieldArray
+                              <DocumentationFieldArray
                                 values={values}
                                 setFieldValue={setFieldValue}
+                                errors={errors}
                               />
                             </Box>
                           )}

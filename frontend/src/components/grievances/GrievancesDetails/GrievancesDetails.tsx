@@ -15,7 +15,6 @@ import {
   GrievancesChoiceDataQuery,
   GrievanceTicketQuery,
 } from '../../../__generated__/graphql';
-import { BlackLink } from '../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';
