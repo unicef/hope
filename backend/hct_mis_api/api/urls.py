@@ -27,8 +27,6 @@ router = APIRouter()
 urlpatterns = [
     path(r"(<str:format>\.json|\.yaml)", schema_view.without_ui(cache_timeout=0), name="schema-json"),
     path(r"", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
-    # re_path(r'^/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    # re_path(r"", include(router.urls)),
     path("<slug:business_area>/rdi/upload/", endpoints.UploadRDIView().as_view(), name="rdi-upload"),
     path("<slug:business_area>/rdi/create/", endpoints.CreateRDIView().as_view(), name="rdi-create"),
     path("<slug:business_area>/rdi/<uuid:rdi>/push/lax/", endpoints.PushLaxToRDIView().as_view(), name="rdi-push-lax"),

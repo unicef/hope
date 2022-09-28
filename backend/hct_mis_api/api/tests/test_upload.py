@@ -280,7 +280,6 @@ class UploadRDITests(HOPEApiTestCase):
                             "documents": [
                                 {
                                     "document_number": 10,
-                                    # "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -454,7 +453,6 @@ class UploadRDITests(HOPEApiTestCase):
                             "documents": [
                                 {
                                     "document_number": 10,
-                                    # "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -540,7 +538,6 @@ class UploadRDITests(HOPEApiTestCase):
                             "documents": [
                                 {
                                     "document_number": 10,
-                                    # "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
