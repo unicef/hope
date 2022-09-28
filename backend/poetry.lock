@@ -409,8 +409,26 @@ docs = ["markdown-include", "mdx_gh_links", "mkdocs", "mkdocs-material", "mkdocs
 test = ["coverage", "django_webtest", "factory-boy", "pdbpp", "pyquery", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "tox (>=2.3)", "wheel"]
 
 [[package]]
+name = "django-admin-sync"
+version = "0.3.0"
+description = ""
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+django-admin-extra-buttons = ">=1.5.1"
+requests = "*"
+
+[package.extras]
+constance = ["django-constance", "django-picklefield"]
+dev = ["black", "django", "django-concurrency", "django-reversion", "django-smart-admin", "django-webtest", "factory-boy", "flake8 (<5)", "flake8-html", "freezegun", "isort", "pdbpp", "pytest", "pytest-coverage", "pytest-django", "pytest-echo", "pytest-responses", "redis", "tox"]
+docs = ["markdown-include", "mdx_gh_links", "mkdocs", "mkdocs-material"]
+test = ["black", "django-concurrency", "django-constance", "django-picklefield", "django-reversion", "django-smart-admin", "django-webtest", "factory-boy", "flake8 (<5)", "flake8-html", "freezegun", "isort", "pytest", "pytest-coverage", "pytest-django", "pytest-echo", "pytest-responses", "redis", "tox"]
+
+[[package]]
 name = "django-adminactions"
-version = "1.15"
+version = "2.0.0"
 description = "Collections of useful actions to use with django.contrib.admin.ModelAdmin"
 category = "main"
 optional = false
@@ -422,9 +440,9 @@ xlrd = ">=0.9.2"
 xlwt = "*"
 
 [package.extras]
-dev = ["check-manifest", "check-manifest", "django-admin-extra-urls", "django-dynamic-fixture", "django-webtest (>1.9.6)", "docutils", "flake8", "flake8-isort", "mock (>=1.0.1)", "modernize", "pdbpp", "pillow", "pytest", "pytest-cache", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "readme", "selenium (>=2.42.0)", "setuptools (>=15.0)", "tox", "virtualenv", "wheel"]
+dev = ["celery", "check-manifest", "check-manifest", "django-admin-extra-urls", "django-dynamic-fixture", "django-environ", "django-webtest (>1.9.6)", "docutils", "flake8", "flake8-isort", "mock (>=1.0.1)", "modernize", "pdbpp", "pillow", "pytest", "pytest-cache", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "readme", "redis", "selenium (>=2.42.0)", "setuptools (>=15.0)", "tox", "virtualenv", "wheel"]
 docs = ["check-manifest", "django", "docutils", "pdbpp", "sphinx", "sphinx_rtd_theme", "virtualenv", "wheel"]
-test = ["check-manifest", "django-admin-extra-urls", "django-dynamic-fixture", "django-webtest (>1.9.6)", "flake8", "flake8-isort", "mock (>=1.0.1)", "modernize", "pillow", "pytest", "pytest-cache", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "pytz", "readme", "selenium (>=2.42.0)", "setuptools (>=15.0)", "tox", "xlrd (>=0.9.2)", "xlwt"]
+test = ["celery", "check-manifest", "django-admin-extra-urls", "django-dynamic-fixture", "django-environ", "django-webtest (>1.9.6)", "flake8", "flake8-isort", "mock (>=1.0.1)", "modernize", "pillow", "pytest", "pytest-cache", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "pytz", "readme", "redis", "selenium (>=2.42.0)", "setuptools (>=15.0)", "tox", "xlrd (>=0.9.2)", "xlwt"]
 
 [[package]]
 name = "django-adminfilters"
@@ -478,7 +496,6 @@ python-dateutil = "2.6.0"
 [package.source]
 type = "url"
 url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip"
-
 [[package]]
 name = "django-author"
 version = "1.2.0"
@@ -539,7 +556,7 @@ python-versions = "*"
 
 [[package]]
 name = "django-constance"
-version = "2.9.0"
+version = "2.9.1"
 description = "Django live settings with pluggable backends, including Redis."
 category = "main"
 optional = false
@@ -803,6 +820,17 @@ test = ["admin-extra-urls", "django-webtest", "factory_boy", "isort", "pdbpp", "
 tests = ["admin-extra-urls", "django-webtest", "factory_boy", "isort", "pdbpp", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-isort", "pytest-pep8", "pytest-pythonpath", "tox"]
 
 [[package]]
+name = "django-reversion"
+version = "5.0.2"
+description = "An extension to the Django web framework that provides version control for model instances."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+django = ">=2.0"
+
+[[package]]
 name = "django-silk"
 version = "5.0.1"
 description = "Silky smooth profiling for the Django Framework"
@@ -822,7 +850,7 @@ sqlparse = "*"
 
 [[package]]
 name = "django-smart-admin"
-version = "1.9.0"
+version = "2.4.0"
 description = ""
 category = "main"
 optional = false
@@ -1224,6 +1252,14 @@ setproctitle = ["setproctitle"]
 tornado = ["tornado (>=0.2)"]
 
 [[package]]
+name = "html-json-forms"
+version = "1.1.1"
+description = "Implementation of the HTML JSON Forms spec for use with the Django REST Framework."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "idna"
 version = "3.4"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -1464,6 +1500,17 @@ description = "Experimental type system extensions for programs checked with the
 category = "main"
 optional = false
 python-versions = "*"
+
+[[package]]
+name = "natural-keys"
+version = "2.0.0"
+description = "Enhanced support for natural keys in Django and Django REST Framework"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+html-json-forms = ">=1.0.0"
 
 [[package]]
 name = "newrelic"
@@ -2107,7 +2154,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "sqlparse"
-version = "0.4.2"
+version = "0.4.3"
 description = "A non-validating SQL parser."
 category = "main"
 optional = false
@@ -2414,6 +2461,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "1.1"
+
 python-versions = "3.9.12"
 content-hash = "22400ec81ffabe4b1993d981edc6142c53c3638904f87cce59010b0992edcec6"
 
@@ -2652,8 +2700,11 @@ Django = [
 django-admin-extra-buttons = [
     {file = "django-admin-extra-buttons-1.5.4.tar.gz", hash = "sha256:916f3575fd5b5f12772b70c28aa5ac9a0f2010d31a777697dad7999905000a01"},
 ]
+django-admin-sync = [
+    {file = "django-admin-sync-0.3.0.tar.gz", hash = "sha256:fe370a9395a1bca52136d8b90e9c68c347fa4ae823b347cb1c9a61be376b155b"},
+]
 django-adminactions = [
-    {file = "django-adminactions-1.15.tar.gz", hash = "sha256:a3e16fb25e1d326c82dc5f854ae9e08b502c6c49d9dc64baa5c46b062e53d4eb"},
+    {file = "django-adminactions-2.0.0.tar.gz", hash = "sha256:f5753045572a99e211455858fa1c3780ea1b3cd657fe5a43047cc3d542b10fc3"},
 ]
 django-adminfilters = [
     {file = "django-adminfilters-2.0.2.tar.gz", hash = "sha256:e8f5223f7c4775f473db73501c1fb6903ba247897b0a3ca84c1e793129fd5126"},
@@ -2687,8 +2738,8 @@ django-concurrency = [
     {file = "django_concurrency-2.4-py2.py3-none-any.whl", hash = "sha256:ae7dcec114ba14216c97c33870de45b62e381aa99ec3c7c4e047921b25d9246f"},
 ]
 django-constance = [
-    {file = "django-constance-2.9.0.tar.gz", hash = "sha256:758e190755f05b12e9729933239b87053aa1f790071a402cc02034cb23c8624e"},
-    {file = "django_constance-2.9.0-py3-none-any.whl", hash = "sha256:c78eed0f75eb003836db84345fa7df0c529b47b2c4e04ac84fdf8558b3338a28"},
+    {file = "django-constance-2.9.1.tar.gz", hash = "sha256:4c6a96a5f2cbce1bc3fa41aa20566b6ee26fbd896c9f91f996518a3a0904f6c8"},
+    {file = "django_constance-2.9.1-py3-none-any.whl", hash = "sha256:bf0b392efa18a1f3f464eddb7eb36ac5c02598354a5e31d0d4ce4fc8b535694b"},
 ]
 django-cors-headers = [
     {file = "django-cors-headers-3.13.0.tar.gz", hash = "sha256:f9dc6b4e3f611c3199700b3e5f3398c28757dcd559c2f82932687f3d0443cfdf"},
@@ -2764,12 +2815,16 @@ django-redis = [
 django-regex = [
     {file = "django-regex-0.5.0.tar.gz", hash = "sha256:6af1add11ae5232f133a42754c9291f9113996b1294b048305d9f1a427bca27c"},
 ]
+django-reversion = [
+    {file = "django-reversion-5.0.2.tar.gz", hash = "sha256:243a12ee4e04c1611c0f076fbfc3074f1ad40afc45adc64de5ba2414cc4eaf29"},
+    {file = "django_reversion-5.0.2-py3-none-any.whl", hash = "sha256:5ae3f0a529530bc24afd64b084b690c96d615b70a45bad3a68dc12fcf50ed8c9"},
+]
 django-silk = [
     {file = "django-silk-5.0.1.tar.gz", hash = "sha256:3bdf188256fff00d1ce741f9ffa7cfa1f37f6941f07c23bc85ff26466170eb30"},
     {file = "django_silk-5.0.1-py3-none-any.whl", hash = "sha256:9dad85e783fcaaa1c97bebfa7ea01899428ded55b517d363f25ba87e43b5ce50"},
 ]
 django-smart-admin = [
-    {file = "django-smart-admin-1.9.0.tar.gz", hash = "sha256:6b6987e786260cb2323b3b2e59449c324def140706b2bec056f2a1051fbee3c0"},
+    {file = "django-smart-admin-2.4.0.tar.gz", hash = "sha256:0a4dbe213e900506e01b1ae872cbe212af67eab949059cc57b203ce6d7df2eaa"},
 ]
 django-sql-explorer = [
     {file = "django-sql-explorer-2.4.2.tar.gz", hash = "sha256:7e224a382a86229f323ce8373afe06b4f3ebc948b9a805e72b7d55d53c4479bb"},
@@ -2963,6 +3018,10 @@ gunicorn = [
     {file = "gunicorn-20.1.0-py3-none-any.whl", hash = "sha256:9dcc4547dbb1cb284accfb15ab5667a0e5d1881cc443e0677b4882a4067a807e"},
     {file = "gunicorn-20.1.0.tar.gz", hash = "sha256:e0a968b5ba15f8a328fdfd7ab1fcb5af4470c28aaf7e55df02a99bc13138e6e8"},
 ]
+html-json-forms = [
+    {file = "html-json-forms-1.1.1.tar.gz", hash = "sha256:16dc413dc858fcc53602ad509c1aef735534838e1bae888bf429e210a9c48f6b"},
+    {file = "html_json_forms-1.1.1-py3-none-any.whl", hash = "sha256:51e7e9088bc88e324027144ca25d8bcdd37da28f311a8436bfd88944138ed409"},
+]
 idna = [
     {file = "idna-3.4-py3-none-any.whl", hash = "sha256:90b77e79eaa3eba6de819a0c442c0b4ceefc341a7a2ab77d7562bf49f425c5c2"},
     {file = "idna-3.4.tar.gz", hash = "sha256:814f528e8dead7d329833b91c5faa87d60bf71824cd12a7530b5526063d02cb4"},
@@ -3137,6 +3196,10 @@ msrest = [
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
+]
+natural-keys = [
+    {file = "natural-keys-2.0.0.tar.gz", hash = "sha256:e50b6d7d15fd79860e626163184b2f2df9de4fb6f7851d4b9e4ceb311e989f8d"},
+    {file = "natural_keys-2.0.0-py3-none-any.whl", hash = "sha256:cc21d4c19475a37fdef44a8d68f6b9f11c4bdb15af1ab331eb60badfe571eca2"},
 ]
 newrelic = [
     {file = "newrelic-7.16.0.178-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:f42a04818c2ab0ade18c0a1a5d35652bb0d1d8cc2cfcb16304fffb15f556f117"},
@@ -3626,8 +3689,8 @@ soupsieve = [
     {file = "soupsieve-2.3.2.post1.tar.gz", hash = "sha256:fc53893b3da2c33de295667a0e19f078c14bf86544af307354de5fcf12a3f30d"},
 ]
 sqlparse = [
-    {file = "sqlparse-0.4.2-py3-none-any.whl", hash = "sha256:48719e356bb8b42991bdbb1e8b83223757b93789c00910a616a071910ca4a64d"},
-    {file = "sqlparse-0.4.2.tar.gz", hash = "sha256:0c00730c74263a94e5a9919ade150dfc3b19c574389985446148402998287dae"},
+    {file = "sqlparse-0.4.3-py3-none-any.whl", hash = "sha256:0323c0ec29cd52bceabc1b4d9d579e311f3e4961b98d174201d5622a23b85e34"},
+    {file = "sqlparse-0.4.3.tar.gz", hash = "sha256:69ca804846bb114d2ec380e4360a8a340db83f0ccf3afceeb1404df028f57268"},
 ]
 stack-data = [
     {file = "stack_data-0.5.0-py3-none-any.whl", hash = "sha256:66d2ebd3d7f29047612ead465b6cae5371006a71f45037c7e2507d01367bce3b"},

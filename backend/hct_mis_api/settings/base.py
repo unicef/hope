@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.urls import reverse_lazy
+from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -242,6 +243,7 @@ DJANGO_APPS = [
     "smart_admin.logs",
     "smart_admin.apps.SmartTemplateConfig",
     "hct_mis_api.apps.administration.apps.Config",
+    "admin_sync.apps.Config",
     "django_sysinfo",
     "django.contrib.auth",
     "django.contrib.humanize",
@@ -384,6 +386,7 @@ CACHES = {
 }
 
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "sessionid")
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 AUTH_USER_MODEL = "account.User"
 
@@ -498,6 +501,7 @@ CONSTANCE_CONFIG = {
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
+    "PRODUCTION_SERVER": ("https://hope.unicef.org/api/admin", "", str),
     "CASHASSIST_DOAP_RECIPIENT": (
         "",
         "UNHCR email address where to send DOAP updates",
@@ -724,7 +728,7 @@ AA_PERMISSION_HANDLER = 3
 
 
 def filter_environment(key, config, request):
-    return key in ["ROOT_ACCESS_TOKEN"]
+    return key in ["ROOT_ACCESS_TOKEN"] or key.startswith("DIRENV")
 
 
 def masker(key, value, config, request):
@@ -732,6 +736,8 @@ def masker(key, value, config, request):
 
     from ..apps.utils.security import is_root
 
+    if key in ["PATH", "PYTHONPATH"]:
+        return mark_safe(value.replace(":", r":<br>"))
     if not is_root(request):
         if key.startswith("DATABASE_URL"):
             from urllib.parse import urlparse
@@ -810,4 +816,5 @@ SWAGGER_SETTINGS = {
     "LOGIN_URL": "/",
     "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
+
 MAX_STORAGE_FILE_SIZE = 30

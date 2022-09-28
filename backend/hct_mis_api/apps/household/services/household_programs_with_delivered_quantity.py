@@ -1,4 +1,4 @@
-from django.db.models import Sum, F, DecimalField
+from django.db.models import DecimalField, F, Sum
 
 from hct_mis_api.apps.household.models import Household
 

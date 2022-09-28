@@ -1,4 +1,5 @@
 from typing import Sequence
+
 from django.db import transaction
 
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
