@@ -22,6 +22,7 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
+    NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
@@ -89,12 +90,15 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 
 class CollectDataMixin(serializers.Serializer):
+    collect_individual_data = serializers.CharField(required=True)
+
     def validate_collect_individual_data(self, value):
-        if value in [COLLECT_TYPE_FULL, "FULL", "full"]:
+        v = value.upper()
+        if v in [COLLECT_TYPE_FULL, "FULL", "F"]:
             return COLLECT_TYPE_FULL
-        if value in [COLLECT_TYPE_PARTIAL, "PARTIAL", "partial"]:
+        if v in [COLLECT_TYPE_PARTIAL, "PARTIAL", "P"]:
             return COLLECT_TYPE_PARTIAL
-        if value in [COLLECT_TYPE_NONE, "NO", "N", "no"]:
+        if v in [COLLECT_TYPE_NONE, "NO", "N", "NONE"]:
             return COLLECT_TYPE_NONE
         raise ValidationError(
             "Invalid value %s. " "Check values at %s" % (value, reverse("api:datacollectingpolicy-list"))
@@ -143,6 +147,7 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     members = IndividualSerializer(many=True, required=True)
     country_origin = serializers.CharField(allow_blank=True, required=False)
+    size = serializers.IntegerField(required=False, allow_null=True)
 
     class Meta:
         model = ImportedHousehold
@@ -165,11 +170,25 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
         ret.pop("members", None)
         return ret
 
+    def validate(self, attrs):
+        def get_related():
+            return len([m for m in attrs["members"] if m["relationship"] not in [NON_BENEFICIARY]])
 
-class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.ModelSerializer):
+        ctype = attrs.get("collect_individual_data", "")
+        if ctype == COLLECT_TYPE_NONE:
+            if not attrs.get("size", 0) > 0:
+                raise ValidationError({"size": ["This field is required 2"]})
+        elif ctype == COLLECT_TYPE_PARTIAL:
+            if not attrs.get("size", 0) > get_related():
+                raise ValidationError({"size": ["Households size must be greater than provided details"]})
+        else:
+            attrs["size"] = get_related()
+        return attrs
+
+
+class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     households = HouseholdSerializer(many=True, required=True)
-    collect_individual_data = serializers.CharField()
 
     class Meta:
         model = RegistrationDataImportDatahub
@@ -188,12 +207,11 @@ class RDINestedSerializer(CollectDataMixin, HouseholdUploadMixin, serializers.Mo
     def create(self, validated_data):
         created_by = validated_data.pop("user")
         households = validated_data.pop("households")
-        collect_individual_data = validated_data.pop("collect_individual_data")
 
         rdi_datahub = RegistrationDataImportDatahub.objects.create(
             **validated_data, business_area_slug=self.business_area.slug
         )
-        info = self.save_households(rdi_datahub, households, collect_individual_data)
+        info = self.save_households(rdi_datahub, households)
         rdi_mis = RegistrationDataImport.objects.create(
             **validated_data,
             imported_by=created_by,

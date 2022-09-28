@@ -30,7 +30,6 @@ class HOPEApiTestCase(APITestCase):
             grants=[c.name for c in cls.user_permissions],
         )
         cls.token.valid_for.set([cls.business_area])
-        # cls.token.user.user_roles.create(role=cls.role, business_area=cls.business_area)
 
     def setUp(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)

@@ -42,6 +42,7 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 "residence_status": "",
                 "village": "village1",
                 "country": "AF",
+                "collect_individual_data": COLLECT_TYPE_FULL,
                 "members": [
                     {
                         "relationship": HEAD,
@@ -67,20 +68,20 @@ class PushLaxToRDITests(HOPEApiTestCase):
                         "sex": "FEMALE",
                     },
                 ],
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "size": 1,
             },  # household 1
             {
                 "residence_status": "",
                 "village": "village2",
                 "country": "AF",
+                "collect_individual_data": COLLECT_TYPE_FULL,
                 "members": [
                     {
                         "relationship": HEAD,
                         "full_name": "James Head #1",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
-                        "role": "",
+                        "role": ROLE_PRIMARY,
                         "documents": [
                             {
                                 "document_number": 10,
@@ -97,6 +98,8 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": "village3",
                 "country": "AF",
+                "collect_individual_data": COLLECT_TYPE_FULL,
+                "size": 1,
                 "members": [
                     {
                         "full_name": "Jhon Primary #1",
@@ -134,12 +137,13 @@ class PushLaxToRDITests(HOPEApiTestCase):
                         "sex": "MALE",
                     },
                 ],
-                "size": 1,
             },  # household 3
             {
                 "residence_status": "",
                 "village": "village4",
                 "country": "AF",
+                "collect_individual_data": COLLECT_TYPE_FULL,
+                "size": 1,
                 "members": [
                     {
                         "relationship": HEAD,
@@ -165,12 +169,13 @@ class PushLaxToRDITests(HOPEApiTestCase):
                         "sex": "FEMALE",
                     },
                 ],
-                "size": 1,
             },  # household 4
             {
                 "residence_status": "",
                 "village": "village5",
                 "country": "AF",
+                "collect_individual_data": COLLECT_TYPE_FULL,
+                "size": 1,
                 "members": [
                     {
                         "relationship": HEAD,
@@ -196,12 +201,13 @@ class PushLaxToRDITests(HOPEApiTestCase):
                         "sex": "FEMALE",
                     },
                 ],
-                "size": 1,
             },  # household 5
             {
                 "residence_status": "",
                 "village": "village6",
                 "country": "AF",
+                "collect_individual_data": COLLECT_TYPE_FULL,
+                "size": 1,
                 "members": [
                     {
                         "full_name": "James Head #1",
@@ -226,8 +232,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                         "sex": "FEMALE",
                     },
                 ],
-                "collect_individual_data": COLLECT_TYPE_FULL,
-                "size": 1,
             },  # household 6
         ]
         response = self.client.post(self.url, data, format="json")
@@ -236,13 +240,12 @@ class PushLaxToRDITests(HOPEApiTestCase):
         data = response.json()
         self.assertEquals(len(data["households"]), 6)
         self.assertEquals(data["processed"], 6)
-        self.assertEquals(data["errors"], 3)
-        self.assertEquals(data["accepted"], 3)
+        self.assertEquals(data["errors"], 2)
+        self.assertEquals(data["accepted"], 4)
         hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(hrdi)
         for valid in ["village1", "village4", "village5"]:
             self.assertTrue(ImportedHousehold.objects.filter(registration_data_import=hrdi, village=valid).exists())
-        self.assertDictEqual(data["households"][1], {"Household #2": [{"size": ["This field is required."]}]})
         self.assertDictEqual(
             data["households"][2], {"Household #3": [{"primary_collector": ["Missing Primary Collector"]}]}
         )
