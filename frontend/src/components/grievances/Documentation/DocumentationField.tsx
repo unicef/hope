@@ -40,6 +40,7 @@ export const DocumentationField = ({
         <Box style={{ height: '100%' }} display='flex' alignItems='center'>
           <input
             type='file'
+            accept='.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,image/*'
             onChange={(event) => {
               setFieldValue(
                 `${baseName}[${index}].file`,

@@ -75,15 +75,22 @@ export const GrievancesDetails = ({
   const mappedDocumentation = (): React.ReactElement => {
     return (
       <Box display='flex' flexDirection='column'>
-        {/* TODO: uncomment this */}
-        {/* {ticket.documentation.map((doc) => {
-          if (doc.type === 'photo') {
+        {ticket.documentation.map((doc) => {
+          if (doc.contentType.includes('image')) {
             return (
-              <PhotoModal src={doc.src} variant='link' linkText={doc.name} />
+              <PhotoModal
+                src={doc.filePath}
+                variant='link'
+                linkText={doc.name}
+              />
             );
           }
-          return <BlackLink to={doc.src}>{doc.name}</BlackLink>;
-        })} */}
+          return (
+            <ContentLink download href={doc.filePath}>
+              {doc.name}
+            </ContentLink>
+          );
+        })}
       </Box>
     );
   };
