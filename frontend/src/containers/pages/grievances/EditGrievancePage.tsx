@@ -10,6 +10,27 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
+import { ContentLink } from '../../../components/core/ContentLink';
+import { LabelizedField } from '../../../components/core/LabelizedField';
+import { LoadingButton } from '../../../components/core/LoadingButton';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { Title } from '../../../components/core/Title';
+import { DocumentationFieldArray } from '../../../components/grievances/Documentation/DocumentationFieldArray';
+import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
+import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
+import {
+  dataChangeComponentDict,
+  EmptyComponent,
+  prepareInitialValues,
+  prepareVariables,
+} from '../../../components/grievances/utils/editGrievanceUtils';
+import { validate } from '../../../components/grievances/utils/validateGrievance';
+import { validationSchema } from '../../../components/grievances/utils/validationSchema';
 import {
   hasCreatorOrOwnerPermissions,
   hasPermissions,
@@ -45,28 +66,7 @@ import {
   useMeQuery,
   useUpdateGrievanceMutation,
 } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
-import {
-  dataChangeComponentDict,
-  EmptyComponent,
-  prepareInitialValues,
-  prepareVariables,
-} from '../../../components/grievances/utils/editGrievanceUtils';
-import { validate } from '../../../components/grievances/utils/validateGrievance';
-import { validationSchema } from '../../../components/grievances/utils/validationSchema';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { LabelizedField } from '../../../components/core/LabelizedField';
-import { ContentLink } from '../../../components/core/ContentLink';
-import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
-import { Title } from '../../../components/core/Title';
-import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -492,9 +492,10 @@ export const EditGrievancePage = (): React.ReactElement => {
                               {t('Documentation')}
                             </Typography>
                           </Title>
-                          <NewDocumentationFieldArray
+                          <DocumentationFieldArray
                             values={values}
                             setFieldValue={setFieldValue}
+                            errors={errors}
                           />
                         </Box>
                       )}
