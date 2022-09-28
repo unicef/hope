@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSetMixin
 
 from ..auth import HOPEAuthentication, HOPEPermission
-from ..models import APILogEntry
+from ..models import APILogEntry, Grant
 
 
 class RejectPolicy(models.TextChoices):
@@ -28,7 +28,7 @@ class SelectedBusinessAreaMixin:
 class HOPEAPIView(APIView):
     permission_classes = [HOPEPermission]
     authentication_classes = [HOPEAuthentication]
-    permission = None
+    permission = Grant.API_READ_ONLY
     log_http_methods = ["POST", "PUT", "DELETE"]
 
     def dispatch(self, request, *args, **kwargs):

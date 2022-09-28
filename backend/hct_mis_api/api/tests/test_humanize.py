@@ -15,7 +15,13 @@ MEMBER = {
     "sex": "MALE",
     "relationship": "HEAD",
 }
-HOUSEHOLD = {"country": "AF", "residence_status": "IDP", "size": 1, "members": [MEMBER]}
+HOUSEHOLD = {
+    "country": "AF",
+    "residence_status": "IDP",
+    "size": 1,
+    "collect_individual_data": "FULL",
+    "members": [MEMBER],
+}
 
 
 class ValidatorTest(TestCase):
@@ -39,18 +45,17 @@ class ValidatorTest(TestCase):
         self.assertErrors(
             {},
             {
-                "collect_individual_data": ["This field is required."],
                 "households": ["This field is required."],
                 "name": ["This field is required."],
             },
         )
 
     def test_empty_households(self):
-        data = {"households": [], "collect_individual_data": "N", "name": "Test1"}
+        data = {"households": [], "name": "Test1"}
         self.assertErrors(data, {"households": ["This field is required."]})
 
     def test_empty_household_value(self):
-        data = {"households": [{}], "collect_individual_data": "N", "name": "Test1"}
+        data = {"households": [{}], "name": "Test1"}
         self.assertErrors(
             data,
             {
@@ -58,10 +63,11 @@ class ValidatorTest(TestCase):
                     {
                         "Household #1": [
                             {
+                                "collect_individual_data": ["This field is required."],
                                 "country": ["This field is required."],
                                 "members": ["This field is required."],
                                 "residence_status": ["This field is required."],
-                                "size": ["This field is required."],
+                                # "size": ["This field is required."],
                             }
                         ]
                     }
@@ -72,9 +78,8 @@ class ValidatorTest(TestCase):
     def test_empty_members(self):
         data = {
             "households": [
-                {"country": "AF", "residence_status": "IDP", "size": 1, "members": []},
+                {"country": "AF", "collect_individual_data": "N", "residence_status": "IDP", "size": 1, "members": []},
             ],
-            "collect_individual_data": "N",
             "name": "Test1",
         }
         self.assertErrors(data, {"households": [{"Household #1": [{"members": ["This field is required"]}]}]})
@@ -83,7 +88,7 @@ class ValidatorTest(TestCase):
         h1 = dict(**HOUSEHOLD)
         h1["members"] = [MEMBER, MEMBER]
 
-        data = {"collect_individual_data": "N", "name": "Test1", "households": [h1]}
+        data = {"name": "Test1", "households": [h1]}
         self.assertErrors(
             data,
             {
