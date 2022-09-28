@@ -50,8 +50,6 @@ class HouseholdUploadMixin:
     def save_member(
         self, rdi: RegistrationDataImportDatahub, hh: ImportedHousehold, member_data: dict
     ) -> ImportedIndividual:
-        # member_ser = IndividualSerializer(data=member_data)
-        # member_ser.is_valid(raise_exception=True)
         documents = member_data.pop("documents", [])
         member_of = None
         if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):

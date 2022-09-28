@@ -120,7 +120,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                         "documents": [
                             {
                                 "document_number": 10,
-                                # "image": base64_encoded_data,
                                 "doc_date": "2010-01-01",
                                 "country": "AF",
                                 "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -205,7 +204,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 "country": "AF",
                 "members": [
                     {
-                        # "relationship": HEAD,
                         "full_name": "James Head #1",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
