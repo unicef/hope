@@ -44,6 +44,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -86,12 +87,13 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_external_collector(self):
         data = {
             "name": "aaaa",
-            "collect_individual_data": "FULL",
+            "collect_individual_data": COLLECT_TYPE_FULL,
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -114,6 +116,8 @@ class UploadRDITests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, data)
+
         hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(hrdi)
         rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
@@ -139,6 +143,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": "FULL",
                     "members": [
                         {
                             "relationship": HEAD,
@@ -197,6 +202,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -256,6 +262,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -300,6 +307,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village2",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -331,6 +339,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village3",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -389,6 +398,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -429,6 +439,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -473,6 +484,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -514,6 +526,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -558,6 +571,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
