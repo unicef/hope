@@ -26,20 +26,18 @@ variables:
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registry: "ICTD-HOPE-DEV-ACR"
     Docker.url: "uniappsakshopedev.azurecr.io"
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ else }}:
     Docker.registry: "ICTD-HOPE-PRD-ACR"
     Docker.url: "uniappsakshope.azurecr.io"
   ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
     Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
-  ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'staging') }}:
     Sentry.frontend.dsn: $(STG_SENTRY_FRONTEND_DSN)
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}:
     Sentry.frontend.dsn: $(PRD_SENTRY_FRONTEND_DSN)
-  ${{ if eq(ne(variables['Build.SourceBranchName'], 'develop'),
-            ne(variables['Build.SourceBranchName'], 'staging'),
-            ne(variables['Build.SourceBranchName'], 'master')) }}:
-    Sentry.frontend.dsn: $(SENTRY_FRONTEND_DSN)
     Sentry.frontend.trn_dsn: $(TRN_SENTRY_FRONTEND_DSN)
+  ${{ else }}:
+    Sentry.frontend.dsn: $(SENTRY_FRONTEND_DSN)
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
 
 stages:
