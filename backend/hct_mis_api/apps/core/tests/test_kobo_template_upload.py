@@ -1,5 +1,4 @@
 from datetime import timedelta
-from django.utils import timezone
 from tempfile import NamedTemporaryFile
 from unittest.mock import patch
 
@@ -9,6 +8,7 @@ from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import Client, RequestFactory
 from django.urls import reverse
+from django.utils import timezone
 
 import requests
 

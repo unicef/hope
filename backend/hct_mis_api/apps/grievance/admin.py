@@ -2,9 +2,7 @@ from django.contrib import admin
 
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
@@ -64,65 +62,66 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraButtonsMixin, AdminAdvancedF
 
 
 @admin.register(TicketNote)
-class TicketNoteAdmin(HOPEModelAdminBase):
+class TicketNoteAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "created_by")
 
 
 @admin.register(TicketComplaintDetails)
-class TicketComplaintDetailsAdmin(HOPEModelAdminBase):
+class TicketComplaintDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "payment_record", "household", "individual")
 
 
 @admin.register(TicketSensitiveDetails)
-class TicketSensitiveDetailsAdmin(HOPEModelAdminBase):
+class TicketSensitiveDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "payment_record", "household", "individual")
 
 
 @admin.register(TicketHouseholdDataUpdateDetails)
-class TicketHouseholdDataUpdateDetailsAdmin(HOPEModelAdminBase):
+class TicketHouseholdDataUpdateDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "household")
 
 
 @admin.register(TicketIndividualDataUpdateDetails)
-class TicketIndividualDataUpdateDetailsAdmin(HOPEModelAdminBase):
+class TicketIndividualDataUpdateDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "individual")
 
 
 @admin.register(TicketAddIndividualDetails)
-class TicketAddIndividualDetailsAdmin(HOPEModelAdminBase):
+class TicketAddIndividualDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "household")
 
 
 @admin.register(TicketDeleteIndividualDetails)
-class TicketDeleteIndividualDetailsAdmin(HOPEModelAdminBase):
+class TicketDeleteIndividualDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "individual")
 
 
 @admin.register(TicketDeleteHouseholdDetails)
-class TicketDeleteHouseholdDetailsAdmin(HOPEModelAdminBase):
+class TicketDeleteHouseholdDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "household")
 
 
 @admin.register(TicketNeedsAdjudicationDetails)
-class TicketNeedsAdjudicationDetailsAdmin(HOPEModelAdminBase):
+class TicketNeedsAdjudicationDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "golden_records_individual", "possible_duplicate", "selected_individual")
+    filter_horizontal = ("possible_duplicates", "selected_individuals")
 
 
 @admin.register(TicketPaymentVerificationDetails)
-class TicketPaymentVerificationDetailsAdmin(HOPEModelAdminBase):
+class TicketPaymentVerificationDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket",)
 
 
 @admin.register(TicketPositiveFeedbackDetails)
-class TicketPositiveFeedbackDetailsAdmin(HOPEModelAdminBase):
+class TicketPositiveFeedbackDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "household", "individual")
 
 
 @admin.register(TicketNegativeFeedbackDetails)
-class TicketNegativeFeedbackDetailsAdmin(HOPEModelAdminBase):
+class TicketNegativeFeedbackDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "household", "individual")
 
 
 @admin.register(TicketReferralDetails)
-class TicketReferralDetailsAdmin(HOPEModelAdminBase):
+class TicketReferralDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase):
     raw_id_fields = ("ticket", "household", "individual")
