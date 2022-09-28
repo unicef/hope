@@ -5,6 +5,7 @@ from itertools import chain
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField, Q
@@ -773,7 +774,7 @@ class GrievanceDocument(UUIDModel):
     grievance_ticket = models.ForeignKey(
         GrievanceTicket, null=True, related_name="support_documents", on_delete=models.SET_NULL
     )
-    file = models.FileField(upload_to="grievance_documents", blank=True, null=True)
+    file = models.FileField(upload_to="", blank=True, null=True)
     file_size = models.IntegerField(null=True)
     content_type = models.CharField(max_length=100, null=False)
 
@@ -783,7 +784,7 @@ class GrievanceDocument(UUIDModel):
 
     @property
     def file_path(self):
-        return self.file.path
+        return default_storage.url(self.file.name)
 
     def __str__(self):
         return self.file_name
