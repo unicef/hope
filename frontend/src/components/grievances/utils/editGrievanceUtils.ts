@@ -34,6 +34,7 @@ interface EditValuesTypes {
   partner?;
   comments?;
   programme?;
+  documentation?;
 }
 
 function prepareInitialValueAddIndividual(
@@ -206,8 +207,7 @@ export function prepareInitialValues(
     selectedRelatedTickets: ticket.relatedTickets.map(
       (relatedTicket) => relatedTicket.id,
     ),
-    //TODO: uncomment documentation
-    // documentation: ticket.documentation || null,
+    documentation: ticket.documentation || null,
   };
   const prepareInitialValueFunction = thingForSpecificGrievanceType(
     ticket,

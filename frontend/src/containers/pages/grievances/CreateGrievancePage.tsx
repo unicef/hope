@@ -231,6 +231,11 @@ export const CreateGrievancePage = (): React.ReactElement => {
   )
     return null;
 
+  const canAddDocumentation = hasPermissions(
+    PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
+    permissions,
+  );
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
@@ -827,17 +832,19 @@ export const CreateGrievancePage = (): React.ReactElement => {
                       )}
                       {activeStep === steps.length - 1 && (
                         <>
-                          <Box mt={3}>
-                            <Title>
-                              <Typography variant='h6'>
-                                {t('Documentation')}
-                              </Typography>
-                            </Title>
-                            <NewDocumentationFieldArray
-                              values={values}
-                              setFieldValue={setFieldValue}
-                            />
-                          </Box>
+                          {canAddDocumentation && (
+                            <Box mt={3}>
+                              <Title>
+                                <Typography variant='h6'>
+                                  {t('Documentation')}
+                                </Typography>
+                              </Title>
+                              <NewDocumentationFieldArray
+                                values={values}
+                                setFieldValue={setFieldValue}
+                              />
+                            </Box>
+                          )}
                           <DataChangeComponent
                             values={values}
                             setFieldValue={setFieldValue}
