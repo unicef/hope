@@ -5,7 +5,7 @@ import { MiśTheme } from '../../theme';
 const Link = styled.a`
   font-family: ${({ theme }: { theme: MiśTheme }) =>
     theme.hctTypography.fontFamily};
-  color: #253b46;
+  color: #000;
   font-size: 14px;
   line-height: 19px;
 `;
