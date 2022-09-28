@@ -1,13 +1,28 @@
 from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
-from django.db.models import Q, Count
+from django.db.models import Q
+from django.db.models import Count as ModelCount
 
-from hct_mis_api.apps.household.models import Household, NON_BENEFICIARY, FEMALE, MALE, DISABLED, YES
+from hct_mis_api.apps.household.models import (
+    Household,
+    NON_BENEFICIARY,
+    FEMALE,
+    MALE,
+    DISABLED,
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_PARTIAL,
+)
 
 
 def recalculate_data(household: Household) -> None:
-    if not (household.collect_individual_data == YES):
+    if not (
+        household.collect_individual_data
+        in (
+            COLLECT_TYPE_FULL,
+            COLLECT_TYPE_PARTIAL,
+        )
+    ):
         return
     for individual in household.individuals.all():
         individual.recalculate_data()
@@ -15,6 +30,9 @@ def recalculate_data(household: Household) -> None:
     date_12_years_ago = timezone.now() - relativedelta(years=+12)
     date_18_years_ago = timezone.now() - relativedelta(years=+18)
     date_60_years_ago = timezone.now() - relativedelta(years=+60)
+
+    def Count(*args, **kwargs):
+        return None if household.collect_individual_data == COLLECT_TYPE_PARTIAL else ModelCount(*args, **kwargs)
 
     is_beneficiary = ~Q(relationship=NON_BENEFICIARY)
     active_beneficiary = Q(withdrawn=False, duplicate=False)
