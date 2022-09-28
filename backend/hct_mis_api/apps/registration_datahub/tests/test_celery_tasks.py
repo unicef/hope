@@ -1,5 +1,4 @@
 import base64
-from django.utils import timezone
 import json
 from contextlib import contextmanager
 from pathlib import Path
@@ -7,6 +6,7 @@ from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 
 from django_countries.fields import Country
 

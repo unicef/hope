@@ -459,9 +459,12 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     def status(self):
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self):
+    def withdraw(self, tag=None):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
+        user_fields = self.user_fields or {}
+        user_fields["withdrawn_tag"] = tag
+        self.user_fields = user_fields
         self.save()
 
     def unwithdraw(self):
