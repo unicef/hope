@@ -144,9 +144,6 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
     members = IndividualSerializer(many=True, required=True)
     country_origin = serializers.CharField(allow_blank=True, required=False)
 
-    # reject_policy = serializers.ChoiceField(choices=RejectPolicy.choices,
-    #                                         default=RejectPolicy.STRICT)
-
     class Meta:
         model = ImportedHousehold
         exclude = [

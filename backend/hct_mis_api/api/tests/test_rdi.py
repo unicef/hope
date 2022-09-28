@@ -146,6 +146,3 @@ class CompleteRDITests(HOPEApiTestCase):
         data = response.json()
         self.assertDictEqual(data[0], {"id": str(self.rdi.id), "status": "DONE"})
         self.assertDictEqual(data[1], {"id": str(self.rdi2.id), "status": "IN_REVIEW"})
-
-        # self.assertEqual(self.rdi.import_done, RegistrationDataImportDatahub.DONE)
-        # self.assertEqual(self.rdi2.status, RegistrationDataImport.IN_REVIEW)
