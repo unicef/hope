@@ -37,7 +37,7 @@ variables:
     Sentry.frontend.dsn: $(PRD_SENTRY_FRONTEND_DSN)
   ${{ if eq(ne(variables['Build.SourceBranchName'], 'develop'),
             ne(variables['Build.SourceBranchName'], 'staging'),
-            ne(variables['Build.SourceBranchName'], 'master')}}:
+            ne(variables['Build.SourceBranchName'], 'master')) }}:
     Sentry.frontend.dsn: $(SENTRY_FRONTEND_DSN)
     Sentry.frontend.trn_dsn: $(TRN_SENTRY_FRONTEND_DSN)
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
