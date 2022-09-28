@@ -813,6 +813,10 @@ if PROFILING:
 
 ADMIN_SYNC_USE_REVERSION = False
 
-SWAGGER_SETTINGS = {"LOGOUT_URL": reverse_lazy("logout"), "LOGIN_URL": "/"}
+SWAGGER_SETTINGS = {
+    "LOGOUT_URL": reverse_lazy("logout"),
+    "LOGIN_URL": "/",
+    "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
+}
 
 MAX_STORAGE_FILE_SIZE = 30
