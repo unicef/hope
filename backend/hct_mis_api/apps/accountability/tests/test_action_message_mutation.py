@@ -9,6 +9,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 
@@ -19,7 +20,6 @@ class TestActionMessageMutation(APITestCase):
       createAccountabilityCommunicationMessage(businessAreaSlug: $businessArea, inputs: $inputs) {
         message {
           title
-          unicefId
           body
           createdBy {
             firstName
@@ -50,6 +50,8 @@ class TestActionMessageMutation(APITestCase):
         HouseholdSelection.objects.bulk_create(
             [HouseholdSelection(household=household, target_population=cls.tp) for household in cls.households]
         )
+
+        cls.rdi_id = RegistrationDataImport.objects.order_by("?").first().id
 
         cls.sampling_data = {
             Message.SamplingChoices.FULL_LIST: {
@@ -122,6 +124,8 @@ class TestActionMessageMutation(APITestCase):
                 "body": f"{sampling_type} message body",
                 look_up_with: self.tp.id
                 if look_up_with == "targetPopulation"
+                else self.rdi_id
+                if look_up_with == "registration_data_import"
                 else [household.id for household in self.households],
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
@@ -186,6 +190,8 @@ class TestActionMessageMutation(APITestCase):
             "inputs": {
                 look_up_with: self.tp.id
                 if look_up_with == "targetPopulation"
+                else self.rdi_id
+                if look_up_with == "registration_data_import"
                 else [household.id for household in self.households],
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
@@ -193,7 +199,7 @@ class TestActionMessageMutation(APITestCase):
         }
 
         self.snapshot_graphql_request(
-            request_string=self.MUTATION_NEW_MESSAGE,
+            request_string=self.MUTATION_SAMPLE_SIZE,
             context={"user": self.user},
             variables=data,
         )
