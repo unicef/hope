@@ -111,6 +111,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
     @property
     def payment_verification_summary_obj(self):
+        """ PaymentPlan has only one payment_verification_summary """
         return self.payment_verification_summary.first()
 
     def available_payment_records(
@@ -956,7 +957,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
-            "cash_plan",
+            "payment_plan",
             "sampling",
             "verification_channel",
             "sample_size",
@@ -1082,7 +1083,7 @@ def build_summary(payment_plan):
     not_finished_count = payment_plan.payment_verification_plans.exclude(
         status=PaymentVerificationSummary.STATUS_FINISHED
     ).count()
-    summary = PaymentVerificationSummary.objects.get(payment_plan=payment_plan)
+    summary = payment_plan.payment_verification_summary_obj
     if active_count >= 1:
         summary.status = PaymentVerificationSummary.STATUS_ACTIVE
         summary.completion_date = None
