@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
 from parameterized import parameterized
@@ -75,11 +76,16 @@ class TestGenerateReportService(TestCase):
             business_area=self.business_area, program=self.program_1, end_date="2020-01-01"
         )
         self.cash_plan_2 = CashPlanFactory(business_area=self.business_area, end_date="2020-01-01")
+        ct = ContentType.objects.get(app_label="payment", model="cashplan")
         self.cash_plan_verification_1 = PaymentVerificationPlanFactory(
-            cash_plan=self.cash_plan_1, completion_date="2020-01-01"
+            payment_plan_object_id=self.cash_plan_1.pk,
+            payment_plan_content_type=ct,
+            completion_date="2020-01-01"
         )
         self.cash_plan_verification_2 = PaymentVerificationPlanFactory(
-            cash_plan=self.cash_plan_2, completion_date="2020-01-01"
+            payment_plan_object_id=self.cash_plan_2.pk,
+            payment_plan_content_type=ct,
+            completion_date="2020-01-01"
         )
         PaymentRecordFactory(
             household=self.households[0],

@@ -5,6 +5,7 @@ from datetime import timedelta
 from decimal import Decimal
 from random import randint
 
+from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from factory import fuzzy
 from pytz import utc
@@ -253,7 +254,8 @@ class PaymentVerificationPlanFactory(factory.DjangoModelFactory):
         PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES,
         getter=lambda c: c[0],
     )
-    cash_plan = factory.Iterator(CashPlan.objects.all())
+    payment_plan_object_id = CashPlan.objects.all().order_by("?")[0].pk,
+    payment_plan_content_type = ContentType.objects.get(app_label="payment", model="cashplan"),
     sample_size = fuzzy.FuzzyInteger(0, 100)
     responded_count = fuzzy.FuzzyInteger(20, 90)
     received_count = fuzzy.FuzzyInteger(30, 70)
@@ -268,7 +270,7 @@ class PaymentVerificationPlanFactory(factory.DjangoModelFactory):
 class PaymentVerificationFactory(factory.DjangoModelFactory):
     payment_verification_plan = factory.Iterator(PaymentVerificationPlan.objects.all())
     payment_record = factory.LazyAttribute(
-        lambda o: PaymentRecord.objects.filter(parent=o.payment_verification_plan.cash_plan).order_by("?").first()
+        lambda o: PaymentRecord.objects.filter(parent=o.payment_verification_plan.payment_plan).order_by("?").first()
     )
     status = fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,

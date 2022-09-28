@@ -13,9 +13,6 @@ from django.core.mail import EmailMultiAlternatives
 from django.db.models import Count, DecimalField, Max, Min, Q, Sum
 from django.template.loader import render_to_string
 
-import openpyxl
-from openpyxl.utils import get_column_letter
-
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -27,7 +24,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     PaymentRecord,
     PaymentVerification,
     PaymentPlan,
@@ -152,7 +149,7 @@ class GenerateReportContentHelpers:
         }
         if report.program:
             filter_vars["cash_plan__program"] = report.program
-        return CashPlanPaymentVerification.objects.filter(**filter_vars)
+        return PaymentVerificationPlan.objects.filter(**filter_vars)
 
     @staticmethod
     def _map_admin_area_names_from_ids(admin_areas_ids: list) -> str:
@@ -166,11 +163,11 @@ class GenerateReportContentHelpers:
         return ", ".join(result)
 
     @classmethod
-    def format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification) -> tuple:
+    def format_cash_plan_verification_row(self, verification: PaymentVerificationPlan) -> tuple:
         return (
             verification.id,
-            verification.cash_plan.ca_id,
-            verification.cash_plan.program.name,
+            verification.payment_plan.unicef_id,
+            verification.payment_plan.program.name,
             self._format_date(verification.activation_date),
             verification.status,
             verification.verification_channel,
@@ -244,7 +241,7 @@ class GenerateReportContentHelpers:
         return (
             payment_verification.payment_verification_plan.id,
             payment_verification.payment_record.ca_id,
-            payment_verification.payment_verification_plan.cash_plan.ca_id,
+            payment_verification.payment_verification_plan.payment_plan.unicef_id,
             self._format_date(payment_verification.payment_verification_plan.completion_date),
             payment_verification.received_amount,
             payment_verification.status,
