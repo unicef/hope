@@ -18,9 +18,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         self.payment_list = payment_plan.not_excluded_payments
         self.file = file
         self.errors = []
-        self.payments_dict = {
-            str(x.unicef_id): x for x in self.payment_list
-        }
+        self.payments_dict = {str(x.unicef_id): x for x in self.payment_list}
         self.payment_ids = list(self.payments_dict.keys())
         self.payments_to_save = []
         self.payment_channel_update = False
@@ -140,9 +138,9 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                     )
                 )
             collectors_payment_channels = list(
-                    payment.collector.payment_channels.all()
-                    .distinct("delivery_mechanism")
-                    .values_list("delivery_mechanism", flat=True)
+                payment.collector.payment_channels.all()
+                .distinct("delivery_mechanism")
+                .values_list("delivery_mechanism", flat=True)
             )
             if payment.collector.payment_channels.exists() and payment_channel not in collectors_payment_channels:
                 self.errors.append(
@@ -188,6 +186,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         if not payment.collector.payment_channels.exists():
             for payment_channel in payment_channels_list:
                 if payment_channel is not None and payment_channel != "":
+                    # TODO handle delivery data
                     PaymentChannel.objects.get_or_create(
                         individual=payment.collector,
                         delivery_mechanism=payment_channel,
