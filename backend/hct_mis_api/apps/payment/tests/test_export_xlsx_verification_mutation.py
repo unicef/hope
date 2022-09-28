@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -47,7 +48,8 @@ class TestXlsxVerificationExport(APITestCase):
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
         cls.payment_verification_plan = PaymentVerificationPlanFactory(
-            cash_plan=cash_plan,
+            payment_plan_object_id=cash_plan.pk,
+            payment_plan_content_type=ContentType.objects.get(app_label="payment", model="cashplan"),
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
             status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
