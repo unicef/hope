@@ -11,7 +11,6 @@ export interface DocumentationFieldProps {
   onDelete: () => {};
   isEdited?: boolean;
   setFieldValue;
-  photoSrc?: string;
 }
 
 export const DocumentationField = ({
@@ -20,7 +19,6 @@ export const DocumentationField = ({
   onDelete,
   isEdited,
   setFieldValue,
-  photoSrc,
 }: DocumentationFieldProps): React.ReactElement => {
   const { t } = useTranslation();
 

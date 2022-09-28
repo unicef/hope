@@ -470,5 +470,14 @@ export function validateUsingSteps(
     }
     setValidateData(true);
   }
+
+  if (values.documentation?.length) {
+    values.documentation.forEach((el, index) => {
+      const doc = values.documentation[index];
+      if (!doc.name || !doc.file) {
+        errors.documentation = 'Documentation name and file are required';
+      }
+    });
+  }
   return errors;
 }
