@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React  from 'react';
 import { useParams } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -16,14 +16,11 @@ export const EditSetUpFspPage = (): React.ReactElement => {
     data: paymentPlanData,
     loading: paymentPlanLoading,
   } = usePaymentPlanQuery({
-    variables: { id },
+    variables: {
+      id,
+    },
     fetchPolicy: 'cache-and-network',
   });
-
-  const [deliveryMechanismsForQuery, setDeliveryMechanismsForQuery] = useState(
-    paymentPlanData?.paymentPlan?.deliveryMechanisms?.map((el) => el.name) ||
-      [],
-  );
 
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -57,8 +54,6 @@ export const EditSetUpFspPage = (): React.ReactElement => {
         businessArea={businessArea}
         permissions={permissions}
         initialValues={initialValues}
-        deliveryMechanismsForQuery={deliveryMechanismsForQuery}
-        setDeliveryMechanismsForQuery={setDeliveryMechanismsForQuery}
       />
     </>
   );

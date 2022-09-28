@@ -710,7 +710,7 @@
   "Delivery Mechanisms have been set": "Delivery Mechanisms have been set",
   "FSPs have been assigned to the delivery mechanisms": "FSPs have been assigned to the delivery mechanisms",
   "Total Entitled Quantity": "Total Entitled Quantity",
-  "Payment Plan FSP is locked.": "Payment Plan FSP is locked.",
+  "Payment Plan FSPs are locked.": "Payment Plan FSPs are locked.",
   "Error during FSP locking in Payment Plan.": "Error during FSP locking in Payment Plan.",
   "Lock FSP": "Lock FSP",
   "After you lock the FSP in this Payment Plan, you will be able to send the Payment Plan for approval.": "After you lock the FSP in this Payment Plan, you will be able to send the Payment Plan for approval.",
