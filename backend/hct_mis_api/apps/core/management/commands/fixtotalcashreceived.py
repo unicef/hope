@@ -1,7 +1,10 @@
 from time import time
 
 from django.core.management import BaseCommand
-from hct_mis_api.apps.payment.services.handle_total_cash_in_households import handle_total_cash_in_households
+
+from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
+    handle_total_cash_in_households,
+)
 
 
 class Command(BaseCommand):

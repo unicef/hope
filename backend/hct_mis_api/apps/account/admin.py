@@ -34,6 +34,8 @@ from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_buttons.api import ExtraButtonsMixin, button
+from admin_sync.mixin import GetManyFromRemoteMixin
+from adminactions.export import ForeignKeysCollector
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import AllValuesComboFilter
@@ -50,7 +52,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, User
+from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, Role, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
@@ -342,6 +344,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
         "is_active",
     )
     list_display = (
+        "username",
         "email",
         "partner",
         "first_name",
@@ -598,7 +601,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
 
     @button(
         permission="account.can_create_kobo_user",
-        visible=lambda o, r: not o.custom_fields.get("kobo_username"),
+        enabled=lambda b: not b.original.custom_fields.get("kobo_username"),
     )
     def create_kobo_user(self, request, pk):
         try:
@@ -610,7 +613,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
 
     @button(
         permission="account.can_create_kobo_user",
-        visible=lambda o, r: o.custom_fields.get("kobo_username"),
+        enabled=lambda b: not b.custom_fields.get("kobo_username"),
     )
     def remove_kobo_access(self, request, pk):
         try:
@@ -919,13 +922,12 @@ class RoleResource(resources.ModelResource):
 
 
 @admin.register(account_models.Role)
-class RoleAdmin(ImportExportModelAdmin, ExtraButtonsMixin, HOPEModelAdminBase):
+class RoleAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
     search_fields = ("name",)
     form = RoleAdminForm
     list_filter = (PermissionFilter, "subsystem")
     resource_class = RoleResource
-    change_list_template = "admin/account/role/change_list.html"
 
     @button()
     def members(self, request, pk):
@@ -983,7 +985,7 @@ class RoleAdmin(ImportExportModelAdmin, ExtraButtonsMixin, HOPEModelAdminBase):
 
 
 @admin.register(account_models.UserRole)
-class UserRoleAdmin(HOPEModelAdminBase):
+class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
     autocomplete_fields = ("role",)
@@ -994,6 +996,24 @@ class UserRoleAdmin(HOPEModelAdminBase):
         ("role", AutoCompleteFilter),
         ("role__subsystem", AllValuesComboFilter),
     )
+
+    def check_sync_permission(self, request, obj=None):
+        return request.user.is_staff
+
+    def check_publish_permission(self, request, obj=None):
+        return False
+
+    def _get_data(self, record) -> str:
+        roles = Role.objects.all()
+        collector = ForeignKeysCollector(None)
+        objs = []
+        for qs in [roles]:
+            objs.extend(qs)
+        objs.extend(account_models.UserRole.objects.filter(pk=record.pk))
+        collector.collect(objs)
+        serializer = self.get_serializer("json")
+        return serializer.serialize(
+            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3)
 
 
 class IncompatibleRoleFilter(SimpleListFilter):
