@@ -10,12 +10,12 @@ import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PAYMENT_PLAN_QUERY } from '../../../../apollo/queries/paymentmodule/PaymentPlan';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { ImportErrors } from '../../../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   ImportXlsxPpListMutation,
+  PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
   useImportXlsxPpListMutation,
@@ -60,7 +60,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           },
           refetchQueries: () => [
             {
-              query: PAYMENT_PLAN_QUERY,
+              query: PaymentPlanDocument,
               variables: {
                 id: paymentPlan.id,
               },

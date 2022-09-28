@@ -13,9 +13,9 @@ import AttachFileIcon from '@material-ui/icons/AttachFile';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PAYMENT_PLAN_QUERY } from '../../../../apollo/queries/paymentmodule/PaymentPlan';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
+  PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
   useAllSteficonRulesQuery,
@@ -95,12 +95,12 @@ export const Entitlement = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
-    paymentPlan?.steficonRule?.rule.id || '',
+    paymentPlan.steficonRule?.rule.id || '',
   );
   const options = {
     refetchQueries: () => [
       {
-        query: PAYMENT_PLAN_QUERY,
+        query: PaymentPlanDocument,
         variables: {
           id: paymentPlan.id,
         },

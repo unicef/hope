@@ -140,6 +140,7 @@ parso = "0.8.3"
 argh = "^0.26.2"
 flake8 = "4.0.1"
 flake8-formatter-junit-xml = "^0.0.6"
+pygraphviz = "1.10"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

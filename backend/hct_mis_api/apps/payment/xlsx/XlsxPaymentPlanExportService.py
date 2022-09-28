@@ -42,7 +42,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
 
     def __init__(self, payment_plan: PaymentPlan):
         self.payment_plan = payment_plan
-        self.payment_list = payment_plan.all_active_payments
+        self.payment_list = payment_plan.not_excluded_payments.order_by("unicef_id")
 
     def _add_payment_row(self, payment: Payment):
         household = payment.household

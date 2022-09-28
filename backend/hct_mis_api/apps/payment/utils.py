@@ -2,7 +2,6 @@ from decimal import Decimal
 from math import ceil
 
 import datetime
-from typing import Optional, List
 
 from django.db.models import Q
 
@@ -112,7 +111,7 @@ def get_quantity_in_usd(
 
 
 def get_payment_items_sequence_qs() -> ExtendedQuerySetSequence:
-    return ExtendedQuerySetSequence(Payment.objects.all(), PaymentRecord.objects.all())
+    return ExtendedQuerySetSequence(Payment.objects.filter(excluded=False), PaymentRecord.objects.all())
 
 
 def get_payment_cash_plan_items_sequence_qs() -> ExtendedQuerySetSequence:
