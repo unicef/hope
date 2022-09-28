@@ -1,13 +1,12 @@
 import os
 import random
 import shutil
-import openpyxl
 
-from django.core.management import BaseCommand
 from django.conf import settings
+from django.core.management import BaseCommand
 
+import openpyxl
 from faker import Faker
-
 
 faker = Faker()
 

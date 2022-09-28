@@ -6,7 +6,9 @@ from django.utils.safestring import mark_safe
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
+from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
@@ -23,9 +25,11 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(PaymentRecord)
-class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("household", "status", "cash_plan_name", "target_population")
     list_filter = (
+        DepotManager,
+        QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("target_population", AutoCompleteFilter),
@@ -118,6 +122,8 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
     list_display = ("household", "status", "received_amount", "cash_plan_name")
 
     list_filter = (
+        DepotManager,
+        QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
         ("cash_plan_payment_verification__cash_plan", AutoCompleteFilter),
         ("cash_plan_payment_verification__cash_plan__business_area", AutoCompleteFilter),
