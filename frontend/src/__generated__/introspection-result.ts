@@ -150,6 +150,9 @@
             "name": "TicketNoteNode"
           },
           {
+            "name": "GrievanceDocumentNode"
+          },
+          {
             "name": "CommunicationMessageRecipientMapNode"
           },
           {

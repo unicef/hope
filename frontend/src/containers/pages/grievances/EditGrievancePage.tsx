@@ -1,4 +1,10 @@
-import { Box, Button, FormHelperText, Grid } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Grid,
+  Typography,
+} from '@material-ui/core';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +12,7 @@ import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   hasCreatorOrOwnerPermissions,
+  hasPermissions,
   PERMISSIONS,
 } from '../../../config/permissions';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
@@ -58,6 +65,8 @@ import { ContentLink } from '../../../components/core/ContentLink';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
+import { Title } from '../../../components/core/Title';
+import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -242,6 +251,11 @@ export const EditGrievancePage = (): React.ReactElement => {
           <FormHelperText error>{errors[fieldname]}</FormHelperText>
         ),
     );
+
+  const canAddDocumentation = hasPermissions(
+    PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
+    permissions,
+  );
 
   return (
     <Formik
@@ -471,6 +485,19 @@ export const EditGrievancePage = (): React.ReactElement => {
                           </Grid>
                         )}
                       </Grid>
+                      {canAddDocumentation && (
+                        <Box mt={3}>
+                          <Title>
+                            <Typography variant='h6'>
+                              {t('Documentation')}
+                            </Typography>
+                          </Title>
+                          <NewDocumentationFieldArray
+                            values={values}
+                            setFieldValue={setFieldValue}
+                          />
+                        </Box>
+                      )}
                     </BoxPadding>
                     <BoxPadding>
                       <BoxWithBorders>
