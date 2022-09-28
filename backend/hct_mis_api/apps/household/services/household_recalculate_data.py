@@ -1,8 +1,9 @@
 from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
-from django.db.models import Q
-from django.db.models import Count as ModelCount
+from django.db.models import Q, Case, When, Value, Count
+
+# from django.db.models import Count as ModelCount
 
 from hct_mis_api.apps.household.models import (
     Household,
@@ -14,15 +15,15 @@ from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_PARTIAL,
 )
 
+# TODO
+def my_aggregate(household, condition, **kwargs):
+    if condition:
+        return {key: None for key, _ in kwargs.items()}
+    return household.individuals.aggregate(**kwargs)
+
 
 def recalculate_data(household: Household) -> None:
-    if not (
-        household.collect_individual_data
-        in (
-            COLLECT_TYPE_FULL,
-            COLLECT_TYPE_PARTIAL,
-        )
-    ):
+    if not (household.collect_individual_data in (COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL)):
         return
     for individual in household.individuals.all():
         individual.recalculate_data()
@@ -30,9 +31,6 @@ def recalculate_data(household: Household) -> None:
     date_12_years_ago = timezone.now() - relativedelta(years=+12)
     date_18_years_ago = timezone.now() - relativedelta(years=+18)
     date_60_years_ago = timezone.now() - relativedelta(years=+60)
-
-    def Count(*args, **kwargs):
-        return None if household.collect_individual_data == COLLECT_TYPE_PARTIAL else ModelCount(*args, **kwargs)
 
     is_beneficiary = ~Q(relationship=NON_BENEFICIARY)
     active_beneficiary = Q(withdrawn=False, duplicate=False)
@@ -56,7 +54,9 @@ def recalculate_data(household: Household) -> None:
     female_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & female_disability_beneficiary
     male_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & male_disability_beneficiary
 
-    age_groups = household.individuals.aggregate(
+    age_groups = my_aggregate(
+        household,
+        household.collect_individual_data == COLLECT_TYPE_PARTIAL,
         female_age_group_0_5_count=Count("id", distinct=True, filter=Q(female_beneficiary & to_6_years)),
         female_age_group_6_11_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_6_to_12_years)),
         female_age_group_12_17_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_12_to_18_years)),
@@ -156,6 +156,7 @@ def recalculate_data(household: Household) -> None:
 
     for key, value in age_groups.items():
         updated_fields.append(key)
+        # print("SETATTR", key, value)
         setattr(household, key, value)
 
     household.child_hoh = False
