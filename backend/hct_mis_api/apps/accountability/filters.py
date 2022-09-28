@@ -1,3 +1,4 @@
+from django.db.models import Func
 from django.db.models.functions import Lower
 
 from django_filters import CharFilter, ChoiceFilter, FilterSet
@@ -7,6 +8,27 @@ from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
 
 from .models import Feedback, Message
+
+
+class IsNull(Func):
+    template = '%(expressions)s IS NULL'
+
+
+class RelatedOrderingFilter(CustomOrderingFilter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.extra['choices'] += [
+            ('linked_grievance', '-linked_grievance'),
+            ('Linked_grievance', 'Linked_grievance (descending)'),
+        ]
+
+    def filter(self, qs, value):
+        if any(v in ['linked_grievance', '-linked_grievance'] for v in value):
+            if value[0] == "linked_grievance":
+                return qs.annotate(linked_isnull=IsNull(value[0])).order_by("-linked_isnull", f"{value[0]}__unicef_id")
+            else:
+                return qs.annotate(linked_isnull=IsNull(value[0])).order_by("linked_isnull", f"{value[0]}__unicef_id")
+        return super().filter(qs, value)
 
 
 class MessagesFilter(FilterSet):
@@ -28,7 +50,16 @@ class MessagesFilter(FilterSet):
             "created_by": ["exact"],
         }
 
-    order_by = CustomOrderingFilter(fields=(Lower("title"), "number_of_recipients", "sampling_type", "created_by", "id", "created_at"))
+    order_by = CustomOrderingFilter(
+        fields=(
+            Lower("title"),
+            "number_of_recipients",
+            "sampling_type",
+            "created_by",
+            "id",
+            "created_at"
+        )
+    )
 
 
 class MessageRecipientsMapFilter(FilterSet):
@@ -80,7 +111,7 @@ class FeedbackFilter(FilterSet):
         model = Feedback
         fields = ()
 
-    order_by = CustomOrderingFilter(
+    order_by = RelatedOrderingFilter(
         fields=(
             "unicef_id",
             "issue_type",
