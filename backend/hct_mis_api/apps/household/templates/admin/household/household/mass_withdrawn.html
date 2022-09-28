@@ -1,0 +1,17 @@
+{% extends "admin_extra_buttons/action_page.html" %}{% load hope i18n admin_urls static admin_modify %}
+{% block action-content %}
+        <div>Continuing will <strong>{{ op }}</strong> {{ queryset.count }} household(s) and all his members (not the
+            external collectors) and
+            will <strong>{{ ticket_operation }}</strong>
+        </div>
+        <form method="post">{% csrf_token %}
+            <table>
+                {{ form }}
+            </table>
+            <input type="hidden" name="action" value="{{ action }}" />
+            <input type="submit"
+                   name="apply"
+                   value="{{ op.title }} Households"
+                   class="btn btn-default">
+        </form>
+{% endblock action-content %}

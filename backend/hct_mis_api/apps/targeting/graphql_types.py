@@ -10,10 +10,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.schema import (
-    ExtendedConnection,
-    FieldAttributeNode,
-)
+from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.targeting.filters import TargetPopulationFilter
 from hct_mis_api.apps.utils.schema import Arg
