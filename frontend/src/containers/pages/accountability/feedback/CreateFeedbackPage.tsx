@@ -242,7 +242,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     individualLookup: values.selectedIndividual.id,
     description: values.description,
     comments: values.comments,
-    admin2: values.admin2.node.id,
+    admin2: values.admin2.node?.id,
     area: values.area,
     language: values.language,
     consent: values.consent,
