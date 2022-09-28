@@ -811,6 +811,8 @@ if PROFILING:
     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
     SILKY_PYTHON_PROFILER = True
 
+ADMIN_SYNC_USE_REVERSION = False
+
 SWAGGER_SETTINGS = {
     "LOGOUT_URL": reverse_lazy("logout"),
     "LOGIN_URL": "/",
