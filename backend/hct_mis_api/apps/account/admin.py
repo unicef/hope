@@ -929,8 +929,6 @@ class RoleAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_filter = (PermissionFilter, "subsystem")
     resource_class = RoleResource
 
-    # change_list_template = "admin/account/role/change_list.html"
-
     @button()
     def members(self, request, pk):
         url = reverse("admin:account_userrole_changelist")

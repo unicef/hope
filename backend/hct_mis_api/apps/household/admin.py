@@ -127,14 +127,9 @@ class HouseholdAdmin(
     list_filter = (
         DepotManager,
         QueryStringFilter,
-        # ("unicef_id", MultiValueFilter),
-        # ("unhcr_id", MultiValueFilter),
-        # ("id", MultiValueFilter),
         ("registration_data_import", AutoCompleteFilter),
         ("withdrawn", ChoicesFieldComboFilter),
-        # ("country", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
-        # ("size", MaxMinFilter),
         "org_enumerator",
         "last_registration_date",
     )
