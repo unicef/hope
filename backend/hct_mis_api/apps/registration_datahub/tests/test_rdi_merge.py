@@ -7,7 +7,8 @@ from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
     COUSIN,
     HEAD,
-    YES,
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_PARTIAL,
     Household,
     Individual,
 )
@@ -17,6 +18,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
 )
+from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
 
 class TestRdiMergeTask(BaseElasticSearchTestCase):
@@ -28,22 +30,15 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
-
-        cls.RdiMergeTask = RdiMergeTask
-
         cls.rdi = RegistrationDataImportFactory()
-        rdi_hub = RegistrationDataImportDatahubFactory(
+        cls.rdi_hub = RegistrationDataImportDatahubFactory(
             name=cls.rdi.name, hct_id=cls.rdi.id, business_area_slug=cls.rdi.business_area.slug
         )
-        cls.rdi.datahub_id = rdi_hub.id
+        cls.rdi.datahub_id = cls.rdi_hub.id
         cls.rdi.save()
 
-        imported_household = ImportedHouseholdFactory(
-            collect_individual_data=YES,
-            registration_data_import=rdi_hub,
-        )
-
+    @classmethod
+    def set_imported_individuals(cls, imported_household):
         individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
@@ -52,7 +47,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": HEAD,
                 "birth_date": "1962-02-02",  # age 39
                 "sex": "MALE",
-                "registration_data_import": rdi_hub,
+                "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
             },
             {
@@ -62,7 +57,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": COUSIN,
                 "birth_date": "2017-02-15",  # age 4
                 "sex": "MALE",
-                "registration_data_import": rdi_hub,
+                "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
             },
             {
@@ -72,7 +67,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": COUSIN,
                 "birth_date": "2011-12-21",  # age 10
                 "sex": "MALE",
-                "registration_data_import": rdi_hub,
+                "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
             },
             {
@@ -82,7 +77,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": BROTHER_SISTER,
                 "birth_date": "2006-03-23",  # age 15
                 "sex": "MALE",
-                "registration_data_import": rdi_hub,
+                "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
             },
             {
@@ -92,7 +87,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": BROTHER_SISTER,
                 "birth_date": "2005-02-21",  # age 16
                 "sex": "MALE",
-                "registration_data_import": rdi_hub,
+                "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
             },
             {
@@ -102,7 +97,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": BROTHER_SISTER,
                 "birth_date": "2005-10-10",  # age 16
                 "sex": "FEMALE",
-                "registration_data_import": rdi_hub,
+                "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
             },
             {
@@ -112,7 +107,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": BROTHER_SISTER,
                 "birth_date": "1996-11-29",  # age 25
                 "sex": "FEMALE",
-                "registration_data_import": rdi_hub,
+                "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
             },
             {
@@ -122,7 +117,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "relationship": BROTHER_SISTER,
                 "birth_date": "1956-03-03",  # age 65
                 "sex": "MALE",
-                "registration_data_import": rdi_hub,
+                "registration_data_import": cls.rdi_hub,
                 "household": imported_household,
             },
         ]
@@ -131,7 +126,13 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self):
-        self.RdiMergeTask().execute(self.rdi.pk)
+        imported_household = ImportedHouseholdFactory(
+            collect_individual_data=COLLECT_TYPE_FULL,
+            registration_data_import=self.rdi_hub,
+        )
+        self.set_imported_individuals(imported_household)
+
+        RdiMergeTask().execute(self.rdi.pk)
 
         households = Household.objects.all()
         individuals = Individual.objects.all()
@@ -168,5 +169,52 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             "male_age_group_18_59_count": 1,
             "male_age_group_60_count": 1,
             "children_count": 5,
+        }
+        self.assertEqual(household_data, expected)
+
+    @freeze_time("2022-01-01")
+    def test_merge_rdi_and_recalculation_for_collect_data_partial(self):
+        imported_household = ImportedHouseholdFactory(
+            collect_individual_data=COLLECT_TYPE_PARTIAL,
+            registration_data_import=self.rdi_hub,
+        )
+        self.set_imported_individuals(imported_household)
+
+        households = Household.objects.all()
+        individuals = Individual.objects.all()
+
+        self.assertEqual(1, households.count())
+        self.assertEqual(8, individuals.count())
+
+        household_data = model_to_dict(
+            households[0],
+            (
+                "female_age_group_0_5_count",
+                "female_age_group_6_11_count",
+                "female_age_group_12_17_count",
+                "female_age_group_18_59_count",
+                "female_age_group_60_count",
+                "male_age_group_0_5_count",
+                "male_age_group_6_11_count",
+                "male_age_group_12_17_count",
+                "male_age_group_18_59_count",
+                "male_age_group_60_count",
+                "children_count",
+            ),
+        )
+
+        expected = {
+            "female_age_group_0_5_count": None,
+            "female_age_group_6_11_count": None,
+            "female_age_group_12_17_count": None,
+            "female_age_group_18_59_count": None,
+            "female_age_group_60_count": None,
+            "male_age_group_0_5_count": None,
+            "male_age_group_6_11_count": None,
+            "male_age_group_12_17_count": None,
+            "male_age_group_18_59_count": None,
+            "male_age_group_60_count": None,
+            "children_count": None,
+            "size": None,
         }
         self.assertEqual(household_data, expected)
