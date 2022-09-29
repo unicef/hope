@@ -141,6 +141,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         individuals = Individual.objects.all()
 
         self.assertEqual(1, households.count())
+        self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(8, individuals.count())
 
         household_data = model_to_dict(
@@ -157,6 +158,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "male_age_group_18_59_count",
                 "male_age_group_60_count",
                 "children_count",
+                "size",
             ),
         )
 
@@ -172,6 +174,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             "male_age_group_18_59_count": 1,
             "male_age_group_60_count": 1,
             "children_count": 5,
+            "size": 8,
         }
         self.assertEqual(household_data, expected)
 
@@ -189,6 +192,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         individuals = Individual.objects.all()
 
         self.assertEqual(1, households.count())
+        self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_PARTIAL)
         self.assertEqual(8, individuals.count())
 
         household_data = model_to_dict(
@@ -205,6 +209,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
                 "male_age_group_18_59_count",
                 "male_age_group_60_count",
                 "children_count",
+                "size",
             ),
         )
 
