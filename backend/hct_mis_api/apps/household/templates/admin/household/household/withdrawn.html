@@ -1,24 +1,24 @@
 {% extends "admin_extra_buttons/action_page.html" %}{% load hope i18n admin_urls static admin_modify %}
 {% block action-content %}
     {% if original.withdrawn %}
-    <h1 style="color: red">Warning: Household already withdrawn</h1>
-        <h2>Continuing will restore this household and all his  members (not the external collectors) and
+    <h1 style="color: red">Household currently withdrawn</h1>
+        <div><strong>Continuing will restore this household and all his  members (not the external collectors) and
             will reopen all tickets closed when it was withdrew.
-        </h2>
+        </strong></div>
     {% else %}
-        <h2>Continuing will withdrawn household and all his members (not the external collectors) and
+        <div><strong>Continuing will withdrawn household and all his members (not the external collectors) and
             will close any ticket related to the household or his members
-        </h2>
+        </strong></div>
     {% endif %}
     <form method="post">{% csrf_token %}
         <input type="checkbox" checked="{{ status }}" disabled="disabled">
             {{ original }}
         <table>
+            {{ form }}
         <tr><td colspan="3">Members</td> </tr>
-
             <tr>
                 <th colspan="3">individual</th>
-                <th>is withdrawn</th><th>is duplicate</th>
+                <th>currently withdrawn</th><th>currently duplicate</th>
             </tr>
         {% for member in original.individuals.all %}
             <tr>

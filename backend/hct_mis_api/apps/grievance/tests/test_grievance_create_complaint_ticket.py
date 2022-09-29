@@ -87,32 +87,36 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
     def test_create_complaint_ticket(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        input_data = {
-            "input": {
-                "description": "Test Feedback",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-                "admin": self.admin_area.p_code,
-                "language": "Polish, English",
-                "consent": True,
-                "businessArea": "afghanistan",
-                "extras": {
-                    "category": {
-                        "grievanceComplaintTicketExtras": {
-                            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
-                        }
-                    }
-                },
-            }
-        }
+        input_data = self._create_variables(
+            household=self.id_to_base64(self.household.id, "HouseholdNode"),
+            individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            payment_records=[self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
+        )
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
             context={"user": self.user},
             variables=input_data,
         )
+
+    def test_create_a_ticket_per_payment_record(self):
+        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area)
+
+        input_data = self._create_variables(
+            household=self.id_to_base64(self.household.id, "HouseholdNode"),
+            individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            payment_records=[
+                self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                self.id_to_base64(self.second_payment_record.id, "PaymentRecordNode"),
+            ],
+        )
+
+        self.graphql_request(
+            request_string=self.CREATE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
+        )
+        self.assertEqual(GrievanceTicket.objects.count(), 2)
 
     @parameterized.expand(
         [
@@ -126,25 +130,10 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
     def test_create_complaint_ticket_without_payment_record(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        input_data = {
-            "input": {
-                "description": "Test Feedback",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-                "admin": self.admin_area.p_code,
-                "language": "Polish, English",
-                "consent": True,
-                "businessArea": "afghanistan",
-                "extras": {
-                    "category": {
-                        "grievanceComplaintTicketExtras": {
-                            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                        }
-                    }
-                },
-            }
-        }
+        input_data = self._create_variables(
+            household=self.id_to_base64(self.household.id, "HouseholdNode"),
+            individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+        )
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
@@ -164,29 +153,14 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
     def test_create_complaint_ticket_with_two_payment_records(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        input_data = {
-            "input": {
-                "description": "Test Feedback",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-                "admin": self.admin_area.p_code,
-                "language": "Polish, English",
-                "consent": True,
-                "businessArea": "afghanistan",
-                "extras": {
-                    "category": {
-                        "grievanceComplaintTicketExtras": {
-                            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": [
-                                self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
-                                self.id_to_base64(self.second_payment_record.id, "PaymentRecordNode"),
-                            ],
-                        }
-                    }
-                },
-            }
-        }
+        input_data = self._create_variables(
+            household=self.id_to_base64(self.household.id, "HouseholdNode"),
+            individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            payment_records=[
+                self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
+                self.id_to_base64(self.second_payment_record.id, "PaymentRecordNode"),
+            ],
+        )
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
@@ -206,25 +180,10 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
     def test_create_complaint_ticket_without_household(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        input_data = {
-            "input": {
-                "description": "Test Feedback",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-                "admin": self.admin_area.p_code,
-                "language": "Polish, English",
-                "consent": True,
-                "businessArea": "afghanistan",
-                "extras": {
-                    "category": {
-                        "grievanceComplaintTicketExtras": {
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
-                        }
-                    }
-                },
-            }
-        }
+        input_data = self._create_variables(
+            individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            payment_records=[self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
+        )
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
@@ -244,25 +203,10 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
     def test_create_complaint_ticket_without_individual(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        input_data = {
-            "input": {
-                "description": "Test Feedback",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-                "admin": self.admin_area.p_code,
-                "language": "Polish, English",
-                "consent": True,
-                "businessArea": "afghanistan",
-                "extras": {
-                    "category": {
-                        "grievanceComplaintTicketExtras": {
-                            "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "paymentRecord": [self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
-                        }
-                    }
-                },
-            }
-        }
+        input_data = self._create_variables(
+            household=self.id_to_base64(self.household.id, "HouseholdNode"),
+            payment_records=[self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
+        )
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,
@@ -282,7 +226,16 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
     def test_create_complaint_ticket_without_extras(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        input_data = {
+        input_data = self._create_variables()
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
+        )
+
+    def _create_variables(self, household=None, individual=None, payment_records=None):
+        return {
             "input": {
                 "description": "Test Feedback",
                 "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
@@ -291,11 +244,14 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
                 "language": "Polish, English",
                 "consent": True,
                 "businessArea": "afghanistan",
+                "extras": {
+                    "category": {
+                        "grievanceComplaintTicketExtras": {
+                            "household": household,
+                            "individual": individual,
+                            "paymentRecord": payment_records,
+                        }
+                    }
+                },
             }
         }
-
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
-            variables=input_data,
-        )

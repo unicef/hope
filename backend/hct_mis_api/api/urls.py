@@ -27,12 +27,16 @@ router = APIRouter()
 urlpatterns = [
     path(r"(<str:format>\.json|\.yaml)", schema_view.without_ui(cache_timeout=0), name="schema-json"),
     path(r"", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
-    # re_path(r'^/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    # re_path(r"", include(router.urls)),
-    path("rdi/<slug:business_area>/upload/", endpoints.UploadRDIView().as_view(), name="rdi-upload"),
-    path("rdi/<slug:business_area>/create/", endpoints.CreateRDIView().as_view(), name="rdi-create"),
-    path("rdi/<slug:business_area>/<uuid:rdi>/push/", endpoints.PushToRDIView().as_view(), name="rdi-push"),
-    path("rdi/<slug:business_area>/<uuid:rdi>/completed/", endpoints.CompleteRDIView().as_view(), name="rdi-complete"),
+    path("<slug:business_area>/rdi/upload/", endpoints.UploadRDIView().as_view(), name="rdi-upload"),
+    path("<slug:business_area>/rdi/create/", endpoints.CreateRDIView().as_view(), name="rdi-create"),
+    path("<slug:business_area>/rdi/<uuid:rdi>/push/lax/", endpoints.PushLaxToRDIView().as_view(), name="rdi-push-lax"),
+    path("<slug:business_area>/rdi/<uuid:rdi>/push/", endpoints.PushToRDIView().as_view(), name="rdi-push"),
+    path("<slug:business_area>/rdi/<uuid:rdi>/completed/", endpoints.CompleteRDIView().as_view(), name="rdi-complete"),
+    path(
+        "<slug:business_area>/program/create/",
+        endpoints.ProgramViewSet.as_view({"post": "create"}),
+        name="program-create",
+    ),
     path("areas/", endpoints.AreaList().as_view(), name="area-list"),
     path("areatypes/", endpoints.AreaTypeList().as_view(), name="areatype-list"),
     path("lookups/document/", endpoints.DocumentType().as_view(), name="document-list"),
@@ -43,4 +47,5 @@ urlpatterns = [
     path("lookups/relationship/", endpoints.Relationship().as_view(), name="relationship-list"),
     path("lookups/datacollectingpolicy/", endpoints.DataCollectingPolicy().as_view(), name="datacollectingpolicy-list"),
     path("lookups/role/", endpoints.Roles().as_view(), name="role-list"),
+    path("lookups/sex/", endpoints.Sex().as_view(), name="sex-list"),
 ]

@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.test import TestCase
 
@@ -10,8 +11,6 @@ from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
-
-from unittest.mock import patch
 
 
 class TestPullDataFromErpDatahub(TestCase):

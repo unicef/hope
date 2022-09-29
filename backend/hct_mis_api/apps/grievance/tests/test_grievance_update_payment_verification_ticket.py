@@ -13,8 +13,8 @@ from hct_mis_api.apps.grievance.fixtures import TicketPaymentVerificationDetails
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
+    PaymentRecordFactory,
     PaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import (

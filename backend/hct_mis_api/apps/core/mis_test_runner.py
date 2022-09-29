@@ -1,12 +1,10 @@
 import os
 import unittest
 
-import xmlrunner
 from django.conf import settings
-from django.test.runner import (
-    ParallelTestSuite,
-    partition_suite_by_case,
-)
+from django.test.runner import ParallelTestSuite, partition_suite_by_case
+
+import xmlrunner
 from snapshottest.django import TestRunner
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
