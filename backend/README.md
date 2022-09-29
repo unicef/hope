@@ -12,6 +12,12 @@ python3.9 -m pip install -r venv/requirements.txt --require-hashes
 CMD + Shift + P => `Python: Select interpreter`
 Provide path to `./backend/venv/bin/Python3`
 
+Oneliner to refresh your packages:
+
+```sh
+docker-compose run --rm backend poetry export -f requirements.txt --output venv/requirements.txt ; python3.9 -m pip install -r venv/requirements.txt --require-hashes
+```
+
 ## Testing
 
 To run tests, you call `./manage.py test`. Example invocation:
