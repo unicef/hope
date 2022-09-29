@@ -19,7 +19,8 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { Title } from '../../../components/core/Title';
-import { DocumentationFieldArray } from '../../../components/grievances/Documentation/DocumentationFieldArray';
+import { ExistingDocumentationFieldArray } from '../../../components/grievances/Documentation/ExistingDocumentationFieldArray';
+import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
@@ -492,7 +493,13 @@ export const EditGrievancePage = (): React.ReactElement => {
                               {t('Documentation')}
                             </Typography>
                           </Title>
-                          <DocumentationFieldArray
+                          <ExistingDocumentationFieldArray
+                            values={values}
+                            setFieldValue={setFieldValue}
+                            errors={errors}
+                            ticket={ticket}
+                          />
+                          <NewDocumentationFieldArray
                             values={values}
                             setFieldValue={setFieldValue}
                             errors={errors}

@@ -35,6 +35,8 @@ interface EditValuesTypes {
   comments?;
   programme?;
   documentation?;
+  documentationToUpdate?;
+  documentationToDelete?;
 }
 
 function prepareInitialValueAddIndividual(
@@ -207,7 +209,9 @@ export function prepareInitialValues(
     selectedRelatedTickets: ticket.relatedTickets.map(
       (relatedTicket) => relatedTicket.id,
     ),
-    documentation: ticket.documentation || null,
+    documentation: null,
+    documentationToUpdate: null,
+    documentationToDelete: null,
   };
   const prepareInitialValueFunction = thingForSpecificGrievanceType(
     ticket,
@@ -481,6 +485,8 @@ export function prepareVariables(businessArea, values, ticket) {
     programme: values.programme,
     paymentRecord: values.selectedPaymentRecords[0] || null,
     documentation: values.documentation || null,
+    documentationToUpdate: values.documentationToUpdate || null,
+    documentationToDelete: values.documentationToDelete || null,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,

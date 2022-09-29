@@ -68,7 +68,8 @@ import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/Loo
 import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { Title } from '../../../components/core/Title';
-import { DocumentationFieldArray } from '../../../components/grievances/Documentation/DocumentationFieldArray';
+import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
+import { ExistingDocumentationFieldArray } from '../../../components/grievances/Documentation/ExistingDocumentationFieldArray';
 
 const steps = [
   'Category Selection',
@@ -838,7 +839,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   {t('Documentation')}
                                 </Typography>
                               </Title>
-                              <DocumentationFieldArray
+
+                              <NewDocumentationFieldArray
                                 values={values}
                                 setFieldValue={setFieldValue}
                                 errors={errors}

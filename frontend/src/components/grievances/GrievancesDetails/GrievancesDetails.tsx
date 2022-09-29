@@ -74,22 +74,24 @@ export const GrievancesDetails = ({
   const mappedDocumentation = (): React.ReactElement => {
     return (
       <Box display='flex' flexDirection='column'>
-        {ticket.documentation.map((doc) => {
-          if (doc.contentType.includes('image')) {
-            return (
-              <PhotoModal
-                src={doc.filePath}
-                variant='link'
-                linkText={doc.name}
-              />
-            );
-          }
-          return (
-            <ContentLink download href={doc.filePath}>
-              {doc.name}
-            </ContentLink>
-          );
-        })}
+        {ticket.documentation.length
+          ? ticket.documentation.map((doc) => {
+              if (doc.contentType.includes('image')) {
+                return (
+                  <PhotoModal
+                    src={doc.filePath}
+                    variant='link'
+                    linkText={doc.name}
+                  />
+                );
+              }
+              return (
+                <ContentLink download href={doc.filePath}>
+                  {doc.name}
+                </ContentLink>
+              );
+            })
+          : '-'}
       </Box>
     );
   };
