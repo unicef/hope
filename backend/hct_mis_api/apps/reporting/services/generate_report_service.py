@@ -10,6 +10,9 @@ from django.core.mail import EmailMultiAlternatives
 from django.db.models import Count, DecimalField, Max, Min, Q, Sum
 from django.template.loader import render_to_string
 
+import openpyxl
+from openpyxl.utils import get_column_letter
+
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
