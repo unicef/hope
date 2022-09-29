@@ -5,17 +5,17 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DocumentationField } from './DocumentationField';
 
-export interface DocumentationFieldArrayProps {
+export interface NewDocumentationFieldArrayProps {
   values;
   setFieldValue;
   errors;
 }
 
-export const DocumentationFieldArray = ({
+export const NewDocumentationFieldArray = ({
   values,
   setFieldValue,
   errors,
-}: DocumentationFieldArrayProps): React.ReactElement => {
+}: NewDocumentationFieldArrayProps): React.ReactElement => {
   const { t } = useTranslation();
   return (
     <Grid container spacing={3}>
