@@ -1,8 +1,8 @@
 import { gql } from 'apollo-boost';
 
 export const query = gql`
-  query CashPlanPaymentVerification($id: ID!) {
-    cashPlanPaymentVerification(id: $id) {
+  query PaymentVerificationPlan($id: ID!) {
+    paymentVerificationPlan(id: $id) {
       id
       # cashPlan{
       #   id

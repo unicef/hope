@@ -53,7 +53,7 @@ export const fakeApolloAllCashPlansPaymentVerification = [
                 //   id:
                 //     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NGNhNTdkZDUtYmY4ZC00MGIxLWE3NWEtOTM0Yzg4OTc3ZTM4',
                 //   status: 'PENDING',
-                //   __typename: 'CashPlanPaymentVerificationSummaryNode',
+                //   __typename: 'PaymentVerificationPlanSummaryNode',
                 // },
                 __typename: 'CashPlanNode',
               },
@@ -90,7 +90,7 @@ export const fakeApolloAllCashPlansPaymentVerification = [
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6YzE1M2FmZmYtNTNmOS00ZDRjLWEyMmUtNTJmNmQ2NzczNjVj',
                   status: 'PENDING',
-                  __typename: 'CashPlanPaymentVerificationSummaryNode',
+                  __typename: 'PaymentVerificationPlanSummaryNode',
                 },
                 __typename: 'CashPlanNode',
               },
@@ -127,7 +127,7 @@ export const fakeApolloAllCashPlansPaymentVerification = [
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NjZlODU1YmQtZDUxMS00OWEzLTljYWItNGIwMmQ1YzQzYzBk',
                   status: 'PENDING',
-                  __typename: 'CashPlanPaymentVerificationSummaryNode',
+                  __typename: 'PaymentVerificationPlanSummaryNode',
                 },
                 __typename: 'CashPlanNode',
               },
@@ -164,7 +164,7 @@ export const fakeApolloAllCashPlansPaymentVerification = [
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NjdjN2I3YWYtZDU4Zi00NWFlLTliYmQtNjFlYTA1M2IwOWZh',
                   status: 'PENDING',
-                  __typename: 'CashPlanPaymentVerificationSummaryNode',
+                  __typename: 'PaymentVerificationPlanSummaryNode',
                 },
                 __typename: 'CashPlanNode',
               },
@@ -201,7 +201,7 @@ export const fakeApolloAllCashPlansPaymentVerification = [
                   id:
                     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NzRlNWU1NzUtYTgyNi00MTgyLThhYWMtN2EyZjVlOTQ5YWY4',
                   status: 'PENDING',
-                  __typename: 'CashPlanPaymentVerificationSummaryNode',
+                  __typename: 'PaymentVerificationPlanSummaryNode',
                 },
                 __typename: 'CashPlanNode',
               },

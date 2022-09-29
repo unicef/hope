@@ -7,7 +7,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
 
@@ -72,7 +72,7 @@ class BaseSampling(abc.ABC):
         self.payment_records = []
 
     def calc_sample_size(self, sample_count: int) -> int:
-        if self.sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
+        if self.sampling_type == PaymentVerificationPlan.SAMPLING_FULL_LIST:
             return sample_count
         else:
             return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)

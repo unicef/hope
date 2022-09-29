@@ -15,8 +15,8 @@ import { ImportErrors } from '../../containers/tables/payments/VerificationRecor
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import {
-  useImportXlsxCashPlanVerificationMutation,
-  ImportXlsxCashPlanVerificationMutation,
+  useImportXlsxPaymentVerificationPlanFileMutation,
+  ImportXlsxPaymentVerificationPlanFileMutation,
   XlsxErrorNode,
 } from '../../__generated__/graphql';
 import { DropzoneField } from '../core/DropzoneField';
@@ -30,7 +30,7 @@ const StyledButton = styled(Button)`
   width: 150px;
 `;
 
-export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
+export function ImportXlsx({ paymentVerificationPlanId, cashPlanId }): ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
@@ -41,11 +41,11 @@ export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
   const [
     mutate,
     { data: uploadData, loading: fileLoading, error },
-  ] = useImportXlsxCashPlanVerificationMutation();
+  ] = useImportXlsxPaymentVerificationPlanFileMutation();
 
-  const xlsxErrors: ImportXlsxCashPlanVerificationMutation['importXlsxCashPlanVerification']['errors'] = get(
+  const xlsxErrors: ImportXlsxPaymentVerificationPlanFileMutation['importXlsxPaymentVerificationPlanFile']['errors'] = get(
     uploadData,
-    'importXlsxCashPlanVerification.errors',
+    'importXlsxPaymentVerificationPlanFile.errors',
   );
 
   const handleImport = async (): Promise<void> => {
@@ -53,13 +53,13 @@ export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
       try {
         const { data, errors } = await mutate({
           variables: {
-            cashPlanVerificationId: verificationPlanId,
+            paymentVerificationPlanId,
             file: fileToImport,
           },
           refetchQueries,
         });
 
-        if (!errors && !data?.importXlsxCashPlanVerification?.errors.length) {
+        if (!errors && !data?.importXlsxPaymentVerificationPlanFile?.errors.length) {
           setOpenImport(false);
           showMessage(t('Your import was successful!'));
         }

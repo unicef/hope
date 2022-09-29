@@ -23,7 +23,7 @@ export function ActivityLogPageFilters({
     household: 'Household',
     individual: 'Individual',
     grievanceticket: 'Grievance ticket',
-    cashplanpaymentverification: 'Cash plan payment verification',
+    paymentverificationplan: 'Cash plan payment verification',
     targetpopulation: 'Target Population',
     registrationdataimport: 'Registration data import',
   };

@@ -11,13 +11,13 @@ export const headCells: HeadCell<PaymentVerificationNode>[] = [
   {
     disablePadding: false,
     label: 'Verification Channel',
-    id: 'cash_plan_payment_verification__verification_channel',
+    id: 'payment_verification_plan__verification_channel',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Verification Plan Id',
-    id: 'cash_plan_payment_verification__unicef_id',
+    id: 'payment_verification_plan__unicef_id',
     numeric: false,
   },
   {

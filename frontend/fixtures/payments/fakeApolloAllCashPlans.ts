@@ -55,7 +55,7 @@ export const fakeApolloAllCashPlans = [
                 //   id:
                 //     'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6NGNhNTdkZDUtYmY4ZC00MGIxLWE3NWEtOTM0Yzg4OTc3ZTM4',
                 //   status: 'PENDING',
-                //   __typename: 'CashPlanPaymentVerificationSummaryNode',
+                //   __typename: 'PaymentVerificationPlanSummaryNode',
                 // },
                 __typename: 'CashPlanNode',
               },

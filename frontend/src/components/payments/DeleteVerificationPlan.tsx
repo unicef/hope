@@ -9,28 +9,28 @@ import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useDeleteCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { useDeletePaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
 
 export interface DeleteVerificationPlanProps {
-  cashPlanVerificationId: string;
+  paymentVerificationPlanId: string;
   cashPlanId: string;
 }
 
 export function DeleteVerificationPlan({
-  cashPlanVerificationId,
+  paymentVerificationPlanId,
   cashPlanId,
 }: DeleteVerificationPlanProps): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useDeleteCashPlanPaymentVerificationMutation();
+  const [mutate] = useDeletePaymentVerificationPlanMutation();
 
   const handleDeleteVerificationPlan = async (): Promise<void> => {
     const { errors } = await mutate({
-      variables: { cashPlanVerificationId },
+      variables: { paymentVerificationPlanId },
       refetchQueries,
     });
     if (errors) {
