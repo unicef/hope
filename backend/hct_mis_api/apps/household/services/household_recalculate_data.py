@@ -153,7 +153,6 @@ def recalculate_data(household: Household) -> None:
 
     for key, value in age_groups.items():
         updated_fields.append(key)
-        # print("SETATTR", key, value)
         setattr(household, key, value)
 
     household.child_hoh = False
