@@ -57,3 +57,11 @@ export const REPORTING_STATES = {
   GENERATED: 2,
   FAILED: 3
 };
+
+
+export const COLLECT_TYPES_MAPPING = {
+  "A_": "Unknown",
+  "A_0": "None",
+  "A_1": "Full",
+  "A_2": "Partial",
+}
