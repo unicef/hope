@@ -1,13 +1,13 @@
 from django.db.models import Func
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, ChoiceFilter, FilterSet
+from django_filters import CharFilter, ChoiceFilter, FilterSet, UUIDFilter
 
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
 
-from .models import Feedback, Message
+from .models import Feedback, Message, FeedbackMessage
 
 
 class IsNull(Func):
@@ -120,3 +120,11 @@ class FeedbackFilter(FilterSet):
             "created_at",
         )
     )
+
+
+class FeedbackMessageFilter(FilterSet):
+    feedback = UUIDFilter(field_name="feedback", required=True)
+
+    class Meta:
+        fields = ("id", )
+        model = FeedbackMessage

@@ -59,3 +59,10 @@ class UpdateFeedbackInput(graphene.InputObjectType):
     language = graphene.String()
     consent = graphene.Boolean()
     program = graphene.ID()
+
+
+class CreateFeedbackMessageInput(graphene.InputObjectType):
+    from .schema import FeedbackMessageNode
+
+    description = graphene.String(required=True)
+    feedback = graphene.GlobalID(node=FeedbackMessageNode, required=True)
