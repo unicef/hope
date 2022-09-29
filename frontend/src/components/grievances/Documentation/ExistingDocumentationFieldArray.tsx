@@ -1,7 +1,6 @@
 import { FormHelperText, Grid } from '@material-ui/core';
 import { FieldArray } from 'formik';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { EditDocumentationRow } from './EditDocumentationRow';
 
@@ -18,7 +17,6 @@ export const ExistingDocumentationFieldArray = ({
   errors,
   ticket,
 }: ExistingDocumentationFieldArrayProps): React.ReactElement => {
-  const { t } = useTranslation();
   return (
     <Grid container spacing={3}>
       <FieldArray
