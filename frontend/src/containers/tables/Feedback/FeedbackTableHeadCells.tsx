@@ -23,7 +23,7 @@ export const headCells: HeadCell<FeedbackNode>[] = [
   {
     disablePadding: false,
     label: 'Linked Grievance',
-    id: 'linkedGrievance',
+    id: 'linked_grievance',
     numeric: false,
   },
   {
