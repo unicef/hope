@@ -33,8 +33,10 @@ export const ExistingDocumentationFieldArray = ({
                   index={index}
                 />
               ))}
-              {errors?.documentation && (
-                <FormHelperText error>{errors?.documentation}</FormHelperText>
+              {errors?.documentationToUpdate && (
+                <FormHelperText error>
+                  {errors?.documentationToUpdate}
+                </FormHelperText>
               )}
             </>
           );
