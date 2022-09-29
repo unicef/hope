@@ -165,6 +165,9 @@ class Permissions(Enum):
     ACCOUNTABILITY_FEEDBACK_VIEW_DETAILS = auto()
     ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE = auto()
 
+    # FeedbackMessage
+    ACCOUNTABILITY_FEEDBACK_MESSAGE_VIEW_CREATE = auto()
+
     # Django Admin
     # ...
 
