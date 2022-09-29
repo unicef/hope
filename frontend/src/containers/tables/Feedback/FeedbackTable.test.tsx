@@ -2,25 +2,23 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
-import { fakeApolloAllCommunicationMessages } from '../../../../fixtures/communication/fakeApolloAllCommunicationMessages';
+import { fakeApolloAllFeedbacks } from '../../../../fixtures/feedback/fakeApolloAllFeedbacks';
 import { ApolloLoadingLink, render } from '../../../testUtils/testUtils';
 import { FeedbackTable } from './FeedbackTable';
 
 describe('containers/tables//Feedback/FeedbackTable', () => {
   it('should render with data', async () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllCommunicationMessages}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllFeedbacks}>
         <FeedbackTable
           filter={{
-            search: '',
-            status: '',
+            feedbackId: '',
+            issueType: '',
             createdBy: '',
             createdAtRange: '',
           }}
-          businessArea={'afghanistan'}
+          businessArea='afghanistan'
+          canViewDetails={true}
         />
       </MockedProvider>,
     );
@@ -34,16 +32,17 @@ describe('containers/tables//Feedback/FeedbackTable', () => {
       <MockedProvider
         link={new ApolloLoadingLink()}
         addTypename={false}
-        mocks={fakeApolloAllCommunicationMessages}
+        mocks={fakeApolloAllFeedbacks}
       >
         <FeedbackTable
           filter={{
-            search: '',
-            status: '',
+            feedbackId: '',
+            issueType: '',
             createdBy: '',
             createdAtRange: '',
           }}
           businessArea={'afghanistan'}
+          canViewDetails={true}
         />
       </MockedProvider>,
     );
