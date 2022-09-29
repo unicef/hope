@@ -10,7 +10,7 @@ python3.9 -m pip install -r venv/requirements.txt --require-hashes
 ```
 
 CMD + Shift + P => `Python: Select interpreter`
-Provide path to `./backend/venv/bin/Python3`
+Provide path to `./backend/venv/bin/python3`
 
 Oneliner to refresh your packages:
 
