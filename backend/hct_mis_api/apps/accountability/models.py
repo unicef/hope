@@ -114,3 +114,23 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
         blank=True,
         verbose_name=_("Linked grievance"),
     )
+
+
+class FeedbackMessage(TimeStampedUUIDModel):
+    description = models.TextField(
+        verbose_name=_("Description"),
+        help_text=_("The content of the feedback message."),
+    )
+    feedback = models.ForeignKey(
+        Feedback,
+        related_name="feedback_messages",
+        on_delete=models.CASCADE,
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="feedback_messages",
+        blank=True,
+        null=True,
+        verbose_name=_("Created by"),
+    )

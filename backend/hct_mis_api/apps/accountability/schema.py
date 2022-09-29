@@ -14,7 +14,7 @@ from hct_mis_api.apps.household.models import Household
 
 from .filters import MessageRecipientsMapFilter, MessagesFilter, FeedbackFilter
 from .inputs import GetAccountabilityCommunicationMessageSampleSizeInput
-from .models import Feedback, Message
+from .models import Feedback, Message, FeedbackMessage
 from .services.message_crud_services import MessageCrudServices
 from .services.sampling import Sampling
 from .services.verifiers import MessageArgumentVerifier
@@ -55,6 +55,14 @@ class CommunicationMessageNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         connection_class = ExtendedConnection
         filter_fields = []
+
+
+class FeedbackMessageNode(DjangoObjectType):
+    class Meta:
+        model = FeedbackMessage
+        exclude = ("feedback",)
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class FeedbackNode(BaseNodePermissionMixin, DjangoObjectType):
