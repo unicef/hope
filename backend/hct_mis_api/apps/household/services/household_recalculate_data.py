@@ -1,20 +1,16 @@
+from dateutil.relativedelta import relativedelta
 from django.db.models import Count, Q
 from django.utils import timezone
-
-from dateutil.relativedelta import relativedelta
-from django.db.models import Q, Case, When, Value, Count
-
-# from django.db.models import Count as ModelCount
-
 from hct_mis_api.apps.household.models import (
-    Household,
-    NON_BENEFICIARY,
-    FEMALE,
-    MALE,
-    DISABLED,
     COLLECT_TYPE_FULL,
     COLLECT_TYPE_PARTIAL,
+    DISABLED,
+    FEMALE,
+    MALE,
+    NON_BENEFICIARY,
+    Household,
 )
+
 
 # TODO
 def my_aggregate(household, condition, **kwargs):
