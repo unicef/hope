@@ -69,7 +69,6 @@ import { LookUpHouseholdIndividualSelection } from '../../../components/grievanc
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { Title } from '../../../components/core/Title';
 import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
-import { ExistingDocumentationFieldArray } from '../../../components/grievances/Documentation/ExistingDocumentationFieldArray';
 
 const steps = [
   'Category Selection',
