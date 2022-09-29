@@ -34,7 +34,7 @@ export function EditDocumentationRow({
   const removed = documentsToRemove.includes(document.id);
 
   return isEdited ? (
-    <Grid item container xs={12}>
+    <Grid item container spacing={3} xs={12} key={document.id}>
       <DocumentationField
         index={index}
         key={`${index}-documentation-file`}
@@ -43,12 +43,8 @@ export function EditDocumentationRow({
         setFieldValue={setFieldValue}
         isEdited={isEdited}
       />
-      <Box
-        style={{ width: '100%' }}
-        display='flex'
-        alignItems='center'
-        justifyContent='flex-end'
-      >
+      <Grid item xs={1} />
+      <Grid item>
         <Button
           onClick={() => {
             arrayHelpers.remove({
@@ -60,7 +56,7 @@ export function EditDocumentationRow({
         >
           {t('CANCEL')}
         </Button>
-      </Box>
+      </Grid>
     </Grid>
   ) : (
     <Grid item container xs={12} key={document.id}>
