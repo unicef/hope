@@ -11,6 +11,7 @@ from django.db import transaction
 from django.utils import timezone
 
 import openpyxl
+
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -22,6 +23,10 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_PARTIAL,
+    COLLECT_TYPE_UNKNOWN,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -61,6 +66,17 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.individuals = []
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
+
+    def _handle_collect_individual_data(self, value, header, row_num, individual, *args, **kwargs):
+        try:
+            return {
+                "FULL": COLLECT_TYPE_FULL,
+                "PARTIAL": COLLECT_TYPE_PARTIAL,
+                "NONE": COLLECT_TYPE_NONE,
+                "UNKNOWN": COLLECT_TYPE_UNKNOWN,
+            }[value]
+        except KeyError:
+            return COLLECT_TYPE_UNKNOWN
 
     def _handle_bank_account_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
@@ -378,6 +394,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "child_hoh_h_c": self._handle_bool_field,
                 "consent_h_c": self._handle_bool_field,
                 "first_registration_date_h_c": self._handle_datetime,
+                "collect_individual_data": self._handle_collect_individual_data,
             },
         }
 
@@ -408,6 +425,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                 excluded = ("age",)
                 for cell, header_cell in zip(row, first_row):
+                    # print(f"{header_cell.value} - {cell.value}")
+                    # if cell.value == "FULL":
+                    #     print("-" * 60)
                     try:
                         header = header_cell.value
                         combined_fields = self.COMBINED_FIELDS
@@ -446,6 +466,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 is_field_required=current_field.get("required", False),
                             )
                             if value is not None:
+                                # print(f"--- Setting #1 {header} to {value}")
                                 setattr(
                                     obj_to_create,
                                     combined_fields[header]["name"],
@@ -468,6 +489,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     household.head_of_household = obj_to_create
                                     households_to_update.append(household)
 
+                            # print(f"--- Setting #2 {header} to {value}")
                             setattr(
                                 obj_to_create,
                                 combined_fields[header]["name"],

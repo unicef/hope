@@ -91,6 +91,7 @@ household_header_mapping = {
     "BQ": ("condiments_h_f", None),
     "BR": ("assistance_type_h_f", None),
     "BS": ("assistance_source_h_f", None),
+    "BT": ("collect_individual_data", "FULL"),
 }
 
 individual_header_mapping = {

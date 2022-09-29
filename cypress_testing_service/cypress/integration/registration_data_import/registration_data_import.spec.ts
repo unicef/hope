@@ -129,9 +129,6 @@ Then('I see the newly imported individuals', () => {
   cy.get('td').should('contain', individualId);
 });
 
-// When I check the household details
-// Then I see the household has the correct data
-
 When('I check the household details', () => {
   cy.get('td').contains(householdId).click();
 })
