@@ -439,7 +439,6 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
                 "selfcare_disability",
                 "comms_disability",
                 "work_status",
-                "collect_individual_data",
             ],
         )
 
