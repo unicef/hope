@@ -49,7 +49,7 @@ const TabsContainer = styled.div`
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(
-  cashPlanVerificationId,
+  paymentVerificationPlanId,
   selectedTab,
   values,
   businessArea,
@@ -57,8 +57,8 @@ function prepareVariables(
 ) {
   return {
     input: {
-      ...(cashPlanVerificationId && {
-        cashPlanPaymentVerificationId: cashPlanVerificationId,
+      ...(paymentVerificationPlanId && {
+        paymentVerificationPlanId,
       }),
       ...(cashPlanId && { cashPlanId }),
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
@@ -98,11 +98,11 @@ function prepareVariables(
 }
 
 export interface Props {
-  cashPlanVerificationId: string;
+  paymentVerificationPlanId: string;
   cashPlanId: string;
 }
 export function EditVerificationPlan({
-  cashPlanVerificationId,
+  paymentVerificationPlanId,
   cashPlanId,
 }: Props): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashPlanId);
@@ -160,7 +160,7 @@ export function EditVerificationPlan({
 
   const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
     variables: prepareVariables(
-      cashPlanVerificationId,
+      paymentVerificationPlanId,
       selectedTab,
       formValues,
       businessArea,
@@ -177,7 +177,7 @@ export function EditVerificationPlan({
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
       variables: prepareVariables(
-        cashPlanVerificationId,
+        paymentVerificationPlanId,
         selectedTab,
         values,
         businessArea,

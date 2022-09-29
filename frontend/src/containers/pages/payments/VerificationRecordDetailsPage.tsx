@@ -69,7 +69,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
       {verification.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
         <VerifyManual
-          paymentVerificationId={paymentVerification.id}
+          paymentVerificationPlanId={paymentVerification.id}
           enabled={paymentVerification.isManuallyEditable}
         />
       ) : null}

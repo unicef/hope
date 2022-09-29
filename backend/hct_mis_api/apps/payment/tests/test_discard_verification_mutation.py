@@ -8,15 +8,12 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentVerificationPlanFactory,
+    CashPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import (
-    PaymentVerificationPlan,
-    PaymentVerification,
-)
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
@@ -28,8 +25,8 @@ from hct_mis_api.apps.targeting.fixtures import (
 class TestDiscardVerificationMutation(APITestCase):
 
     DISCARD_MUTATION = """
-        mutation DiscardVerification($cashPlanVerificationId: ID!){
-          discardCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
+        mutation DiscardVerification($paymentVerificationPlanId: ID!){
+          discardPaymentVerificationPlan(paymentVerificationPlanId:$paymentVerificationPlanId) {
             cashPlan{
                 name
                 verificationPlans {
@@ -118,6 +115,6 @@ class TestDiscardVerificationMutation(APITestCase):
             request_string=self.DISCARD_MUTATION,
             context={"user": self.user},
             variables={
-                "cashPlanVerificationId": [self.id_to_base64(self.verification.id, "CashPlanPaymentVerificationNode")]
+                "paymentVerificationPlanId": [self.id_to_base64(self.verification.id, "PaymentVerificationPlanNode")]
             },
         )

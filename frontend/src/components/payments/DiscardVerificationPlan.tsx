@@ -9,28 +9,28 @@ import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useDiscardCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { useDiscardPaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
 
 export interface DiscardVerificationPlanProps {
-  cashPlanVerificationId: string;
+  paymentVerificationPlanId: string;
   cashPlanId: string;
 }
 
 export function DiscardVerificationPlan({
-  cashPlanVerificationId,
+  paymentVerificationPlanId,
   cashPlanId,
 }: DiscardVerificationPlanProps): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useDiscardCashPlanPaymentVerificationMutation();
+  const [mutate] = useDiscardPaymentVerificationPlanMutation();
 
   const discard = async (): Promise<void> => {
     const { errors } = await mutate({
-      variables: { cashPlanVerificationId },
+      variables: { paymentVerificationPlanId },
       refetchQueries,
     });
     if (errors) {

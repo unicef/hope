@@ -1,8 +1,8 @@
 import { gql } from 'apollo-boost';
 
-export const ExportXlsxCashPlanVerification = gql`
-  mutation ExportXlsxCashPlanVerification($cashPlanVerificationId: ID!) {
-    exportXlsxCashPlanVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+export const ExportXlsxPaymentVerificationPlanFile = gql`
+  mutation ExportXlsxPaymentVerificationPlanFile($paymentVerificationPlanId: ID!) {
+    exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: $paymentVerificationPlanId) {
       cashPlan {
         id
         #   verificationPlans {

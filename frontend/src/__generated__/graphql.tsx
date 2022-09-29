@@ -69,8 +69,8 @@ export type ActionPaymentPlanMutation = {
   paymentPlan?: Maybe<PaymentPlanNode>,
 };
 
-export type ActivateCashPlanVerificationMutation = {
-   __typename?: 'ActivateCashPlanVerificationMutation',
+export type ActivatePaymentVerificationPlan = {
+   __typename?: 'ActivatePaymentVerificationPlan',
   validationErrors?: Maybe<Scalars['Arg']>,
   cashPlan?: Maybe<CashPlanNode>,
 };
@@ -652,88 +652,6 @@ export type CashPlanNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export type CashPlanPaymentVerificationNode = Node & {
-   __typename?: 'CashPlanPaymentVerificationNode',
-  id: Scalars['ID'],
-  createdAt: Scalars['DateTime'],
-  updatedAt: Scalars['DateTime'],
-  version: Scalars['BigInt'],
-  unicefId?: Maybe<Scalars['String']>,
-  status: PaymentVerificationPlanStatus,
-  paymentPlanContentType?: Maybe<ContentTypeObjectType>,
-  paymentPlanObjectId?: Maybe<Scalars['String']>,
-  sampling: PaymentVerificationPlanSampling,
-  verificationChannel: PaymentVerificationPlanVerificationChannel,
-  sampleSize?: Maybe<Scalars['Int']>,
-  respondedCount?: Maybe<Scalars['Int']>,
-  receivedCount?: Maybe<Scalars['Int']>,
-  notReceivedCount?: Maybe<Scalars['Int']>,
-  receivedWithProblemsCount?: Maybe<Scalars['Int']>,
-  confidenceInterval?: Maybe<Scalars['Float']>,
-  marginOfError?: Maybe<Scalars['Float']>,
-  rapidProFlowId: Scalars['String'],
-  rapidProFlowStartUuids: Array<Scalars['String']>,
-  ageFilter?: Maybe<AgeFilterObject>,
-  excludedAdminAreasFilter?: Maybe<Array<Maybe<Scalars['String']>>>,
-  sexFilter?: Maybe<Scalars['String']>,
-  activationDate?: Maybe<Scalars['DateTime']>,
-  completionDate?: Maybe<Scalars['DateTime']>,
-  xlsxFileExporting: Scalars['Boolean'],
-  xlsxFileImported: Scalars['Boolean'],
-  paymentRecordVerifications: PaymentVerificationNodeConnection,
-  xlsxFileWasDownloaded?: Maybe<Scalars['Boolean']>,
-  hasXlsxFile?: Maybe<Scalars['Boolean']>,
-};
-
-
-export type CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-export type CashPlanPaymentVerificationNodeConnection = {
-   __typename?: 'CashPlanPaymentVerificationNodeConnection',
-  pageInfo: PageInfo,
-  edges: Array<Maybe<CashPlanPaymentVerificationNodeEdge>>,
-  totalCount?: Maybe<Scalars['Int']>,
-  edgeCount?: Maybe<Scalars['Int']>,
-};
-
-export type CashPlanPaymentVerificationNodeEdge = {
-   __typename?: 'CashPlanPaymentVerificationNodeEdge',
-  node?: Maybe<CashPlanPaymentVerificationNode>,
-  cursor: Scalars['String'],
-};
-
-export type CashPlanPaymentVerificationSummaryNode = Node & {
-   __typename?: 'CashPlanPaymentVerificationSummaryNode',
-  id: Scalars['ID'],
-  createdAt: Scalars['DateTime'],
-  updatedAt: Scalars['DateTime'],
-  status: PaymentVerificationSummaryStatus,
-  activationDate?: Maybe<Scalars['DateTime']>,
-  completionDate?: Maybe<Scalars['DateTime']>,
-  paymentPlanContentType?: Maybe<ContentTypeObjectType>,
-  paymentPlanObjectId?: Maybe<Scalars['String']>,
-};
-
-export type CashPlanPaymentVerificationSummaryNodeConnection = {
-   __typename?: 'CashPlanPaymentVerificationSummaryNodeConnection',
-  pageInfo: PageInfo,
-  edges: Array<Maybe<CashPlanPaymentVerificationSummaryNodeEdge>>,
-  totalCount?: Maybe<Scalars['Int']>,
-  edgeCount?: Maybe<Scalars['Int']>,
-};
-
-export type CashPlanPaymentVerificationSummaryNodeEdge = {
-   __typename?: 'CashPlanPaymentVerificationSummaryNodeEdge',
-  node?: Maybe<CashPlanPaymentVerificationSummaryNode>,
-  cursor: Scalars['String'],
-};
-
 export enum CashPlanStatus {
   DistributionCompleted = 'DISTRIBUTION_COMPLETED',
   DistributionCompletedWithErrors = 'DISTRIBUTION_COMPLETED_WITH_ERRORS',
@@ -805,8 +723,8 @@ export type ContentTypeObjectType = {
   id: Scalars['ID'],
   appLabel: Scalars['String'],
   model: Scalars['String'],
-  paymentverificationplanSet: CashPlanPaymentVerificationNodeConnection,
-  paymentverificationsummarySet: CashPlanPaymentVerificationSummaryNodeConnection,
+  paymentverificationplanSet: PaymentVerificationPlanNodeConnection,
+  paymentverificationsummarySet: PaymentVerificationPlanSummaryNodeConnection,
   logEntries: PaymentVerificationLogEntryNodeConnection,
   name?: Maybe<Scalars['String']>,
 };
@@ -936,8 +854,8 @@ export type CreatePaymentPlanMutation = {
   paymentPlan?: Maybe<PaymentPlanNode>,
 };
 
-export type CreatePaymentVerificationMutation = {
-   __typename?: 'CreatePaymentVerificationMutation',
+export type CreatePaymentVerificationPlanMutation = {
+   __typename?: 'CreatePaymentVerificationPlanMutation',
   paymentPlan?: Maybe<GenericPaymentPlanNode>,
 };
 
@@ -1025,14 +943,14 @@ export type DeduplicationResultNode = {
   age?: Maybe<Scalars['Int']>,
 };
 
-export type DeleteCashPlanVerificationMutation = {
-   __typename?: 'DeleteCashPlanVerificationMutation',
-  cashPlan?: Maybe<CashPlanNode>,
-};
-
 export type DeletePaymentPlanMutation = {
    __typename?: 'DeletePaymentPlanMutation',
   paymentPlan?: Maybe<PaymentPlanNode>,
+};
+
+export type DeletePaymentVerificationPlan = {
+   __typename?: 'DeletePaymentVerificationPlan',
+  cashPlan?: Maybe<CashPlanNode>,
 };
 
 export type DeleteProgram = {
@@ -1110,8 +1028,8 @@ export enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   Voucher = 'VOUCHER'
 }
 
-export type DiscardCashPlanVerificationMutation = {
-   __typename?: 'DiscardCashPlanVerificationMutation',
+export type DiscardPaymentVerificationPlan = {
+   __typename?: 'DiscardPaymentVerificationPlan',
   cashPlan?: Maybe<CashPlanNode>,
 };
 
@@ -1238,11 +1156,6 @@ export type EditPaymentVerificationMutation = {
   paymentPlan?: Maybe<GenericPaymentPlanNode>,
 };
 
-export type ExportXlsxCashPlanVerification = {
-   __typename?: 'ExportXlsxCashPlanVerification',
-  cashPlan?: Maybe<CashPlanNode>,
-};
-
 export type ExportXlsxPaymentPlanPaymentListMutation = {
    __typename?: 'ExportXLSXPaymentPlanPaymentListMutation',
   paymentPlan?: Maybe<PaymentPlanNode>,
@@ -1251,6 +1164,11 @@ export type ExportXlsxPaymentPlanPaymentListMutation = {
 export type ExportXlsxPaymentPlanPaymentListPerFspMutation = {
    __typename?: 'ExportXLSXPaymentPlanPaymentListPerFSPMutation',
   paymentPlan?: Maybe<PaymentPlanNode>,
+};
+
+export type ExportXlsxPaymentVerificationPlanFile = {
+   __typename?: 'ExportXlsxPaymentVerificationPlanFile',
+  cashPlan?: Maybe<CashPlanNode>,
 };
 
 export type FieldAttributeNode = {
@@ -1421,8 +1339,8 @@ export type FinancialServiceProviderXlsxTemplateNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export type FinishCashPlanVerificationMutation = {
-   __typename?: 'FinishCashPlanVerificationMutation',
+export type FinishPaymentVerificationPlan = {
+   __typename?: 'FinishPaymentVerificationPlan',
   cashPlan?: Maybe<CashPlanNode>,
 };
 
@@ -1451,7 +1369,7 @@ export type FullListArguments = {
 
 export type GenericPaymentPlanNode = {
    __typename?: 'GenericPaymentPlanNode',
-  paymentVerificationSummary?: Maybe<CashPlanPaymentVerificationSummaryNode>,
+  paymentVerificationSummary?: Maybe<PaymentVerificationPlanSummaryNode>,
 };
 
 
@@ -2720,12 +2638,6 @@ export enum ImportedIndividualSex {
   Female = 'FEMALE'
 }
 
-export type ImportXlsxCashPlanVerification = {
-   __typename?: 'ImportXlsxCashPlanVerification',
-  cashPlan?: Maybe<CashPlanNode>,
-  errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
-};
-
 export type ImportXlsxPaymentPlanPaymentListMutation = {
    __typename?: 'ImportXLSXPaymentPlanPaymentListMutation',
   paymentPlan?: Maybe<PaymentPlanNode>,
@@ -2735,6 +2647,12 @@ export type ImportXlsxPaymentPlanPaymentListMutation = {
 export type ImportXlsxPaymentPlanPaymentListPerFspMutation = {
    __typename?: 'ImportXLSXPaymentPlanPaymentListPerFSPMutation',
   paymentPlan?: Maybe<PaymentPlanNode>,
+  errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
+};
+
+export type ImportXlsxPaymentVerificationPlanFile = {
+   __typename?: 'ImportXlsxPaymentVerificationPlanFile',
+  cashPlan?: Maybe<CashPlanNode>,
   errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
 };
 
@@ -3146,8 +3064,8 @@ export type IndividualUpdateDataObjectType = {
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
-export type InvalidCashPlanVerificationMutation = {
-   __typename?: 'InvalidCashPlanVerificationMutation',
+export type InvalidPaymentVerificationPlan = {
+   __typename?: 'InvalidPaymentVerificationPlan',
   cashPlan?: Maybe<CashPlanNode>,
 };
 
@@ -3287,17 +3205,17 @@ export type Mutations = {
   approveNeedsAdjudication?: Maybe<NeedsAdjudicationApproveMutation>,
   approvePaymentDetails?: Maybe<PaymentDetailsApproveMutation>,
   reassignRole?: Maybe<ReassignRoleMutation>,
-  createPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
+  createPaymentVerification?: Maybe<CreatePaymentVerificationPlanMutation>,
   editPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
   createFinancialServiceProvider?: Maybe<CreateFinancialServiceProviderMutation>,
   editFinancialServiceProvider?: Maybe<EditFinancialServiceProviderMutation>,
-  exportXlsxCashPlanVerification?: Maybe<ExportXlsxCashPlanVerification>,
-  importXlsxCashPlanVerification?: Maybe<ImportXlsxCashPlanVerification>,
-  activateCashPlanPaymentVerification?: Maybe<ActivateCashPlanVerificationMutation>,
-  finishCashPlanPaymentVerification?: Maybe<FinishCashPlanVerificationMutation>,
-  discardCashPlanPaymentVerification?: Maybe<DiscardCashPlanVerificationMutation>,
-  invalidCashPlanPaymentVerification?: Maybe<InvalidCashPlanVerificationMutation>,
-  deleteCashPlanPaymentVerification?: Maybe<DeleteCashPlanVerificationMutation>,
+  exportXlsxPaymentVerificationPlanFile?: Maybe<ExportXlsxPaymentVerificationPlanFile>,
+  importXlsxPaymentVerificationPlanFile?: Maybe<ImportXlsxPaymentVerificationPlanFile>,
+  activatePaymentVerificationPlan?: Maybe<ActivatePaymentVerificationPlan>,
+  finishPaymentVerificationPlan?: Maybe<FinishPaymentVerificationPlan>,
+  discardPaymentVerificationPlan?: Maybe<DiscardPaymentVerificationPlan>,
+  invalidPaymentVerificationPlan?: Maybe<InvalidPaymentVerificationPlan>,
+  deletePaymentVerificationPlan?: Maybe<DeletePaymentVerificationPlan>,
   chooseDeliveryMechanismsForPaymentPlan?: Maybe<ChooseDeliveryMechanismsForPaymentPlanMutation>,
   assignFspToDeliveryMechanism?: Maybe<AssignFspToDeliveryMechanismMutation>,
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
@@ -3478,43 +3396,43 @@ export type MutationsEditFinancialServiceProviderArgs = {
 };
 
 
-export type MutationsExportXlsxCashPlanVerificationArgs = {
-  cashPlanVerificationId: Scalars['ID']
+export type MutationsExportXlsxPaymentVerificationPlanFileArgs = {
+  paymentVerificationPlanId: Scalars['ID']
 };
 
 
-export type MutationsImportXlsxCashPlanVerificationArgs = {
-  cashPlanVerificationId: Scalars['ID'],
-  file: Scalars['Upload']
+export type MutationsImportXlsxPaymentVerificationPlanFileArgs = {
+  file: Scalars['Upload'],
+  paymentVerificationPlanId: Scalars['ID']
 };
 
 
-export type MutationsActivateCashPlanPaymentVerificationArgs = {
-  cashPlanVerificationId: Scalars['ID'],
+export type MutationsActivatePaymentVerificationPlanArgs = {
+  paymentVerificationPlanId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
 
 
-export type MutationsFinishCashPlanPaymentVerificationArgs = {
-  cashPlanVerificationId: Scalars['ID'],
+export type MutationsFinishPaymentVerificationPlanArgs = {
+  paymentVerificationPlanId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
 
 
-export type MutationsDiscardCashPlanPaymentVerificationArgs = {
-  cashPlanVerificationId: Scalars['ID'],
+export type MutationsDiscardPaymentVerificationPlanArgs = {
+  paymentVerificationPlanId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
 
 
-export type MutationsInvalidCashPlanPaymentVerificationArgs = {
-  cashPlanVerificationId: Scalars['ID'],
+export type MutationsInvalidPaymentVerificationPlanArgs = {
+  paymentVerificationPlanId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
 
 
-export type MutationsDeleteCashPlanPaymentVerificationArgs = {
-  cashPlanVerificationId: Scalars['ID'],
+export type MutationsDeletePaymentVerificationPlanArgs = {
+  paymentVerificationPlanId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -4256,7 +4174,7 @@ export type PaymentVerificationLogEntryNode = Node & {
   user?: Maybe<UserNode>,
   businessArea?: Maybe<UserBusinessAreaNode>,
   timestamp?: Maybe<Scalars['DateTime']>,
-  contentObject?: Maybe<CashPlanPaymentVerificationNode>,
+  contentObject?: Maybe<PaymentVerificationPlanNode>,
 };
 
 export type PaymentVerificationLogEntryNodeConnection = {
@@ -4279,7 +4197,7 @@ export type PaymentVerificationNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   version: Scalars['BigInt'],
-  paymentVerificationPlan: CashPlanPaymentVerificationNode,
+  paymentVerificationPlan: PaymentVerificationPlanNode,
   paymentRecord?: Maybe<PaymentRecordNode>,
   status: PaymentVerificationStatus,
   statusDate?: Maybe<Scalars['DateTime']>,
@@ -4321,6 +4239,62 @@ export type PaymentVerificationNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type PaymentVerificationPlanNode = Node & {
+   __typename?: 'PaymentVerificationPlanNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
+  unicefId?: Maybe<Scalars['String']>,
+  status: PaymentVerificationPlanStatus,
+  paymentPlanContentType?: Maybe<ContentTypeObjectType>,
+  paymentPlanObjectId?: Maybe<Scalars['String']>,
+  sampling: PaymentVerificationPlanSampling,
+  verificationChannel: PaymentVerificationPlanVerificationChannel,
+  sampleSize?: Maybe<Scalars['Int']>,
+  respondedCount?: Maybe<Scalars['Int']>,
+  receivedCount?: Maybe<Scalars['Int']>,
+  notReceivedCount?: Maybe<Scalars['Int']>,
+  receivedWithProblemsCount?: Maybe<Scalars['Int']>,
+  confidenceInterval?: Maybe<Scalars['Float']>,
+  marginOfError?: Maybe<Scalars['Float']>,
+  rapidProFlowId: Scalars['String'],
+  rapidProFlowStartUuids: Array<Scalars['String']>,
+  ageFilter?: Maybe<AgeFilterObject>,
+  excludedAdminAreasFilter?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sexFilter?: Maybe<Scalars['String']>,
+  activationDate?: Maybe<Scalars['DateTime']>,
+  completionDate?: Maybe<Scalars['DateTime']>,
+  xlsxFileExporting: Scalars['Boolean'],
+  xlsxFileImported: Scalars['Boolean'],
+  paymentRecordVerifications: PaymentVerificationNodeConnection,
+  xlsxFileWasDownloaded?: Maybe<Scalars['Boolean']>,
+  hasXlsxFile?: Maybe<Scalars['Boolean']>,
+};
+
+
+export type PaymentVerificationPlanNodePaymentRecordVerificationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type PaymentVerificationPlanNodeConnection = {
+   __typename?: 'PaymentVerificationPlanNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<PaymentVerificationPlanNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type PaymentVerificationPlanNodeEdge = {
+   __typename?: 'PaymentVerificationPlanNodeEdge',
+  node?: Maybe<PaymentVerificationPlanNode>,
+  cursor: Scalars['String'],
+};
+
 export enum PaymentVerificationPlanSampling {
   FullList = 'FULL_LIST',
   Random = 'RANDOM'
@@ -4332,6 +4306,32 @@ export enum PaymentVerificationPlanStatus {
   Pending = 'PENDING',
   Invalid = 'INVALID'
 }
+
+export type PaymentVerificationPlanSummaryNode = Node & {
+   __typename?: 'PaymentVerificationPlanSummaryNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  status: PaymentVerificationSummaryStatus,
+  activationDate?: Maybe<Scalars['DateTime']>,
+  completionDate?: Maybe<Scalars['DateTime']>,
+  paymentPlanContentType?: Maybe<ContentTypeObjectType>,
+  paymentPlanObjectId?: Maybe<Scalars['String']>,
+};
+
+export type PaymentVerificationPlanSummaryNodeConnection = {
+   __typename?: 'PaymentVerificationPlanSummaryNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<PaymentVerificationPlanSummaryNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type PaymentVerificationPlanSummaryNodeEdge = {
+   __typename?: 'PaymentVerificationPlanSummaryNodeEdge',
+  node?: Maybe<PaymentVerificationPlanSummaryNode>,
+  cursor: Scalars['String'],
+};
 
 export enum PaymentVerificationPlanVerificationChannel {
   Manual = 'MANUAL',
@@ -4550,10 +4550,10 @@ export type Query = {
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>,
   allFinancialServiceProviders?: Maybe<FinancialServiceProviderNodeConnection>,
   paymentRecordVerification?: Maybe<PaymentVerificationNode>,
-  cashPlanPaymentVerification?: Maybe<CashPlanPaymentVerificationNode>,
+  paymentVerificationPlan?: Maybe<PaymentVerificationPlanNode>,
   allPaymentRecords?: Maybe<PaymentRecordNodeConnection>,
   allPaymentVerifications?: Maybe<PaymentVerificationNodeConnection>,
-  allCashPlanPaymentVerification?: Maybe<CashPlanPaymentVerificationNodeConnection>,
+  allPaymentVerificationPlan?: Maybe<PaymentVerificationPlanNodeConnection>,
   chartPaymentVerification?: Maybe<ChartPaymentVerification>,
   chartVolumeByDeliveryMechanism?: Maybe<ChartDatasetNode>,
   chartPayment?: Maybe<ChartDatasetNode>,
@@ -4877,7 +4877,7 @@ export type QueryPaymentRecordVerificationArgs = {
 };
 
 
-export type QueryCashPlanPaymentVerificationArgs = {
+export type QueryPaymentVerificationPlanArgs = {
   id: Scalars['ID']
 };
 
@@ -4911,7 +4911,7 @@ export type QueryAllPaymentVerificationsArgs = {
 };
 
 
-export type QueryAllCashPlanPaymentVerificationArgs = {
+export type QueryAllPaymentVerificationPlanArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -8189,16 +8189,16 @@ export type SetSteficonRuleOnPpListMutation = (
   )> }
 );
 
-export type ActivateCashPlanPaymentVerificationMutationVariables = {
-  cashPlanVerificationId: Scalars['ID']
+export type ActivatePaymentVerificationPlanMutationVariables = {
+  paymentVerificationPlanId: Scalars['ID']
 };
 
 
-export type ActivateCashPlanPaymentVerificationMutation = (
+export type ActivatePaymentVerificationPlanMutation = (
   { __typename?: 'Mutations' }
-  & { activateCashPlanPaymentVerification: Maybe<(
-    { __typename?: 'ActivateCashPlanVerificationMutation' }
-    & Pick<ActivateCashPlanVerificationMutation, 'validationErrors'>
+  & { activatePaymentVerificationPlan: Maybe<(
+    { __typename?: 'ActivatePaymentVerificationPlan' }
+    & Pick<ActivatePaymentVerificationPlan, 'validationErrors'>
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
@@ -8214,26 +8214,26 @@ export type CreatePaymentVerificationMutationVariables = {
 export type CreatePaymentVerificationMutation = (
   { __typename?: 'Mutations' }
   & { createPaymentVerification: Maybe<(
-    { __typename?: 'CreatePaymentVerificationMutation' }
+    { __typename?: 'CreatePaymentVerificationPlanMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'GenericPaymentPlanNode' }
       & { paymentVerificationSummary: Maybe<(
-        { __typename?: 'CashPlanPaymentVerificationSummaryNode' }
-        & Pick<CashPlanPaymentVerificationSummaryNode, 'id'>
+        { __typename?: 'PaymentVerificationPlanSummaryNode' }
+        & Pick<PaymentVerificationPlanSummaryNode, 'id'>
       )> }
     )> }
   )> }
 );
 
-export type DeleteCashPlanPaymentVerificationMutationVariables = {
-  cashPlanVerificationId: Scalars['ID']
+export type DeletePaymentVerificationPlanMutationVariables = {
+  paymentVerificationPlanId: Scalars['ID']
 };
 
 
-export type DeleteCashPlanPaymentVerificationMutation = (
+export type DeletePaymentVerificationPlanMutation = (
   { __typename?: 'Mutations' }
-  & { deleteCashPlanPaymentVerification: Maybe<(
-    { __typename?: 'DeleteCashPlanVerificationMutation' }
+  & { deletePaymentVerificationPlan: Maybe<(
+    { __typename?: 'DeletePaymentVerificationPlan' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
@@ -8241,15 +8241,15 @@ export type DeleteCashPlanPaymentVerificationMutation = (
   )> }
 );
 
-export type DiscardCashPlanPaymentVerificationMutationVariables = {
-  cashPlanVerificationId: Scalars['ID']
+export type DiscardPaymentVerificationPlanMutationVariables = {
+  paymentVerificationPlanId: Scalars['ID']
 };
 
 
-export type DiscardCashPlanPaymentVerificationMutation = (
+export type DiscardPaymentVerificationPlanMutation = (
   { __typename?: 'Mutations' }
-  & { discardCashPlanPaymentVerification: Maybe<(
-    { __typename?: 'DiscardCashPlanVerificationMutation' }
+  & { discardPaymentVerificationPlan: Maybe<(
+    { __typename?: 'DiscardPaymentVerificationPlan' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
@@ -8257,34 +8257,34 @@ export type DiscardCashPlanPaymentVerificationMutation = (
   )> }
 );
 
-export type EditCashPlanPaymentVerificationMutationVariables = {
+export type EditPaymentVerificationPlanMutationVariables = {
   input: CreateUpdatePaymentVerificationInput
 };
 
 
-export type EditCashPlanPaymentVerificationMutation = (
+export type EditPaymentVerificationPlanMutation = (
   { __typename?: 'Mutations' }
   & { editPaymentVerification: Maybe<(
     { __typename?: 'EditPaymentVerificationMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'GenericPaymentPlanNode' }
       & { paymentVerificationSummary: Maybe<(
-        { __typename?: 'CashPlanPaymentVerificationSummaryNode' }
-        & Pick<CashPlanPaymentVerificationSummaryNode, 'id'>
+        { __typename?: 'PaymentVerificationPlanSummaryNode' }
+        & Pick<PaymentVerificationPlanSummaryNode, 'id'>
       )> }
     )> }
   )> }
 );
 
-export type ExportXlsxCashPlanVerificationMutationVariables = {
-  cashPlanVerificationId: Scalars['ID']
+export type ExportXlsxPaymentVerificationPlanFileMutationVariables = {
+  paymentVerificationPlanId: Scalars['ID']
 };
 
 
-export type ExportXlsxCashPlanVerificationMutation = (
+export type ExportXlsxPaymentVerificationPlanFileMutation = (
   { __typename?: 'Mutations' }
-  & { exportXlsxCashPlanVerification: Maybe<(
-    { __typename?: 'ExportXlsxCashPlanVerification' }
+  & { exportXlsxPaymentVerificationPlanFile: Maybe<(
+    { __typename?: 'ExportXlsxPaymentVerificationPlanFile' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id'>
@@ -8292,15 +8292,15 @@ export type ExportXlsxCashPlanVerificationMutation = (
   )> }
 );
 
-export type FinishCashPlanPaymentVerificationMutationVariables = {
-  cashPlanVerificationId: Scalars['ID']
+export type FinishPaymentVerificationPlanMutationVariables = {
+  paymentVerificationPlanId: Scalars['ID']
 };
 
 
-export type FinishCashPlanPaymentVerificationMutation = (
+export type FinishPaymentVerificationPlanMutation = (
   { __typename?: 'Mutations' }
-  & { finishCashPlanPaymentVerification: Maybe<(
-    { __typename?: 'FinishCashPlanVerificationMutation' }
+  & { finishPaymentVerificationPlan: Maybe<(
+    { __typename?: 'FinishPaymentVerificationPlan' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
@@ -8308,16 +8308,16 @@ export type FinishCashPlanPaymentVerificationMutation = (
   )> }
 );
 
-export type ImportXlsxCashPlanVerificationMutationVariables = {
-  cashPlanVerificationId: Scalars['ID'],
+export type ImportXlsxPaymentVerificationPlanFileMutationVariables = {
+  paymentVerificationPlanId: Scalars['ID'],
   file: Scalars['Upload']
 };
 
 
-export type ImportXlsxCashPlanVerificationMutation = (
+export type ImportXlsxPaymentVerificationPlanFileMutation = (
   { __typename?: 'Mutations' }
-  & { importXlsxCashPlanVerification: Maybe<(
-    { __typename?: 'ImportXlsxCashPlanVerification' }
+  & { importXlsxPaymentVerificationPlanFile: Maybe<(
+    { __typename?: 'ImportXlsxPaymentVerificationPlanFile' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id'>
@@ -8328,15 +8328,15 @@ export type ImportXlsxCashPlanVerificationMutation = (
   )> }
 );
 
-export type InvalidCashPlanPaymentVerificationMutationVariables = {
-  cashPlanVerificationId: Scalars['ID']
+export type InvalidPaymentVerificationPlanMutationVariables = {
+  paymentVerificationPlanId: Scalars['ID']
 };
 
 
-export type InvalidCashPlanPaymentVerificationMutation = (
+export type InvalidPaymentVerificationPlanMutation = (
   { __typename?: 'Mutations' }
-  & { invalidCashPlanPaymentVerification: Maybe<(
-    { __typename?: 'InvalidCashPlanVerificationMutation' }
+  & { invalidPaymentVerificationPlan: Maybe<(
+    { __typename?: 'InvalidPaymentVerificationPlan' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id'>
@@ -8359,8 +8359,8 @@ export type UpdatePaymentVerificationReceivedAndReceivedAmountMutation = (
       { __typename?: 'PaymentVerificationNode' }
       & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
       & { paymentVerificationPlan: (
-        { __typename?: 'CashPlanPaymentVerificationNode' }
-        & Pick<CashPlanPaymentVerificationNode, 'id' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount'>
+        { __typename?: 'PaymentVerificationPlanNode' }
+        & Pick<PaymentVerificationPlanNode, 'id' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount'>
       ) }
     )> }
   )> }
@@ -10210,8 +10210,8 @@ export type AllPaymentVerificationLogEntriesQuery = (
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
         )>, contentObject: Maybe<(
-          { __typename?: 'CashPlanPaymentVerificationNode' }
-          & Pick<CashPlanPaymentVerificationNode, 'id' | 'unicefId'>
+          { __typename?: 'PaymentVerificationPlanNode' }
+          & Pick<PaymentVerificationPlanNode, 'id' | 'unicefId'>
         )> }
       )> }
     )>> }
@@ -10250,8 +10250,8 @@ export type AllPaymentVerificationsQuery = (
         { __typename?: 'PaymentVerificationNode' }
         & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
         & { paymentVerificationPlan: (
-          { __typename?: 'CashPlanPaymentVerificationNode' }
-          & Pick<CashPlanPaymentVerificationNode, 'id' | 'unicefId' | 'verificationChannel'>
+          { __typename?: 'PaymentVerificationPlanNode' }
+          & Pick<PaymentVerificationPlanNode, 'id' | 'unicefId' | 'verificationChannel'>
         ), paymentRecord: Maybe<(
           { __typename?: 'PaymentRecordNode' }
           & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity' | 'currency'>
@@ -10282,16 +10282,16 @@ export type AllRapidProFlowsQuery = (
   )>>> }
 );
 
-export type CashPlanPaymentVerificationQueryVariables = {
+export type PaymentVerificationPlanQueryVariables = {
   id: Scalars['ID']
 };
 
 
-export type CashPlanPaymentVerificationQuery = (
+export type PaymentVerificationPlanQuery = (
   { __typename?: 'Query' }
-  & { cashPlanPaymentVerification: Maybe<(
-    { __typename?: 'CashPlanPaymentVerificationNode' }
-    & Pick<CashPlanPaymentVerificationNode, 'id'>
+  & { paymentVerificationPlan: Maybe<(
+    { __typename?: 'PaymentVerificationPlanNode' }
+    & Pick<PaymentVerificationPlanNode, 'id'>
   )> }
 );
 
@@ -13487,9 +13487,9 @@ export function useSetSteficonRuleOnPpListMutation(baseOptions?: ApolloReactHook
 export type SetSteficonRuleOnPpListMutationHookResult = ReturnType<typeof useSetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationResult = ApolloReactCommon.MutationResult<SetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationOptions = ApolloReactCommon.BaseMutationOptions<SetSteficonRuleOnPpListMutation, SetSteficonRuleOnPpListMutationVariables>;
-export const ActivateCashPlanPaymentVerificationDocument = gql`
-    mutation ActivateCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
-  activateCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+export const ActivatePaymentVerificationPlanDocument = gql`
+    mutation ActivatePaymentVerificationPlan($paymentVerificationPlanId: ID!) {
+  activatePaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
     cashPlan {
       id
       status
@@ -13499,48 +13499,48 @@ export const ActivateCashPlanPaymentVerificationDocument = gql`
   }
 }
     `;
-export type ActivateCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>;
-export type ActivateCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+export type ActivatePaymentVerificationPlanMutationFn = ApolloReactCommon.MutationFunction<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables>;
+export type ActivatePaymentVerificationPlanComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables>, 'mutation'>;
 
-    export const ActivateCashPlanPaymentVerificationComponent = (props: ActivateCashPlanPaymentVerificationComponentProps) => (
-      <ApolloReactComponents.Mutation<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables> mutation={ActivateCashPlanPaymentVerificationDocument} {...props} />
+    export const ActivatePaymentVerificationPlanComponent = (props: ActivatePaymentVerificationPlanComponentProps) => (
+      <ApolloReactComponents.Mutation<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables> mutation={ActivatePaymentVerificationPlanDocument} {...props} />
     );
     
-export type ActivateCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables> & TChildProps;
-export function withActivateCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type ActivatePaymentVerificationPlanProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables> & TChildProps;
+export function withActivatePaymentVerificationPlan<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  ActivateCashPlanPaymentVerificationMutation,
-  ActivateCashPlanPaymentVerificationMutationVariables,
-  ActivateCashPlanPaymentVerificationProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables, ActivateCashPlanPaymentVerificationProps<TChildProps>>(ActivateCashPlanPaymentVerificationDocument, {
-      alias: 'activateCashPlanPaymentVerification',
+  ActivatePaymentVerificationPlanMutation,
+  ActivatePaymentVerificationPlanMutationVariables,
+  ActivatePaymentVerificationPlanProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables, ActivatePaymentVerificationPlanProps<TChildProps>>(ActivatePaymentVerificationPlanDocument, {
+      alias: 'activatePaymentVerificationPlan',
       ...operationOptions
     });
 };
 
 /**
- * __useActivateCashPlanPaymentVerificationMutation__
+ * __useActivatePaymentVerificationPlanMutation__
  *
- * To run a mutation, you first call `useActivateCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useActivateCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useActivatePaymentVerificationPlanMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useActivatePaymentVerificationPlanMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [activateCashPlanPaymentVerificationMutation, { data, loading, error }] = useActivateCashPlanPaymentVerificationMutation({
+ * const [activatePaymentVerificationPlanMutation, { data, loading, error }] = useActivatePaymentVerificationPlanMutation({
  *   variables: {
- *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      paymentVerificationPlanId: // value for 'paymentVerificationPlanId'
  *   },
  * });
  */
-export function useActivateCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>) {
-        return ApolloReactHooks.useMutation<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>(ActivateCashPlanPaymentVerificationDocument, baseOptions);
+export function useActivatePaymentVerificationPlanMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables>) {
+        return ApolloReactHooks.useMutation<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables>(ActivatePaymentVerificationPlanDocument, baseOptions);
       }
-export type ActivateCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useActivateCashPlanPaymentVerificationMutation>;
-export type ActivateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<ActivateCashPlanPaymentVerificationMutation>;
-export type ActivateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>;
+export type ActivatePaymentVerificationPlanMutationHookResult = ReturnType<typeof useActivatePaymentVerificationPlanMutation>;
+export type ActivatePaymentVerificationPlanMutationResult = ApolloReactCommon.MutationResult<ActivatePaymentVerificationPlanMutation>;
+export type ActivatePaymentVerificationPlanMutationOptions = ApolloReactCommon.BaseMutationOptions<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables>;
 export const CreatePaymentVerificationDocument = gql`
     mutation createPaymentVerification($input: CreateUpdatePaymentVerificationInput!) {
   createPaymentVerification(input: $input) {
@@ -13594,9 +13594,9 @@ export function useCreatePaymentVerificationMutation(baseOptions?: ApolloReactHo
 export type CreatePaymentVerificationMutationHookResult = ReturnType<typeof useCreatePaymentVerificationMutation>;
 export type CreatePaymentVerificationMutationResult = ApolloReactCommon.MutationResult<CreatePaymentVerificationMutation>;
 export type CreatePaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<CreatePaymentVerificationMutation, CreatePaymentVerificationMutationVariables>;
-export const DeleteCashPlanPaymentVerificationDocument = gql`
-    mutation DeleteCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
-  deleteCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+export const DeletePaymentVerificationPlanDocument = gql`
+    mutation DeletePaymentVerificationPlan($paymentVerificationPlanId: ID!) {
+  deletePaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
     cashPlan {
       id
       status
@@ -13605,51 +13605,51 @@ export const DeleteCashPlanPaymentVerificationDocument = gql`
   }
 }
     `;
-export type DeleteCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>;
-export type DeleteCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+export type DeletePaymentVerificationPlanMutationFn = ApolloReactCommon.MutationFunction<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables>;
+export type DeletePaymentVerificationPlanComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables>, 'mutation'>;
 
-    export const DeleteCashPlanPaymentVerificationComponent = (props: DeleteCashPlanPaymentVerificationComponentProps) => (
-      <ApolloReactComponents.Mutation<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables> mutation={DeleteCashPlanPaymentVerificationDocument} {...props} />
+    export const DeletePaymentVerificationPlanComponent = (props: DeletePaymentVerificationPlanComponentProps) => (
+      <ApolloReactComponents.Mutation<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables> mutation={DeletePaymentVerificationPlanDocument} {...props} />
     );
     
-export type DeleteCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables> & TChildProps;
-export function withDeleteCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type DeletePaymentVerificationPlanProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables> & TChildProps;
+export function withDeletePaymentVerificationPlan<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  DeleteCashPlanPaymentVerificationMutation,
-  DeleteCashPlanPaymentVerificationMutationVariables,
-  DeleteCashPlanPaymentVerificationProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables, DeleteCashPlanPaymentVerificationProps<TChildProps>>(DeleteCashPlanPaymentVerificationDocument, {
-      alias: 'deleteCashPlanPaymentVerification',
+  DeletePaymentVerificationPlanMutation,
+  DeletePaymentVerificationPlanMutationVariables,
+  DeletePaymentVerificationPlanProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables, DeletePaymentVerificationPlanProps<TChildProps>>(DeletePaymentVerificationPlanDocument, {
+      alias: 'deletePaymentVerificationPlan',
       ...operationOptions
     });
 };
 
 /**
- * __useDeleteCashPlanPaymentVerificationMutation__
+ * __useDeletePaymentVerificationPlanMutation__
  *
- * To run a mutation, you first call `useDeleteCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDeletePaymentVerificationPlanMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePaymentVerificationPlanMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [deleteCashPlanPaymentVerificationMutation, { data, loading, error }] = useDeleteCashPlanPaymentVerificationMutation({
+ * const [deletePaymentVerificationPlanMutation, { data, loading, error }] = useDeletePaymentVerificationPlanMutation({
  *   variables: {
- *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      paymentVerificationPlanId: // value for 'paymentVerificationPlanId'
  *   },
  * });
  */
-export function useDeleteCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>) {
-        return ApolloReactHooks.useMutation<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>(DeleteCashPlanPaymentVerificationDocument, baseOptions);
+export function useDeletePaymentVerificationPlanMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables>(DeletePaymentVerificationPlanDocument, baseOptions);
       }
-export type DeleteCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useDeleteCashPlanPaymentVerificationMutation>;
-export type DeleteCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<DeleteCashPlanPaymentVerificationMutation>;
-export type DeleteCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>;
-export const DiscardCashPlanPaymentVerificationDocument = gql`
-    mutation DiscardCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
-  discardCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+export type DeletePaymentVerificationPlanMutationHookResult = ReturnType<typeof useDeletePaymentVerificationPlanMutation>;
+export type DeletePaymentVerificationPlanMutationResult = ApolloReactCommon.MutationResult<DeletePaymentVerificationPlanMutation>;
+export type DeletePaymentVerificationPlanMutationOptions = ApolloReactCommon.BaseMutationOptions<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables>;
+export const DiscardPaymentVerificationPlanDocument = gql`
+    mutation DiscardPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
+  discardPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
     cashPlan {
       id
       status
@@ -13658,50 +13658,50 @@ export const DiscardCashPlanPaymentVerificationDocument = gql`
   }
 }
     `;
-export type DiscardCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables>;
-export type DiscardCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+export type DiscardPaymentVerificationPlanMutationFn = ApolloReactCommon.MutationFunction<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables>;
+export type DiscardPaymentVerificationPlanComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables>, 'mutation'>;
 
-    export const DiscardCashPlanPaymentVerificationComponent = (props: DiscardCashPlanPaymentVerificationComponentProps) => (
-      <ApolloReactComponents.Mutation<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables> mutation={DiscardCashPlanPaymentVerificationDocument} {...props} />
+    export const DiscardPaymentVerificationPlanComponent = (props: DiscardPaymentVerificationPlanComponentProps) => (
+      <ApolloReactComponents.Mutation<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables> mutation={DiscardPaymentVerificationPlanDocument} {...props} />
     );
     
-export type DiscardCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables> & TChildProps;
-export function withDiscardCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type DiscardPaymentVerificationPlanProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables> & TChildProps;
+export function withDiscardPaymentVerificationPlan<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  DiscardCashPlanPaymentVerificationMutation,
-  DiscardCashPlanPaymentVerificationMutationVariables,
-  DiscardCashPlanPaymentVerificationProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables, DiscardCashPlanPaymentVerificationProps<TChildProps>>(DiscardCashPlanPaymentVerificationDocument, {
-      alias: 'discardCashPlanPaymentVerification',
+  DiscardPaymentVerificationPlanMutation,
+  DiscardPaymentVerificationPlanMutationVariables,
+  DiscardPaymentVerificationPlanProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables, DiscardPaymentVerificationPlanProps<TChildProps>>(DiscardPaymentVerificationPlanDocument, {
+      alias: 'discardPaymentVerificationPlan',
       ...operationOptions
     });
 };
 
 /**
- * __useDiscardCashPlanPaymentVerificationMutation__
+ * __useDiscardPaymentVerificationPlanMutation__
  *
- * To run a mutation, you first call `useDiscardCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDiscardCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDiscardPaymentVerificationPlanMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDiscardPaymentVerificationPlanMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [discardCashPlanPaymentVerificationMutation, { data, loading, error }] = useDiscardCashPlanPaymentVerificationMutation({
+ * const [discardPaymentVerificationPlanMutation, { data, loading, error }] = useDiscardPaymentVerificationPlanMutation({
  *   variables: {
- *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      paymentVerificationPlanId: // value for 'paymentVerificationPlanId'
  *   },
  * });
  */
-export function useDiscardCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables>) {
-        return ApolloReactHooks.useMutation<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables>(DiscardCashPlanPaymentVerificationDocument, baseOptions);
+export function useDiscardPaymentVerificationPlanMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables>) {
+        return ApolloReactHooks.useMutation<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables>(DiscardPaymentVerificationPlanDocument, baseOptions);
       }
-export type DiscardCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useDiscardCashPlanPaymentVerificationMutation>;
-export type DiscardCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<DiscardCashPlanPaymentVerificationMutation>;
-export type DiscardCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables>;
-export const EditCashPlanPaymentVerificationDocument = gql`
-    mutation editCashPlanPaymentVerification($input: CreateUpdatePaymentVerificationInput!) {
+export type DiscardPaymentVerificationPlanMutationHookResult = ReturnType<typeof useDiscardPaymentVerificationPlanMutation>;
+export type DiscardPaymentVerificationPlanMutationResult = ApolloReactCommon.MutationResult<DiscardPaymentVerificationPlanMutation>;
+export type DiscardPaymentVerificationPlanMutationOptions = ApolloReactCommon.BaseMutationOptions<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables>;
+export const EditPaymentVerificationPlanDocument = gql`
+    mutation editPaymentVerificationPlan($input: CreateUpdatePaymentVerificationInput!) {
   editPaymentVerification(input: $input) {
     paymentPlan {
       paymentVerificationSummary {
@@ -13711,102 +13711,102 @@ export const EditCashPlanPaymentVerificationDocument = gql`
   }
 }
     `;
-export type EditCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>;
-export type EditCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+export type EditPaymentVerificationPlanMutationFn = ApolloReactCommon.MutationFunction<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables>;
+export type EditPaymentVerificationPlanComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables>, 'mutation'>;
 
-    export const EditCashPlanPaymentVerificationComponent = (props: EditCashPlanPaymentVerificationComponentProps) => (
-      <ApolloReactComponents.Mutation<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables> mutation={EditCashPlanPaymentVerificationDocument} {...props} />
+    export const EditPaymentVerificationPlanComponent = (props: EditPaymentVerificationPlanComponentProps) => (
+      <ApolloReactComponents.Mutation<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables> mutation={EditPaymentVerificationPlanDocument} {...props} />
     );
     
-export type EditCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables> & TChildProps;
-export function withEditCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type EditPaymentVerificationPlanProps<TChildProps = {}> = ApolloReactHoc.MutateProps<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables> & TChildProps;
+export function withEditPaymentVerificationPlan<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  EditCashPlanPaymentVerificationMutation,
-  EditCashPlanPaymentVerificationMutationVariables,
-  EditCashPlanPaymentVerificationProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables, EditCashPlanPaymentVerificationProps<TChildProps>>(EditCashPlanPaymentVerificationDocument, {
-      alias: 'editCashPlanPaymentVerification',
+  EditPaymentVerificationPlanMutation,
+  EditPaymentVerificationPlanMutationVariables,
+  EditPaymentVerificationPlanProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables, EditPaymentVerificationPlanProps<TChildProps>>(EditPaymentVerificationPlanDocument, {
+      alias: 'editPaymentVerificationPlan',
       ...operationOptions
     });
 };
 
 /**
- * __useEditCashPlanPaymentVerificationMutation__
+ * __useEditPaymentVerificationPlanMutation__
  *
- * To run a mutation, you first call `useEditCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useEditCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useEditPaymentVerificationPlanMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditPaymentVerificationPlanMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [editCashPlanPaymentVerificationMutation, { data, loading, error }] = useEditCashPlanPaymentVerificationMutation({
+ * const [editPaymentVerificationPlanMutation, { data, loading, error }] = useEditPaymentVerificationPlanMutation({
  *   variables: {
  *      input: // value for 'input'
  *   },
  * });
  */
-export function useEditCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>) {
-        return ApolloReactHooks.useMutation<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>(EditCashPlanPaymentVerificationDocument, baseOptions);
+export function useEditPaymentVerificationPlanMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables>) {
+        return ApolloReactHooks.useMutation<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables>(EditPaymentVerificationPlanDocument, baseOptions);
       }
-export type EditCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useEditCashPlanPaymentVerificationMutation>;
-export type EditCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<EditCashPlanPaymentVerificationMutation>;
-export type EditCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>;
-export const ExportXlsxCashPlanVerificationDocument = gql`
-    mutation ExportXlsxCashPlanVerification($cashPlanVerificationId: ID!) {
-  exportXlsxCashPlanVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+export type EditPaymentVerificationPlanMutationHookResult = ReturnType<typeof useEditPaymentVerificationPlanMutation>;
+export type EditPaymentVerificationPlanMutationResult = ApolloReactCommon.MutationResult<EditPaymentVerificationPlanMutation>;
+export type EditPaymentVerificationPlanMutationOptions = ApolloReactCommon.BaseMutationOptions<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables>;
+export const ExportXlsxPaymentVerificationPlanFileDocument = gql`
+    mutation ExportXlsxPaymentVerificationPlanFile($paymentVerificationPlanId: ID!) {
+  exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: $paymentVerificationPlanId) {
     cashPlan {
       id
     }
   }
 }
     `;
-export type ExportXlsxCashPlanVerificationMutationFn = ApolloReactCommon.MutationFunction<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables>;
-export type ExportXlsxCashPlanVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables>, 'mutation'>;
+export type ExportXlsxPaymentVerificationPlanFileMutationFn = ApolloReactCommon.MutationFunction<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>;
+export type ExportXlsxPaymentVerificationPlanFileComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>, 'mutation'>;
 
-    export const ExportXlsxCashPlanVerificationComponent = (props: ExportXlsxCashPlanVerificationComponentProps) => (
-      <ApolloReactComponents.Mutation<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables> mutation={ExportXlsxCashPlanVerificationDocument} {...props} />
+    export const ExportXlsxPaymentVerificationPlanFileComponent = (props: ExportXlsxPaymentVerificationPlanFileComponentProps) => (
+      <ApolloReactComponents.Mutation<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables> mutation={ExportXlsxPaymentVerificationPlanFileDocument} {...props} />
     );
     
-export type ExportXlsxCashPlanVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables> & TChildProps;
-export function withExportXlsxCashPlanVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type ExportXlsxPaymentVerificationPlanFileProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables> & TChildProps;
+export function withExportXlsxPaymentVerificationPlanFile<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  ExportXlsxCashPlanVerificationMutation,
-  ExportXlsxCashPlanVerificationMutationVariables,
-  ExportXlsxCashPlanVerificationProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables, ExportXlsxCashPlanVerificationProps<TChildProps>>(ExportXlsxCashPlanVerificationDocument, {
-      alias: 'exportXlsxCashPlanVerification',
+  ExportXlsxPaymentVerificationPlanFileMutation,
+  ExportXlsxPaymentVerificationPlanFileMutationVariables,
+  ExportXlsxPaymentVerificationPlanFileProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables, ExportXlsxPaymentVerificationPlanFileProps<TChildProps>>(ExportXlsxPaymentVerificationPlanFileDocument, {
+      alias: 'exportXlsxPaymentVerificationPlanFile',
       ...operationOptions
     });
 };
 
 /**
- * __useExportXlsxCashPlanVerificationMutation__
+ * __useExportXlsxPaymentVerificationPlanFileMutation__
  *
- * To run a mutation, you first call `useExportXlsxCashPlanVerificationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useExportXlsxCashPlanVerificationMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useExportXlsxPaymentVerificationPlanFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExportXlsxPaymentVerificationPlanFileMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [exportXlsxCashPlanVerificationMutation, { data, loading, error }] = useExportXlsxCashPlanVerificationMutation({
+ * const [exportXlsxPaymentVerificationPlanFileMutation, { data, loading, error }] = useExportXlsxPaymentVerificationPlanFileMutation({
  *   variables: {
- *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      paymentVerificationPlanId: // value for 'paymentVerificationPlanId'
  *   },
  * });
  */
-export function useExportXlsxCashPlanVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables>) {
-        return ApolloReactHooks.useMutation<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables>(ExportXlsxCashPlanVerificationDocument, baseOptions);
+export function useExportXlsxPaymentVerificationPlanFileMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>) {
+        return ApolloReactHooks.useMutation<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>(ExportXlsxPaymentVerificationPlanFileDocument, baseOptions);
       }
-export type ExportXlsxCashPlanVerificationMutationHookResult = ReturnType<typeof useExportXlsxCashPlanVerificationMutation>;
-export type ExportXlsxCashPlanVerificationMutationResult = ApolloReactCommon.MutationResult<ExportXlsxCashPlanVerificationMutation>;
-export type ExportXlsxCashPlanVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables>;
-export const FinishCashPlanPaymentVerificationDocument = gql`
-    mutation FinishCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
-  finishCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+export type ExportXlsxPaymentVerificationPlanFileMutationHookResult = ReturnType<typeof useExportXlsxPaymentVerificationPlanFileMutation>;
+export type ExportXlsxPaymentVerificationPlanFileMutationResult = ApolloReactCommon.MutationResult<ExportXlsxPaymentVerificationPlanFileMutation>;
+export type ExportXlsxPaymentVerificationPlanFileMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>;
+export const FinishPaymentVerificationPlanDocument = gql`
+    mutation FinishPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
+  finishPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
     cashPlan {
       id
       status
@@ -13815,51 +13815,51 @@ export const FinishCashPlanPaymentVerificationDocument = gql`
   }
 }
     `;
-export type FinishCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>;
-export type FinishCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+export type FinishPaymentVerificationPlanMutationFn = ApolloReactCommon.MutationFunction<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables>;
+export type FinishPaymentVerificationPlanComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables>, 'mutation'>;
 
-    export const FinishCashPlanPaymentVerificationComponent = (props: FinishCashPlanPaymentVerificationComponentProps) => (
-      <ApolloReactComponents.Mutation<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables> mutation={FinishCashPlanPaymentVerificationDocument} {...props} />
+    export const FinishPaymentVerificationPlanComponent = (props: FinishPaymentVerificationPlanComponentProps) => (
+      <ApolloReactComponents.Mutation<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables> mutation={FinishPaymentVerificationPlanDocument} {...props} />
     );
     
-export type FinishCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables> & TChildProps;
-export function withFinishCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type FinishPaymentVerificationPlanProps<TChildProps = {}> = ApolloReactHoc.MutateProps<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables> & TChildProps;
+export function withFinishPaymentVerificationPlan<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  FinishCashPlanPaymentVerificationMutation,
-  FinishCashPlanPaymentVerificationMutationVariables,
-  FinishCashPlanPaymentVerificationProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables, FinishCashPlanPaymentVerificationProps<TChildProps>>(FinishCashPlanPaymentVerificationDocument, {
-      alias: 'finishCashPlanPaymentVerification',
+  FinishPaymentVerificationPlanMutation,
+  FinishPaymentVerificationPlanMutationVariables,
+  FinishPaymentVerificationPlanProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables, FinishPaymentVerificationPlanProps<TChildProps>>(FinishPaymentVerificationPlanDocument, {
+      alias: 'finishPaymentVerificationPlan',
       ...operationOptions
     });
 };
 
 /**
- * __useFinishCashPlanPaymentVerificationMutation__
+ * __useFinishPaymentVerificationPlanMutation__
  *
- * To run a mutation, you first call `useFinishCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useFinishCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useFinishPaymentVerificationPlanMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFinishPaymentVerificationPlanMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [finishCashPlanPaymentVerificationMutation, { data, loading, error }] = useFinishCashPlanPaymentVerificationMutation({
+ * const [finishPaymentVerificationPlanMutation, { data, loading, error }] = useFinishPaymentVerificationPlanMutation({
  *   variables: {
- *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      paymentVerificationPlanId: // value for 'paymentVerificationPlanId'
  *   },
  * });
  */
-export function useFinishCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>) {
-        return ApolloReactHooks.useMutation<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>(FinishCashPlanPaymentVerificationDocument, baseOptions);
+export function useFinishPaymentVerificationPlanMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables>) {
+        return ApolloReactHooks.useMutation<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables>(FinishPaymentVerificationPlanDocument, baseOptions);
       }
-export type FinishCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useFinishCashPlanPaymentVerificationMutation>;
-export type FinishCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<FinishCashPlanPaymentVerificationMutation>;
-export type FinishCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>;
-export const ImportXlsxCashPlanVerificationDocument = gql`
-    mutation importXlsxCashPlanVerification($cashPlanVerificationId: ID!, $file: Upload!) {
-  importXlsxCashPlanVerification(cashPlanVerificationId: $cashPlanVerificationId, file: $file) {
+export type FinishPaymentVerificationPlanMutationHookResult = ReturnType<typeof useFinishPaymentVerificationPlanMutation>;
+export type FinishPaymentVerificationPlanMutationResult = ApolloReactCommon.MutationResult<FinishPaymentVerificationPlanMutation>;
+export type FinishPaymentVerificationPlanMutationOptions = ApolloReactCommon.BaseMutationOptions<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables>;
+export const ImportXlsxPaymentVerificationPlanFileDocument = gql`
+    mutation ImportXlsxPaymentVerificationPlanFile($paymentVerificationPlanId: ID!, $file: Upload!) {
+  importXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: $paymentVerificationPlanId, file: $file) {
     cashPlan {
       id
     }
@@ -13871,100 +13871,100 @@ export const ImportXlsxCashPlanVerificationDocument = gql`
   }
 }
     `;
-export type ImportXlsxCashPlanVerificationMutationFn = ApolloReactCommon.MutationFunction<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>;
-export type ImportXlsxCashPlanVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>, 'mutation'>;
+export type ImportXlsxPaymentVerificationPlanFileMutationFn = ApolloReactCommon.MutationFunction<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables>;
+export type ImportXlsxPaymentVerificationPlanFileComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables>, 'mutation'>;
 
-    export const ImportXlsxCashPlanVerificationComponent = (props: ImportXlsxCashPlanVerificationComponentProps) => (
-      <ApolloReactComponents.Mutation<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables> mutation={ImportXlsxCashPlanVerificationDocument} {...props} />
+    export const ImportXlsxPaymentVerificationPlanFileComponent = (props: ImportXlsxPaymentVerificationPlanFileComponentProps) => (
+      <ApolloReactComponents.Mutation<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables> mutation={ImportXlsxPaymentVerificationPlanFileDocument} {...props} />
     );
     
-export type ImportXlsxCashPlanVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables> & TChildProps;
-export function withImportXlsxCashPlanVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type ImportXlsxPaymentVerificationPlanFileProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables> & TChildProps;
+export function withImportXlsxPaymentVerificationPlanFile<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  ImportXlsxCashPlanVerificationMutation,
-  ImportXlsxCashPlanVerificationMutationVariables,
-  ImportXlsxCashPlanVerificationProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables, ImportXlsxCashPlanVerificationProps<TChildProps>>(ImportXlsxCashPlanVerificationDocument, {
-      alias: 'importXlsxCashPlanVerification',
+  ImportXlsxPaymentVerificationPlanFileMutation,
+  ImportXlsxPaymentVerificationPlanFileMutationVariables,
+  ImportXlsxPaymentVerificationPlanFileProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables, ImportXlsxPaymentVerificationPlanFileProps<TChildProps>>(ImportXlsxPaymentVerificationPlanFileDocument, {
+      alias: 'importXlsxPaymentVerificationPlanFile',
       ...operationOptions
     });
 };
 
 /**
- * __useImportXlsxCashPlanVerificationMutation__
+ * __useImportXlsxPaymentVerificationPlanFileMutation__
  *
- * To run a mutation, you first call `useImportXlsxCashPlanVerificationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useImportXlsxCashPlanVerificationMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useImportXlsxPaymentVerificationPlanFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useImportXlsxPaymentVerificationPlanFileMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [importXlsxCashPlanVerificationMutation, { data, loading, error }] = useImportXlsxCashPlanVerificationMutation({
+ * const [importXlsxPaymentVerificationPlanFileMutation, { data, loading, error }] = useImportXlsxPaymentVerificationPlanFileMutation({
  *   variables: {
- *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      paymentVerificationPlanId: // value for 'paymentVerificationPlanId'
  *      file: // value for 'file'
  *   },
  * });
  */
-export function useImportXlsxCashPlanVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>) {
-        return ApolloReactHooks.useMutation<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>(ImportXlsxCashPlanVerificationDocument, baseOptions);
+export function useImportXlsxPaymentVerificationPlanFileMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables>) {
+        return ApolloReactHooks.useMutation<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables>(ImportXlsxPaymentVerificationPlanFileDocument, baseOptions);
       }
-export type ImportXlsxCashPlanVerificationMutationHookResult = ReturnType<typeof useImportXlsxCashPlanVerificationMutation>;
-export type ImportXlsxCashPlanVerificationMutationResult = ApolloReactCommon.MutationResult<ImportXlsxCashPlanVerificationMutation>;
-export type ImportXlsxCashPlanVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>;
-export const InvalidCashPlanPaymentVerificationDocument = gql`
-    mutation InvalidCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
-  invalidCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+export type ImportXlsxPaymentVerificationPlanFileMutationHookResult = ReturnType<typeof useImportXlsxPaymentVerificationPlanFileMutation>;
+export type ImportXlsxPaymentVerificationPlanFileMutationResult = ApolloReactCommon.MutationResult<ImportXlsxPaymentVerificationPlanFileMutation>;
+export type ImportXlsxPaymentVerificationPlanFileMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables>;
+export const InvalidPaymentVerificationPlanDocument = gql`
+    mutation InvalidPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
+  invalidPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
     cashPlan {
       id
     }
   }
 }
     `;
-export type InvalidCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>;
-export type InvalidCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+export type InvalidPaymentVerificationPlanMutationFn = ApolloReactCommon.MutationFunction<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables>;
+export type InvalidPaymentVerificationPlanComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables>, 'mutation'>;
 
-    export const InvalidCashPlanPaymentVerificationComponent = (props: InvalidCashPlanPaymentVerificationComponentProps) => (
-      <ApolloReactComponents.Mutation<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables> mutation={InvalidCashPlanPaymentVerificationDocument} {...props} />
+    export const InvalidPaymentVerificationPlanComponent = (props: InvalidPaymentVerificationPlanComponentProps) => (
+      <ApolloReactComponents.Mutation<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables> mutation={InvalidPaymentVerificationPlanDocument} {...props} />
     );
     
-export type InvalidCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables> & TChildProps;
-export function withInvalidCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type InvalidPaymentVerificationPlanProps<TChildProps = {}> = ApolloReactHoc.MutateProps<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables> & TChildProps;
+export function withInvalidPaymentVerificationPlan<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  InvalidCashPlanPaymentVerificationMutation,
-  InvalidCashPlanPaymentVerificationMutationVariables,
-  InvalidCashPlanPaymentVerificationProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables, InvalidCashPlanPaymentVerificationProps<TChildProps>>(InvalidCashPlanPaymentVerificationDocument, {
-      alias: 'invalidCashPlanPaymentVerification',
+  InvalidPaymentVerificationPlanMutation,
+  InvalidPaymentVerificationPlanMutationVariables,
+  InvalidPaymentVerificationPlanProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables, InvalidPaymentVerificationPlanProps<TChildProps>>(InvalidPaymentVerificationPlanDocument, {
+      alias: 'invalidPaymentVerificationPlan',
       ...operationOptions
     });
 };
 
 /**
- * __useInvalidCashPlanPaymentVerificationMutation__
+ * __useInvalidPaymentVerificationPlanMutation__
  *
- * To run a mutation, you first call `useInvalidCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useInvalidCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useInvalidPaymentVerificationPlanMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useInvalidPaymentVerificationPlanMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [invalidCashPlanPaymentVerificationMutation, { data, loading, error }] = useInvalidCashPlanPaymentVerificationMutation({
+ * const [invalidPaymentVerificationPlanMutation, { data, loading, error }] = useInvalidPaymentVerificationPlanMutation({
  *   variables: {
- *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      paymentVerificationPlanId: // value for 'paymentVerificationPlanId'
  *   },
  * });
  */
-export function useInvalidCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>) {
-        return ApolloReactHooks.useMutation<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>(InvalidCashPlanPaymentVerificationDocument, baseOptions);
+export function useInvalidPaymentVerificationPlanMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables>) {
+        return ApolloReactHooks.useMutation<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables>(InvalidPaymentVerificationPlanDocument, baseOptions);
       }
-export type InvalidCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useInvalidCashPlanPaymentVerificationMutation>;
-export type InvalidCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<InvalidCashPlanPaymentVerificationMutation>;
-export type InvalidCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>;
+export type InvalidPaymentVerificationPlanMutationHookResult = ReturnType<typeof useInvalidPaymentVerificationPlanMutation>;
+export type InvalidPaymentVerificationPlanMutationResult = ApolloReactCommon.MutationResult<InvalidPaymentVerificationPlanMutation>;
+export type InvalidPaymentVerificationPlanMutationOptions = ApolloReactCommon.BaseMutationOptions<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables>;
 export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
     mutation updatePaymentVerificationReceivedAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $received: Boolean!) {
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, received: $received) {
@@ -18845,56 +18845,56 @@ export function useAllRapidProFlowsLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type AllRapidProFlowsQueryHookResult = ReturnType<typeof useAllRapidProFlowsQuery>;
 export type AllRapidProFlowsLazyQueryHookResult = ReturnType<typeof useAllRapidProFlowsLazyQuery>;
 export type AllRapidProFlowsQueryResult = ApolloReactCommon.QueryResult<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>;
-export const CashPlanPaymentVerificationDocument = gql`
-    query CashPlanPaymentVerification($id: ID!) {
-  cashPlanPaymentVerification(id: $id) {
+export const PaymentVerificationPlanDocument = gql`
+    query PaymentVerificationPlan($id: ID!) {
+  paymentVerificationPlan(id: $id) {
     id
   }
 }
     `;
-export type CashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>, 'query'> & ({ variables: CashPlanPaymentVerificationQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type PaymentVerificationPlanComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>, 'query'> & ({ variables: PaymentVerificationPlanQueryVariables; skip?: boolean; } | { skip: boolean; });
 
-    export const CashPlanPaymentVerificationComponent = (props: CashPlanPaymentVerificationComponentProps) => (
-      <ApolloReactComponents.Query<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables> query={CashPlanPaymentVerificationDocument} {...props} />
+    export const PaymentVerificationPlanComponent = (props: PaymentVerificationPlanComponentProps) => (
+      <ApolloReactComponents.Query<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables> query={PaymentVerificationPlanDocument} {...props} />
     );
     
-export type CashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables> & TChildProps;
-export function withCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type PaymentVerificationPlanProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables> & TChildProps;
+export function withPaymentVerificationPlan<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  CashPlanPaymentVerificationQuery,
-  CashPlanPaymentVerificationQueryVariables,
-  CashPlanPaymentVerificationProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables, CashPlanPaymentVerificationProps<TChildProps>>(CashPlanPaymentVerificationDocument, {
-      alias: 'cashPlanPaymentVerification',
+  PaymentVerificationPlanQuery,
+  PaymentVerificationPlanQueryVariables,
+  PaymentVerificationPlanProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables, PaymentVerificationPlanProps<TChildProps>>(PaymentVerificationPlanDocument, {
+      alias: 'paymentVerificationPlan',
       ...operationOptions
     });
 };
 
 /**
- * __useCashPlanPaymentVerificationQuery__
+ * __usePaymentVerificationPlanQuery__
  *
- * To run a query within a React component, call `useCashPlanPaymentVerificationQuery` and pass it any options that fit your needs.
- * When your component renders, `useCashPlanPaymentVerificationQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `usePaymentVerificationPlanQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentVerificationPlanQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useCashPlanPaymentVerificationQuery({
+ * const { data, loading, error } = usePaymentVerificationPlanQuery({
  *   variables: {
  *      id: // value for 'id'
  *   },
  * });
  */
-export function useCashPlanPaymentVerificationQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>) {
-        return ApolloReactHooks.useQuery<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>(CashPlanPaymentVerificationDocument, baseOptions);
+export function usePaymentVerificationPlanQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>(PaymentVerificationPlanDocument, baseOptions);
       }
-export function useCashPlanPaymentVerificationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>(CashPlanPaymentVerificationDocument, baseOptions);
+export function usePaymentVerificationPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>(PaymentVerificationPlanDocument, baseOptions);
         }
-export type CashPlanPaymentVerificationQueryHookResult = ReturnType<typeof useCashPlanPaymentVerificationQuery>;
-export type CashPlanPaymentVerificationLazyQueryHookResult = ReturnType<typeof useCashPlanPaymentVerificationLazyQuery>;
-export type CashPlanPaymentVerificationQueryResult = ApolloReactCommon.QueryResult<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>;
+export type PaymentVerificationPlanQueryHookResult = ReturnType<typeof usePaymentVerificationPlanQuery>;
+export type PaymentVerificationPlanLazyQueryHookResult = ReturnType<typeof usePaymentVerificationPlanLazyQuery>;
+export type PaymentVerificationPlanQueryResult = ApolloReactCommon.QueryResult<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>;
 export const CashPlanVerificationStatusChoicesDocument = gql`
     query cashPlanVerificationStatusChoices {
   cashPlanVerificationStatusChoices {
@@ -22106,14 +22106,14 @@ export type ResolversTypes = {
   HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>,
-  CashPlanPaymentVerificationNode: ResolverTypeWrapper<CashPlanPaymentVerificationNode>,
+  PaymentVerificationPlanNode: ResolverTypeWrapper<PaymentVerificationPlanNode>,
   PaymentVerificationPlanStatus: PaymentVerificationPlanStatus,
   ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>,
-  CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
-  CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationNodeEdge>,
-  CashPlanPaymentVerificationSummaryNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationSummaryNodeConnection>,
-  CashPlanPaymentVerificationSummaryNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationSummaryNodeEdge>,
-  CashPlanPaymentVerificationSummaryNode: ResolverTypeWrapper<CashPlanPaymentVerificationSummaryNode>,
+  PaymentVerificationPlanNodeConnection: ResolverTypeWrapper<PaymentVerificationPlanNodeConnection>,
+  PaymentVerificationPlanNodeEdge: ResolverTypeWrapper<PaymentVerificationPlanNodeEdge>,
+  PaymentVerificationPlanSummaryNodeConnection: ResolverTypeWrapper<PaymentVerificationPlanSummaryNodeConnection>,
+  PaymentVerificationPlanSummaryNodeEdge: ResolverTypeWrapper<PaymentVerificationPlanSummaryNodeEdge>,
+  PaymentVerificationPlanSummaryNode: ResolverTypeWrapper<PaymentVerificationPlanSummaryNode>,
   PaymentVerificationSummaryStatus: PaymentVerificationSummaryStatus,
   PaymentVerificationLogEntryNodeConnection: ResolverTypeWrapper<PaymentVerificationLogEntryNodeConnection>,
   PaymentVerificationLogEntryNodeEdge: ResolverTypeWrapper<PaymentVerificationLogEntryNodeEdge>,
@@ -22389,21 +22389,21 @@ export type ResolversTypes = {
   PaymentDetailsApproveMutation: ResolverTypeWrapper<PaymentDetailsApproveMutation>,
   ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>,
   CreateUpdatePaymentVerificationInput: CreateUpdatePaymentVerificationInput,
-  CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
+  CreatePaymentVerificationPlanMutation: ResolverTypeWrapper<CreatePaymentVerificationPlanMutation>,
   GenericPaymentPlanNode: ResolverTypeWrapper<GenericPaymentPlanNode>,
   EditPaymentVerificationMutation: ResolverTypeWrapper<EditPaymentVerificationMutation>,
   CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput,
   CreateFinancialServiceProviderMutation: ResolverTypeWrapper<CreateFinancialServiceProviderMutation>,
   EditFinancialServiceProviderMutation: ResolverTypeWrapper<EditFinancialServiceProviderMutation>,
-  ExportXlsxCashPlanVerification: ResolverTypeWrapper<ExportXlsxCashPlanVerification>,
+  ExportXlsxPaymentVerificationPlanFile: ResolverTypeWrapper<ExportXlsxPaymentVerificationPlanFile>,
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
-  ImportXlsxCashPlanVerification: ResolverTypeWrapper<ImportXlsxCashPlanVerification>,
+  ImportXlsxPaymentVerificationPlanFile: ResolverTypeWrapper<ImportXlsxPaymentVerificationPlanFile>,
   XlsxErrorNode: ResolverTypeWrapper<XlsxErrorNode>,
-  ActivateCashPlanVerificationMutation: ResolverTypeWrapper<ActivateCashPlanVerificationMutation>,
-  FinishCashPlanVerificationMutation: ResolverTypeWrapper<FinishCashPlanVerificationMutation>,
-  DiscardCashPlanVerificationMutation: ResolverTypeWrapper<DiscardCashPlanVerificationMutation>,
-  InvalidCashPlanVerificationMutation: ResolverTypeWrapper<InvalidCashPlanVerificationMutation>,
-  DeleteCashPlanVerificationMutation: ResolverTypeWrapper<DeleteCashPlanVerificationMutation>,
+  ActivatePaymentVerificationPlan: ResolverTypeWrapper<ActivatePaymentVerificationPlan>,
+  FinishPaymentVerificationPlan: ResolverTypeWrapper<FinishPaymentVerificationPlan>,
+  DiscardPaymentVerificationPlan: ResolverTypeWrapper<DiscardPaymentVerificationPlan>,
+  InvalidPaymentVerificationPlan: ResolverTypeWrapper<InvalidPaymentVerificationPlan>,
+  DeletePaymentVerificationPlan: ResolverTypeWrapper<DeletePaymentVerificationPlan>,
   ChooseDeliveryMechanismsForPaymentPlanInput: ChooseDeliveryMechanismsForPaymentPlanInput,
   ChooseDeliveryMechanismsForPaymentPlanMutation: ResolverTypeWrapper<ChooseDeliveryMechanismsForPaymentPlanMutation>,
   AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
@@ -22546,14 +22546,14 @@ export type ResolversParentTypes = {
   HouseholdSelection: HouseholdSelection,
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentVerificationNode: PaymentVerificationNode,
-  CashPlanPaymentVerificationNode: CashPlanPaymentVerificationNode,
+  PaymentVerificationPlanNode: PaymentVerificationPlanNode,
   PaymentVerificationPlanStatus: PaymentVerificationPlanStatus,
   ContentTypeObjectType: ContentTypeObjectType,
-  CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
-  CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge,
-  CashPlanPaymentVerificationSummaryNodeConnection: CashPlanPaymentVerificationSummaryNodeConnection,
-  CashPlanPaymentVerificationSummaryNodeEdge: CashPlanPaymentVerificationSummaryNodeEdge,
-  CashPlanPaymentVerificationSummaryNode: CashPlanPaymentVerificationSummaryNode,
+  PaymentVerificationPlanNodeConnection: PaymentVerificationPlanNodeConnection,
+  PaymentVerificationPlanNodeEdge: PaymentVerificationPlanNodeEdge,
+  PaymentVerificationPlanSummaryNodeConnection: PaymentVerificationPlanSummaryNodeConnection,
+  PaymentVerificationPlanSummaryNodeEdge: PaymentVerificationPlanSummaryNodeEdge,
+  PaymentVerificationPlanSummaryNode: PaymentVerificationPlanSummaryNode,
   PaymentVerificationSummaryStatus: PaymentVerificationSummaryStatus,
   PaymentVerificationLogEntryNodeConnection: PaymentVerificationLogEntryNodeConnection,
   PaymentVerificationLogEntryNodeEdge: PaymentVerificationLogEntryNodeEdge,
@@ -22829,21 +22829,21 @@ export type ResolversParentTypes = {
   PaymentDetailsApproveMutation: PaymentDetailsApproveMutation,
   ReassignRoleMutation: ReassignRoleMutation,
   CreateUpdatePaymentVerificationInput: CreateUpdatePaymentVerificationInput,
-  CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
+  CreatePaymentVerificationPlanMutation: CreatePaymentVerificationPlanMutation,
   GenericPaymentPlanNode: GenericPaymentPlanNode,
   EditPaymentVerificationMutation: EditPaymentVerificationMutation,
   CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput,
   CreateFinancialServiceProviderMutation: CreateFinancialServiceProviderMutation,
   EditFinancialServiceProviderMutation: EditFinancialServiceProviderMutation,
-  ExportXlsxCashPlanVerification: ExportXlsxCashPlanVerification,
+  ExportXlsxPaymentVerificationPlanFile: ExportXlsxPaymentVerificationPlanFile,
   Upload: Scalars['Upload'],
-  ImportXlsxCashPlanVerification: ImportXlsxCashPlanVerification,
+  ImportXlsxPaymentVerificationPlanFile: ImportXlsxPaymentVerificationPlanFile,
   XlsxErrorNode: XlsxErrorNode,
-  ActivateCashPlanVerificationMutation: ActivateCashPlanVerificationMutation,
-  FinishCashPlanVerificationMutation: FinishCashPlanVerificationMutation,
-  DiscardCashPlanVerificationMutation: DiscardCashPlanVerificationMutation,
-  InvalidCashPlanVerificationMutation: InvalidCashPlanVerificationMutation,
-  DeleteCashPlanVerificationMutation: DeleteCashPlanVerificationMutation,
+  ActivatePaymentVerificationPlan: ActivatePaymentVerificationPlan,
+  FinishPaymentVerificationPlan: FinishPaymentVerificationPlan,
+  DiscardPaymentVerificationPlan: DiscardPaymentVerificationPlan,
+  InvalidPaymentVerificationPlan: InvalidPaymentVerificationPlan,
+  DeletePaymentVerificationPlan: DeletePaymentVerificationPlan,
   ChooseDeliveryMechanismsForPaymentPlanInput: ChooseDeliveryMechanismsForPaymentPlanInput,
   ChooseDeliveryMechanismsForPaymentPlanMutation: ChooseDeliveryMechanismsForPaymentPlanMutation,
   AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
@@ -22918,7 +22918,7 @@ export type ActionPaymentPlanMutationResolvers<ContextType = any, ParentType ext
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
 };
 
-export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
+export type ActivatePaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivatePaymentVerificationPlan'] = ResolversParentTypes['ActivatePaymentVerificationPlan']> = {
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
@@ -23195,73 +23195,6 @@ export type CashPlanNodeEdgeResolvers<ContextType = any, ParentType extends Reso
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
-export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNode'] = ResolversParentTypes['CashPlanPaymentVerificationNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['PaymentVerificationPlanStatus'], ParentType, ContextType>,
-  paymentPlanContentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
-  paymentPlanObjectId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  sampling?: Resolver<ResolversTypes['PaymentVerificationPlanSampling'], ParentType, ContextType>,
-  verificationChannel?: Resolver<ResolversTypes['PaymentVerificationPlanVerificationChannel'], ParentType, ContextType>,
-  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  respondedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  receivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  notReceivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  receivedWithProblemsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  confidenceInterval?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  marginOfError?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  rapidProFlowStartUuids?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
-  ageFilter?: Resolver<Maybe<ResolversTypes['AgeFilterObject']>, ParentType, ContextType>,
-  excludedAdminAreasFilter?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  xlsxFileExporting?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  xlsxFileImported?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
-  xlsxFileWasDownloaded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  hasXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-};
-
-export type CashPlanPaymentVerificationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeConnection'] = ResolversParentTypes['CashPlanPaymentVerificationNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['CashPlanPaymentVerificationNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type CashPlanPaymentVerificationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeEdge'] = ResolversParentTypes['CashPlanPaymentVerificationNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type CashPlanPaymentVerificationSummaryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationSummaryNode'] = ResolversParentTypes['CashPlanPaymentVerificationSummaryNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['PaymentVerificationSummaryStatus'], ParentType, ContextType>,
-  activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  paymentPlanContentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
-  paymentPlanObjectId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-};
-
-export type CashPlanPaymentVerificationSummaryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationSummaryNodeConnection'] = ResolversParentTypes['CashPlanPaymentVerificationSummaryNodeConnection']> = {
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['CashPlanPaymentVerificationSummaryNodeEdge']>>, ParentType, ContextType>,
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type CashPlanPaymentVerificationSummaryNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationSummaryNodeEdge'] = ResolversParentTypes['CashPlanPaymentVerificationSummaryNodeEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationSummaryNode']>, ParentType, ContextType>,
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
 export type ChartDatasetNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartDatasetNode'] = ResolversParentTypes['ChartDatasetNode']> = {
   labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>, ParentType, ContextType>,
@@ -23305,8 +23238,8 @@ export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   appLabel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   model?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  paymentverificationplanSet?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, ContentTypeObjectTypePaymentverificationplanSetArgs>,
-  paymentverificationsummarySet?: Resolver<ResolversTypes['CashPlanPaymentVerificationSummaryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypePaymentverificationsummarySetArgs>,
+  paymentverificationplanSet?: Resolver<ResolversTypes['PaymentVerificationPlanNodeConnection'], ParentType, ContextType, ContentTypeObjectTypePaymentverificationplanSetArgs>,
+  paymentverificationsummarySet?: Resolver<ResolversTypes['PaymentVerificationPlanSummaryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypePaymentverificationsummarySetArgs>,
   logEntries?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeLogEntriesArgs>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
@@ -23346,7 +23279,7 @@ export type CreatePaymentPlanMutationResolvers<ContextType = any, ParentType ext
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
 };
 
-export type CreatePaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreatePaymentVerificationMutation'] = ResolversParentTypes['CreatePaymentVerificationMutation']> = {
+export type CreatePaymentVerificationPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreatePaymentVerificationPlanMutation'] = ResolversParentTypes['CreatePaymentVerificationPlanMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['GenericPaymentPlanNode']>, ParentType, ContextType>,
 };
 
@@ -23389,12 +23322,12 @@ export type DeduplicationResultNodeResolvers<ContextType = any, ParentType exten
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
-export type DeleteCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteCashPlanVerificationMutation'] = ResolversParentTypes['DeleteCashPlanVerificationMutation']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
-};
-
 export type DeletePaymentPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeletePaymentPlanMutation'] = ResolversParentTypes['DeletePaymentPlanMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+};
+
+export type DeletePaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeletePaymentVerificationPlan'] = ResolversParentTypes['DeletePaymentVerificationPlan']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
@@ -23444,7 +23377,7 @@ export type DeliveryMechanismNodeEdgeResolvers<ContextType = any, ParentType ext
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
-export type DiscardCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscardCashPlanVerificationMutation'] = ResolversParentTypes['DiscardCashPlanVerificationMutation']> = {
+export type DiscardPaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscardPaymentVerificationPlan'] = ResolversParentTypes['DiscardPaymentVerificationPlan']> = {
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
@@ -23513,16 +23446,16 @@ export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentTy
   paymentPlan?: Resolver<Maybe<ResolversTypes['GenericPaymentPlanNode']>, ParentType, ContextType>,
 };
 
-export type ExportXlsxCashPlanVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportXlsxCashPlanVerification'] = ResolversParentTypes['ExportXlsxCashPlanVerification']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
-};
-
 export type ExportXlsxPaymentPlanPaymentListMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportXLSXPaymentPlanPaymentListMutation'] = ResolversParentTypes['ExportXLSXPaymentPlanPaymentListMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
 };
 
 export type ExportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportXLSXPaymentPlanPaymentListPerFSPMutation'] = ResolversParentTypes['ExportXLSXPaymentPlanPaymentListPerFSPMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+};
+
+export type ExportXlsxPaymentVerificationPlanFileResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportXlsxPaymentVerificationPlanFile'] = ResolversParentTypes['ExportXlsxPaymentVerificationPlanFile']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FieldAttributeNode'] = ResolversParentTypes['FieldAttributeNode']> = {
@@ -23621,7 +23554,7 @@ export type FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<ContextType = 
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
-export type FinishCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinishCashPlanVerificationMutation'] = ResolversParentTypes['FinishCashPlanVerificationMutation']> = {
+export type FinishPaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinishPaymentVerificationPlan'] = ResolversParentTypes['FinishPaymentVerificationPlan']> = {
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
@@ -23640,7 +23573,7 @@ export type FspChoicesResolvers<ContextType = any, ParentType extends ResolversP
 };
 
 export type GenericPaymentPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GenericPaymentPlanNode'] = ResolversParentTypes['GenericPaymentPlanNode']> = {
-  paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationSummaryNode']>, ParentType, ContextType>,
+  paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanSummaryNode']>, ParentType, ContextType>,
 };
 
 export interface GeoJsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['GeoJSON'], any> {
@@ -24064,11 +23997,6 @@ export type ImportedIndividualNodeEdgeResolvers<ContextType = any, ParentType ex
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
-export type ImportXlsxCashPlanVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXlsxCashPlanVerification'] = ResolversParentTypes['ImportXlsxCashPlanVerification']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
-  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
-};
-
 export type ImportXlsxPaymentPlanPaymentListMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXLSXPaymentPlanPaymentListMutation'] = ResolversParentTypes['ImportXLSXPaymentPlanPaymentListMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
   errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
@@ -24076,6 +24004,11 @@ export type ImportXlsxPaymentPlanPaymentListMutationResolvers<ContextType = any,
 
 export type ImportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation'] = ResolversParentTypes['ImportXLSXPaymentPlanPaymentListPerFSPMutation']> = {
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
+};
+
+export type ImportXlsxPaymentVerificationPlanFileResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXlsxPaymentVerificationPlanFile'] = ResolversParentTypes['ImportXlsxPaymentVerificationPlanFile']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
   errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
 };
 
@@ -24213,7 +24146,7 @@ export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType
   role?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdRole']>, ParentType, ContextType>,
 };
 
-export type InvalidCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['InvalidCashPlanVerificationMutation'] = ResolversParentTypes['InvalidCashPlanVerificationMutation']> = {
+export type InvalidPaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['InvalidPaymentVerificationPlan'] = ResolversParentTypes['InvalidPaymentVerificationPlan']> = {
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
@@ -24328,17 +24261,17 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>,
   approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approveStatus' | 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
-  createPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentVerificationArgs, 'input'>>,
+  createPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentVerificationArgs, 'input'>>,
   editPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditPaymentVerificationArgs, 'input'>>,
   createFinancialServiceProvider?: Resolver<Maybe<ResolversTypes['CreateFinancialServiceProviderMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFinancialServiceProviderArgs, 'businessAreaSlug' | 'inputs'>>,
   editFinancialServiceProvider?: Resolver<Maybe<ResolversTypes['EditFinancialServiceProviderMutation']>, ParentType, ContextType, RequireFields<MutationsEditFinancialServiceProviderArgs, 'businessAreaSlug' | 'financialServiceProviderId' | 'inputs'>>,
-  exportXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ExportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsExportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId'>>,
-  importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
-  activateCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['ActivateCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsActivateCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
-  finishCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['FinishCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsFinishCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
-  discardCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DiscardCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDiscardCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
-  invalidCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['InvalidCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsInvalidCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
-  deleteCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DeleteCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDeleteCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
+  exportXlsxPaymentVerificationPlanFile?: Resolver<Maybe<ResolversTypes['ExportXlsxPaymentVerificationPlanFile']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentVerificationPlanFileArgs, 'paymentVerificationPlanId'>>,
+  importXlsxPaymentVerificationPlanFile?: Resolver<Maybe<ResolversTypes['ImportXlsxPaymentVerificationPlanFile']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentVerificationPlanFileArgs, 'file' | 'paymentVerificationPlanId'>>,
+  activatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['ActivatePaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsActivatePaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
+  finishPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['FinishPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsFinishPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
+  discardPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DiscardPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDiscardPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
+  invalidPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['InvalidPaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsInvalidPaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
+  deletePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentVerificationPlan']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentVerificationPlanArgs, 'paymentVerificationPlanId'>>,
   chooseDeliveryMechanismsForPaymentPlan?: Resolver<Maybe<ResolversTypes['ChooseDeliveryMechanismsForPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsChooseDeliveryMechanismsForPaymentPlanArgs, 'input'>>,
   assignFspToDeliveryMechanism?: Resolver<Maybe<ResolversTypes['AssignFspToDeliveryMechanismMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFspToDeliveryMechanismArgs, 'input'>>,
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
@@ -24380,7 +24313,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentVerificationNode' | 'CashPlanPaymentVerificationNode' | 'CashPlanPaymentVerificationSummaryNode' | 'PaymentVerificationLogEntryNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'ReportNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'PaymentChannelNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationPlanSummaryNode' | 'PaymentVerificationLogEntryNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'ReportNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'PaymentChannelNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -24595,7 +24528,7 @@ export type PaymentVerificationLogEntryNodeResolvers<ContextType = any, ParentTy
   user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  contentObject?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType>,
+  contentObject?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNode']>, ParentType, ContextType>,
 };
 
 export type PaymentVerificationLogEntryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNodeConnection'] = ResolversParentTypes['PaymentVerificationLogEntryNodeConnection']> = {
@@ -24615,7 +24548,7 @@ export type PaymentVerificationNodeResolvers<ContextType = any, ParentType exten
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
-  paymentVerificationPlan?: Resolver<ResolversTypes['CashPlanPaymentVerificationNode'], ParentType, ContextType>,
+  paymentVerificationPlan?: Resolver<ResolversTypes['PaymentVerificationPlanNode'], ParentType, ContextType>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentVerificationStatus'], ParentType, ContextType>,
   statusDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
@@ -24634,6 +24567,73 @@ export type PaymentVerificationNodeConnectionResolvers<ContextType = any, Parent
 
 export type PaymentVerificationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNodeEdge'] = ResolversParentTypes['PaymentVerificationNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type PaymentVerificationPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationPlanNode'] = ResolversParentTypes['PaymentVerificationPlanNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['PaymentVerificationPlanStatus'], ParentType, ContextType>,
+  paymentPlanContentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
+  paymentPlanObjectId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  sampling?: Resolver<ResolversTypes['PaymentVerificationPlanSampling'], ParentType, ContextType>,
+  verificationChannel?: Resolver<ResolversTypes['PaymentVerificationPlanVerificationChannel'], ParentType, ContextType>,
+  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  respondedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  receivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  notReceivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  receivedWithProblemsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  confidenceInterval?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  marginOfError?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  rapidProFlowStartUuids?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
+  ageFilter?: Resolver<Maybe<ResolversTypes['AgeFilterObject']>, ParentType, ContextType>,
+  excludedAdminAreasFilter?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  xlsxFileExporting?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  xlsxFileImported?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, PaymentVerificationPlanNodePaymentRecordVerificationsArgs>,
+  xlsxFileWasDownloaded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type PaymentVerificationPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationPlanNodeConnection'] = ResolversParentTypes['PaymentVerificationPlanNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentVerificationPlanNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type PaymentVerificationPlanNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationPlanNodeEdge'] = ResolversParentTypes['PaymentVerificationPlanNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type PaymentVerificationPlanSummaryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationPlanSummaryNode'] = ResolversParentTypes['PaymentVerificationPlanSummaryNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['PaymentVerificationSummaryStatus'], ParentType, ContextType>,
+  activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  paymentPlanContentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
+  paymentPlanObjectId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type PaymentVerificationPlanSummaryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationPlanSummaryNodeConnection'] = ResolversParentTypes['PaymentVerificationPlanSummaryNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentVerificationPlanSummaryNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type PaymentVerificationPlanSummaryNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationPlanSummaryNodeEdge'] = ResolversParentTypes['PaymentVerificationPlanSummaryNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanSummaryNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
@@ -24723,10 +24723,10 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderArgs, 'id'>>,
   allFinancialServiceProviders?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNodeConnection']>, ParentType, ContextType, QueryAllFinancialServiceProvidersArgs>,
   paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>,
-  cashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryCashPlanPaymentVerificationArgs, 'id'>>,
+  paymentVerificationPlan?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNode']>, ParentType, ContextType, RequireFields<QueryPaymentVerificationPlanArgs, 'id'>>,
   allPaymentRecords?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, QueryAllPaymentRecordsArgs>,
   allPaymentVerifications?: Resolver<Maybe<ResolversTypes['PaymentVerificationNodeConnection']>, ParentType, ContextType, QueryAllPaymentVerificationsArgs>,
-  allCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNodeConnection']>, ParentType, ContextType, QueryAllCashPlanPaymentVerificationArgs>,
+  allPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, QueryAllPaymentVerificationPlanArgs>,
   chartPaymentVerification?: Resolver<Maybe<ResolversTypes['ChartPaymentVerification']>, ParentType, ContextType, RequireFields<QueryChartPaymentVerificationArgs, 'businessAreaSlug' | 'year'>>,
   chartVolumeByDeliveryMechanism?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartVolumeByDeliveryMechanismArgs, 'businessAreaSlug' | 'year'>>,
   chartPayment?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPaymentArgs, 'businessAreaSlug' | 'year'>>,
@@ -25833,7 +25833,7 @@ export type Resolvers<ContextType = any> = {
   _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>,
   _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>,
   ActionPaymentPlanMutation?: ActionPaymentPlanMutationResolvers<ContextType>,
-  ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<ContextType>,
+  ActivatePaymentVerificationPlan?: ActivatePaymentVerificationPlanResolvers<ContextType>,
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
   AgencyNode?: AgencyNodeResolvers<ContextType>,
   ApprovalNode?: ApprovalNodeResolvers<ContextType>,
@@ -25857,12 +25857,6 @@ export type Resolvers<ContextType = any> = {
   CashPlanNode?: CashPlanNodeResolvers<ContextType>,
   CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>,
   CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>,
-  CashPlanPaymentVerificationNode?: CashPlanPaymentVerificationNodeResolvers<ContextType>,
-  CashPlanPaymentVerificationNodeConnection?: CashPlanPaymentVerificationNodeConnectionResolvers<ContextType>,
-  CashPlanPaymentVerificationNodeEdge?: CashPlanPaymentVerificationNodeEdgeResolvers<ContextType>,
-  CashPlanPaymentVerificationSummaryNode?: CashPlanPaymentVerificationSummaryNodeResolvers<ContextType>,
-  CashPlanPaymentVerificationSummaryNodeConnection?: CashPlanPaymentVerificationSummaryNodeConnectionResolvers<ContextType>,
-  CashPlanPaymentVerificationSummaryNodeEdge?: CashPlanPaymentVerificationSummaryNodeEdgeResolvers<ContextType>,
   ChartDatasetNode?: ChartDatasetNodeResolvers<ContextType>,
   ChartDetailedDatasetsNode?: ChartDetailedDatasetsNodeResolvers<ContextType>,
   ChartGrievanceTicketsNode?: ChartGrievanceTicketsNodeResolvers<ContextType>,
@@ -25878,7 +25872,7 @@ export type Resolvers<ContextType = any> = {
   CreateFinancialServiceProviderMutation?: CreateFinancialServiceProviderMutationResolvers<ContextType>,
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
   CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>,
-  CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
+  CreatePaymentVerificationPlanMutation?: CreatePaymentVerificationPlanMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateReport?: CreateReportResolvers<ContextType>,
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
@@ -25887,8 +25881,8 @@ export type Resolvers<ContextType = any> = {
   DateTime?: GraphQLScalarType,
   Decimal?: GraphQLScalarType,
   DeduplicationResultNode?: DeduplicationResultNodeResolvers<ContextType>,
-  DeleteCashPlanVerificationMutation?: DeleteCashPlanVerificationMutationResolvers<ContextType>,
   DeletePaymentPlanMutation?: DeletePaymentPlanMutationResolvers<ContextType>,
+  DeletePaymentVerificationPlan?: DeletePaymentVerificationPlanResolvers<ContextType>,
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,
@@ -25896,7 +25890,7 @@ export type Resolvers<ContextType = any> = {
   DeliveryMechanismNode?: DeliveryMechanismNodeResolvers<ContextType>,
   DeliveryMechanismNodeConnection?: DeliveryMechanismNodeConnectionResolvers<ContextType>,
   DeliveryMechanismNodeEdge?: DeliveryMechanismNodeEdgeResolvers<ContextType>,
-  DiscardCashPlanVerificationMutation?: DiscardCashPlanVerificationMutationResolvers<ContextType>,
+  DiscardPaymentVerificationPlan?: DiscardPaymentVerificationPlanResolvers<ContextType>,
   DjangoDebug?: DjangoDebugResolvers<ContextType>,
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
   DocumentNode?: DocumentNodeResolvers<ContextType>,
@@ -25905,9 +25899,9 @@ export type Resolvers<ContextType = any> = {
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
   EditFinancialServiceProviderMutation?: EditFinancialServiceProviderMutationResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
-  ExportXlsxCashPlanVerification?: ExportXlsxCashPlanVerificationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListMutation?: ExportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation?: ExportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,
+  ExportXlsxPaymentVerificationPlanFile?: ExportXlsxPaymentVerificationPlanFileResolvers<ContextType>,
   FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>,
   FilteredActionsListNode?: FilteredActionsListNodeResolvers<ContextType>,
   FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
@@ -25920,7 +25914,7 @@ export type Resolvers<ContextType = any> = {
   FinancialServiceProviderXlsxTemplateNode?: FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType>,
   FinancialServiceProviderXlsxTemplateNodeConnection?: FinancialServiceProviderXlsxTemplateNodeConnectionResolvers<ContextType>,
   FinancialServiceProviderXlsxTemplateNodeEdge?: FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<ContextType>,
-  FinishCashPlanVerificationMutation?: FinishCashPlanVerificationMutationResolvers<ContextType>,
+  FinishPaymentVerificationPlan?: FinishPaymentVerificationPlanResolvers<ContextType>,
   FlexFieldsScalar?: GraphQLScalarType,
   FspChoice?: FspChoiceResolvers<ContextType>,
   FspChoices?: FspChoicesResolvers<ContextType>,
@@ -25951,9 +25945,9 @@ export type Resolvers<ContextType = any> = {
   ImportedIndividualNode?: ImportedIndividualNodeResolvers<ContextType>,
   ImportedIndividualNodeConnection?: ImportedIndividualNodeConnectionResolvers<ContextType>,
   ImportedIndividualNodeEdge?: ImportedIndividualNodeEdgeResolvers<ContextType>,
-  ImportXlsxCashPlanVerification?: ImportXlsxCashPlanVerificationResolvers<ContextType>,
   ImportXLSXPaymentPlanPaymentListMutation?: ImportXlsxPaymentPlanPaymentListMutationResolvers<ContextType>,
   ImportXLSXPaymentPlanPaymentListPerFSPMutation?: ImportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType>,
+  ImportXlsxPaymentVerificationPlanFile?: ImportXlsxPaymentVerificationPlanFileResolvers<ContextType>,
   IndividualDataChangeApproveMutation?: IndividualDataChangeApproveMutationResolvers<ContextType>,
   IndividualIdentityNode?: IndividualIdentityNodeResolvers<ContextType>,
   IndividualIdentityNodeConnection?: IndividualIdentityNodeConnectionResolvers<ContextType>,
@@ -25962,7 +25956,7 @@ export type Resolvers<ContextType = any> = {
   IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,
   IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
   IndividualRoleInHouseholdNode?: IndividualRoleInHouseholdNodeResolvers<ContextType>,
-  InvalidCashPlanVerificationMutation?: InvalidCashPlanVerificationMutationResolvers<ContextType>,
+  InvalidPaymentVerificationPlan?: InvalidPaymentVerificationPlanResolvers<ContextType>,
   IssueTypesObject?: IssueTypesObjectResolvers<ContextType>,
   JSONString?: GraphQLScalarType,
   KoboAssetObject?: KoboAssetObjectResolvers<ContextType>,
@@ -26000,6 +25994,12 @@ export type Resolvers<ContextType = any> = {
   PaymentVerificationNode?: PaymentVerificationNodeResolvers<ContextType>,
   PaymentVerificationNodeConnection?: PaymentVerificationNodeConnectionResolvers<ContextType>,
   PaymentVerificationNodeEdge?: PaymentVerificationNodeEdgeResolvers<ContextType>,
+  PaymentVerificationPlanNode?: PaymentVerificationPlanNodeResolvers<ContextType>,
+  PaymentVerificationPlanNodeConnection?: PaymentVerificationPlanNodeConnectionResolvers<ContextType>,
+  PaymentVerificationPlanNodeEdge?: PaymentVerificationPlanNodeEdgeResolvers<ContextType>,
+  PaymentVerificationPlanSummaryNode?: PaymentVerificationPlanSummaryNodeResolvers<ContextType>,
+  PaymentVerificationPlanSummaryNodeConnection?: PaymentVerificationPlanSummaryNodeConnectionResolvers<ContextType>,
+  PaymentVerificationPlanSummaryNodeEdge?: PaymentVerificationPlanSummaryNodeEdgeResolvers<ContextType>,
   ProgramNode?: ProgramNodeResolvers<ContextType>,
   ProgramNodeConnection?: ProgramNodeConnectionResolvers<ContextType>,
   ProgramNodeEdge?: ProgramNodeEdgeResolvers<ContextType>,
