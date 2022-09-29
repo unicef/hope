@@ -4,8 +4,8 @@ from pathlib import Path
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from hct_mis_api.api.models import Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -27,7 +27,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 class UploadRDITests(HOPEApiTestCase):
     databases = ["default", "registration_datahub"]
-    user_permissions = [Permissions.API_UPLOAD_RDI]
+    user_permissions = [Grant.API_RDI_UPLOAD]
 
     @classmethod
     def setUpTestData(cls):
@@ -41,9 +41,10 @@ class UploadRDITests(HOPEApiTestCase):
             "collect_individual_data": "FULL",
             "households": [
                 {
-                    "residence_status": "",
+                    "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -86,12 +87,13 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_external_collector(self):
         data = {
             "name": "aaaa",
-            "collect_individual_data": "FULL",
+            "collect_individual_data": COLLECT_TYPE_FULL,
             "households": [
                 {
-                    "residence_status": "",
+                    "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -114,6 +116,8 @@ class UploadRDITests(HOPEApiTestCase):
         }
         response = self.client.post(self.url, data, format="json")
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, data)
+
         hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(hrdi)
         rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
@@ -136,9 +140,10 @@ class UploadRDITests(HOPEApiTestCase):
             "collect_individual_data": "FULL",
             "households": [
                 {
-                    "residence_status": "",
+                    "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": "FULL",
                     "members": [
                         {
                             "relationship": HEAD,
@@ -194,9 +199,10 @@ class UploadRDITests(HOPEApiTestCase):
             "collect_individual_data": "FULL",
             "households": [
                 {
-                    "residence_status": "",
+                    "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -253,9 +259,10 @@ class UploadRDITests(HOPEApiTestCase):
             "collect_individual_data": "FULL",
             "households": [
                 {
-                    "residence_status": "",
+                    "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -280,7 +287,6 @@ class UploadRDITests(HOPEApiTestCase):
                             "documents": [
                                 {
                                     "document_number": 10,
-                                    # "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -301,6 +307,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village2",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -332,6 +339,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village3",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -390,6 +398,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -430,6 +439,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -454,7 +464,6 @@ class UploadRDITests(HOPEApiTestCase):
                             "documents": [
                                 {
                                     "document_number": 10,
-                                    # "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -475,6 +484,7 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -516,11 +526,13 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
                             "full_name": "Jhon Primary #1",
                             "birth_date": "2000-01-01",
+                            "role": "",
                             "sex": "FEMALE",
                         },
                         {
@@ -539,7 +551,6 @@ class UploadRDITests(HOPEApiTestCase):
                             "documents": [
                                 {
                                     "document_number": 10,
-                                    # "image": base64_encoded_data,
                                     "doc_date": "2010-01-01",
                                     "country": "AF",
                                     "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -559,11 +570,14 @@ class UploadRDITests(HOPEApiTestCase):
                 {
                     "residence_status": "",
                     "village": "village1",
+                    "country": "AF",
+                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
                             "full_name": "John Doe",
                             "birth_date": "2000-01-01",
+                            "role": "",
                             "sex": "MALE",
                         },
                         {
@@ -583,8 +597,23 @@ class UploadRDITests(HOPEApiTestCase):
             response.json(),
             {
                 "households": [
-                    {"Household #1": [{"member #1": [{"role": ["This field is required."]}]}]},
-                    {"Household #2": [{"member #1": [{"role": ["This field is required."]}]}]},
+                    {
+                        "Household #1": [
+                            {
+                                "alternate_collector": ["Only one Alternate Collector allowed"],
+                                "head_of_household": ["Missing Head Of Household"],
+                                "primary_collector": ["Missing Primary Collector"],
+                            }
+                        ]
+                    },
+                    {
+                        "Household #2": [
+                            {
+                                "head_of_household": ["Only one HoH allowed"],
+                                "primary_collector": ["Missing Primary Collector"],
+                            }
+                        ]
+                    },
                 ]
             },
             f"""

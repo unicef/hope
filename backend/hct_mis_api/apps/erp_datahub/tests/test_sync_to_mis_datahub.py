@@ -1,7 +1,6 @@
-from django.utils import timezone
-
 from django.core.management import call_command
 from django.test import TestCase
+from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.erp_datahub.fixtures import FundsCommitmentFactory

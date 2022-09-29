@@ -25,40 +25,40 @@ def save_sensitive_grievance_extras(root, info, input, grievance_ticket, extras,
     household_encoded_id = sensitive_grievance_complaint_category_extras.get("household")
     household = decode_and_get_object(household_encoded_id, Household, False)
 
-    payment_record_encoded_ids_list = sensitive_grievance_complaint_category_extras.get("payment_record")
+    payment_record_encoded_ids_list = sensitive_grievance_complaint_category_extras.get("payment_record") or []
 
+    payment_record = None
     if payment_record_encoded_ids_list:
-        grievance_tickets_to_return = []
-        for payment_record_encoded_id in payment_record_encoded_ids_list:
-            payment_record = decode_and_get_object(payment_record_encoded_id, PaymentRecord, False)
+        payment_record_encoded_id = payment_record_encoded_ids_list.pop(0)
+        payment_record = decode_and_get_object(payment_record_encoded_id, PaymentRecord, False)
 
-            # copy GrievanceTicket object and assign linked tickets
-            ticket = grievance_ticket
-            linked_tickets = grievance_ticket.linked_tickets.all()
-            ticket.id = None
-            ticket.pk = None
-            ticket.save()
-            ticket.linked_tickets.set(linked_tickets)
+    TicketSensitiveDetails.objects.create(
+        individual=individual,
+        household=household,
+        payment_record=payment_record,
+        ticket=grievance_ticket,
+    )
+    grievance_ticket.refresh_from_db()
+    grievance_tickets_to_return = [grievance_ticket]
 
-            TicketSensitiveDetails.objects.create(
-                individual=individual,
-                household=household,
-                payment_record=payment_record,
-                ticket=ticket,
-            )
+    for payment_record_encoded_id in payment_record_encoded_ids_list:
+        payment_record = decode_and_get_object(payment_record_encoded_id, PaymentRecord, False)
 
-            ticket.refresh_from_db()
-            grievance_tickets_to_return.append(ticket)
-    else:
+        # copy GrievanceTicket object and assign linked tickets
+        ticket = grievance_ticket
+        linked_tickets = grievance_ticket.linked_tickets.all()
+        ticket.pk = None
+        ticket.save()
+        ticket.linked_tickets.set(linked_tickets)
+
         TicketSensitiveDetails.objects.create(
             individual=individual,
             household=household,
-            payment_record=None,
-            ticket=grievance_ticket,
+            payment_record=payment_record,
+            ticket=ticket,
         )
-        grievance_ticket.refresh_from_db()
-        grievance_tickets_to_return = [grievance_ticket]
 
-    grievance_ticket.refresh_from_db()
+        ticket.refresh_from_db()
+        grievance_tickets_to_return.append(ticket)
 
     return grievance_tickets_to_return

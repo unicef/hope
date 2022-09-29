@@ -4,10 +4,16 @@ from random import random
 
 from django.core.management import BaseCommand
 from django.db.transaction import atomic
+
 from faker import Faker
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Document, Individual, MALE, BankAccountInfo
+from hct_mis_api.apps.household.models import (
+    MALE,
+    BankAccountInfo,
+    Document,
+    Individual,
+)
 
 
 class Command(BaseCommand):
