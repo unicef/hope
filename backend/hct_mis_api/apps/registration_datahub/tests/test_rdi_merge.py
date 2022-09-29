@@ -30,7 +30,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.maxDiff = None
         cls.rdi = RegistrationDataImportFactory()
+        cls.rdi.business_area.postpone_deduplication = True
+        cls.rdi.business_area.save()
         cls.rdi_hub = RegistrationDataImportDatahubFactory(
             name=cls.rdi.name, hct_id=cls.rdi.id, business_area_slug=cls.rdi.business_area.slug
         )
@@ -179,6 +182,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             registration_data_import=self.rdi_hub,
         )
         self.set_imported_individuals(imported_household)
+
+        RdiMergeTask().execute(self.rdi.pk)
 
         households = Household.objects.all()
         individuals = Individual.objects.all()
