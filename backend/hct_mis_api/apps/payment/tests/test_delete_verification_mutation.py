@@ -8,15 +8,12 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentVerificationPlanFactory,
+    CashPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import (
-    PaymentVerificationPlan,
-    PaymentVerification,
-)
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
@@ -28,7 +25,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 class TestDeleteVerificationMutation(APITestCase):
     MUTATION = """
         mutation DeleteVerification($cashPlanVerificationId: ID!){
-          deleteCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
+          deletePaymentVerificationPlan(cashPlanVerificationId:$cashPlanVerificationId) {
             cashPlan{
                 name
                 verificationPlans {
@@ -79,7 +76,7 @@ class TestDeleteVerificationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "cashPlanVerificationId": [
-                    self.id_to_base64(payment_verification_plan.id, "CashPlanPaymentVerificationNode")
+                    self.id_to_base64(payment_verification_plan.id, "PaymentVerificationPlanNode")
                 ]
             },
         )
@@ -100,7 +97,7 @@ class TestDeleteVerificationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "cashPlanVerificationId": [
-                    self.id_to_base64(payment_verification_plan.id, "CashPlanPaymentVerificationNode")
+                    self.id_to_base64(payment_verification_plan.id, "PaymentVerificationPlanNode")
                 ]
             },
         )

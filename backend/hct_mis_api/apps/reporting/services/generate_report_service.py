@@ -1,10 +1,7 @@
-import logging
 import copy
-import openpyxl
-
+import logging
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
-from openpyxl.utils import get_column_letter
 
 from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
@@ -24,10 +21,10 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    PaymentVerificationPlan,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
-    PaymentPlan,
+    PaymentVerificationPlan,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import Report

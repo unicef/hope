@@ -8,15 +8,15 @@ import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useActivateCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { useActivatePaymentVerificationPlanMutation } from '../../__generated__/graphql';
 
 export interface ActivateVerificationPlanProps {
-  cashPlanVerificationId: string;
+  paymentVerificationPlanId: string;
   cashPlanId: string;
 }
 
 export function ActivateVerificationPlan({
-  cashPlanVerificationId,
+  paymentVerificationPlanId,
   cashPlanId,
 }: ActivateVerificationPlanProps): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashPlanId);
@@ -24,11 +24,11 @@ export function ActivateVerificationPlan({
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
 
   const { showMessage } = useSnackbar();
-  const [mutate] = useActivateCashPlanPaymentVerificationMutation();
+  const [mutate] = useActivatePaymentVerificationPlanMutation();
   const activate = async (): Promise<void> => {
     try {
       await mutate({
-        variables: { cashPlanVerificationId },
+        variables: { paymentVerificationPlanId },
         refetchQueries,
       });
     } catch (error) {

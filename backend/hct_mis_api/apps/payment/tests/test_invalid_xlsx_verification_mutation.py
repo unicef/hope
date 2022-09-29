@@ -1,10 +1,10 @@
 from io import BytesIO
 from pathlib import Path
 
-from parameterized import parameterized
-
 from django.conf import settings
 from django.core.files import File
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -13,18 +13,21 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
     PaymentVerificationPlanFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan, XlsxPaymentVerificationPlanFile
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.models import (
+    PaymentVerificationPlan,
+    XlsxPaymentVerificationPlanFile,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestXlsxVerificationMarkAsInvalid(APITestCase):
 
     INVALID_MUTATION = """
-        mutation invalidCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
-          invalidCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+        mutation invalidPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
+          invalidPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
             cashPlan{
               verificationPlans{
                 edges{
@@ -82,7 +85,7 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
             context={"user": self.user},
             # TODO: upd vars after update intups
             variables={
-                "cashPlanVerificationId": self.id_to_base64(
+                "paymentVerificationPlanId": self.id_to_base64(
                     self.payment_verification_plan.id, "PaymentVerificationPlanNode"
                 ),
             },

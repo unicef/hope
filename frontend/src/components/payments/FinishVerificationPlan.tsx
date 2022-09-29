@@ -18,24 +18,24 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { getPercentage } from '../../utils/utils';
 import {
   useCashPlanQuery,
-  useFinishCashPlanPaymentVerificationMutation,
+  useFinishPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 
 export interface FinishVerificationPlanProps {
-  cashPlanVerificationId: string;
+  paymentVerificationPlanId: string;
   cashPlanId: string;
 }
 
 export function FinishVerificationPlan({
-  cashPlanVerificationId,
+  paymentVerificationPlanId,
   cashPlanId,
 }: FinishVerificationPlanProps): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useFinishCashPlanPaymentVerificationMutation();
+  const [mutate] = useFinishPaymentVerificationPlanMutation();
   const { id } = useParams();
   const { data, loading } = useCashPlanQuery({
     variables: { id },
@@ -53,7 +53,7 @@ export function FinishVerificationPlan({
 
   const finish = async (): Promise<void> => {
     const { errors } = await mutate({
-      variables: { cashPlanVerificationId },
+      variables: { paymentVerificationPlanId },
       refetchQueries,
     });
     if (errors) {

@@ -14,8 +14,8 @@ import {
   PaymentVerificationPlanStatus,
   CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
-  useExportXlsxCashPlanVerificationMutation,
-  useInvalidCashPlanPaymentVerificationMutation,
+  useExportXlsxPaymentVerificationPlanFileMutation,
+  useInvalidPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingButton } from '../core/LoadingButton';
@@ -72,12 +72,12 @@ export const VerificationPlanDetails = ({
   const [
     mutateExport,
     { loading: loadingExport },
-  ] = useExportXlsxCashPlanVerificationMutation();
+  ] = useExportXlsxPaymentVerificationPlanFileMutation();
 
   const [
     mutateInvalid,
     { loading: loadingInvalid },
-  ] = useInvalidCashPlanPaymentVerificationMutation();
+  ] = useInvalidPaymentVerificationPlanMutation();
 
   if (!verificationPlan || !samplingChoicesData || !permissions) return null;
 
@@ -130,7 +130,7 @@ export const VerificationPlanDetails = ({
                 <Box mr={2}>
                   {canDelete && (
                     <DeleteVerificationPlan
-                      cashPlanVerificationId={verificationPlan.id}
+                      paymentVerificationPlanId={verificationPlan.id}
                       cashPlanId={cashPlan.id}
                     />
                   )}
@@ -139,14 +139,14 @@ export const VerificationPlanDetails = ({
                 {canEdit && (
                   <EditVerificationPlan
                     cashPlanId={cashPlan.id}
-                    cashPlanVerificationId={verificationPlan.id}
+                    paymentVerificationPlanId={verificationPlan.id}
                   />
                 )}
                 {canActivate && (
                   <Box alignItems='center' display='flex'>
                     {canActivate && (
                       <ActivateVerificationPlan
-                        cashPlanVerificationId={verificationPlan.id}
+                        paymentVerificationPlanId={verificationPlan.id}
                         cashPlanId={cashPlan.id}
                       />
                     )}
@@ -175,7 +175,7 @@ export const VerificationPlanDetails = ({
                                 try {
                                   await mutateExport({
                                     variables: {
-                                      cashPlanVerificationId:
+                                      paymentVerificationPlanId:
                                         verificationPlan.id,
                                     },
                                   });
@@ -220,7 +220,7 @@ export const VerificationPlanDetails = ({
                       <Box p={2}>
                         <ImportXlsx
                           cashPlanId={cashPlan.id}
-                          verificationPlanId={verificationPlan.id}
+                          paymentVerificationPlanId={verificationPlan.id}
                         />
                       </Box>
                     )}
@@ -230,7 +230,7 @@ export const VerificationPlanDetails = ({
                   verificationPlan.xlsxFileWasDownloaded &&
                   verificationPlan.xlsxFileImported && (
                     <FinishVerificationPlan
-                      cashPlanVerificationId={verificationPlan.id}
+                      paymentVerificationPlanId={verificationPlan.id}
                       cashPlanId={cashPlan.id}
                     />
                   )}
@@ -246,7 +246,7 @@ export const VerificationPlanDetails = ({
                         onClick={() =>
                           mutateInvalid({
                             variables: {
-                              cashPlanVerificationId: verificationPlan.id,
+                              paymentVerificationPlanId: verificationPlan.id,
                             },
                           })
                         }
@@ -256,7 +256,7 @@ export const VerificationPlanDetails = ({
                     </Box>
                   ) : (
                     <DiscardVerificationPlan
-                      cashPlanVerificationId={verificationPlan.id}
+                      paymentVerificationPlanId={verificationPlan.id}
                       cashPlanId={cashPlan.id}
                     />
                   ))}

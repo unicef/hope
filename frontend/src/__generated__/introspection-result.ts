@@ -66,10 +66,10 @@
             "name": "PaymentVerificationNode"
           },
           {
-            "name": "CashPlanPaymentVerificationNode"
+            "name": "PaymentVerificationPlanNode"
           },
           {
-            "name": "CashPlanPaymentVerificationSummaryNode"
+            "name": "PaymentVerificationPlanSummaryNode"
           },
           {
             "name": "PaymentVerificationLogEntryNode"

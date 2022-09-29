@@ -30,7 +30,7 @@ import { getPercentage } from '../../utils/utils';
 import {
   useAllAdminAreasQuery,
   useAllRapidProFlowsQuery,
-  useCreateCashPlanPaymentVerificationMutation,
+  useCreatePaymentVerificationMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
 import { ButtonTooltip } from '../core/ButtonTooltip';
@@ -63,10 +63,10 @@ const initialValues = {
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function prepareVariables(cashPlanId, selectedTab, values, businessArea) {
+function prepareVariables(paymentPlanId, selectedTab, values, businessArea) {
   const variables = {
     input: {
-      cashPlanId,
+      paymentPlanId,
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
         selectedTab === 0
@@ -107,16 +107,16 @@ export interface Props {
   canCreatePaymentVerificationPlan: boolean;
 }
 export function CreateVerificationPlan({
-  cashPlanId,
+  cashPlanId: paymentPlanId,
   disabled,
   canCreatePaymentVerificationPlan,
 }: Props): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(paymentPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useCreateCashPlanPaymentVerificationMutation();
+  const [mutate, { loading }] = useCreatePaymentVerificationMutation();
   const businessArea = useBusinessArea();
   const [formValues, setFormValues] = useState(initialValues);
 
@@ -134,7 +134,7 @@ export function CreateVerificationPlan({
 
   const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
     variables: prepareVariables(
-      cashPlanId,
+      paymentPlanId,
       selectedTab,
       formValues,
       businessArea,
@@ -150,7 +150,7 @@ export function CreateVerificationPlan({
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
       variables: prepareVariables(
-        cashPlanId,
+        paymentPlanId,
         selectedTab,
         values,
         businessArea,
