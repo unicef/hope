@@ -230,10 +230,14 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return programs_with_delivered_quantity(parent)
 
     def resolve_country(parent, info):
-        return parent.country.name
+        if parent.country:
+            return parent.country.name
+        return ""
 
     def resolve_country_origin(parent, info):
-        return parent.country_origin.name
+        if parent.country_origin:
+            return parent.country_origin.name
+        return ""
 
     def resolve_selection(parent, info):
         selection = parent.selections.first()

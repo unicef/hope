@@ -1,24 +1,26 @@
 import os
 import random
 import shutil
-
-from django.conf import settings
-from django.core.management import BaseCommand
-
 import openpyxl
+
+from django.core.management import BaseCommand
+from django.conf import settings
+
 from faker import Faker
+
 
 faker = Faker()
 
 random_number = lambda: random.randint(1, 2**31)
-household_id = random_number()
 address = lambda: faker.address()
-date = lambda: faker.date_between(start_date="-30y", end_date="today").strftime("%Y-%m-%d")
+date = lambda: faker.date_between(start_date="-30y", end_date="today")
 name = lambda: faker.name()
 phone_number = lambda: faker.phone_number()
 
+household_ids = []
+
 household_header_mapping = {
-    "A": ("household_id", household_id),
+    "A": ("household_id", random_number),
     "B": ("residence_status_h_c", "REFUGEE"),
     "C": ("consent_h_c", "TRUE"),
     "D": ("consent_sign_h_c", None),
@@ -92,11 +94,11 @@ household_header_mapping = {
 }
 
 individual_header_mapping = {
-    "A": ("household_id", household_id),
+    "A": ("household_id", ""),  # SPECIAL
     "B": ("age", random_number),
     "C": ("relationship_i_c", "HEAD"),
     "D": ("full_name_i_c", name),
-    "E": ("given_name_i_c", name),
+    "E": ("given_name_i_c", None),
     "F": ("middle_name_i_c", None),
     "G": ("family_name_i_c", name),
     "H": ("gender_i_c", "MALE"),
@@ -142,7 +144,7 @@ individual_header_mapping = {
     "AV": ("comms_disability_i_c", None),
     "AW": ("who_answers_phone_i_c", None),
     "AX": ("who_answers_alt_phone_i_c", None),
-    "AY": ("primary_collector_id", household_id),
+    "AY": ("primary_collector_id", ""),  # SPECIAL
     "AZ": ("alternate_collector_id", None),
     "BA": ("photo_i_f", None),
     "BB": ("id_type_i_f", None),
@@ -165,15 +167,34 @@ individual_header_mapping = {
 
 
 class Command(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "amount",
+            default=1,
+            action="store",
+            nargs="?",
+            type=int,
+        )
+
+        parser.add_argument(
+            "--seed",
+            default=None,
+            action="store",
+            nargs="?",
+            type=int,
+        )
+
     def handle(self, *args, **options):
-        print("Generating xlsx files")
+        amount = options["amount"]
+        seed = options["seed"]
+        print(f"Generating xlsx file ({amount}x HHs & INDs) with seed {seed}")
 
         generated_dir = os.path.join(settings.PROJECT_ROOT, "..", "generated")
         if os.path.exists(generated_dir):
             shutil.rmtree(generated_dir)
         os.makedirs(generated_dir)
 
-        filepath = os.path.join(generated_dir, "rdi_import_1_hh_1_ind.xlsx")
+        filepath = os.path.join(generated_dir, f"rdi_import_{amount}_hh_{amount}_ind.xlsx")
         wb = openpyxl.Workbook()
         wb.remove_sheet(wb.get_sheet_by_name(wb.get_sheet_names()[0]))
 
@@ -181,16 +202,30 @@ class Command(BaseCommand):
         for index, (_, (header, value)) in enumerate(household_header_mapping.items()):
             households.cell(row=1, column=index + 1).value = header
             households.cell(row=2, column=index + 1).value = "description"
-            if value is None:
-                continue
-            households.cell(row=3, column=index + 1).value = value() if callable(value) else value
+        for count in range(amount):
+            for index, (key, (header, value)) in enumerate(household_header_mapping.items()):
+                if value is None:
+                    continue
+                to_write = value() if callable(value) else value
+                # TODO: unique seed to household somewhere?
+                households.cell(row=3 + count, column=index + 1).value = to_write
+                if key == "A":
+                    household_ids.append(to_write)
 
         individuals = wb.create_sheet("Individuals")
         for index, (_, (header, value)) in enumerate(individual_header_mapping.items()):
             individuals.cell(row=1, column=index + 1).value = header
             individuals.cell(row=2, column=index + 1).value = "description"
-            if value is None:
-                continue
-            individuals.cell(row=3, column=index + 1).value = value() if callable(value) else value
+        for count in range(amount):
+            for index, (key, (header, value)) in enumerate(individual_header_mapping.items()):
+                if value is None:
+                    continue
+                if key in ["AY", "A"]:
+                    to_write = household_ids[count]
+                elif callable(value):
+                    to_write = value()
+                else:
+                    to_write = value
+                individuals.cell(row=3 + count, column=index + 1).value = to_write
 
         wb.save(filepath)
