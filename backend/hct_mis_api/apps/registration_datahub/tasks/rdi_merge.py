@@ -171,12 +171,12 @@ class RdiMergeTask:
 
             if country_origin := countries.get(country_origin.code):
                 household_data["country_origin"] = country_origin
+
             household = Household(
                 **household_data,
                 registration_data_import=obj_hct,
                 business_area=obj_hct.business_area,
             )
-            print("HH:", household_data)
             self.merge_admin_area(imported_household, household)
             households_dict[imported_household.id] = household
 

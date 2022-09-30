@@ -425,9 +425,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                 excluded = ("age",)
                 for cell, header_cell in zip(row, first_row):
-                    # print(f"{header_cell.value} - {cell.value}")
-                    # if cell.value == "FULL":
-                    #     print("-" * 60)
                     try:
                         header = header_cell.value
                         combined_fields = self.COMBINED_FIELDS
@@ -466,7 +463,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 is_field_required=current_field.get("required", False),
                             )
                             if value is not None:
-                                # print(f"--- Setting #1 {header} to {value}")
                                 setattr(
                                     obj_to_create,
                                     combined_fields[header]["name"],
@@ -489,7 +485,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     household.head_of_household = obj_to_create
                                     households_to_update.append(household)
 
-                            # print(f"--- Setting #2 {header} to {value}")
                             setattr(
                                 obj_to_create,
                                 combined_fields[header]["name"],
