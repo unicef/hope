@@ -71,13 +71,6 @@ import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/Look
 import { HouseholdQuestionnaire } from '../../../components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '../../../components/grievances/IndividualQuestionnnaire/IndividualQuestionnaire';
 
-const steps = [
-  'Category Selection',
-  'Household/Individual Look up',
-  'Identity Verification',
-  'Description',
-];
-
 const BoxPadding = styled.div`
   padding: 15px 0;
 `;
@@ -301,6 +294,17 @@ export const CreateGrievancePage = (): React.ReactElement => {
       : '-';
   };
 
+  let steps = [
+    'Category Selection',
+    'Household/Individual Look up',
+    'Identity Verification',
+    'Description',
+  ];
+  // if creating a linked G&F ticket from Feedback page skip Look Up
+  if (linkedFeedbackId) {
+    steps = ['Category Selection', 'Identity Verification', 'Description'];
+  }
+
   return (
     <Formik
       initialValues={initialValues}
@@ -332,6 +336,10 @@ export const CreateGrievancePage = (): React.ReactElement => {
         } else {
           setValidateData(false);
           handleNext();
+          // if creating a linked G&F ticket from Feedback page skip Look Up
+          if (activeStep === 0 && linkedFeedbackId) {
+            handleNext();
+          }
         }
       }}
       validateOnChange={
