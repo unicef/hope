@@ -31,6 +31,7 @@ export const ExistingDocumentationFieldArray = ({
                   document={item}
                   arrayHelpers={arrayHelpers}
                   index={index}
+                  key={item.id}
                 />
               ))}
               {errors?.documentationToUpdate && (
