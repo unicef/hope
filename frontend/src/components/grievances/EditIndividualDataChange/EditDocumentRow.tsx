@@ -107,7 +107,7 @@ export function EditDocumentRow({
           <Box display='flex' align-items='center'>
             <IconButton
               onClick={() => {
-                arrayHelpers.push({
+                arrayHelpers.replace(index, {
                   id: document.node.id,
                   country: document.node.type.countryIso3,
                   type: document.node.type.type,
