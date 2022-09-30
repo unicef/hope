@@ -47,10 +47,7 @@ export function EditDocumentationRow({
       <Grid item>
         <Button
           onClick={() => {
-            arrayHelpers.remove({
-              id: document.id,
-              name: document.name,
-            });
+            arrayHelpers.remove(index);
             setEdit(false);
           }}
         >
@@ -82,10 +79,11 @@ export function EditDocumentationRow({
           <Box ml={2} display='flex' align-items='center'>
             <IconButton
               onClick={() => {
-                arrayHelpers.push({
+                arrayHelpers.replace(index, {
                   id: document.id,
                   name: document.name,
                   file: null,
+                  contentType: document.contentType,
                 });
                 setEdit(true);
               }}

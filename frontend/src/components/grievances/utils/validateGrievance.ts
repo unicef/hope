@@ -200,21 +200,23 @@ export function validate(
   }
 
   if (values.documentation?.length) {
-    values.documentation.forEach((_el, index) => {
-      const doc = values.documentation[index];
-      if (!doc.name || !doc.file) {
-        errors.documentation = 'Documentation name and file are required';
-      }
-    });
+    values.documentation
+      .filter((el) => el)
+      .forEach((doc) => {
+        if (!doc.name || !doc.file) {
+          errors.documentation = 'Documentation name and file are required';
+        }
+      });
   }
   if (values.documentationToUpdate?.length) {
-    values.documentationToUpdate.forEach((_el, index) => {
-      const doc = values.documentationToUpdate[index];
-      if (!doc.name || !doc.file) {
-        errors.documentationToUpdate =
-          'Documentation name and file are required';
-      }
-    });
+    values.documentationToUpdate
+      .filter((el) => el)
+      .forEach((doc) => {
+        if (!doc.name || !doc.file) {
+          errors.documentationToUpdate =
+            'Documentation name and file are required';
+        }
+      });
   }
   return errors;
 }
@@ -490,12 +492,13 @@ export function validateUsingSteps(
   }
 
   if (values.documentation?.length) {
-    values.documentation.forEach((_el, index) => {
-      const doc = values.documentation[index];
-      if (!doc.name || !doc.file) {
-        errors.documentation = 'Documentation name and file are required';
-      }
-    });
+    values.documentation
+      .filter((el) => el)
+      .forEach((doc) => {
+        if (!doc.name || !doc.file) {
+          errors.documentation = 'Documentation name and file are required';
+        }
+      });
   }
 
   return errors;
