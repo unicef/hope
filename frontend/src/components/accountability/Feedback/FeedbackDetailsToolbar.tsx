@@ -62,6 +62,7 @@ export const FeedbackDetailsToolbar = ({
             }
             variant='contained'
             color='primary'
+            disabled={Boolean(feedback.linkedGrievance?.id)}
           >
             {t('Create Linked Ticket')}
           </Button>
