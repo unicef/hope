@@ -74,7 +74,7 @@ export const GrievancesDetails = ({
   const mappedDocumentation = (): React.ReactElement => {
     return (
       <Box display='flex' flexDirection='column'>
-        {ticket.documentation.length
+        {ticket.documentation?.length
           ? ticket.documentation.map((doc) => {
               if (doc.contentType.includes('image')) {
                 return (
