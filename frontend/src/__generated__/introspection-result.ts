@@ -69,6 +69,9 @@
             "name": "FeedbackNode"
           },
           {
+            "name": "FeedbackMessageNode"
+          },
+          {
             "name": "ServiceProviderNode"
           },
           {

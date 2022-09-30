@@ -1,5 +1,4 @@
 import { Avatar, Box, Grid, Paper, Typography } from '@material-ui/core';
-import { Title } from '@material-ui/icons';
 import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,14 +8,14 @@ import * as Yup from 'yup';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { renderUserName } from '../../../../utils/utils';
 import {
-  GrievanceTicketQuery,
-  useMeQuery,
-  useCreateGrievanceTicketNoteMutation,
-  GrievanceTicketDocument,
+  FeedbackDocument,
   FeedbackQuery,
+  useCreateFeedbackMsgMutation,
+  useMeQuery,
 } from '../../../../__generated__/graphql';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { OverviewContainerColumn } from '../../../core/OverviewContainerColumn';
+import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 
 const Name = styled.span`
@@ -38,8 +37,7 @@ const StyledBox = styled(Paper)`
 `;
 
 interface MessagesProps {
-  messages;
-  // messages: FeedbackQuery['feedback']['messages'];
+  messages: FeedbackQuery['feedback']['feedbackMessages'];
   canAddMessage: boolean;
 }
 
@@ -53,7 +51,7 @@ export const Messages = ({
   });
 
   const { id } = useParams();
-  const [mutate, { loading }] = useCreateGrievanceTicketNoteMutation();
+  const [mutate, { loading }] = useCreateFeedbackMsgMutation();
 
   if (meLoading) {
     return null;
@@ -114,10 +112,10 @@ export const Messages = ({
           onSubmit={(values, { resetForm }) => {
             mutate({
               variables: {
-                noteInput: { ticket: id, description: values.newNote },
+                input: { feedback: id, description: values.newNote },
               },
               refetchQueries: () => [
-                { query: GrievanceTicketDocument, variables: { id } },
+                { query: FeedbackDocument, variables: { id } },
               ],
             });
             resetForm({});
@@ -127,7 +125,7 @@ export const Messages = ({
           {({ submitForm }) => (
             <StyledBox>
               <Title>
-                <Typography variant='h6'>messages</Typography>
+                <Typography variant='h6'>{t('Messages')}</Typography>
               </Title>
               <OverviewContainerColumn>
                 {mappedMessages}
