@@ -556,6 +556,15 @@ input CreateFeedbackInput {
   program: ID
 }
 
+input CreateFeedbackMessageInput {
+  description: String!
+  feedback: ID!
+}
+
+type CreateFeedbackMessageMutation {
+  feedbackMessage: FeedbackMessageNode
+}
+
 type CreateFeedbackMutation {
   feedback: FeedbackNode
 }
@@ -827,6 +836,26 @@ enum FeedbackIssueType {
   A_2
 }
 
+type FeedbackMessageNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  description: String!
+  createdBy: UserNode
+}
+
+type FeedbackMessageNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FeedbackMessageNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type FeedbackMessageNodeEdge {
+  node: FeedbackMessageNode
+  cursor: String!
+}
+
 type FeedbackNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -845,6 +874,7 @@ type FeedbackNode implements Node {
   program: ProgramNode
   createdBy: UserNode
   linkedGrievance: GrievanceTicketNode
+  feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
 }
 
 type FeedbackNodeConnection {
@@ -2317,6 +2347,7 @@ type Mutations {
   createAccountabilityCommunicationMessage(businessAreaSlug: String!, inputs: CreateAccountabilityCommunicationMessageInput!): CreateCommunicationMessageMutation
   createFeedback(input: CreateFeedbackInput!): CreateFeedbackMutation
   updateFeedback(input: UpdateFeedbackInput!): UpdateFeedbackMutation
+  createFeedbackMessage(input: CreateFeedbackMessageInput!): CreateFeedbackMessageMutation
   createReport(reportData: CreateReportInput!): CreateReport
   restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
@@ -3974,6 +4005,7 @@ type UserNode implements Node {
   logs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
+  feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
 }
 

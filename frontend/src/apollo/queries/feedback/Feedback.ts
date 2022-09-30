@@ -43,6 +43,23 @@ export const Feedback = gql`
         id
         unicefId
       }
+      feedbackMessages {
+        edges {
+          node {
+            id
+            createdAt
+            updatedAt
+            description
+            createdBy {
+              id
+              firstName
+              lastName
+              username
+              email
+            }
+          }
+        }
+      }
     }
   }
 `;

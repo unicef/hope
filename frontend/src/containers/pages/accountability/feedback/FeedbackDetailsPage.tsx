@@ -39,9 +39,8 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
     PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     permissions,
   );
-  //TODO: do we need another permission?
   const canAddMessage = hasPermissions(
-    PERMISSIONS.ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE,
+    PERMISSIONS.ACCOUNTABILITY_FEEDBACK_MESSAGE_VIEW_CREATE,
     permissions,
   );
 
@@ -60,7 +59,10 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
           canViewHouseholdDetails={canViewHouseholdDetails}
           canViewIndividualDetails={canViewIndividualDetails}
         />
-        {/* <Messages messages={feedback.messages} canAddMessage={canAddMessage} /> */}
+        <Messages
+          messages={feedback.feedbackMessages}
+          canAddMessage={canAddMessage}
+        />
         <LinkedGrievance businessArea={businessArea} feedback={feedback} />
       </Grid>
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (

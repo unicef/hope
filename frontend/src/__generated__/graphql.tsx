@@ -914,6 +914,16 @@ export type CreateFeedbackInput = {
   program?: Maybe<Scalars['ID']>,
 };
 
+export type CreateFeedbackMessageInput = {
+  description: Scalars['String'],
+  feedback: Scalars['ID'],
+};
+
+export type CreateFeedbackMessageMutation = {
+   __typename?: 'CreateFeedbackMessageMutation',
+  feedbackMessage?: Maybe<FeedbackMessageNode>,
+};
+
 export type CreateFeedbackMutation = {
    __typename?: 'CreateFeedbackMutation',
   feedback?: Maybe<FeedbackNode>,
@@ -1213,6 +1223,29 @@ export enum FeedbackIssueType {
   A_2 = 'A_2'
 }
 
+export type FeedbackMessageNode = Node & {
+   __typename?: 'FeedbackMessageNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  description: Scalars['String'],
+  createdBy?: Maybe<UserNode>,
+};
+
+export type FeedbackMessageNodeConnection = {
+   __typename?: 'FeedbackMessageNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<FeedbackMessageNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type FeedbackMessageNodeEdge = {
+   __typename?: 'FeedbackMessageNodeEdge',
+  node?: Maybe<FeedbackMessageNode>,
+  cursor: Scalars['String'],
+};
+
 export type FeedbackNode = Node & {
    __typename?: 'FeedbackNode',
   id: Scalars['ID'],
@@ -1232,6 +1265,16 @@ export type FeedbackNode = Node & {
   program?: Maybe<ProgramNode>,
   createdBy?: Maybe<UserNode>,
   linkedGrievance?: Maybe<GrievanceTicketNode>,
+  feedbackMessages: FeedbackMessageNodeConnection,
+};
+
+
+export type FeedbackNodeFeedbackMessagesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 export type FeedbackNodeConnection = {
@@ -3112,6 +3155,7 @@ export type Mutations = {
   createAccountabilityCommunicationMessage?: Maybe<CreateCommunicationMessageMutation>,
   createFeedback?: Maybe<CreateFeedbackMutation>,
   updateFeedback?: Maybe<UpdateFeedbackMutation>,
+  createFeedbackMessage?: Maybe<CreateFeedbackMessageMutation>,
   createReport?: Maybe<CreateReport>,
   restartCreateReport?: Maybe<RestartCreateReport>,
   createDashboardReport?: Maybe<CreateDashboardReport>,
@@ -3176,6 +3220,11 @@ export type MutationsCreateFeedbackArgs = {
 
 export type MutationsUpdateFeedbackArgs = {
   input: UpdateFeedbackInput
+};
+
+
+export type MutationsCreateFeedbackMessageArgs = {
+  input: CreateFeedbackMessageInput
 };
 
 
@@ -6482,6 +6531,7 @@ export type UserNode = Node & {
   logs: PaymentVerificationLogEntryNodeConnection,
   messages: CommunicationMessageNodeConnection,
   feedbacks: FeedbackNodeConnection,
+  feedbackMessages: FeedbackMessageNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
 };
 
@@ -6634,6 +6684,15 @@ export type UserNodeMessagesArgs = {
 
 
 export type UserNodeFeedbacksArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeFeedbackMessagesArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -7123,6 +7182,26 @@ export type CreateFeedbackTicketMutation = (
     & { feedback: Maybe<(
       { __typename?: 'FeedbackNode' }
       & Pick<FeedbackNode, 'id'>
+    )> }
+  )> }
+);
+
+export type CreateFeedbackMsgMutationVariables = {
+  input: CreateFeedbackMessageInput
+};
+
+
+export type CreateFeedbackMsgMutation = (
+  { __typename?: 'Mutations' }
+  & { createFeedbackMessage: Maybe<(
+    { __typename?: 'CreateFeedbackMessageMutation' }
+    & { feedbackMessage: Maybe<(
+      { __typename?: 'FeedbackMessageNode' }
+      & Pick<FeedbackMessageNode, 'id' | 'createdAt' | 'updatedAt' | 'description'>
+      & { createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email'>
+      )> }
     )> }
   )> }
 );
@@ -8724,7 +8803,20 @@ export type FeedbackQuery = (
     )>, linkedGrievance: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'unicefId'>
-    )> }
+    )>, feedbackMessages: (
+      { __typename?: 'FeedbackMessageNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'FeedbackMessageNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'FeedbackMessageNode' }
+          & Pick<FeedbackMessageNode, 'id' | 'createdAt' | 'updatedAt' | 'description'>
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email'>
+          )> }
+        )> }
+      )>> }
+    ) }
   )> }
 );
 
@@ -11618,6 +11710,67 @@ export function useCreateFeedbackTicketMutation(baseOptions?: ApolloReactHooks.M
 export type CreateFeedbackTicketMutationHookResult = ReturnType<typeof useCreateFeedbackTicketMutation>;
 export type CreateFeedbackTicketMutationResult = ApolloReactCommon.MutationResult<CreateFeedbackTicketMutation>;
 export type CreateFeedbackTicketMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>;
+export const CreateFeedbackMsgDocument = gql`
+    mutation CreateFeedbackMsg($input: CreateFeedbackMessageInput!) {
+  createFeedbackMessage(input: $input) {
+    feedbackMessage {
+      id
+      createdAt
+      updatedAt
+      description
+      createdBy {
+        id
+        firstName
+        lastName
+        username
+        email
+      }
+    }
+  }
+}
+    `;
+export type CreateFeedbackMsgMutationFn = ApolloReactCommon.MutationFunction<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables>;
+export type CreateFeedbackMsgComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables>, 'mutation'>;
+
+    export const CreateFeedbackMsgComponent = (props: CreateFeedbackMsgComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables> mutation={CreateFeedbackMsgDocument} {...props} />
+    );
+    
+export type CreateFeedbackMsgProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables> & TChildProps;
+export function withCreateFeedbackMsg<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateFeedbackMsgMutation,
+  CreateFeedbackMsgMutationVariables,
+  CreateFeedbackMsgProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables, CreateFeedbackMsgProps<TChildProps>>(CreateFeedbackMsgDocument, {
+      alias: 'createFeedbackMsg',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateFeedbackMsgMutation__
+ *
+ * To run a mutation, you first call `useCreateFeedbackMsgMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateFeedbackMsgMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createFeedbackMsgMutation, { data, loading, error }] = useCreateFeedbackMsgMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateFeedbackMsgMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables>(CreateFeedbackMsgDocument, baseOptions);
+      }
+export type CreateFeedbackMsgMutationHookResult = ReturnType<typeof useCreateFeedbackMsgMutation>;
+export type CreateFeedbackMsgMutationResult = ApolloReactCommon.MutationResult<CreateFeedbackMsgMutation>;
+export type CreateFeedbackMsgMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables>;
 export const UpdateFeedbackTicketDocument = gql`
     mutation UpdateFeedbackTicket($input: UpdateFeedbackInput!) {
   updateFeedback(input: $input) {
@@ -15967,6 +16120,23 @@ export const FeedbackDocument = gql`
     linkedGrievance {
       id
       unicefId
+    }
+    feedbackMessages {
+      edges {
+        node {
+          id
+          createdAt
+          updatedAt
+          description
+          createdBy {
+            id
+            firstName
+            lastName
+            username
+            email
+          }
+        }
+      }
     }
   }
 }
@@ -21334,6 +21504,9 @@ export type ResolversTypes = {
   FeedbackNodeEdge: ResolverTypeWrapper<FeedbackNodeEdge>,
   FeedbackNode: ResolverTypeWrapper<FeedbackNode>,
   FeedbackIssueType: FeedbackIssueType,
+  FeedbackMessageNodeConnection: ResolverTypeWrapper<FeedbackMessageNodeConnection>,
+  FeedbackMessageNodeEdge: ResolverTypeWrapper<FeedbackMessageNodeEdge>,
+  FeedbackMessageNode: ResolverTypeWrapper<FeedbackMessageNode>,
   ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
   CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
   CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationNodeEdge>,
@@ -21546,6 +21719,8 @@ export type ResolversTypes = {
   CreateFeedbackMutation: ResolverTypeWrapper<CreateFeedbackMutation>,
   UpdateFeedbackInput: UpdateFeedbackInput,
   UpdateFeedbackMutation: ResolverTypeWrapper<UpdateFeedbackMutation>,
+  CreateFeedbackMessageInput: CreateFeedbackMessageInput,
+  CreateFeedbackMessageMutation: ResolverTypeWrapper<CreateFeedbackMessageMutation>,
   CreateReportInput: CreateReportInput,
   CreateReport: ResolverTypeWrapper<CreateReport>,
   RestartCreateReportInput: RestartCreateReportInput,
@@ -21734,6 +21909,9 @@ export type ResolversParentTypes = {
   FeedbackNodeEdge: FeedbackNodeEdge,
   FeedbackNode: FeedbackNode,
   FeedbackIssueType: FeedbackIssueType,
+  FeedbackMessageNodeConnection: FeedbackMessageNodeConnection,
+  FeedbackMessageNodeEdge: FeedbackMessageNodeEdge,
+  FeedbackMessageNode: FeedbackMessageNode,
   ServiceProviderNode: ServiceProviderNode,
   CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
   CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge,
@@ -21946,6 +22124,8 @@ export type ResolversParentTypes = {
   CreateFeedbackMutation: CreateFeedbackMutation,
   UpdateFeedbackInput: UpdateFeedbackInput,
   UpdateFeedbackMutation: UpdateFeedbackMutation,
+  CreateFeedbackMessageInput: CreateFeedbackMessageInput,
+  CreateFeedbackMessageMutation: CreateFeedbackMessageMutation,
   CreateReportInput: CreateReportInput,
   CreateReport: CreateReport,
   RestartCreateReportInput: RestartCreateReportInput,
@@ -22460,6 +22640,10 @@ export type CreateDashboardReportResolvers<ContextType = any, ParentType extends
   success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
+export type CreateFeedbackMessageMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateFeedbackMessageMutation'] = ResolversParentTypes['CreateFeedbackMessageMutation']> = {
+  feedbackMessage?: Resolver<Maybe<ResolversTypes['FeedbackMessageNode']>, ParentType, ContextType>,
+};
+
 export type CreateFeedbackMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateFeedbackMutation'] = ResolversParentTypes['CreateFeedbackMutation']> = {
   feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType>,
 };
@@ -22602,6 +22786,26 @@ export type ExportXlsxCashPlanVerificationResolvers<ContextType = any, ParentTyp
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
+export type FeedbackMessageNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FeedbackMessageNode'] = ResolversParentTypes['FeedbackMessageNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+};
+
+export type FeedbackMessageNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FeedbackMessageNodeConnection'] = ResolversParentTypes['FeedbackMessageNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['FeedbackMessageNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type FeedbackMessageNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FeedbackMessageNodeEdge'] = ResolversParentTypes['FeedbackMessageNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['FeedbackMessageNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type FeedbackNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FeedbackNode'] = ResolversParentTypes['FeedbackNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -22620,6 +22824,7 @@ export type FeedbackNodeResolvers<ContextType = any, ParentType extends Resolver
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   linkedGrievance?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+  feedbackMessages?: Resolver<ResolversTypes['FeedbackMessageNodeConnection'], ParentType, ContextType, FeedbackNodeFeedbackMessagesArgs>,
 };
 
 export type FeedbackNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FeedbackNodeConnection'] = ResolversParentTypes['FeedbackNodeConnection']> = {
@@ -23330,6 +23535,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createAccountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CreateCommunicationMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateAccountabilityCommunicationMessageArgs, 'businessAreaSlug' | 'inputs'>>,
   createFeedback?: Resolver<Maybe<ResolversTypes['CreateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackArgs, 'input'>>,
   updateFeedback?: Resolver<Maybe<ResolversTypes['UpdateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateFeedbackArgs, 'input'>>,
+  createFeedbackMessage?: Resolver<Maybe<ResolversTypes['CreateFeedbackMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackMessageArgs, 'input'>>,
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
   restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>,
   createDashboardReport?: Resolver<Maybe<ResolversTypes['CreateDashboardReport']>, ParentType, ContextType, RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>>,
@@ -23385,7 +23591,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'GrievanceTicketNode' | 'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'FeedbackNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'CommunicationMessageRecipientMapNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'GrievanceTicketNode' | 'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'CommunicationMessageRecipientMapNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -24658,6 +24864,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   logs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserNodeLogsArgs>,
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, UserNodeMessagesArgs>,
   feedbacks?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, UserNodeFeedbacksArgs>,
+  feedbackMessages?: Resolver<ResolversTypes['FeedbackMessageNodeConnection'], ParentType, ContextType, UserNodeFeedbackMessagesArgs>,
   businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, UserNodeBusinessAreasArgs>,
 };
 
@@ -24743,6 +24950,7 @@ export type Resolvers<ContextType = any> = {
   CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
   CreateCommunicationMessageMutation?: CreateCommunicationMessageMutationResolvers<ContextType>,
   CreateDashboardReport?: CreateDashboardReportResolvers<ContextType>,
+  CreateFeedbackMessageMutation?: CreateFeedbackMessageMutationResolvers<ContextType>,
   CreateFeedbackMutation?: CreateFeedbackMutationResolvers<ContextType>,
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
   CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
@@ -24768,6 +24976,9 @@ export type Resolvers<ContextType = any> = {
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
   ExportXlsxCashPlanVerification?: ExportXlsxCashPlanVerificationResolvers<ContextType>,
+  FeedbackMessageNode?: FeedbackMessageNodeResolvers<ContextType>,
+  FeedbackMessageNodeConnection?: FeedbackMessageNodeConnectionResolvers<ContextType>,
+  FeedbackMessageNodeEdge?: FeedbackMessageNodeEdgeResolvers<ContextType>,
   FeedbackNode?: FeedbackNodeResolvers<ContextType>,
   FeedbackNodeConnection?: FeedbackNodeConnectionResolvers<ContextType>,
   FeedbackNodeEdge?: FeedbackNodeEdgeResolvers<ContextType>,
