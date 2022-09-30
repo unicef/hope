@@ -92,8 +92,8 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
     admin: Yup.string().nullable(),
     description: Yup.string(),
     consent: Yup.bool(),
-    area: Yup.string(),
-    language: Yup.string(),
+    area: Yup.string().nullable(),
+    language: Yup.string().nullable(),
     selectedPaymentRecords: Yup.array()
       .of(Yup.string())
       .nullable(),
