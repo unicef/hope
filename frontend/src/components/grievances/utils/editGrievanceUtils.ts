@@ -469,6 +469,19 @@ const grievanceTypeIssueTypeDict = {
 };
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function prepareVariables(businessArea, values, ticket) {
+  const mapDocumentationToUpdate = (
+    documentationToUpdate,
+  ): { id: number; name: string; file: File }[] | null => {
+    if (documentationToUpdate) {
+      return documentationToUpdate.map((doc) => ({
+        id: doc.id,
+        name: doc.name,
+        file: doc.file,
+      }));
+    }
+    return null;
+  };
+
   const requiredVariables = {
     ticketId: ticket.id,
     description: values.description,
@@ -485,7 +498,9 @@ export function prepareVariables(businessArea, values, ticket) {
     programme: values.programme,
     paymentRecord: values.selectedPaymentRecords[0] || null,
     documentation: values.documentation || null,
-    documentationToUpdate: values.documentationToUpdate || null,
+    documentationToUpdate: mapDocumentationToUpdate(
+      values.documentationToUpdate,
+    ),
     documentationToDelete: values.documentationToDelete || null,
   };
   const prepareFunction = thingForSpecificGrievanceType(
