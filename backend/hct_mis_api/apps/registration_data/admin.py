@@ -10,11 +10,10 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from admin_extra_buttons.api import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -39,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImport)
-class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class RegistrationDataImportAdmin(HOPEModelAdminBase):
     list_display = ("name", "status", "import_date", "data_source", "business_area")
     search_fields = ("name",)
     list_filter = (
@@ -56,6 +55,9 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
         ("imported_by__username", "imported by"),
         ("business_area__name", "business area"),
     )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("business_area")
 
     @link(
         label="HUB RDI",

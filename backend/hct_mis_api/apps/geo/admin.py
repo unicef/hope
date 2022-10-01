@@ -9,7 +9,6 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
 from smart_admin.mixins import FieldsetMixin
@@ -66,7 +65,7 @@ class ValidityManagerMixin:
 
 
 @admin.register(Country)
-class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     list_display = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     search_fields = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     raw_id_fields = ("parent",)
@@ -99,7 +98,7 @@ class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEM
 
 
 @admin.register(AreaType)
-class AreaTypeAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     list_display = ("name", "country", "area_level", "parent")
     list_filter = (("country", AutoCompleteFilter), ("area_level", NumberFilter))
 
@@ -135,7 +134,7 @@ class AreaTypeFilter(RelatedFieldListFilter):
 
 
 @admin.register(Area)
-class AreaAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class AreaAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "area_type",

@@ -37,7 +37,7 @@ class JSONWidgetMixin:
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
-class LastSyncDateResetMixin(ExtraButtonsMixin):
+class LastSyncDateResetMixin:
     @button()
     def reset_sync_date(self, request):
         if request.method == "POST":
@@ -66,9 +66,11 @@ class LastSyncDateResetMixin(ExtraButtonsMixin):
             )
 
 
-class HOPEModelAdminBase(
-    SmartDisplayAllMixin, AdminFiltersMixin, AdminActionPermMixin, JSONWidgetMixin, admin.ModelAdmin
-):
+class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPermMixin, AdminFiltersMixin):
+    pass
+
+
+class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
     list_per_page = 50
 
     def get_fields(self, request, obj=None):

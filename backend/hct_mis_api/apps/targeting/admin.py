@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action
+from admin_extra_buttons.api import button, confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, ValueFilter
@@ -18,9 +18,7 @@ from .steficon import SteficonExecutorMixin
 
 
 @admin.register(TargetPopulation)
-class TargetPopulationAdmin(
-    SoftDeletableAdminMixin, SteficonExecutorMixin, LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase
-):
+class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "status",
@@ -91,7 +89,7 @@ class TargetPopulationAdmin(
 
 
 @admin.register(HouseholdSelection)
-class HouseholdSelectionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class HouseholdSelectionAdmin(HOPEModelAdminBase):
     list_display = (
         "household",
         "target_population",

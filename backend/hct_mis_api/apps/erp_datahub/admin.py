@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.filters import ValueFilter
 
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -103,7 +103,7 @@ class SplitBusinessAreaFilter(SimpleListFilter):
 
 
 @admin.register(FundsCommitment)
-class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class FundsCommitmentAdmin(HOPEModelAdminBase):
     list_display = ("rec_serial_number", "business_area", "funds_commitment_number", "posting_date")
     list_filter = (
         SplitBusinessAreaFilter,
@@ -197,7 +197,7 @@ class DownPaymentAssignBusinessOffice(forms.ModelForm):
 
 
 @admin.register(DownPayment)
-class DownPaymentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class DownPaymentAdmin(HOPEModelAdminBase):
     list_filter = (
         "mis_sync_date",
         "ca_sync_date",
