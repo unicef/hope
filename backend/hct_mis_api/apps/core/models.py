@@ -8,6 +8,7 @@ from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
+from natural_keys import NaturalKeyModel
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
@@ -89,6 +90,7 @@ class BusinessArea(TimeStampedUUIDModel):
     )
     screen_beneficiary = models.BooleanField(default=False)
     deduplication_ignore_withdraw = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
@@ -139,7 +141,7 @@ class BusinessArea(TimeStampedUUIDModel):
         return default
 
 
-class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
+class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
     ASSOCIATED_WITH_HOUSEHOLD = 0
     ASSOCIATED_WITH_INDIVIDUAL = 1
     STRING = "STRING"
@@ -186,7 +188,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         return f"type: {self.type}, name: {self.name}"
 
 
-class FlexibleAttributeGroup(SoftDeletionTreeModel):
+class FlexibleAttributeGroup(NaturalKeyModel, SoftDeletionTreeModel):
     name = models.CharField(max_length=255, unique=True)
     label = JSONField(default=dict)
     required = models.BooleanField(default=False)
@@ -205,7 +207,7 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
         return f"name: {self.name}"
 
 
-class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
+class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
     class Meta:
         unique_together = ["list_name", "name"]
         ordering = ("name",)

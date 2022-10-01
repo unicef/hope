@@ -13,7 +13,6 @@ from django.utils.safestring import mark_safe
 
 import requests
 from admin_extra_buttons.decorators import button, link
-from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminactions.mass_update import mass_update
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
@@ -54,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImportDatahub)
-class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
     list_display = ("name", "import_date", "import_done", "business_area_slug", "hct_id")
     list_filter = ("created_at", "import_done", ("business_area_slug", ValueFilter.factory(lookup_name="istartswith")))
     advanced_filter_fields = (
@@ -104,7 +103,7 @@ class ImportedBankAccountInfoStackedInline(admin.StackedInline):
 
 
 @admin.register(ImportedIndividual)
-class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class ImportedIndividualAdmin(HOPEModelAdminBase):
     list_display = (
         "registration_data_import",
         "individual_id",
@@ -337,7 +336,7 @@ class AlexisFilter(SimpleListFilter):
 
 
 @admin.register(Record)
-class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class RecordDatahubAdmin(HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "status", "ignored")
     readonly_fields = (
         "id",
