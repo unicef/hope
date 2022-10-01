@@ -17,8 +17,8 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
 
+from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import (
@@ -76,13 +76,17 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(Agency)
-class AgencyTypeAdmin(HOPEModelAdminBase):
+class AgencyAdmin(HOPEModelAdminBase):
     search_fields = ("label", "country")
     list_display = ("label", "type", "country")
     list_filter = (
         "type",
         ("country", ValueFilter.factory(label="Country ISO CODE 2")),
     )
+    autocomplete_fields = ("country",)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("country")
 
 
 @admin.register(Document)
@@ -96,6 +100,9 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     )
     autocomplete_fields = ["type"]
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("individual", "type", "type__country")
+
 
 @admin.register(DocumentType)
 class DocumentTypeAdmin(HOPEModelAdminBase):
@@ -107,6 +114,15 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
         ("country", ValueFilter.factory(label="Country ISO CODE 2")),
     )
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "country",
+            )
+        )
+
 
 @admin.register(Household)
 class HouseholdAdmin(
@@ -115,6 +131,7 @@ class HouseholdAdmin(
     LinkedObjectsMixin,
     PowerQueryMixin,
     SmartFieldsetMixin,
+    CursorPaginatorAdmin,
     HOPEModelAdminBase,
 ):
     list_display = (
@@ -126,12 +143,13 @@ class HouseholdAdmin(
     )
     list_filter = (
         DepotManager,
-        QueryStringFilter,
-        ("registration_data_import", AutoCompleteFilter),
-        ("withdrawn", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
-        "org_enumerator",
-        "last_registration_date",
+        QueryStringFilter,
+        # ("registration_data_import", AutoCompleteFilter),
+        "withdrawn",
+        # ("withdrawn", ChoicesFieldComboFilter),
+        # "org_enumerator",
+        # "last_registration_date",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
@@ -174,9 +192,28 @@ class HouseholdAdmin(
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
     actions = ["mass_withdraw", "mass_unwithdraw"]
+    cursor_ordering_field = "unicef_id"
+
+    def get_queryset(self, request):
+        qs = self.model.all_objects.get_queryset().select_related(
+            "head_of_household", "country", "country_origin", "admin_area"
+        )
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
 
     def get_ignored_linked_objects(self, request):
         return []
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    # def has_change_permission(self, request):
+    #     return request
 
     def _toggle_withdraw_status(self, request, hh: Household, tickets: Iterable = None, comment=None, tag=None):
         from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -226,7 +263,7 @@ class HouseholdAdmin(
                         )
                         if service.household.withdraw:
                             results += 1
-                self.message_user(request, f"Changed { results } Households.")
+                self.message_user(request, f"Changed {results} Households.")
             else:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
@@ -253,7 +290,7 @@ class HouseholdAdmin(
                         service = self._toggle_withdraw_status(request, hh, comment=form.cleaned_data["reason"])
                         if not service.household.withdraw:
                             results += 1
-                self.message_user(request, f"Changed { results } Households.")
+                self.message_user(request, f"Changed {results} Households.")
             else:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
@@ -408,10 +445,12 @@ class IndividualAdmin(
     LinkedObjectsMixin,
     SmartFieldsetMixin,
     AdminAdvancedFiltersMixin,
+    CursorPaginatorAdmin,
     HOPEModelAdminBase,
 ):
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
     advanced_change_list_template = "admin/household/advanced_filters_extra_buttons_change_list.html"
+    cursor_ordering_field = "unicef_id"
 
     list_display = (
         "unicef_id",
@@ -432,9 +471,9 @@ class IndividualAdmin(
     )
 
     search_fields = ("family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at", "registration_data_import")
     exclude = ("created_at", "updated_at")
-    inlines = [IndividualRoleInHouseholdInline, BankAccountInfoStackedInline]
+    # inlines = [IndividualRoleInHouseholdInline, BankAccountInfoStackedInline]
     list_filter = (
         DepotManager,
         QueryStringFilter,
@@ -489,6 +528,16 @@ class IndividualAdmin(
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "household",
+                "registration_data_import",
+            )
+        )
+
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if isinstance(db_field, JSONField):
             if is_root(request):
@@ -502,7 +551,8 @@ class IndividualAdmin(
     def household_members(self, request, pk):
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.household.unicef_id}")
+        flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
+        return HttpResponseRedirect(f"{url}?{flt}")
 
     @button(html_attrs={"class": "aeb-green"})
     def sanity_check(self, request, pk):
@@ -554,7 +604,7 @@ class IndividualAdmin(
 
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("individual_id", "household_id", "role")
+    list_display = ("individual", "household", "role")
     list_filter = (
         DepotManager,
         QueryStringFilter,
@@ -565,16 +615,27 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
         "household",
     )
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "individual",
+                "household",
+            )
+        )
+
 
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     list_display = ("agency", "individual", "number")
     list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
     autocomplete_fields = ["agency"]
+    raw_id_fields = ("individual",)
 
 
 @admin.register(EntitlementCard)
-class EntitlementCardAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class EntitlementCardAdmin(HOPEModelAdminBase):
     list_display = ("id", "card_number", "status", "card_type", "service_provider")
     search_fields = ("card_number",)
     date_hierarchy = "created_at"
@@ -583,7 +644,7 @@ class EntitlementCardAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 
 @admin.register(XlsxUpdateFile)
-class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class XlsxUpdateFileAdmin(HOPEModelAdminBase):
     readonly_fields = ("file", "business_area", "rdi", "xlsx_match_columns", "uploaded_by")
     list_filter = (
         ("business_area", AutoCompleteFilter),

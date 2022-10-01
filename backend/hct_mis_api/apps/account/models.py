@@ -1,4 +1,5 @@
 import logging
+from functools import lru_cache
 
 from django import forms
 from django.contrib.auth.models import AbstractUser
@@ -15,6 +16,7 @@ from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 from model_utils.models import UUIDModel
+from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
@@ -48,7 +50,7 @@ class Partner(models.Model):
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
-class User(AbstractUser, UUIDModel):
+class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
     partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True, blank=True)
@@ -84,6 +86,7 @@ class User(AbstractUser, UUIDModel):
             self.partner.save()
         super().save(*args, **kwargs)
 
+    @lru_cache(5)
     def permissions_in_business_area(self, business_area_slug):
         all_roles_permissions_list = list(
             Role.objects.filter(
@@ -96,18 +99,22 @@ class User(AbstractUser, UUIDModel):
         ]
 
     def has_permission(self, permission, business_area, write=False):
-        query = Role.objects.filter(
-            permissions__contains=[permission],
-            user_roles__user=self,
-            user_roles__business_area=business_area,
-        )
-        return query.count() > 0
+        return permission in self.permissions_in_business_area(business_area)
+
+    # def has_permission(self, permission, business_area, write=False):
+    #     query = Role.objects.filter(
+    #         permissions__contains=[permission],
+    #         user_roles__user=self,
+    #         user_roles__business_area=business_area,
+    #     )
+    #     return query.count() > 0
 
     def can_download_storage_files(self):
-        return any(
-            self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
-            for role in self.user_roles.all()
-        )
+        return
+        # return any(
+        #     self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
+        #     for role in self.user_roles.all()
+        # )
 
     class Meta:
         permissions = (
@@ -132,7 +139,7 @@ class ChoiceArrayField(ArrayField):
         return super(ArrayField, self).formfield(**defaults)
 
 
-class UserRole(TimeStampedUUIDModel):
+class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
@@ -144,7 +151,7 @@ class UserRole(TimeStampedUUIDModel):
         return f"{self.user} {self.role} in {self.business_area}"
 
 
-class Role(TimeStampedUUIDModel):
+class Role(NaturalKeyModel, TimeStampedUUIDModel):
     API = "API"
     HOPE = "HOPE"
     KOBO = "KOBO"
@@ -210,7 +217,7 @@ class IncompatibleRolesManager(models.Manager):
             )
 
 
-class IncompatibleRoles(TimeStampedUUIDModel):
+class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
     """
     Keeps track of what roles are incompatible:
     user cannot be assigned both of the roles in the same business area at the same time
