@@ -852,6 +852,11 @@ class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
             ),
         )
         assert "errors" not in choose_dms_with_cash_response, choose_dms_with_cash_response
+        self.individuals_4[0].refresh_from_db()
+        assert (
+            self.individuals_4[0].payment_channels.filter(delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH).count()
+            == 1
+        )
 
     def test_sufficient_delivery_mechanisms_for_collector_with_cash_payment_channel(self):
         IndividualRoleInHouseholdFactory(

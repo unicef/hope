@@ -185,6 +185,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         if not payment.collector.payment_channels.exists():
             for payment_channel in payment_channels_list:
                 if payment_channel is not None and payment_channel != "":
+                    # TODO handle delivery data
                     PaymentChannel.objects.get_or_create(
                         individual=payment.collector,
                         delivery_mechanism=payment_channel,

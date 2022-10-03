@@ -756,6 +756,7 @@ class PaymentChannel(TimeStampedUUIDModel):
     individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="payment_channels")
     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, null=True)
     delivery_data = JSONField(default=dict, blank=True)
+    is_fallback = models.BooleanField(default=False)
 
 
 class CashPlan(GenericPaymentPlan):
