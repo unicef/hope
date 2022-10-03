@@ -664,15 +664,15 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     @property
     def household(self):
-        return self.payment_verification.payment_record.household
+        return getattr(self.payment_record, "household", None)
 
     @property
     def individual(self):
-        return self.payment_verification.payment_record.head_of_household
+        return getattr(self.payment_record, "head_of_household", None)
 
     @property
     def payment_record(self):
-        return self.payment_verification.payment_record
+        return getattr(self.payment_verification, "payment_record", None)
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
