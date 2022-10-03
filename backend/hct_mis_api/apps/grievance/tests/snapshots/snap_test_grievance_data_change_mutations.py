@@ -58,8 +58,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                         }
                     },
                     'issueType': 14,
-                    'sensitiveTicketDetails': None,
-                    'subCategory': None
+                    'sensitiveTicketDetails': None
                 }
             ]
         }
@@ -146,8 +145,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                         }
                     },
                     'issueType': 14,
-                    'sensitiveTicketDetails': None,
-                    'subCategory': None
+                    'sensitiveTicketDetails': None
                 }
             ]
         }
@@ -225,8 +223,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                     'householdDataUpdateTicketDetails': None,
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 16,
-                    'sensitiveTicketDetails': None,
-                    'subCategory': 1
+                    'sensitiveTicketDetails': None
                 }
             ]
         }
@@ -264,8 +261,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_househol
                     'householdDataUpdateTicketDetails': None,
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 17,
-                    'sensitiveTicketDetails': None,
-                    'subCategory': None
+                    'sensitiveTicketDetails': None
                 }
             ]
         }
@@ -303,8 +299,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_individu
                     'householdDataUpdateTicketDetails': None,
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 15,
-                    'sensitiveTicketDetails': None,
-                    'subCategory': None
+                    'sensitiveTicketDetails': None
                 }
             ]
         }
@@ -365,8 +360,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                     },
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 13,
-                    'sensitiveTicketDetails': None,
-                    'subCategory': None
+                    'sensitiveTicketDetails': None
                 }
             ]
         }
@@ -415,7 +409,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             'disability': {
                                 'approve_status': False,
                                 'previous_value': 'not disabled',
-                                'value': "disabled"
+                                'value': 'disabled'
                             },
                             'documents': [
                                 {
@@ -520,8 +514,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                         }
                     },
                     'issueType': 14,
-                    'sensitiveTicketDetails': None,
-                    'subCategory': 3
+                    'sensitiveTicketDetails': None
                 }
             ]
         }
