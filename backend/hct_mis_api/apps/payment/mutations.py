@@ -948,7 +948,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
             transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
 
-        return cls(payment_plan, import_service.errors)
+        return cls(payment_plan, None)
 
 
 class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
@@ -977,13 +977,13 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
         import_service.open_workbook()
         import_service.validate()
         if import_service.errors:
-            return cls(None, import_service.errors)
+            return cls(payment_plan=None, errors=import_service.errors)
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).import_xlsx_per_fsp(
             user=info.context.user, file=file
         )
 
-        return cls(payment_plan, None)
+        return cls(payment_plan=payment_plan, errors=None)
 
 
 class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
