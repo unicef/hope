@@ -15,14 +15,15 @@ class IsNull(Func):
 
 
 class RelatedOrderingFilter(CustomOrderingFilter):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.extra["choices"] += [
-            ("linked_grievance", "-linked_grievance"),
-            ("Linked_grievance", "Linked_grievance (descending)"),
-        ]
+    pass  # TODO
 
-    # TODO: not working
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.extra["choices"] += [
+    #         ("linked_grievance", "-linked_grievance"),
+    #         ("Linked_grievance", "Linked_grievance (descending)"),
+    #     ]
+
     # def filter(self, qs, value):
     #     if any(v in ["linked_grievance", "-linked_grievance"] for v in value):
     #         if value[0] == "linked_grievance":
