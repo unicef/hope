@@ -295,6 +295,7 @@ type CashPlanPaymentVerificationNode implements Node {
   completionDate: DateTime
   xlsxFileExporting: Boolean!
   xlsxFileImported: Boolean!
+  error: String
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   xlsxFileWasDownloaded: Boolean
   hasXlsxFile: Boolean
@@ -322,6 +323,7 @@ enum CashPlanPaymentVerificationStatus {
   FINISHED
   PENDING
   INVALID
+  RAPID_PRO_ERROR
 }
 
 type CashPlanPaymentVerificationSummaryNode implements Node {
@@ -825,6 +827,7 @@ type GroupAttributeNode {
 
 enum HouseholdCollectIndividualData {
   A_
+  A_2
   A_1
   A_0
 }
@@ -890,7 +893,7 @@ type HouseholdNode implements Node {
   childrenDisabledCount: Int
   maleChildrenDisabledCount: Int
   femaleChildrenDisabledCount: Int
-  registrationDataImport: RegistrationDataImportNode!
+  registrationDataImport: RegistrationDataImportNode
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean
   flexFields: FlexFieldsScalar
@@ -1369,6 +1372,7 @@ enum ImportedDocumentTypeType {
 
 enum ImportedHouseholdCollectIndividualData {
   A_
+  A_2
   A_1
   A_0
 }
@@ -2328,6 +2332,7 @@ type PaymentVerificationNode implements Node {
   status: PaymentVerificationStatus!
   statusDate: DateTime
   receivedAmount: Float
+  sentToRapidPro: Boolean!
   ticketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
   ticketDetail(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
   isManuallyEditable: Boolean
@@ -2619,9 +2624,11 @@ enum RegistrationDataImportDataSource {
   KOBO
   DIIA
   FLEX_REGISTRATION
+  API
 }
 
 enum RegistrationDataImportDatahubImportDone {
+  LOADING
   NOT_STARTED
   STARTED
   DONE
@@ -2695,6 +2702,7 @@ type RegistrationDataImportNodeEdge {
 }
 
 enum RegistrationDataImportStatus {
+  LOADING
   DEDUPLICATION
   DEDUPLICATION_FAILED
   IMPORTING
@@ -2786,6 +2794,7 @@ enum RoleSubsystem {
   HOPE
   KOBO
   CA
+  API
 }
 
 enum RuleCommitLanguage {
@@ -3361,7 +3370,7 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   updatedAt: DateTime!
   goldenRecordsIndividual: IndividualNode!
   isMultipleDuplicatesVersion: Boolean!
-  possibleDuplicate: IndividualNode!
+  possibleDuplicate: IndividualNode
   possibleDuplicates: [IndividualNode]
   selectedIndividual: IndividualNode
   selectedIndividuals: [IndividualNode]
