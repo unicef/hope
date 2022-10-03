@@ -1235,7 +1235,7 @@ export type HouseholdNode = Node & {
   residenceStatus: HouseholdResidenceStatus,
   countryOrigin?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
-  size: Scalars['Int'],
+  size?: Maybe<Scalars['Int']>,
   address: Scalars['String'],
   adminArea?: Maybe<AreaNode>,
   representatives: IndividualNodeConnection,
@@ -6152,7 +6152,7 @@ export type HouseholdMinimalFragment = (
 
 export type HouseholdDetailedFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'activeIndividualsCount' | 'countryOrigin' | 'country' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'flexFields'>
+  & Pick<HouseholdNode, 'activeIndividualsCount' | 'countryOrigin' | 'country' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'collectIndividualData' | 'flexFields'>
   & { individuals: (
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
@@ -6400,7 +6400,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'importId' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'koboAssetId' | 'rowId' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh'>
+  & Pick<ImportedHouseholdNode, 'id' | 'importId' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'koboAssetId' | 'rowId' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh' | 'collectIndividualData'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -10081,6 +10081,7 @@ export const HouseholdDetailedFragmentDoc = gql`
   orgEnumerator
   updatedAt
   consent
+  collectIndividualData
   individuals {
     totalCount
     edges {
@@ -10395,6 +10396,7 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   hasDuplicates
   fchildHoh
   childHoh
+  collectIndividualData
 }
     `;
 export const ImportedIndividualMinimalFragmentDoc = gql`
@@ -20713,7 +20715,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,

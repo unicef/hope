@@ -13,8 +13,8 @@ When('I visit admin panel', () => {
 });
 
 And('I fill in the login form', () => {
-  cy.get('input[name="username"]').type(Cypress.env('username'));
-  cy.get('input[name="password"]').type(Cypress.env('password'));
+  cy.get('input[name="username"]').type(Cypress.env('daUsername'));
+  cy.get('input[name="password"]').type(Cypress.env('daPassword'));
   cy.get('input').contains('Log in').click();
 });
 
