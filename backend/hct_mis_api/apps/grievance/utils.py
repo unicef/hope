@@ -2,7 +2,6 @@ import logging
 import os
 from typing import List
 
-from django.core.files.storage import default_storage
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails, GrievanceDocument
@@ -66,8 +65,6 @@ def update_grievance_documents(documents):
     for document in documents:
         current_document = GrievanceDocument.objects.filter(id=decode_id_string(document["id"])).first()
         if current_document:
-            print("*********")
-            print(current_document.file.path)
             os.remove(current_document.file.path)
 
             file = document.get("file")
