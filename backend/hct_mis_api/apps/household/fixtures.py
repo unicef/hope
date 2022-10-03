@@ -172,6 +172,7 @@ class BankAccountInfoFactory(factory.DjangoModelFactory):
 class DocumentTypeFactory(factory.DjangoModelFactory):
     class Meta:
         model = DocumentType
+        django_get_or_create = ("type",)
 
     type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
 
@@ -179,11 +180,12 @@ class DocumentTypeFactory(factory.DjangoModelFactory):
 class DocumentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Document
-        django_get_or_create = ("type",)
+        django_get_or_create = ("type", "country")
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
     type = factory.SubFactory(DocumentTypeFactory)
     individual = factory.SubFactory(IndividualFactory)
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
