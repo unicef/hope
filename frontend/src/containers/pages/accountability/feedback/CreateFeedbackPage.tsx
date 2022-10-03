@@ -361,6 +361,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                             required
                             container={false}
                             component={FormikCheckboxField}
+                            data-cy='input-consent'
                           />
                         </BoxWithBorders>
                       )}
@@ -463,6 +464,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                             color='primary'
                             variant='contained'
                             onClick={submitForm}
+                            data-cy='button-submit'
                           >
                             {activeStep === steps.length - 1
                               ? t('Save')
