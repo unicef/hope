@@ -12,6 +12,13 @@ User = get_user_model()
 
 class FeedbackCrudServices:
     @classmethod
+    def validate_lookup(cls, feedback):
+        # pass
+        if feedback.household_lookup is not None and feedback.individual_lookup is not None:
+            if feedback.household_lookup != feedback.individual_lookup.household:
+                raise Exception("Household lookup does not match individual lookup")
+
+    @classmethod
     def create(cls, user: User, input_data: dict) -> Feedback:
         obj = Feedback(
             business_area=BusinessArea.objects.get(slug=input_data["business_area_slug"]),
@@ -35,6 +42,7 @@ class FeedbackCrudServices:
         if input_data.get("program"):
             obj.program = get_object_or_404(Program, id=decode_id_string(input_data["program"]))
         obj.created_by = user
+        cls.validate_lookup(obj)
         obj.save()
         return obj
 
@@ -64,5 +72,6 @@ class FeedbackCrudServices:
             feedback.consent = input_data["consent"]
         if "program" in input_data:
             feedback.program = get_object_or_404(Program, id=decode_id_string(input_data["program"]))
+        cls.validate_lookup(feedback)
         feedback.save()
         return feedback
