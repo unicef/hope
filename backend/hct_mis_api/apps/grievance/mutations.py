@@ -304,7 +304,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         programme = input.pop("programme", None)
         if programme:
             programme = get_object_or_404(Program, pk=decode_id_string(programme))
-        linked_feedback_id = input.pop("linked_feedback_id")
+        linked_feedback_id = input.pop("linked_feedback_id") if "linked_feedback_id" in input else None
         grievance_ticket = GrievanceTicket.objects.create(
             **input,
             admin2=admin_object,
