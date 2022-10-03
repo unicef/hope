@@ -1,6 +1,8 @@
 import logging
+import os
 from typing import List
 
+from django.core.files.storage import default_storage
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails, GrievanceDocument
@@ -62,13 +64,29 @@ def create_grievance_documents(info, grievance_ticket, documents):
 
 def update_grievance_documents(documents):
     for document in documents:
-        ticket_id = document["id"]
-        current_document_qs = GrievanceDocument.objects.filter(id=ticket_id)
-        current_document = current_document_qs.first()
-
+        current_document = GrievanceDocument.objects.filter(id=decode_id_string(document["id"])).first()
         if current_document:
-            name = document.get("name", current_document.name)
-            file = document.get("file", current_document.file)
+            print("*********")
+            print(current_document.file.path)
+            os.remove(current_document.file.path)
+
+            file = document.get("file")
             validate_file(file)
 
-            current_document_qs.update(name=name, file=file, file_size=file.size, content_type=file.content_type)
+            current_document.name = document.get("name")
+            current_document.file = file
+            current_document.file_size = file.size
+            current_document.content_type = file.content_type
+            current_document.save()
+
+
+def delete_grievance_documents(ticket_id, ids_to_delete):
+    documents_to_delete = GrievanceDocument.objects.filter(
+        grievance_ticket_id=ticket_id,
+        id__in=[decode_id_string(document_id) for document_id in ids_to_delete]
+    )
+
+    for document in documents_to_delete:
+        os.remove(document.file.path)
+
+    documents_to_delete.delete()

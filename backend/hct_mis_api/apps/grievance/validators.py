@@ -3,6 +3,7 @@ import logging
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from graphql import GraphQLError
+from hct_mis_api.apps.core.utils import decode_id_string
 
 from hct_mis_api.apps.grievance.models import GrievanceDocument
 
@@ -61,9 +62,9 @@ def validate_grievance_documents_size(ticket_id, new_documents, is_updated=False
     if is_updated:
         current_documents_size = sum(
             (
-                grievance_documents.exclude(id__in=[ticket["id"] for ticket in new_documents]).values_list(
-                    "file_size", flat=True
-                )
+                grievance_documents.exclude(
+                    id__in=[decode_id_string(document["id"]) for document in new_documents]
+                ).values_list("file_size", flat=True)
             )
         )
     else:

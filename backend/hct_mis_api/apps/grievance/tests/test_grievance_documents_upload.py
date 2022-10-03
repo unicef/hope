@@ -304,7 +304,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     **self.grievance_data_to_update,
                     "documentationToUpdate": [
                         {
-                            "id": self.grievance_document.id,
+                            "id": self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
@@ -332,7 +332,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
             variables={
                 "input": {
                     **self.grievance_data_to_update,
-                    "documentationToDelete": [self.grievance_document.id]
+                    "documentationToDelete": [self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode")]
                 }
             }
         )
@@ -362,7 +362,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             )
                         }
                     ],
-                    "documentationToDelete": [self.grievance_document.id]
+                    "documentationToDelete": [self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode")]
                 }
             }
         )
@@ -394,7 +394,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     ],
                     "documentationToUpdate": [
                         {
-                            "id": self.grievance_document.id,
+                            "id": self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
@@ -422,7 +422,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
             variables={
                 "input": {
                     **self.grievance_data_to_update,
-                    "documentationToDelete": [uuid.uuid4()]
+                    "documentationToDelete": [self.id_to_base64(uuid.uuid4(), "GrievanceDocumentNode")]
                 }
             }
         )
@@ -444,7 +444,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     **self.grievance_data_to_update,
                     "documentationToUpdate": [
                         {
-                            "id": uuid.uuid4(),
+                            "id":self.id_to_base64(uuid.uuid4(), "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
@@ -489,7 +489,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     ],
                     "documentationToUpdate": [
                         {
-                            "id": self.grievance_document.id,
+                            "id": self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
@@ -498,7 +498,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             )
                         }
                     ],
-                    "documentationToDelete": [grievance_document_to_delete.id]
+                    "documentationToDelete": [self.id_to_base64(grievance_document_to_delete.id, "GrievanceDocumentNode")]
                 }
             }
         )
@@ -530,7 +530,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     ],
                     "documentationToUpdate": [
                         {
-                            "id": self.grievance_document.id,
+                            "id": self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
@@ -570,7 +570,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     ],
                     "documentationToUpdate": [
                         {
-                            "id": self.grievance_document.id,
+                            "id": self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
