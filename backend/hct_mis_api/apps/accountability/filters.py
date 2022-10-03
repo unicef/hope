@@ -11,24 +11,25 @@ from .models import Feedback, Message, FeedbackMessage
 
 
 class IsNull(Func):
-    template = '%(expressions)s IS NULL'
+    template = "%(expressions)s IS NULL"
 
 
 class RelatedOrderingFilter(CustomOrderingFilter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.extra['choices'] += [
-            ('linked_grievance', '-linked_grievance'),
-            ('Linked_grievance', 'Linked_grievance (descending)'),
+        self.extra["choices"] += [
+            ("linked_grievance", "-linked_grievance"),
+            ("Linked_grievance", "Linked_grievance (descending)"),
         ]
 
-    def filter(self, qs, value):
-        if any(v in ['linked_grievance', '-linked_grievance'] for v in value):
-            if value[0] == "linked_grievance":
-                return qs.annotate(linked_isnull=IsNull(value[0])).order_by("-linked_isnull", f"{value[0]}__unicef_id")
-            else:
-                return qs.annotate(linked_isnull=IsNull(value[0])).order_by("linked_isnull", f"{value[0]}__unicef_id")
-        return super().filter(qs, value)
+    # TODO: not working
+    # def filter(self, qs, value):
+    #     if any(v in ["linked_grievance", "-linked_grievance"] for v in value):
+    #         if value[0] == "linked_grievance":
+    #             return qs.annotate(linked_isnull=IsNull(value[0])).order_by("-linked_isnull", f"{value[0]}__unicef_id")
+    #         else:
+    #             return qs.annotate(linked_isnull=IsNull(value[0])).order_by("linked_isnull", f"{value[0]}__unicef_id")
+    #     return super().filter(qs, value)
 
 
 class MessagesFilter(FilterSet):
@@ -51,14 +52,7 @@ class MessagesFilter(FilterSet):
         }
 
     order_by = CustomOrderingFilter(
-        fields=(
-            Lower("title"),
-            "number_of_recipients",
-            "sampling_type",
-            "created_by",
-            "id",
-            "created_at"
-        )
+        fields=(Lower("title"), "number_of_recipients", "sampling_type", "created_by", "id", "created_at")
     )
 
 
@@ -126,5 +120,5 @@ class FeedbackMessageFilter(FilterSet):
     feedback = UUIDFilter(field_name="feedback", required=True)
 
     class Meta:
-        fields = ("id", )
+        fields = ("id",)
         model = FeedbackMessage
