@@ -14920,13 +14920,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "RegistrationDataImportNode",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "RegistrationDataImportNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -19259,6 +19255,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "LOADING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "DEDUPLICATION",
             "description": null,
             "isDeprecated": false,
@@ -19343,6 +19345,12 @@
           },
           {
             "name": "FLEX_REGISTRATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "API",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -22613,13 +22621,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "IndividualNode",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "IndividualNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -24832,6 +24836,12 @@
         "enumValues": [
           {
             "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "A_2",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -29665,6 +29675,18 @@
             "deprecationReason": null
           },
           {
+            "name": "error",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "paymentRecordVerifications",
             "description": null,
             "args": [
@@ -29795,6 +29817,12 @@
           },
           {
             "name": "INVALID",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "RAPID_PRO_ERROR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -30132,6 +30160,22 @@
               "kind": "SCALAR",
               "name": "Float",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sentToRapidPro",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -31776,6 +31820,12 @@
           },
           {
             "name": "CA",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "API",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -38356,6 +38406,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "LOADING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "NOT_STARTED",
             "description": null,
             "isDeprecated": false,
@@ -40965,6 +41021,12 @@
         "enumValues": [
           {
             "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "A_2",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
