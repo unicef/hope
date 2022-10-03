@@ -902,7 +902,7 @@ export type CreateDashboardReportInput = {
 
 export type CreateFeedbackInput = {
   businessAreaSlug: Scalars['String'],
-  issueType: Scalars['String'],
+  issueType: Scalars['Int'],
   householdLookup?: Maybe<Scalars['ID']>,
   individualLookup?: Maybe<Scalars['ID']>,
   description: Scalars['String'],
@@ -6178,7 +6178,7 @@ export type UpdateAddIndividualIssueTypeExtras = {
 
 export type UpdateFeedbackInput = {
   feedbackId: Scalars['ID'],
-  issueType?: Maybe<Scalars['String']>,
+  issueType?: Maybe<Scalars['Int']>,
   householdLookup?: Maybe<Scalars['ID']>,
   individualLookup?: Maybe<Scalars['ID']>,
   description?: Maybe<Scalars['String']>,

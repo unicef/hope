@@ -544,7 +544,7 @@ input CreateDashboardReportInput {
 
 input CreateFeedbackInput {
   businessAreaSlug: String!
-  issueType: String!
+  issueType: Int!
   householdLookup: ID
   individualLookup: ID
   description: String!
@@ -3809,7 +3809,7 @@ input UpdateAddIndividualIssueTypeExtras {
 
 input UpdateFeedbackInput {
   feedbackId: ID!
-  issueType: String
+  issueType: Int
   householdLookup: ID
   individualLookup: ID
   description: String
