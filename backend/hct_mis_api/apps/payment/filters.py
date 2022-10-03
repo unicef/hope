@@ -1,32 +1,36 @@
-from django.db.models import Count, Q, Case, When, Value, CharField, F
+from django.db.models import Case, CharField, Count, F, Q, Value, When
 from django.db.models.functions import Lower
+from django.shortcuts import get_object_or_404
 
 from django_filters import (
     CharFilter,
-    FilterSet,
-    OrderingFilter,
-    NumberFilter,
-    UUIDFilter,
-    MultipleChoiceFilter,
     DateFilter,
+    FilterSet,
+    MultipleChoiceFilter,
+    NumberFilter,
+    OrderingFilter,
+    UUIDFilter,
 )
-from django.shortcuts import get_object_or_404
-
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid, decode_id_string
+from hct_mis_api.apps.core.utils import (
+    CustomOrderingFilter,
+    decode_id_string,
+    is_valid_uuid,
+)
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    PaymentVerificationPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
-    PaymentRecord,
-    PaymentVerification,
-    PaymentPlan,
     GenericPayment,
     Payment,
+    PaymentPlan,
+    PaymentRecord,
+    PaymentVerification,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
 )
 
 
@@ -111,6 +115,12 @@ class PaymentVerificationPlanFilter(FilterSet):
     class Meta:
         fields = tuple()
         model = PaymentVerificationPlan
+
+
+class PaymentVerificationSummaryFilter(FilterSet):
+    class Meta:
+        fields = tuple()
+        model = PaymentVerificationSummary
 
 
 class PaymentVerificationLogEntryFilter(LogEntryFilter):
@@ -341,8 +351,4 @@ class CashPlanPaymentPlanFilter(FilterSet):
         model = CashPlan
         fields = tuple()
 
-    order_by = OrderingFilter(
-        fields=(
-            "unicef_id",
-        )
-    )
+    order_by = OrderingFilter(fields=("unicef_id",))

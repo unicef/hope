@@ -9,21 +9,21 @@ export const DISCARD_CASH_PLAN_PAYMENT_VERIFICATION = gql`
         id
         status
         statusDate
-        # verificationPlans {
-        #   edges {
-        #     node {
-        #       id
-        #       status
-        #       sampleSize
-        #       receivedCount
-        #       notReceivedCount
-        #       respondedCount
-        #       receivedCount
-        #       receivedWithProblemsCount
-        #       activationDate
-        #     }
-        #   }
-        # }
+        verificationPlans {
+          edges {
+            node {
+              id
+              status
+              sampleSize
+              receivedCount
+              notReceivedCount
+              respondedCount
+              receivedCount
+              receivedWithProblemsCount
+              activationDate
+            }
+          }
+        }
       }
     }
   }

@@ -47,8 +47,8 @@ export function FinishVerificationPlan({
     return null;
   }
   const { cashPlan } = data;
-  const verificationPlan = cashPlan?.verifications?.edges?.length
-    ? cashPlan.verifications.edges[0].node
+  const verificationPlan = cashPlan?.verificationPlans?.edges?.length
+    ? cashPlan.verificationPlans.edges[0].node
     : null;
 
   const finish = async (): Promise<void> => {

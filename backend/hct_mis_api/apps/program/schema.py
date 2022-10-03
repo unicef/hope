@@ -1,20 +1,20 @@
-import graphene
-
 from django.db.models import (
     Case,
+    CharField,
     Count,
     DecimalField,
+    Exists,
+    F,
     IntegerField,
+    OuterRef,
     Q,
+    Subquery,
     Sum,
     Value,
     When,
-    F,
-    CharField,
-    OuterRef,
-    Exists,
-    Subquery,
 )
+
+import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -28,30 +28,28 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
-
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_map_choices,
     chart_permission_decorator,
     to_choice_object,
-    get_paginator,
+)
+from hct_mis_api.apps.payment.filters import (
+    CashPlanFilter,
+    PaymentVerificationPlanFilter,
+    PaymentVerificationSummaryFilter,
 )
 from hct_mis_api.apps.payment.models import (
-    PaymentVerificationPlan,
-    PaymentRecord,
+    CashPlan,
     GenericPayment,
-    DeliveryMechanismPerPaymentPlan,
-    FinancialServiceProvider,
-    ServiceProvider,
-    PaymentPlan,
-    PaymentVerificationSummary,
+    PaymentRecord,
+    PaymentVerificationPlan,
 )
+from hct_mis_api.apps.payment.schema import PaymentVerificationPlanNode
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
-from hct_mis_api.apps.payment.filters import CashPlanFilter
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
@@ -100,6 +98,15 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     total_undelivered_quantity = graphene.Float()
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
+    verification_plans = DjangoPermissionFilterConnectionField(
+        PaymentVerificationPlanNode,
+        source="payment_verification_plans",
+        filterset_class=PaymentVerificationPlanFilter,
+    )
+    payment_verification_summary = DjangoPermissionFilterConnectionField(
+        "hct_mis_api.apps.payment.schema.PaymentVerificationPlanSummaryNode",
+        filterset_class=PaymentVerificationSummaryFilter,
+    )
 
     class Meta:
         model = CashPlan
@@ -161,17 +168,14 @@ class Query(graphene.ObjectType):
     cash_plan_status_choices = graphene.List(ChoiceObject)
 
     def resolve_all_programs(self, info, **kwargs):
-        return (
-            Program.objects.annotate(
-                custom_order=Case(
-                    When(status=Program.DRAFT, then=Value(1)),
-                    When(status=Program.ACTIVE, then=Value(2)),
-                    When(status=Program.FINISHED, then=Value(3)),
-                    output_field=IntegerField(),
-                )
+        return Program.objects.annotate(
+            custom_order=Case(
+                When(status=Program.DRAFT, then=Value(1)),
+                When(status=Program.ACTIVE, then=Value(2)),
+                When(status=Program.FINISHED, then=Value(3)),
+                output_field=IntegerField(),
             )
-            .order_by("custom_order", "start_date")
-        )
+        ).order_by("custom_order", "start_date")
 
     def resolve_program_status_choices(self, info, **kwargs):
         return to_choice_object(Program.STATUS_CHOICE)
@@ -206,7 +210,6 @@ class Query(graphene.ObjectType):
                 output_field=IntegerField(),
             )
         ).order_by("-updated_at", "custom_order")
-
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):

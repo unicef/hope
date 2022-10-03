@@ -36,7 +36,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
 
   const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
   const verification =
-    paymentVerification.paymentRecord?.parent?.verifications?.edges[0].node;
+    paymentVerification.paymentRecord?.parent?.verificationPlans?.edges[0].node;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
@@ -69,7 +69,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
       {verification.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
         <VerifyManual
-          paymentVerificationPlanId={paymentVerification.id}
+          paymentVerificationId={paymentVerification.id}
           enabled={paymentVerification.isManuallyEditable}
         />
       ) : null}

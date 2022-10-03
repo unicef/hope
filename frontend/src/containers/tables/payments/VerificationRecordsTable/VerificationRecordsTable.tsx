@@ -18,12 +18,12 @@ export function VerificationRecordsTable({
   const { t } = useTranslation();
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {
-    cashPlanPaymentVerification: filter.cashPlanPaymentVerification,
+    paymentVerificationPlan: filter.cashPlanPaymentVerification,
     search: filter.search,
     status: filter.status,
     verificationChannel: filter.verificationChannel,
     businessArea,
-    cashPlanId,
+    // cashPlanId,
   };
 
   return (

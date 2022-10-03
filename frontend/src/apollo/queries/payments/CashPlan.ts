@@ -27,47 +27,52 @@ export const CashPlan = gql`
       bankReconciliationSuccess
       bankReconciliationError
       totalNumberOfHouseholds
-      # verificationPlans {
-      #   totalCount
-      #   edges {
-      #     node {
-      #       id
-      #       unicefId
-      #       status
-      #       sampleSize
-      #       receivedCount
-      #       notReceivedCount
-      #       respondedCount
-      #       verificationChannel
-      #       sampling
-      #       receivedCount
-      #       receivedWithProblemsCount
-      #       rapidProFlowId
-      #       confidenceInterval
-      #       marginOfError
-      #       activationDate
-      #       completionDate
-      #       ageFilter {
-      #         min
-      #         max
-      #       }
-      #       excludedAdminAreasFilter
-      #       sexFilter
-      #       xlsxFileExporting
-      #       hasXlsxFile
-      #       xlsxFileWasDownloaded
-      #       xlsxFileImported
-      #     }
-      #   }
-      # }
-      # paymentVerificationSummary {
-      #   id
-      #   createdAt
-      #   updatedAt
-      #   status
-      #   activationDate
-      #   completionDate
-      # }
+      verificationPlans {
+        totalCount
+        edges {
+          node {
+            id
+            unicefId
+            status
+            sampleSize
+            receivedCount
+            notReceivedCount
+            respondedCount
+            verificationChannel
+            sampling
+            receivedCount
+            receivedWithProblemsCount
+            rapidProFlowId
+            confidenceInterval
+            marginOfError
+            activationDate
+            completionDate
+            ageFilter {
+              min
+              max
+            }
+            excludedAdminAreasFilter
+            sexFilter
+            xlsxFileExporting
+            hasXlsxFile
+            xlsxFileWasDownloaded
+            xlsxFileImported
+          }
+        }
+      }
+      paymentVerificationSummary {
+        totalCount
+        edges {
+          node {
+            id
+            createdAt
+            updatedAt
+            status
+            activationDate
+            completionDate
+          }
+        }
+      }
       program {
         id
         name
