@@ -43,6 +43,9 @@ query allFeedbacks(
             node {
                 id
                 issueType
+                linkedGrievance {
+                    id
+                }
             }
         }
     }
@@ -63,6 +66,19 @@ mutation updateFeedback($input: UpdateFeedbackInput!) {
 query feedback($id: ID!) {
     feedback(id: $id) {
         id
+    }
+}
+"""
+
+    CREATE_GRIEVANCE_MUTATION = """
+mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
+    createGrievanceTicket(input: $input) {
+        grievanceTickets {
+            id
+            feedback {
+                id
+            }
+        }
     }
 }
 """
@@ -294,23 +310,9 @@ query feedback($id: ID!) {
         assert "errors" not in response, response["errors"]
         self.assertEqual(response["data"]["feedback"]["id"], encode_id_base64(feedback_id, "Feedback"))
 
-    def test_linking_feedback_to_grievance_ticket(self):
-        feedback_id = self.create_new_feedback()
-
-        create_grievance_mutation = """
-mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
-    createGrievanceTicket(input: $input) {
-        grievanceTickets {
-            id
-            feedback {
-                id
-            }
-        }
-    }
-}
-"""
+    def create_linked_grievance_ticket(self, feedback_id):
         create_grievance_response = self.graphql_request(
-            request_string=create_grievance_mutation,
+            request_string=self.CREATE_GRIEVANCE_MUTATION,
             context={"user": self.user},
             variables={
                 "input": {
@@ -326,7 +328,11 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             },
         )
         assert "errors" not in create_grievance_response, create_grievance_response["errors"]
-        grievance_data = create_grievance_response["data"]["createGrievanceTicket"]["grievanceTickets"][0]
+        return create_grievance_response["data"]["createGrievanceTicket"]["grievanceTickets"][0]
+
+    def test_linking_feedback_to_grievance_ticket(self):
+        feedback_id = self.create_new_feedback()
+        grievance_data = self.create_linked_grievance_ticket(feedback_id)
         received_grievance_id = decode_id_string(grievance_data["id"])
         received_feedback_id = decode_id_string(grievance_data["feedback"]["id"])
         feedback = Feedback.objects.get(id=feedback_id)
@@ -398,3 +404,34 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         self.assertEqual(len(feedbacks_2), 2)
         self.assertTrue(feedbacks_2[0]["node"]["issueType"].endswith(str(Feedback.POSITIVE_FEEDBACK)))
         self.assertTrue(feedbacks_2[1]["node"]["issueType"].endswith(str(Feedback.NEGATIVE_FEEDBACK)))
+
+    def test_ordering_by_linked_grievance(self):
+        feedback_id_1 = self.create_new_feedback()
+        grievance_data_1 = self.create_linked_grievance_ticket(feedback_id_1)
+        feedback_id_2 = self.create_new_feedback()
+        grievance_data_2 = self.create_linked_grievance_ticket(feedback_id_2)
+        self.create_new_feedback()
+
+        response_1 = self.graphql_request(
+            request_string=self.ALL_FEEDBACKS_QUERY,
+            context={"user": self.user},
+            variables={"businessAreaSlug": self.business_area.slug, "orderBy": "linked_grievance"},
+        )
+        assert "errors" not in response_1, response_1["errors"]
+        feedbacks_1 = response_1["data"]["allFeedbacks"]["edges"]
+        self.assertEqual(len(feedbacks_1), 3)
+        self.assertEqual(feedbacks_1[0]["node"]["linkedGrievance"]["id"], grievance_data_1["id"])
+        self.assertEqual(feedbacks_1[1]["node"]["linkedGrievance"]["id"], grievance_data_2["id"])
+        self.assertEqual(feedbacks_1[2]["node"]["linkedGrievance"], None)
+
+        response_2 = self.graphql_request(
+            request_string=self.ALL_FEEDBACKS_QUERY,
+            context={"user": self.user},
+            variables={"businessAreaSlug": self.business_area.slug, "orderBy": "-linked_grievance"},
+        )
+        assert "errors" not in response_2, response_2["errors"]
+        feedbacks_2 = response_2["data"]["allFeedbacks"]["edges"]
+        self.assertEqual(len(feedbacks_2), 3)
+        self.assertEqual(feedbacks_2[0]["node"]["linkedGrievance"], None)
+        self.assertEqual(feedbacks_2[1]["node"]["linkedGrievance"]["id"], grievance_data_2["id"])
+        self.assertEqual(feedbacks_2[2]["node"]["linkedGrievance"]["id"], grievance_data_1["id"])
