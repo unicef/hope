@@ -334,3 +334,27 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             received_grievance_id,
         )
         self.assertEqual(str(feedback.id), received_feedback_id)
+
+    def test_individuals_lookup_household_matching_household_lookup(self):
+        self.other_household, self.other_individuals = create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.registration_data_import,
+                "business_area": self.business_area,
+            },
+            individuals_data=[{}],
+        )
+
+        amount = Feedback.objects.count()
+        response = self.graphql_request(
+            request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": self.create_dummy_correct_input()
+                | {
+                    "householdLookup": encode_id_base64(self.household.pk, "Household"),
+                    "individualLookup": encode_id_base64(self.other_individuals[0].pk, "Individual"),
+                }
+            },
+        )
+        assert "errors" in response, response
+        self.assertEqual(Feedback.objects.count(), amount)
