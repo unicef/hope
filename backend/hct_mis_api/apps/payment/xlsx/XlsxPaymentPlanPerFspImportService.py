@@ -13,7 +13,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.file = file
         self.errors = []
         self.payments_dict = {str(x.unicef_id): x for x in self.payment_list}
-        self.payments_ids = list(self.payments_dict.keys())
+        self.payment_ids = list(self.payments_dict.keys())
         self.payments_to_save = []
         self.fsp = None
         self.expected_columns = []

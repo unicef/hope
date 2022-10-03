@@ -597,7 +597,8 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return "wrong_column_name"
 
         obj, nested_field = map_obj_name_column[column_name]
-        return getattr(obj, nested_field, "")
+
+        return getattr(obj, nested_field, None) or ""
 
     def __str__(self):
         return f"{self.name} ({len(self.columns)})"

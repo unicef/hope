@@ -69,7 +69,6 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                     for payment in payment_qs:
                         payment_row = [
                             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
-                            or ""
                             for column_name in column_list
                         ]
                         ws_fsp.append(payment_row)

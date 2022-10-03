@@ -27,7 +27,7 @@ class XlsxPaymentPlanExportService(XlsxExportBaseService):
 
     def _add_payment_row(self, payment: Payment):
         payment_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name) or ""
+            FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
             for column_name in self.HEADERS
         ]
         self.ws_export_list.append(payment_row)

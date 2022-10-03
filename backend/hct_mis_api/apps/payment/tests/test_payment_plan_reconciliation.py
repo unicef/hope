@@ -13,7 +13,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
 )
-from hct_mis_api.apps.payment.models import PaymentPlan, Payment
+from hct_mis_api.apps.payment.models import PaymentPlan, Payment, FinancialServiceProviderXlsxTemplate
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -178,6 +178,11 @@ mutation ImportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $file: Uplo
         paymentPlan {
             id
         }
+        errors {
+            sheet
+            coordinates
+            message
+        }
     }
 }
 """
@@ -225,6 +230,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
 
         cls.household_1, cls.individual_1 = cls.create_household_and_individual()
+        cls.household_1.refresh_from_db()
         cls.payment_channel_1_cash = PaymentChannelFactory(
             individual=cls.individual_1,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
@@ -602,25 +608,25 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(payment.assigned_payment_channel.delivery_mechanism, "Cash")
 
             self.assertEqual(sheet.cell(row=1, column=2).value, "household_id")
-            self.assertEqual(sheet.cell(row=2, column=2).value, "HH-22-0000.0209")
+            self.assertEqual(sheet.cell(row=2, column=2).value, self.household_1.unicef_id)
             self.assertEqual(sheet.cell(row=1, column=3).value, "household_size")
-            self.assertEqual(sheet.cell(row=2, column=3).value, "household_size")
+            self.assertEqual(sheet.cell(row=2, column=3).value, self.household_1.size)
             self.assertEqual(sheet.cell(row=1, column=4).value, "admin_level_2")
-            self.assertEqual(sheet.cell(row=2, column=4).value, "admin_level_2")
+            self.assertEqual(sheet.cell(row=2, column=4).value, None)
             self.assertEqual(sheet.cell(row=1, column=5).value, "collector_name")
-            self.assertEqual(sheet.cell(row=2, column=5).value, "collector_name")
-            self.assertEqual(sheet.cell(row=1, column=5).value, "payment_channel")
-            self.assertEqual(sheet.cell(row=2, column=5).value, "Cash")
-            self.assertEqual(sheet.cell(row=1, column=6).value, "fsp_name")
-            self.assertEqual(sheet.cell(row=2, column=6).value, "fsp_name")
-            self.assertEqual(sheet.cell(row=1, column=7).value, "currency")
-            self.assertEqual(sheet.cell(row=2, column=7).value, "currency")
-            self.assertEqual(sheet.cell(row=1, column=8).value, "entitlement_quantity")
-            self.assertEqual(sheet.cell(row=2, column=8).value, 500)
-            self.assertEqual(sheet.cell(row=1, column=8).value, "entitlement_quantity_usd")
-            self.assertEqual(sheet.cell(row=2, column=8).value, 5000)
-            self.assertEqual(sheet.cell(row=1, column=9).value, "delivered_quantity")
-            self.assertEqual(sheet.cell(row=2, column=9).value, None)
+            self.assertEqual(sheet.cell(row=2, column=5).value, payment.collector.full_name)
+            self.assertEqual(sheet.cell(row=1, column=6).value, "payment_channel")
+            self.assertEqual(sheet.cell(row=2, column=6).value, "Cash")
+            self.assertEqual(sheet.cell(row=1, column=7).value, "fsp_name")
+            self.assertEqual(sheet.cell(row=2, column=7).value, payment.financial_service_provider.name)
+            self.assertEqual(sheet.cell(row=1, column=8).value, "currency")
+            self.assertEqual(sheet.cell(row=2, column=8).value, payment.currency)
+            self.assertEqual(sheet.cell(row=1, column=9).value, "entitlement_quantity")
+            self.assertEqual(sheet.cell(row=2, column=9).value, payment.entitlement_quantity)
+            self.assertEqual(sheet.cell(row=1, column=10).value, "entitlement_quantity_usd")
+            self.assertEqual(sheet.cell(row=2, column=10).value, payment.entitlement_quantity_usd)
+            self.assertEqual(sheet.cell(row=1, column=11).value, "delivered_quantity")
+            self.assertEqual(sheet.cell(row=2, column=11).value, None)
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
@@ -628,7 +634,10 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(payment.status, Payment.STATUS_NOT_DISTRIBUTED)
             self.assertEqual(payment_plan.is_reconciled, False)
 
-            sheet.cell(row=2, column=8).value = 500
+            # update xls delivered_quantity
+            sheet.cell(
+                row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity") + 1
+            ).value = 666
             filled_file_name = "filled.xlsx"
             filled_file_path = os.path.join(temp_dir, filled_file_name)
             workbook.save(filled_file_path)
@@ -653,6 +662,6 @@ class TestPaymentPlanReconciliation(APITestCase):
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
-            self.assertEqual(payment.delivered_quantity, 500)
+            self.assertEqual(payment.delivered_quantity, 666)
             self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
             self.assertEqual(payment_plan.is_reconciled, True)
