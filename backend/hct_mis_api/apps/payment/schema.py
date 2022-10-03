@@ -461,15 +461,6 @@ class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
 
 
-class PaginatedType(graphene.ObjectType):
-    page = graphene.Int()
-    pages = graphene.Int()
-    page_size = graphene.Int()
-    total_count = graphene.Int()
-    has_next = graphene.Boolean()
-    has_prev = graphene.Boolean()
-
-
 class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     """
     for CashPlan and PaymentPlan models
@@ -482,17 +473,18 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     obj_type = graphene.String()
     id = graphene.String(source="pk")
-    unicef_id = graphene.String(source="unicef_id")
+    unicef_id = graphene.String()
     verification_status = graphene.String()
     fsp_names = graphene.String()
     delivery_mechanisms = graphene.String(source="delivery_type")
-    delivery_types = graphene.String(source="delivery_types")
-    currency = graphene.String(source="currency")
-    total_delivered_quantity = graphene.Float(source="total_delivered_quantity")
-    start_date = graphene.String(source="start_date")
-    end_date = graphene.String(source="end_date")
+    delivery_types = graphene.String()
+    currency = graphene.String()
+    total_delivered_quantity = graphene.Float()
+    start_date = graphene.String()
+    end_date = graphene.String()
     programme_name = graphene.String()
-    updated_at = graphene.String(source="updated_at")
+    updated_at = graphene.String()
+    verifications = graphene.List(PaymentVerificationPlanNode)
 
     def resolve_obj_type(self, info, **kwargs):
         return self.__class__.__name__
@@ -505,6 +497,18 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     def resolve_programme_name(self, info, **kwargs):
         return self.program.name
+
+    def resolve_verifications(self, info, **kwargs):
+        return self.payment_verification_plans.all()
+
+
+class PaginatedType(graphene.ObjectType):
+    page = graphene.Int()
+    pages = graphene.Int()
+    page_size = graphene.Int()
+    total_count = graphene.Int()
+    has_next = graphene.Boolean()
+    has_prev = graphene.Boolean()
 
 
 class PaginatedCashPlanAndPaymentPlanNode(PaginatedType):

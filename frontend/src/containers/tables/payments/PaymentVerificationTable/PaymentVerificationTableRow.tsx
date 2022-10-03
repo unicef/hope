@@ -57,7 +57,7 @@ export function PaymentVerificationTableRow({
       </TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={plan.paymentVerificationSummary.status}
+          status={plan.paymentVerificationSummary.edges[0].node.status}
           statusToColor={paymentVerificationStatusToColor}
         />
       </TableCell>

@@ -106,7 +106,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   };
 
   const isFinished =
-    cashPlan.paymentVerificationSummary.status === 'FINISHED';
+    cashPlan.paymentVerificationSummary.edges[0].node.status === 'FINISHED';
 
   const toolbar = (
     <PageHeader
@@ -157,8 +157,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       <Container>
         <VerificationPlansSummary cashPlan={cashPlan} />
       </Container>
-      {cashPlan.verifications?.edges?.length
-        ? cashPlan.verifications.edges.map((edge) => (
+      {cashPlan.verificationPlans?.edges?.length
+        ? cashPlan.verificationPlans.edges.map((edge) => (
             <VerificationPlanDetails
               key={edge.node.id}
               samplingChoicesData={choicesData}
@@ -173,7 +173,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             <VerificationRecordsFilters
               filter={filter}
               onFilterChange={setFilter}
-              verifications={cashPlan.verifications}
+              verifications={cashPlan.verificationPlans}
             />
           </Container>
           <TableWrapper>
@@ -200,7 +200,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}
-      {cashPlan.verifications?.edges[0]?.node?.id &&
+      {cashPlan.verificationPlans?.edges[0]?.node?.id &&
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={cashPlan.id}

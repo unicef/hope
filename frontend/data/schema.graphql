@@ -302,6 +302,7 @@ type CashPlanAndPaymentPlanNode {
   endDate: String
   programmeName: String
   updatedAt: String
+  verifications: [PaymentVerificationPlanNode]
 }
 
 type CashPlanNode implements Node {
@@ -348,6 +349,8 @@ type CashPlanNode implements Node {
   currency: String
   canCreatePaymentVerificationPlan: Boolean
   availablePaymentRecordsCount: Int
+  verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection
+  paymentVerificationSummary(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanSummaryNodeConnection
 }
 
 type CashPlanNodeConnection {

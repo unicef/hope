@@ -580,6 +580,7 @@ export type CashPlanAndPaymentPlanNode = {
   endDate?: Maybe<Scalars['String']>,
   programmeName?: Maybe<Scalars['String']>,
   updatedAt?: Maybe<Scalars['String']>,
+  verifications?: Maybe<Array<Maybe<PaymentVerificationPlanNode>>>,
 };
 
 export type CashPlanNode = Node & {
@@ -627,10 +628,30 @@ export type CashPlanNode = Node & {
   currency?: Maybe<Scalars['String']>,
   canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']>,
   availablePaymentRecordsCount?: Maybe<Scalars['Int']>,
+  verificationPlans?: Maybe<PaymentVerificationPlanNodeConnection>,
+  paymentVerificationSummary?: Maybe<PaymentVerificationPlanSummaryNodeConnection>,
 };
 
 
 export type CashPlanNodePaymentItemsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type CashPlanNodeVerificationPlansArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type CashPlanNodePaymentVerificationSummaryArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -8202,6 +8223,26 @@ export type ActivatePaymentVerificationPlanMutation = (
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & { verificationPlans: Maybe<(
+        { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'PaymentVerificationPlanNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'PaymentVerificationPlanNode' }
+            & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'activationDate'>
+          )> }
+        )>> }
+      )>, paymentVerificationSummary: Maybe<(
+        { __typename?: 'PaymentVerificationPlanSummaryNodeConnection' }
+        & Pick<PaymentVerificationPlanSummaryNodeConnection, 'totalCount'>
+        & { edges: Array<Maybe<(
+          { __typename?: 'PaymentVerificationPlanSummaryNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'PaymentVerificationPlanSummaryNode' }
+            & Pick<PaymentVerificationPlanSummaryNode, 'id' | 'status'>
+          )> }
+        )>> }
+      )> }
     )> }
   )> }
 );
@@ -8237,6 +8278,16 @@ export type DeletePaymentVerificationPlanMutation = (
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & { verificationPlans: Maybe<(
+        { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'PaymentVerificationPlanNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'PaymentVerificationPlanNode' }
+            & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
+          )> }
+        )>> }
+      )> }
     )> }
   )> }
 );
@@ -8253,6 +8304,16 @@ export type DiscardPaymentVerificationPlanMutation = (
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & { verificationPlans: Maybe<(
+        { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'PaymentVerificationPlanNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'PaymentVerificationPlanNode' }
+            & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
+          )> }
+        )>> }
+      )> }
     )> }
   )> }
 );
@@ -8304,6 +8365,26 @@ export type FinishPaymentVerificationPlanMutation = (
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & { verificationPlans: Maybe<(
+        { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'PaymentVerificationPlanNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'PaymentVerificationPlanNode' }
+            & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'completionDate'>
+          )> }
+        )>> }
+      )>, paymentVerificationSummary: Maybe<(
+        { __typename?: 'PaymentVerificationPlanSummaryNodeConnection' }
+        & Pick<PaymentVerificationPlanSummaryNodeConnection, 'totalCount'>
+        & { edges: Array<Maybe<(
+          { __typename?: 'PaymentVerificationPlanSummaryNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'PaymentVerificationPlanSummaryNode' }
+            & Pick<PaymentVerificationPlanSummaryNode, 'id' | 'status'>
+          )> }
+        )>> }
+      )> }
     )> }
   )> }
 );
@@ -9901,7 +9982,16 @@ export type AllCashPlansQuery = (
         )>, program: (
           { __typename?: 'ProgramNode' }
           & Pick<ProgramNode, 'id' | 'name'>
-        ) }
+        ), paymentVerificationSummary: Maybe<(
+          { __typename?: 'PaymentVerificationPlanSummaryNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'PaymentVerificationPlanSummaryNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'PaymentVerificationPlanSummaryNode' }
+              & Pick<PaymentVerificationPlanSummaryNode, 'id' | 'status'>
+            )> }
+          )>> }
+        )> }
       )> }
     )>> }
   )> }
@@ -10015,6 +10105,30 @@ export type CashPlanQuery = (
     & { serviceProvider: Maybe<(
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
+    )>, verificationPlans: Maybe<(
+      { __typename?: 'PaymentVerificationPlanNodeConnection' }
+      & Pick<PaymentVerificationPlanNodeConnection, 'totalCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentVerificationPlanNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentVerificationPlanNode' }
+          & Pick<PaymentVerificationPlanNode, 'id' | 'unicefId' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationChannel' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'activationDate' | 'completionDate' | 'excludedAdminAreasFilter' | 'sexFilter' | 'xlsxFileExporting' | 'hasXlsxFile' | 'xlsxFileWasDownloaded' | 'xlsxFileImported'>
+          & { ageFilter: Maybe<(
+            { __typename?: 'AgeFilterObject' }
+            & Pick<AgeFilterObject, 'min' | 'max'>
+          )> }
+        )> }
+      )>> }
+    )>, paymentVerificationSummary: Maybe<(
+      { __typename?: 'PaymentVerificationPlanSummaryNodeConnection' }
+      & Pick<PaymentVerificationPlanSummaryNodeConnection, 'totalCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentVerificationPlanSummaryNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentVerificationPlanSummaryNode' }
+          & Pick<PaymentVerificationPlanSummaryNode, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'activationDate' | 'completionDate'>
+        )> }
+      )>> }
     )>, program: (
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'caId'>
@@ -10166,7 +10280,16 @@ export type PaymentRecordQuery = (
       & { program: (
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name'>
-      ) }
+      ), verificationPlans: Maybe<(
+        { __typename?: 'PaymentVerificationPlanNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'PaymentVerificationPlanNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'PaymentVerificationPlanNode' }
+            & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'verificationChannel'>
+          )> }
+        )>> }
+      )> }
     )>, verification: Maybe<(
       { __typename?: 'PaymentVerificationNode' }
       & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
@@ -10349,7 +10472,16 @@ export type PaymentRecordVerificationQuery = (
         & { program: (
           { __typename?: 'ProgramNode' }
           & Pick<ProgramNode, 'id' | 'name'>
-        ) }
+        ), verificationPlans: Maybe<(
+          { __typename?: 'PaymentVerificationPlanNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'PaymentVerificationPlanNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'PaymentVerificationPlanNode' }
+              & Pick<PaymentVerificationPlanNode, 'id' | 'status' | 'verificationChannel'>
+            )> }
+          )>> }
+        )> }
       )>, serviceProvider: (
         { __typename?: 'ServiceProviderNode' }
         & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
@@ -13494,6 +13626,24 @@ export const ActivatePaymentVerificationPlanDocument = gql`
       id
       status
       statusDate
+      verificationPlans {
+        edges {
+          node {
+            id
+            status
+            activationDate
+          }
+        }
+      }
+      paymentVerificationSummary {
+        totalCount
+        edges {
+          node {
+            id
+            status
+          }
+        }
+      }
     }
     validationErrors
   }
@@ -13601,6 +13751,21 @@ export const DeletePaymentVerificationPlanDocument = gql`
       id
       status
       statusDate
+      verificationPlans {
+        edges {
+          node {
+            id
+            status
+            sampleSize
+            receivedCount
+            notReceivedCount
+            respondedCount
+            receivedCount
+            receivedWithProblemsCount
+            activationDate
+          }
+        }
+      }
     }
   }
 }
@@ -13654,6 +13819,21 @@ export const DiscardPaymentVerificationPlanDocument = gql`
       id
       status
       statusDate
+      verificationPlans {
+        edges {
+          node {
+            id
+            status
+            sampleSize
+            receivedCount
+            notReceivedCount
+            respondedCount
+            receivedCount
+            receivedWithProblemsCount
+            activationDate
+          }
+        }
+      }
     }
   }
 }
@@ -13811,6 +13991,24 @@ export const FinishPaymentVerificationPlanDocument = gql`
       id
       status
       statusDate
+      verificationPlans {
+        edges {
+          node {
+            id
+            status
+            completionDate
+          }
+        }
+      }
+      paymentVerificationSummary {
+        totalCount
+        edges {
+          node {
+            id
+            status
+          }
+        }
+      }
     }
   }
 }
@@ -17839,6 +18037,14 @@ export const AllCashPlansDocument = gql`
         totalDeliveredQuantity
         totalUndeliveredQuantity
         updatedAt
+        paymentVerificationSummary {
+          edges {
+            node {
+              id
+              status
+            }
+          }
+        }
       }
     }
   }
@@ -18135,6 +18341,52 @@ export const CashPlanDocument = gql`
     bankReconciliationSuccess
     bankReconciliationError
     totalNumberOfHouseholds
+    verificationPlans {
+      totalCount
+      edges {
+        node {
+          id
+          unicefId
+          status
+          sampleSize
+          receivedCount
+          notReceivedCount
+          respondedCount
+          verificationChannel
+          sampling
+          receivedCount
+          receivedWithProblemsCount
+          rapidProFlowId
+          confidenceInterval
+          marginOfError
+          activationDate
+          completionDate
+          ageFilter {
+            min
+            max
+          }
+          excludedAdminAreasFilter
+          sexFilter
+          xlsxFileExporting
+          hasXlsxFile
+          xlsxFileWasDownloaded
+          xlsxFileImported
+        }
+      }
+    }
+    paymentVerificationSummary {
+      totalCount
+      edges {
+        node {
+          id
+          createdAt
+          updatedAt
+          status
+          activationDate
+          completionDate
+        }
+      }
+    }
     program {
       id
       name
@@ -18494,6 +18746,15 @@ export const PaymentRecordDocument = gql`
         id
         name
       }
+      verificationPlans {
+        edges {
+          node {
+            id
+            status
+            verificationChannel
+          }
+        }
+      }
     }
     verification {
       id
@@ -18542,6 +18803,15 @@ export const PaymentRecordDocument = gql`
       program {
         id
         name
+      }
+      verificationPlans {
+        edges {
+          node {
+            id
+            status
+            verificationChannel
+          }
+        }
       }
     }
     currency
@@ -19040,6 +19310,15 @@ export const PaymentRecordVerificationDocument = gql`
         program {
           id
           name
+        }
+        verificationPlans {
+          edges {
+            node {
+              id
+              status
+              verificationChannel
+            }
+          }
         }
       }
       currency
@@ -23135,6 +23414,7 @@ export type CashPlanAndPaymentPlanNodeResolvers<ContextType = any, ParentType ex
   endDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   programmeName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   updatedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  verifications?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentVerificationPlanNode']>>>, ParentType, ContextType>,
 };
 
 export type CashPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNode'] = ResolversParentTypes['CashPlanNode']> = {
@@ -23181,6 +23461,8 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  verificationPlans?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, CashPlanNodeVerificationPlansArgs>,
+  paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanSummaryNodeConnection']>, ParentType, ContextType, CashPlanNodePaymentVerificationSummaryArgs>,
 };
 
 export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
