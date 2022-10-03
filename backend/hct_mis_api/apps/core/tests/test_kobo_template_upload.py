@@ -52,6 +52,7 @@ class TestKoboTemplateUpload(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.maxDiff = None
         cls.client = Client()
         cls.factory = RequestFactory()
         cls.site = AdminSite()
@@ -83,6 +84,7 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: relationship_i_c - Choice: OTHER is not present in the file",
                 "Field: marital_status_i_c - Choice: MARRIED is not present in the file",
                 "Field: marital_status_i_c - Choice: WRONG_CHOICE is not present in HOPE",
+                "Field: collect_individual_data_h_c - Choice: 2 is not present in the file",
                 "Field: currency_h_c - Choice: BOV is not present in the file",
                 "Field: currency_h_c - Choice: MRU is not present in the file",
                 "Field: currency_h_c - Choice: STN is not present in the file",

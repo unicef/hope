@@ -12,10 +12,10 @@ python3.9 -m pip install -r venv/requirements.txt --require-hashes
 CMD + Shift + P => `Python: Select interpreter`
 Provide path to `./backend/venv/bin/python3`
 
-Oneliner to refresh your packages:
+Oneliner to refresh your packages (from `backend` dir):
 
 ```sh
-docker-compose run --rm backend poetry export -f requirements.txt --output venv/requirements.txt ; python3.9 -m pip install -r venv/requirements.txt --require-hashes
+sh -c ". ./venv/bin/activate ; docker-compose run --rm backend poetry export -f requirements.txt --output venv/requirements.txt ; python3.9 -m pip install -r venv/requirements.txt --require-hashes"
 ```
 
 ## Testing

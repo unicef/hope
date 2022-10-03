@@ -861,7 +861,7 @@ type HouseholdNode implements Node {
   residenceStatus: HouseholdResidenceStatus!
   countryOrigin: String
   country: String
-  size: Int!
+  size: Int
   address: String!
   adminArea: AreaNode
   representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
