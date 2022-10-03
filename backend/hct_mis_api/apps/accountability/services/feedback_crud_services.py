@@ -24,7 +24,7 @@ class FeedbackCrudServices:
 
         obj = Feedback(
             business_area=BusinessArea.objects.get(slug=input_data["business_area_slug"]),
-            issue_type=input_data["issue_type"],
+            issue_type=int(input_data["issue_type"]),
             description=input_data["description"],
         )
         if check("household_lookup"):
@@ -54,7 +54,7 @@ class FeedbackCrudServices:
             return key in input_data and input_data[key] is not None
 
         if check("issue_type"):
-            feedback.issue_type = input_data["issue_type"]
+            feedback.issue_type = int(input_data["issue_type"])
         if check("description"):
             feedback.description = input_data["description"]
         if check("household_lookup"):

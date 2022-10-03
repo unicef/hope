@@ -89,16 +89,11 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
       .required('Issue Type is required')
       .nullable(),
     admin: Yup.string().nullable(),
-    description: Yup.string(),
-    consent: Yup.bool(),
-    area: Yup.string(),
-    language: Yup.string(),
-    selectedPaymentRecords: Yup.array()
-      .of(Yup.string())
-      .nullable(),
-    selectedRelatedTickets: Yup.array()
-      .of(Yup.string())
-      .nullable(),
+    description: Yup.string().nullable(),
+    consent: Yup.bool().nullable(),
+    area: Yup.string().nullable(),
+    language: Yup.string().nullable(),
+    program: Yup.string().nullable(),
   };
   if (currentStep === FeedbackSteps.Description) {
     datum.description = Yup.string().required('Description is required');
@@ -174,12 +169,12 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     selectedHousehold: null,
     selectedIndividual: null,
     description: '',
-    comments: '',
-    admin2: '',
-    area: '',
-    language: '',
+    comments: null,
+    admin2: null,
+    area: null,
+    language: null,
     consent: false,
-    program: '',
+    program: null,
     verificationRequired: false,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
@@ -242,7 +237,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     individualLookup: values.selectedIndividual.id,
     description: values.description,
     comments: values.comments,
-    admin2: values.admin2.node?.id,
+    admin2: values.admin2?.node?.id,
     area: values.area,
     language: values.language,
     consent: values.consent,
