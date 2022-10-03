@@ -178,9 +178,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         type_name = IDENTIFICATION_TYPE_OTHER
                     label = IDENTIFICATION_TYPE_DICT.get(type_name, data.get("name"))
                     country = Country(data["issuing_country"])
-
                     document_type, _ = ImportedDocumentType.objects.get_or_create(
-                        country=country,
                         label=label,
                         type=type_name,
                     )
@@ -188,6 +186,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     documents.append(
                         ImportedDocument(
                             document_number=data["number"],
+                            country=country,
                             photo=file,
                             individual=data["individual"],
                             type=document_type,
