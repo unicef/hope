@@ -43,6 +43,7 @@ export const FeedbackDetailsToolbar = ({
               component={Link}
               to={`/${businessArea}/accountability/feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
+              data-cy='button-edit'
             >
               {t('Edit')}
             </Button>
