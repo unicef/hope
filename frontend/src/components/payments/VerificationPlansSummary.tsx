@@ -16,13 +16,7 @@ export function VerificationPlansSummary({
   cashPlan,
 }: VerificationPlansSummaryProps): React.ReactElement {
   const { t } = useTranslation();
-  const {
-    paymentVerificationSummary: {
-      status,
-      activationDate,
-      completionDate,
-    },
-  } = cashPlan;
+  const {status, activationDate, completionDate} = cashPlan.paymentVerificationSummary.edges[0].node;
 
   return (
     <Grid container>
@@ -60,7 +54,7 @@ export function VerificationPlansSummary({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Number of Verification Plans')}>
-                {cashPlan.verifications.totalCount}
+                {cashPlan.verificationPlans.totalCount}
               </LabelizedField>
             </Box>
           </Grid>

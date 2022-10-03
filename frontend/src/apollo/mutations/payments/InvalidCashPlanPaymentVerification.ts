@@ -7,17 +7,17 @@ export const InvalidPaymentVerificationPlan = gql`
     ) {
       cashPlan {
         id
-        # verificationPlans {
-        #   edges {
-        #     node {
-        #       id
-        #       xlsxFileExporting
-        #       hasXlsxFile
-        #       xlsxFileWasDownloaded
-        #       xlsxFileImported
-        #     }
-        #   }
-        # }
+        verificationPlans {
+          edges {
+            node {
+              id
+              xlsxFileExporting
+              hasXlsxFile
+              xlsxFileWasDownloaded
+              xlsxFileImported
+            }
+          }
+        }
       }
     }
   }

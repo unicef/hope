@@ -1,50 +1,52 @@
-from uuid import UUID
-import factory
-
 from datetime import timedelta
 from decimal import Decimal
 from random import randint
+from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
+
+import factory
 from factory import fuzzy
 from pytz import utc
 
-from hct_mis_api.apps.targeting.models import (
-    TargetPopulation,
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-)
-from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
-from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY, Individual, MALE
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+)
+from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
 from hct_mis_api.apps.payment.models import (
-    PaymentVerificationPlan,
+    CashPlan,
+    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
     FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
+    GenericPayment,
+    Payment,
+    PaymentChannel,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
-    ServiceProvider,
+    PaymentVerificationPlan,
     PaymentVerificationSummary,
-    PaymentPlan,
-    Payment,
-    GenericPayment,
-    PaymentChannel,
-    DeliveryMechanismPerPaymentPlan,
+    ServiceProvider,
 )
-from hct_mis_api.apps.program.fixtures import (
-    ProgramFactory,
-)
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import CashPlan
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.models import (
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetPopulation,
+)
 
 
 class PaymentVerificationSummaryFactory(factory.DjangoModelFactory):
@@ -254,8 +256,8 @@ class PaymentVerificationPlanFactory(factory.DjangoModelFactory):
         PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES,
         getter=lambda c: c[0],
     )
-    payment_plan_object_id = CashPlan.objects.all().order_by("?")[0].pk,
-    payment_plan_content_type = ContentType.objects.get(app_label="payment", model="cashplan"),
+    payment_plan_object_id = (PaymentPlan.objects.order_by("?").first().pk if PaymentPlan.objects.count() else None,)
+    payment_plan_content_type = (ContentType.objects.get(app_label="payment", model="cashplan"),)
     sample_size = fuzzy.FuzzyInteger(0, 100)
     responded_count = fuzzy.FuzzyInteger(20, 90)
     received_count = fuzzy.FuzzyInteger(30, 70)

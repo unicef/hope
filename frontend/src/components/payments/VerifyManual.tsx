@@ -22,6 +22,7 @@ export interface Props {
   paymentVerificationId: string;
   enabled: boolean;
 }
+
 export function VerifyManual({
   paymentVerificationId,
   enabled,

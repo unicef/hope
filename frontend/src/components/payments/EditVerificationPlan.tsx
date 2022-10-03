@@ -31,7 +31,7 @@ import {
   useAllAdminAreasQuery,
   useAllRapidProFlowsQuery,
   useCashPlanQuery,
-  useEditCashPlanPaymentVerificationMutation,
+  useEditPaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
 import { FormikEffect } from '../core/FormikEffect';
@@ -49,7 +49,7 @@ const TabsContainer = styled.div`
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(
-  paymentVerificationPlanId,
+  paymentPlanId,
   selectedTab,
   values,
   businessArea,
@@ -57,8 +57,8 @@ function prepareVariables(
 ) {
   return {
     input: {
-      ...(paymentVerificationPlanId && {
-        paymentVerificationPlanId,
+      ...(paymentPlanId && {
+        paymentPlanId,
       }),
       ...(cashPlanId && { cashPlanId }),
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
@@ -98,11 +98,12 @@ function prepareVariables(
 }
 
 export interface Props {
-  paymentVerificationPlanId: string;
+  paymentPlanId: string;
   cashPlanId: string;
 }
+
 export function EditVerificationPlan({
-  paymentVerificationPlanId,
+  paymentPlanId,
   cashPlanId,
 }: Props): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashPlanId);
@@ -110,14 +111,14 @@ export function EditVerificationPlan({
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useEditCashPlanPaymentVerificationMutation();
+  const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
   const businessArea = useBusinessArea();
   const {
     data: { cashPlan },
   } = useCashPlanQuery({
     variables: { id: cashPlanId },
   });
-  const verification = cashPlan?.verifications?.edges[0].node;
+  const verification = cashPlan?.verificationPlans?.edges[0].node;
   useEffect(() => {
     if (verification.sampling === 'FULL_LIST') {
       setSelectedTab(0);
@@ -160,7 +161,7 @@ export function EditVerificationPlan({
 
   const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
     variables: prepareVariables(
-      paymentVerificationPlanId,
+      paymentPlanId,
       selectedTab,
       formValues,
       businessArea,
@@ -177,7 +178,7 @@ export function EditVerificationPlan({
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
       variables: prepareVariables(
-        paymentVerificationPlanId,
+        paymentPlanId,
         selectedTab,
         values,
         businessArea,

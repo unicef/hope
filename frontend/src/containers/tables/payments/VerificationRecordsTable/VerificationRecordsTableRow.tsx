@@ -37,10 +37,10 @@ export function VerificationRecordsTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        {record.cashPlanPaymentVerification.verificationChannel}
+        {record.paymentVerificationPlan.verificationChannel}
       </TableCell>
       <TableCell align='left'>
-        {record.cashPlanPaymentVerification.unicefId}
+        {record.paymentVerificationPlan.unicefId}
       </TableCell>
       <TableCell align='left'>
         <StatusBox

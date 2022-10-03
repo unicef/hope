@@ -31,7 +31,7 @@ import { ImportXlsx } from './ImportXlsx';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
 
 interface VerificationPlanDetailsProps {
-  verificationPlan: CashPlanQuery['cashPlan']['verifications']['edges'][number]['node'];
+  verificationPlan: CashPlanQuery['cashPlan']['verificationPlans']['edges'][number]['node'];
   samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
   cashPlan: CashPlanQuery['cashPlan'];
 }
@@ -139,7 +139,7 @@ export const VerificationPlanDetails = ({
                 {canEdit && (
                   <EditVerificationPlan
                     cashPlanId={cashPlan.id}
-                    paymentVerificationPlanId={verificationPlan.id}
+                    paymentPlanId={verificationPlan.id}
                   />
                 )}
                 {canActivate && (

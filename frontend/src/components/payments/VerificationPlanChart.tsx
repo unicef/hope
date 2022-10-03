@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { CashPlanQuery } from '../../__generated__/graphql';
 
 interface VerificationPlanDetailsChartProps {
-  verificationPlan: CashPlanQuery['cashPlan']['verifications']['edges'][number]['node'];
+  verificationPlan: CashPlanQuery['cashPlan']['verificationPlans']['edges'][number]['node'];
 }
 
 const ChartContainer = styled.div`
