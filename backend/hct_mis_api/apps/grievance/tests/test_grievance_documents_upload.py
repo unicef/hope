@@ -24,8 +24,6 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
             grievanceTickets{
               category
               admin
-              language
-              description
               consent
               documentation {
                 name
@@ -45,8 +43,6 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
             grievanceTicket{
               category
               admin
-              language
-              description
               consent
               documentation {
                 name
@@ -85,8 +81,6 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         cls.ticket_2 = ReferralTicketWithoutExtrasFactory()
         cls.ticket_2.ticket.status = GrievanceTicket.STATUS_NEW
         cls.ticket_2.ticket.save()
-
-        cls.grievance_document = GrievanceDocumentFactory(grievance_ticket=cls.ticket_2.ticket)
 
         cls.grievance_data = {
             "description": "Test Feedback",
@@ -294,7 +288,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         ]
     )
     def test_mutation_updates_single_document_for_existing_grievance_ticket(self, _, permissions):
+        self.maxDiff = None
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
@@ -304,7 +300,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     **self.grievance_data_to_update,
                     "documentationToUpdate": [
                         {
-                            "id": self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode"),
+                            "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
@@ -325,6 +321,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     )
     def test_mutation_deletes_single_document_for_existing_grievance_ticket(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
@@ -332,7 +329,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
             variables={
                 "input": {
                     **self.grievance_data_to_update,
-                    "documentationToDelete": [self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode")]
+                    "documentationToDelete": [self.id_to_base64(grievance_document.id, "GrievanceDocumentNode")]
                 }
             }
         )
@@ -345,6 +342,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     )
     def test_mutation_creates_and_deletes_documents_for_existing_grievance_ticket(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
@@ -362,7 +360,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             )
                         }
                     ],
-                    "documentationToDelete": [self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode")]
+                    "documentationToDelete": [self.id_to_base64(grievance_document.id, "GrievanceDocumentNode")]
                 }
             }
         )
@@ -375,6 +373,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     )
     def test_mutation_creates_and_updates_documents_for_existing_grievance_ticket(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
@@ -394,7 +393,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     ],
                     "documentationToUpdate": [
                         {
-                            "id": self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode"),
+                            "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
@@ -444,7 +443,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     **self.grievance_data_to_update,
                     "documentationToUpdate": [
                         {
-                            "id":self.id_to_base64(uuid.uuid4(), "GrievanceDocumentNode"),
+                            "id": self.id_to_base64(uuid.uuid4(), "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
@@ -465,6 +464,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     )
     def test_mutation_creates_updates_deletes_documents(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        grievance_document_to_update = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         grievance_document_to_delete = GrievanceDocumentFactory(
             grievance_ticket=self.ticket_2.ticket,
@@ -489,7 +489,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     ],
                     "documentationToUpdate": [
                         {
-                            "id": self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode"),
+                            "id": self.id_to_base64(grievance_document_to_update.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
@@ -511,6 +511,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     )
     def test_raises_error_when_mutation_updates_documents_above_25mb_limit(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
@@ -530,7 +531,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     ],
                     "documentationToUpdate": [
                         {
-                            "id": self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode"),
+                            "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
@@ -551,6 +552,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
     )
     def test_raises_error_when_mutation_updates_document_with_size_5mb(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        grievance_document = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_GRIEVANCE_MUTATION,
@@ -570,7 +572,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     ],
                     "documentationToUpdate": [
                         {
-                            "id": self.id_to_base64(self.grievance_document.id, "GrievanceDocumentNode"),
+                            "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
                                 name="scanned_document_update.jpg",
