@@ -1,4 +1,5 @@
 import logging
+import os
 from enum import Enum
 from typing import Union
 
@@ -83,14 +84,9 @@ from hct_mis_api.apps.grievance.utils import (
     get_individual,
     traverse_sibling_tickets,
     create_grievance_documents,
-    update_grievance_documents,
+    update_grievance_documents, delete_grievance_documents,
 )
-from hct_mis_api.apps.grievance.validators import (
-    DataChangeValidator,
-    validate_file,
-    validate_files_size,
-    validate_grievance_documents_size,
-)
+from hct_mis_api.apps.grievance.validators import DataChangeValidator, validate_grievance_documents_size
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -100,7 +96,6 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.utils.schema import Arg
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +108,7 @@ class GrievanceDocumentInput(graphene.InputObjectType):
 class GrievanceDocumentUpdateInput(graphene.InputObjectType):
     id = graphene.Field(graphene.ID, required=True)
     name = graphene.String(required=False)
-    file = Upload(required=True)
+    file = Upload(required=False)
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
@@ -503,7 +498,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         ids_to_delete = input.pop("documentation_to_delete", None)
 
         if ids_to_delete:
-            GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id, id__in=ids_to_delete).delete()
+            delete_grievance_documents(ticket_id, ids_to_delete)
 
         if documents_to_update:
             validate_grievance_documents_size(ticket_id, documents_to_update, is_updated=True)
