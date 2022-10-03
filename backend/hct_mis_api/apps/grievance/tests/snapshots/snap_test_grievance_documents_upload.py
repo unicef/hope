@@ -14,7 +14,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_and_deletes_docum
                 'admin': 'City Test',
                 'category': 6,
                 'consent': True,
-                'description': 'While amount push to yeah.',
+                'description': 'Huge hundred experience bad example choice free.',
                 'documentation': [
                     {
                         'contentType': 'image/jpeg',
@@ -22,7 +22,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_and_deletes_docum
                         'name': 'created_scanned_document1'
                     }
                 ],
-                'language': 'With might network own half less name.'
+                'language': 'Become better tend.'
             }
         }
     }
@@ -50,28 +50,22 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_and_deletes_docum
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_and_updates_documents_for_existing_grievance_ticket_0_with_permission 1'] = {
     'data': {
-        'updateGrievanceTicket': {
-            'grievanceTicket': {
-                'admin': 'City Test',
-                'category': 6,
-                'consent': True,
-                'description': 'While amount push to yeah.',
-                'documentation': [
-                    {
-                        'contentType': 'image/jpeg',
-                        'fileSize': 666,
-                        'name': 'created_scanned_document1'
-                    },
-                    {
-                        'contentType': 'image/jpeg',
-                        'fileSize': 1048576,
-                        'name': 'updated_document.jpg'
-                    }
-                ],
-                'language': 'With might network own half less name.'
-            }
+        'updateGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 5
+                }
+            ],
+            'message': "[Errno 2] No such file or directory: '/code/test_data/xyz.jpg'",
+            'path': [
+                'updateGrievanceTicket'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_and_updates_documents_for_existing_grievance_ticket_1_without_permission 1'] = {
@@ -241,7 +235,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_single_document_f
                 'admin': 'City Test',
                 'category': 6,
                 'consent': True,
-                'description': 'While amount push to yeah.',
+                'description': 'Huge hundred experience bad example choice free.',
                 'documentation': [
                     {
                         'contentType': 'image/jpeg',
@@ -254,7 +248,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_single_document_f
                         'name': 'xyz'
                     }
                 ],
-                'language': 'With might network own half less name.'
+                'language': 'Become better tend.'
             }
         }
     }
@@ -282,28 +276,22 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_single_document_f
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_updates_deletes_documents_0_with_permission 1'] = {
     'data': {
-        'updateGrievanceTicket': {
-            'grievanceTicket': {
-                'admin': 'City Test',
-                'category': 6,
-                'consent': True,
-                'description': 'While amount push to yeah.',
-                'documentation': [
-                    {
-                        'contentType': 'image/jpeg',
-                        'fileSize': 666,
-                        'name': 'created_scanned_document1'
-                    },
-                    {
-                        'contentType': 'image/jpeg',
-                        'fileSize': 1048576,
-                        'name': 'updated_document.jpg'
-                    }
-                ],
-                'language': 'With might network own half less name.'
-            }
+        'updateGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 5
+                }
+            ],
+            'message': "[Errno 2] No such file or directory: '/code/test_data/xyz.jpg'",
+            'path': [
+                'updateGrievanceTicket'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_updates_deletes_documents_1_without_permission 1'] = {
@@ -333,7 +321,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_deletes_non_existing_docu
                 'admin': 'City Test',
                 'category': 6,
                 'consent': True,
-                'description': 'While amount push to yeah.',
+                'description': 'Huge hundred experience bad example choice free.',
                 'documentation': [
                     {
                         'contentType': 'image/jpeg',
@@ -341,7 +329,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_deletes_non_existing_docu
                         'name': 'xyz'
                     }
                 ],
-                'language': 'With might network own half less name.'
+                'language': 'Become better tend.'
             }
         }
     }
@@ -374,10 +362,10 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_deletes_single_document_f
                 'admin': 'City Test',
                 'category': 6,
                 'consent': True,
-                'description': 'While amount push to yeah.',
+                'description': 'Huge hundred experience bad example choice free.',
                 'documentation': [
                 ],
-                'language': 'With might network own half less name.'
+                'language': 'Become better tend.'
             }
         }
     }
@@ -530,7 +518,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_updates_non_existing_docu
                 'admin': 'City Test',
                 'category': 6,
                 'consent': True,
-                'description': 'While amount push to yeah.',
+                'description': 'Huge hundred experience bad example choice free.',
                 'documentation': [
                     {
                         'contentType': 'image/jpeg',
@@ -538,7 +526,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_updates_non_existing_docu
                         'name': 'xyz'
                     }
                 ],
-                'language': 'With might network own half less name.'
+                'language': 'Become better tend.'
             }
         }
     }
@@ -566,23 +554,22 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_updates_non_existing_docu
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_updates_single_document_for_existing_grievance_ticket_0_with_permission 1'] = {
     'data': {
-        'updateGrievanceTicket': {
-            'grievanceTicket': {
-                'admin': 'City Test',
-                'category': 6,
-                'consent': True,
-                'description': 'While amount push to yeah.',
-                'documentation': [
-                    {
-                        'contentType': 'image/jpeg',
-                        'fileSize': 1048576,
-                        'name': 'updated_document.jpg'
-                    }
-                ],
-                'language': 'With might network own half less name.'
-            }
+        'updateGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 5
+                }
+            ],
+            'message': "[Errno 2] No such file or directory: '/code/test_data/xyz.jpg'",
+            'path': [
+                'updateGrievanceTicket'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_updates_single_document_for_existing_grievance_ticket_1_without_permission 1'] = {
@@ -617,7 +604,7 @@ snapshots['TestGrievanceDocumentsUpload::test_raises_error_when_mutation_updates
                     'line': 5
                 }
             ],
-            'message': 'File scanned_document_update.jpg of size 5242880 is above max size limit',
+            'message': "[Errno 2] No such file or directory: '/code/test_data/xyz.jpg'",
             'path': [
                 'updateGrievanceTicket'
             ]
