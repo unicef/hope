@@ -2,7 +2,6 @@ import zipfile
 
 from io import BytesIO
 from pathlib import Path
-from constance.test import override_config
 from unittest.mock import patch
 
 from django.conf import settings
@@ -19,6 +18,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
 )
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportPerFspService import XlsxPaymentPlanExportPerFspService
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.payment.fixtures import (
     ServiceProviderFactory,
@@ -88,6 +88,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         ).file
 
     def test_import_invalid_file(self):
+        self.maxDiff = None
         error_msg = [
             ("Payment Plan - Payment List", "A2", "This payment id 123123 is not in Payment Plan Payment List"),
             (
@@ -113,6 +114,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(service.errors, error_msg)
 
     def test_import_valid_file(self):
+        self.maxDiff = None
         not_excluded_payments = self.payment_plan.not_excluded_payments.all()
         # override imported payment id
         payment_id_1 = str(not_excluded_payments[0].unicef_id)
@@ -160,15 +162,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(wb.active["A2"].value, str(payment.unicef_id))
         self.assertEqual(wb.active["I2"].value, payment.entitlement_quantity)
         self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity_usd)
-        payment_channels = ", ".join(
-            list(
-                self.payment_plan.not_excluded_payments.first()
-                .collector.payment_channels.all()
-                .distinct("delivery_mechanism")
-                .values_list("delivery_mechanism", flat=True)
-            )
-        )
-        self.assertEqual(wb.active["F2"].value, payment_channels)
+        self.assertEqual(wb.active["F2"].value, "")
 
     def test_export_payment_plan_payment_list_per_fsp(self):
         # add assigned_payment_channel
@@ -176,7 +170,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
             p.assigned_payment_channel = p.collector.payment_channels.first()
             p.save()
 
-        export_service = XlsxPaymentPlanExportService(self.payment_plan)
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         export_service.export_per_fsp(self.user)
 
         self.assertTrue(self.payment_plan.has_export_file)

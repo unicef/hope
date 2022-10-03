@@ -601,14 +601,26 @@ class TestPaymentPlanReconciliation(APITestCase):
 
             self.assertEqual(payment.assigned_payment_channel.delivery_mechanism, "Cash")
 
+            self.assertEqual(sheet.cell(row=1, column=2).value, "household_id")
+            self.assertEqual(sheet.cell(row=2, column=2).value, "HH-22-0000.0209")
+            self.assertEqual(sheet.cell(row=1, column=3).value, "household_size")
+            self.assertEqual(sheet.cell(row=2, column=3).value, "household_size")
+            self.assertEqual(sheet.cell(row=1, column=4).value, "admin_level_2")
+            self.assertEqual(sheet.cell(row=2, column=4).value, "admin_level_2")
+            self.assertEqual(sheet.cell(row=1, column=5).value, "collector_name")
+            self.assertEqual(sheet.cell(row=2, column=5).value, "collector_name")
             self.assertEqual(sheet.cell(row=1, column=5).value, "payment_channel")
             self.assertEqual(sheet.cell(row=2, column=5).value, "Cash")
-
-            self.assertEqual(sheet.cell(row=1, column=7).value, "entitlement_quantity")
-            self.assertEqual(sheet.cell(row=2, column=7).value, 500)
-
-            self.assertEqual(sheet.cell(row=1, column=8).value, "delivered_quantity")
-            self.assertEqual(sheet.cell(row=2, column=8).value, None)
+            self.assertEqual(sheet.cell(row=1, column=6).value, "fsp_name")
+            self.assertEqual(sheet.cell(row=2, column=6).value, "fsp_name")
+            self.assertEqual(sheet.cell(row=1, column=7).value, "currency")
+            self.assertEqual(sheet.cell(row=2, column=7).value, "currency")
+            self.assertEqual(sheet.cell(row=1, column=8).value, "entitlement_quantity")
+            self.assertEqual(sheet.cell(row=2, column=8).value, 500)
+            self.assertEqual(sheet.cell(row=1, column=8).value, "entitlement_quantity_usd")
+            self.assertEqual(sheet.cell(row=2, column=8).value, 5000)
+            self.assertEqual(sheet.cell(row=1, column=9).value, "delivered_quantity")
+            self.assertEqual(sheet.cell(row=2, column=9).value, None)
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)

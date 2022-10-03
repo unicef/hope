@@ -244,7 +244,7 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     )
 
     def total_selected_columns(self, obj):
-        return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_TO_CHOOSE)}"
+        return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES)}"
 
     total_selected_columns.short_description = "# of columns"
 
