@@ -2,7 +2,6 @@ import zipfile
 
 from io import BytesIO
 from pathlib import Path
-from constance.test import override_config
 from unittest.mock import patch
 
 from django.conf import settings
@@ -17,8 +16,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     ServiceProvider,
     FinancialServiceProvider,
+    GenericPayment,
 )
 from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportPerFspService import XlsxPaymentPlanExportPerFspService
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.payment.fixtures import (
     ServiceProviderFactory,
@@ -26,6 +27,8 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     PaymentFactory,
     PaymentChannelFactory,
+    FinancialServiceProviderFactory,
+    DeliveryMechanismPerPaymentPlanFactory,
 )
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
@@ -160,23 +163,27 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         self.assertEqual(wb.active["A2"].value, str(payment.unicef_id))
         self.assertEqual(wb.active["I2"].value, payment.entitlement_quantity)
         self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity_usd)
-        payment_channels = ", ".join(
-            list(
-                self.payment_plan.not_excluded_payments.first()
-                .collector.payment_channels.all()
-                .distinct("delivery_mechanism")
-                .values_list("delivery_mechanism", flat=True)
-            )
-        )
-        self.assertEqual(wb.active["F2"].value, payment_channels)
+        self.assertEqual(wb.active["F2"].value, "")
 
     def test_export_payment_plan_payment_list_per_fsp(self):
-        # add assigned_payment_channel
-        for p in self.payment_plan.not_excluded_payments.all():
-            p.assigned_payment_channel = p.collector.payment_channels.first()
-            p.save()
+        financial_service_provider1 = FinancialServiceProviderFactory(
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
+        )
+        financial_service_provider2 = FinancialServiceProviderFactory(
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER]
+        )
+        dms1 = DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            financial_service_provider=financial_service_provider1,
+        )
+        dms2 = DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+            financial_service_provider=financial_service_provider2,
+        )
 
-        export_service = XlsxPaymentPlanExportService(self.payment_plan)
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         export_service.export_per_fsp(self.user)
 
         self.assertTrue(self.payment_plan.has_export_file)
@@ -186,7 +193,7 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
             )
         )
-        fsp_ids = export_service.payment_list.values_list("financial_service_provider_id", flat=True)
+        fsp_ids = self.payment_plan.delivery_mechanisms.values_list("financial_service_provider_id", flat=True)
         with zipfile.ZipFile(self.payment_plan.export_file.file, mode="r") as zip_file:
             file_list = zip_file.namelist()
             self.assertEqual(len(fsp_ids), len(file_list))
