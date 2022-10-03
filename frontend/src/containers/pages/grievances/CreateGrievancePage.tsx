@@ -300,11 +300,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
     'Identity Verification',
     'Description',
   ];
-  const feedbackWithHouseholdAndIndividual =
-    linkedFeedbackId && selectedHousehold && selectedIndividual;
 
   // if creating a linked G&F ticket from Feedback page skip Look Up
-  if (feedbackWithHouseholdAndIndividual) {
+  if (linkedFeedbackId) {
     steps = ['Category Selection', 'Identity Verification', 'Description'];
   }
 
@@ -340,7 +338,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
           setValidateData(false);
           handleNext();
           // if creating a linked G&F ticket from Feedback page skip Look Up
-          if (activeStep === 0 && feedbackWithHouseholdAndIndividual) {
+          if (activeStep === 0 && linkedFeedbackId) {
             handleNext();
           }
         }
