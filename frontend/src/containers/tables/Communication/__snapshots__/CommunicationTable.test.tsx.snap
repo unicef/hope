@@ -207,9 +207,7 @@ exports[`containers/tables//Communication/CommunicationTable should render with 
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  VARUN
-                   
-                  GANDE
+                  VARUN GANDE
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -243,9 +241,7 @@ exports[`containers/tables//Communication/CommunicationTable should render with 
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Root
-                   
-                  Rootkowski
+                  Root Rootkowski
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -279,9 +275,7 @@ exports[`containers/tables//Communication/CommunicationTable should render with 
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Root
-                   
-                  Rootkowski
+                  Root Rootkowski
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -315,9 +309,7 @@ exports[`containers/tables//Communication/CommunicationTable should render with 
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Root
-                   
-                  Rootkowski
+                  Root Rootkowski
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
