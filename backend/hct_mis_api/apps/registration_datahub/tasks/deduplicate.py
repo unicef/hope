@@ -418,7 +418,7 @@ class DeduplicateTask:
             "birth_date",
         )
         dict_fields = {
-            "documents": ("document_number", "type.type", "type.country"),
+            "documents": ("document_number", "type.type", "country"),
             "identities": ("document_number", "agency.type"),
             "household": (
                 "residence_status",
@@ -491,7 +491,7 @@ class DeduplicateTask:
             "birth_date",
         )
         dict_fields = {
-            "documents": ("document_number", "type.type", "type.country"),
+            "documents": ("document_number", "type.type", "country"),
             "identities": ("number", "agency.type"),
             "household": (
                 "residence_status",
