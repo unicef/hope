@@ -5,13 +5,13 @@ let individualId;
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
-  cy.get('input[name="username"]').type(Cypress.env('username'));
-  cy.get('input[name="password"]').type(Cypress.env('password'));
+  cy.get('input[name="username"]').type(Cypress.env('daUsername'));
+  cy.get('input[name="password"]').type(Cypress.env('daPassword'));
   cy.get('input').contains('Log in').click();
 });
 
 Given('There are no RDI imports', () => {
-  cy.exec('yarn run generate-xlsx-files');
+  cy.exec('yarn run generate-xlsx-files 1');
 });
 
 const clearCache = () => {
@@ -77,7 +77,7 @@ When('I press import', () => {
 });
 
 Then('I should see a new import with status in review', () => {
-  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
   cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
   // it lets the browser load the status
@@ -121,10 +121,18 @@ Then('I see a newly imported household', () => {
 });
 
 When('I visit the Individuals dashboard', () => {
-  cy.get('span').contains('Individuals').click();
+  cy.get('span').contains('Individuals').click({ force: true });
 });
 
 Then('I see the newly imported individuals', () => {
   // after 10+ runs, it may fail, because there are 10 rows in this table by default
   cy.get('td').should('contain', individualId);
 });
+
+When('I check the household details', () => {
+  cy.get('td').contains(householdId).click();
+})
+
+Then('I see the household has the correct data', () => {
+  cy.get('[data-cy="label-COLLECT TYPE"]').contains('Full');
+})

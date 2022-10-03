@@ -14,10 +14,8 @@ export function ProfilePage(): React.ReactElement {
         `${LOGIN_URL}?next=${location.pathname}${location.search}`,
       );
     }
-    if(next && next.startsWith('/api/')){
-      window.location.replace(
-        next,
-      );
+    if (next?.startsWith('/api/')) {
+      window.location.replace(next);
     }
   });
   if (error) {

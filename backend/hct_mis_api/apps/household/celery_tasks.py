@@ -5,6 +5,7 @@ from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
@@ -14,14 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 @app.task()
+@log_start_and_end
 @sentry_tags
 def recalculate_population_fields_task(household_ids: list[UUID] = None):
-    logger.info("recalculate_population_fields")
     try:
-        from hct_mis_api.apps.household.models import YES, Household, Individual
+        from hct_mis_api.apps.household.models import Household, Individual
 
-        params = {"collect_individual_data": YES}
-
+        params = {}
         if household_ids:
             params["pk__in"] = household_ids
 
@@ -40,8 +40,6 @@ def recalculate_population_fields_task(household_ids: list[UUID] = None):
     except Exception as e:
         logger.exception(e)
         raise
-
-    logger.info("recalculate_population_fields end")
 
 
 @app.task()
