@@ -43,7 +43,7 @@ def create_es_query(options):
     query_term_fields = []
     query_terms_fields = []
 
-    options["admin2"] = options.pop("admin")
+    options["admin2"] = options.pop("admin", None)
 
     grievance_status = options.pop("grievance_status", "active")
     created_at_range = options.pop("created_at_range", None)
@@ -128,7 +128,7 @@ def create_es_query(options):
                     }
                 })
 
-        if k in TERMS_FIELDS and v not in ([""], [None]):
+        if k in TERMS_FIELDS and v not in ([""], [None], None):
             if k == "admin2":
                 query_terms_fields.append({
                     "terms": {
