@@ -25,23 +25,7 @@ Feature: Create Payment Plan
     #        When I choose the steficon rule
     #        And I apply the steficon rule
     #        Then I see the entitlements calculated
-    #        And I am able to set up FSPs
-    #        Then I should see the Set up FSP page
-    #        When I select the delivery mechanisms
-    #        Then I should be able to assign FSPs
-    #        When I select the FSPs and save
-    #        Then I should see volumes by delivery mechanisms
-    #        When I lock the FSPs
-    #        Then I should see that the status is FSP Locked
-    #        When I send the Payment Plan for approval
-    #        Then I see the acceptance process stepper
-    #        When I approve the Payment Plan
-    #        Then I see the Payment Plan as in authorization
-    #        When I authorize the Payment Plan
-    #        Then I see the Payment Plan as in review
-    #        When I finalize the Payment Plan
-    #        Then I see the Payment Plan as accepted
-    # And I can export xlsx to zip file
+    # can stop here, since the following steps are done in the scenario below
 
     Scenario: Create Payment Plan with xlsx entitlements
         When I visit the main dashboard
