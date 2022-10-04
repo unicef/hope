@@ -646,5 +646,9 @@
   "Ticket already exists": "Ticket already exists",
   "Tickets already exist": "Tickets already exist",
   "Programme Title": "Programme Title",
+  "Documentation": "Documentation",
+  "Add another document": "Add another document",
+  "Add document": "Add document",
+  "Document Name": "Document Name",
   "Communication": "Communication"
 }

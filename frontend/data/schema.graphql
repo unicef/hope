@@ -562,6 +562,7 @@ input CreateGrievanceTicketInput {
   partner: Int
   programme: ID
   comments: String
+  documentation: [GrievanceDocumentInput]
 }
 
 type CreateGrievanceTicketMutation {
@@ -866,6 +867,40 @@ input GrievanceComplaintTicketExtras {
   paymentRecord: [ID]
 }
 
+input GrievanceDocumentInput {
+  name: String!
+  file: Upload!
+}
+
+type GrievanceDocumentNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String
+  createdBy: UserNode
+  grievanceTicket: GrievanceTicketNode
+  fileSize: Int
+  contentType: String!
+  filePath: String
+  fileName: String
+}
+
+type GrievanceDocumentNodeConnection {
+  pageInfo: PageInfo!
+  edges: [GrievanceDocumentNodeEdge]!
+}
+
+type GrievanceDocumentNodeEdge {
+  node: GrievanceDocumentNode
+  cursor: String!
+}
+
+input GrievanceDocumentUpdateInput {
+  id: ID!
+  name: String
+  file: Upload!
+}
+
 type GrievanceStatusChangeMutation {
   grievanceTicket: GrievanceTicketNode
 }
@@ -914,6 +949,7 @@ type GrievanceTicketNode implements Node {
   positiveFeedbackTicketDetails: TicketPositiveFeedbackDetailsNode
   negativeFeedbackTicketDetails: TicketNegativeFeedbackDetailsNode
   referralTicketDetails: TicketReferralDetailsNode
+  supportDocuments(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceDocumentNodeConnection!
   household: HouseholdNode
   individual: IndividualNode
   paymentRecord: PaymentRecordNode
@@ -921,6 +957,7 @@ type GrievanceTicketNode implements Node {
   admin: String
   existingTickets: [GrievanceTicketNode]
   totalDays: String
+  documentation: [GrievanceDocumentNode]
 }
 
 type GrievanceTicketNodeConnection {
@@ -3734,6 +3771,9 @@ input UpdateGrievanceTicketInput {
   partner: Int
   programme: ID
   comments: String
+  documentation: [GrievanceDocumentInput]
+  documentationToUpdate: [GrievanceDocumentUpdateInput]
+  documentationToDelete: [ID]
 }
 
 type UpdateGrievanceTicketMutation {
