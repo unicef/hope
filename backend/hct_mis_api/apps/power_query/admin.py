@@ -1,6 +1,8 @@
 import logging
 import pickle
 
+from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import register
 from django.contrib.contenttypes.models import ContentType
@@ -8,6 +10,7 @@ from django.db import models
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.template.response import TemplateResponse
 from django.urls import reverse
 
 import tablib
@@ -16,11 +19,14 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from import_export import fields, resources
 from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
+from smart_admin.mixins import LinkedObjectsMixin
 
+from ..steficon.widget import PythonEditor
 from ..utils.admin import HOPEModelAdminBase
 from .celery_tasks import queue, refresh_reports
-from .forms import ExportForm, FormatterTestForm, QueryForm
-from .models import Dataset, Formatter, Query, Report
+from .defaults import SYSTEM_QUERYARGS
+from .forms import ExportForm, FormatterTestForm
+from .models import Dataset, Formatter, Parametrizer, Query, Report, ReportResult
 from .utils import to_dataset
 from .widget import FormatterEditor
 
@@ -47,18 +53,30 @@ class QueryResource(resources.ModelResource):
 
 
 @register(Query)
-class QueryAdmin(HOPEModelAdminBase):
-    list_display = ("name", "target", "description", "owner", "status", "is_ready")
+class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+    list_display = ("name", "target", "description", "owner")
     search_fields = ("name",)
     list_filter = (
         ("target", AutoCompleteFilter),
         ("owner", AutoCompleteFilter),
     )
     autocomplete_fields = ("target", "owner")
-    readonly_fields = ("error",)
-    form = QueryForm
+    readonly_fields = ("error", "info")
     change_form_template = None
     resource_class = QueryResource
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "code":
+            kwargs = {"widget": PythonEditor}
+        elif db_field.name == "description":
+            kwargs = {"widget": forms.Textarea(attrs={"rows": 2, "style": "width:80%"})}
+        elif db_field.name == "owner":
+            kwargs = {"widget": forms.HiddenInput}
+
+        return super(QueryAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_readonly_fields(self, request, obj=None):
+        return super().get_readonly_fields(request, obj)
 
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser or (obj and obj.owner == request.user)
@@ -73,20 +91,26 @@ class QueryAdmin(HOPEModelAdminBase):
 
     is_ready.boolean = True
 
-    @button(visible=lambda btn: "/change" in btn.context["request"].path)
-    def create_report(self, request, pk):
-        obj = self.get_object(request, pk)
-        url = reverse("admin:power_query_report_add")
-        return HttpResponseRedirect(f"{url}?q={obj.pk}")
-
-    @button(visible=lambda btn: btn.context["original"].ready and "/change" in btn.context["request"].path)
-    def result(self, request, pk):
-        obj = self.get_object(request, pk)
-        try:
-            url = reverse("admin:power_query_dataset_change", args=[obj.dataset.pk])
-            return HttpResponseRedirect(url)
-        except Exception as e:
-            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+    # @button(visible=lambda btn: "/change" in btn.context["request"].path)
+    # def create_report(self, request, pk):
+    #     obj = self.get_object(request, pk)
+    #     url = reverse("admin:power_query_report_add")
+    #     return HttpResponseRedirect(f"{url}?q={obj.pk}")
+    #
+    # @button(visible=lambda btn: btn.context["original"].ready and "/change" in btn.context["request"].path)
+    # def result(self, request, pk):
+    #     obj = self.get_object(request, pk)
+    #     try:
+    #         url = reverse("admin:power_query_dataset_change", args=[obj.dataset.pk])
+    #         return HttpResponseRedirect(url)
+    #     except Exception as e:
+    #         self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+    #
+    @button(visible=settings.DEBUG)
+    def run(self, request, pk):
+        query: Query = self.get_object(request, pk)
+        result = query.execute_matrix(persist=True)
+        self.message_user(request, f"{result}", messages.SUCCESS)
 
     @button()
     def queue(self, request, pk):
@@ -127,14 +151,20 @@ class QueryAdmin(HOPEModelAdminBase):
 @register(Dataset)
 class DatasetAdmin(HOPEModelAdminBase):
     search_fields = ("query__name",)
-    list_display = ("query", "dataset_type", "target_type")
-    list_filter = (("query__target", AutoCompleteFilter),)
+    list_display = ("query", "last_run", "dataset_type", "target_type", "size", "arguments")
+    list_filter = (
+        ("query__target", AutoCompleteFilter),
+        ("query", AutoCompleteFilter),
+    )
     change_form_template = None
     readonly_fields = ("last_run", "query", "info")
     date_hierarchy = "last_run"
 
     def has_add_permission(self, request):
         return False
+
+    def arguments(self, obj):
+        return obj.info.get("arguments")
 
     def dataset_type(self, obj):
         return obj.info.get("type")
@@ -241,10 +271,10 @@ class ReportResource(resources.ModelResource):
 
 
 @register(Report)
-class ReportAdmin(ImportExportMixin, HOPEModelAdminBase):
-    list_display = ("name", "query", "formatter", "is_ready", "last_run")
+class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+    list_display = ("name", "query", "formatter", "last_run")
     autocomplete_fields = ("query", "formatter")
-    filter_horizontal = ("available_to",)
+    filter_horizontal = ("limit_access_to",)
     readonly_fields = ("last_run",)
     list_filter = (("query", AutoCompleteFilter), ("formatter", AutoCompleteFilter))
     resource_class = ReportResource
@@ -262,24 +292,15 @@ class ReportAdmin(ImportExportMixin, HOPEModelAdminBase):
             kwargs["notify_to"] = [request.user]
         return kwargs
 
-    def is_ready(self, obj):
-        return obj.result is not None
-
-    is_ready.boolean = True
-
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request, pk):
         obj: Report = self.get_object(request, pk)
         try:
-            obj.execute()
+            result = obj.execute()
+            self.message_user(request, f"{result}")
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-
-    @button(visible=lambda btn: btn.context["original"].result and "/change" in btn.context["request"].path)
-    def view(self, request, pk):
-        url = reverse("power_query:report", args=[pk])
-        return HttpResponseRedirect(url)
 
     @button(visible=lambda btn: btn.path.endswith("/power_query/report/"))
     def refresh(self, request):
@@ -288,3 +309,37 @@ class ReportAdmin(ImportExportMixin, HOPEModelAdminBase):
             self.message_user(request, "Reports refresh queued", messages.SUCCESS)
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+
+
+@register(Parametrizer)
+class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+    list_display = ("name", "code", "system")
+    list_filter = ("system",)
+    search_fields = ("name", "code")
+
+    @button()
+    def preview(self, request, pk):
+        context = self.get_common_context(request, pk, title="Execution Plan")
+        return TemplateResponse(request, "admin/power_query/queryargs/preview.html", context)
+
+    @button(visible=lambda b: b.context["original"].system)
+    def refresh(self, request, pk):
+        obj = self.get_object(request, pk)
+        obj.value = SYSTEM_QUERYARGS[obj.code]["value"]()
+        obj.save()
+
+
+@register(ReportResult)
+class ReportResultAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+    list_display = ("report", "dataset", "info", "size")
+
+    def info(self, obj: ReportResult):
+        return obj.dataset.info
+
+    def size(self, obj: ReportResult):
+        return len(obj.output or "")
+
+    @button()
+    def view(self, request, pk):
+        url = reverse("power_query:report", args=[pk])
+        return HttpResponseRedirect(url)

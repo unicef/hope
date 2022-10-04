@@ -12,7 +12,6 @@ from concurrency.utils import get_classname
 
 
 def fqn(o):
-
     parts = []
 
     if inspect.isclass(o):
@@ -87,3 +86,11 @@ def basicauth(view):
         return response
 
     return wrap
+
+
+def sizeof(num, suffix="B"):
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+        if abs(num) < 1024.0:
+            return f"{num:3.1f}{unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f}Yi{suffix}"
