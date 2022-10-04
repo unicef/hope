@@ -178,24 +178,6 @@ class AgeFilterObject(graphene.ObjectType):
     max = graphene.Int()
 
 
-class PaymentVerificationPlanNode(DjangoObjectType):
-    excluded_admin_areas_filter = graphene.List(graphene.String)
-    age_filter = graphene.Field(AgeFilterObject)
-    xlsx_file_was_downloaded = graphene.Boolean()
-    has_xlsx_file = graphene.Boolean()
-
-    class Meta:
-        model = PaymentVerificationPlan
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-    def resolve_xlsx_file_was_downloaded(self, info):
-        return self.xlsx_payment_verification_plan_file_was_downloaded
-
-    def resolve_has_xlsx_file(self, info):
-        return self.has_xlsx_payment_verification_plan_file
-
-
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
     is_manually_editable = graphene.Boolean()
@@ -222,15 +204,6 @@ class GetCashplanVerificationSampleSizeObject(graphene.ObjectType):
 class ChartPaymentVerification(ChartDetailedDatasetsNode):
     households = graphene.Int()
     average_sample_size = graphene.Float()
-
-
-class PaymentVerificationLogEntryNode(LogEntryNode):
-    content_object = graphene.Field(PaymentVerificationPlanNode)
-
-    class Meta:
-        model = LogEntry
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
 
 
 class ApprovalNode(DjangoObjectType):
@@ -447,6 +420,34 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
 
+class PaymentVerificationPlanNode(DjangoObjectType):
+    excluded_admin_areas_filter = graphene.List(graphene.String)
+    age_filter = graphene.Field(AgeFilterObject)
+    xlsx_file_was_downloaded = graphene.Boolean()
+    has_xlsx_file = graphene.Boolean()
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Meta:
+        model = PaymentVerificationPlan
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    def resolve_xlsx_file_was_downloaded(self, info):
+        return self.xlsx_payment_verification_plan_file_was_downloaded
+
+    def resolve_has_xlsx_file(self, info):
+        return self.has_xlsx_payment_verification_plan_file
+
+
+class PaymentVerificationLogEntryNode(LogEntryNode):
+    content_object = graphene.Field(PaymentVerificationPlanNode)
+
+    class Meta:
+        model = LogEntry
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
 
@@ -459,6 +460,21 @@ class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
+
+
+class XProgramNode(BaseNodePermissionMixin, graphene.ObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+        ),
+    )
+
+    budget = graphene.Decimal()
+    total_entitled_quantity = graphene.Decimal()
+    total_delivered_quantity = graphene.Decimal()
+    total_undelivered_quantity = graphene.Decimal()
+    total_number_of_households = graphene.Int()
+    individual_data_needed = graphene.Boolean()
 
 
 class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
@@ -484,7 +500,16 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     end_date = graphene.String()
     programme_name = graphene.String()
     updated_at = graphene.String()
-    verifications = graphene.List(PaymentVerificationPlanNode)
+    verification_plans = graphene.List(PaymentVerificationPlanNode)
+    total_number_of_households = graphene.Int()
+    total_entitled_quantity = graphene.Float()
+    total_undelivered_quantity = graphene.Float()
+
+    # TODO: Fields with dummy data
+    assistance_measurement = graphene.String()
+    dispersion_date = graphene.String()
+    service_provider_full_name = graphene.String()
+    # payment_verification_summary = graphene.List(PaymentVerificationPlanSummaryNode)
 
     def resolve_obj_type(self, info, **kwargs):
         return self.__class__.__name__
@@ -498,8 +523,20 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     def resolve_programme_name(self, info, **kwargs):
         return self.program.name
 
-    def resolve_verifications(self, info, **kwargs):
+    def resolve_verification_plans(self, info, **kwargs):
         return self.payment_verification_plans.all()
+
+    def resolve_assistance_measurement(self, info, **kwargs):
+        return "HH"
+
+    def resolve_dispersion_date(self, info, **kwargs):
+        return ""
+
+    def resolve_service_provider_full_name(self, info, **kwargs):
+        return ""
+
+    # def resolve_payment_verification_summary(self, info, **kwargs):
+    #     return self.payment_verification_summary.all()
 
 
 class PaginatedType(graphene.ObjectType):
@@ -980,13 +1017,13 @@ class Query(graphene.ObjectType):
             payment_plan_object_id=str(OuterRef("id"))
         )
         service_provider_qs = ServiceProvider.objects.filter(cash_plans=OuterRef("id")).distinct()
-        cash_plan_qs = CashPlan.objects.filter(id=OuterRef("id")).distinct()
+        # cash_plan_qs = CashPlan.objects.filter(id=OuterRef("id")).distinct()
 
         delivery_mechanisms_per_payment_plan_qs = DeliveryMechanismPerPaymentPlan.objects.filter(
             payment_plan=OuterRef("pk")
         )
-        fsp_ids = delivery_mechanisms_per_payment_plan_qs.values_list("financial_service_provider", flat=True)
-        fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
+        # fsp_ids = delivery_mechanisms_per_payment_plan_qs.values_list("financial_service_provider", flat=True)
+        # fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
 
         qs = qs.annotate(
             custom_order=Case(
