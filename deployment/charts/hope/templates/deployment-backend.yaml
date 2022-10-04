@@ -1,0 +1,70 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hope.fullname" . }}-backend
+  labels:
+    {{- include "hope.labels" . | nindent 4 }}
+spec:
+  replicas: {{ int (.Values.backend.replicaCount) }}
+  selector:
+    matchLabels:
+      {{- include "hope.selectorLabels" . | nindent 6 }}
+      hope/service: backend
+  template:
+    metadata:
+    {{- with .Values.backend.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "hope.selectorLabels" . | nindent 8 }}
+        hope/service: backend
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hope.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-backend
+          securityContext:
+            {{- toYaml .Values.backend.securityContext | nindent 12 }}
+          image: "{{ .Values.backend.image }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.port }}
+              protocol: TCP
+          envFrom:
+          - secretRef:
+              name: {{ include "hope.fullname" . }}-backend
+          - configMapRef:
+              name: {{ include "hope.fullname" . }}-backend
+          - secretRef:
+              name: {{ include "hope.fullname" .  }}-postgres-data
+          readinessProbe:
+            httpGet:
+              path: /api/_health
+              port: {{ .Values.backend.service.port }}
+              httpHeaders:
+              - name: X-Health
+                value:  "Kubernetes-Health"
+              - name: Host
+                value: "kubernetes.internal"
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+      {{- with .Values.backend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

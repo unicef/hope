@@ -1,0 +1,56 @@
+global:
+  env: dev
+  storageClass: default
+
+backend:
+  image: #pipeline generated
+  replicaCount: 1
+
+  secret:
+    AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
+    AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
+    AZURE_TENANT_KEY: #secret-variables: AZURE_TENANT_KEY
+    STORAGE_AZURE_ACCOUNT_NAME: hctmisdev-pm
+    STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: STORAGE_AZURE_ACCOUNT_KEY
+    SECRET_KEY: r4nd0m5ecretkeyf0rrandomenv
+    SENTRY_DNS: "https://ef1f07a684094f4ab5b07cb470ee8769@excubo.unicef.io/13"
+    EMAIL_HOST: extmail01.unicef.org
+    EMAIL_USE_TLS: "false"
+    EXCHANGE_RATES_API_KEY: #secret-variables: EXCHANGE_RATES_API_KEY
+    ROOT_ACCESS_TOKEN: r4nd0mrootaccesstokenf0rrandomenv 
+    KOBO_MASTER_API_TOKEN: #secret-variables: KOBO_MASTER_API_TOKEN
+    KOBO_KF_URL: https://kobo.humanitarianresponse.info
+    KOBO_KC_URL: https://kobo.humanitarianresponse.info
+
+frontend:
+  image: #pipeline generated
+
+celery:
+  image: #pipeline generated
+  replicaCount: 1
+
+celeryflower:
+  secret:
+    FLOWER_BASIC_AUTH: hope-pm-gg=G
+
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+  host: pm-hope-dev.unitst.org
+  tls: "true"
+
+
+postgres:
+  enabled: true
+  password: hope-pm
+  db: hope-pm
+  user: hope-pm
+  image: postgis/postgis:11
+  resources:
+    requests:
+      cpu: 0.5
+      memory: 256M
+    limits:
+      cpu: 1
+      memory: 1.5G

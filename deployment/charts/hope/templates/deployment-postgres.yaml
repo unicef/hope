@@ -1,0 +1,70 @@
+{{- if not .Values.postgres.enabled }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-postgres
+  labels:
+    {{- include "hope.labels" . | nindent 8 }}
+spec:
+  type: ExternalName
+  externalName: {{ get .Values.postgres.externalHost .Values.env }}
+{{ else }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name  }}-postgres-init
+  labels:
+    {{- include "hope.labels" . | nindent 4 }}
+data:
+{{ (.Files.Glob "scripts/postgres/init-dbs.sh").AsConfig | indent 2}}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-postgres
+  labels:
+    {{- include "hope.labels" . | nindent 8 }}
+spec:
+  ports:
+  - protocol: TCP
+    port: 5432
+  selector:
+    pod: {{ .Release.Name }}-postgres
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: {{ .Release.Name }}-postgres
+  template:
+    metadata:
+      labels:
+        pod: {{ .Release.Name }}-postgres
+        {{- include "hope.labels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: postgres
+        image: "{{ .Values.postgres.image }}"
+        imagePullPolicy: IfNotPresent
+        envFrom:
+          - secretRef:
+              name: {{ .Release.Name  }}-postgres-data
+        volumeMounts:
+        - mountPath: "/var/lib/postgresql/data"
+          name: postgres-data
+        - mountPath: "/docker-entrypoint-initdb.d"
+          name: postgres-init-script
+        resources: {{ toYaml .Values.postgres.resources | nindent 10 }}
+      volumes:
+      - name: postgres-data
+        emptyDir: {}
+      - name: postgres-init-script
+        configMap:
+          name: {{ .Release.Name }}-postgres-init
+{{ end }}
