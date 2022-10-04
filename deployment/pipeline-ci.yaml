@@ -222,17 +222,6 @@ stages:
             inputs:
               command: login
               containerRegistry: $(Docker.registry)
-          - task: DownloadSecureFile@1
-            inputs:
-              secureFile: '.env-django-test'
-          - task: CmdLine@2
-            displayName: "Setup .env and docker-compose.tst.yml"
-            inputs:
-              script: |
-               mv deployment/docker-compose.tst.yml docker-compose.tst.yml
-               mv $(Agent.TempDirectory)/.env-django-test .env
-          - publish: .env
-            artifact: env-for-tests
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:

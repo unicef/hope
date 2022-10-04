@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hope.fullname" . }}-celery-beat
+  labels:
+    {{- include "hope.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "hope.selectorLabels" . | nindent 6 }}
+      hope/service: celery-beat
+  template:
+    metadata:
+    {{- with .Values.celery.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "hope.selectorLabels" . | nindent 8 }}
+        hope/service: celery-beat
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hope.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.celery.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-celery-beat
+          command: ["celery", "-A", "hct_mis_api.apps.core.celery", "beat", "-l", "info", "--scheduler", "hct_mis_api.apps.core.models:CustomDatabaseScheduler"]
+          securityContext:
+            {{- toYaml .Values.celery.securityContext | nindent 12 }}
+          image: "{{ .Values.celery.image }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          envFrom:
+          - secretRef:
+              name: {{ include "hope.fullname" . }}-backend
+          - configMapRef:
+              name: {{ include "hope.fullname" . }}-backend
+          - configMapRef:
+              name: {{ .Release.Name  }}-postgres-data
+          resources:
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+      {{- with .Values.celery.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.celery.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.celery.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
