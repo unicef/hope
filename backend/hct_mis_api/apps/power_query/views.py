@@ -5,17 +5,18 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 
-from .models import Report
+from .models import Report, ReportResult
 from .utils import basicauth
 
 
 @login_required()
 def report(request, pk):
-    report: Report = get_object_or_404(Report, pk=pk)
-    if request.user.is_superuser or report.available_to.filter(pk=request.user.pk):
-        if report.result is None:
-            return HttpResponse("This report is not currently available", status=400)
-        data = pickle.loads(report.result)
+    result: ReportResult = get_object_or_404(ReportResult, pk=pk)
+    report: Report = result.report
+    if request.user.is_superuser or report.limit_access_to.filter(pk=request.user.pk):
+        # if report.result is None:
+        #     return HttpResponse("This report is not currently available", status=400)
+        data = pickle.loads(result.output)
         if report.formatter.content_type == "xls":
             response = HttpResponse(data, content_type=report.formatter.content_type)
             response["Content-Disposition"] = f"attachment; filename={report.name}.xls"

@@ -72,19 +72,21 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, Link
     # def download_xlsx(self, request, pk):
     #     return redirect("admin-download-target-population", target_population_id=pk)
 
-    @button()
+    @button(enabled=lambda b: b.context["original"].steficon_rule)
     def rerun_steficon(self, request, pk):
         def _rerun(request):
             context = self.get_common_context(request, pk)
             target_population_apply_steficon.delay(pk)
             return TemplateResponse(request, "admin/targeting/targetpopulation/rule_change.html", context)
 
+        obj: TargetPopulation = self.get_object(request, pk)
         return confirm_action(
             self,
             request,
             _rerun,
-            "Do you want to rerun the steficon rule ?",
+            "Do you want to rerun the steficon rule '%s' ?" % obj.steficon_rule,
             "Updating target population in the background with correct scores.",
+            title="ddddd",
         )
 
 
