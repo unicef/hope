@@ -1,5 +1,7 @@
 import logging
 import math
+import graphene
+
 from base64 import b64decode
 from decimal import Decimal
 
@@ -8,7 +10,6 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-import graphene
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
@@ -75,7 +76,7 @@ from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 logger = logging.getLogger(__name__)
 
 
-class CreatePaymentVerificationPlanMutation(PermissionMutation):
+class CreateVerificationPlanMutation(PermissionMutation):
     payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
@@ -91,7 +92,7 @@ class CreatePaymentVerificationPlanMutation(PermissionMutation):
         if node_name == "CashPlanNode":
             payment_plan_object = get_object_or_404(CashPlan, id=obj_id)
         else:
-            payment_plan_object = get_object_or_404(PaymentPlan, id=payment_plan_id)
+            payment_plan_object = get_object_or_404(PaymentPlan, id=obj_id)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
 
@@ -1045,8 +1046,8 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
 
 class Mutations(graphene.ObjectType):
-    create_payment_verification = CreatePaymentVerificationPlanMutation.Field()
-    edit_payment_verification = EditPaymentVerificationMutation.Field()
+    create_verification_plan = CreateVerificationPlanMutation.Field()
+    edit_verification_plan = EditPaymentVerificationMutation.Field()
 
     create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
     edit_financial_service_provider = EditFinancialServiceProviderMutation.Field()
