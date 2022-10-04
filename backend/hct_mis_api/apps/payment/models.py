@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import Optional
 
 from django.conf import settings
+from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -505,7 +506,8 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def status_reconciled(self):
         self.status_date = timezone.now()
         PaymentVerificationSummary.objects.create(
-            payment_plan=self,
+            payment_plan_content_type=get_content_type_for_model(self),
+            payment_plan_object_id=self.pk,
         )
 
     @property
