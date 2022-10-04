@@ -1,3 +1,4 @@
+from django.contrib.admin.options import get_content_type_for_model
 from graphql import GraphQLError
 
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
@@ -28,7 +29,9 @@ class VerificationPlanCrudServices:
         verifier.verify("verification_channel")
 
         payment_verification_plan = PaymentVerificationPlan()
-        payment_verification_plan.payment_plan = payment_plan
+        payment_verification_plan.payment_plan_content_type = get_content_type_for_model(payment_plan)
+        payment_verification_plan.payment_plan_object_id = payment_plan.pk
+
         payment_verification_plan.verification_channel = input_data.get("verification_channel")
 
         payment_records = get_payment_records(
