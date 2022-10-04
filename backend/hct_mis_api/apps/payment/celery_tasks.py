@@ -149,8 +149,8 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
 def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import (
-            XlsxPaymentPlanExportService,
+        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportPerFspService import (
+            XlsxPaymentPlanExportPerFspService,
         )
 
         user = get_user_model().objects.get(pk=user_id)
@@ -164,7 +164,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
             try:
                 with transaction.atomic():
                     # regenerate always xlsx
-                    service = XlsxPaymentPlanExportService(payment_plan)
+                    service = XlsxPaymentPlanExportPerFspService(payment_plan)
                     service.export_per_fsp(user)
                     payment_plan.background_action_status_none()
                     payment_plan.save()
@@ -245,6 +245,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
                         payment_plan.status_reconciled()
 
                     payment_plan.save()
+
         except Exception:
             logger.exception("Unexpected error during xlsx per fsp import")
             payment_plan.background_action_status_xlsx_import_error()
