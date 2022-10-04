@@ -153,7 +153,6 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(head_of_household__middle_name__istartswith=value)
             inner_query |= Q(head_of_household__family_name__istartswith=value)
             inner_query |= Q(residence_status__istartswith=value)
-            inner_query |= Q(admin_area__title__istartswith=value)
             inner_query |= Q(admin_area__name__istartswith=value)
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
