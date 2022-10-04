@@ -43,31 +43,4 @@ class Migration(migrations.Migration):
             field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE,
                                        related_name='xlsx_verification_file', to='payment.paymentverificationplan'),
         ),
-        migrations.AddField(
-            model_name='paymentchannel',
-            name='is_fallback',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AlterField(
-            model_name='payment',
-            name='financial_service_provider',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT,
-                                    to='payment.financialserviceprovider'),
-        ),
-        migrations.AlterField(
-            model_name='financialserviceproviderxlsxtemplate',
-            name='columns',
-            field=multiselectfield.db.fields.MultiSelectField(
-                choices=[('payment_id', 'Payment ID'), ('household_id', 'Household ID'),
-                         ('household_size', 'Household Size'), ('admin_level_2', 'Admin Level 2'),
-                         ('collector_name', 'Collector Name'),
-                         ('payment_channel', 'Payment Channel (Delivery mechanism)'), ('fsp_name', 'FSP Name'),
-                         ('currency', 'Currency'), ('entitlement_quantity', 'Entitlement Quantity'),
-                         ('entitlement_quantity_usd', 'Entitlement Quantity USD'),
-                         ('delivered_quantity', 'Delivered Quantity')],
-                default=['payment_id', 'household_id', 'household_size', 'admin_level_2', 'collector_name',
-                         'payment_channel', 'fsp_name', 'currency', 'entitlement_quantity', 'entitlement_quantity_usd',
-                         'delivered_quantity'], help_text='Select the columns to include in the report', max_length=166,
-                verbose_name='Columns'),
-        ),
     ]
