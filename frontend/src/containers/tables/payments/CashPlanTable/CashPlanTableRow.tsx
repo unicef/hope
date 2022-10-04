@@ -1,7 +1,7 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { CashPlanNode } from '../../../../__generated__/graphql';
+import { CashPlanAndPaymentPlanNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { StatusBox } from '../../../../components/core/StatusBox';
@@ -13,15 +13,15 @@ import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
 
 interface CashPlanTableRowProps {
-  cashPlan: CashPlanNode;
+  cashAndPaymentPlan: CashPlanAndPaymentPlanNode;
 }
 
 export function CashPlanTableRow({
-  cashPlan,
+  cashAndPaymentPlan,
 }: CashPlanTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const cashPlanPath = `/${businessArea}/cashplans/${cashPlan.id}`;
+  const cashPlanPath = `/${businessArea}/cashplans/${cashAndPaymentPlan.id}`;
   const handleClick = (): void => {
     history.push(cashPlanPath);
   };
@@ -30,7 +30,7 @@ export function CashPlanTableRow({
       hover
       onClick={handleClick}
       role='checkbox'
-      key={cashPlan.id}
+      key={cashAndPaymentPlan.id}
       data-cy='cash-plan-table-row'
     >
       <TableCell align='left'>
@@ -40,21 +40,21 @@ export function CashPlanTableRow({
               textOverflow: 'ellipsis',
             }}
           >
-            {cashPlan.caId}
+            {cashAndPaymentPlan.unicefId}
           </div>
         </BlackLink>
       </TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={cashPlan.status}
+          status={cashAndPaymentPlan.verificationStatus}
           statusToColor={cashPlanStatusToColor}
         />
       </TableCell>
-      <TableCell align='right'>{cashPlan.totalNumberOfHouseholds}</TableCell>
-      <TableCell align='left'>{cashPlan.assistanceMeasurement}</TableCell>
+      <TableCell align='right'>{cashAndPaymentPlan.totalNumberOfHouseholds}</TableCell>
+      <TableCell align='left'>{cashAndPaymentPlan.assistanceMeasurement}</TableCell>
       <TableCell align='right'>
         {renderSomethingOrDash(
-          cashPlan?.totalEntitledQuantity?.toLocaleString('en-US', {
+          cashAndPaymentPlan?.totalEntitledQuantity?.toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }),
@@ -62,7 +62,7 @@ export function CashPlanTableRow({
       </TableCell>
       <TableCell align='right'>
         {renderSomethingOrDash(
-          cashPlan?.totalDeliveredQuantity?.toLocaleString('en-US', {
+          cashAndPaymentPlan?.totalDeliveredQuantity?.toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }),
@@ -70,14 +70,14 @@ export function CashPlanTableRow({
       </TableCell>
       <TableCell align='right'>
         {renderSomethingOrDash(
-          cashPlan?.totalUndeliveredQuantity?.toLocaleString('en-US', {
+          cashAndPaymentPlan?.totalUndeliveredQuantity?.toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }),
         )}
       </TableCell>
       <TableCell align='left'>
-        <UniversalMoment>{cashPlan.dispersionDate}</UniversalMoment>
+        <UniversalMoment>{cashAndPaymentPlan.dispersionDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );

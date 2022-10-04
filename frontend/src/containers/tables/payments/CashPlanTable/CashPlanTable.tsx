@@ -2,10 +2,10 @@ import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
-  AllCashPlansQueryVariables,
-  CashPlanNode,
+  AllCashPlansAndPaymentPlansQueryVariables,
+  CashPlanAndPaymentPlanNode,
   ProgramNode,
-  useAllCashPlansQuery,
+  useAllCashPlansAndPaymentPlansQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './CashPlanTableHeadCells';
@@ -14,6 +14,7 @@ import { CashPlanTableRow } from './CashPlanTableRow';
 interface CashPlanTableProps {
   program: ProgramNode;
 }
+
 export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -23,13 +24,13 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
   };
 
   return (
-    <UniversalTable<CashPlanNode, AllCashPlansQueryVariables>
+    <UniversalTable<CashPlanAndPaymentPlanNode, AllCashPlansAndPaymentPlansQueryVariables>
       title={t('Cash Plans')}
       headCells={headCells}
-      query={useAllCashPlansQuery}
-      queriedObjectName='allCashPlans'
+      query={useAllCashPlansAndPaymentPlansQuery}
+      queriedObjectName='allCashPlansAndPaymentPlans'
       initialVariables={initialVariables}
-      renderRow={(row) => <CashPlanTableRow key={row.id} cashPlan={row} />}
+      renderRow={(cashAndPaymentPlan) => <CashPlanTableRow key={cashAndPaymentPlan.id} cashAndPaymentPlan={cashAndPaymentPlan} />}
     />
   );
 }

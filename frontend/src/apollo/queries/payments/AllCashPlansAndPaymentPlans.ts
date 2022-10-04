@@ -52,14 +52,12 @@ query AllCashPlansAndPaymentPlans(
         createdAt
         unicefId
       }
-      # paymentVerificationSummary {
-      #   edges {
-      #     node {
-      #       id
-      #       status
-      #     }
-      #   }
-      # }
+      totalNumberOfHouseholds
+      assistanceMeasurement
+      totalEntitledQuantity
+      totalUndeliveredQuantity
+      dispersionDate
+      serviceProviderFullName
     }
   }
 }

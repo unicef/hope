@@ -302,7 +302,13 @@ type CashPlanAndPaymentPlanNode {
   endDate: String
   programmeName: String
   updatedAt: String
-  verifications: [PaymentVerificationPlanNode]
+  verificationPlans: [PaymentVerificationPlanNode]
+  totalNumberOfHouseholds: Int
+  totalEntitledQuantity: Float
+  totalUndeliveredQuantity: Float
+  assistanceMeasurement: String
+  dispersionDate: String
+  serviceProviderFullName: String
 }
 
 type CashPlanNode implements Node {
@@ -904,13 +910,15 @@ enum FinancialServiceProviderXlsxReportStatus {
 enum FinancialServiceProviderXlsxTemplateColumns {
   PAYMENT_ID
   HOUSEHOLD_ID
-  ADMIN_LEVE_2
+  HOUSEHOLD_SIZE
+  ADMIN_LEVEL_2
   COLLECTOR_NAME
   PAYMENT_CHANNEL
   FSP_NAME
+  CURRENCY
   ENTITLEMENT_QUANTITY
+  ENTITLEMENT_QUANTITY_USD
   DELIVERED_QUANTITY
-  TBD
 }
 
 type FinancialServiceProviderXlsxTemplateNode implements Node {
@@ -2497,6 +2505,7 @@ type PaymentChannelNode implements Node {
   updatedAt: DateTime!
   individual: IndividualNode!
   deliveryMechanism: PaymentChannelDeliveryMechanism
+  isFallback: Boolean!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
 }
 
@@ -2987,6 +2996,7 @@ type PaymentVerificationPlanNode implements Node {
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   xlsxFileWasDownloaded: Boolean
   hasXlsxFile: Boolean
+  paymentPlan: PaymentPlanNode
 }
 
 type PaymentVerificationPlanNodeConnection {
