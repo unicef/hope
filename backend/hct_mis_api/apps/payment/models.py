@@ -98,11 +98,6 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         content_type_field="payment_plan_content_type",
         object_id_field="payment_plan_object_id",
     )
-    payment_verification_summary = GenericRelation(
-        "payment.PaymentVerificationSummary",
-        content_type_field="payment_plan_content_type",
-        object_id_field="payment_plan_object_id",
-    )
 
     class Meta:
         abstract = True
@@ -114,9 +109,26 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
 
     @property
-    def payment_verification_summary_obj(self):
+    def payment_verification_summary(self):
         """PaymentPlan has only one payment_verification_summary"""
-        return self.payment_verification_summary.first()
+        c_type = ContentType.objects.get_for_model(self.__class__)
+        try:
+            verification_summary = PaymentVerificationSummary.objects.get(
+                payment_plan_content_type_id=c_type.pk,
+                payment_plan_object_id=self.pk
+            )
+        except PaymentVerificationSummary.DoesNotExist:
+            return None
+        return verification_summary
+
+    @property
+    def get_payment_verification_plans(self):
+        c_type = ContentType.objects.get_for_model(self.__class__)
+        payment_verification_plans = PaymentVerificationPlan.objects.filter(
+            payment_plan_content_type_id=c_type.pk,
+            payment_plan_object_id=self.pk
+        )
+        return payment_verification_plans
 
     def available_payment_records(
         self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None
@@ -1106,7 +1118,7 @@ def build_summary(payment_plan):
     not_finished_count = payment_plan.payment_verification_plans.exclude(
         status=PaymentVerificationSummary.STATUS_FINISHED
     ).count()
-    summary = payment_plan.payment_verification_summary_obj
+    summary = payment_plan.payment_verification_summary
     if active_count >= 1:
         summary.status = PaymentVerificationSummary.STATUS_ACTIVE
         summary.completion_date = None
@@ -1166,9 +1178,9 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         on_delete=models.CASCADE,
         related_name="payment_record_verifications",
     )
-    payment_record = models.OneToOneField(
-        "payment.PaymentRecord", related_name="verification", on_delete=models.CASCADE, null=True, blank=True
-    )
+    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    payment_object_id = models.CharField(max_length=50, null=True)
+    payment = GenericForeignKey("payment_content_type", "payment_object_id")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
     status_date = models.DateTimeField(null=True)
     received_amount = models.DecimalField(
@@ -1177,6 +1189,14 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
     )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["payment_content_type", "payment_object_id"],
+                name="payment_content_type_and_payment_id",
+            )
+        ]
 
     @property
     def is_manually_editable(self):
@@ -1212,6 +1232,14 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
     payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     payment_plan_object_id = models.CharField(max_length=50, null=True)
     payment_plan = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["payment_plan_content_type", "payment_plan_object_id"],
+                name="payment_plan_content_type_and_payment_plan_id",
+            )
+        ]
 
 
 class ApprovalProcess(TimeStampedUUIDModel):

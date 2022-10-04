@@ -1,4 +1,6 @@
 import json
+import graphene
+
 from decimal import Decimal
 
 from django.db.models import (
@@ -18,7 +20,6 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
-import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -178,20 +179,19 @@ class AgeFilterObject(graphene.ObjectType):
     max = graphene.Int()
 
 
+class PaymentVerificationSummaryNode(DjangoObjectType):
+    class Meta:
+        model = PaymentVerificationSummary
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
     is_manually_editable = graphene.Boolean()
 
     class Meta:
         model = PaymentVerification
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class PaymentVerificationPlanSummaryNode(DjangoObjectType):
-    # TODO: upd node name
-    class Meta:
-        model = PaymentVerificationSummary
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -491,9 +491,6 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     id = graphene.String(source="pk")
     unicef_id = graphene.String()
     verification_status = graphene.String()
-    fsp_names = graphene.String()
-    delivery_mechanisms = graphene.String(source="delivery_type")
-    delivery_types = graphene.String()
     currency = graphene.String()
     total_delivered_quantity = graphene.Float()
     start_date = graphene.String()
@@ -515,10 +512,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
         return self.__class__.__name__
 
     def resolve_verification_status(self, info, **kwargs):
-        return self.payment_verification_summary_obj.status if self.payment_verification_summary_obj else None
-
-    def resolve_fsp_names(self, info, **kwargs):
-        return self.fsp_names
+        return self.payment_verification_summary.status if self.payment_verification_summary else None
 
     def resolve_programme_name(self, info, **kwargs):
         return self.program.name
@@ -559,10 +553,10 @@ class GenericPaymentPlanNode(graphene.ObjectType):
     #     hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
     # )
 
-    payment_verification_summary = graphene.Field(PaymentVerificationPlanSummaryNode)
+    payment_verification_summary = graphene.Field(PaymentVerificationSummaryNode)
 
     def resolve_payment_verification_summary(self):
-        return self.payment_verification_summary_obj
+        return self.payment_verification_summary
 
 
 class Query(graphene.ObjectType):
