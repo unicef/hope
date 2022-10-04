@@ -53,7 +53,7 @@ class GenerateReportContentHelpers:
         return (
             individual.household.id,
             individual.household.country_origin.name if individual.household.country_origin else "",
-            individual.household.admin_area.title if individual.household.admin_area else "",
+            individual.household.admin_area.name if individual.household.admin_area else "",
             individual.birth_date,
             individual.estimated_birth_date,
             individual.sex,
@@ -100,7 +100,7 @@ class GenerateReportContentHelpers:
         row = [
             household.id,
             household.country_origin.name if household.country_origin else "",
-            household.admin_area.title if household.admin_area else "",
+            household.admin_area.name if household.admin_area else "",
             household.size,
             household.geopoint[0] if household.geopoint else "",
             household.geopoint[1] if household.geopoint else "",
@@ -355,7 +355,7 @@ class GenerateReportContentHelpers:
         return (
             individual.household.id,
             individual.household.country_origin.name if individual.household.country_origin else "",
-            individual.household.admin_area.title if individual.household.admin_area else "",
+            individual.household.admin_area.name if individual.household.admin_area else "",
             self._format_date(individual.first_delivery_date),
             self._format_date(individual.last_delivery_date),
             individual.payments_made,
