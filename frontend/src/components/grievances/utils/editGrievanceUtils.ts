@@ -34,6 +34,9 @@ interface EditValuesTypes {
   partner?;
   comments?;
   programme?;
+  documentation?;
+  documentationToUpdate?;
+  documentationToDelete?;
 }
 
 function prepareInitialValueAddIndividual(
@@ -206,6 +209,9 @@ export function prepareInitialValues(
     selectedRelatedTickets: ticket.relatedTickets.map(
       (relatedTicket) => relatedTicket.id,
     ),
+    documentation: null,
+    documentationToUpdate: null,
+    documentationToDelete: null,
   };
   const prepareInitialValueFunction = thingForSpecificGrievanceType(
     ticket,
@@ -463,6 +469,21 @@ const grievanceTypeIssueTypeDict = {
 };
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function prepareVariables(businessArea, values, ticket) {
+  const mapDocumentationToUpdate = (
+    documentationToUpdate,
+  ): { id: number; name: string; file: File }[] | null => {
+    if (documentationToUpdate) {
+      return documentationToUpdate
+        .filter((el) => el)
+        .map((doc) => ({
+          id: doc.id,
+          name: doc.name,
+          file: doc.file,
+        }));
+    }
+    return null;
+  };
+
   const requiredVariables = {
     ticketId: ticket.id,
     description: values.description,
@@ -477,7 +498,14 @@ export function prepareVariables(businessArea, values, ticket) {
     partner: values.partner,
     comments: values.comments,
     programme: values.programme,
-    paymentRecord: values.selectedPaymentRecords[0] || null,
+    paymentRecord: values.selectedPaymentRecords
+      ? values.selectedPaymentRecords[0]
+      : null,
+    documentation: values.documentation || null,
+    documentationToUpdate: mapDocumentationToUpdate(
+      values.documentationToUpdate,
+    ),
+    documentationToDelete: values.documentationToDelete || null,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,
