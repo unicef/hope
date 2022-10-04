@@ -4,6 +4,7 @@ from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+
 from model_utils import Choices
 
 from hct_mis_api.apps.core.core_fields_attributes import (
@@ -14,13 +15,8 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_SELECT_MANY,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.utils import (
-    get_attr_value,
-)
-from hct_mis_api.apps.household.models import (
-    Individual,
-    Household,
-)
+from hct_mis_api.apps.core.utils import get_attr_value
+from hct_mis_api.apps.household.models import Household, Individual
 
 logger = logging.getLogger(__name__)
 

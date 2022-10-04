@@ -1,12 +1,22 @@
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from hct_mis_api.apps.registration_datahub.models import ImportedDocument, ImportedHousehold
-from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, Document, Household
-from hct_mis_api.apps.household.serializers import serialize_by_household, serialize_by_individual
-from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_TAX_ID,
+    Document,
+    Household,
+)
+from hct_mis_api.apps.household.serializers import (
+    serialize_by_household,
+    serialize_by_individual,
+)
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedDocument,
+    ImportedHousehold,
+)
 from hct_mis_api.apps.utils.profiling import profiling
 
 

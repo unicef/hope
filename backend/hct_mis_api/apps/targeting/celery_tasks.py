@@ -1,14 +1,16 @@
 import logging
 
-from concurrency.api import disable_concurrency
 from django.core.cache import cache
 from django.db import transaction
 from django.db.transaction import atomic
 from django.utils import timezone
+
+from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.utils.sentry import sentry_tags
+
 from ..targeting.models import HouseholdSelection, TargetPopulation
 
 logger = logging.getLogger(__name__)
