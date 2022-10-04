@@ -1,26 +1,28 @@
 from io import BytesIO
 from pathlib import Path
+from unittest import mock
 
 from django.conf import settings
 from django.core.files import File
 from django.test import TestCase
-from unittest import mock
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.celery_tasks import update_individuals_iban_from_xlsx_task
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.celery_tasks import (
+    update_individuals_iban_from_xlsx_task,
+)
+from hct_mis_api.apps.household.fixtures import (
+    BankAccountInfoFactory,
+    RegistrationDataImportFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
     MALE,
     WIFE_HUSBAND,
     XlsxUpdateFile,
-)
-from hct_mis_api.apps.household.fixtures import (
-    RegistrationDataImportFactory,
-    create_household_and_individuals,
-    BankAccountInfoFactory,
 )
 
 

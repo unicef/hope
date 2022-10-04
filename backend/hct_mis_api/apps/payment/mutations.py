@@ -29,6 +29,7 @@ from hct_mis_api.apps.payment.inputs import (
 )
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.payment.schema import PaymentRecordNode, PaymentVerificationNode
+from hct_mis_api.apps.payment.services.mark_as_failed import mark_as_failed
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
 )
@@ -556,8 +557,7 @@ class MarkPaymentRecordAsFailedMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
 
         try:
-            payment_record.mark_as_failed()
-            payment_record.save()
+            mark_as_failed(payment_record)
         except ValidationError as e:
             logger.error(e.message)
             raise GraphQLError(e.message) from e

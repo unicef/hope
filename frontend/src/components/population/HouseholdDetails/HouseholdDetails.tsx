@@ -3,6 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
+import { COLLECT_TYPES_MAPPING } from '../../../utils/constants';
 import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
 import {
   GrievancesChoiceDataQuery,
@@ -161,8 +162,19 @@ export function HouseholdDetails({
                 {household.returnee ? t('Yes') : t('No')}
               </LabelizedField>
             </Grid>
-            <Grid item xs={6} >
-              {household.unicefId && <LinkedGrievancesModal household={household} businessArea={businessArea} grievancesChoices={grievancesChoices} />}
+            <Grid item xs={3}>
+              {household.unicefId && (
+                <LinkedGrievancesModal
+                  household={household}
+                  businessArea={businessArea}
+                  grievancesChoices={grievancesChoices}
+                />
+              )}
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label={t('COLLECT TYPE')}>
+                {COLLECT_TYPES_MAPPING[household.collectIndividualData]}
+              </LabelizedField>
             </Grid>
           </Grid>
         </Overview>

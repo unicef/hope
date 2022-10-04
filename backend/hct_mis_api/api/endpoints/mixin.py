@@ -50,8 +50,6 @@ class HouseholdUploadMixin:
     def save_member(
         self, rdi: RegistrationDataImportDatahub, hh: ImportedHousehold, member_data: dict
     ) -> ImportedIndividual:
-        # member_ser = IndividualSerializer(data=member_data)
-        # member_ser.is_valid(raise_exception=True)
         documents = member_data.pop("documents", [])
         member_of = None
         if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
@@ -69,12 +67,9 @@ class HouseholdUploadMixin:
             hh.individuals_and_roles.create(individual=ind, role=ROLE_ALTERNATE)
         return ind
 
-    def save_households(
-        self, rdi: RegistrationDataImportDatahub, households_data: list[dict], collect_individual_data: str
-    ):
+    def save_households(self, rdi: RegistrationDataImportDatahub, households_data: list[dict]):
         totals = Totals(0, 0)
         for i, household_data in enumerate(households_data):
-            household_data.setdefault("collect_individual_data", collect_individual_data)
             totals.households += 1
             members: list[dict] = household_data.pop("members")
             hh = ImportedHousehold.objects.create(registration_data_import=rdi, **household_data)

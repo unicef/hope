@@ -1,15 +1,15 @@
 from datetime import datetime
 
-from pytz import utc
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
 from freezegun import freeze_time
+from pytz import utc
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
     create_household,
     create_household_and_individuals,
