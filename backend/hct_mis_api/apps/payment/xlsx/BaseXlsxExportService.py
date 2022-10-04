@@ -4,16 +4,18 @@ import openpyxl
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.urls import reverse
 
 from openpyxl.styles import PatternFill, Side, Border
 from openpyxl.utils import get_column_letter
+
+from hct_mis_api.apps.core.utils import encode_id_base64
 
 
 logger = logging.getLogger(__name__)
 
 
 class XlsxExportBaseService:
-
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws_active = wb.active
@@ -36,7 +38,7 @@ class XlsxExportBaseService:
         self.wb.save(filename=filename)
 
     @staticmethod
-    def _adjust_column_width_from_col(ws, min_row, min_col, max_col):
+    def _adjust_column_width_from_col(ws, min_row=0, min_col=1, max_col=1):
         column_widths = []
 
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
@@ -61,7 +63,7 @@ class XlsxExportBaseService:
     def _add_col_bgcolor(self, col=None, hex_code="A0FDB0"):
         for row_index in col or []:
             fill = PatternFill(bgColor=hex_code, fgColor=hex_code, fill_type="lightUp")
-            bd = Side(style='thin', color="999999")
+            bd = Side(style="thin", color="999999")
             for y in range(1, self.ws_export_list.max_column + 1):
                 cell = self.ws_export_list.cell(row=y, column=row_index)
                 cell.fill = fill
@@ -89,3 +91,21 @@ class XlsxExportBaseService:
         result = email.send()
         if not result:
             logger.error(f"Email couldn't be send to {context['email']}")
+
+    def get_email_context(self, user):
+        payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
+        path_name = "download-payment-plan-payment-list"
+        link = self.get_link(reverse(path_name, args=[payment_verification_id]))
+
+        msg = "Payment Plan Payment List xlsx file(s) were generated and below You have the link to download this file."
+
+        context = {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "message": msg,
+            "link": link,
+            "title": "Payment Plan Payment List files generated",
+        }
+
+        return context

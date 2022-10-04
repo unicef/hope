@@ -7,15 +7,15 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField, Q, Count, Sum, UniqueConstraint
-from django.db.models.signals import post_delete, post_save
+from django.db.models import Count, JSONField, Q, Sum, UniqueConstraint
 from django.db.models.functions import Coalesce
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.contrib.postgres.fields import ArrayField
 
 from dateutil.relativedelta import relativedelta
 from django_fsm import FSMField, transition
@@ -23,15 +23,19 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
 from hct_mis_api.apps.payment.managers import PaymentManager
+from hct_mis_api.apps.steficon.models import RuleCommit
+from hct_mis_api.apps.utils.models import (
+    ConcurrencyModel,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
@@ -91,13 +95,13 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     )
     payment_verification_plans = GenericRelation(
         "payment.PaymentVerificationPlan",
-        content_type_field='payment_plan_content_type',
-        object_id_field='payment_plan_object_id',
+        content_type_field="payment_plan_content_type",
+        object_id_field="payment_plan_object_id",
     )
     payment_verification_summary = GenericRelation(
         "payment.PaymentVerificationSummary",
-        content_type_field='payment_plan_content_type',
-        object_id_field='payment_plan_object_id',
+        content_type_field="payment_plan_content_type",
+        object_id_field="payment_plan_object_id",
     )
 
     class Meta:
@@ -111,7 +115,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
     @property
     def payment_verification_summary_obj(self):
-        """ PaymentPlan has only one payment_verification_summary """
+        """PaymentPlan has only one payment_verification_summary"""
         return self.payment_verification_summary.first()
 
     def available_payment_records(
@@ -586,29 +590,21 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
-    # TODO: add/remove fields after finalizing the fields
-    # after updating COLUMNS_TO_CHOOSE please update XlsxPaymentPlanExportService.export_per_fsp as well
-    COLUMNS_TO_CHOOSE = (
+    COLUMNS_CHOICES = (
         ("payment_id", _("Payment ID")),
         ("household_id", _("Household ID")),
-        ("admin_leve_2", _("Admin Level 2")),
+        ("household_size", _("Household Size")),
+        ("admin_level_2", _("Admin Level 2")),
         ("collector_name", _("Collector Name")),
         ("payment_channel", _("Payment Channel (Delivery mechanism)")),
         ("fsp_name", _("FSP Name")),
+        ("currency", _("Currency")),
         ("entitlement_quantity", _("Entitlement Quantity")),
+        ("entitlement_quantity_usd", _("Entitlement Quantity USD")),
         ("delivered_quantity", _("Delivered Quantity")),
-        ("tbd", _("TBD")),
     )
-    DEFAULT_COLUMNS = [
-        "payment_id",
-        "household_id",
-        "admin_leve_2",
-        "collector_name",
-        "payment_channel",
-        "fsp_name",
-        "entitlement_quantity",
-        "delivered_quantity",
-    ]
+
+    DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -620,11 +616,33 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=120, verbose_name=_("Name"))
     columns = MultiSelectField(
-        choices=COLUMNS_TO_CHOOSE,
+        choices=COLUMNS_CHOICES,
         default=DEFAULT_COLUMNS,
         verbose_name=_("Columns"),
         help_text=_("Select the columns to include in the report"),
     )
+
+    @classmethod
+    def get_column_value_from_payment(cls, payment, column_name: str):
+        map_obj_name_column = {
+            "payment_id": (payment, "unicef_id"),
+            "household_id": (payment.household, "unicef_id"),
+            "household_size": (payment.household, "size"),
+            "admin_level_2": (payment.household.admin2, "title"),
+            "collector_name": (payment.collector, "full_name"),
+            "fsp_name": (payment.financial_service_provider, "name"),
+            "currency": (payment, "currency"),
+            "payment_channel": (payment.assigned_payment_channel, "delivery_mechanism"),
+            "entitlement_quantity": (payment, "entitlement_quantity"),
+            "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
+            "delivered_quantity": (payment, "delivered_quantity"),
+        }
+        if column_name not in map_obj_name_column:
+            return "wrong_column_name"
+
+        obj, nested_field = map_obj_name_column[column_name]
+
+        return getattr(obj, nested_field, None) or ""
 
     def __str__(self):
         return f"{self.name} ({len(self.columns)})"
@@ -782,6 +800,7 @@ class PaymentChannel(TimeStampedUUIDModel):
     individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="payment_channels")
     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, null=True)
     delivery_data = JSONField(default=dict, blank=True)
+    is_fallback = models.BooleanField(default=False)
 
 
 class CashPlan(GenericPaymentPlan):
@@ -924,7 +943,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
     financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
+        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
     assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
@@ -1078,8 +1097,12 @@ class XlsxPaymentVerificationPlanFile(TimeStampedUUIDModel):
 
 
 def build_summary(payment_plan):
-    active_count = payment_plan.payment_verification_plans.filter(status=PaymentVerificationSummary.STATUS_ACTIVE).count()
-    pending_count = payment_plan.payment_verification_plans.filter(status=PaymentVerificationSummary.STATUS_PENDING).count()
+    active_count = payment_plan.payment_verification_plans.filter(
+        status=PaymentVerificationSummary.STATUS_ACTIVE
+    ).count()
+    pending_count = payment_plan.payment_verification_plans.filter(
+        status=PaymentVerificationSummary.STATUS_PENDING
+    ).count()
     not_finished_count = payment_plan.payment_verification_plans.exclude(
         status=PaymentVerificationSummary.STATUS_FINISHED
     ).count()
@@ -1157,10 +1180,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
 
     @property
     def is_manually_editable(self):
-        if (
-            self.payment_verification_plan.verification_channel
-            != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
-        ):
+        if self.payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL:
             return False
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
         return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)

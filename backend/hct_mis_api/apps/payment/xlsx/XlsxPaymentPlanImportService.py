@@ -18,13 +18,10 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         self.payment_list = payment_plan.not_excluded_payments
         self.file = file
         self.errors = []
-        self.payments_dict = {
-            str(x.unicef_id): x for x in self.payment_list
-        }
+        self.payments_dict = {str(x.unicef_id): x for x in self.payment_list}
         self.payment_ids = list(self.payments_dict.keys())
         self.payments_to_save = []
-        self.payment_channel_update = False
-        self.entitlement_update = False
+        self.is_updated = False
 
     def open_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.load_workbook(self.file, data_only=True)
@@ -101,7 +98,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             column += 1
 
     def _validate_payment_id(self, row):
-        cell = row[XlsxPaymentPlanExportService.ID_COLUMN_INDEX]
+        cell = row[XlsxPaymentPlanExportService.HEADERS.index("payment_id")]
         if cell.value not in self.payment_ids:
             self.errors.append(
                 (
@@ -112,23 +109,23 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             )
 
     def _validate_entitlement(self, row):
-        payment_id = row[XlsxPaymentPlanExportService.ID_COLUMN_INDEX].value
+        payment_id = row[XlsxPaymentPlanExportService.HEADERS.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
-        entitlement_amount = row[XlsxPaymentPlanExportService.ENTITLEMENT_COLUMN_INDEX].value
+        entitlement_amount = row[XlsxPaymentPlanExportService.HEADERS.index("entitlement_quantity")].value
         if entitlement_amount is not None and entitlement_amount != "":
             entitlement_amount = float_to_decimal(entitlement_amount)
             if entitlement_amount != payment.entitlement_quantity:
-                self.entitlement_update = True
+                self.is_updated = True
 
     def _validate_payment_channel(self, row):
-        payment_id = row[XlsxPaymentPlanExportService.ID_COLUMN_INDEX].value
+        payment_id = row[XlsxPaymentPlanExportService.HEADERS.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
-        payment_channels_list = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX].value.split(", ")
-        payment_channel_cell = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX]
+        payment_channels_list = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")].value.split(", ")
+        payment_channel_cell = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")]
         for payment_channel in payment_channels_list:
             if payment_channel not in [x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]:
                 self.errors.append(
@@ -140,9 +137,9 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                     )
                 )
             collectors_payment_channels = list(
-                    payment.collector.payment_channels.all()
-                    .distinct("delivery_mechanism")
-                    .values_list("delivery_mechanism", flat=True)
+                payment.collector.payment_channels.all()
+                .distinct("delivery_mechanism")
+                .values_list("delivery_mechanism", flat=True)
             )
             if payment.collector.payment_channels.exists() and payment_channel not in collectors_payment_channels:
                 self.errors.append(
@@ -154,10 +151,10 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                     )
                 )
             if not payment.collector.payment_channels.exists() and payment_channel:
-                self.payment_channel_update = True
+                self.is_updated = True
 
     def _validate_imported_file(self):
-        if not self.payment_channel_update and not self.entitlement_update:
+        if not self.is_updated:
             self.errors.append(
                 (
                     XlsxPaymentPlanExportService.TITLE,
@@ -176,9 +173,9 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
             self._validate_payment_channel(row)
 
     def _import_row(self, row, exchange_rate):
-        payment_id = row[XlsxPaymentPlanExportService.ID_COLUMN_INDEX].value
-        entitlement_amount = row[XlsxPaymentPlanExportService.ENTITLEMENT_COLUMN_INDEX].value
-        payment_channels_list = row[XlsxPaymentPlanExportService.PAYMENT_CHANNEL_COLUMN_INDEX].value.split(", ")
+        payment_id = row[XlsxPaymentPlanExportService.HEADERS.index("payment_id")].value
+        entitlement_amount = row[XlsxPaymentPlanExportService.HEADERS.index("entitlement_quantity")].value
+        payment_channels_list = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")].value.split(", ")
 
         payment = self.payments_dict.get(payment_id)
 
@@ -188,6 +185,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         if not payment.collector.payment_channels.exists():
             for payment_channel in payment_channels_list:
                 if payment_channel is not None and payment_channel != "":
+                    # TODO handle delivery data
                     PaymentChannel.objects.get_or_create(
                         individual=payment.collector,
                         delivery_mechanism=payment_channel,
