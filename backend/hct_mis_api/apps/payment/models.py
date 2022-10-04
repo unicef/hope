@@ -242,6 +242,18 @@ class GenericPayment(TimeStampedUUIDModel):
     class Meta:
         abstract = True
 
+    @property
+    def verification(self):
+        c_type = ContentType.objects.get_for_model(self.__class__)
+        try:
+            verification = PaymentVerification.objects.get(
+                payment_plan_content_type_id=c_type.pk,
+                payment_plan_object_id=self.pk
+            )
+        except PaymentVerification.DoesNotExist:
+            return None
+        return verification
+
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
