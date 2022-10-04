@@ -1,0 +1,45 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "hope.fullname" . -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "hope.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+    - hosts:
+      - {{.Values.ingress.host }}
+      secretName: {{ .Values.ingress.tlsSecret }}
+  {{- end }}
+  rules:
+    - host: {{.Values.ingress.host }}
+      http:
+        paths:
+        - path: /api/*
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: {{ $fullName }}-backend
+              port:
+                number: {{ .Values.backend.service.port }}
+        - path: /flower/*
+          pathType: ImplementationSpecific
+          backend: 
+            service:
+              name: {{ include "hope.fullname" . }}-celery-flower
+              port:
+                number: {{ .Values.celeryflower.service.port }}
+        - path: /
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: {{ $fullName }}-frontend
+              port:
+                number: {{ .Values.frontend.service.port }}
+{{- end }}
