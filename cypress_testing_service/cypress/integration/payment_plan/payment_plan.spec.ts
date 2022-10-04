@@ -381,16 +381,19 @@ When("I unarchive the zip file", () => {
 
 Then('I see the {int} xlsx files', (count) => {
   const currentRunFileName = fileName(paymentPlanUnicefId);
-  cy.exec(`ls -l ${downloadsFolder} | grep ${currentRunFileName} | grep FSP | awk "{print $9;}"`).then((result) => {
+  cy.exec(`find ${downloadsFolder} | grep ${currentRunFileName} | grep FSP | sed 's@.*/@@'`).then((result) => {
     fspXlsxFilenames = result.stdout.split("\n");
+    cy.log(fspXlsxFilenames)
     expect(fspXlsxFilenames.length).to.eq(count);
   })
 })
 
 When('I fill the reconciliation info', () => {
   const fspFilename = fspXlsxFilenames[0];
+  cy.log(downloadsFolder)
   const downloadedFilePath = `${downloadsFolder}/${fspFilename}`;
-  cy.exec(`node cypress/scripts/fillXlsxReconciliation.js ${downloadedFilePath}`);
+  cy.log(downloadedFilePath)
+  cy.exec(`node cypress/scripts/fillXlsxReconciliation.js "${downloadedFilePath}"`);
 })
 
 And('I upload the reconciliation info', () => {

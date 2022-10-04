@@ -2,16 +2,13 @@ const xlsx = require('node-xlsx').default;
 const fileSys = require('fs');
 
 const filePath = process.argv[2];
-console.log(process.argv);
 const jsonData = xlsx.parse(fileSys.readFileSync(filePath))[0];
 const rows = jsonData.data;
 
-console.log('ROWS', rows);
-
 for (let i = 1; i < rows.length; i++) {
   if (rows[i].length !== 0) {
-    // add delivered column and write value of 100
-    rows[i].push(100);
+    // column index 10 is delivered_quantity
+    rows[i][10] = 100;
   }
 }
 

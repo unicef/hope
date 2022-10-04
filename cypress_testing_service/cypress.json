@@ -7,5 +7,6 @@
     "reporterOptions": {
       "mochaFile": "cypress/reports/junit/test-results.[hash].xml",
       "testsuitesTitle": false
-    }
+    },
+    "numTestsKeptInMemory": 0
 }
