@@ -256,8 +256,6 @@ class PaymentVerificationPlanFactory(factory.DjangoModelFactory):
         PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES,
         getter=lambda c: c[0],
     )
-    payment_plan_object_id = (PaymentPlan.objects.order_by("?").first().pk if PaymentPlan.objects.count() else None,)
-    payment_plan_content_type = (ContentType.objects.get(app_label="payment", model="cashplan"),)
     sample_size = fuzzy.FuzzyInteger(0, 100)
     responded_count = fuzzy.FuzzyInteger(20, 90)
     received_count = fuzzy.FuzzyInteger(30, 70)
@@ -268,11 +266,23 @@ class PaymentVerificationPlanFactory(factory.DjangoModelFactory):
     class Meta:
         model = PaymentVerificationPlan
 
+    @factory.post_generation
+    def add_payment_plan_obj(obj, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if not obj.payment_plan_object_id and not obj.payment_plan_content_type:
+            cash_plan_ct, _ = ContentType.objects.get_or_create(app_label="payment", model="cashplan")
+            obj.payment_plan_object_id = CashPlanFactory().pk
+            obj.payment_plan_content_type = cash_plan_ct
+            obj.save()
+
 
 class PaymentVerificationFactory(factory.DjangoModelFactory):
-    payment_verification_plan = factory.Iterator(PaymentVerificationPlan.objects.all())
-    payment_record = factory.LazyAttribute(
-        lambda o: PaymentRecord.objects.filter(parent=o.payment_verification_plan.payment_plan).order_by("?").first()
+    payment_verification_plan = factory.Iterator(
+        PaymentVerificationPlan.objects.filter(
+            payment_plan_content_type=ContentType.objects.get(app_label="payment", model="cashplan")
+        )
     )
     status = fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,
@@ -282,6 +292,17 @@ class PaymentVerificationFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = PaymentVerification
+
+    @factory.post_generation
+    def add_payment_obj(obj, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if not obj.payment_object_id and not obj.payment_content_type:
+            cash_plan_ct, _ = ContentType.objects.get_or_create(app_label="payment", model="paymentrecord")
+            obj.payment_object_id = PaymentRecordFactory().pk
+            obj.payment_content_type = cash_plan_ct
+            obj.save()
 
 
 class RealProgramFactory(factory.DjangoModelFactory):

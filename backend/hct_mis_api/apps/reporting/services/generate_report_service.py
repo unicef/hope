@@ -1,5 +1,8 @@
 import copy
 import logging
+import openpyxl
+
+from openpyxl.utils import get_column_letter
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
@@ -138,14 +141,24 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_cash_plan_verifications(report: Report):
+        pp_business_area_ids = list(
+            CashPlan.objects
+            .filter(business_area=report.business_area)
+            .values_list("id", flat=True)
+        )
         filter_vars = {
-            "cash_plan__business_area": report.business_area,
+            "payment_plan_object_id__in": pp_business_area_ids,
             "completion_date__isnull": False,
             "completion_date__gte": report.date_from,
             "completion_date__lte": report.date_to,
         }
         if report.program:
-            filter_vars["cash_plan__program"] = report.program
+            pp_program_ids = list(
+                CashPlan.objects
+                .filter(program=report.program)
+                .values_list("id", flat=True)
+            )
+            filter_vars["payment_plan_object_id__in"] = pp_program_ids
         return PaymentVerificationPlan.objects.filter(**filter_vars)
 
     @staticmethod
@@ -224,13 +237,23 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_payment_verifications(report: Report):
+        pp_business_area_ids = list(
+            PaymentPlan.objects
+            .filter(business_area=report.business_area)
+            .values_list("id", flat=True)
+        )
         filter_vars = {
-            "payment_verification_plan__cash_plan__business_area": report.business_area,
+            "payment_verification_plan__payment_plan_object_id__in": pp_business_area_ids,
             "payment_verification_plan__completion_date__isnull": False,
             "payment_verification_plan__completion_date__date__range": (report.date_from, report.date_to),
         }
         if report.program:
-            filter_vars["payment_verification_plan__cash_plan__program"] = report.program
+            pp_program_ids = list(
+                PaymentPlan.objects
+                .filter(program=report.program)
+                .values_list("id", flat=True)
+            )
+            filter_vars["payment_verification_plan__payment_plan_object_id__in"] = pp_program_ids
         return PaymentVerification.objects.filter(**filter_vars)
 
     @classmethod
@@ -564,9 +587,9 @@ class GenerateReportService:
             "household id",  # 145aacc4-160a-493e-9d36-4f7f981284c7
         ),
         Report.PAYMENT_VERIFICATION: (
-            "cash plan verification ID",
+            "plan verification ID",
             "payment record ID",  # ANT-21-CSH-00001-0000002
-            "cash plan ID",  # ANT-21-CSH-00001
+            "plan ID",  # ANT-21-CSH-00001
             "verification completion date",
             "received amount",  # 30,00
             "status",  # RECEIVED_WITH_ISSUES

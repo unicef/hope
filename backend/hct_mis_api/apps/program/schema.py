@@ -104,7 +104,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         filterset_class=PaymentVerificationPlanFilter,
     )
     payment_verification_summary = DjangoPermissionFilterConnectionField(
-        "hct_mis_api.apps.payment.schema.PaymentVerificationPlanSummaryNode",
+        "hct_mis_api.apps.payment.schema.PaymentVerificationSummaryNode",
         filterset_class=PaymentVerificationSummaryFilter,
     )
 
