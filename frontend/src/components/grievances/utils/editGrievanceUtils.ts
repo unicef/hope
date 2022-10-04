@@ -496,7 +496,9 @@ export function prepareVariables(businessArea, values, ticket) {
     partner: values.partner,
     comments: values.comments,
     programme: values.programme,
-    paymentRecord: values.selectedPaymentRecords[0] || null,
+    paymentRecord: values.selectedPaymentRecords
+      ? values.selectedPaymentRecords[0]
+      : null,
     documentation: values.documentation || null,
     documentationToUpdate: mapDocumentationToUpdate(
       values.documentationToUpdate,
