@@ -2,7 +2,7 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import {
-  AllCashPlansQuery,
+  CashPlanAndPaymentPlanNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
@@ -17,7 +17,7 @@ import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
 
 interface PaymentVerificationTableRowProps {
-  plan: AllCashPlansQuery['allCashPlans']['edges'][number]['node'];
+  plan: CashPlanAndPaymentPlanNode;
   canViewDetails: boolean;
 }
 
@@ -50,22 +50,22 @@ export function PaymentVerificationTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={paymentVerificationPlanPath}>{plan.caId}</BlackLink>
+          <BlackLink to={paymentVerificationPlanPath}>{plan.unicefId}</BlackLink>
         ) : (
-          plan.caId
+          plan.unicefId
         )}
       </TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={plan.paymentVerificationSummary.edges[0].node.status}
+          status={plan.verificationStatus}
           statusToColor={paymentVerificationStatusToColor}
         />
       </TableCell>
       <TableCell align='left'>
-        {plan.serviceProvider?.fullName || '-'}
+        {plan.serviceProviderFullName || '-'}
       </TableCell>
       <TableCell align='left'>
-        {deliveryTypeChoicesDict[plan.deliveryType]}
+        {deliveryTypeChoicesDict[plan.deliveryTypes]}
       </TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}
@@ -74,7 +74,7 @@ export function PaymentVerificationTableRow({
         <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
         <UniversalMoment>{plan.endDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{plan.program.name}</TableCell>
+      <TableCell align='left'>{plan.programmeName}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{plan.updatedAt}</UniversalMoment>
       </TableCell>

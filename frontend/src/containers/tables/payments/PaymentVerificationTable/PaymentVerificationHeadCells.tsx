@@ -1,8 +1,8 @@
 import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
-import { AllCashPlansQuery } from '../../../../__generated__/graphql';
+import { CashPlanAndPaymentPlanNode } from '../../../../__generated__/graphql';
 
 export const headCells: HeadCell<
-  AllCashPlansQuery['allCashPlans']['edges'][number]['node']
+  CashPlanAndPaymentPlanNode
 >[] = [
   {
     disablePadding: false,
