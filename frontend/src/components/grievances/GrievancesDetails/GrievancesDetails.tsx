@@ -79,6 +79,7 @@ export const GrievancesDetails = ({
               if (doc.contentType.includes('image')) {
                 return (
                   <PhotoModal
+                    key={doc.id}
                     src={doc.filePath}
                     variant='link'
                     linkText={doc.name}
@@ -86,7 +87,7 @@ export const GrievancesDetails = ({
                 );
               }
               return (
-                <ContentLink download href={doc.filePath}>
+                <ContentLink key={doc.id} download href={doc.filePath}>
                   {doc.name}
                 </ContentLink>
               );
