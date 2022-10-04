@@ -832,6 +832,17 @@ class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
                 created_by=info.context.user,
             )
 
+        cash_fallback_payment_collectors = collectors_that_can_be_paid.filter(payment_channels__isnull=True)
+        payment_channels_to_create = []
+        for collector in cash_fallback_payment_collectors:
+            # TODO handle delivery data
+            payment_channels_to_create.append(
+                PaymentChannel(
+                    individual=collector, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH, is_fallback=True
+                )
+            )
+        PaymentChannel.objects.bulk_create(payment_channels_to_create)
+
         return cls(payment_plan=payment_plan)
 
 
@@ -937,7 +948,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
             transaction.on_commit(lambda: import_payment_plan_payment_list_from_xlsx.delay(payment_plan.id))
 
-        return cls(payment_plan, import_service.errors)
+        return cls(payment_plan, None)
 
 
 class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
@@ -966,13 +977,13 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
         import_service.open_workbook()
         import_service.validate()
         if import_service.errors:
-            return cls(None, import_service.errors)
+            return cls(payment_plan=None, errors=import_service.errors)
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).import_xlsx_per_fsp(
             user=info.context.user, file=file
         )
 
-        return cls(payment_plan, None)
+        return cls(payment_plan=payment_plan, errors=None)
 
 
 class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):

@@ -546,29 +546,21 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
-    # TODO: add/remove fields after finalizing the fields
-    # after updating COLUMNS_TO_CHOOSE please update XlsxPaymentPlanExportService.export_per_fsp as well
-    COLUMNS_TO_CHOOSE = (
+    COLUMNS_CHOICES = (
         ("payment_id", _("Payment ID")),
         ("household_id", _("Household ID")),
-        ("admin_leve_2", _("Admin Level 2")),
+        ("household_size", _("Household Size")),
+        ("admin_level_2", _("Admin Level 2")),
         ("collector_name", _("Collector Name")),
         ("payment_channel", _("Payment Channel (Delivery mechanism)")),
         ("fsp_name", _("FSP Name")),
+        ("currency", _("Currency")),
         ("entitlement_quantity", _("Entitlement Quantity")),
+        ("entitlement_quantity_usd", _("Entitlement Quantity USD")),
         ("delivered_quantity", _("Delivered Quantity")),
-        ("tbd", _("TBD")),
     )
-    DEFAULT_COLUMNS = [
-        "payment_id",
-        "household_id",
-        "admin_leve_2",
-        "collector_name",
-        "payment_channel",
-        "fsp_name",
-        "entitlement_quantity",
-        "delivered_quantity",
-    ]
+
+    DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -580,11 +572,33 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=120, verbose_name=_("Name"))
     columns = MultiSelectField(
-        choices=COLUMNS_TO_CHOOSE,
+        choices=COLUMNS_CHOICES,
         default=DEFAULT_COLUMNS,
         verbose_name=_("Columns"),
         help_text=_("Select the columns to include in the report"),
     )
+
+    @classmethod
+    def get_column_value_from_payment(cls, payment, column_name: str):
+        map_obj_name_column = {
+            "payment_id": (payment, "unicef_id"),
+            "household_id": (payment.household, "unicef_id"),
+            "household_size": (payment.household, "size"),
+            "admin_level_2": (payment.household.admin2, "title"),
+            "collector_name": (payment.collector, "full_name"),
+            "fsp_name": (payment.financial_service_provider, "name"),
+            "currency": (payment, "currency"),
+            "payment_channel": (payment.assigned_payment_channel, "delivery_mechanism"),
+            "entitlement_quantity": (payment, "entitlement_quantity"),
+            "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
+            "delivered_quantity": (payment, "delivered_quantity"),
+        }
+        if column_name not in map_obj_name_column:
+            return "wrong_column_name"
+
+        obj, nested_field = map_obj_name_column[column_name]
+
+        return getattr(obj, nested_field, None) or ""
 
     def __str__(self):
         return f"{self.name} ({len(self.columns)})"
@@ -742,6 +756,7 @@ class PaymentChannel(TimeStampedUUIDModel):
     individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="payment_channels")
     delivery_mechanism = models.CharField(max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, null=True)
     delivery_data = JSONField(default=dict, blank=True)
+    is_fallback = models.BooleanField(default=False)
 
 
 class CashPlan(GenericPaymentPlan):
@@ -899,7 +914,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
     financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", on_delete=models.CASCADE, null=True
+        "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
     assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
