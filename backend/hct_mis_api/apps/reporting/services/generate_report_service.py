@@ -707,7 +707,7 @@ class GenerateReportService:
             filter_rows.append(
                 (
                     "Administrative area 2",
-                    GenerateReportContentHelpers._to_values_list(self.report.admin_area.all(), "title"),
+                    GenerateReportContentHelpers._to_values_list(self.report.admin_area.all(), "name"),
                 )
             )
         if self.report.program:

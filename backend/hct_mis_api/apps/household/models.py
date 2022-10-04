@@ -351,7 +351,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
     country = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
-    size = models.PositiveIntegerField(db_index=True)
+    size = models.PositiveIntegerField(db_index=True, null=True)
     address = CICharField(max_length=1024, blank=True)
     """location contains lowest administrative area info"""
     admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
@@ -459,9 +459,12 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     def status(self):
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self):
+    def withdraw(self, tag=None):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
+        user_fields = self.user_fields or {}
+        user_fields["withdrawn_tag"] = tag
+        self.user_fields = user_fields
         self.save()
 
     def unwithdraw(self):

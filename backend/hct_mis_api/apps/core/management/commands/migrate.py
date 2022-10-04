@@ -5,15 +5,8 @@ from importlib import import_module
 from django.apps import apps
 from django.conf import settings
 from django.core.checks import Tags, run_checks
-from django.core.management.base import (
-    BaseCommand,
-    CommandError,
-    no_translations,
-)
-from django.core.management.sql import (
-    emit_post_migrate_signal,
-    emit_pre_migrate_signal,
-)
+from django.core.management.base import BaseCommand, CommandError, no_translations
+from django.core.management.sql import emit_post_migrate_signal, emit_pre_migrate_signal
 from django.db import DEFAULT_DB_ALIAS, connections, router
 from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.executor import MigrationExecutor

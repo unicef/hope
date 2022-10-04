@@ -3,6 +3,8 @@
 from __future__ import unicode_literals
 
 from snapshottest import Snapshot
+
+
 snapshots = Snapshot()
 
 snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
@@ -51420,34 +51422,44 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'No',
+                        'labelEn': 'Full individual collected',
                         'labels': [
                             {
-                                'label': 'No',
+                                'label': 'Full individual collected',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': 'No individual data',
+                        'labels': [
+                            {
+                                'label': 'No individual data',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': '0'
                     },
                     {
-                        'labelEn': 'None',
+                        'labelEn': 'Partial individuals collected',
                         'labels': [
                             {
-                                'label': 'None',
+                                'label': 'Partial individuals collected',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': 'Unknown',
+                        'labels': [
+                            {
+                                'label': 'Unknown',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': ''
-                    },
-                    {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
                     }
                 ],
                 'hint': '',

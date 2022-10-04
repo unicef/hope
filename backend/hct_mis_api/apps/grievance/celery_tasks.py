@@ -1,9 +1,9 @@
 import logging
 from datetime import timedelta
 from typing import Sequence
-from django.utils import timezone
 
 from django.db.models import Q
+from django.utils import timezone
 
 from sentry_sdk import configure_scope
 
