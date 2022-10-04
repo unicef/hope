@@ -8,7 +8,8 @@ const rows = jsonData.data;
 
 for (let i = 1; i < rows.length; i++) {
   if (rows[i].length !== 0) {
-    rows[i][10] = 100;
+    // column index 8 is entitlement_quantity (non-usd)
+    rows[i][8] = 100;
   }
 }
 
