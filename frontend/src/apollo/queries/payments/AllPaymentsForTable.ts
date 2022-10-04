@@ -40,6 +40,7 @@ export const AllPaymentsForTable = gql`
               name
             }
           }
+          entitlementQuantity
           entitlementQuantityUsd
           currency
           deliveredQuantity

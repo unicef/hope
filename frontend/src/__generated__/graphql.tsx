@@ -1370,13 +1370,15 @@ export enum FinancialServiceProviderXlsxReportStatus {
 export enum FinancialServiceProviderXlsxTemplateColumns {
   PaymentId = 'PAYMENT_ID',
   HouseholdId = 'HOUSEHOLD_ID',
-  AdminLeve_2 = 'ADMIN_LEVE_2',
+  HouseholdSize = 'HOUSEHOLD_SIZE',
+  AdminLevel_2 = 'ADMIN_LEVEL_2',
   CollectorName = 'COLLECTOR_NAME',
   PaymentChannel = 'PAYMENT_CHANNEL',
   FspName = 'FSP_NAME',
+  Currency = 'CURRENCY',
   EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
-  DeliveredQuantity = 'DELIVERED_QUANTITY',
-  Tbd = 'TBD'
+  EntitlementQuantityUsd = 'ENTITLEMENT_QUANTITY_USD',
+  DeliveredQuantity = 'DELIVERED_QUANTITY'
 }
 
 export type FinancialServiceProviderXlsxTemplateNode = Node & {
@@ -3756,6 +3758,7 @@ export type PaymentChannelNode = Node & {
   updatedAt: Scalars['DateTime'],
   individual: IndividualNode,
   deliveryMechanism?: Maybe<PaymentChannelDeliveryMechanism>,
+  isFallback: Scalars['Boolean'],
   paymentSet: PaymentNodeConnection,
 };
 
@@ -9975,7 +9978,7 @@ export type AllPaymentsForTableQuery = (
       & Pick<PaymentNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentNode' }
-        & Pick<PaymentNode, 'id' | 'unicefId' | 'entitlementQuantityUsd' | 'currency' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'paymentPlanHardConflicted' | 'paymentPlanSoftConflicted' | 'hasPaymentChannel'>
+        & Pick<PaymentNode, 'id' | 'unicefId' | 'entitlementQuantity' | 'entitlementQuantityUsd' | 'currency' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'paymentPlanHardConflicted' | 'paymentPlanSoftConflicted' | 'hasPaymentChannel'>
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
@@ -18138,6 +18141,7 @@ export const AllPaymentsForTableDocument = gql`
             name
           }
         }
+        entitlementQuantity
         entitlementQuantityUsd
         currency
         deliveredQuantity
@@ -24552,6 +24556,7 @@ export type PaymentChannelNodeResolvers<ContextType = any, ParentType extends Re
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   deliveryMechanism?: Resolver<Maybe<ResolversTypes['PaymentChannelDeliveryMechanism']>, ParentType, ContextType>,
+  isFallback?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentChannelNodePaymentSetArgs>,
 };
 

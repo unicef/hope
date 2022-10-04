@@ -10,6 +10,7 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import {
   formatCurrency,
+  formatCurrencyWithSymbol,
   paymentPlanStatusMapping,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
@@ -66,20 +67,16 @@ export const PaymentPlanTableRow = ({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>
-        {plan.totalHouseholdsCount || '-'}
-      </TableCell>
-      <TableCell align='left'>
-        {plan.currencyName}
+      <TableCell align='left'>{plan.totalHouseholdsCount || '-'}</TableCell>
+      <TableCell align='left'>{plan.currencyName}</TableCell>
+      <TableCell align='right'>
+        {`${formatCurrencyWithSymbol(plan.totalEntitledQuantity, 'USD')}`}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(plan.totalEntitledQuantity, true)}
+        {`${formatCurrencyWithSymbol(plan.totalDeliveredQuantity, 'USD')}`}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(plan.totalDeliveredQuantity, true)}
-      </TableCell>
-      <TableCell align='right'>
-        {formatCurrency(plan.totalUndeliveredQuantity, true)}
+        {`${formatCurrencyWithSymbol(plan.totalUndeliveredQuantity, 'USD')}`}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{plan.dispersionStartDate}</UniversalMoment>

@@ -29049,7 +29049,13 @@
             "deprecationReason": null
           },
           {
-            "name": "ADMIN_LEVE_2",
+            "name": "HOUSEHOLD_SIZE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ADMIN_LEVEL_2",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -29073,19 +29079,25 @@
             "deprecationReason": null
           },
           {
+            "name": "CURRENCY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "ENTITLEMENT_QUANTITY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "DELIVERED_QUANTITY",
+            "name": "ENTITLEMENT_QUANTITY_USD",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "TBD",
+            "name": "DELIVERED_QUANTITY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -30289,6 +30301,22 @@
               "kind": "ENUM",
               "name": "PaymentChannelDeliveryMechanism",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "isFallback",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

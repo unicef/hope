@@ -119,12 +119,24 @@ export const PaymentsTableRow = ({
       </TableCell>
       <TableCell align='left'>
         {payment.entitlementQuantityUsd > 0
-          ? formatCurrency(payment.entitlementQuantityUsd, true)
+          ? `${formatCurrencyWithSymbol(
+              payment.entitlementQuantity,
+              payment.currency,
+            )} (${formatCurrencyWithSymbol(
+              payment.entitlementQuantityUsd,
+              'USD',
+            )})`
           : '-'}
       </TableCell>
       <TableCell align='left'>
         {payment.deliveredQuantity > 0
-          ? formatCurrencyWithSymbol(payment.deliveredQuantity)
+          ? `${formatCurrencyWithSymbol(
+              payment.deliveredQuantity,
+              payment.currency,
+            )} (${formatCurrencyWithSymbol(
+              payment.deliveredQuantityUsd,
+              'USD',
+            )})`
           : '-'}
       </TableCell>
     </ClickableTableRow>

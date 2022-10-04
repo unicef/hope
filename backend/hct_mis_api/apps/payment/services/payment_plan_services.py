@@ -5,6 +5,7 @@ from decimal import Decimal
 from django.db import transaction
 from django.db.models import Q, Sum, Subquery, OuterRef, F
 from django.db.models.functions import Coalesce
+from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from graphql import GraphQLError
@@ -22,6 +23,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.core.models import FileTemp
 
 
 User = get_user_model()
@@ -387,8 +389,13 @@ class PaymentPlanService:
         return self.payment_plan
 
     def import_xlsx_per_fsp(self, user, file) -> PaymentPlan:
-        # TODO: Object of type InMemoryUploadedFile is not JSON serializable
-        import_payment_plan_payment_list_per_fsp_from_xlsx.delay(self.payment_plan.pk, user.pk, file)
+        file_temp = FileTemp.objects.create(
+            object_id=self.payment_plan.pk,
+            content_type=get_content_type_for_model(self.payment_plan),
+            created_by=user,
+            file=file,
+        )
+        import_payment_plan_payment_list_per_fsp_from_xlsx.delay(self.payment_plan.pk, user.pk, file_temp.pk)
         return self.payment_plan
 
     def validate_fsps_per_delivery_mechanisms(self, dm_to_fsp_mapping, update_dms=False, update_payments=False):
