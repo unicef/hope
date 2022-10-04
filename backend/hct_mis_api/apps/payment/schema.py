@@ -555,8 +555,11 @@ class GenericPaymentPlanNode(graphene.ObjectType):
 
     payment_verification_summary = graphene.Field(PaymentVerificationSummaryNode)
 
-    def resolve_payment_verification_summary(self):
+    def resolve_payment_verification_summary(self, info, **kwargs):
         return self.payment_verification_summary
+
+    def resolve_id(self, info, **kwargs):
+        return self.pk
 
 
 class Query(graphene.ObjectType):
