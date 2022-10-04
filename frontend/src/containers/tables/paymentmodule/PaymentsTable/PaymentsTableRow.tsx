@@ -9,7 +9,6 @@ import { ClickableTableRow } from '../../../../components/core/Table/ClickableTa
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
-  formatCurrency,
   formatCurrencyWithSymbol,
   renderSomethingOrDash,
 } from '../../../../utils/utils';
