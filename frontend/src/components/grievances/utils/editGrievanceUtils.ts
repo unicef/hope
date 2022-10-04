@@ -473,11 +473,13 @@ export function prepareVariables(businessArea, values, ticket) {
     documentationToUpdate,
   ): { id: number; name: string; file: File }[] | null => {
     if (documentationToUpdate) {
-      return documentationToUpdate.map((doc) => ({
-        id: doc.id,
-        name: doc.name,
-        file: doc.file,
-      }));
+      return documentationToUpdate
+        .filter((el) => el)
+        .map((doc) => ({
+          id: doc.id,
+          name: doc.name,
+          file: doc.file,
+        }));
     }
     return null;
   };
