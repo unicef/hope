@@ -11,7 +11,7 @@ from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPayme
 
 
 class XlsxPaymentPlanImportService(XlsxImportBaseService):
-    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n")
+    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "n")
 
     def __init__(self, payment_plan: PaymentPlan, file):
         self.payment_plan = payment_plan
