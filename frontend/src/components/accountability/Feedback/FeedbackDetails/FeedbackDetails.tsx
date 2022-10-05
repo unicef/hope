@@ -2,7 +2,10 @@ import { Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '../../../../utils/utils';
-import { FeedbackQuery } from '../../../../__generated__/graphql';
+import {
+  FeedbackIssueType,
+  FeedbackQuery,
+} from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../../core/LabelizedField';
@@ -43,7 +46,7 @@ export const FeedbackDetails = ({
                 label: t('Issue Type'),
                 value: (
                   <span>
-                    {feedback.issueType === 'A_1'
+                    {feedback.issueType === FeedbackIssueType.PositiveFeedback
                       ? 'Positive Feedback'
                       : 'Negative Feedback'}
                   </span>
