@@ -5,6 +5,7 @@ max-nesting-depth = 12
 exclude =
     # No need to traverse virtualenv
     .venv,
+    venv,
     # No need to traverse our git directory
     .git,
     # There's no value in checking cache directories
@@ -21,20 +22,9 @@ exclude =
 
 ignore =
     # black formatting related
-    E203, # whitespace before ':'
-    E501, # line too long
-    W503, # line break before binary operator
     F405, # may be undefined, or defined from star imports
     E731, # lamda expressions
     #
-    W291, # trailing whitespace
-    W293, # blank line contains whitespace
-    E303, # too many blank lines
     E722, # do not use bare except # TODO: fix this
-    E231, # missing whitespace after ','
-    W292, # no newline at end of file
-    E302, # expected 2 blank lines, found 1
-    E225, # missing whitespace around operator
-    W391, # blank line at end of file
     #
     C901, # too complex # TODO: fix this
