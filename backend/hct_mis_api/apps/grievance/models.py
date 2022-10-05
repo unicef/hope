@@ -356,7 +356,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
-        for key, value in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
+        for value in GrievanceTicket.ISSUE_TYPES_CHOICES.values():
             issue_type_choices_dict.update(value)
         return issue_type_choices_dict[self.issue_type]
 

@@ -30,3 +30,5 @@ ignore =
     E731, # lamda expressions
     #
     C901, # too complex # TODO: fix this
+    # bugbear
+    B023, # function def does not bind loop var TODO: fix this
