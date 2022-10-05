@@ -68,15 +68,6 @@ Then('I should see the Feedback details page', () => {
 
 When('I edit the Feedback and save', () => {
   cy.get('[data-cy="button-edit"]').click({ force: true });
-  cy.get('[data-cy="button-submit"]').click();
-  cy.get('[data-cy="button-submit"]').click();
-  cy.get('[data-cy="input-address"]').click();
-  cy.get('[data-cy="input-admin1"]').click();
-  cy.get('[data-cy="input-village"]').click();
-  cy.get('[data-cy="input-countryOrigin"]').click();
-  cy.get('[data-cy="input-headOfHousehold"]').click();
-  cy.get('[data-cy="input-consent"]').click();
-  cy.get('[data-cy="button-submit"]').click();
   cy.get('[data-cy="input-description"]').click().type('description EDITED');
   cy.get('[data-cy="button-submit"]').click();
 });
