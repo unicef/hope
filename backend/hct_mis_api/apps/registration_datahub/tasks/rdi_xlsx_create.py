@@ -11,22 +11,21 @@ from django.db import transaction
 from django.utils import timezone
 
 import openpyxl
-
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
 from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_PARTIAL,
+    COLLECT_TYPE_UNKNOWN,
     HEAD,
     IDENTIFICATION_TYPE_DICT,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    COLLECT_TYPE_FULL,
-    COLLECT_TYPE_NONE,
-    COLLECT_TYPE_PARTIAL,
-    COLLECT_TYPE_UNKNOWN,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
