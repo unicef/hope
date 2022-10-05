@@ -81,73 +81,27 @@ const BoxWithBorders = styled.div`
   padding: 15px 0;
 `;
 
-export const validationSchemaWithSteps = (currentStep: number): unknown => {
-  const datum = {
-    category: Yup.string()
-      .required('Category is required')
-      .nullable(),
-    issueType: Yup.string()
-      .required('Issue Type is required')
-      .nullable(),
-    admin: Yup.string().nullable(),
-    description: Yup.string(),
-    consent: Yup.bool(),
-    area: Yup.string().nullable(),
-    language: Yup.string().nullable(),
-    selectedPaymentRecords: Yup.array()
-      .of(Yup.string())
-      .nullable(),
-    selectedRelatedTickets: Yup.array()
-      .of(Yup.string())
-      .nullable(),
-  };
-  if (currentStep === FeedbackSteps.Description) {
-    datum.description = Yup.string().required('Description is required');
-  }
-  if (currentStep >= FeedbackSteps.Verification) {
-    datum.consent = Yup.bool().oneOf([true], 'Consent is required');
-  }
-  return Yup.object().shape(datum);
-};
-
-export function validateUsingSteps(
-  values,
-  activeStep,
-  setValidateData,
-): { [key: string]: string | { [key: string]: string } } {
-  const errors: { [key: string]: string | { [key: string]: string } } = {};
-  const verficationStepFields = [
-    'size',
-    'maleChildrenCount',
-    'femaleChildrenCount',
-    'childrenDisabledCount',
-    'headOfHousehold',
-    'countryOrigin',
-    'address',
-    'village',
-    'admin1',
-    'unhcrId',
-    'months_displaced_h_f',
-    'fullName',
-    'birthDate',
-    'phoneNo',
-    'relationship',
-  ];
-
-  if (
-    activeStep === FeedbackSteps.Verification &&
-    (values.selectedHousehold ||
-      (values.selectedIndividual && !values.verificationRequired))
-  ) {
-    if (
-      verficationStepFields.filter((item) => values[item] === true).length < 5
-    ) {
-      setValidateData(true);
-      errors.verificationRequired = 'Select correctly minimum 5 questions';
-    }
-  }
-  return errors;
-}
+export const validationSchema = Yup.object().shape({
+  category: Yup.string()
+    .required('Category is required')
+    .nullable(),
+  issueType: Yup.string()
+    .required('Issue Type is required')
+    .nullable(),
+  admin: Yup.string().nullable(),
+  description: Yup.string()
+    .nullable()
+    .required('Description is required'),
+  consent: Yup.bool(),
+  area: Yup.string().nullable(),
+  language: Yup.string().nullable(),
+  selectedPaymentRecords: Yup.array()
+    .of(Yup.string())
+    .nullable(),
+  selectedRelatedTickets: Yup.array()
+    .of(Yup.string())
+    .nullable(),
+});
 
 export const EditFeedbackPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -258,31 +212,21 @@ export const EditFeedbackPage = (): React.ReactElement => {
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
-        if (activeStep === steps.length - 1) {
-          try {
-            const response = await mutate({
-              variables: { input: prepareVariables(values) },
-            });
-            showMessage(t('Feedback updated'), {
-              pathname: `/${businessArea}/accountability/feedback/${response.data.updateFeedback.feedback.id}`,
-              historyMethod: 'push',
-            });
-          } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
-          }
-        } else {
-          setValidateData(false);
-          handleNext();
+        try {
+          const response = await mutate({
+            variables: { input: prepareVariables(values) },
+          });
+          showMessage(t('Feedback updated'), {
+            pathname: `/${businessArea}/accountability/feedback/${response.data.updateFeedback.feedback.id}`,
+            historyMethod: 'push',
+          });
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
         }
       }}
-      validateOnChange={activeStep < FeedbackSteps.Verification || validateData}
-      validateOnBlur={activeStep < FeedbackSteps.Verification || validateData}
-      validationSchema={validationSchemaWithSteps(activeStep)}
-      validate={(values) =>
-        validateUsingSteps(values, activeStep, setValidateData)
-      }
+      validationSchema={validationSchema}
     >
-      {({ submitForm, values, setFieldValue, errors, touched }) => {
+      {({ submitForm }) => {
         return (
           <>
             <PageHeader
@@ -301,197 +245,99 @@ export const EditFeedbackPage = (): React.ReactElement => {
                 <NewTicket>
                   <InnerBoxPadding>
                     <ContainerColumnWithBorder>
-                      <NoRootPadding>
-                        <Stepper activeStep={activeStep}>
-                          {steps.map((label) => {
-                            const stepProps: { completed?: boolean } = {};
-                            const labelProps: {
-                              optional?: React.ReactNode;
-                            } = {};
-                            return (
-                              <Step key={label} {...stepProps}>
-                                <StepLabel {...labelProps}>{label}</StepLabel>
-                              </Step>
-                            );
-                          })}
-                        </Stepper>
-                      </NoRootPadding>
-                      {activeStep === FeedbackSteps.Selection && (
-                        <Grid container spacing={3}>
+                      <BoxPadding>
+                        <Grid container spacing={6}>
                           <Grid item xs={6}>
                             <LabelizedField label={t('Category')}>
                               {t('Feedback')}
                             </LabelizedField>
                           </Grid>
                           <Grid item xs={6}>
+                            <LabelizedField label={t('Issue Type')}>
+                              {feedback.issueType === 'POSITIVE_FEEDBACK'
+                                ? 'Positive Feedback'
+                                : 'Negative Feedback'}
+                            </LabelizedField>
+                          </Grid>
+                        </Grid>
+                        <BoxPadding />
+                        <Grid container spacing={3}>
+                          <Grid item xs={12}>
                             <Field
-                              name='issueType'
-                              label='Issue Type'
+                              name='description'
+                              multiline
+                              fullWidth
                               variant='outlined'
+                              label={t('Description')}
                               required
-                              choices={choicesData.feedbackIssueTypeChoices}
+                              component={FormikTextField}
+                            />
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Field
+                              name='comments'
+                              multiline
+                              fullWidth
+                              variant='outlined'
+                              label={t('Comments')}
+                              component={FormikTextField}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Field
+                              name='admin2'
+                              label={t('Administrative Level 2')}
+                              variant='outlined'
+                              component={FormikAdminAreaAutocomplete}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Field
+                              name='area'
+                              fullWidth
+                              variant='outlined'
+                              label={t('Area / Village / Pay point')}
+                              component={FormikTextField}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Field
+                              name='language'
+                              multiline
+                              fullWidth
+                              variant='outlined'
+                              label={t('Languages Spoken')}
+                              component={FormikTextField}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Field
+                              name='program'
+                              fullWidth
+                              variant='outlined'
+                              label={t('Programme Title')}
+                              choices={mappedPrograms}
                               component={FormikSelectField}
                             />
                           </Grid>
                         </Grid>
-                      )}
-                      {activeStep === FeedbackSteps.Lookup && (
-                        <BoxWithBorders>
-                          <Box display='flex' flexDirection='column'>
-                            <LookUpHouseholdIndividualSelection
-                              values={values}
-                              onValueChange={setFieldValue}
-                              errors={errors}
-                              touched={touched}
-                            />
-                          </Box>
-                        </BoxWithBorders>
-                      )}
-                      {activeStep === FeedbackSteps.Verification && (
-                        <BoxWithBorders>
-                          {values.selectedHousehold && (
-                            <>
-                              <Typography variant='subtitle1'>
-                                {t(
-                                  'Select correctly answered questions (minimum 5)',
-                                )}
-                              </Typography>
-                              <Box py={4}>
-                                <Typography variant='subtitle2'>
-                                  {t('Household Questionnaire')}
-                                </Typography>
-                                <Box py={4}>
-                                  <HouseholdQuestionnaire values={values} />
-                                </Box>
-                              </Box>
-                              <Typography variant='subtitle2'>
-                                {t('Individual Questionnaire')}
-                              </Typography>
-                              <Box py={4}>
-                                <IndividualQuestionnaire values={values} />
-                              </Box>
-                              <BoxWithBorderBottom />
-                            </>
-                          )}
-                          <Consent />
-                          <Field
-                            name='consent'
-                            label={t('Received Consent')}
-                            color='primary'
-                            fullWidth
-                            required
-                            container={false}
-                            component={FormikCheckboxField}
-                            data-cy='input-consent'
-                          />
-                        </BoxWithBorders>
-                      )}
-                      {activeStep === steps.length - 1 && (
-                        <BoxPadding>
-                          <OverviewContainer>
-                            <Grid container spacing={6}>
-                              <LabelizedField label={t('Category')}>
-                                {t('Feedback')}
-                              </LabelizedField>
-                            </Grid>
-                          </OverviewContainer>
-                          <BoxWithBorderBottom />
-                          <BoxPadding />
-                          <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                              <Field
-                                name='description'
-                                multiline
-                                fullWidth
-                                variant='outlined'
-                                label={t('Description')}
-                                required
-                                component={FormikTextField}
-                              />
-                            </Grid>
-                            <Grid item xs={12}>
-                              <Field
-                                name='comments'
-                                multiline
-                                fullWidth
-                                variant='outlined'
-                                label={t('Comments')}
-                                component={FormikTextField}
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name='admin2'
-                                label={t('Administrative Level 2')}
-                                variant='outlined'
-                                component={FormikAdminAreaAutocomplete}
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name='area'
-                                fullWidth
-                                variant='outlined'
-                                label={t('Area / Village / Pay point')}
-                                component={FormikTextField}
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name='language'
-                                multiline
-                                fullWidth
-                                variant='outlined'
-                                label={t('Languages Spoken')}
-                                component={FormikTextField}
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name='program'
-                                fullWidth
-                                variant='outlined'
-                                label={t('Programme Title')}
-                                choices={mappedPrograms}
-                                component={FormikSelectField}
-                              />
-                            </Grid>
-                          </Grid>
-                        </BoxPadding>
-                      )}
-                      {errors.verificationRequired ? (
-                        <FormHelperText error>
-                          {errors.verificationRequired}
-                        </FormHelperText>
-                      ) : null}
-                      <Box pt={3} display='flex' flexDirection='row'>
-                        <Box mr={3}>
-                          <Button
-                            component={Link}
-                            to={`/${businessArea}/accountability/feedback`}
-                          >
-                            {t('Cancel')}
-                          </Button>
-                        </Box>
-                        <Box display='flex' ml='auto'>
-                          <Button
-                            disabled={activeStep === 0}
-                            onClick={handleBack}
-                          >
-                            {t('Back')}
-                          </Button>
-                          <LoadingButton
-                            loading={loading}
-                            color='primary'
-                            variant='contained'
-                            onClick={submitForm}
-                            data-cy='button-submit'
-                          >
-                            {activeStep === steps.length - 1
-                              ? t('Save')
-                              : t('Next')}
-                          </LoadingButton>
-                        </Box>
+                      </BoxPadding>
+                      <Box display='flex' justifyContent='space-between'>
+                        <Button
+                          component={Link}
+                          to={`/${businessArea}/accountability/feedback/${feedback.id}`}
+                        >
+                          {t('Cancel')}
+                        </Button>
+                        <LoadingButton
+                          loading={loading}
+                          color='primary'
+                          variant='contained'
+                          onClick={submitForm}
+                          data-cy='button-submit'
+                        >
+                          {t('Save')}
+                        </LoadingButton>
                       </Box>
                     </ContainerColumnWithBorder>
                   </InnerBoxPadding>
