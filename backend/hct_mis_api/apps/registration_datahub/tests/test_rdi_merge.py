@@ -5,10 +5,10 @@ from freezegun import freeze_time
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
-    COUSIN,
-    HEAD,
     COLLECT_TYPE_FULL,
     COLLECT_TYPE_PARTIAL,
+    COUSIN,
+    HEAD,
     Household,
     Individual,
 )

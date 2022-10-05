@@ -1,12 +1,13 @@
 from django.core.management.base import BaseCommand
+
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk, scan
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 
 BATCH_SIZE = 5_000
 
