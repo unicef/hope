@@ -159,8 +159,8 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
                     request,
                     self.delete_rdi,
                     mark_safe(
-                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                    <h3>All households connected to this Registration data import will be deleted</h3> 
+                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    <h3>All households connected to this Registration data import will be deleted</h3>
                     """
                     ),
                     "Successfully executed",
@@ -248,8 +248,8 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
                     request,
                     self.delete_rdi,
                     mark_safe(
-                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                    <h3>All households connected to this Registration data import will be deleted</h3> 
+                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    <h3>All households connected to this Registration data import will be deleted</h3>
                     """
                     ),
                     "Successfully executed",

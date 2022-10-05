@@ -375,8 +375,8 @@ UNICEF HOPE""",
                 request,
                 self.mark_submissions,
                 mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                <h3>All ImportedSubmission for not merged rdi will be marked.</h3> 
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
                 """
                 ),
                 "Successfully executed",
