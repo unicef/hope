@@ -1,31 +1,17 @@
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid,
-  Step,
-  StepLabel,
-  Stepper,
-  Typography,
-} from '@material-ui/core';
+import { Box, Button, Divider, Grid } from '@material-ui/core';
 import { Field, Formik } from 'formik';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import * as Yup from 'yup';
-import { HouseholdQuestionnaire } from '../../../../components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
-import { IndividualQuestionnaire } from '../../../../components/accountability/Feedback/IndividualQuestionnnaire/IndividualQuestionnaire';
+import { BlackLink } from '../../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../../../components/core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../../../components/core/LabelizedField';
 import { LoadingButton } from '../../../../components/core/LoadingButton';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { OverviewContainer } from '../../../../components/core/OverviewContainer';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { Consent } from '../../../../components/grievances/Consent';
-import { LookUpHouseholdIndividualSelection } from '../../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import {
   hasPermissionInModule,
   hasPermissions,
@@ -35,10 +21,8 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { FeedbackSteps } from '../../../../utils/constants';
 import {
   UpdateFeedbackInput,
   useAllProgramsQuery,
@@ -47,39 +31,6 @@ import {
   useFeedbackQuery,
   useUpdateFeedbackTicketMutation,
 } from '../../../../__generated__/graphql';
-
-const steps = [
-  'Category Selection',
-  'Household/Individual Look up',
-  'Identity Verification',
-  'Description',
-];
-
-const BoxPadding = styled.div`
-  padding: 15px 0;
-`;
-const NoRootPadding = styled.div`
-  .MuiStepper-root {
-    padding: 0 !important;
-  }
-`;
-const InnerBoxPadding = styled.div`
-  .MuiPaper-root {
-    padding: 32px 20px;
-  }
-`;
-const NewTicket = styled.div`
-  padding: 20px;
-`;
-const BoxWithBorderBottom = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  padding: 15px 0;
-`;
-const BoxWithBorders = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  padding: 15px 0;
-`;
 
 export const validationSchema = Yup.object().shape({
   category: Yup.string()
@@ -115,9 +66,6 @@ export const EditFeedbackPage = (): React.ReactElement => {
       fetchPolicy: 'network-only',
     },
   );
-
-  const [activeStep, setActiveStep] = useState(FeedbackSteps.Selection);
-  const [validateData, setValidateData] = useState(false);
 
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
@@ -169,14 +117,6 @@ export const EditFeedbackPage = (): React.ReactElement => {
     },
   ];
 
-  const handleNext = (): void => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = (): void => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
   const { feedback } = feedbackData;
 
   const initialValues = {
@@ -207,6 +147,16 @@ export const EditFeedbackPage = (): React.ReactElement => {
     consent: values.consent,
     program: values.program,
   });
+
+  const canViewHouseholdDetails = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+    permissions,
+  );
+
+  const canViewIndividualDetails = hasPermissions(
+    PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+    permissions,
+  );
 
   return (
     <Formik
@@ -242,10 +192,10 @@ export const EditFeedbackPage = (): React.ReactElement => {
             />
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <NewTicket>
-                  <InnerBoxPadding>
-                    <ContainerColumnWithBorder>
-                      <BoxPadding>
+                <Box p={3}>
+                  <ContainerColumnWithBorder>
+                    <Box p={3}>
+                      <Box mb={3}>
                         <Grid container spacing={6}>
                           <Grid item xs={6}>
                             <LabelizedField label={t('Category')}>
@@ -260,88 +210,126 @@ export const EditFeedbackPage = (): React.ReactElement => {
                             </LabelizedField>
                           </Grid>
                         </Grid>
-                        <BoxPadding />
-                        <Grid container spacing={3}>
-                          <Grid item xs={12}>
-                            <Field
-                              name='description'
-                              multiline
-                              fullWidth
-                              variant='outlined'
-                              label={t('Description')}
-                              required
-                              component={FormikTextField}
-                            />
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Field
-                              name='comments'
-                              multiline
-                              fullWidth
-                              variant='outlined'
-                              label={t('Comments')}
-                              component={FormikTextField}
-                            />
+                        <Grid container spacing={6}>
+                          <Grid item xs={6}>
+                            <LabelizedField label={t('Household ID')}>
+                              {feedback.householdLookup?.id ? (
+                                <BlackLink
+                                  to={
+                                    canViewHouseholdDetails
+                                      ? `/${businessArea}/population/household/${feedback.householdLookup.id}`
+                                      : undefined
+                                  }
+                                >
+                                  {feedback.householdLookup.unicefId}
+                                </BlackLink>
+                              ) : (
+                                '-'
+                              )}
+                            </LabelizedField>
                           </Grid>
                           <Grid item xs={6}>
-                            <Field
-                              name='admin2'
-                              label={t('Administrative Level 2')}
-                              variant='outlined'
-                              component={FormikAdminAreaAutocomplete}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Field
-                              name='area'
-                              fullWidth
-                              variant='outlined'
-                              label={t('Area / Village / Pay point')}
-                              component={FormikTextField}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Field
-                              name='language'
-                              multiline
-                              fullWidth
-                              variant='outlined'
-                              label={t('Languages Spoken')}
-                              component={FormikTextField}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Field
-                              name='program'
-                              fullWidth
-                              variant='outlined'
-                              label={t('Programme Title')}
-                              choices={mappedPrograms}
-                              component={FormikSelectField}
-                            />
+                            <LabelizedField label={t('Individual ID')}>
+                              {feedback.individualLookup?.id ? (
+                                <BlackLink
+                                  to={
+                                    canViewIndividualDetails
+                                      ? `/${businessArea}/population/individuals/${feedback.individualLookup.id}`
+                                      : undefined
+                                  }
+                                >
+                                  {feedback.individualLookup.unicefId}
+                                </BlackLink>
+                              ) : (
+                                '-'
+                              )}
+                            </LabelizedField>
                           </Grid>
                         </Grid>
-                      </BoxPadding>
-                      <Box display='flex' justifyContent='space-between'>
-                        <Button
-                          component={Link}
-                          to={`/${businessArea}/accountability/feedback/${feedback.id}`}
-                        >
-                          {t('Cancel')}
-                        </Button>
-                        <LoadingButton
-                          loading={loading}
-                          color='primary'
-                          variant='contained'
-                          onClick={submitForm}
-                          data-cy='button-submit'
-                        >
-                          {t('Save')}
-                        </LoadingButton>
+                        <Box mt={6} mb={6}>
+                          <Divider />
+                        </Box>
                       </Box>
-                    </ContainerColumnWithBorder>
-                  </InnerBoxPadding>
-                </NewTicket>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                          <Field
+                            name='description'
+                            multiline
+                            fullWidth
+                            variant='outlined'
+                            label={t('Description')}
+                            required
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Field
+                            name='comments'
+                            multiline
+                            fullWidth
+                            variant='outlined'
+                            label={t('Comments')}
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='admin2'
+                            label={t('Administrative Level 2')}
+                            variant='outlined'
+                            component={FormikAdminAreaAutocomplete}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='area'
+                            fullWidth
+                            variant='outlined'
+                            label={t('Area / Village / Pay point')}
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='language'
+                            multiline
+                            fullWidth
+                            variant='outlined'
+                            label={t('Languages Spoken')}
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='program'
+                            fullWidth
+                            variant='outlined'
+                            label={t('Programme Title')}
+                            choices={mappedPrograms}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                    <Box display='flex' justifyContent='space-between'>
+                      <Button
+                        component={Link}
+                        to={`/${businessArea}/accountability/feedback/${feedback.id}`}
+                      >
+                        {t('Cancel')}
+                      </Button>
+                      <LoadingButton
+                        loading={loading}
+                        color='primary'
+                        variant='contained'
+                        onClick={submitForm}
+                        data-cy='button-submit'
+                      >
+                        {t('Save')}
+                      </LoadingButton>
+                    </Box>
+                  </ContainerColumnWithBorder>
+                </Box>
               </Grid>
             </Grid>
           </>
