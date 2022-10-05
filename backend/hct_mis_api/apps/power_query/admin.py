@@ -279,6 +279,7 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_filter = (("query", AutoCompleteFilter), ("formatter", AutoCompleteFilter))
     resource_class = ReportResource
     change_list_template = None
+    search_fields = ("name",)
 
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser or (obj and obj.owner == request.user)
@@ -331,7 +332,8 @@ class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
 @register(ReportResult)
 class ReportResultAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("report", "dataset", "info", "size")
+    list_display = ("title", "report", "info", "size")
+    list_filter = (("report", AutoCompleteFilter),)
 
     def info(self, obj: ReportResult):
         return obj.dataset.info

@@ -12,7 +12,7 @@ class TestPowerQuery(TestCase):
     @classmethod
     def setUpTestData(self):
         create_defaults()
-        self.query1 = QueryFactory(code="result=conn.all()")
+        self.query1 = QueryFactory(code="dataset=conn.all()")
         self.query2 = QueryFactory(code=f"result, __=invoke({self.query1.pk})")
         self.formatter = FormatterFactory(name="Queryset To HTML")
         self.report = ReportFactory(formatter=self.formatter, query=self.query1)
