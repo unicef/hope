@@ -39,14 +39,12 @@ spec:
               name: {{ include "hope.fullname" . }}-backend
           - configMapRef:
               name: {{ include "hope.fullname" . }}-backend
-          - configMapRef:
-              name: {{ .Release.Name  }}-postgres-data
           resources:
             limits:
               cpu: "250m"
               memory: "256Mi"
             requests:
-              cpu: "250m"
+              cpu: "25m"
               memory: "256Mi"
       {{- with .Values.celery.nodeSelector }}
       nodeSelector:
