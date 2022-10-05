@@ -59,7 +59,7 @@ stages:
             displayName: "Use Python 3.9"
           - script: pip install black==22.8.0 isort==5.10.1
           # remember to update this if you change the version of black/isort in pyproject.toml
-            displayName: "Install Black"
+            displayName: "Install tools"
           - script: black --check .
             workingDirectory: 'backend'
             displayName: "Check format"
