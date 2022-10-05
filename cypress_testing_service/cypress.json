@@ -8,6 +8,6 @@
       "mochaFile": "cypress/reports/junit/test-results.[hash].xml",
       "testsuitesTitle": false
     },
-    "numTestsKeptInMemory": 0,
+    "numTestsKeptInMemory": 10,
     "downloadFolder": "cypress/downloads"
 }
