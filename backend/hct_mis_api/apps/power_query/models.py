@@ -16,7 +16,8 @@ from natural_keys import NaturalKeyModel
 from sentry_sdk import capture_exception
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.power_query.utils import sizeof, to_dataset
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.power_query.utils import dict_hash, to_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,11 @@ class Query(NaturalKeyModel, models.Model):
         self.error = None
         super().save(force_insert, force_update, using, update_fields)
 
+    def _invoke(self, query_id):
+        query = Query.objects.get(id=query_id)
+        result, debug_info = query.run(persist=False)
+        return result, debug_info
+
     def execute_matrix(self, persist=False, **kwargs) -> "[Dataset]":
         if self.parametrizer:
             args = self.parametrizer.get_matrix()
@@ -105,41 +111,54 @@ class Query(NaturalKeyModel, models.Model):
         results = []
         for a in args:
             try:
-                pk = self.run(persist, a)
-                results.append(pk)
+                dataset = self.run(persist, a)
+                results.append(dataset)
             except Exception as e:
                 results.append(e)
-
+        self.datasets.exclude(pk__in=[d.pk for d in results if d]).delete()
         return results
 
-    def complete(self) -> "Dataset":
-        pass
-
-    def run(self, persist=False, query_args=None) -> "Optional[Dataset]":
+    def run(self, persist=False, arguments=None) -> "Optional[Dataset]":
         model = self.target.model_class()
         _error = None
         return_value = None
+        connections = {
+            f"{model._meta.object_name}Manager": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
+            for model in [BusinessArea, User]
+        }
+
         try:
             locals_ = {
                 "conn": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS),
                 "query": self,
-                "args": query_args,
-                "arguments": query_args,
+                "args": arguments,
+                "arguments": arguments,
+                "invoke": self._invoke,
+                **connections,
             }
 
             exec(self.code, globals(), locals_)
-            result = locals_.get("result", None)
+            result = locals_.get("queryset", None)
+            extra = locals_.get("extra", None)
+            debug_info = locals_.get("debug_info", None)
             if persist:
-                info = {"type": type(result).__name__, "size": sizeof(len(result)), "arguments": query_args}
-                r, __ = Dataset.objects.update_or_create(
+                info = {
+                    "type": type(result).__name__,
+                    "arguments": arguments,
+                }
+                dataset, __ = Dataset.objects.update_or_create(
                     query=self,
-                    info=info,
+                    hash=dict_hash({"query": self.pk, **arguments}),
                     defaults={
+                        "info": info,
                         "last_run": timezone.now(),
-                        "result": pickle.dumps(result),
+                        "value": pickle.dumps(result),
+                        "extra": pickle.dumps(extra),
                     },
                 )
-                return_value = r.pk
+                return_value = dataset
+            else:
+                return_value = (result, debug_info)
         except Exception as e:
             _error = capture_exception(e)
             logger.exception(e)
@@ -149,22 +168,28 @@ class Query(NaturalKeyModel, models.Model):
 
 
 class Dataset(models.Model):
+    hash = models.CharField(unique=True, max_length=200)
     last_run = models.DateTimeField(null=True, blank=True)
     description = models.CharField(max_length=100)
     query = models.ForeignKey(Query, on_delete=models.CASCADE, related_name="datasets")
-    result = models.BinaryField(null=True, blank=True)
+    value = models.BinaryField(null=True, blank=True)
     info = JSONField(default=dict, blank=True)
+    extra = models.BinaryField(null=True, blank=True, help_text="Any other attribute to pass to the formatter")
 
     def __str__(self):
-        return f"Result of {self.query.name}"
+        return f"Result of {self.query.name} {self.arguments}"
 
     @property
     def data(self):
-        return pickle.loads(self.result)
+        return pickle.loads(self.value)
 
     @property
     def size(self):
-        return self.info.get("size")
+        return len(self.value)
+
+    @property
+    def arguments(self):
+        return self.info.get("arguments", {})
 
 
 class Formatter(NaturalKeyModel, models.Model):
@@ -211,12 +236,13 @@ class Report(NaturalKeyModel, models.Model):
                     {
                         "dataset": dataset,
                         "report": "self",
+                        "arguments": dataset.arguments,
                     }
                 )
-                res, __ = ReportResult.objects.update_or_create(report=self, dataset=dataset)
-                res.last_run = timezone.now()
-                res.output = pickle.dumps(output)
-                res.save()
+                title = self.name % {**dataset.arguments, **pickle.loads(dataset.extra)}
+                res, __ = ReportResult.objects.update_or_create(
+                    report=self, title=title, dataset=dataset, output=pickle.dumps(output), arguments=dataset.arguments
+                )
                 result.append([res.pk, len(res.output)])
             except Exception as e:
                 result.append(e)
@@ -226,7 +252,20 @@ class Report(NaturalKeyModel, models.Model):
         return self.name
 
 
+class ReportResultManager(models.Manager):
+    pass
+
+
 class ReportResult(NaturalKeyModel, models.Model):
+    timestamp = models.DateTimeField(auto_now=True)
+    title = models.CharField(max_length=300)
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
     output = models.BinaryField(null=True, blank=True)
+    arguments = models.JSONField(default=dict)
+    limit_access_to = models.ManyToManyField(User, blank=True, related_name="+")
+
+    objects = ReportResultManager()
+
+    class Meta:
+        unique_together = ("report", "dataset")

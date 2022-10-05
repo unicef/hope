@@ -19,7 +19,15 @@ logger = logging.getLogger(__name__)
 @app.task()
 @sentry_tags
 def spawn(query_id, **kwargs):
-    pass
+    query = Query.objects.get(pk=query_id)
+    query.run(True, kwargs)
+
+
+@app.task()
+@sentry_tags
+def complete(query_id, **kwargs):
+    query = Query.objects.get(pk=query_id)
+    query.run(True, kwargs)
 
 
 @app.task()
@@ -31,19 +39,7 @@ def queue(query_id, **kwargs):
             args = query.parametrizer.get_matrix()
         else:
             args = []
-        for a in args:
-            chord(query.run.s, persist=True, query_args=a)(query.complete.si())
-    #         if result:
-    #             url = reverse("admin:power_query_dataset_export", args=[query.dataset.pk])
-    #             send_mail(
-    #                 "Power Query completed",
-    #                 f"""Power Query {query.name} completed.
-    # results available here: {url}.
-    #
-    # """,
-    #                 from_email=settings.DEFAULT_FROM_EMAIL,
-    #                 recipient_list=[query.owner.email],
-    #             )
+        chord([spawn.s(persist=True, **a) for a in args])(complete.si(query_id))
     except Exception as e:
         logger.exception(e)
         return False
