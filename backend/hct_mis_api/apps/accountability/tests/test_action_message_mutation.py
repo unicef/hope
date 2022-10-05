@@ -19,7 +19,6 @@ class TestActionMessageMutation(APITestCase):
       createAccountabilityCommunicationMessage(businessAreaSlug: $businessArea, inputs: $inputs) {
         message {
           title
-          unicefId
           body
           createdBy {
             firstName
