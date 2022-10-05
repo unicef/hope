@@ -5,10 +5,10 @@ from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
