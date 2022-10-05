@@ -112,3 +112,4 @@ class UploadDocumentsBase(APITestCase):
             shutil.rmtree(cls.TEST_DIR)
         except OSError:
             pass
+        super().tearDownClass()
