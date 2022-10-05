@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.power_query.models import Query
+from hct_mis_api.apps.power_query.models import Query, Report
 
 SYSTEM_QUERYARGS = {
     "active-business-areas": {
@@ -36,7 +36,7 @@ def create_defaults():
         },
     )
 
-    Formatter.objects.get_or_create(
+    fmt_html, __ = Formatter.objects.get_or_create(
         name="Queryset To HTML",
         defaults={
             "code": """
@@ -61,10 +61,18 @@ def create_defaults():
             name=params["name"], code=code, defaults={"system": True, "value": params["value"]()}
         )
 
-    Query.objects.get_or_create(
-        name="Household list by BusinessArea",
-        target=ContentType.objects.get_for_model(Household),
-        code="result=conn.filter(business_area__slug=args['business_area'])",
-        parametrizer=Parametrizer.objects.get(code="active-business-areas"),
-        owner=User.objects.first(),
+    q, __ = Query.objects.update_or_create(
+        name="Households by BusinessArea",
+        defaults=dict(
+            target=ContentType.objects.get_for_model(Household),
+            code="""ba=BusinessAreaManager.get(slug=args['business_area'])  
+queryset=conn.filter(business_area=ba)
+extra={"ba": ba}
+""",
+            parametrizer=Parametrizer.objects.get(code="active-business-areas"),
+            owner=User.objects.first(),
+        ),
+    )
+    Report.objects.update_or_create(
+        name="Household by BusinessArea: %(business_area)s", defaults={"query": q, "formatter": fmt_html}
     )
