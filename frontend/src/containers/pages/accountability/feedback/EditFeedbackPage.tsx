@@ -189,7 +189,27 @@ export const EditFeedbackPage = (): React.ReactElement => {
                   ? breadCrumbsItems
                   : null
               }
-            />
+            >
+              <Box display='flex' alignContent='center'>
+                <Box mr={3}>
+                  <Button
+                    component={Link}
+                    to={`/${businessArea}/accountability/feedback/${feedback.id}`}
+                  >
+                    {t('Cancel')}
+                  </Button>
+                </Box>
+                <LoadingButton
+                  loading={loading}
+                  color='primary'
+                  variant='contained'
+                  onClick={submitForm}
+                  data-cy='button-submit'
+                >
+                  {t('Save')}
+                </LoadingButton>
+              </Box>
+            </PageHeader>
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Box p={3}>
@@ -310,23 +330,6 @@ export const EditFeedbackPage = (): React.ReactElement => {
                           />
                         </Grid>
                       </Grid>
-                    </Box>
-                    <Box display='flex' justifyContent='space-between'>
-                      <Button
-                        component={Link}
-                        to={`/${businessArea}/accountability/feedback/${feedback.id}`}
-                      >
-                        {t('Cancel')}
-                      </Button>
-                      <LoadingButton
-                        loading={loading}
-                        color='primary'
-                        variant='contained'
-                        onClick={submitForm}
-                        data-cy='button-submit'
-                      >
-                        {t('Save')}
-                      </LoadingButton>
                     </Box>
                   </ContainerColumnWithBorder>
                 </Box>
