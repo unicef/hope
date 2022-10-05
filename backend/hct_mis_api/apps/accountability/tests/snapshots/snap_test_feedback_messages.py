@@ -49,7 +49,7 @@ snapshots['TestTicketNotes::test_feedback_query_shows_feedback_messages_0_with_p
                     {
                         'node': {
                             'description': 'Feedback message you see',
-                            'id': 'RmVlZGJhY2tNZXNzYWdlTm9kZTpkZDFkMjQ0OS0wNzIyLTRkODktOThkZS1hYzhhOTVjNTA5ZTU='
+                            'id': 'RmVlZGJhY2tNZXNzYWdlTm9kZTplMGRmYjAyMy04NzQ3LTRkMDQtOTNlNi1lZjAyN2ZjMzYwMGY='
                         }
                     }
                 ]
