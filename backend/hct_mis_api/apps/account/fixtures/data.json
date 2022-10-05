@@ -27,7 +27,7 @@
   "model": "account.user",
   "pk": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
   "fields": {
-    "password": "pbkdf2_sha256$260000$MliHGeJGjoDZgW6slv5IZf$+SjjYVud/fzaOrV+SezINCtzVW/Y4YNirWhA2yaz3x4=",
+    "password": "pbkdf2_sha256$260000$1hKoE7uDGN0lLX4x0RCuhJ$+oF9os6+oExtr5KC0hxlQsNw6WSYQKigWQyuoi1Uu1I=",
     "last_login": "2022-03-30 09:07:40-00:00",
     "is_superuser": true,
     "username": "root",
