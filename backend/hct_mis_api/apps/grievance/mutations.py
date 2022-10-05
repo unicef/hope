@@ -260,12 +260,11 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             verify_required_arguments(input, "issue_type", cls.ISSUE_TYPE_OPTIONS)
         category = arg("category")
 
-        # TODO
-        # if category in (
-        #     GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-        #     GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-        # ):
-        #     raise GraphQLError("Feedback tickets are not allowed to be created through this mutation.")
+        if category in (
+            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+        ):
+            raise GraphQLError("Feedback tickets are not allowed to be created through this mutation.")
 
         documents = input.pop("documentation", None)
         grievance_ticket, extras = cls.save_basic_data(root, info, input, **kwargs)
