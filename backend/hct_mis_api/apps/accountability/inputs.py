@@ -35,7 +35,7 @@ class CreateAccountabilityCommunicationMessageInput(GetAccountabilityCommunicati
 
 class CreateFeedbackInput(graphene.InputObjectType):
     business_area_slug = graphene.String(required=True)
-    issue_type = graphene.Int(required=True)
+    issue_type = graphene.String(required=True)
     household_lookup = graphene.ID()
     individual_lookup = graphene.ID()
     description = graphene.String(required=True)
@@ -49,7 +49,7 @@ class CreateFeedbackInput(graphene.InputObjectType):
 
 class UpdateFeedbackInput(graphene.InputObjectType):
     feedback_id = graphene.ID(required=True)
-    issue_type = graphene.Int()
+    issue_type = graphene.String()
     household_lookup = graphene.ID()
     individual_lookup = graphene.ID()
     description = graphene.String()

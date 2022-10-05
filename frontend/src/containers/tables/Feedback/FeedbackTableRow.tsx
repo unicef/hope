@@ -1,7 +1,10 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
-import { FeedbackNode } from '../../../__generated__/graphql';
+import {
+  FeedbackIssueType,
+  FeedbackNode,
+} from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
@@ -41,7 +44,7 @@ export const FeedbackTableRow = ({
         )}
       </TableCell>
       <TableCell align='left'>
-        {feedback.issueType === 'A_1'
+        {feedback.issueType === FeedbackIssueType.PositiveFeedback
           ? 'Positive Feedback'
           : 'Negative Feedback'}
       </TableCell>

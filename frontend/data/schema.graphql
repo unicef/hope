@@ -544,7 +544,7 @@ input CreateDashboardReportInput {
 
 input CreateFeedbackInput {
   businessAreaSlug: String!
-  issueType: Int!
+  issueType: String!
   householdLookup: ID
   individualLookup: ID
   description: String!
@@ -832,8 +832,8 @@ type ExportXlsxCashPlanVerification {
 }
 
 enum FeedbackIssueType {
-  A_1
-  A_2
+  POSITIVE_FEEDBACK
+  NEGATIVE_FEEDBACK
 }
 
 type FeedbackMessageNode implements Node {
@@ -3809,7 +3809,7 @@ input UpdateAddIndividualIssueTypeExtras {
 
 input UpdateFeedbackInput {
   feedbackId: ID!
-  issueType: Int
+  issueType: String
   householdLookup: ID
   individualLookup: ID
   description: String

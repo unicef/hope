@@ -390,9 +390,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         assert "errors" not in response_1, response_1["errors"]
         feedbacks_1 = response_1["data"]["allFeedbacks"]["edges"]
         self.assertEqual(len(feedbacks_1), 2)
-        self.assertTrue(feedbacks_1[0]["node"]["issueType"].endswith(str(Feedback.NEGATIVE_FEEDBACK)))
-        self.assertTrue(feedbacks_1[1]["node"]["issueType"].endswith(str(Feedback.POSITIVE_FEEDBACK)))
-        # endswith due to A_1/A_2 format of issue type
+        self.assertEqual(feedbacks_1[0]["node"]["issueType"], Feedback.POSITIVE_FEEDBACK)
+        self.assertEqual(feedbacks_1[1]["node"]["issueType"], Feedback.NEGATIVE_FEEDBACK)
 
         response_2 = self.graphql_request(
             request_string=self.ALL_FEEDBACKS_QUERY,
@@ -402,8 +401,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         assert "errors" not in response_2, response_2["errors"]
         feedbacks_2 = response_2["data"]["allFeedbacks"]["edges"]
         self.assertEqual(len(feedbacks_2), 2)
-        self.assertTrue(feedbacks_2[0]["node"]["issueType"].endswith(str(Feedback.POSITIVE_FEEDBACK)))
-        self.assertTrue(feedbacks_2[1]["node"]["issueType"].endswith(str(Feedback.NEGATIVE_FEEDBACK)))
+        self.assertEqual(feedbacks_2[0]["node"]["issueType"], Feedback.NEGATIVE_FEEDBACK)
+        self.assertEqual(feedbacks_2[1]["node"]["issueType"], Feedback.POSITIVE_FEEDBACK)
 
     def test_ordering_by_linked_grievance(self):
         feedback_id_1 = self.create_new_feedback()

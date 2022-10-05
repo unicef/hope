@@ -238,7 +238,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
 
   const initialValues = {
     category: 'Feedback',
-    issueType: feedback.issueType === 'A_1' ? 1 : 2,
+    issueType: feedback.issueType,
     selectedHousehold: feedback.householdLookup || null,
     selectedIndividual: feedback.individualLookup || null,
     description: feedback.description || null,
