@@ -62,8 +62,21 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
 
 
 class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
-    # TODO
-    # ACTIVITY_LOG_MAPPING =
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "issue_type",
+            "household_lookup",
+            "individual_lookup",
+            "description",
+            "comments",
+            "admin2",
+            "area",
+            "language",
+            "program",
+            "consent",
+            "linked_grievance",
+        ]
+    )
 
     POSITIVE_FEEDBACK = "POSITIVE_FEEDBACK"
     NEGATIVE_FEEDBACK = "NEGATIVE_FEEDBACK"
