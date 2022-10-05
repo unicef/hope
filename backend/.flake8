@@ -28,6 +28,5 @@ ignore =
     W503, # line break before binary operator
     F405, # may be undefined, or defined from star imports
     E731, # lamda expressions
-    W293, # blank line contains whitespace
     #
     C901, # too complex # TODO: fix this
