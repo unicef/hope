@@ -1,22 +1,19 @@
-from django.db.models import (
-    Case,
-    CharField,
-    Count,
-    DecimalField,
-    Exists,
-    F,
-    IntegerField,
-    OuterRef,
-    Q,
-    Subquery,
-    Sum,
-    Value,
-    When,
-)
-
 import graphene
+
 from graphene import relay
 from graphene_django import DjangoObjectType
+
+from django.db.models import (
+    Case,
+    Count,
+    DecimalField,
+    F,
+    IntegerField,
+    Q,
+    Sum,
+    Value,
+    When, OuterRef, Exists,
+)
 
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
@@ -38,15 +35,14 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.payment.filters import (
     CashPlanFilter,
     PaymentVerificationPlanFilter,
-    PaymentVerificationSummaryFilter,
 )
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     GenericPayment,
     PaymentRecord,
-    PaymentVerificationPlan,
+    PaymentVerificationPlan, PaymentVerificationSummary,
 )
-from hct_mis_api.apps.payment.schema import PaymentVerificationPlanNode
+from hct_mis_api.apps.payment.schema import PaymentVerificationPlanNode, PaymentVerificationSummaryNode
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
 from hct_mis_api.apps.program.models import Program
@@ -103,10 +99,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         source="payment_verification_plans",
         filterset_class=PaymentVerificationPlanFilter,
     )
-    payment_verification_summary = DjangoPermissionFilterConnectionField(
-        "hct_mis_api.apps.payment.schema.PaymentVerificationSummaryNode",
-        filterset_class=PaymentVerificationSummaryFilter,
-    )
+    payment_verification_summary = graphene.Field(PaymentVerificationSummaryNode)
 
     class Meta:
         model = CashPlan
@@ -123,6 +116,9 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.payment_items.filter(
             status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         ).count()
+
+    def resolve_payment_verification_summary(self, info, **kwargs):
+        return self.payment_verification_summary
 
 
 class Query(graphene.ObjectType):
@@ -193,22 +189,27 @@ class Query(graphene.ObjectType):
         return to_choice_object(Program.STATUS_CHOICE)
 
     def resolve_all_cash_plans(self, info, **kwargs):
+        payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(
+            payment_plan_object_id=str(OuterRef("id"))
+        )
+
         return CashPlan.objects.annotate(
             custom_order=Case(
                 When(
-                    payment_verification_summary__status=PaymentVerificationPlan.STATUS_ACTIVE,
+                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_ACTIVE)),
                     then=Value(1),
                 ),
                 When(
-                    payment_verification_summary__status=PaymentVerificationPlan.STATUS_PENDING,
+                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_PENDING)),
                     then=Value(2),
                 ),
                 When(
-                    payment_verification_summary__status=PaymentVerificationPlan.STATUS_FINISHED,
+                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_FINISHED)),
                     then=Value(3),
                 ),
                 output_field=IntegerField(),
-            )
+                default=Value(0),
+            ),
         ).order_by("-updated_at", "custom_order")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])

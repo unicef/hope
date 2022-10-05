@@ -22,6 +22,7 @@ from django.shortcuts import get_object_or_404
 
 from graphene import relay
 from graphene_django import DjangoObjectType
+from graphql_relay import to_global_id
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -488,7 +489,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     )
 
     obj_type = graphene.String()
-    id = graphene.String(source="pk")
+    id = graphene.String()
     unicef_id = graphene.String()
     verification_status = graphene.String()
     currency = graphene.String()
@@ -506,7 +507,9 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
     assistance_measurement = graphene.String()
     dispersion_date = graphene.String()
     service_provider_full_name = graphene.String()
-    # payment_verification_summary = graphene.List(PaymentVerificationPlanSummaryNode)
+
+    def resolve_id(self, info, **kwargs):
+        return to_global_id(self.__class__.__name__ + "Node", self.id)
 
     def resolve_obj_type(self, info, **kwargs):
         return self.__class__.__name__
@@ -528,9 +531,6 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     def resolve_service_provider_full_name(self, info, **kwargs):
         return ""
-
-    # def resolve_payment_verification_summary(self, info, **kwargs):
-    #     return self.payment_verification_summary.all()
 
 
 class PaginatedType(graphene.ObjectType):
@@ -559,7 +559,7 @@ class GenericPaymentPlanNode(graphene.ObjectType):
         return self.payment_verification_summary
 
     def resolve_id(self, info, **kwargs):
-        return self.pk
+        return to_global_id(self.__class__.__name__ + "Node", self.id)
 
 
 class Query(graphene.ObjectType):
