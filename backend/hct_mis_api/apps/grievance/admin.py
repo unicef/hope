@@ -10,6 +10,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
+    GrievanceDocument,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
     TicketDeleteHouseholdDetails,
@@ -126,3 +127,10 @@ class TicketNegativeFeedbackDetailsAdmin(HOPEModelAdminBase):
 @admin.register(TicketReferralDetails)
 class TicketReferralDetailsAdmin(HOPEModelAdminBase):
     raw_id_fields = ("ticket", "household", "individual")
+
+
+@admin.register(GrievanceDocument)
+class TicketReferralDetailsAdmin(HOPEModelAdminBase):
+    list_display = (
+        "file_name",
+    )

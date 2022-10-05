@@ -17,7 +17,7 @@ snapshots['TestActionMessageMutation::test_create_communication_message_0_with_p
                 },
                 'numberOfRecipients': 4,
                 'title': 'FULL_LIST message title',
-                'unicefId': 'MSG-22-0029'
+                'unicefId': 'MSG-22-0043'
             }
         }
     }
@@ -33,7 +33,7 @@ snapshots['TestActionMessageMutation::test_create_communication_message_1_with_p
                 },
                 'numberOfRecipients': 3,
                 'title': 'RANDOM message title',
-                'unicefId': 'MSG-22-0030'
+                'unicefId': 'MSG-22-0044'
             }
         }
     }
@@ -49,7 +49,7 @@ snapshots['TestActionMessageMutation::test_create_communication_message_2_with_p
                 },
                 'numberOfRecipients': 4,
                 'title': 'FULL_LIST message title',
-                'unicefId': 'MSG-22-0031'
+                'unicefId': 'MSG-22-0045'
             }
         }
     }
@@ -65,7 +65,7 @@ snapshots['TestActionMessageMutation::test_create_communication_message_3_with_p
                 },
                 'numberOfRecipients': 3,
                 'title': 'RANDOM message title',
-                'unicefId': 'MSG-22-0032'
+                'unicefId': 'MSG-22-0046'
             }
         }
     }

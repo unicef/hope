@@ -363,6 +363,22 @@ export const GrievanceTicket = gql`
         id
       }
       comments
+      documentation {
+        id
+        createdAt
+        updatedAt
+        name
+        createdBy {
+          id
+          firstName
+          lastName
+          email
+        }
+        fileSize
+        contentType
+        filePath
+        fileName
+      }
     }
   }
 `;

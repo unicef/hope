@@ -316,6 +316,7 @@ export function prepareVariables(businessArea, values) {
     comments: values.comments,
     programme: values.programme,
     linkedFeedbackId: values.linkedFeedbackId,
+    documentation: values.documentation,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,

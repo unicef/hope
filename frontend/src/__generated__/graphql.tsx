@@ -1359,6 +1359,32 @@ export type GrievanceComplaintTicketExtras = {
   paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
 };
 
+export type GrievanceDocumentNode = Node & {
+   __typename?: 'GrievanceDocumentNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  name?: Maybe<Scalars['String']>,
+  createdBy?: Maybe<UserNode>,
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+  fileSize?: Maybe<Scalars['Int']>,
+  contentType: Scalars['String'],
+  filePath?: Maybe<Scalars['String']>,
+  fileName?: Maybe<Scalars['String']>,
+};
+
+export type GrievanceDocumentNodeConnection = {
+   __typename?: 'GrievanceDocumentNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<GrievanceDocumentNodeEdge>>,
+};
+
+export type GrievanceDocumentNodeEdge = {
+   __typename?: 'GrievanceDocumentNodeEdge',
+  node?: Maybe<GrievanceDocumentNode>,
+  cursor: Scalars['String'],
+};
+
 export type GrievanceStatusChangeMutation = {
    __typename?: 'GrievanceStatusChangeMutation',
   grievanceTicket?: Maybe<GrievanceTicketNode>,
@@ -1409,6 +1435,7 @@ export type GrievanceTicketNode = Node & {
   positiveFeedbackTicketDetails?: Maybe<TicketPositiveFeedbackDetailsNode>,
   negativeFeedbackTicketDetails?: Maybe<TicketNegativeFeedbackDetailsNode>,
   referralTicketDetails?: Maybe<TicketReferralDetailsNode>,
+  supportDocuments: GrievanceDocumentNodeConnection,
   feedback?: Maybe<FeedbackNode>,
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
@@ -1417,6 +1444,7 @@ export type GrievanceTicketNode = Node & {
   admin?: Maybe<Scalars['String']>,
   existingTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
   totalDays?: Maybe<Scalars['String']>,
+  documentation?: Maybe<Array<Maybe<GrievanceDocumentNode>>>,
 };
 
 
@@ -1439,6 +1467,15 @@ export type GrievanceTicketNodeLinkedTicketsRelatedArgs = {
 
 
 export type GrievanceTicketNodeTicketNotesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type GrievanceTicketNodeSupportDocumentsArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -9263,7 +9300,14 @@ export type GrievanceTicketQuery = (
     ), programme: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'name' | 'id'>
-    )> }
+    )>, documentation: Maybe<Array<Maybe<(
+      { __typename?: 'GrievanceDocumentNode' }
+      & Pick<GrievanceDocumentNode, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'fileSize' | 'contentType' | 'filePath' | 'fileName'>
+      & { createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+      )> }
+    )>>> }
   )> }
 );
 
@@ -16879,6 +16923,22 @@ export const GrievanceTicketDocument = gql`
       id
     }
     comments
+    documentation {
+      id
+      createdAt
+      updatedAt
+      name
+      createdBy {
+        id
+        firstName
+        lastName
+        email
+      }
+      fileSize
+      contentType
+      filePath
+      fileName
+    }
   }
 }
     ${IndividualDetailedFragmentDoc}
@@ -21624,6 +21684,9 @@ export type ResolversTypes = {
   TicketNoteNodeConnection: ResolverTypeWrapper<TicketNoteNodeConnection>,
   TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
   TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
+  GrievanceDocumentNodeConnection: ResolverTypeWrapper<GrievanceDocumentNodeConnection>,
+  GrievanceDocumentNodeEdge: ResolverTypeWrapper<GrievanceDocumentNodeEdge>,
+  GrievanceDocumentNode: ResolverTypeWrapper<GrievanceDocumentNode>,
   MessageSamplingType: MessageSamplingType,
   CommunicationMessageRecipientMapNode: ResolverTypeWrapper<CommunicationMessageRecipientMapNode>,
   CommunicationMessageRecipientMapNodeConnection: ResolverTypeWrapper<CommunicationMessageRecipientMapNodeConnection>,
@@ -22029,6 +22092,9 @@ export type ResolversParentTypes = {
   TicketNoteNodeConnection: TicketNoteNodeConnection,
   TicketNoteNodeEdge: TicketNoteNodeEdge,
   TicketNoteNode: TicketNoteNode,
+  GrievanceDocumentNodeConnection: GrievanceDocumentNodeConnection,
+  GrievanceDocumentNodeEdge: GrievanceDocumentNodeEdge,
+  GrievanceDocumentNode: GrievanceDocumentNode,
   MessageSamplingType: MessageSamplingType,
   CommunicationMessageRecipientMapNode: CommunicationMessageRecipientMapNode,
   CommunicationMessageRecipientMapNodeConnection: CommunicationMessageRecipientMapNodeConnection,
@@ -22878,6 +22944,29 @@ export type GetCommunicationMessageSampleSizeObjectResolvers<ContextType = any, 
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
+export type GrievanceDocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceDocumentNode'] = ResolversParentTypes['GrievanceDocumentNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+  fileSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  contentType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  filePath?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  fileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type GrievanceDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceDocumentNodeConnection'] = ResolversParentTypes['GrievanceDocumentNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['GrievanceDocumentNodeEdge']>>, ParentType, ContextType>,
+};
+
+export type GrievanceDocumentNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceDocumentNodeEdge'] = ResolversParentTypes['GrievanceDocumentNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['GrievanceDocumentNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type GrievanceStatusChangeMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceStatusChangeMutation'] = ResolversParentTypes['GrievanceStatusChangeMutation']> = {
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
@@ -22926,6 +23015,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   positiveFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketPositiveFeedbackDetailsNode']>, ParentType, ContextType>,
   negativeFeedbackTicketDetails?: Resolver<Maybe<ResolversTypes['TicketNegativeFeedbackDetailsNode']>, ParentType, ContextType>,
   referralTicketDetails?: Resolver<Maybe<ResolversTypes['TicketReferralDetailsNode']>, ParentType, ContextType>,
+  supportDocuments?: Resolver<ResolversTypes['GrievanceDocumentNodeConnection'], ParentType, ContextType, GrievanceTicketNodeSupportDocumentsArgs>,
   feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
@@ -22934,6 +23024,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   existingTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
   totalDays?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  documentation?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceDocumentNode']>>>, ParentType, ContextType>,
 };
 
 export type GrievanceTicketNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']> = {
@@ -23591,7 +23682,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'GrievanceTicketNode' | 'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'CommunicationMessageRecipientMapNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'GrievanceTicketNode' | 'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'GrievanceDocumentNode' | 'CommunicationMessageRecipientMapNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -24989,6 +25080,9 @@ export type Resolvers<ContextType = any> = {
   GeoJSON?: GraphQLScalarType,
   GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<ContextType>,
   GetCommunicationMessageSampleSizeObject?: GetCommunicationMessageSampleSizeObjectResolvers<ContextType>,
+  GrievanceDocumentNode?: GrievanceDocumentNodeResolvers<ContextType>,
+  GrievanceDocumentNodeConnection?: GrievanceDocumentNodeConnectionResolvers<ContextType>,
+  GrievanceDocumentNodeEdge?: GrievanceDocumentNodeEdgeResolvers<ContextType>,
   GrievanceStatusChangeMutation?: GrievanceStatusChangeMutationResolvers<ContextType>,
   GrievanceTicketNode?: GrievanceTicketNodeResolvers<ContextType>,
   GrievanceTicketNodeConnection?: GrievanceTicketNodeConnectionResolvers<ContextType>,

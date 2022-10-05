@@ -1,4 +1,10 @@
-import { Box, Button, FormHelperText, Grid } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Grid,
+  Typography,
+} from '@material-ui/core';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +18,9 @@ import { LoadingButton } from '../../../components/core/LoadingButton';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { Title } from '../../../components/core/Title';
+import { ExistingDocumentationFieldArray } from '../../../components/grievances/Documentation/ExistingDocumentationFieldArray';
+import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
@@ -25,6 +34,7 @@ import { validate } from '../../../components/grievances/utils/validateGrievance
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
 import {
   hasCreatorOrOwnerPermissions,
+  hasPermissions,
   PERMISSIONS,
 } from '../../../config/permissions';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
@@ -243,6 +253,11 @@ export const EditGrievancePage = (): React.ReactElement => {
         ),
     );
 
+  const canAddDocumentation = hasPermissions(
+    PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
+    permissions,
+  );
+
   return (
     <Formik
       initialValues={initialValues}
@@ -313,7 +328,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                 </LoadingButton>
               </Box>
             </PageHeader>
-            <Grid spacing={3}>
+            <Grid container spacing={3}>
               <Grid item xs={12}>
                 <NewTicket>
                   <ContainerColumnWithBorder>
@@ -471,6 +486,26 @@ export const EditGrievancePage = (): React.ReactElement => {
                           </Grid>
                         )}
                       </Grid>
+                      {canAddDocumentation && (
+                        <Box mt={3}>
+                          <Title>
+                            <Typography variant='h6'>
+                              {t('Documentation')}
+                            </Typography>
+                          </Title>
+                          <ExistingDocumentationFieldArray
+                            values={values}
+                            setFieldValue={setFieldValue}
+                            errors={errors}
+                            ticket={ticket}
+                          />
+                          <NewDocumentationFieldArray
+                            values={values}
+                            setFieldValue={setFieldValue}
+                            errors={errors}
+                          />
+                        </Box>
+                      )}
                     </BoxPadding>
                     <BoxPadding>
                       <BoxWithBorders>
