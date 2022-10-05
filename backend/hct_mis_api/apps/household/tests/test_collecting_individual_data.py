@@ -1,12 +1,19 @@
 from datetime import date
 
-from hct_mis_api.apps.household.services.household_recalculate_data import recalculate_data
-from hct_mis_api.apps.household.models import COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL, COLLECT_TYPE_NONE
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import HEAD, MALE
+from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_PARTIAL,
+    HEAD,
+    MALE,
+)
+from hct_mis_api.apps.household.services.household_recalculate_data import (
+    recalculate_data,
+)
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 
 
 class TestOptionalRecalculationOfIndividuals(APITestCase):

@@ -5,7 +5,6 @@ from datetime import datetime
 from functools import reduce
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     admin_area1_query,
@@ -53,6 +52,7 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
 
 logger = logging.getLogger(__name__)
 
