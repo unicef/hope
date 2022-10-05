@@ -337,6 +337,8 @@ When('I download the xlsx template', () => {
 });
 
 Then('I fill the xlsx template', () => {
+  // Wait for the file to be generated
+  cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
   const name = xlsxFileName(paymentPlanUnicefId);
   const downloadedFilePath = `${downloadsFolder}/${name}`;
   cy.exec(`node cypress/scripts/fillXlsxEntitlements.js ${downloadedFilePath}`);
@@ -412,11 +414,14 @@ And('I upload the reconciliation info', () => {
     });
   });
   cy.get('[data-cy="file-input"').click({ force: true });
-  cy.get('[data-cy="imported-file-name"]').should('exist');
-  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
+  // cy.get('[data-cy="imported-file-name"]').should('exist'); // TODO
+  cy.get('[data-cy="button-import-submit"').click({ force: true });
+  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
 })
 
 Then('I see the delivered quantities for each payment', () => {
-  // TODO
+  cy.get('[data-cy="delivered-quantity-cell"]').each(($el) => {
+    cy.wrap($el).should('contain', 'AFN 100');
+  })
 })

@@ -127,7 +127,7 @@ export const PaymentsTableRow = ({
             )})`
           : '-'}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell data-cy='delivered-quantity-cell' align='left'>
         {payment.deliveredQuantity > 0
           ? `${formatCurrencyWithSymbol(
               payment.deliveredQuantity,
