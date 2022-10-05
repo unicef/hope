@@ -902,7 +902,7 @@ export type CreateDashboardReportInput = {
 
 export type CreateFeedbackInput = {
   businessAreaSlug: Scalars['String'],
-  issueType: Scalars['Int'],
+  issueType: Scalars['String'],
   householdLookup?: Maybe<Scalars['ID']>,
   individualLookup?: Maybe<Scalars['ID']>,
   description: Scalars['String'],
@@ -1219,8 +1219,8 @@ export type ExportXlsxCashPlanVerification = {
 };
 
 export enum FeedbackIssueType {
-  A_1 = 'A_1',
-  A_2 = 'A_2'
+  PositiveFeedback = 'POSITIVE_FEEDBACK',
+  NegativeFeedback = 'NEGATIVE_FEEDBACK'
 }
 
 export type FeedbackMessageNode = Node & {
@@ -6178,7 +6178,7 @@ export type UpdateAddIndividualIssueTypeExtras = {
 
 export type UpdateFeedbackInput = {
   feedbackId: Scalars['ID'],
-  issueType?: Maybe<Scalars['Int']>,
+  issueType?: Maybe<Scalars['String']>,
   householdLookup?: Maybe<Scalars['ID']>,
   individualLookup?: Maybe<Scalars['ID']>,
   description?: Maybe<Scalars['String']>,

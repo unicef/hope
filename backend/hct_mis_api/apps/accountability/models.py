@@ -65,8 +65,8 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
     # TODO
     # ACTIVITY_LOG_MAPPING =
 
-    POSITIVE_FEEDBACK = 1
-    NEGATIVE_FEEDBACK = 2
+    POSITIVE_FEEDBACK = "POSITIVE_FEEDBACK"
+    NEGATIVE_FEEDBACK = "NEGATIVE_FEEDBACK"
 
     ISSUE_TYPE_CHOICES = (
         (POSITIVE_FEEDBACK, _("Positive feedback")),
@@ -74,7 +74,7 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
     )
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    issue_type = models.IntegerField(verbose_name=_("Issue type"), choices=ISSUE_TYPE_CHOICES)
+    issue_type = models.CharField(verbose_name=_("Issue type"), choices=ISSUE_TYPE_CHOICES, max_length=20)
     household_lookup = models.ForeignKey(
         "household.Household",
         related_name="feedbacks",
