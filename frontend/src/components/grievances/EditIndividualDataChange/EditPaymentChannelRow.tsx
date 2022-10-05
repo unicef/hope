@@ -90,7 +90,7 @@ export function EditPaymentChannelRow({
             </IconButton>
             <IconButton
               onClick={() => {
-                arrayHelpers.push({
+                arrayHelpers.replace(index, {
                   id: paymentChannel.id,
                   bankName: paymentChannel.bankName,
                   bankAccountNumber: paymentChannel.bankAccountNumber,

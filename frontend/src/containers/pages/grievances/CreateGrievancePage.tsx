@@ -70,6 +70,8 @@ import { LookUpHouseholdIndividualSelection } from '../../../components/grievanc
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { HouseholdQuestionnaire } from '../../../components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '../../../components/grievances/IndividualQuestionnnaire/IndividualQuestionnaire';
+import { Title } from '../../../components/core/Title';
+import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -142,6 +144,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     linkedFeedbackId: linkedFeedbackId
       ? decodeIdString(linkedFeedbackId)
       : null,
+    documentation: [],
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
@@ -227,6 +230,11 @@ export const CreateGrievancePage = (): React.ReactElement => {
     !individualFieldsDict
   )
     return null;
+
+  const canAddDocumentation = hasPermissions(
+    PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
+    permissions,
+  );
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -695,10 +703,27 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         </BoxPadding>
                       )}
                       {activeStep === steps.length - 1 && (
-                        <DataChangeComponent
-                          values={values}
-                          setFieldValue={setFieldValue}
-                        />
+                        <>
+                          {canAddDocumentation && (
+                            <Box mt={3}>
+                              <Title>
+                                <Typography variant='h6'>
+                                  {t('Documentation')}
+                                </Typography>
+                              </Title>
+
+                              <NewDocumentationFieldArray
+                                values={values}
+                                setFieldValue={setFieldValue}
+                                errors={errors}
+                              />
+                            </Box>
+                          )}
+                          <DataChangeComponent
+                            values={values}
+                            setFieldValue={setFieldValue}
+                          />
+                        </>
                       )}
                       {dataChangeErrors(errors, touched)}
                       <Box pt={3} display='flex' flexDirection='row'>

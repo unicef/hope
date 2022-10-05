@@ -1,7 +1,6 @@
 import datetime
 import logging
 
-from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db.models import Case, DateField, F, Q, When
 from django.utils import timezone
@@ -53,7 +52,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
-    GrievanceTicketThrough,
+    GrievanceDocument,
 )
 from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -63,6 +62,16 @@ from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
+
+
+class GrievanceDocumentNode(DjangoObjectType):
+    file_path = graphene.String(source="file_path")
+    file_name = graphene.String(source="file_name")
+
+    class Meta:
+        model = GrievanceDocument
+        exclude = ("file",)
+        interfaces = (relay.Node,)
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -86,6 +95,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     total_days = graphene.String()
     partner = graphene.Field(PartnerType)
     programme = graphene.Field(ProgramNode)
+    documentation = graphene.List(GrievanceDocumentNode)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -160,6 +170,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_programme(grievance_ticket: GrievanceTicket, info):
         return grievance_ticket.programme
+
+    @staticmethod
+    def resolve_documentation(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.support_documents.order_by("-created_at")
 
 
 class TicketNoteNode(DjangoObjectType):

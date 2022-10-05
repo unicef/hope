@@ -49,13 +49,13 @@ snapshots['TestTicketNotes::test_feedback_query_shows_feedback_messages_0_with_p
                     {
                         'node': {
                             'description': 'Feedback message you see',
-                            'id': 'RmVlZGJhY2tNZXNzYWdlTm9kZTplMGRmYjAyMy04NzQ3LTRkMDQtOTNlNi1lZjAyN2ZjMzYwMGY='
+                            'id': 'RmVlZGJhY2tNZXNzYWdlTm9kZTo1Yzc2NTdjMC00NGM5LTQwYjEtYTg3YS0xZTVhMGVlN2ViMjc='
                         }
                     }
                 ]
             },
             'id': 'RmVlZGJhY2tOb2RlOjE3NjFkMDIwLWVhZDItNDg5Zi05NWE4LTYxODUzZmJlNTY4ZQ==',
-            'issueType': 'NEGATIVE_FEEDBACK'
+            'issueType': 'POSITIVE_FEEDBACK'
         }
     }
 }
