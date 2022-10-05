@@ -196,7 +196,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
                   <ContainerColumnWithBorder>
                     <Box p={3}>
                       <Box mb={3}>
-                        <Grid container spacing={6}>
+                        <Grid container item xs={6} spacing={6}>
                           <Grid item xs={6}>
                             <LabelizedField label={t('Category')}>
                               {t('Feedback')}
@@ -210,7 +210,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
                             </LabelizedField>
                           </Grid>
                         </Grid>
-                        <Grid container spacing={6}>
+                        <Grid container xs={6} spacing={6}>
                           <Grid item xs={6}>
                             <LabelizedField label={t('Household ID')}>
                               {feedback.householdLookup?.id ? (
