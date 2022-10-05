@@ -422,6 +422,7 @@ And('I upload the reconciliation info', () => {
 
 Then('I see the delivered quantities for each payment', () => {
   cy.get('[data-cy="delivered-quantity-cell"]').each(($el) => {
-    cy.wrap($el).should('contain', 'AFN 100');
+    cy.wrap($el).should('contain', 'AFN');
+    cy.wrap($el).should('contain', '100');
   })
 })
