@@ -57,12 +57,15 @@ stages:
             inputs:
               versionSpec: "3.9"
             displayName: "Use Python 3.9"
-          - script: pip install black==22.8.0
-          # remember to update this if you change the version of black in pyproject.toml
+          - script: pip install black==22.8.0 isort==5.10.1
+          # remember to update this if you change the version of black/isort in pyproject.toml
             displayName: "Install Black"
           - script: black --check .
             workingDirectory: 'backend'
             displayName: "Check format"
+          - script: isort --check-only .
+            workingDirectory: 'backend'
+            displayName: "Check imports order"
 
 
   - stage: build_and_push
