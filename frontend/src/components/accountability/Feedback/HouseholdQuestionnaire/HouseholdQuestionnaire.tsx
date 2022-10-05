@@ -94,6 +94,7 @@ export const HouseholdQuestionnaire = ({
       ].map((el) => (
         <Grid item xs={3}>
           <Field
+            data-cy={`input-${el.name}`}
             name={el.name}
             label={el.label}
             displayValue={el.value || '-'}

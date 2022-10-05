@@ -300,6 +300,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     'Identity Verification',
     'Description',
   ];
+
   // if creating a linked G&F ticket from Feedback page skip Look Up
   if (linkedFeedbackId) {
     steps = ['Category Selection', 'Identity Verification', 'Description'];

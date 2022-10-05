@@ -23,7 +23,7 @@ export const FeedbackTableRow = ({
   const history = useHistory();
   const businessArea = useBusinessArea();
   const feedbackDetailsPath = `/${businessArea}/accountability/feedback/${feedback.id}`;
-  const householdDetailsPath = `/${businessArea}/population/households/${feedback.householdLookup.id}`;
+  const householdDetailsPath = `/${businessArea}/population/households/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = `/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance?.id}`;
 
   const handleClick = (): void => {
@@ -49,9 +49,13 @@ export const FeedbackTableRow = ({
           : 'Negative Feedback'}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink to={householdDetailsPath}>
-          {feedback.householdLookup.unicefId}
-        </BlackLink>
+        {feedback.householdLookup?.id ? (
+          <BlackLink to={householdDetailsPath}>
+            {feedback.householdLookup?.unicefId}
+          </BlackLink>
+        ) : (
+          renderSomethingOrDash(feedback.householdLookup?.unicefId)
+        )}
       </TableCell>
       <TableCell align='left'>
         {feedback.linkedGrievance?.id ? (

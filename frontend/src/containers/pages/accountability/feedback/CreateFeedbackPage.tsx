@@ -128,17 +128,6 @@ export function validateUsingSteps(
     'relationship',
   ];
 
-  if (activeStep === FeedbackSteps.Lookup && !values.selectedHousehold) {
-    errors.selectedHousehold = 'Household is Required';
-  }
-
-  if (activeStep === FeedbackSteps.Lookup) {
-    if (!values.selectedIndividual) {
-      errors.selectedIndividual = 'Individual is Required';
-    } else if (!values.selectedHousehold) {
-      errors.selectedHousehold = 'Household is Required';
-    }
-  }
   if (
     activeStep === FeedbackSteps.Verification &&
     (values.selectedHousehold ||
@@ -233,8 +222,8 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   const prepareVariables = (values): CreateFeedbackInput => ({
     businessAreaSlug: businessArea,
     issueType: values.issueType,
-    householdLookup: values.selectedHousehold.id,
-    individualLookup: values.selectedIndividual.id,
+    householdLookup: values.selectedHousehold?.id,
+    individualLookup: values.selectedIndividual?.id,
     description: values.description,
     comments: values.comments,
     admin2: values.admin2?.node?.id,
@@ -372,6 +361,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                             required
                             container={false}
                             component={FormikCheckboxField}
+                            data-cy='input-consent'
                           />
                         </BoxWithBorders>
                       )}
@@ -474,6 +464,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                             color='primary'
                             variant='contained'
                             onClick={submitForm}
+                            data-cy='button-submit'
                           >
                             {activeStep === steps.length - 1
                               ? t('Save')
