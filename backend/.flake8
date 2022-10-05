@@ -31,6 +31,4 @@ ignore =
     W291, # trailing whitespace
     W293, # blank line contains whitespace
     #
-    E722, # do not use bare except # TODO: fix this
-    #
     C901, # too complex # TODO: fix this

@@ -73,7 +73,7 @@ class RapidProAPI:
                 errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
             return errors
 
-        except:
+        except Exception:
             return False
 
     def _get_url(self):
