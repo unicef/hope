@@ -400,6 +400,7 @@ And('I upload the reconciliation info', () => {
   const fspFilename = fspXlsxFilenames[0];
 
   const filledFilePath = `out_${fspFilename}`;
+  cy.log(filledFilePath)
   cy.get('[data-cy="button-import"]').click({ force: true });
   cy.fixture(filledFilePath, 'base64').then((fileContent) => {
     cy.get('[data-cy="file-input"]').upload({

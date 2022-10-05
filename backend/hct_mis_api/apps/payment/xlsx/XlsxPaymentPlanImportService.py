@@ -162,7 +162,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                 (
                     XlsxPaymentPlanExportService.TITLE,
                     None,
-                    "There are no any updates in imported file, please add changes and try again",
+                    "There aren't any updates in imported file, please add changes and try again",
                 )
             )
 
