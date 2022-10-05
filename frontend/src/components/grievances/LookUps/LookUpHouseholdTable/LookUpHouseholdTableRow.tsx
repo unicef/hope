@@ -39,6 +39,7 @@ export function LookUpHouseholdTableRow({
       hover
       role='checkbox'
       key={household.id}
+      data-cy='household-table-row'
     >
       <TableCell padding='checkbox'>
         <Radio
