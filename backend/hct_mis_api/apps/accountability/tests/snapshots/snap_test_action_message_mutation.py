@@ -16,8 +16,7 @@ snapshots['TestActionMessageMutation::test_create_communication_message_0_with_p
                     'firstName': 'John'
                 },
                 'numberOfRecipients': 4,
-                'title': 'FULL_LIST message title',
-                'unicefId': 'MSG-22-0043'
+                'title': 'FULL_LIST message title'
             }
         }
     }
@@ -32,8 +31,7 @@ snapshots['TestActionMessageMutation::test_create_communication_message_1_with_p
                     'firstName': 'John'
                 },
                 'numberOfRecipients': 3,
-                'title': 'RANDOM message title',
-                'unicefId': 'MSG-22-0044'
+                'title': 'RANDOM message title'
             }
         }
     }
@@ -48,8 +46,7 @@ snapshots['TestActionMessageMutation::test_create_communication_message_2_with_p
                     'firstName': 'John'
                 },
                 'numberOfRecipients': 4,
-                'title': 'FULL_LIST message title',
-                'unicefId': 'MSG-22-0045'
+                'title': 'FULL_LIST message title'
             }
         }
     }
@@ -64,8 +61,7 @@ snapshots['TestActionMessageMutation::test_create_communication_message_3_with_p
                     'firstName': 'John'
                 },
                 'numberOfRecipients': 3,
-                'title': 'RANDOM message title',
-                'unicefId': 'MSG-22-0046'
+                'title': 'RANDOM message title'
             }
         }
     }

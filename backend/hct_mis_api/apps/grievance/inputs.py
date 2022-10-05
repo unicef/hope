@@ -1,4 +1,5 @@
 import graphene
+from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.schema import PartnerType, UserNode
 from hct_mis_api.apps.core.schema import BusinessAreaNode
@@ -10,6 +11,17 @@ from hct_mis_api.apps.grievance.schema import GrievanceTicketNode
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.program.schema import ProgramNode
+
+
+class GrievanceDocumentInput(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    file = Upload(required=True)
+
+
+class GrievanceDocumentUpdateInput(graphene.InputObjectType):
+    id = graphene.Field(graphene.ID, required=True)
+    name = graphene.String(required=False)
+    file = Upload(required=False)
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
@@ -30,6 +42,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     programme = graphene.ID(node=ProgramNode)
     comments = graphene.String()
     linked_feedback_id = graphene.ID()
+    documentation = graphene.List(GrievanceDocumentInput)
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -49,6 +62,9 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     partner = graphene.Int(node=PartnerType, required=False)
     programme = graphene.ID(node=ProgramNode)
     comments = graphene.String()
+    documentation = graphene.List(GrievanceDocumentInput)
+    documentation_to_update = graphene.List(GrievanceDocumentUpdateInput)
+    documentation_to_delete = graphene.List(graphene.ID)
 
 
 class CreateTicketNoteInput(graphene.InputObjectType):
