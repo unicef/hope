@@ -646,11 +646,15 @@
   "Ticket already exists": "Ticket already exists",
   "Tickets already exist": "Tickets already exist",
   "Programme Title": "Programme Title",
-  "Communication": "Communication",
   "Feedback": "Feedback",
   "Linked Grievance": "Linked Grievance",
   "Create a ticket": "Create a ticket",
   "Feedback created": "Feedback created",
   "Feedback updated": "Feedback updated",
-  "Messages": "Messages"
+  "Messages": "Messages",
+  "Documentation": "Documentation",
+  "Add another document": "Add another document",
+  "Add document": "Add document",
+  "Document Name": "Document Name",
+  "Communication": "Communication"
 }
