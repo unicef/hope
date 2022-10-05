@@ -44,8 +44,29 @@ stages:
             workingDirectory: 'frontend'
             displayName: "Test"
 
-  - stage: build_and_push
+  - stage: check_format
     dependsOn: []
+    displayName: Check BE format
+    jobs:
+      - job: check_format
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[CHECK FORMAT]"
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.9"
+            displayName: "Use Python 3.9"
+          - script: pip install black==22.8.0
+          # remember to update this if you change the version of black in pyproject.toml
+            displayName: "Install Black"
+          - script: black --check .
+            workingDirectory: 'backend'
+            displayName: "Check format"
+
+
+  - stage: build_and_push
+    dependsOn: check_format
     displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
