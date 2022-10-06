@@ -190,11 +190,10 @@ class Command(BaseCommand):
         print(f"Generating xlsx file ({amount}x HHs & INDs) with seed {seed}")
 
         generated_dir = os.path.join(settings.PROJECT_ROOT, "..", "generated")
-        if os.path.exists(generated_dir):
-            shutil.rmtree(generated_dir)
-        os.makedirs(generated_dir)
+        if not os.path.exists(generated_dir):
+            os.makedirs(generated_dir)
 
-        filepath = os.path.join(generated_dir, f"rdi_import_{amount}_hh_{amount}_ind.xlsx")
+        filepath = os.path.join(generated_dir, f"rdi_import_{amount}_hh_{amount}_ind_seed_{seed}.xlsx")
         wb = openpyxl.Workbook()
         wb.remove_sheet(wb.get_sheet_by_name(wb.get_sheet_names()[0]))
 

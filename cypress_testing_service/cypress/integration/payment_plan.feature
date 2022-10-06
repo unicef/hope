@@ -8,24 +8,25 @@ Feature: Create Payment Plan
         Given I have an active program
         Given I have target population in ready status
         Given Business area is payment plan applicable
-
-    Scenario: Create Payment Plan with steficon
         Given There are steficon rules provided
-        When I visit the main dashboard
-        Then I should see the side panel with Payment Module option
-        When I click on Payment Module option
-        Then I should see the Payment Module page
-        When I click the New Payment Plan button
-        Then I should see the New Payment Plan page
-        When I fill out the form fields and save
-        Then I should see the Payment Plan details page
-        When I lock the Payment Plan
-        Then I see the entitlements input
-        And I see that all individuals have proper payment channels
-        When I choose the steficon rule
-        And I apply the steficon rule
-        Then I see the entitlements calculated
-    # can stop here, since the following steps are done in the scenario below
+
+    # Scenario: Create Payment Plan with steficon
+    #     Given There are steficon rules provided
+    #     When I visit the main dashboard
+    #     Then I should see the side panel with Payment Module option
+    #     When I click on Payment Module option
+    #     Then I should see the Payment Module page
+    #     When I click the New Payment Plan button
+    #     Then I should see the New Payment Plan page
+    #     When I fill out the form fields and save
+    #     Then I should see the Payment Plan details page
+    #     When I lock the Payment Plan
+    #     Then I see the entitlements input
+    #     And I see that all individuals have proper payment channels
+    #     When I choose the steficon rule
+    #     And I apply the steficon rule
+    #     Then I see the entitlements calculated
+    # # can stop here, since the following steps are done in the scenario below
 
     Scenario: Create Payment Plan with xlsx entitlements
         When I visit the main dashboard
@@ -39,10 +40,16 @@ Feature: Create Payment Plan
         When I lock the Payment Plan
         Then I see the entitlements input
         And I see that all individuals have proper payment channels
+        #
+        When I choose the steficon rule
+        And I apply the steficon rule
+        Then I see the entitlements calculated
+        #
         When I download the xlsx template
         Then I fill the xlsx template
         When I upload the xlsx template
         Then I see the entitlements calculated
+        #
         And I am able to set up FSPs
         Then I should see the Set up FSP page
         When I select the delivery mechanisms

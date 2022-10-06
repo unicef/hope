@@ -1,5 +1,5 @@
 import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
-import { getIndividualsFromRdiDetails } from '../../procedures/procedures';
+import { getIndividualsFromRdiDetails, uniqueSeed } from '../../procedures/procedures';
 let householdId;
 let individualId;
 let individualIds = [];
@@ -55,7 +55,7 @@ When('I select the xlsx file', () => {
     'Test import '.concat(new Date().toISOString()),
   );
 
-  const fileName = 'rdi_import_1_hh_1_ind.xlsx';
+  const fileName = `rdi_import_3_hh_3_ind_seed_${uniqueSeed}.xlsx`;
   cy.fixture(fileName, 'base64').then((fileContent) => {
     cy.get('[data-cy="file-input"]').upload({
       fileContent,

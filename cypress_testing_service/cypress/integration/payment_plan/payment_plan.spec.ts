@@ -52,7 +52,7 @@ Given('There are individuals and households imported', () => {
     'Test import '.concat(new Date().toISOString()),
   );
 
-  const rdiFileName = 'rdi_import_3_hh_3_ind.xlsx';
+  const rdiFileName = `rdi_import_3_hh_3_ind_seed_${uniqueSeed}.xlsx`;
   cy.fixture(rdiFileName, 'base64').then((fileContent) => {
     cy.get('[data-cy="file-input"]').upload({
       fileContent,
@@ -338,7 +338,7 @@ When('I download the xlsx template', () => {
 
 Then('I fill the xlsx template', () => {
   // Wait for the file to be generated
-  cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
   const name = xlsxFileName(paymentPlanUnicefId);
   const downloadedFilePath = `${downloadsFolder}/${name}`;
   cy.exec(`node cypress/scripts/fillXlsxEntitlements.js ${downloadedFilePath}`);
