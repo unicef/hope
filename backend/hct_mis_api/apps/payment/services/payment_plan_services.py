@@ -1,3 +1,4 @@
+from functools import partial
 import logging
 
 from decimal import Decimal
@@ -389,13 +390,21 @@ class PaymentPlanService:
         return self.payment_plan
 
     def import_xlsx_per_fsp(self, user, file) -> PaymentPlan:
-        file_temp = FileTemp.objects.create(
-            object_id=self.payment_plan.pk,
-            content_type=get_content_type_for_model(self.payment_plan),
-            created_by=user,
-            file=file,
-        )
-        import_payment_plan_payment_list_per_fsp_from_xlsx.delay(self.payment_plan.pk, user.pk, file_temp.pk)
+        with transaction.atomic():
+            file_temp = FileTemp.objects.create(
+                object_id=self.payment_plan.pk,
+                content_type=get_content_type_for_model(self.payment_plan),
+                created_by=user,
+                file=file,
+            )
+            transaction.on_commit(
+                partial(
+                    import_payment_plan_payment_list_per_fsp_from_xlsx.delay,
+                    self.payment_plan.pk,
+                    user.pk,
+                    file_temp.pk,
+                )
+            )
         return self.payment_plan
 
     def validate_fsps_per_delivery_mechanisms(self, dm_to_fsp_mapping, update_dms=False, update_payments=False):
