@@ -64,16 +64,12 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
 class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
-            "issue_type",
-            "household_lookup",
-            "individual_lookup",
             "description",
             "comments",
             "admin2",
             "area",
             "language",
             "program",
-            "consent",
             "linked_grievance",
         ]
     )
