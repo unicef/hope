@@ -69,7 +69,7 @@ class HouseholdUploadMixin:
 
     def save_households(self, rdi: RegistrationDataImportDatahub, households_data: list[dict]):
         totals = Totals(0, 0)
-        for i, household_data in enumerate(households_data):
+        for household_data in households_data:
             totals.households += 1
             members: list[dict] = household_data.pop("members")
             hh = ImportedHousehold.objects.create(registration_data_import=rdi, **household_data)
