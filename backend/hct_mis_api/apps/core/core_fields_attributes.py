@@ -610,7 +610,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "tax_id_photo_i_c",
-        "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
+        "scope": [Scope.XLSX],
     },
     {
         "id": "34a9519f-9c42-4910-b097-157ec8e6e31f",
