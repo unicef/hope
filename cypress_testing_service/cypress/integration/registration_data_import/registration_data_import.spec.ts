@@ -12,7 +12,7 @@ Given('I am authenticated', () => {
 });
 
 Given('There are no RDI imports', () => {
-  cy.exec('yarn run generate-xlsx-files');
+  cy.exec(`yarn run generate-xlsx-files 1 --seed ${uniqueSeed}`);
 });
 
 const clearCache = () => {
@@ -55,7 +55,7 @@ When('I select the xlsx file', () => {
     'Test import '.concat(new Date().toISOString()),
   );
 
-  const fileName = `rdi_import_3_hh_3_ind_seed_${uniqueSeed}.xlsx`;
+  const fileName = `rdi_import_1_hh_1_ind_seed_${uniqueSeed}.xlsx`;
   cy.fixture(fileName, 'base64').then((fileContent) => {
     cy.get('[data-cy="file-input"]').upload({
       fileContent,
@@ -113,7 +113,8 @@ Then('I see that the status is merged', () => {
     householdId = $td.text().split(' (')[0];
   });
   cy.get('button > span').contains('Individuals').click({ force: true });
-  individualId = getIndividualsFromRdiDetails(cy, 1)[0];
+
+  getIndividualsFromRdiDetails(cy, 1, individualIds)
 });
 
 When('I visit the Households dashboard', () => {
@@ -132,10 +133,7 @@ When('I visit the Individuals dashboard', () => {
 
 Then('I see the newly imported individuals', () => {
   // after 10+ runs, it may fail, because there are 10 rows in this table by default
+  const individualId = individualIds[0];
+  cy.log('looking for individualId: ' + individualId);
   cy.get('td').should('contain', individualId);
-  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
-    individualId = $td.text();
-    console.log('individualId');
-    individualIds.push(individualId);
-  });
 });

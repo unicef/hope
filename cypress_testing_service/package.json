@@ -10,7 +10,7 @@
     "cy:open": "cypress open",
     "initdb": "docker-compose run --rm backend sh -c './manage.py initcypress --skip-drop'",
     "generate-xlsx-files": "./generate_xlsx_files.sh",
-    "clean": "rm -rf cypress/fixtures/*.xlsx ; rm -rf cypress/downloads/*.{xlsx,zip}"
+    "clean": "rm -rf cypress/fixtures/*.xlsx ; rm -rf cypress/downloads/*.{xlsx,zip} ; docker-compose run --rm backend ./manage.py clean_generated"
   },
   "devDependencies": {
     "@types/cypress-cucumber-preprocessor": "^1.14.1",

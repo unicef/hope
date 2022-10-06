@@ -8,7 +8,7 @@ import {
 
 let programName;
 let targetPopulationName;
-let individualIds;
+let individualIds = [];
 let paymentPlanUnicefId;
 let fspXlsxFilenames;
 const downloadsFolder = Cypress.config('downloadsFolder');
@@ -81,7 +81,7 @@ Given('There are individuals and households imported', () => {
   cy.reload();
   cy.get('div').contains('MERGED');
   cy.get('button > span').contains('Individuals').click({ force: true });
-  individualIds = getIndividualsFromRdiDetails(cy, 3);
+  getIndividualsFromRdiDetails(cy, 3, individualIds);
 });
 
 Given('Each imported individual has a payment channel', () => {
