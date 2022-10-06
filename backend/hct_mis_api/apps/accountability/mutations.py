@@ -83,7 +83,7 @@ class UpdateFeedbackMutation(PermissionMutation):
             Message.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            None,
+            feedback,
             updated_feedback,
         )
         return cls(feedback=updated_feedback)
@@ -103,11 +103,8 @@ class CreateFeedbackMessageMutation(PermissionMutation):
         cls.has_permission(info, Permissions.ACCOUNTABILITY_FEEDBACK_MESSAGE_VIEW_CREATE, feedback.business_area.slug)
 
         feedback_message = FeedbackMessage.objects.create(
-            feedback=feedback,
-            description=input["description"],
-            created_by=info.context.user
+            feedback=feedback, description=input["description"], created_by=info.context.user
         )
-
         return cls(feedback_message=feedback_message)
 
 
