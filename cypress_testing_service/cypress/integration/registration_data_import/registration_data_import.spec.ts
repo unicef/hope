@@ -138,5 +138,6 @@ Then('I see the newly imported individuals', () => {
   // after 10+ runs, it may fail, because there are 10 rows in this table by default
   const individualId = individualIds[0];
   cy.log('looking for individualId: ' + individualId);
+  cy.get('[data-cy="filters-search"]').type(individualId);
   cy.get('td').should('contain', individualId);
 });
