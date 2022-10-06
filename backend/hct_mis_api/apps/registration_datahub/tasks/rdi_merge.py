@@ -386,6 +386,6 @@ class RdiMergeTask:
 
             self._update_individuals_and_households(individual_ids)
 
-        except:
+        except Exception:
             remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
             raise

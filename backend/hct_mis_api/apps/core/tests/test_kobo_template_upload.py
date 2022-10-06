@@ -114,9 +114,9 @@ class TestKoboTemplateUpload(APITestCase):
     )
     def test_upload_valid_template(self):
         request = self.prepare_request("kobo-template-valid.xlsx")
-        setattr(request, "session", "session")
+        request.session = "session"
         messages = FallbackStorage(request)
-        setattr(request, "_messages", messages)
+        request._messages = messages
         response = self.admin.add_view(request, form_url="", extra_context=None)
         stored_messages = tuple(get_messages(request))
         self.assertEqual(response.status_code, 302)

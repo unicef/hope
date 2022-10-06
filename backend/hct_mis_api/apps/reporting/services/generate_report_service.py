@@ -814,7 +814,7 @@ class GenerateReportService:
                     except IndexError:
                         column_widths.append(len(value))
 
-        for i, width in enumerate(column_widths):
+        for i in range(len(column_widths)):
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             value = GenerateReportService.MAX_COL_WIDTH if value > GenerateReportService.MAX_COL_WIDTH else value
