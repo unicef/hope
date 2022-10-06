@@ -36,7 +36,7 @@ export const validationSchema = Yup.object().shape({
   issueType: Yup.string()
     .required('Issue Type is required')
     .nullable(),
-  admin: Yup.string().nullable(),
+  admin2: Yup.string().nullable(),
   description: Yup.string()
     .nullable()
     .required('Description is required'),
