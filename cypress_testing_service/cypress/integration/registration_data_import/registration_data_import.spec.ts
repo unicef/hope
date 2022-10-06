@@ -1,5 +1,8 @@
 import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
-import { getIndividualsFromRdiDetails, uniqueSeed } from '../../procedures/procedures';
+import {
+  getIndividualsFromRdiDetails,
+  uniqueSeed,
+} from '../../procedures/procedures';
 let householdId;
 let individualId;
 let individualIds = [];
@@ -114,7 +117,7 @@ Then('I see that the status is merged', () => {
   });
   cy.get('button > span').contains('Individuals').click({ force: true });
 
-  getIndividualsFromRdiDetails(cy, 1, individualIds)
+  getIndividualsFromRdiDetails(cy, 1, individualIds);
 });
 
 When('I visit the Households dashboard', () => {
