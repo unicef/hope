@@ -644,9 +644,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
             with open(filled_file_path, "rb") as file:
                 uploaded_file = SimpleUploadedFile(filled_file_name, file.read())
-                with patch(
-                    "hct_mis_api.apps.payment.services.payment_plan_services.import_payment_plan_payment_list_per_fsp_from_xlsx"
-                ) as mock_import:
+                with patch("hct_mis_api.apps.payment.services.payment_plan_services.transaction") as mock_import:
                     import_mutation_response = self.graphql_request(
                         request_string=IMPORT_XLSX_PER_FSP_MUTATION,
                         context={"user": self.user},
@@ -656,9 +654,8 @@ class TestPaymentPlanReconciliation(APITestCase):
                         },
                     )
                     assert "errors" not in import_mutation_response, import_mutation_response
-                    assert mock_import.delay.call_count == 1
-                    call_args = mock_import.delay.call_args[0]
-                    import_payment_plan_payment_list_per_fsp_from_xlsx(*call_args)
+                    assert mock_import.on_commit.call_count == 1
+                    mock_import.on_commit.call_args[0][0]()  # call real func
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
