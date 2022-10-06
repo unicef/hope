@@ -104,7 +104,6 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: currency_h_c - Choice: XXX is not present in HOPE",
                 "Field: tax_id_no_i_c - Field is missing",
                 "Field: tax_id_issuer_i_c - Field is missing",
-                "Field: tax_id_photo_i_c - Field is missing",
                 "Field: bank_name_i_c - Field is missing",
                 "Field: bank_account_number_i_c - Field is missing",
             ]
