@@ -76,6 +76,7 @@ class UpdateFeedbackMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input):
+        old_feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback_id"]))
         feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback_id"]))
         cls.has_permission(info, Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE, feedback.business_area.slug)
         updated_feedback = FeedbackCrudServices.update(feedback, input)
@@ -83,7 +84,7 @@ class UpdateFeedbackMutation(PermissionMutation):
             Feedback.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            feedback,
+            old_feedback,
             updated_feedback,
         )
         return cls(feedback=updated_feedback)
