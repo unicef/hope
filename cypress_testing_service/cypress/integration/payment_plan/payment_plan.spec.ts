@@ -104,7 +104,7 @@ Given('There are steficon rules provided', () => {
 
   cy.visit('/api/unicorn/steficon/rulecommit/add/');
   cy.get('#id_rule').select(uniqueSeed);
-  cy.get('#id_definition').clear().type('result.value=100');
+  cy.get('#id_definition').clear().type('result.value=20');
   cy.get('input[name="is_release"]').click();
   cy.get('input[name="enabled"]').click();
   cy.get('input[name="version"]').type(
@@ -252,11 +252,9 @@ Then('I see the entitlements calculated', () => {
   // TODO: check the amount
 });
 
-And('I am able to set up FSPs', () => {
-  cy.get('[data-cy="button-set-up-fsp"]', {
-    timeout: 10000,
-  }).click({ force: true });
-});
+When("I click Set up FSP button", () => {
+  cy.get('[data-cy="button-set-up-fsp"]').click({ force: true });
+})
 
 Then('I should see the Set up FSP page', () => {
   cy.get('[data-cy="page-header-container"]').contains('Set up FSP', {
@@ -347,6 +345,7 @@ Then('I fill the xlsx template', () => {
 When('I upload the xlsx template', () => {
   const name = xlsxFileName(paymentPlanUnicefId);
   const filledFilePath = `out_${name}`;
+  cy.log(filledFilePath)
   cy.get('[data-cy="button-import"]').click({ force: true });
   cy.fixture(filledFilePath, 'base64').then((fileContent) => {
     cy.get('[data-cy="file-input"]').upload({
