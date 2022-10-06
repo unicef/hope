@@ -539,6 +539,7 @@ class PageInfoNode(graphene.ObjectType):
     has_next_page = graphene.Boolean()
     has_previous_page = graphene.Boolean()
 
+
 class CashPlanAndPaymentPlanEdges(graphene.ObjectType):
     cursor = graphene.String()
     node = graphene.Field(CashPlanAndPaymentPlanNode)
@@ -1104,7 +1105,7 @@ class Query(graphene.ObjectType):
                 has_next_page=page.has_next(),
                 has_previous_page=page.has_previous(),
             ),
-            edges=page.object_list,
+            edges=[CashPlanAndPaymentPlanEdges(cursor="cursor", node=obj) for obj in page.object_list],
             total_count=qs_count,
             # page=page.number,
             # pages=paginator.num_pages,
