@@ -359,14 +359,10 @@ When('I upload the xlsx template', () => {
 });
 
 And('I see that all individuals have proper payment channels', () => {
-  // cy.get("td").should("not.contain", "Missing");
-  // each row with individual from individualIds should not have a "missing"
-  for (const individualId of individualIds) {
-    cy.get('td')
-      .contains(individualId)
-      .parent()
-      .should('not.contain', 'Missing');
-  }
+  // TODO: this will fail as long as there isn't a proper targeting
+  // that filters the individuals by some common seed
+  // but also isn't a blocking issue for deduplication
+  cy.get("td").should("not.contain", "Missing");
 });
 
 And('I export xlsx to zip file', () => {

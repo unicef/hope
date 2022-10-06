@@ -2,9 +2,10 @@ import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
 import {
   fillProgramForm,
   fillTargetingForm,
-  uniqueSeed,
+  uniqueSeed, getIndividualsFromRdiDetails,
 } from '../../procedures/procedures';
 
+let individualIds = [];
 let programName;
 
 Given('I am authenticated', () => {
@@ -12,6 +13,62 @@ Given('I am authenticated', () => {
   cy.get('input[name="username"]').type(Cypress.env('daUsername'));
   cy.get('input[name="password"]').type(Cypress.env('daPassword'));
   cy.get('input').contains('Log in').click();
+});
+
+const clearCache = () => {
+  cy.get('[data-cy="menu-user-profile"]').click();
+  cy.get('[data-cy="menu-item-clear-cache"]').click();
+  // hack to let the page reload
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
+};
+
+
+Given('There are individuals and households imported', () => {
+  cy.exec(`yarn run generate-xlsx-files 3 --seed ${uniqueSeed}`);
+  cy.visit('/');
+  clearCache();
+  cy.get('span')
+    .contains('Registration Data Import', { timeout: 10000 })
+    .click();
+  cy.get('button > span').contains('IMPORT').click({ force: true });
+
+  cy.get('[data-cy="import-type-select"]').click();
+  cy.get('[data-cy="excel-menu-item"]').click();
+
+  cy.get('[data-cy="input-name"]').type(
+    'Test import '.concat(new Date().toISOString()),
+  );
+
+  const rdiFileName = `rdi_import_3_hh_3_ind_seed_${uniqueSeed}.xlsx`;
+  cy.fixture(rdiFileName, 'base64').then((fileContent) => {
+    cy.get('[data-cy="file-input"]').upload({
+      fileContent,
+      fileName: rdiFileName,
+      mimeType:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      encoding: 'base64',
+    });
+  });
+
+  cy.get('[data-cy="button-import-rdi"').click();
+
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.reload();
+  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
+  // it lets the browser load the status
+
+  cy.get('div').contains('IMPORT ERROR').should('not.exist');
+  cy.get('div').contains('IN REVIEW');
+
+  cy.get('span').contains('Merge').click({ force: true }); // top of page
+  cy.get('span').contains('MERGE').click({ force: true }); // inside modal
+
+  cy.get('div').contains('MERGING');
+  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.reload();
+  cy.get('div').contains('MERGED');
+  cy.get('button > span').contains('Individuals').click({ force: true });
+  getIndividualsFromRdiDetails(cy, 3, individualIds);
 });
 
 Given('I have an active program', () => {

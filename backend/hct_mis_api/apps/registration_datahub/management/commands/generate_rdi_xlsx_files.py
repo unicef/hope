@@ -12,7 +12,7 @@ from faker import Faker
 faker = Faker()
 
 random_number = lambda: random.randint(1, 2**31)
-address = lambda: faker.address()
+# address = lambda: faker.address()
 date = lambda: faker.date_between(start_date="-30y", end_date="today")
 name = lambda: faker.name()
 phone_number = lambda: faker.phone_number()
@@ -26,7 +26,7 @@ household_header_mapping = {
     "D": ("consent_sign_h_c", None),
     "E": ("consent_origin_h_c", "POL"),
     "F": ("country_h_c", "POL"),
-    "G": ("address_h_c", address),
+    "G": ("address_h_c", ""),  # SPECIAL
     "H": ("admin1_h_c", "AF11"),
     "I": ("admin2_h_c", "AF1115"),
     "J": ("hh_geopoint_h_c", "70.210209, 172.085021"),
@@ -205,7 +205,10 @@ class Command(BaseCommand):
             for index, (key, (header, value)) in enumerate(household_header_mapping.items()):
                 if value is None:
                     continue
-                to_write = value() if callable(value) else value
+                if key == "G":
+                    to_write = seed  # address is seed
+                else:
+                    to_write = value() if callable(value) else value
                 # TODO: unique seed to household somewhere?
                 households.cell(row=3 + count, column=index + 1).value = to_write
                 if key == "A":
