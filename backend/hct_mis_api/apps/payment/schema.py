@@ -690,16 +690,18 @@ class Query(graphene.ObjectType):
     all_cash_plans_and_payment_plans = graphene.Field(
         PaginatedCashPlanAndPaymentPlanNode,
         business_area=graphene.String(required=True),
-        program=graphene.String(required=False),
-        search=graphene.String(required=False),
-        service_provider=graphene.String(required=False),
-        delivery_type=graphene.String(required=False),
-        verification_status=graphene.String(required=False),
-        start_date_gte=graphene.String(required=False),
-        end_date_lte=graphene.String(required=False),
-        order_by=graphene.String(required=False),
-        page=graphene.Int(required=False),
-        page_size=graphene.Int(required=False),
+        program=graphene.String(),
+        search=graphene.String(),
+        service_provider=graphene.String(),
+        delivery_type=graphene.String(),
+        verification_status=graphene.String(),
+        start_date_gte=graphene.String(),
+        end_date_lte=graphene.String(),
+        order_by=graphene.String(),
+        first=graphene.Int(),
+        last=graphene.Int(),
+        before=graphene.String(),
+        after=graphene.String(),
     )
 
     def resolve_available_fsps_for_delivery_mechanisms(self, info, input, **kwargs):
@@ -1007,7 +1009,7 @@ class Query(graphene.ObjectType):
     def resolve_payment_plan_background_action_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentPlan.BackgroundActionStatus.choices)
 
-    def resolve_all_cash_plans_and_payment_plans(self, info, page_size=5, page=1, **kwargs):
+    def resolve_all_cash_plans_and_payment_plans(self, info, **kwargs):
         qs = ExtendedQuerySetSequence(
             # TODO: added only for tests
             # PaymentPlan.objects.filter(status=PaymentPlan.Status.RECONCILED),
@@ -1096,18 +1098,19 @@ class Query(graphene.ObjectType):
                 qs = qs.order_by(reverse + order_by)
 
         qs_count = len(qs) if isinstance(qs, list) else qs.count()
-        paginator, page = get_paginator(qs, page_size, page)
+
+        # TODO: will use 'first', 'last', 'before', 'after'
+        paginator, page = get_paginator(qs, page_size=1, page=1)
 
         return PaginatedCashPlanAndPaymentPlanNode(
             page_info=PageInfoNode(
-                start_cursor="start",
-                end_cursor="end",
+                start_cursor="arrayconnection:0",
+                end_cursor="arrayconnection:4",
                 has_next_page=page.has_next(),
                 has_previous_page=page.has_previous(),
             ),
-            edges=[CashPlanAndPaymentPlanEdges(cursor="cursor", node=obj) for obj in page.object_list],
+            edges=[CashPlanAndPaymentPlanEdges(cursor=f"arrayconnection:2", node=obj) for obj in page.object_list],
             total_count=qs_count,
             # page=page.number,
             # pages=paginator.num_pages,
-            # edges=page.object_list,
         )
