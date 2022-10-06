@@ -9,5 +9,6 @@
       "testsuitesTitle": false
     },
     "numTestsKeptInMemory": 0,
-    "downloadFolder": "cypress/downloads"
+    "downloadFolder": "cypress/downloads",
+    "projectId": "hope"
 }

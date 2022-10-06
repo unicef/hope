@@ -357,7 +357,6 @@ When('I upload the xlsx template', () => {
     });
   });
   cy.get('[data-cy="button-import-entitlement"').click({ force: true });
-  cy.get('[data-cy="imported-file-name"]').should('exist');
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
 });
