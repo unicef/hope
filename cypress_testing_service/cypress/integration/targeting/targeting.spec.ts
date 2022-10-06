@@ -77,8 +77,8 @@ Then('I should see the Target Population details page and status Open', () => {
 });
 
 When('I Lock Target Population', () => {
-  cy.get('[data-cy="button-target-population-lock"]').click();
-  cy.get('[data-cy="button-target-population-modal-lock"]').click();
+  cy.get('[data-cy="button-target-population-lock"]').click({ force: true });
+  cy.get('[data-cy="button-target-population-modal-lock"]').click({ force: true });
 });
 
 Then(
