@@ -41,6 +41,7 @@ When running locally, you don't neet to provide AD credentials - you can go stra
 # Cypress Testing Service
 Go to cypress_testing_service catalog
 Create cypress.env.json file based on cypress.env.json.example file
+Run yarn install
 Run yarn cy:open
 
 
@@ -129,4 +130,3 @@ The following are the code branches and their CI / CD usage.
 | feature/\* or bug/\* | no | n/a |  |
 
 In the future hotfix branches might be made as well which merge directly to master potentially. A UAT environment that mirrors the stability of production \(master branch\) might be necessary as well. If strictly following an agile methodology, it may or may not be necessary, but a UAT env mirroring production might be helpful for production focused hot fix testing.
-
