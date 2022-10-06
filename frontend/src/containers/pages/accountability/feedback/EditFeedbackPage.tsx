@@ -33,9 +33,6 @@ import {
 } from '../../../../__generated__/graphql';
 
 export const validationSchema = Yup.object().shape({
-  category: Yup.string()
-    .required('Category is required')
-    .nullable(),
   issueType: Yup.string()
     .required('Issue Type is required')
     .nullable(),
@@ -46,12 +43,7 @@ export const validationSchema = Yup.object().shape({
   consent: Yup.bool(),
   area: Yup.string().nullable(),
   language: Yup.string().nullable(),
-  selectedPaymentRecords: Yup.array()
-    .of(Yup.string())
-    .nullable(),
-  selectedRelatedTickets: Yup.array()
-    .of(Yup.string())
-    .nullable(),
+  comments: Yup.string().nullable(),
 });
 
 export const EditFeedbackPage = (): React.ReactElement => {
@@ -120,7 +112,6 @@ export const EditFeedbackPage = (): React.ReactElement => {
   const { feedback } = feedbackData;
 
   const initialValues = {
-    category: 'Feedback',
     issueType: feedback.issueType,
     selectedHousehold: feedback.householdLookup || null,
     selectedIndividual: feedback.individualLookup || null,
@@ -131,7 +122,6 @@ export const EditFeedbackPage = (): React.ReactElement => {
     language: feedback.language || null,
     consent: false,
     program: feedback.program?.id || null,
-    verificationRequired: false,
   };
 
   const prepareVariables = (values): UpdateFeedbackInput => ({
