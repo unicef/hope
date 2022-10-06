@@ -57,7 +57,7 @@ class CreateFeedbackMutation(PermissionMutation):
         cls.has_permission(info, Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_CREATE, input.get("business_area_slug"))
         new_feedback = FeedbackCrudServices.create(info.context.user, input)
         log_create(
-            Message.ACTIVITY_LOG_MAPPING,
+            Feedback.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
             None,
@@ -80,7 +80,7 @@ class UpdateFeedbackMutation(PermissionMutation):
         cls.has_permission(info, Permissions.ACCOUNTABILITY_FEEDBACK_VIEW_UPDATE, feedback.business_area.slug)
         updated_feedback = FeedbackCrudServices.update(feedback, input)
         log_create(
-            Message.ACTIVITY_LOG_MAPPING,
+            Feedback.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
             feedback,
