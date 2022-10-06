@@ -2,9 +2,13 @@ from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
 from typing import Optional
+from dateutil.relativedelta import relativedelta
+from django_fsm import FSMField, transition
+from model_utils import Choices
+from model_utils.models import SoftDeletableModel
+from multiselectfield import MultiSelectField
 
 from django.conf import settings
-from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -17,12 +21,6 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
-from dateutil.relativedelta import relativedelta
-from django_fsm import FSMField, transition
-from model_utils import Choices
-from model_utils.models import SoftDeletableModel
-from multiselectfield import MultiSelectField
 
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
