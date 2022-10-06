@@ -13,7 +13,7 @@ Frontend running on Local Machine (use node 16)
 cd frontend
 yarn
 yarn start
-# in anthorer terminal
+# in another terminal
 cd ..
 docker-compose build
 docker-compose up
@@ -37,6 +37,14 @@ Access the frontend in your browser at [`localhost:8082/login`](http://localhost
 Backend can be accessed at `/api/` i.e. [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/)
 
 When running locally, you don't neet to provide AD credentials - you can go straight to [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/) and log in with `root:root1234`. When you have the necessary cookies in your browser, you can also access the FE dashboard.
+
+# Cypress Testing Service
+Go to cypress_testing_service catalog
+Create cypress.env.json file based on cypress.env.json.example file
+Run yarn cy:open
+
+
+
 
 ### **Commands**
 
