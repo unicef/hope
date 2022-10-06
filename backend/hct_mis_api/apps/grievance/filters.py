@@ -1,5 +1,6 @@
 from django.db import models
-from django.db.models import Q, Count, F, Window
+from django.db.models import Q, Count, F, Window, Func
+from django_cte import With
 
 from django_filters import (
     CharFilter,
@@ -25,6 +26,10 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.core.utils import choices_to_dict
 
 
+class IsNull(Func):
+    template = '%(expressions)s IS NULL'
+
+
 class GrievanceOrderingFilter(OrderingFilter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,9 +39,10 @@ class GrievanceOrderingFilter(OrderingFilter):
         ]
 
     def filter(self, qs, value):
-        if any(v in ["linked_tickets", "-linked_tickets"] for v in value):
+        if value and any(v in ["linked_tickets", "-linked_tickets"] for v in value):
+            qs = super().filter(qs, value)
             qs = (
-                GrievanceTicket.objects.all()
+                GrievanceTicket.objects
                 .annotate(linked=Count("linked_tickets"))
                 .annotate(linked_related=Count("linked_tickets_related"))
                 .annotate(total_linked=F("linked") + F("linked_related"))
@@ -49,11 +55,9 @@ class GrievanceOrderingFilter(OrderingFilter):
                 )
                 .order_by(F("total_linked") + F("household_unicef_id_count") - 1, "unicef_id")
             )
-
             if value == ["-linked_tickets"]:
                 return qs.reverse()
             return qs
-
         return super().filter(qs, value)
 
 
@@ -192,7 +196,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         }
         model = GrievanceTicket
 
-    order_by = OrderingFilter(
+    order_by = GrievanceOrderingFilter(
         fields=(
             "unicef_id",
             "status",

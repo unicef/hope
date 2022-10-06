@@ -339,11 +339,12 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     @property
     def related_tickets(self):
-        return (
-            GrievanceTicket.objects.exclude(household_unicef_id__isnull=True)
-            .filter(household_unicef_id=self.household_unicef_id)
-            .exclude(pk=self.pk)
-        )
+        all_through_objects = GrievanceTicketThrough.objects.filter(
+            Q(linked_ticket=self) | Q(main_ticket=self)
+        ).values_list("main_ticket", "linked_ticket")
+        ids = set(self.flatten(all_through_objects))
+        ids.discard(self.id)
+        return GrievanceTicket.objects.filter(id__in=ids)
 
     @property
     def existing_tickets(self):  # temporarily linked tickets
