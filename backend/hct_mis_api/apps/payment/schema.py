@@ -533,17 +533,22 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
         return ""
 
 
-class PaginatedType(graphene.ObjectType):
-    page = graphene.Int()
-    pages = graphene.Int()
-    page_size = graphene.Int()
+class PageInfoNode(graphene.ObjectType):
+    start_cursor = graphene.String()
+    end_cursor = graphene.String()
+    has_next_page = graphene.Boolean()
+    has_previous_page = graphene.Boolean()
+
+class CashPlanAndPaymentPlanEdges(graphene.ObjectType):
+    cursor = graphene.String()
+    node = graphene.Field(CashPlanAndPaymentPlanNode)
+
+
+class PaginatedCashPlanAndPaymentPlanNode(graphene.ObjectType):
+    page_info = graphene.Field(PageInfoNode)
+    edges = graphene.List(CashPlanAndPaymentPlanEdges)
     total_count = graphene.Int()
-    has_next = graphene.Boolean()
-    has_prev = graphene.Boolean()
 
-
-class PaginatedCashPlanAndPaymentPlanNode(PaginatedType):
-    objects = graphene.List(CashPlanAndPaymentPlanNode)
 
 
 class GenericPaymentPlanNode(graphene.ObjectType):
@@ -1089,4 +1094,19 @@ class Query(graphene.ObjectType):
             else:
                 qs = qs.order_by(reverse + order_by)
 
-        return get_paginator(qs, page_size, page, PaginatedCashPlanAndPaymentPlanNode)
+        qs_count = len(qs) if isinstance(qs, list) else qs.count()
+        paginator, page = get_paginator(qs, page_size, page)
+
+        return PaginatedCashPlanAndPaymentPlanNode(
+            page_info=PageInfoNode(
+                start_cursor="start",
+                end_cursor="end",
+                has_next_page=page.has_next(),
+                has_previous_page=page.has_previous(),
+            ),
+            edges=page.object_list,
+            total_count=qs_count,
+            # page=page.number,
+            # pages=paginator.num_pages,
+            # edges=page.object_list,
+        )
