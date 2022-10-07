@@ -112,7 +112,7 @@ When('I refresh the page', () => {
 
 Then('I see that the status is merged', () => {
   cy.get('div').contains('MERGED');
-  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
+  cy.get('tbody > tr > td:nth-child(1)').then(($td) => {
     householdId = $td.text().split(' (')[0];
   });
   cy.get('button > span').contains('Individuals').click({ force: true });
