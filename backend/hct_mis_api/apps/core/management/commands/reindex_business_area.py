@@ -74,7 +74,8 @@ class Command(BaseCommand):
             for item in batch:
                 document = {**es_document().prepare(item), "_id": item.id}
                 document_list.append(document)
-                bulk(es, document_list, index=index)
+            bulk(es, document_list, index=index)
+            document_list = []
             i += 1
 
         self.stdout.write(self.style.SUCCESS(f"Documents for index: {index}, business_area: {business_area} created"))
