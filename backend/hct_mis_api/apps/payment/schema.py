@@ -1001,7 +1001,6 @@ class Query(graphene.ObjectType):
             PaymentPlan.objects.all(),
             CashPlan.objects.all(),
         )
-        print("KW== > ", kwargs)
 
         payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(
             payment_plan_object_id=str(OuterRef("id"))
@@ -1069,6 +1068,7 @@ class Query(graphene.ObjectType):
 
         order_by_value = kwargs.get("order_by")
 
+        # ordering
         if order_by_value:
             reverse = "-" if order_by_value.startswith("-") else ""
             order_by = order_by_value[1:] if reverse else order_by_value
@@ -1078,7 +1078,6 @@ class Query(graphene.ObjectType):
 
             elif order_by == "unicef_id":
                 qs = sorted(qs, key=lambda o: o.unicef_id, reverse=bool(reverse))
-                print("order by unicef ID", bool(reverse), type(qs), len(qs))
             else:
                 qs = qs.order_by(reverse + order_by)
 
