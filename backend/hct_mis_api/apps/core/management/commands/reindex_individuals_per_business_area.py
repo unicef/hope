@@ -31,32 +31,24 @@ class Command(BaseCommand):
 
         while i <= count:
             self.stdout.write(f"{i}/{count}")
-            batch = qs[BATCH_SIZE * i: BATCH_SIZE * (i + 1)]
+            batch = qs[BATCH_SIZE * i : BATCH_SIZE * (i + 1)]
             for item in batch:
                 document = {**IndividualDocument().prepare(item), "_id": item.id}
                 document_list.append(document)
-                bulk(self.es, document_list, index=index)
+            bulk(self.es, document_list, index=index)
+            document_list = []
             i += 1
 
     def reindex_business_area(self, business_area_slug):
         index = f"individuals_{business_area_slug}"
         if self.es.indices.exists(index=index):
-            self.es.delete_by_query(
-                index=index,
-                body={
-                    "query": {
-                        "match_all": {}
-                    }
-                }
-            )
+            self.es.delete_by_query(index=index, body={"query": {"match_all": {}}})
             self.load_batches(index, business_area_slug)
         else:
             self.es.indices.create(index=index)
             self.load_batches(index, business_area_slug)
 
-        self.stdout.write(
-            self.style.SUCCESS(f"Documents for index: {index} created")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Documents for index: {index} created"))
 
     def handle(self, *args, **options):
         business_area_slug = options.pop("business_area", None)
