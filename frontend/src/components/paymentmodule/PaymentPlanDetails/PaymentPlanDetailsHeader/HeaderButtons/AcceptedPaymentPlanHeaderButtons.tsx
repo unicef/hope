@@ -39,6 +39,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
                 color='primary'
                 variant='contained'
                 startIcon={<GetApp />}
+                data-cy='button-export-xlsx'
                 onClick={async () => {
                   try {
                     await mutateExport({
@@ -61,6 +62,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
                 color='primary'
                 component='a'
                 variant='contained'
+                data-cy='button-download-xlsx'
                 download
                 href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
               >

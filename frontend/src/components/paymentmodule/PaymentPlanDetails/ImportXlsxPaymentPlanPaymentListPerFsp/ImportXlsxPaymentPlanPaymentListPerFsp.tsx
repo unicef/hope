@@ -72,7 +72,7 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
         });
         if (
           !errors &&
-          !data?.importXlsxPaymentPlanPaymentListPerFsp.errors.length
+          !data?.importXlsxPaymentPlanPaymentListPerFsp.errors?.length
         ) {
           setOpenImport(false);
           showMessage(t('Your import was successful!'));
