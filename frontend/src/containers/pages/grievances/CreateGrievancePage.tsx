@@ -33,6 +33,7 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import {
+  decodeIdString,
   isInvalid,
   reduceChoices,
   thingForSpecificGrievanceType,
@@ -67,15 +68,10 @@ import { ContentLink } from '../../../components/core/ContentLink';
 import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { HouseholdQuestionnaire } from '../../../components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
+import { IndividualQuestionnaire } from '../../../components/grievances/IndividualQuestionnnaire/IndividualQuestionnaire';
 import { Title } from '../../../components/core/Title';
 import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
-
-const steps = [
-  'Category Selection',
-  'Household/Individual Look up',
-  'Identity Verification',
-  'Description',
-];
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -125,6 +121,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const selectedHousehold = history.location.state?.selectedHousehold;
   const selectedIndividual = history.location.state?.selectedIndividual;
   const category = history.location.state?.category;
+  const linkedFeedbackId = history.location.state?.linkedFeedbackId;
 
   const initialValues = {
     description: '',
@@ -144,6 +141,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
     partner: null,
     programme: null,
     comments: null,
+    linkedFeedbackId: linkedFeedbackId
+      ? decodeIdString(linkedFeedbackId)
+      : null,
     documentation: [],
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
@@ -302,148 +302,17 @@ export const CreateGrievancePage = (): React.ReactElement => {
       : '-';
   };
 
-  const showHouseholdQuestionnaire = (values): ReactElement => {
-    const selectedHouseholdData = values.selectedHousehold;
-    return (
-      <Grid container spacing={6}>
-        {[
-          {
-            name: 'size',
-            label: t('Household Size'),
-            value: selectedHouseholdData.size,
-            size: 3,
-          },
-          {
-            name: 'maleChildrenCount',
-            label: t('Number of Male Children'),
-            value: selectedHouseholdData.maleChildrenCount?.toString(),
-            size: 3,
-          },
-          {
-            name: 'femaleChildrenCount',
-            label: t('Number of Female Children'),
-            value: selectedHouseholdData.femaleChildrenCount?.toString(),
-            size: 3,
-          },
-          {
-            name: 'childrenDisabledCount',
-            label: t('Number of Disabled Children'),
-            value: selectedHouseholdData.childrenDisabledCount?.toString(),
-            size: 3,
-          },
-          {
-            name: 'headOfHousehold',
-            label: t('Head of Household'),
-            value: (
-              <ContentLink
-                href={`/${businessArea}/population/individuals/${selectedHouseholdData.headOfHousehold.id}`}
-              >
-                {selectedHouseholdData.headOfHousehold.fullName}
-              </ContentLink>
-            ),
-            size: 3,
-          },
-          {
-            name: 'countryOrigin',
-            label: t('Country of Origin'),
-            value: selectedHouseholdData.countryOrigin,
-            size: 3,
-          },
-          {
-            name: 'address',
-            label: t('Address'),
-            value: selectedHouseholdData.address,
-            size: 3,
-          },
-          {
-            name: 'village',
-            label: t('Village'),
-            value: selectedHouseholdData.village,
-            size: 3,
-          },
-          {
-            name: 'admin1',
-            label: t('Administrative Level 1'),
-            value: selectedHouseholdData.admin1?.name,
-            size: 3,
-          },
-          {
-            name: 'unhcrId',
-            label: t('UNHCR CASE ID'),
-            value: selectedHouseholdData.unicefId,
-            size: 3,
-          },
-          {
-            name: 'months_displaced_h_f',
-            label: t('LENGTH OF TIME SINCE ARRIVAL'),
-            value: selectedHouseholdData.flexFields?.months_displaced_h_f,
-            size: 3,
-          },
-        ].map((el) => (
-          <Grid item xs={3}>
-            <Field
-              name={el.name}
-              label={el.label}
-              displayValue={el.value || '-'}
-              color='primary'
-              component={FormikCheckboxField}
-            />
-          </Grid>
-        ))}
-      </Grid>
-    );
-  };
+  let steps = [
+    'Category Selection',
+    'Household/Individual Look up',
+    'Identity Verification',
+    'Description',
+  ];
 
-  const showIndividualQuestionnaire = (values): ReactElement => {
-    const selectedIndividualData =
-      values.selectedIndividual || values.selectedHousehold.headOfHousehold;
-    return (
-      <Grid container spacing={6}>
-        {[
-          {
-            name: 'fullName',
-            label: t('Individual Full Name'),
-            value: (
-              <ContentLink
-                href={`/${businessArea}/population/individuals/${selectedIndividualData.id}`}
-              >
-                {selectedIndividualData.fullName}
-              </ContentLink>
-            ),
-            size: 3,
-          },
-          {
-            name: 'birthDate',
-            label: t('Birth Date'),
-            value: selectedIndividualData.birthDate,
-            size: 3,
-          },
-          {
-            name: 'phoneNo',
-            label: t('Phone Number'),
-            value: selectedIndividualData.phoneNo,
-            size: 3,
-          },
-          {
-            name: 'relationship',
-            label: t('Relationship to HOH'),
-            value: selectedIndividualData.relationship,
-            size: 3,
-          },
-        ].map((el) => (
-          <Grid item xs={3}>
-            <Field
-              name={el.name}
-              label={el.label}
-              displayValue={el.value || '-'}
-              color='primary'
-              component={FormikCheckboxField}
-            />
-          </Grid>
-        ))}
-      </Grid>
-    );
-  };
+  // if creating a linked G&F ticket from Feedback page skip Look Up
+  if (linkedFeedbackId) {
+    steps = ['Category Selection', 'Identity Verification', 'Description'];
+  }
 
   return (
     <Formik
@@ -476,6 +345,10 @@ export const CreateGrievancePage = (): React.ReactElement => {
         } else {
           setValidateData(false);
           handleNext();
+          // if creating a linked G&F ticket from Feedback page skip Look Up
+          if (activeStep === 0 && linkedFeedbackId) {
+            handleNext();
+          }
         }
       }}
       validateOnChange={
@@ -595,14 +468,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
                                   {t('Household Questionnaire')}
                                 </Typography>
                                 <Box py={4}>
-                                  {showHouseholdQuestionnaire(values)}
+                                  <HouseholdQuestionnaire values={values} />
                                 </Box>
                               </Box>
                               <Typography variant='subtitle2'>
                                 {t('Individual Questionnaire')}
                               </Typography>
                               <Box py={4}>
-                                {showIndividualQuestionnaire(values)}
+                                <IndividualQuestionnaire values={values} />
                               </Box>
                               <BoxWithBorderBottom />
                             </>
