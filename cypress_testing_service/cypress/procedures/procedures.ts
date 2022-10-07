@@ -46,9 +46,7 @@ export const fillTargetingForm = (cy, programName, seed) => {
   cy.get('[data-cy="button-household-rule"]', {
     timeout: 10000,
   }).click();
-  cy.get('[data-cy="autocomplete-target-criteria"]')
-    .click()
-    .type('address');
+  cy.get('[data-cy="autocomplete-target-criteria"]').click().type('address');
   cy.contains('Address').click();
   cy.get('[data-cy="input-filters[0].value"]').click().type(uniqueSeed);
 

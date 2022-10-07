@@ -2,7 +2,8 @@ import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
 import {
   fillProgramForm,
   fillTargetingForm,
-  uniqueSeed, getIndividualsFromRdiDetails,
+  uniqueSeed,
+  getIndividualsFromRdiDetails,
 } from '../../procedures/procedures';
 
 let individualIds = [];
@@ -21,7 +22,6 @@ const clearCache = () => {
   // hack to let the page reload
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
 };
-
 
 Given('There are individuals and households imported', () => {
   cy.exec(`yarn run generate-xlsx-files 3 --seed ${uniqueSeed}`);
@@ -135,7 +135,9 @@ Then('I should see the Target Population details page and status Open', () => {
 
 When('I Lock Target Population', () => {
   cy.get('[data-cy="button-target-population-lock"]').click({ force: true });
-  cy.get('[data-cy="button-target-population-modal-lock"]').click({ force: true });
+  cy.get('[data-cy="button-target-population-modal-lock"]').click({
+    force: true,
+  });
 });
 
 Then(

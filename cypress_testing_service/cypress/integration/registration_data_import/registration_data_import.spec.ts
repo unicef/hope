@@ -117,7 +117,7 @@ Then('I see that the status is merged', () => {
     .then(($td) => {
       householdId = $td.text().split(' (')[0];
       cy.log(`Saved householdId: ${householdId}`);
-    })
+    });
   cy.get('button > span').contains('Individuals').click({ force: true });
 
   getIndividualsFromRdiDetails(cy, 1, individualIds);

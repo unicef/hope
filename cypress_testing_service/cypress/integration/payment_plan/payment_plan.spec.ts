@@ -362,7 +362,7 @@ And('I see that all individuals have proper payment channels', () => {
   // TODO: this will fail as long as there isn't a proper targeting
   // that filters the individuals by some common seed
   // but also isn't a blocking issue for deduplication
-  cy.get("td").should("not.contain", "Missing");
+  cy.get('td').should('not.contain', 'Missing');
 });
 
 And('I export xlsx to zip file', () => {
