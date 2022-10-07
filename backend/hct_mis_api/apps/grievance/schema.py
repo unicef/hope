@@ -65,13 +65,13 @@ logger = logging.getLogger(__name__)
 
 
 class GrievanceDocumentNode(DjangoObjectType):
-    file_path = graphene.String(source='file_path')
-    file_name = graphene.String(source='file_name')
+    file_path = graphene.String(source="file_path")
+    file_name = graphene.String(source="file_name")
 
     class Meta:
         model = GrievanceDocument
-        exclude = ("file", )
-        interfaces = (relay.Node, )
+        exclude = ("file",)
+        interfaces = (relay.Node,)
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -473,8 +473,7 @@ class Query(graphene.ObjectType):
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         return (
-            GrievanceTicket.objects
-            .filter(ignored=False)
+            GrievanceTicket.objects.filter(ignored=False)
             .select_related("assigned_to", "created_by")
             .annotate(
                 total=Case(
@@ -500,6 +499,11 @@ class Query(graphene.ObjectType):
             {"name": name, "value": value}
             for value, name in GrievanceTicket.CATEGORY_CHOICES
             if value in GrievanceTicket.MANUAL_CATEGORIES
+            and value
+            not in (
+                GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+                GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            )  # feedback tickets are not available anymore via grievance ticket
         ]
 
     def resolve_grievance_ticket_system_category_choices(self, info, **kwargs):
