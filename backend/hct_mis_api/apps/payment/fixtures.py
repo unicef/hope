@@ -21,7 +21,7 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
-from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY, Individual, MALE
+from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY, Individual, MALE, REFUGEE
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     FinancialServiceProvider,
@@ -42,7 +42,11 @@ from hct_mis_api.apps.program.fixtures import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import CashPlan
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetPopulationFactory,
+    TargetingCriteriaRuleFactory,
+    TargetingCriteriaFactory,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
@@ -464,11 +468,26 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
 def generate_real_cash_plans():
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3)
-    program = RealProgramFactory()
+    program = RealProgramFactory(status=Program.ACTIVE)
     cash_plans = RealCashPlanFactory.create_batch(3, program=program)
     for cash_plan in cash_plans:
+        targeting_criteria = TargetingCriteriaFactory()
+
+        rule = TargetingCriteriaRule.objects.create(targeting_criteria=targeting_criteria)
+        TargetingCriteriaRuleFilter.objects.create(
+            targeting_criteria_rule=rule, comparison_method="EQUALS", field_name="residence_status", arguments=[REFUGEE]
+        )
+        target_population = TargetPopulationFactory(
+            program=program,
+            status=TargetPopulation.STATUS_OPEN,
+            targeting_criteria=targeting_criteria,
+        )
+        target_population.full_rebuild()
+        target_population.status = TargetPopulation.STATUS_READY_FOR_CASH_ASSIST
+        target_population.save()
         RealPaymentRecordFactory.create_batch(
             5,
+            target_population=target_population,
             parent=cash_plan,
         )
     program.households.set(
@@ -619,24 +638,6 @@ class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
     delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
 
 
-def generate_real_payment_plans():
-    afghanistan = BusinessArea.objects.get(slug="afghanistan")
-    if ServiceProvider.objects.count() < 3:
-        ServiceProviderFactory.create_batch(3)
-    program = RealProgramFactory()
-    payment_plans = PaymentPlanFactory.create_batch(3, program=program, business_area=afghanistan)
-    program.households.set(Household.objects.all().values_list("id", flat=True))
-    for payment_plan in payment_plans:
-        for household in program.households.all():
-            PaymentFactory(parent=payment_plan, household=household, business_area=afghanistan)
-
-    for delivery_type in PaymentRecord.DELIVERY_TYPE_CHOICE:
-        delivery_mechanism = delivery_type[0]
-        for financial_service_provider in FinancialServiceProvider.objects.all().order_by("?")[:3]:
-            financial_service_provider.delivery_mechanisms.append(delivery_mechanism)
-            financial_service_provider.save()
-
-
 def generate_payment_plan():
     # creates a payment plan that has all the necessary data needed to go with it for manual testing
 
@@ -755,6 +756,7 @@ def generate_payment_plan():
         targeting_criteria=targeting_criteria,
         status=TargetPopulation.STATUS_ASSIGNED,
         business_area=afghanistan,
+        program=program,
         created_by=root,
     )[0]
     target_population.full_rebuild()
