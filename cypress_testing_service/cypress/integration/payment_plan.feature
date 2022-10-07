@@ -10,7 +10,7 @@ Feature: Create Payment Plan
         Given Business area is payment plan applicable
         Given There are steficon rules provided
 
-    Scenario: Create Payment Plan with xlsx entitlements
+    Scenario: Create Payment Plan
         When I visit the main dashboard
         Then I should see the side panel with Payment Module option
         When I click on Payment Module option
