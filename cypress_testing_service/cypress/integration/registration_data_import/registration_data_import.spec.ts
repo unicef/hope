@@ -129,8 +129,8 @@ When('I visit the Households dashboard', () => {
 });
 
 Then('I see a newly imported household', () => {
-  cy.log(`looking householdId: ${householdId}`);
-  cy.get('[data-cy="hh-filters-search"]').type(householdId);
+  cy.log(`looking for householdId: ${householdId}`);
+  cy.get('[data-cy="hh-filters-search"]').find('input').type(householdId, { force: true });
   cy.get('td').should('contain', householdId);
 });
 
