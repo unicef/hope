@@ -60,7 +60,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     programs_with_delivered_quantity,
 )
-from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
+from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.schema import (
@@ -231,12 +231,14 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return programs_with_delivered_quantity(parent)
 
     def resolve_country(parent, info):
-        return parent.country.name
+        if parent.country:
+            return parent.country.name
+        return ""
 
     def resolve_country_origin(parent, info):
-        if not parent.country_origin:
-            return None
-        return parent.country_origin.name
+        if parent.country_origin:
+            return parent.country_origin.name
+        return ""
 
     def resolve_selection(parent, info):
         selection = parent.selections.first()
@@ -438,7 +440,6 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
                 "selfcare_disability",
                 "comms_disability",
                 "work_status",
-                "collect_individual_data",
             ],
         )
 

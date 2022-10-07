@@ -1,8 +1,8 @@
-from django.db.models import Sum, Subquery, OuterRef, F
+from django.db.models import F, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentPlan, Payment
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan, PaymentRecord
 
 
 def handle_total_cash_in_specific_households(id_list):

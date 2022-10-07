@@ -91,7 +91,6 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls.target_population_with_individuals.refresh_stats()
         cls.target_population_with_individuals.save()
 
-
         cls.target_population_without_individuals = cls._create_target_population(
             sent_to_datahub=False,
             name="Test TP 2",

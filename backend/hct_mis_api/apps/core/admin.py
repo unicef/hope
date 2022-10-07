@@ -45,6 +45,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
+    StorageFile,
     XLSXKoboTemplate,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
@@ -310,8 +311,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             environment = Site.objects.first().name
             mail = EmailMessage(
                 f"CashAssist - UNICEF - {obj.name} user updates",
-                f"""Dear GSD,
-
+                f"""Dear GSD,\n
 In CashAssist, please update the users in {environment} UNICEF - {obj.name} business unit as per the attached DOAP.
 Many thanks,
 UNICEF HOPE""",
@@ -629,3 +629,20 @@ class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
     def alpha3(self, obj):
         return obj.country.iso_code3
+
+
+@admin.register(StorageFile)
+class StorageFileAdmin(admin.ModelAdmin):
+    list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.can_download_storage_files()
+
+    def has_add_permission(self, request):
+        return request.user.can_download_storage_files()

@@ -61,7 +61,7 @@ class RapidProAPI:
         return response.json()
 
     def _parse_json_urns_error(self, e, phone_numbers):
-        if e.response.status_code != 400:
+        if e.response and e.response.status_code != 400:
             return False
         try:
             error = e.response.json()
@@ -69,11 +69,11 @@ class RapidProAPI:
             if not urns:
                 return False
             errors = []
-            for index, error in urns.items():
+            for index in urns.keys():
                 errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
             return errors
 
-        except:
+        except Exception:
             return False
 
     def _get_url(self):
@@ -83,7 +83,7 @@ class RapidProAPI:
         flows = self._handle_get_request(RapidProAPI.FLOWS_ENDPOINT)
         return flows["results"]
 
-    def start_flow(self, flow_uuid, phone_numbers):
+    def start_flows(self, flow_uuid, phone_numbers):
         array_size_limit = 100  # https://app.rapidpro.io/api/v2/flow_starts
         # urns - the URNs you want to start in this flow (array of up to 100 strings, optional)
 
@@ -100,11 +100,18 @@ class RapidProAPI:
                 errors = self._parse_json_urns_error(e, phone_numbers)
                 if errors:
                     logger.error("wrong phone numbers " + str(errors))
-                    raise ValidationError(message={"phone_numbers": errors})
-                else:
-                    raise
+                    raise ValidationError(message={"phone_numbers": errors}) from e
+                raise
 
-        return [_start_flow({"flow": flow_uuid, "urns": urns, "restart_participants": True}) for urns in by_limit]
+        successful_flows = []
+        for urns in by_limit:
+            try:
+                successful_flows.append(
+                    (_start_flow({"flow": flow_uuid, "urns": urns, "restart_participants": True}), urns)
+                )
+            except Exception as e:
+                return successful_flows, e
+        return successful_flows, None
 
     def get_flow_runs(self):
         return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
@@ -158,7 +165,7 @@ class RapidProAPI:
                 return (
                     f"Initial connection was successful but no flow with name '{flow_name}' was found in results list."
                 ), None
-            response = self.start_flow(test_flow["uuid"], [phone_number])
+            response = self.start_flows(test_flow["uuid"], [phone_number])
             return None, response
         except Exception as e:
             logger.exception(e)
