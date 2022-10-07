@@ -1,16 +1,21 @@
 import logging
-import openpyxl
-
 from tempfile import NamedTemporaryFile
-from django.core.files import File
 
+from django.conf import settings
+from django.core.files import File
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.urls import reverse
+
+import openpyxl
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.models import PaymentVerification, XlsxCashPlanPaymentVerificationFile
-
+from hct_mis_api.apps.payment.models import (
+    PaymentVerification,
+    XlsxCashPlanPaymentVerificationFile,
+)
+from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
 
 logger = logging.getLogger(__name__)
 
@@ -136,3 +141,32 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         }
 
         return context
+
+    @staticmethod
+    def send_email(user, cash_plan_payment_verification_id):
+        protocol = "http" if settings.IS_DEV else "https"
+        payment_verification_id = encode_id_base64(cash_plan_payment_verification_id, "CashPlanPaymentVerification")
+        api = reverse("download-cash-plan-payment-verification", args=[payment_verification_id])
+        link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
+
+        msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
+        context = {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "message": msg,
+            "link": link,
+        }
+        text_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.txt", context=context)
+        html_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.html", context=context)
+
+        email = EmailMultiAlternatives(
+            subject="Verification Plan XLSX file generated",
+            from_email=settings.EMAIL_HOST_USER,
+            to=[context["email"]],
+            body=text_body,
+        )
+        email.attach_alternative(html_body, "text/html")
+        result = email.send()
+        if not result:
+            logger.error(f"Email couldn't be send to {context['email']}")

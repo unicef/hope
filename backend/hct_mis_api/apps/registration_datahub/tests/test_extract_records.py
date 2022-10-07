@@ -1,10 +1,10 @@
 import base64
-from django.utils import timezone
 import json
 from pathlib import Path
 
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 
 from hct_mis_api.apps.registration_datahub.celery_tasks import extract_records_task
 from hct_mis_api.apps.registration_datahub.models import Record

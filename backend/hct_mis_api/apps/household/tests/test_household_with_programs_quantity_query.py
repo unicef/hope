@@ -7,8 +7,9 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, CashPlanFactory, PaymentPlanFactory, PaymentFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 
 
 class TestHouseholdWithProgramsQuantityQuery(APITestCase):
@@ -55,6 +56,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
             delivered_quantity_usd=50,
             delivered_quantity=100,
             household=household,
+            status=PaymentRecord.STATUS_SUCCESS,
         )
         PaymentRecordFactory.create_batch(
             3,
@@ -63,6 +65,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
             delivered_quantity_usd=100,
             delivered_quantity=200,
             household=household,
+            status=PaymentRecord.STATUS_SUCCESS,
         )
 
         PaymentRecordFactory.create_batch(
@@ -72,6 +75,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
             delivered_quantity_usd=100,
             delivered_quantity=100,
             household=household,
+            status=PaymentRecord.STATUS_SUCCESS,
         )
         PaymentRecordFactory.create_batch(
             3,
@@ -80,6 +84,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
             delivered_quantity_usd=200,
             delivered_quantity=200,
             household=household,
+            status=PaymentRecord.STATUS_SUCCESS,
         )
 
         cls.household.programs.add(cls.program1)

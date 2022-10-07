@@ -1,41 +1,47 @@
 from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet, Q
-
+from django.db.models import Q, QuerySet
 from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from django.template.response import TemplateResponse
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
+from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.payment.models import (
+    CashPlan,
     CashPlanPaymentVerification,
+    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
+    Payment,
+    PaymentChannel,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    CashPlan,
-    PaymentPlan,
-    Payment,
-    DeliveryMechanismPerPaymentPlan,
-    PaymentChannel,
+)
+from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
+    VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(PaymentRecord)
-class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("household", "status", "cash_plan_name", "target_population")
     list_filter = (
+        DepotManager,
+        QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("target_population", AutoCompleteFilter),
@@ -111,12 +117,23 @@ class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HO
                 template="admin_extra_buttons/confirm.html",
             )
 
+    def activate(self, request, pk):
+        return confirm_action(
+            self,
+            request,
+            lambda _: VerificationPlanStatusChangeServices(CashPlanPaymentVerification.objects.get(pk=pk)).activate(),
+            "This action will trigger Cash Plan Payment Verification activation (also sending messages via Rapid Pro).",
+            "Successfully activated.",
+        )
+
 
 @admin.register(PaymentVerification)
 class PaymentVerificationAdmin(HOPEModelAdminBase):
     list_display = ("household", "status", "received_amount", "cash_plan_name")
 
     list_filter = (
+        DepotManager,
+        QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
         ("cash_plan_payment_verification__cash_plan", AutoCompleteFilter),
         ("cash_plan_payment_verification__cash_plan__business_area", AutoCompleteFilter),

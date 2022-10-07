@@ -12,11 +12,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='countrycodemap',
-            options={'ordering': ('country',)},
+            options={'ordering': ('country_new',)},
         ),
-        migrations.RenameField(
+        migrations.RemoveField(
             model_name='countrycodemap',
-            old_name='country_new',
-            new_name='country',
+            name='country',
         ),
     ]
