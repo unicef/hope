@@ -22,6 +22,7 @@ import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
+from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -1077,24 +1078,22 @@ class Query(graphene.ObjectType):
 
             elif order_by == "unicef_id":
                 qs = sorted(qs, key=lambda o: o.unicef_id, reverse=bool(reverse))
-
+                print("order by unicef ID", bool(reverse), type(qs), len(qs))
             else:
                 qs = qs.order_by(reverse + order_by)
 
-        qs_count = len(qs) if isinstance(qs, list) else qs.count()
 
-        # TODO: will use 'first', 'last', 'before', 'after'
-        paginator, page = get_paginator(qs, page_size=1, page=1)
+        # add qraphql pagination
+        resp = connection_from_list_slice(
+            qs,
+            args=kwargs,
+            connection_type=PaginatedCashPlanAndPaymentPlanNode,
+            edge_type=CashPlanAndPaymentPlanEdges,
+            pageinfo_type=PageInfoNode,
+            list_length=kwargs.get("first"),
 
-        return PaginatedCashPlanAndPaymentPlanNode(
-            page_info=PageInfoNode(
-                start_cursor="arrayconnection:0",
-                end_cursor="arrayconnection:4",
-                has_next_page=page.has_next(),
-                has_previous_page=page.has_previous(),
-            ),
-            edges=[CashPlanAndPaymentPlanEdges(cursor=f"arrayconnection:2", node=obj) for obj in page.object_list],
-            total_count=qs_count,
-            # page=page.number,
-            # pages=paginator.num_pages,
         )
+        resp.total_count = len(qs)
+
+        return resp
+
