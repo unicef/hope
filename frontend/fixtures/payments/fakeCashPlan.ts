@@ -133,22 +133,14 @@ export const fakeCashPlan = {
     __typename: 'PaymentVerificationPlanNodeConnection',
   },
   paymentVerificationSummary: {
-    totalCount: 1,
-    edges: [
-      {
-        node: {
-          id:
-            'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6MTNjY2MxNzMtNzEwZS00N2NkLTg1ZmQtODM4YTFlMjZiNDUy',
-          createdAt: '2022-02-17T14:23:02.018701',
-          updatedAt: '2022-02-17T14:23:02.018730',
-          status: 'PENDING',
-          activationDate: null,
-          completionDate: null,
-          __typename: 'PaymentVerificationPlanSummaryNode',
-        },
-        __typename: 'PaymentVerificationPlanSummaryNodeEdge',
-      },
-    ],
+    id:
+      'Q2FzaFBsYW5QYXltZW50VmVyaWZpY2F0aW9uU3VtbWFyeU5vZGU6MTNjY2MxNzMtNzEwZS00N2NkLTg1ZmQtODM4YTFlMjZiNDUy',
+    createdAt: '2022-02-17T14:23:02.018701',
+    updatedAt: '2022-02-17T14:23:02.018730',
+    status: 'PENDING',
+    activationDate: null,
+    completionDate: null,
+    __typename: 'PaymentVerificationSummaryNode',
   },
   paymentItems: {
     totalCount: 5,

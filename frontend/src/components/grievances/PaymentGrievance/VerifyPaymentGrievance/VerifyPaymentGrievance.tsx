@@ -17,13 +17,13 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikRadioGroup } from '../../../../shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import {
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   GrievanceTicketDocument,
   useUpdateGrievanceMutation,
 } from '../../../../__generated__/graphql';
 
 export interface VerifyPaymentGrievanceProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
 }
 export function VerifyPaymentGrievance({
   ticket,

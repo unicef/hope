@@ -8,7 +8,7 @@ import {
 } from '../../../utils/utils';
 import {
   GrievancesChoiceDataQuery,
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
 } from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { ContentLink } from '../../core/ContentLink';
@@ -19,7 +19,7 @@ import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
 
 interface GrievancesDetailsProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   choicesData: GrievancesChoiceDataQuery;
   businessArea: string;
   canViewHouseholdDetails: boolean;

@@ -19,6 +19,7 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
+  CashPlanNode,
   PaymentVerificationPlanStatus,
   useCashPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
@@ -74,7 +75,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || !choicesData || permissions === null) return null;
 
-  const { cashPlan } = data;
+  const cashPlan= data.cashPlan as CashPlanNode;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -106,7 +107,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   };
 
   const isFinished =
-    cashPlan.paymentVerificationSummary.edges[0].node.status === 'FINISHED';
+    cashPlan.paymentVerificationSummary.status === 'FINISHED';
 
   const toolbar = (
     <PageHeader

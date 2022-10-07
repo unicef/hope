@@ -8,7 +8,6 @@ import {
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import {
-  choicesToDict,
   formatCurrencyWithSymbol,
   paymentVerificationStatusToColor,
 } from '../../../../utils/utils';
@@ -36,9 +35,6 @@ export function PaymentVerificationTableRow({
   } = useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
-  const deliveryTypeChoicesDict = choicesToDict(
-    statusChoicesData.paymentRecordDeliveryTypeChoices,
-  );
 
   return (
     <ClickableTableRow
@@ -60,12 +56,6 @@ export function PaymentVerificationTableRow({
           status={plan.verificationStatus}
           statusToColor={paymentVerificationStatusToColor}
         />
-      </TableCell>
-      <TableCell align='left'>
-        {plan.serviceProviderFullName || '-'}
-      </TableCell>
-      <TableCell align='left'>
-        {deliveryTypeChoicesDict[plan.deliveryTypes]}
       </TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}

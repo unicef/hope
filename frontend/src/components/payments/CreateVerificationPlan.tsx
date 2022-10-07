@@ -30,7 +30,7 @@ import { getPercentage } from '../../utils/utils';
 import {
   useAllAdminAreasQuery,
   useAllRapidProFlowsQuery,
-  useCreatePaymentVerificationMutation,
+  useCreatePaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
 import { ButtonTooltip } from '../core/ButtonTooltip';
@@ -116,7 +116,7 @@ export function CreateVerificationPlan({
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useCreatePaymentVerificationMutation();
+  const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
   const businessArea = useBusinessArea();
   const [formValues, setFormValues] = useState(initialValues);
 

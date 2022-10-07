@@ -19,13 +19,8 @@ export const ACTIVATE_CASH_PLAN_PAYMENT_VERIFICATION = gql`
           }
         }
         paymentVerificationSummary {
-          totalCount
-          edges {
-            node {
-              id
-              status
-            }
-          }
+          id
+          status
         }
       }
       validationErrors

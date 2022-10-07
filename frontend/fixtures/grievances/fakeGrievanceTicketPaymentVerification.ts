@@ -1,4 +1,4 @@
-import { GrievanceTicketQuery } from '../../src/__generated__/graphql';
+import { GrievanceTicketNode } from '../../src/__generated__/graphql';
 
 export const fakeGrievanceTicketPaymentVerification = {
   id:
@@ -38,17 +38,20 @@ export const fakeGrievanceTicketPaymentVerification = {
       id:
         'UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6NDhmZjMwODEtNTVhMy00Zjg4LWJjNTgtNTE0YWM0MGI0MzQ2',
       receivedAmount: 0,
-      paymentRecord: {
-        id:
-          'UGF5bWVudFJlY29yZE5vZGU6MDZlODg0ZjQtYzAxNS00Mzk2LWI3YmItMDc4NDZkODBkNGQx',
-        deliveredQuantity: 3355,
-        __typename: 'PaymentRecordNode',
-      },
-      __typename: 'PaymentVerificationNode',
-    },
-    paymentVerifications: {
-      edges: [],
-      __typename: 'PaymentVerificationNodeConnection',
+      paymentObjectId: null,
+      paymentContentType: null,
+      // paymentRecord: {
+  //       id:
+  //         'UGF5bWVudFJlY29yZE5vZGU6MDZlODg0ZjQtYzAxNS00Mzk2LWI3YmItMDc4NDZkODBkNGQx',
+  //       deliveredQuantity: 3355,
+  //       __typename: 'PaymentRecordNode',
+  //     },
+  //     __typename: 'PaymentVerificationNode',
+  //   },
+    // paymentVerifications: {
+    //   edges: [],
+    //   __typename: 'PaymentVerificationNodeConnection',
+    // }
     },
     __typename: 'TicketPaymentVerificationDetailsNode',
   },
@@ -56,4 +59,4 @@ export const fakeGrievanceTicketPaymentVerification = {
   issueType: null,
   ticketNotes: { edges: [], __typename: 'TicketNoteNodeConnection' },
   __typename: 'GrievanceTicketNode',
-} as GrievanceTicketQuery['grievanceTicket'];
+} as GrievanceTicketNode;
