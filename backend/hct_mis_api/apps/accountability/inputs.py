@@ -31,3 +31,38 @@ class GetAccountabilityCommunicationMessageSampleSizeInput(graphene.InputObjectT
 class CreateAccountabilityCommunicationMessageInput(GetAccountabilityCommunicationMessageSampleSizeInput):
     title = graphene.String(required=True)
     body = graphene.String(required=True)
+
+
+class CreateFeedbackInput(graphene.InputObjectType):
+    business_area_slug = graphene.String(required=True)
+    issue_type = graphene.String(required=True)
+    household_lookup = graphene.ID()
+    individual_lookup = graphene.ID()
+    description = graphene.String(required=True)
+    comments = graphene.String()
+    admin2 = graphene.ID()
+    area = graphene.String()
+    language = graphene.String()
+    consent = graphene.Boolean()
+    program = graphene.ID()
+
+
+class UpdateFeedbackInput(graphene.InputObjectType):
+    feedback_id = graphene.ID(required=True)
+    issue_type = graphene.String()
+    household_lookup = graphene.ID()
+    individual_lookup = graphene.ID()
+    description = graphene.String()
+    comments = graphene.String()
+    admin2 = graphene.ID()
+    area = graphene.String()
+    language = graphene.String()
+    consent = graphene.Boolean()
+    program = graphene.ID()
+
+
+class CreateFeedbackMessageInput(graphene.InputObjectType):
+    from .schema import FeedbackMessageNode
+
+    description = graphene.String(required=True)
+    feedback = graphene.GlobalID(node=FeedbackMessageNode, required=True)

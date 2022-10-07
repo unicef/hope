@@ -92,28 +92,22 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_and_updates_docum
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_documents_0_with_permission 1'] = {
     'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
                 {
-                    'admin': 'City Test',
-                    'category': 5,
-                    'consent': True,
-                    'documentation': [
-                        {
-                            'contentType': 'image/jpeg',
-                            'fileSize': 200,
-                            'name': 'scanned_document2'
-                        },
-                        {
-                            'contentType': 'image/jpeg',
-                            'fileSize': 100,
-                            'name': 'scanned_document1'
-                        }
-                    ]
+                    'column': 11,
+                    'line': 3
                 }
+            ],
+            'message': 'Feedback tickets are not allowed to be created through this mutation.',
+            'path': [
+                'createGrievanceTicket'
             ]
         }
-    }
+    ]
 }
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_documents_1_without_permission 1'] = {
@@ -138,86 +132,82 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_documents_1_witho
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_file_for_allowed_types_0_some_document_jpg 1'] = {
     'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
                 {
-                    'admin': 'City Test',
-                    'category': 5,
-                    'consent': True,
-                    'documentation': [
-                        {
-                            'contentType': 'image/jpeg',
-                            'fileSize': 1024,
-                            'name': 'scanned_document1'
-                        }
-                    ]
+                    'column': 11,
+                    'line': 3
                 }
+            ],
+            'message': 'Feedback tickets are not allowed to be created through this mutation.',
+            'path': [
+                'createGrievanceTicket'
             ]
         }
-    }
+    ]
 }
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_file_for_allowed_types_1_some_document_png 1'] = {
     'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
                 {
-                    'admin': 'City Test',
-                    'category': 5,
-                    'consent': True,
-                    'documentation': [
-                        {
-                            'contentType': 'image/png',
-                            'fileSize': 1024,
-                            'name': 'scanned_document1'
-                        }
-                    ]
+                    'column': 11,
+                    'line': 3
                 }
+            ],
+            'message': 'Feedback tickets are not allowed to be created through this mutation.',
+            'path': [
+                'createGrievanceTicket'
             ]
         }
-    }
+    ]
 }
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_file_for_allowed_types_2_some_document_tiff 1'] = {
     'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
                 {
-                    'admin': 'City Test',
-                    'category': 5,
-                    'consent': True,
-                    'documentation': [
-                        {
-                            'contentType': 'image/tiff',
-                            'fileSize': 1024,
-                            'name': 'scanned_document1'
-                        }
-                    ]
+                    'column': 11,
+                    'line': 3
                 }
+            ],
+            'message': 'Feedback tickets are not allowed to be created through this mutation.',
+            'path': [
+                'createGrievanceTicket'
             ]
         }
-    }
+    ]
 }
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_file_for_allowed_types_3_some_document_pdf 1'] = {
     'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
                 {
-                    'admin': 'City Test',
-                    'category': 5,
-                    'consent': True,
-                    'documentation': [
-                        {
-                            'contentType': 'application/pdf',
-                            'fileSize': 1024,
-                            'name': 'scanned_document1'
-                        }
-                    ]
+                    'column': 11,
+                    'line': 3
                 }
+            ],
+            'message': 'Feedback tickets are not allowed to be created through this mutation.',
+            'path': [
+                'createGrievanceTicket'
             ]
         }
-    }
+    ]
 }
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_single_document_for_existing_grievance_ticket_0_with_permission 1'] = {
@@ -383,7 +373,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_raises_error_when_not_all
                     'line': 3
                 }
             ],
-            'message': 'File type not supported',
+            'message': 'Feedback tickets are not allowed to be created through this mutation.',
             'path': [
                 'createGrievanceTicket'
             ]
@@ -403,7 +393,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_raises_error_when_not_all
                     'line': 3
                 }
             ],
-            'message': 'File type not supported',
+            'message': 'Feedback tickets are not allowed to be created through this mutation.',
             'path': [
                 'createGrievanceTicket'
             ]
@@ -423,7 +413,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_raises_error_when_total_s
                     'line': 3
                 }
             ],
-            'message': 'Adding/Updating of new files exceed 25mb maximum size of files',
+            'message': 'Feedback tickets are not allowed to be created through this mutation.',
             'path': [
                 'createGrievanceTicket'
             ]
@@ -463,7 +453,7 @@ snapshots['TestGrievanceDocumentsUpload::test_mutation_raises_error_when_uploade
                     'line': 3
                 }
             ],
-            'message': 'File some_big_file.jpg of size 5242880 is above max size limit',
+            'message': 'Feedback tickets are not allowed to be created through this mutation.',
             'path': [
                 'createGrievanceTicket'
             ]
