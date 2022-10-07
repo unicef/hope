@@ -583,7 +583,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "get_query": get_tax_id_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "tax_id_no_i_c",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
     },
     {
         "id": "762cb2a8-b05a-47dc-81da-c71e4b1fd68f",
@@ -597,7 +597,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "get_query": get_tax_id_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "tax_id_issuer_i_c",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
     },
     {
         "id": "d0e84bc0-9ac5-4c5b-bbdc-0644f5349d53",
@@ -1675,7 +1675,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "bank_name_i_c",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
     },
     {
         "id": "3d6a45f3-d3f7-48a0-801b-7a98c0da517a",
@@ -1688,7 +1688,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "bank_account_number_i_c",
-        "scope": [Scope.XLSX],
+        "scope": [Scope.XLSX, Scope.KOBO_IMPORT],
     },
     {
         "id": "4a2ae111-3450-41a4-8d26-5eb20f4e233c",
