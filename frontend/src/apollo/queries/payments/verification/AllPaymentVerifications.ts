@@ -11,7 +11,6 @@ export const AllPaymentVerifications = gql`
     $search: String
     $status: String
     $businessArea: String
-    # $cashPlanId: ID
     $verificationChannel: String
   ) {
     allPaymentVerifications(
@@ -21,7 +20,6 @@ export const AllPaymentVerifications = gql`
       last: $last
       orderBy: $orderBy
       paymentVerificationPlan: $paymentVerificationPlan
-      # paymentVerificationPlan_CashPlan: $cashPlanId
       search: $search
       status: $status
       businessArea: $businessArea
@@ -43,24 +41,24 @@ export const AllPaymentVerifications = gql`
             unicefId
             verificationChannel
           }
-          paymentRecord {
-            id
-            caId
-            deliveredQuantity
-            currency
-            household {
-              status
-              unicefId
-              id
-              headOfHousehold {
-                id
-                fullName
-                familyName
-                phoneNo
-                phoneNoAlternative
-              }
-            }
-          }
+          # paymentRecord {
+          #   id
+          #   caId
+          #   deliveredQuantity
+          #   currency
+          #   household {
+          #     status
+          #     unicefId
+          #     id
+          #     headOfHousehold {
+          #       id
+          #       fullName
+          #       familyName
+          #       phoneNo
+          #       phoneNoAlternative
+          #     }
+          #   }
+          # }
           status
           receivedAmount
         }

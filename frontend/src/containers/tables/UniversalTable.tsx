@@ -78,7 +78,7 @@ export function UniversalTable<T, K>({
     correctTitle = getTitle(data);
   }
   const { edges } = data[queriedObjectName];
-  const typedEdges = (edges || data[queriedObjectName].objects).map((edge) => (edge?.node || edge) as T);
+  const typedEdges = edges.map((edge) => edge.node as T);
 
   return (
     <TableComponent<T>

@@ -17,7 +17,7 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../../../utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   useApprovePaymentDetailsMutation,
 } from '../../../../__generated__/graphql';
 import { useConfirmation } from '../../../core/ConfirmationDialog';
@@ -41,7 +41,7 @@ export function PaymentGrievanceDetails({
   ticket,
   canApprovePaymentVerification,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   canApprovePaymentVerification: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
@@ -53,9 +53,10 @@ export function PaymentGrievanceDetails({
     newReceivedAmount,
     paymentVerification: {
       receivedAmount,
-      paymentRecord: { deliveredQuantity },
     },
   } = ticket.paymentVerificationTicketDetails;
+
+  const deliveredQuantity = ticket.paymentRecord?.deliveredQuantity;
 
   let dialogText = t('Are you sure you want to disapprove this payment?');
   if (!approveStatus) {

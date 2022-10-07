@@ -13,7 +13,9 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
   PaymentVerificationNode,
+  PaymentRecordNode,
   usePaymentRecordVerificationQuery,
+  usePaymentRecordQuery,
   usePaymentVerificationChoicesQuery,
 } from '../../../__generated__/graphql';
 
@@ -22,6 +24,11 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
   const { data, loading, error } = usePaymentRecordVerificationQuery({
+    variables: { id },
+    fetchPolicy: 'cache-and-network',
+  });
+  const { data: { paymentRecord } } = usePaymentRecordQuery({
+    // TODO: What id to use here?
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
@@ -36,7 +43,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
 
   const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
   const verification =
-    paymentVerification.paymentRecord?.parent?.verificationPlans?.edges[0].node;
+    paymentRecord.parent?.verificationPlans?.edges[0].node;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
@@ -53,9 +60,9 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
       ? [
           {
             title: `${t('Cash Plan')} ${decodeIdString(
-              paymentVerification.paymentRecord.parent.id,
+              paymentRecord.parent.id,
             )}`,
-            to: `/${businessArea}/payment-verification/${paymentVerification.paymentRecord.parent.id}`,
+            to: `/${businessArea}/payment-verification/${paymentRecord.parent.id}`,
           },
         ]
       : []),
@@ -63,7 +70,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader
-      title={`${t('Payment ID')} ${paymentVerification.paymentRecord.caId}`}
+      title={`${t('Payment ID')} ${paymentRecord.caId}`}
       breadCrumbs={breadCrumbsItems}
     >
       {verification.verificationChannel === 'MANUAL' &&
@@ -80,6 +87,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
       {toolbar}
       <VerificationRecordDetails
         paymentVerification={paymentVerification}
+        paymentRecord={paymentRecord as PaymentRecordNode}
         canViewActivityLog={hasPermissions(
           PERMISSIONS.ACTIVITY_LOG_VIEW,
           permissions,

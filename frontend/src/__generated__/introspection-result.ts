@@ -63,25 +63,25 @@
             "name": "SteficonRuleNode"
           },
           {
+            "name": "TicketComplaintDetailsNode"
+          },
+          {
+            "name": "TicketSensitiveDetailsNode"
+          },
+          {
             "name": "PaymentVerificationNode"
           },
           {
             "name": "PaymentVerificationPlanNode"
           },
           {
-            "name": "PaymentVerificationPlanSummaryNode"
+            "name": "PaymentVerificationSummaryNode"
           },
           {
             "name": "PaymentVerificationLogEntryNode"
           },
           {
             "name": "TicketPaymentVerificationDetailsNode"
-          },
-          {
-            "name": "TicketComplaintDetailsNode"
-          },
-          {
-            "name": "TicketSensitiveDetailsNode"
           },
           {
             "name": "ReportNode"

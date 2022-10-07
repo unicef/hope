@@ -1,7 +1,5 @@
 import logging
 import math
-import graphene
-
 from base64 import b64decode
 from decimal import Decimal
 
@@ -10,6 +8,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
+import graphene
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
@@ -1046,8 +1045,8 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
 
 
 class Mutations(graphene.ObjectType):
-    create_verification_plan = CreateVerificationPlanMutation.Field()
-    edit_verification_plan = EditPaymentVerificationMutation.Field()
+    create_payment_verification_plan = CreateVerificationPlanMutation.Field()
+    edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
 
     create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
     edit_financial_service_provider = EditFinancialServiceProviderMutation.Field()

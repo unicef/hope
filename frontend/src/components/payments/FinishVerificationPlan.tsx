@@ -53,7 +53,7 @@ export function FinishVerificationPlan({
 
   const finish = async (): Promise<void> => {
     const { errors } = await mutate({
-      variables: { paymentVerificationPlanId },
+      variables: { cashPlanVerificationId: paymentVerificationPlanId },
       refetchQueries,
     });
     if (errors) {

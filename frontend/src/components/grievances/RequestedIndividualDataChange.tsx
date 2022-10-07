@@ -11,7 +11,7 @@ import {
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import {
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   HouseholdNode,
   IndividualNode,
   IndividualRoleInHouseholdRole,
@@ -38,7 +38,7 @@ export function RequestedIndividualDataChange({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   canApproveDataChange: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();

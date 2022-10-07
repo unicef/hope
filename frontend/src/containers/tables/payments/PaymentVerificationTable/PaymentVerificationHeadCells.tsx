@@ -18,18 +18,6 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'FSP',
-    id: 'serviceProvider__fullName',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Modality',
-    id: 'deliveryType',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
     label: 'Cash Amount',
     id: 'totalDeliveredQuantity',
     numeric: true,

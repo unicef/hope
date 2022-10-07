@@ -16,7 +16,7 @@ import { DATE_FORMAT } from '../../config';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   useApproveSystemFlaggingMutation,
 } from '../../__generated__/graphql';
 import { useConfirmation } from '../core/ConfirmationDialog';
@@ -30,7 +30,7 @@ export function FlagDetails({
   ticket,
   canApproveFlag,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   canApproveFlag: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();

@@ -40,15 +40,13 @@ export function PaymentVerificationTable({
       query={useAllCashPlansAndPaymentPlansQuery}
       queriedObjectName='allCashPlansAndPaymentPlans'
       initialVariables={initialVariables}
-      renderRow={(row) => {
-        console.log("ROW", row);
-        return (
+      renderRow={(row) => (
         <PaymentVerificationTableRow
           key={row.id}
           plan={row}
           canViewDetails={canViewDetails}
         />
-      )}}
+      )}
     />
   );
 }

@@ -1,6 +1,4 @@
 import json
-import graphene
-
 from decimal import Decimal
 
 from django.db.models import (
@@ -20,6 +18,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
+import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
@@ -124,15 +123,6 @@ class RapidProFlow(graphene.ObjectType):
         return parent["uuid"]
 
 
-class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS),)
-
-    class Meta:
-        model = PaymentRecord
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
 class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),
@@ -183,16 +173,6 @@ class AgeFilterObject(graphene.ObjectType):
 class PaymentVerificationSummaryNode(DjangoObjectType):
     class Meta:
         model = PaymentVerificationSummary
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
-    is_manually_editable = graphene.Boolean()
-
-    class Meta:
-        model = PaymentVerification
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -421,6 +401,16 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
 
+class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
+    is_manually_editable = graphene.Boolean()
+
+    class Meta:
+        model = PaymentVerification
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class PaymentVerificationPlanNode(DjangoObjectType):
     excluded_admin_areas_filter = graphene.List(graphene.String)
     age_filter = graphene.Field(AgeFilterObject)
@@ -438,6 +428,16 @@ class PaymentVerificationPlanNode(DjangoObjectType):
 
     def resolve_has_xlsx_file(self, info):
         return self.has_xlsx_payment_verification_plan_file
+
+
+class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS),)
+    verification = graphene.Field(PaymentVerificationNode)
+
+    class Meta:
+        model = PaymentRecord
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class PaymentVerificationLogEntryNode(LogEntryNode):
@@ -461,21 +461,6 @@ class PaymentChannelNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
-
-
-class XProgramNode(BaseNodePermissionMixin, graphene.ObjectType):
-    permission_classes = (
-        hopePermissionClass(
-            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
-        ),
-    )
-
-    budget = graphene.Decimal()
-    total_entitled_quantity = graphene.Decimal()
-    total_delivered_quantity = graphene.Decimal()
-    total_undelivered_quantity = graphene.Decimal()
-    total_number_of_households = graphene.Int()
-    individual_data_needed = graphene.Boolean()
 
 
 class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
@@ -549,7 +534,6 @@ class PaginatedCashPlanAndPaymentPlanNode(graphene.ObjectType):
     page_info = graphene.Field(PageInfoNode)
     edges = graphene.List(CashPlanAndPaymentPlanEdges)
     total_count = graphene.Int()
-
 
 
 class GenericPaymentPlanNode(graphene.ObjectType):

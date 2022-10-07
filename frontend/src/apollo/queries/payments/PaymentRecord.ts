@@ -9,25 +9,12 @@ export const PAYMENT_RECORD_QUERY = gql`
       caId
       caHashId
       registrationCaId
-      household {
-        id
-        status
-        size
-      }
       fullName
       distributionModality
       totalPersonsCovered
       targetPopulation {
         id
         name
-      }
-      parent {
-        id
-        caId
-        program {
-          id
-          name
-        }
       }
       verification {
         id
@@ -39,23 +26,12 @@ export const PAYMENT_RECORD_QUERY = gql`
       entitlementQuantity
       deliveredQuantity
       deliveryDate
-      deliveryDate
       entitlementCardIssueDate
       entitlementCardNumber
-
-      serviceProvider {
-        id
-        fullName
-        shortName
-      }
-
-      id
-      status
-      statusDate
-      caId
       household {
         id
         size
+        status
         unicefId
         headOfHousehold {
           id
@@ -64,13 +40,6 @@ export const PAYMENT_RECORD_QUERY = gql`
           phoneNoValid
           phoneNoAlternativeValid
         }
-      }
-      fullName
-      distributionModality
-      totalPersonsCovered
-      targetPopulation {
-        id
-        name
       }
       parent {
         id
@@ -89,15 +58,8 @@ export const PAYMENT_RECORD_QUERY = gql`
           }
         }
       }
-      currency
-      entitlementQuantity
-      deliveredQuantity
       deliveredQuantityUsd
-      deliveryDate
-      deliveryDate
       deliveryType
-      entitlementCardIssueDate
-      entitlementCardNumber
       transactionReferenceId
       serviceProvider {
         id

@@ -1,7 +1,7 @@
 import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CashPlanQuery } from '../../__generated__/graphql';
+import { CashPlanNode } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
 import { paymentVerificationStatusToColor } from '../../utils/utils';
 import { StatusBox } from '../core/StatusBox';
@@ -9,14 +9,14 @@ import { UniversalMoment } from '../core/UniversalMoment';
 import { Title } from '../core/Title';
 
 interface VerificationPlansSummaryProps {
-  cashPlan: CashPlanQuery['cashPlan'];
+  cashPlan: CashPlanNode;
 }
 
 export function VerificationPlansSummary({
   cashPlan,
 }: VerificationPlansSummaryProps): React.ReactElement {
   const { t } = useTranslation();
-  const {status, activationDate, completionDate} = cashPlan.paymentVerificationSummary.edges[0].node;
+  const {status, activationDate, completionDate} = cashPlan.paymentVerificationSummary;
 
   return (
     <Grid container>
