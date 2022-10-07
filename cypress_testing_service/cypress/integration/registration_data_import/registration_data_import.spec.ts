@@ -126,7 +126,8 @@ When('I visit the Households dashboard', () => {
 });
 
 Then('I see a newly imported household', () => {
-  // after 10+ runs, it may fail, because there are 10 rows in this table by default
+  cy.log(`looking householdId: ${householdId}`);
+  cy.get('[data-cy="filters-search"]').type(householdId);
   cy.get('td').should('contain', householdId);
 });
 
@@ -135,9 +136,8 @@ When('I visit the Individuals dashboard', () => {
 });
 
 Then('I see the newly imported individuals', () => {
-  // after 10+ runs, it may fail, because there are 10 rows in this table by default
   const individualId = individualIds[0];
-  cy.log('looking for individualId: ' + individualId);
+  cy.log(`looking for individualId: + ${individualId}`);
   cy.get('[data-cy="filters-search"]').type(individualId);
   cy.get('td').should('contain', individualId);
 });
