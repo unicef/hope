@@ -67,12 +67,8 @@ export const AllCashPlans = gql`
           totalUndeliveredQuantity
           updatedAt
           paymentVerificationSummary {
-            edges {
-              node {
-                id
-                status
-              }
-            }
+            id
+            status
           }
         }
       }

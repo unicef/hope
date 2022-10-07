@@ -10,7 +10,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { GrievanceTicketNode } from '../../../__generated__/graphql';
 import { handleSelected } from '../utils/helpers';
 import { individualDataRow } from './individualDataRow';
 
@@ -22,7 +22,7 @@ export interface EntriesTableProps {
   values;
   isEdit;
   fieldsDict;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   entries;
   entriesFlexFields;
   setFieldValue;

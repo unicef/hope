@@ -11,8 +11,10 @@ query AllCashPlansAndPaymentPlans(
   $startDateGte: String
   $endDateLte: String
   $orderBy: String
-  $page: Int
-  $pageSize: Int
+  $first: Int
+  $last: Int
+  $before: String
+  $after: String
 ) {
   allCashPlansAndPaymentPlans(
     businessArea: $businessArea
@@ -24,40 +26,43 @@ query AllCashPlansAndPaymentPlans(
     startDateGte: $startDateGte
     endDateLte: $endDateLte
     orderBy: $orderBy
-    page: $page
-    pageSize: $pageSize
+    first: $first
+    last: $last
+    before: $before
+    after: $after
   ) {
-    page
-    pages
-    pageSize
+    pageInfo {
+      startCursor
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
     totalCount
-    hasNext
-    hasPrev
-    objects {
-      objType
-      id
-      unicefId
-      verificationStatus
-      fspNames
-      deliveryMechanisms
-      deliveryTypes
-      currency
-      totalDeliveredQuantity
-      startDate
-      endDate
-      programmeName
-      updatedAt
-      verificationPlans {
+    edges {
+      cursor
+      node {
+        objType
         id
-        createdAt
         unicefId
+        verificationStatus
+        currency
+        totalDeliveredQuantity
+        startDate
+        endDate
+        programmeName
+        updatedAt
+        verificationPlans {
+          id
+          createdAt
+          unicefId
+        }
+        totalNumberOfHouseholds
+        assistanceMeasurement
+        totalEntitledQuantity
+        totalUndeliveredQuantity
+        dispersionDate
+        serviceProviderFullName
       }
-      totalNumberOfHouseholds
-      assistanceMeasurement
-      totalEntitledQuantity
-      totalUndeliveredQuantity
-      dispersionDate
-      serviceProviderFullName
     }
   }
 }

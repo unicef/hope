@@ -36,10 +36,10 @@ export function VerificationRecordsTable({
       query={useAllPaymentVerificationsQuery}
       queriedObjectName='allPaymentVerifications'
       initialVariables={initialVariables}
-      renderRow={(row) => (
+      renderRow={(paymentVerification) => (
         <VerificationRecordsTableRow
-          key={row.id}
-          record={row}
+          key={paymentVerification.id}
+          paymentVerification={paymentVerification}
           canViewRecordDetails={canViewRecordDetails}
         />
       )}

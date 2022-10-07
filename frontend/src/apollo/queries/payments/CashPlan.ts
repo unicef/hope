@@ -61,17 +61,12 @@ export const CashPlan = gql`
         }
       }
       paymentVerificationSummary {
-        totalCount
-        edges {
-          node {
-            id
-            createdAt
-            updatedAt
-            status
-            activationDate
-            completionDate
-          }
-        }
+        id
+        # createdAt
+        # updatedAt
+        status
+        # activationDate
+        # completionDate
       }
       program {
         id

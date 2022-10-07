@@ -6,7 +6,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
 import {
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   useExistingGrievanceTicketsQuery,
 } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
@@ -22,8 +22,8 @@ export const OtherRelatedTickets = ({
   linkedTickets,
   ticket,
 }: {
-  linkedTickets: GrievanceTicketQuery['grievanceTicket']['relatedTickets'];
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  linkedTickets: GrievanceTicketNode['relatedTickets'];
+  ticket: GrievanceTicketNode;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();

@@ -14,6 +14,7 @@ import { isPermissionDeniedError } from '../../../../utils/utils';
 import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
+  GrievanceTicketNode,
   useMeQuery,
 } from '../../../../__generated__/graphql';
 import { grievancePermissions } from './grievancePermissions';
@@ -29,7 +30,7 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'network-only',
   });
-  const ticket = data?.grievanceTicket;
+  const ticket = data?.grievanceTicket as GrievanceTicketNode;
   const currentUserId = currentUserData?.me?.id;
   const isCreator = currentUserId === ticket?.createdBy?.id;
   const isOwner = currentUserId === ticket?.assignedTo?.id;

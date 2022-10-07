@@ -288,14 +288,16 @@ type BusinessAreaNodeEdge {
   cursor: String!
 }
 
+type CashPlanAndPaymentPlanEdges {
+  cursor: String
+  node: CashPlanAndPaymentPlanNode
+}
+
 type CashPlanAndPaymentPlanNode {
   objType: String
   id: String
   unicefId: String
   verificationStatus: String
-  fspNames: String
-  deliveryMechanisms: String
-  deliveryTypes: String
   currency: String
   totalDeliveredQuantity: Float
   startDate: String
@@ -356,7 +358,7 @@ type CashPlanNode implements Node {
   canCreatePaymentVerificationPlan: Boolean
   availablePaymentRecordsCount: Int
   verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection
-  paymentVerificationSummary(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanSummaryNodeConnection
+  paymentVerificationSummary: PaymentVerificationSummaryNode
 }
 
 type CashPlanNodeConnection {
@@ -435,7 +437,8 @@ type ContentTypeObjectType {
   appLabel: String!
   model: String!
   paymentverificationplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
-  paymentverificationsummarySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanSummaryNodeConnection!
+  paymentverificationSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  paymentverificationsummarySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationSummaryNodeConnection!
   logEntries(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   name: String
 }
@@ -531,10 +534,6 @@ type CreatePaymentPlanMutation {
   paymentPlan: PaymentPlanNode
 }
 
-type CreatePaymentVerificationPlanMutation {
-  paymentPlan: GenericPaymentPlanNode
-}
-
 type CreateProgram {
   validationErrors: Arg
   program: ProgramNode
@@ -600,6 +599,10 @@ input CreateUpdatePaymentVerificationInput {
   fullListArguments: FullListArguments
   randomSamplingArguments: RandomSamplingArguments
   rapidProArguments: RapidProArguments
+}
+
+type CreateVerificationPlanMutation {
+  paymentPlan: GenericPaymentPlanNode
 }
 
 scalar Date
@@ -964,7 +967,7 @@ input FullListArguments {
 }
 
 type GenericPaymentPlanNode {
-  paymentVerificationSummary: PaymentVerificationPlanSummaryNode
+  paymentVerificationSummary: PaymentVerificationSummaryNode
 }
 
 scalar GeoJSON
@@ -2399,8 +2402,8 @@ type Mutations {
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
-  createPaymentVerification(input: CreateUpdatePaymentVerificationInput!): CreatePaymentVerificationPlanMutation
-  editPaymentVerification(input: CreateUpdatePaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
+  createPaymentVerificationPlan(input: CreateUpdatePaymentVerificationInput!): CreateVerificationPlanMutation
+  editPaymentVerificationPlan(input: CreateUpdatePaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
   createFinancialServiceProvider(businessAreaSlug: String!, inputs: CreateFinancialServiceProviderInput!): CreateFinancialServiceProviderMutation
   editFinancialServiceProvider(businessAreaSlug: String!, financialServiceProviderId: ID!, inputs: CreateFinancialServiceProviderInput!): EditFinancialServiceProviderMutation
   exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: ID!): ExportXlsxPaymentVerificationPlanFile
@@ -2466,14 +2469,17 @@ type PageInfo {
   endCursor: String
 }
 
+type PageInfoNode {
+  startCursor: String
+  endCursor: String
+  hasNextPage: Boolean
+  hasPreviousPage: Boolean
+}
+
 type PaginatedCashPlanAndPaymentPlanNode {
-  page: Int
-  pages: Int
-  pageSize: Int
+  pageInfo: PageInfoNode
+  edges: [CashPlanAndPaymentPlanEdges]
   totalCount: Int
-  hasNext: Boolean
-  hasPrev: Boolean
-  objects: [CashPlanAndPaymentPlanNode]
 }
 
 type PartnerType {
@@ -2883,9 +2889,9 @@ type PaymentRecordNode implements Node {
   visionId: String
   registrationCaId: String
   serviceProvider: ServiceProviderNode!
-  verification: PaymentVerificationNode
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
+  verification: PaymentVerificationNode
 }
 
 type PaymentRecordNodeConnection {
@@ -2945,7 +2951,8 @@ type PaymentVerificationNode implements Node {
   updatedAt: DateTime!
   version: BigInt!
   paymentVerificationPlan: PaymentVerificationPlanNode!
-  paymentRecord: PaymentRecordNode
+  paymentContentType: ContentTypeObjectType
+  paymentObjectId: String
   status: PaymentVerificationStatus!
   statusDate: DateTime
   receivedAmount: Float
@@ -3023,29 +3030,6 @@ enum PaymentVerificationPlanStatus {
   INVALID
 }
 
-type PaymentVerificationPlanSummaryNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  status: PaymentVerificationSummaryStatus!
-  activationDate: DateTime
-  completionDate: DateTime
-  paymentPlanContentType: ContentTypeObjectType
-  paymentPlanObjectId: String
-}
-
-type PaymentVerificationPlanSummaryNodeConnection {
-  pageInfo: PageInfo!
-  edges: [PaymentVerificationPlanSummaryNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type PaymentVerificationPlanSummaryNodeEdge {
-  node: PaymentVerificationPlanSummaryNode
-  cursor: String!
-}
-
 enum PaymentVerificationPlanVerificationChannel {
   MANUAL
   RAPIDPRO
@@ -3064,6 +3048,29 @@ enum PaymentVerificationStatusForUpdate {
   PENDING
   RECEIVED
   RECEIVED_WITH_ISSUES
+}
+
+type PaymentVerificationSummaryNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  status: PaymentVerificationSummaryStatus!
+  activationDate: DateTime
+  completionDate: DateTime
+  paymentPlanContentType: ContentTypeObjectType
+  paymentPlanObjectId: String
+}
+
+type PaymentVerificationSummaryNodeConnection {
+  pageInfo: PageInfo!
+  edges: [PaymentVerificationSummaryNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type PaymentVerificationSummaryNodeEdge {
+  node: PaymentVerificationSummaryNode
+  cursor: String!
 }
 
 enum PaymentVerificationSummaryStatus {
@@ -3218,7 +3225,7 @@ type Query {
   allDeliveryMechanisms: [ChoiceObject]
   paymentPlanBackgroundActionStatusChoices: [ChoiceObject]
   availableFspsForDeliveryMechanisms(input: AvailableFspsForDeliveryMechanismsInput): [FspChoices]
-  allCashPlansAndPaymentPlans(businessArea: String!, program: String, search: String, serviceProvider: String, deliveryType: String, verificationStatus: String, startDateGte: String, endDateLte: String, orderBy: String, page: Int, pageSize: Int): PaginatedCashPlanAndPaymentPlanNode
+  allCashPlansAndPaymentPlans(businessArea: String!, program: String, search: String, serviceProvider: String, deliveryType: String, verificationStatus: String, startDateGte: String, endDateLte: String, orderBy: String, first: Int, last: Int, before: String, after: String): PaginatedCashPlanAndPaymentPlanNode
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String): [FieldAttributeNode]

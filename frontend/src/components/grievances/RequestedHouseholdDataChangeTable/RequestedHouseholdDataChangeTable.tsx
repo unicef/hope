@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import {
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   useAllEditHouseholdFieldsQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
@@ -17,7 +17,7 @@ import { handleSelected } from '../utils/helpers';
 import { householdDataRow } from './householdDataRow';
 
 interface RequestedHouseholdDataChangeTableProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   setFieldValue;
   isEdit;
   values;

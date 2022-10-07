@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
-  GrievanceTicketQuery,
+  GrievanceTicketNode,
   useApproveHouseholdDataChangeMutation,
 } from '../../__generated__/graphql';
 import { useConfirmation } from '../core/ConfirmationDialog';
@@ -17,7 +17,7 @@ export function RequestedHouseholdDataChange({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketNode;
   canApproveDataChange: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
