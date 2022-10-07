@@ -112,9 +112,12 @@ When('I refresh the page', () => {
 
 Then('I see that the status is merged', () => {
   cy.get('div').contains('MERGED');
-  cy.get('tbody > tr > td:nth-child(1)').then(($td) => {
-    householdId = $td.text().split(' (')[0];
-  });
+  cy.get('[data-cy="imported-households-row"]')
+    .find('td:nth-child(2)')
+    .then(($td) => {
+      householdId = $td.text().split(' (')[0];
+      cy.log(`Saved householdId: ${householdId}`);
+    })
   cy.get('button > span').contains('Individuals').click({ force: true });
 
   getIndividualsFromRdiDetails(cy, 1, individualIds);
@@ -127,7 +130,7 @@ When('I visit the Households dashboard', () => {
 
 Then('I see a newly imported household', () => {
   cy.log(`looking householdId: ${householdId}`);
-  cy.get('[data-cy="filters-search"]').type(householdId);
+  cy.get('[data-cy="hh-filters-search"]').type(householdId);
   cy.get('td').should('contain', householdId);
 });
 
@@ -138,6 +141,6 @@ When('I visit the Individuals dashboard', () => {
 Then('I see the newly imported individuals', () => {
   const individualId = individualIds[0];
   cy.log(`looking for individualId: + ${individualId}`);
-  cy.get('[data-cy="filters-search"]').type(individualId);
+  cy.get('[data-cy="ind-filters-search"]').type(individualId);
   cy.get('td').should('contain', individualId);
 });
