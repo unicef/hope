@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -314,6 +315,8 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
         business_area_slug = graphene.String(required=True)
 
     @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
     @is_authenticated
     def mutate(cls, root, info, file, business_area_slug):
 
@@ -325,7 +328,12 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
             created_by_id=info.context.user.id,
             business_area_slug=business_area_slug,
         )
-        validate_xlsx_import_task.delay(import_data.id)
+        transaction.on_commit(
+            partial(
+                validate_xlsx_import_task.delay,
+                import_data.id
+            )
+        )
         return UploadImportDataXLSXFileAsync(import_data, [])
 
 

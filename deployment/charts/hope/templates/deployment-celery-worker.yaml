@@ -41,8 +41,6 @@ spec:
           envFrom:
           - secretRef:
               name: {{ include "hope.fullname" . }}-backend
-          - secretRef:
-              name: {{ include "hope.fullname" . }}-postgres-data
           - configMapRef:
               name: {{ include "hope.fullname" . }}-backend
           resources:

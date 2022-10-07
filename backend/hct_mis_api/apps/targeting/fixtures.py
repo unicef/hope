@@ -6,8 +6,10 @@ from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -63,6 +65,7 @@ class TargetingCriteriaRuleFactory(factory.DjangoModelFactory):
 
 
 class TargetingCriteriaFactory(factory.DjangoModelFactory):
+
     class Meta:
         model = TargetingCriteria
 
@@ -81,7 +84,8 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
     updated_at = factory.LazyAttribute(lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000)))
     status = TargetPopulation.STATUS_OPEN
-    business_area = None
+    program = factory.LazyAttribute(lambda t: Program.objects.filter(status=Program.ACTIVE).first())
+    business_area = factory.LazyAttribute(lambda t: BusinessArea.objects.first())
 
     @factory.post_generation
     def households(self, create, extracted, **kwargs):

@@ -26,7 +26,6 @@ else
       wait_for_db erp_datahub_db
       wait_for_db registration_datahub_db
       python manage.py test  --settings hct_mis_api.settings.test --noinput --parallel
-      sleep 3000
       ;;
     "lint")
       mkdir -p ./lint-results
