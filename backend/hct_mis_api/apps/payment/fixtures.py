@@ -9,6 +9,7 @@ from django.utils import timezone
 from factory import fuzzy
 from pytz import utc
 
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
     TargetingCriteria,
@@ -646,13 +647,13 @@ def generate_payment_plan():
     address = "Ohio"
 
     rdi_pk = UUID("4d100000-0000-0000-0000-000000000000")
-    rdi = RegistrationDataImport.objects.update_or_create(
+    rdi = RegistrationDataImportFactory(
         pk=rdi_pk,
         name="Test Import",
         number_of_individuals=3,
         number_of_households=1,
         business_area=afghanistan,
-    )[0]
+    )
 
     individual_1_pk = UUID("cc000000-0000-0000-0000-000000000001")
     individual_1 = Individual.objects.update_or_create(
