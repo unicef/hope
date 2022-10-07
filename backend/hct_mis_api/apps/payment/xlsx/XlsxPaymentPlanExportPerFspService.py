@@ -36,7 +36,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         if not fsp_qs:
             msg = (
                 f"Not possible to generate export file. "
-                f"There are no any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}."
+                f"There aren't any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}."
             )
             logger.error(msg)
             raise GraphQLError(msg)

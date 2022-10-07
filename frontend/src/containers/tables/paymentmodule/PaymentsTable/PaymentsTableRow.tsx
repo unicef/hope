@@ -9,7 +9,6 @@ import { ClickableTableRow } from '../../../../components/core/Table/ClickableTa
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
-  formatCurrency,
   formatCurrencyWithSymbol,
   renderSomethingOrDash,
 } from '../../../../utils/utils';
@@ -119,12 +118,24 @@ export const PaymentsTableRow = ({
       </TableCell>
       <TableCell align='left'>
         {payment.entitlementQuantityUsd > 0
-          ? formatCurrency(payment.entitlementQuantityUsd, true)
+          ? `${formatCurrencyWithSymbol(
+              payment.entitlementQuantity,
+              payment.currency,
+            )} (${formatCurrencyWithSymbol(
+              payment.entitlementQuantityUsd,
+              'USD',
+            )})`
           : '-'}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell data-cy='delivered-quantity-cell' align='left'>
         {payment.deliveredQuantity > 0
-          ? formatCurrencyWithSymbol(payment.deliveredQuantity)
+          ? `${formatCurrencyWithSymbol(
+              payment.deliveredQuantity,
+              payment.currency,
+            )} (${formatCurrencyWithSymbol(
+              payment.deliveredQuantityUsd,
+              'USD',
+            )})`
           : '-'}
       </TableCell>
     </ClickableTableRow>

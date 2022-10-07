@@ -1,21 +1,21 @@
-import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { BlackLink } from '../../../../components/core/BlackLink';
+import { StatusBox } from '../../../../components/core/StatusBox';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import {
+  formatCurrencyWithSymbol,
+  paymentPlanStatusMapping,
+  paymentPlanStatusToColor,
+} from '../../../../utils/utils';
 import {
   AllPaymentPlansForTableQuery,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import {
-  formatCurrency,
-  paymentPlanStatusMapping,
-  paymentPlanStatusToColor,
-} from '../../../../utils/utils';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -66,20 +66,16 @@ export const PaymentPlanTableRow = ({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>
-        {plan.totalHouseholdsCount || '-'}
-      </TableCell>
-      <TableCell align='left'>
-        {plan.currencyName}
+      <TableCell align='left'>{plan.totalHouseholdsCount || '-'}</TableCell>
+      <TableCell align='left'>{plan.currencyName}</TableCell>
+      <TableCell align='right'>
+        {`${formatCurrencyWithSymbol(plan.totalEntitledQuantity, 'USD')}`}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(plan.totalEntitledQuantity, true)}
+        {`${formatCurrencyWithSymbol(plan.totalDeliveredQuantity, 'USD')}`}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(plan.totalDeliveredQuantity, true)}
-      </TableCell>
-      <TableCell align='right'>
-        {formatCurrency(plan.totalUndeliveredQuantity, true)}
+        {`${formatCurrencyWithSymbol(plan.totalUndeliveredQuantity, 'USD')}`}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{plan.dispersionStartDate}</UniversalMoment>
