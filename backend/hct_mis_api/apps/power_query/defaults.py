@@ -3,9 +3,8 @@ from django.contrib.contenttypes.models import ContentType
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.power_query.models import Query, Report
 
-SYSTEM_QUERYARGS = {
+SYSTEM_PARAMETRIZER = {
     "active-business-areas": {
         "name": "Active Business Areas",
         "value": lambda: {
@@ -22,11 +21,11 @@ SYSTEM_QUERYARGS = {
 def create_defaults():
     from hct_mis_api.apps.power_query.models import Formatter, Parametrizer
 
-    Formatter.objects.get_or_create(
+    fmt_html, __ = Formatter.objects.get_or_create(
         name="Dataset To HTML",
         defaults={
             "code": """
-<h1>{{dataset.query.name}}</h1>
+<h1>{{title}}</h1>
 <table>
     <tr>{% for fname in dataset.data.headers %}<th>{{ fname }}</th>{% endfor %}</tr>
 {% for row in dataset.data %}<tr>{% for col in row %}<td>{{ col }}</td>{% endfor %}</tr>
@@ -36,11 +35,11 @@ def create_defaults():
         },
     )
 
-    fmt_html, __ = Formatter.objects.get_or_create(
+    Formatter.objects.get_or_create(
         name="Queryset To HTML",
         defaults={
             "code": """
-<h1>{{dataset.query.name}}</h1>
+<h1>{{title}}</h1>
 <table>
     <tr><th>id</th><th>str</th></tr>
 {% for row in dataset.data %}<tr>
@@ -56,23 +55,26 @@ def create_defaults():
 
     Formatter.objects.get_or_create(name="Dataset To XLS", defaults={"code": "", "content_type": "xls"})
 
-    for code, params in SYSTEM_QUERYARGS.items():
+    for code, params in SYSTEM_PARAMETRIZER.items():
         Parametrizer.objects.update_or_create(
             name=params["name"], code=code, defaults={"system": True, "value": params["value"]()}
         )
+    from .models import Query, Report
 
     q, __ = Query.objects.update_or_create(
         name="Households by BusinessArea",
         defaults=dict(
             target=ContentType.objects.get_for_model(Household),
             code="""ba=BusinessAreaManager.get(slug=args['business_area'])  
-queryset=conn.filter(business_area=ba)
+result=conn.filter(business_area=ba)
 extra={"ba": ba}
 """,
             parametrizer=Parametrizer.objects.get(code="active-business-areas"),
-            owner=User.objects.first(),
+            owner=User.objects.filter(is_superuser=True).first(),
         ),
     )
+
     Report.objects.update_or_create(
-        name="Household by BusinessArea: %(business_area)s", defaults={"query": q, "formatter": fmt_html}
+        name="Household by BusinessArea",
+        defaults={"query": q, "formatter": fmt_html, "document_title": "Household by BusinessArea: %(business_area)s"},
     )

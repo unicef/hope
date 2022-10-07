@@ -38,7 +38,7 @@ def to_dataset(result):
         data = tablib.Dataset()
         fields = result.__dict__["_fields"]
         if not fields:
-            fields = [field.name for field in result.model._meta.get_fields()]
+            fields = [field.name for field in result.model._meta.concrete_fields]
         data.headers = fields
         try:
             for obj in result.all():
@@ -91,10 +91,10 @@ def basicauth(view):
     return wrap
 
 
-def sizeof(num, suffix="B"):
-    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+def sizeof(num, suffix=""):
+    for unit in ["&nbsp;&nbsp;", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb"]:
         if abs(num) < 1024.0:
-            return f"{num:3.1f}{unit}{suffix}"
+            return f"{num:3.1f} {unit}{suffix} "
         num /= 1024.0
     return f"{num:.1f}Yi{suffix}"
 
