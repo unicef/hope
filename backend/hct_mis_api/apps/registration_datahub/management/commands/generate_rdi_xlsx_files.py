@@ -206,10 +206,9 @@ class Command(BaseCommand):
                 if value is None:
                     continue
                 if key == "G":
-                    to_write = seed  # address is seed
+                    to_write = seed  # address is seed (for targeting filter by address)
                 else:
                     to_write = value() if callable(value) else value
-                # TODO: unique seed to household somewhere?
                 households.cell(row=3 + count, column=index + 1).value = to_write
                 if key == "A":
                     household_ids.append(to_write)
