@@ -1082,7 +1082,6 @@ class Query(graphene.ObjectType):
             else:
                 qs = qs.order_by(reverse + order_by)
 
-
         # add qraphql pagination
         resp = connection_from_list_slice(
             qs,
@@ -1090,8 +1089,7 @@ class Query(graphene.ObjectType):
             connection_type=PaginatedCashPlanAndPaymentPlanNode,
             edge_type=CashPlanAndPaymentPlanEdges,
             pageinfo_type=PageInfoNode,
-            list_length=kwargs.get("first"),
-
+            list_length=len(qs),
         )
         resp.total_count = len(qs)
 
