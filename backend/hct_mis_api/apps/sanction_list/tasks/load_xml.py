@@ -380,7 +380,6 @@ class LoadSanctionListXMLTask:
             hour, minute = 0, 0
             if time:
                 hour, minute = time[0].split(":")
-
             return timezone.make_aware(
                 datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute)),
             )

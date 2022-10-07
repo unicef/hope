@@ -11,6 +11,7 @@ from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
 from hct_mis_api.apps.core.utils import build_arg_dict
 from hct_mis_api.apps.payment.models import (
+    CashPlan,
     CashPlanPaymentVerificationSummary,
     PaymentRecord,
     ServiceProvider,
@@ -20,7 +21,6 @@ from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
 )
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 logger = logging.getLogger(__name__)

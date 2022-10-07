@@ -5,15 +5,16 @@ from typing import Optional
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField, Q, Count, Sum, UniqueConstraint
-from django.db.models.signals import post_delete, post_save
+from django.db.models import Count, JSONField, Q, Sum, UniqueConstraint
 from django.db.models.functions import Coalesce
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.contrib.postgres.fields import ArrayField
 
 from dateutil.relativedelta import relativedelta
 from django_fsm import FSMField, transition
@@ -21,15 +22,19 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 
-from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
 from hct_mis_api.apps.payment.managers import PaymentManager
+from hct_mis_api.apps.steficon.models import RuleCommit
+from hct_mis_api.apps.utils.models import (
+    ConcurrencyModel,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
@@ -105,12 +110,23 @@ class GenericPayment(TimeStampedUUIDModel):
     STATUS_ERROR = "Transaction Erroneous"
     STATUS_DISTRIBUTION_SUCCESS = "Distribution Successful"
     STATUS_NOT_DISTRIBUTED = "Not Distributed"
-    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS)
+    STATUS_FORCE_FAILED = "Force failed"
+
     STATUS_CHOICE = (
         (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),
         (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),
         (STATUS_SUCCESS, _("Transaction Successful")),
         (STATUS_ERROR, _("Transaction Erroneous")),
+        (STATUS_FORCE_FAILED, _("Force failed")),
+    )
+
+    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS)
+
+    ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
+    ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
+    ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
+        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
+        (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
     )
 
     DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL = "Cardless cash withdrawal"
@@ -930,6 +946,12 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
             )
         ]
 
+    def mark_as_failed(self):
+        if self.status is self.STATUS_FORCE_FAILED:
+            raise ValidationError("Status shouldn't be failed")
+        self.status = self.STATUS_FORCE_FAILED
+        self.status_date = timezone.now()
+
 
 class ServiceProvider(TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
@@ -970,6 +992,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
     STATUS_INVALID = "INVALID"
+    STATUS_RAPID_PRO_ERROR = "RAPID_PRO_ERROR"
     SAMPLING_FULL_LIST = "FULL_LIST"
     SAMPLING_RANDOM = "RANDOM"
     VERIFICATION_CHANNEL_RAPIDPRO = "RAPIDPRO"
@@ -980,6 +1003,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         (STATUS_FINISHED, "Finished"),
         (STATUS_PENDING, "Pending"),
         (STATUS_INVALID, "Invalid"),
+        (STATUS_RAPID_PRO_ERROR, "RapidPro Error"),
     )
     SAMPLING_CHOICES = (
         (SAMPLING_FULL_LIST, "Full list"),
@@ -1014,6 +1038,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     completion_date = models.DateTimeField(null=True)
     xlsx_file_exporting = models.BooleanField(default=False)
     xlsx_file_imported = models.BooleanField(default=False)
+    error = models.CharField(max_length=500, null=True, blank=True)
 
     class Meta:
         ordering = ("created_at",)
@@ -1048,6 +1073,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     def set_active(self):
         self.status = CashPlanPaymentVerification.STATUS_ACTIVE
         self.activation_date = timezone.now()
+        self.error = None
 
     def set_pending(self):
         self.status = CashPlanPaymentVerification.STATUS_PENDING
@@ -1057,6 +1083,12 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         self.received_with_problems_count = None
         self.activation_date = None
         self.rapid_pro_flow_start_uuids = []
+
+    def can_activate(self):
+        return self.status not in (
+            CashPlanPaymentVerification.STATUS_PENDING,
+            CashPlanPaymentVerification.STATUS_RAPID_PRO_ERROR,
+        )
 
 
 class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
@@ -1069,25 +1101,18 @@ class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
 
 
 def build_summary(cash_plan):
-    active_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE).count()
-    pending_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_PENDING).count()
-    not_finished_count = cash_plan.verifications.exclude(
-        status=CashPlanPaymentVerificationSummary.STATUS_FINISHED
-    ).count()
+    statuses_count = cash_plan.verifications.aggregate(
+        active=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE)),
+        pending=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_PENDING)),
+        finished=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_FINISHED)),
+    )
     summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=cash_plan)
-    if active_count >= 1:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_ACTIVE
-        summary.completion_date = None
-        if summary.activation_date is None:
-            summary.activation_date = timezone.now()
-    elif not_finished_count == 0 and pending_count == 0:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_FINISHED
-        if summary.completion_date is None:
-            summary.completion_date = timezone.now()
+    if statuses_count["active"] >= 1:
+        summary.mark_as_active()
+    elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
+        summary.mark_as_finished()
     else:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_PENDING
-        summary.completion_date = None
-        summary.activation_date = None
+        summary.mark_as_pending()
     summary.save()
 
 
@@ -1145,6 +1170,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
     )
+    sent_to_rapid_pro = models.BooleanField(default=False)
 
     @property
     def is_manually_editable(self):
@@ -1238,3 +1264,19 @@ class Approval(TimeStampedUUIDModel):
         }
 
         return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type)
+
+    def mark_as_active(self):
+        self.status = self.STATUS_ACTIVE
+        self.completion_date = None
+        if self.activation_date is None:
+            self.activation_date = timezone.now()
+
+    def mark_as_finished(self):
+        self.status = self.STATUS_FINISHED
+        if self.completion_date is None:
+            self.completion_date = timezone.now()
+
+    def mark_as_pending(self):
+        self.status = self.STATUS_PENDING
+        self.completion_date = None
+        self.activation_date = None

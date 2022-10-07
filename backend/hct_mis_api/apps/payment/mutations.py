@@ -1,22 +1,17 @@
 import logging
 import math
-
-import graphene
-
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
-from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import XlsxPaymentPlanImportPerFspService
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -26,40 +21,56 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.celery_tasks import (
+    create_cash_plan_payment_verification_xls,
     fsp_generate_xlsx_report_task,
-    payment_plan_apply_steficon,
     import_payment_plan_payment_list_from_xlsx,
+    payment_plan_apply_steficon,
 )
 from hct_mis_api.apps.payment.inputs import (
-    CreatePaymentVerificationInput,
-    EditCashPlanPaymentVerificationInput,
     ActionPaymentPlanInput,
     CreateFinancialServiceProviderInput,
     CreatePaymentPlanInput,
+    CreatePaymentVerificationInput,
+    EditCashPlanPaymentVerificationInput,
     UpdatePaymentPlanInput,
 )
 from hct_mis_api.apps.payment.models import (
-    PaymentVerification,
-    PaymentPlan,
+    CashPlan,
     DeliveryMechanismPerPaymentPlan,
-    PaymentChannel,
     FinancialServiceProvider,
+    GenericPayment,
+    PaymentChannel,
+    PaymentPlan,
+    PaymentRecord,
+    PaymentVerification,
 )
-from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode, PaymentPlanNode
+from hct_mis_api.apps.payment.schema import (
+    FinancialServiceProviderNode,
+    PaymentPlanNode,
+    PaymentRecordNode,
+    PaymentVerificationNode,
+)
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
+from hct_mis_api.apps.payment.services.mark_as_failed import mark_as_failed
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
 )
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_payment_verification_xls
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import (
+    XlsxPaymentPlanImportService,
+)
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import (
+    XlsxPaymentPlanImportPerFspService,
+)
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
 )
-from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
@@ -214,6 +225,38 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, cash_plan_verification.business_area)
 
         cash_plan_verification = VerificationPlanStatusChangeServices(cash_plan_verification).discard()
+
+        log_create(
+            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_cash_plan_verification,
+            cash_plan_verification,
+        )
+        return cls(cash_plan=cash_plan_verification.cash_plan)
+
+
+class InvalidCashPlanVerificationMutation(PermissionMutation):
+    cash_plan = graphene.Field(CashPlanNode)
+
+    class Arguments:
+        cash_plan_verification_id = graphene.ID(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+        cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
+        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
+
+        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
+
+        old_cash_plan_verification = copy_model_object(cash_plan_verification)
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_INVALID, cash_plan_verification.business_area)
+
+        cash_plan_verification = VerificationPlanStatusChangeServices(cash_plan_verification).mark_invalid()
 
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
@@ -554,6 +597,35 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
         cashplan_payment_verification.xlsx_file_imported = True
         cashplan_payment_verification.save()
         return ImportXlsxCashPlanVerification(cashplan_payment_verification.cash_plan, import_service.errors)
+
+
+class MarkPaymentRecordAsFailedMutation(PermissionMutation):
+    payment_record = graphene.Field(PaymentRecordNode)
+
+    class Arguments:
+        payment_record_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root,
+        info,
+        payment_record_id,
+        **kwargs,
+    ):
+        payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
+
+        try:
+            mark_as_failed(payment_record)
+        except ValidationError as e:
+            logger.error(e.message)
+            raise GraphQLError(e.message) from e
+
+        return MarkPaymentRecordAsFailedMutation(payment_record)
 
 
 class CreateFinancialServiceProviderMutation(PermissionMutation):
@@ -1045,6 +1117,7 @@ class Mutations(graphene.ObjectType):
     choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
     assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
+    mark_payment_record_as_failed = MarkPaymentRecordAsFailedMutation.Field()
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
     )

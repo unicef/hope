@@ -12,7 +12,7 @@ Given('I am authenticated', () => {
 });
 
 Given('There are no RDI imports', () => {
-  cy.exec('yarn run generate-xlsx-files');
+  cy.exec('yarn run generate-xlsx-files 1');
 });
 
 const clearCache = () => {
@@ -57,7 +57,7 @@ When('I select the xlsx file', () => {
 
   const fileName = 'rdi_import_1_hh_1_ind.xlsx';
   cy.fixture(fileName, 'base64').then((fileContent) => {
-    cy.get('[data-cy="file-input"]').upload({
+    cy.get('[data-cy="rdi-file-input"]').upload({
       fileContent,
       fileName,
       mimeType:
@@ -139,3 +139,11 @@ Then('I see the newly imported individuals', () => {
     individualIds.push(individualId);
   });
 });
+
+When('I check the household details', () => {
+  cy.get('td').contains(householdId).click();
+})
+
+Then('I see the household has the correct data', () => {
+  cy.get('[data-cy="label-COLLECT TYPE"]').contains('Full');
+})

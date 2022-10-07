@@ -1,10 +1,9 @@
 import logging
-import graphene
 
+import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-
 
 logger = logging.getLogger(__name__)
 

@@ -1,49 +1,55 @@
-from uuid import UUID
-import factory
-
 from datetime import timedelta
 from decimal import Decimal
 from random import randint
+from uuid import UUID
 
 from django.utils import timezone
+
+import factory
 from factory import fuzzy
 from pytz import utc
 
-from hct_mis_api.apps.targeting.models import (
-    TargetPopulation,
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-)
-from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
-from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY, Individual, MALE
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.fixtures import (
+    EntitlementCardFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household,
+)
+from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
 from hct_mis_api.apps.payment.models import (
+    CashPlan,
     CashPlanPaymentVerification,
+    CashPlanPaymentVerificationSummary,
+    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
     FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
+    GenericPayment,
+    Payment,
+    PaymentChannel,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    CashPlanPaymentVerificationSummary,
-    PaymentPlan,
-    Payment,
-    GenericPayment,
-    PaymentChannel,
-    DeliveryMechanismPerPaymentPlan,
 )
-from hct_mis_api.apps.program.fixtures import (
-    ProgramFactory,
-)
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import CashPlan
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.models import (
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetPopulation,
+)
 
 
 class CashPlanPaymentVerificationSummaryFactory(factory.DjangoModelFactory):
@@ -495,6 +501,37 @@ def generate_real_cash_plans_for_households(households):
         .filter(parent__in=cash_plans)
         .values_list("household__id", flat=True)
     )
+
+
+def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
+    cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
+    cash_plan_payment_verification.status = status
+    cash_plan_payment_verification.save(update_fields=("status",))
+    registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
+    for _ in range(5):
+        household, _ = create_household(
+            {
+                "registration_data_import": registration_data_import,
+                "admin_area": Area.objects.order_by("?").first(),
+            },
+            {"registration_data_import": registration_data_import},
+        )
+
+        household.programs.add(program)
+
+        payment_record = PaymentRecordFactory(
+            cash_plan=cash_plan,
+            household=household,
+            target_population=target_population,
+        )
+
+        PaymentVerificationFactory(
+            cash_plan_payment_verification=cash_plan_payment_verification,
+            payment_record=payment_record,
+            status=PaymentVerification.STATUS_PENDING,
+        )
+        EntitlementCardFactory(household=household)
+    return cash_plan_payment_verification
 
 
 class PaymentPlanFactory(factory.DjangoModelFactory):

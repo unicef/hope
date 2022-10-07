@@ -3,9 +3,12 @@ from typing import List
 
 from django.shortcuts import get_object_or_404
 
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
-from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
+from hct_mis_api.apps.household.models import Individual
 
 logger = logging.getLogger(__name__)
 
