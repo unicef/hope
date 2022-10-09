@@ -1,12 +1,7 @@
 import logging
 
-from django.conf import settings
-from django.core.mail import send_mail
 from django.db.transaction import atomic
-from django.urls import reverse
 from django.utils import timezone
-
-from celery import chord
 
 from hct_mis_api.apps.utils.sentry import sentry_tags
 

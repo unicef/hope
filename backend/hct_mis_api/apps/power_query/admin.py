@@ -1,5 +1,4 @@
 import logging
-import pickle
 
 from django import forms
 from django.conf import settings
@@ -16,7 +15,6 @@ from django.urls import reverse
 import tablib
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
-from celery import current_app
 from import_export import fields, resources
 from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
@@ -26,9 +24,9 @@ from ..steficon.widget import PythonEditor
 from ..utils.admin import HOPEModelAdminBase
 from .celery_tasks import refresh_reports, run_background_query
 from .defaults import SYSTEM_PARAMETRIZER
-from .forms import ExportForm, FormatterTestForm
+from .forms import FormatterTestForm
 from .models import Dataset, Formatter, Parametrizer, Query, Report, ReportDocument
-from .utils import fqn, to_dataset
+from .utils import to_dataset
 from .widget import FormatterEditor
 
 logger = logging.getLogger(__name__)

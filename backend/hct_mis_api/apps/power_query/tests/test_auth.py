@@ -1,15 +1,10 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from ...account.fixtures import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-    UserRoleFactory,
-)
-from ...household.fixtures import HouseholdFactory, create_household
+from ...account.fixtures import BusinessAreaFactory, UserFactory
+from ...household.fixtures import create_household
 from ..defaults import create_defaults
-from ..models import Dataset, Formatter, Query, Report
+from ..models import Formatter, Query, Report
 from .fixtures import (
     FormatterFactory,
     ParametrizerFactory,

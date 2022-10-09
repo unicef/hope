@@ -1,7 +1,5 @@
 import base64
-import random
 
-from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, override_settings
 from django.urls import reverse
 

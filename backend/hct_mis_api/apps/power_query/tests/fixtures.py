@@ -8,7 +8,7 @@ from django.db.models import Q
 import factory
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import User, UserGroup, UserRole
+from hct_mis_api.apps.account.models import User, UserGroup
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.power_query.defaults import SYSTEM_PARAMETRIZER
 from hct_mis_api.apps.power_query.models import Formatter, Parametrizer, Query, Report
@@ -116,7 +116,7 @@ class user_grant_permission:
 
     def stop(self):
         """Stop an active patch."""
-        return self.__exit__()
+        return self.__exit__(None, None, None)
 
 
 class user_grant_office_permission(object):

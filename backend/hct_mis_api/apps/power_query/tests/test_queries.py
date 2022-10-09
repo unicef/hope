@@ -2,7 +2,7 @@ from django.test import TestCase, override_settings
 
 from ...account.fixtures import BusinessAreaFactory, UserFactory
 from ..defaults import create_defaults
-from ..models import Dataset, Formatter, Query, Report
+from ..models import Formatter, Query, Report
 from .fixtures import FormatterFactory, QueryFactory, ReportFactory
 
 
