@@ -1111,3 +1111,45 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
                 "removed": sorted(self.existing_perms.difference(new_perms)),
             }
         return change_message
+
+
+@admin.register(account_models.UserGroup)
+class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
+    list_display = ("user", "group", "business_area")
+    autocomplete_fields = ("group",)
+    raw_id_fields = ("user", "business_area", "group")
+    search_fields = ("user__username__istartswith",)
+    list_filter = (
+        ("business_area", AutoCompleteFilter),
+        ("group", AutoCompleteFilter),
+    )
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "business_area",
+                "user",
+                "group",
+            )
+        )
+
+    def check_sync_permission(self, request, obj=None):
+        return request.user.is_staff
+
+    def check_publish_permission(self, request, obj=None):
+        return False
+
+    def _get_data(self, record) -> str:
+        groups = Group.objects.all()
+        collector = ForeignKeysCollector(None)
+        objs = []
+        for qs in [groups]:
+            objs.extend(qs)
+        objs.extend(account_models.UserGroup.objects.filter(pk=record.pk))
+        collector.collect(objs)
+        serializer = self.get_serializer("json")
+        return serializer.serialize(
+            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
+        )
