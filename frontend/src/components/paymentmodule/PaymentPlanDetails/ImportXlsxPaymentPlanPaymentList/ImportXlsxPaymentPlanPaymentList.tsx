@@ -67,7 +67,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             },
           ],
         });
-        if (!errors && !data?.importXlsxPaymentPlanPaymentList.errors.length) {
+        if (!errors && !data?.importXlsxPaymentPlanPaymentList.errors?.length) {
           setOpenImport(false);
           showMessage(t('Your import was successful!'));
         }

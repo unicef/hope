@@ -1,0 +1,29 @@
+apiVersion: v2
+name: hope
+description: Hope helm chart for Kubernetes
+type: application
+version: 1.0.0
+appVersion: 0.1.0
+
+dependencies:
+  - name: postgresql
+    repository: file://../postgresql
+    version: 0.1.0
+    alias: postgresql
+    condition: postgresql.enabled
+  - name: postgresql
+    repository: file://../postgresql
+    version: 0.1.0
+    alias: registrationdatahubpostgresql
+    condition: registrationdatahubpostgresql.enabled
+  - name: postgresql
+    repository: file://../postgresql
+    version: 0.1.0
+    alias: cashassistdatahubpostgresql
+    condition: cashassistdatahubpostgresql.enabled
+  - name: redis
+    version: 10.x.x
+    repository: https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami
+  - name: elasticsearch
+    version: 12.x.x
+    repository: https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami

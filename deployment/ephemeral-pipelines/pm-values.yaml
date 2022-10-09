@@ -1,0 +1,129 @@
+global:
+  env: dev
+  storageClass: default
+
+backend:
+  image: uniappsakshopedev.azurecr.io/hope-backend:d981ad2d4f4b0aebebfc86e799a79b113a9b584f
+  replicaCount: 1
+  initCommand: "python3 /code/manage.py initdemo"
+  secret:
+    AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
+    AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
+    AZURE_TENANT_KEY: #secret-variables: AZURE_TENANT_KEY
+    STORAGE_AZURE_ACCOUNT_NAME: hctmisdev-pm
+    STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: STORAGE_AZURE_ACCOUNT_KEY
+    SECRET_KEY: r4nd0m5ecretkeyf0rrandomenv
+    SENTRY_DNS: "https://88d65a39ff5d42a9bff63f6b0eff4c19@excubo.unicef.io/43"
+    EMAIL_HOST: extmail01.unicef.org
+    EMAIL_USE_TLS: "false"
+    EXCHANGE_RATES_API_KEY: #secret-variables: EXCHANGE_RATES_API_KEY
+    ROOT_ACCESS_TOKEN: r4nd0mrootaccesstokenf0rrandomenv
+
+frontend:
+  image: uniappsakshopedev.azurecr.io/hope-frontend:d981ad2d4f4b0aebebfc86e799a79b113a9b584f
+
+celery:
+  image: uniappsakshopedev.azurecr.io/hope-backend:d981ad2d4f4b0aebebfc86e799a79b113a9b584f
+  replicaCount: 1
+
+celeryflower:
+  secret:
+    FLOWER_BASIC_AUTH: tivix:fKXRA1FRYTA1lKfdg
+
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+  host: pm-hope-dev.unitst.org
+  tls: "true"
+
+#
+# Defaults for postgres databases, applies to ephemerals only
+#
+psql-auth-default: &psql-auth-default
+  username: hope-pm
+  password: hope-pm
+
+psql-image-default: &psql-image-default
+  image:
+    repository: postgis/postgis
+    tag: 10-3.2
+
+psql-resources-default: &psql-resources-default
+  resources:
+    requests:
+      cpu: 0.2
+      memory: 100M
+    limits:
+      cpu: 1
+      memory: 1.5G
+#
+# Databases
+#
+postgresql:
+  enabled: true
+  <<: *psql-image-default
+  auth:
+    database: hope-pm
+    <<: *psql-auth-default
+  persistence:
+    enabled: false
+  <<: *psql-resources-default
+
+registrationdatahubpostgresql:
+  enabled: true
+  <<: *psql-image-default
+  auth:
+    database: registrationdatahubpostgresql
+    <<: *psql-auth-default
+  persistence:
+    enabled: false
+  <<: *psql-resources-default
+
+cashassistdatahubpostgresql:
+  <<: *psql-image-default
+  enabled: true
+  auth:
+    database: cashassistdatahubpostgresql
+    <<: *psql-auth-default
+  initScripts:
+      create_cashassist-schemas.sh: |
+        psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" - <<-EOSQL
+        CREATE EXTENSION IF NOT EXISTS POSTGIS;
+        CREATE SCHEMA IF NOT EXISTS mis;
+        CREATE SCHEMA IF NOT EXISTS erp;
+        CREATE SCHEMA IF NOT EXISTS ca;
+        EOSQL
+  persistence:
+    enabled: false
+  <<: *psql-resources-default
+
+
+redis:
+  enabled: true
+  fullnameOverride: hope-main-redis
+  persistence.enabled: true
+  usePassword: false
+  redis:
+    usePassword: false
+  cluster:
+    slaveCount: 0
+    enabled: false
+  image:
+    tag: 4.0.14
+
+elasticsearch:
+  enabled: true
+  data:
+    replicas: 1
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 0.4
+  master:
+    replicas: 1
+  sysctlImage:
+    replicas: 1
+  plugins: "analysis-phonetic"
+  externalElasticsearch:
+    host: ""

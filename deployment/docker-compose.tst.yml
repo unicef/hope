@@ -1,79 +1,70 @@
 version: '3.7'
-
-volumes:
-  backend-data:
-  db:
-  db_ca:
-  db_mis:
-  db_erp:
-  db_reg:
+x-django-envs: &django_envs
+  environment:
+    - ENV=dev
+    - SECRET_KEY=31283012-38dasda
+    - POSTGRES_DB=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    - DATABASE_URL=postgis://postgres:postgres@db:5432/postgres
+    - DATABASE_URL_HUB_MIS=postgis://postgres:postgres@mis_datahub_db:5432/postgres
+    - DATABASE_URL_HUB_CA=postgis://postgres:postgres@cash_assist_datahub_db:5432/postgres
+    - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@erp_datahub_db:5432/postgres
+    - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@registration_datahub_db:5432/postgres
+    - POSTGRES_SSL_MODE=off
+    - EMAIL_HOST=TBD
+    - EMAIL_HOST_USER=TBD
+    - EMAIL_HOST_PASSWORD=TBD
+    - KOBO_KF_URL=https://kobo.humanitarianresponse.info
+    - KOBO_KC_URL=https://kobo.humanitarianresponse.info
+    - KOBO_MASTER_API_TOKEN=token
+    - EXCHANGE_RATES_API_KEY=token
+    - REDIS_INSTANCE=redis:6379
 
 services:
   redis:
     restart: unless-stopped
     image: redis:4.0.11-alpine3.8
-    expose:
-      - "6379"
 
   backend:
-    stdin_open: true
-    tty: true
+    <<: *django_envs
     image: ${backend_image}
-    env_file:
-      - .env
-    environment:
-      - REDIS_INSTANCE=redis:6379
-    ports:
-      - "8080:8000"
-    volumes:
-      - ./backend:/code/
-      - backend-data:/data
-    command: "dev"
+    build:
+      context: ../backend
+    command: "test"
     depends_on:
       - db
+      - redis
       - cash_assist_datahub_db
       - mis_datahub_db
       - erp_datahub_db
       - registration_datahub_db
-      - redis
       - elasticsearch
-  db:
-    image: mdillon/postgis:11-alpine
-    env_file:
-      - .env
 
   cash_assist_datahub_db:
-    image: mdillon/postgis:11-alpine
-    env_file:
-      - .env
+    image: postgis/postgis:11-3.3-alpine
+    <<: *django_envs
 
   mis_datahub_db:
-    image: mdillon/postgis:11-alpine
-    env_file:
-      - .env
+    image: postgis/postgis:11-3.3-alpine
+    <<: *django_envs
 
   erp_datahub_db:
-    image: mdillon/postgis:11-alpine
-    env_file:
-      - .env
+    image: postgis/postgis:11-3.3-alpine
+    <<: *django_envs
 
   registration_datahub_db:
-    image: mdillon/postgis:11-alpine
-    env_file:
-      - .env
+    image: postgis/postgis:11-3.3-alpine
+    <<: *django_envs
+
+  db:
+    image: postgis/postgis:11-3.3-alpine
+    <<: *django_envs
 
   celery_worker:
-    stdin_open: true
-    tty: true
+    <<: *django_envs
     image: ${backend_image}
-    env_file:
-      - .env
-    environment:
-      - REDIS_INSTANCE=redis:6379
-    build: ./backend
-    volumes:
-      - ./backend:/code/
-      - backend-data:/data
+    build: ../backend
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
@@ -87,9 +78,10 @@ services:
       - elasticsearch
 
   elasticsearch:
+    <<: *django_envs
     image: unicef/hct-elasticsearch
     build:
-      context: elasticsearch
+      context: ../elasticsearch
       dockerfile: Dockerfile
     environment:
       - node.name=es01
@@ -101,5 +93,3 @@ services:
       memlock:
         soft: -1
         hard: -1
-    ports:
-      - 9200:9200

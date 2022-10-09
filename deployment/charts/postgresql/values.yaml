@@ -1,0 +1,12 @@
+image:
+  repository:
+  tag:
+  imagePullPolicy: IfNotPresent
+
+resources: {}
+
+auth:
+  database:
+  username:
+  password:
+initScripts:
