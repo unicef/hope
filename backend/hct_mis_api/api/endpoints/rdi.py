@@ -108,7 +108,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
         total_errors = 0
         total_accepted = 0
         out = []
-        for i, household_data in enumerate(request.data):
+        for household_data in request.data:
             total_households += 1
             serializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():

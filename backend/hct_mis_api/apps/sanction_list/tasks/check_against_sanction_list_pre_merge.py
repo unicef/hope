@@ -76,7 +76,7 @@ class CheckAgainstSanctionListPreMergeTask:
                     "should": queries,
                 },
             },
-            "_source": ["id", "full_name"]
+            "_source": ["id", "full_name"],
         }
 
         return query_dict
