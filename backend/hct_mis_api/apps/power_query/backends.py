@@ -1,8 +1,8 @@
-from django.contrib.auth.backends import BaseBackend, ModelBackend
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission
 
-from ..account.models import Group, User, UserGroup
-from .models import Query, Report, ReportDocument
+from ..account.models import User
+from .models import Report, ReportDocument
 
 
 class PowerQueryBackend(ModelBackend):

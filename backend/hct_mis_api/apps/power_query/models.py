@@ -1,8 +1,6 @@
 import itertools
 import logging
 import pickle
-from time import strptime
-from typing import Optional
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
