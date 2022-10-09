@@ -28,8 +28,7 @@ class ManualArguments(graphene.InputObjectType):
     pass
 
 
-class CreateUpdatePaymentVerificationInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
+class CreateUpdatePaymentVerificationPlan(graphene.InputObjectType):
     sampling = graphene.String(required=True)
     verification_channel = graphene.String(required=True)
     business_area_slug = graphene.String(required=True)
@@ -38,15 +37,12 @@ class CreateUpdatePaymentVerificationInput(graphene.InputObjectType):
     rapid_pro_arguments = RapidProArguments()
 
 
-# class EditPaymentVerificationInput(graphene.InputObjectType):
-#     payment_plan_id = graphene.ID(required=True)
-#     is_payment_plan_obj = graphene.Boolean(required=True)
-#     sampling = graphene.String(required=True)
-#     verification_channel = graphene.String(required=True)
-#     business_area_slug = graphene.String(required=True)
-#     full_list_arguments = FullListArguments()
-#     random_sampling_arguments = RandomSamplingArguments()
-#     rapid_pro_arguments = RapidProArguments()
+class CreatePaymentVerificationInput(CreateUpdatePaymentVerificationPlan):
+    payment_plan_id = graphene.ID(required=True)
+
+
+class EditPaymentVerificationInput(CreateUpdatePaymentVerificationPlan):
+    payment_verification_plan_id = graphene.ID(required=True)
 
 
 class GetCashplanVerificationSampleSizeInput(graphene.InputObjectType):
