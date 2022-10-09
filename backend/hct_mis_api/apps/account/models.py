@@ -88,7 +88,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def permissions_in_business_area(self, business_area_slug):
         if not hasattr(self, "business_area_perms"):
             self.business_area_perms = {}
-        if not business_area_slug in self.business_area_perms:
+        if business_area_slug not in self.business_area_perms:
             all_roles_permissions_list = list(
                 Role.objects.filter(
                     user_roles__user=self,
