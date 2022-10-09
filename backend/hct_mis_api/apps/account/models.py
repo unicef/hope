@@ -2,7 +2,7 @@ import logging
 from functools import lru_cache
 
 from django import forms
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -149,6 +149,18 @@ class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
 
     def __str__(self):
         return f"{self.user} {self.role} in {self.business_area}"
+
+
+class UserGroup(NaturalKeyModel, models.Model):
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
+    user = models.ForeignKey("account.User", related_name="user_groups", on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, related_name="user_groups", on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("business_area", "user", "group")
+
+    def __str__(self):
+        return f"{self.user} {self.group} in {self.business_area}"
 
 
 class Role(NaturalKeyModel, TimeStampedUUIDModel):
