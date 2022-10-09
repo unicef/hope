@@ -1,5 +1,11 @@
 import json
+import graphene
+
 from decimal import Decimal
+from graphene import relay
+from graphene_django import DjangoObjectType
+from graphql_relay import to_global_id
+from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
 from django.db.models import (
     Case,
@@ -18,11 +24,6 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
-import graphene
-from graphene import relay
-from graphene_django import DjangoObjectType
-from graphql_relay import to_global_id
-from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -44,7 +45,6 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     decode_id_string,
     encode_id_base64,
-    get_paginator,
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
@@ -84,7 +84,7 @@ from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
-from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
+from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard, get_payment_items_sequence_qs
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -405,11 +405,15 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
     is_manually_editable = graphene.Boolean()
+    payment = graphene.Field(PaymentNode)   # TODO: maybe add generic node for Payment and PaymentRecord
 
     class Meta:
         model = PaymentVerification
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_payment(self, info):
+        return self.payment
 
 
 class PaymentVerificationPlanNode(DjangoObjectType):
@@ -544,13 +548,14 @@ class GenericPaymentPlanNode(graphene.ObjectType):
     #     hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
     # )
 
-    payment_verification_summary = graphene.Field(PaymentVerificationSummaryNode)
-
-    def resolve_payment_verification_summary(self, info, **kwargs):
-        return self.payment_verification_summary
+    id = graphene.String()
+    obj_type = graphene.String()
 
     def resolve_id(self, info, **kwargs):
         return to_global_id(self.__class__.__name__ + "Node", self.id)
+
+    def resolve_obj_type(self, info, **kwargs):
+        return self.__class__.__name__
 
 
 class Query(graphene.ObjectType):
@@ -580,7 +585,7 @@ class Query(graphene.ObjectType):
     all_payment_verifications = DjangoPermissionFilterConnectionField(
         PaymentVerificationNode,
         filterset_class=PaymentVerificationFilter,
-        permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
+        # permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),  # TODO check perms
     )
     all_payment_verification_plan = DjangoPermissionFilterConnectionField(
         PaymentVerificationPlanNode,
@@ -717,18 +722,23 @@ class Query(graphene.ObjectType):
         ]
 
     def resolve_all_payment_verifications(self, info, **kwargs):
+        # TODO: FIX error
+        # "'ExtendedQuerySetSequence' object has no attribute 'clone'"
+        # payment_qs = get_payment_items_sequence_qs().filter(id=OuterRef("payment_object_id"))
+        payment_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
+
         return (
             PaymentVerification.objects.filter(
                 Q(payment_verification_plan__status=PaymentVerificationPlan.STATUS_ACTIVE)
                 | Q(payment_verification_plan__status=PaymentVerificationPlan.STATUS_FINISHED)
             )
-            .annotate(
-                payment_record__household__status=Case(
-                    When(payment_record__household__withdrawn=True, then=Value(STATUS_INACTIVE)),
-                    default=Value(STATUS_ACTIVE),
-                    output_field=CharField(),
-                ),
-            )
+            # .annotate(
+            #     payment__household__status=Case(
+            #         When(Exists(payment_qs), then=Value(STATUS_INACTIVE)),
+            #         default=Value(STATUS_ACTIVE),
+            #         output_field=CharField(),
+            #     ),
+            # )
             .distinct()
         )
 
@@ -1093,4 +1103,3 @@ class Query(graphene.ObjectType):
         resp.total_count = len(qs)
 
         return resp
-

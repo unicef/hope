@@ -1,5 +1,7 @@
 import logging
 import math
+import graphene
+
 from base64 import b64decode
 from decimal import Decimal
 
@@ -8,7 +10,6 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-import graphene
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
@@ -32,7 +33,8 @@ from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
     CreateFinancialServiceProviderInput,
     CreatePaymentPlanInput,
-    CreateUpdatePaymentVerificationInput,
+    CreatePaymentVerificationInput,
+    EditPaymentVerificationInput,
     UpdatePaymentPlanInput,
 )
 from hct_mis_api.apps.payment.models import (
@@ -79,7 +81,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
     payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        input = CreateUpdatePaymentVerificationInput(required=True)
+        input = CreatePaymentVerificationInput(required=True)
 
     @classmethod
     @is_authenticated
@@ -113,14 +115,14 @@ class EditPaymentVerificationMutation(PermissionMutation):
     payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
-        input = CreateUpdatePaymentVerificationInput(required=True)
+        input = EditPaymentVerificationInput(required=True)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        payment_verification_id = decode_id_string(input.get("payment_verification_id"))
+        payment_verification_id = decode_id_string(input.get("payment_verification_plan_id"))
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_id)
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
@@ -133,7 +135,8 @@ class EditPaymentVerificationMutation(PermissionMutation):
 
         payment_verification_plan = VerificationPlanCrudServices.update(payment_verification_plan, input)
 
-        payment_verification_plan.refresh_from_db()
+        payment_verification_plan.payment_plan.refresh_from_db()
+
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -141,7 +144,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return cls(payment_plan=payment_verification_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan)
 
 
 class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutationMixin):
@@ -172,7 +175,7 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return ActivatePaymentVerificationPlan(cash_plan=payment_verification_plan.cash_plan)
+        return ActivatePaymentVerificationPlan(cash_plan=payment_verification_plan.cash_plan)  # TODO update .payment_plan
 
 
 class FinishPaymentVerificationPlan(PermissionMutation):
