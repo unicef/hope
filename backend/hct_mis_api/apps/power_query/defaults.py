@@ -65,7 +65,7 @@ def create_defaults():
         name="Households by BusinessArea",
         defaults=dict(
             target=ContentType.objects.get_for_model(Household),
-            code="""ba=BusinessAreaManager.get(slug=args['business_area'])  
+            code="""ba=BusinessAreaManager.get(slug=args['business_area'])
 result=conn.filter(business_area=ba)
 extra={"ba": ba}
 """,
