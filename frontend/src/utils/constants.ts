@@ -33,6 +33,7 @@ export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatus.InAuthorization]: 'In Authorization',
   [PaymentPlanStatus.InReview]: 'In Review',
   [PaymentPlanStatus.Accepted]: 'Accepted',
+  [PaymentPlanStatus.Reconciled]: 'Reconciled',
 };
 
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
