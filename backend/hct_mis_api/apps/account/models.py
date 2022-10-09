@@ -1,5 +1,4 @@
 import logging
-from functools import lru_cache
 
 from django import forms
 from django.contrib.auth.models import AbstractUser, Group
@@ -86,17 +85,21 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             self.partner.save()
         super().save(*args, **kwargs)
 
-    @lru_cache(5)
     def permissions_in_business_area(self, business_area_slug):
-        all_roles_permissions_list = list(
-            Role.objects.filter(
-                user_roles__user=self,
-                user_roles__business_area__slug=business_area_slug,
-            ).values_list("permissions", flat=True)
-        )
-        return [
-            permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
-        ]
+        if not hasattr(self, "business_area_perms"):
+            self.business_area_perms = {}
+        if not business_area_slug in self.business_area_perms:
+            all_roles_permissions_list = list(
+                Role.objects.filter(
+                    user_roles__user=self,
+                    user_roles__business_area__slug=business_area_slug,
+                ).values_list("permissions", flat=True)
+            )
+            self.business_area_perms[business_area_slug] = [
+                permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
+            ]
+
+        return self.business_area_perms[business_area_slug]
 
     def has_permission(self, permission, business_area, write=False):
         return permission in self.permissions_in_business_area(business_area)
