@@ -12,7 +12,11 @@ from natural_keys import NaturalKeyModel
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
-from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import (
+    SoftDeletionTreeManager,
+    SoftDeletionTreeModel,
+    TimeStampedUUIDModel,
+)
 from mptt.fields import TreeForeignKey
 
 
@@ -188,7 +192,12 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         return f"type: {self.type}, name: {self.name}"
 
 
-class FlexibleAttributeGroup(NaturalKeyModel, SoftDeletionTreeModel):
+class FlexibleAttributeGroupManager(SoftDeletionTreeManager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
+class FlexibleAttributeGroup(SoftDeletionTreeModel):
     name = models.CharField(max_length=255, unique=True)
     label = JSONField(default=dict)
     required = models.BooleanField(default=False)
@@ -202,9 +211,13 @@ class FlexibleAttributeGroup(NaturalKeyModel, SoftDeletionTreeModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
+    objects = FlexibleAttributeGroupManager()
 
     def __str__(self):
         return f"name: {self.name}"
+
+    def natural_key(self):
+        return (self.name,)
 
 
 class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
