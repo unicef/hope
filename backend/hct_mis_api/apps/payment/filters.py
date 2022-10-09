@@ -70,6 +70,8 @@ class PaymentRecordFilter(FilterSet):
 
 
 class PaymentVerificationFilter(FilterSet):
+    # TODO refactor this one
+    # 'payment' instead of 'payment_record'
     search = CharFilter(method="search_filter")
     business_area = CharFilter(field_name="payment_record__business_area__slug")
     verification_channel = CharFilter(field_name="payment_verification_plan__verification_channel")
