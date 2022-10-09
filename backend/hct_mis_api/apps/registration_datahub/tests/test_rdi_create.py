@@ -803,7 +803,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
 
         result = []
 
-        for i in range(10000):
+        for _ in range(10000):
             copy = {**base_form}
 
             new_individuals = []

@@ -8,6 +8,7 @@ exclude = '''
   | \.mypy_cache
   | \.tox
   | \.venv
+  | venv
   | _build
   | buck-out
   | build
@@ -16,7 +17,9 @@ exclude = '''
   | snapshots
 )/
 '''
+# TODO: remove migrations exclude rule once it won't create much conflicts between feature branches and develop
 [tool.isort]
+py_version = 39
 profile = "black"
 default_section = "THIRDPARTY"
 known_first_party = [
@@ -42,11 +45,11 @@ known_first_party = [
 known_django = "django"
 sections = ["FUTURE","STDLIB","DJANGO","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
 include_trailing_comma = true
-skip = "migrations ~*"
+skip = ["migrations", "snapshots", "venv"]
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "2022.9.2"
+version = "2022.10.1"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
@@ -56,7 +59,7 @@ Jinja2 = "3.1.2"
 MarkupSafe = "2.1.1"
 PyJWT = "^2.4.0"
 PyYAML = "^6.0"
-black = "^22.3.0"
+black = "22.8.0"
 celery = {extras = ["redis"], version = "^5.2.7"}
 defusedxml = "0.7.0rc1"
 django-admin-extra-buttons = ">=1.5.4"
@@ -137,7 +140,7 @@ factory-boy = "2.12.0"
 faker = "13.12.1"
 freezegun = "0.3.14"
 ipdb = "0.13.9"
-isort = "^5.10.1"
+isort = "5.10.1"
 parameterized = "0.8.1"
 requests-mock = "^1.9.3"
 responses = "^0.21.0"
@@ -149,6 +152,7 @@ parso = "0.8.3"
 argh = "^0.26.2"
 flake8 = "4.0.1"
 flake8-formatter-junit-xml = "^0.0.6"
+flake8-bugbear = "22.9.23"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

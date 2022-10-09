@@ -34,7 +34,7 @@ def combine_collections(a, b, path=None, update=True):
             elif a[key] == b[key]:
                 pass  # same leaf value
             elif isinstance(a[key], list) and isinstance(b[key], list):
-                for idx, val in enumerate(b[key]):
+                for idx in range(len(b[key])):
                     a[key][idx] = combine_collections(
                         a[key][idx], b[key][idx], path + [str(key), str(idx)], update=update
                     )

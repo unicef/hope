@@ -2,6 +2,7 @@ import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import {
   TargetPopulationBuildStatus,
@@ -11,7 +12,6 @@ import { PaperContainer } from './PaperContainer';
 import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -76,7 +76,8 @@ export function TargetPopulationCore({
             {t('Target Population is building')}
           </Typography>
           <Label>
-            Target population is processing, the list of households will be available when the process is finished
+            Target population is processing, the list of households will be
+            available when the process is finished
           </Label>
         </PaperContainer>
       )}
