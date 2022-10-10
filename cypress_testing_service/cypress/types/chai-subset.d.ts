@@ -5,18 +5,18 @@
  * /// <reference path="https://github.com/cypress-io/cypress/issues/7435" />
  */
 
-declare module "chai-subset" {
+declare module 'chai-subset' {
   global {
     namespace Chai {
       interface Assertion {
-        containSubset(expected: any): Assertion
+        containSubset(expected: any): Assertion;
       }
       interface Assert {
-        containSubset(val: any, exp: any, msg?: string): void
+        containSubset(val: any, exp: any, msg?: string): void;
       }
     }
   }
 
   const chaiSubset: Chai.ChaiPlugin;
-  export = chaiSubset
+  export = chaiSubset;
 }
