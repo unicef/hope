@@ -1,7 +1,6 @@
 import time
 
-import factory
-from factory import fuzzy
+import factory.fuzzy
 from faker import Faker
 from pytz import utc
 
@@ -26,11 +25,11 @@ class RegistrationDataImportFactory(factory.DjangoModelFactory):
         tzinfo=utc,
     )
     imported_by = factory.SubFactory(UserFactory)
-    data_source = fuzzy.FuzzyChoice(
+    data_source = factory.fuzzy.FuzzyChoice(
         RegistrationDataImport.DATA_SOURCE_CHOICE,
         getter=lambda c: c[0],
     )
-    number_of_individuals = fuzzy.FuzzyInteger(100, 10000)
-    number_of_households = fuzzy.FuzzyInteger(3, 50)
+    number_of_individuals = factory.fuzzy.FuzzyInteger(100, 10000)
+    number_of_households = factory.fuzzy.FuzzyInteger(3, 50)
     datahub_id = factory.Faker("uuid4")
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())

@@ -60,7 +60,7 @@ When('I select the xlsx file', () => {
 
   const fileName = `rdi_import_1_hh_1_ind_seed_${uniqueSeed}.xlsx`;
   cy.fixture(fileName, 'base64').then((fileContent) => {
-    cy.get('[data-cy="file-input"]').upload({
+    cy.get('[data-cy="rdi-file-input"]').upload({
       fileContent,
       fileName,
       mimeType:
@@ -143,4 +143,12 @@ Then('I see the newly imported individuals', () => {
   cy.log(`looking for individualId: + ${individualId}`);
   cy.get('[data-cy="ind-filters-search"]').type(individualId);
   cy.get('td').should('contain', individualId);
+});
+
+When('I check the household details', () => {
+  cy.get('td').contains(householdId).click();
+});
+
+Then('I see the household has the correct data', () => {
+  cy.get('[data-cy="label-COLLECT TYPE"]').contains('Full');
 });

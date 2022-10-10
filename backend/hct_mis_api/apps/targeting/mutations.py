@@ -1,10 +1,11 @@
 import logging
-import graphene
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
@@ -39,12 +40,12 @@ from hct_mis_api.apps.targeting.schema import (
     TargetPopulationNode,
 )
 from hct_mis_api.apps.targeting.validators import (
-    LockTargetPopulationValidator,
     FinalizeTargetPopulationValidator,
+    LockTargetPopulationValidator,
+    RebuildTargetPopulationValidator,
     TargetingCriteriaInputValidator,
     TargetValidator,
     UnlockTargetPopulationValidator,
-    RebuildTargetPopulationValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
@@ -209,7 +210,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         should_rebuild_stats = False
 
         if target_population.is_locked() and name:
-            msg = "Name can't be changed when Target Population is in LOCKED status"
+            msg = "Name can't be changed when Target Population is in Locked status"
             logger.error(msg)
             raise ValidationError(msg)
         if target_population.is_finalized():

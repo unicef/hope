@@ -1,20 +1,28 @@
-import logging
 import datetime
+import logging
+
+from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.utils import timezone
 
 from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
-from django.contrib.admin.options import get_content_type_for_model
-from django.db import transaction
-from django.utils import timezone
-from django.contrib.auth import get_user_model
 
-from hct_mis_api.apps.payment.models import XlsxCashPlanPaymentVerificationFile, CashPlanPaymentVerification
-from hct_mis_api.apps.payment.utils import get_quantity_in_usd
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import XlsxPaymentPlanImportPerFspService
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
-from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    XlsxCashPlanPaymentVerificationFile,
+)
+from hct_mis_api.apps.payment.utils import get_quantity_in_usd
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import (
+    XlsxPaymentPlanImportPerFspService,
+)
+from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import (
+    XlsxVerificationExportService,
+)
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -40,10 +48,10 @@ def get_sync_run_rapid_pro_task():
 @log_start_and_end
 def fsp_generate_xlsx_report_task(fsp_id):
     try:
+        from hct_mis_api.apps.payment.models import FinancialServiceProvider
         from hct_mis_api.apps.payment.services.generate_fsp_xlsx_service import (
             GenerateReportService,
         )
-        from hct_mis_api.apps.payment.models import FinancialServiceProvider
 
         fsp = FinancialServiceProvider.objects.get(id=fsp_id)
         service = GenerateReportService(fsp=fsp)
@@ -103,7 +111,9 @@ def remove_old_cash_plan_payment_verification_xls(past_days=30):
 def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
+        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import (
+            XlsxPaymentPlanExportService,
+        )
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -140,7 +150,9 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
 def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportPerFspService import XlsxPaymentPlanExportPerFspService
+        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportPerFspService import (
+            XlsxPaymentPlanExportPerFspService,
+        )
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -177,7 +189,9 @@ def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
 def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
+        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import (
+            XlsxPaymentPlanImportService,
+        )
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
 
@@ -247,8 +261,8 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
+    from hct_mis_api.apps.payment.models import Payment, PaymentPlan
     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
-    from hct_mis_api.apps.payment.models import PaymentPlan, Payment
 
     payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
     steficon_rule = Rule.objects.get(id=decode_id_string(steficon_rule_id))

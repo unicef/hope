@@ -169,7 +169,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                     'line': 3
                 }
             ],
-            'message': '["Name can\'t be changed when Target Population is in LOCKED status"]',
+            'message': '["Name can\'t be changed when Target Population is in Locked status"]',
             'path': [
                 'updateTargetPopulation'
             ]

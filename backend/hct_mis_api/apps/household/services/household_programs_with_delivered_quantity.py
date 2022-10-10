@@ -1,16 +1,18 @@
-from django.db.models import Sum, F, DecimalField
-from django.db.models.functions import Coalesce
-
 from decimal import Decimal
+
+from django.db.models import DecimalField, F, Sum
+from django.db.models.functions import Coalesce
 
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 def programs_with_delivered_quantity(household: Household):
     payment_items = ExtendedQuerySetSequence(household.paymentrecord_set.all(), household.payment_set.all())
     programs = (
         payment_items.select_related("parent__program")
+        .exclude(status=PaymentRecord.STATUS_FORCE_FAILED)
         .values("parent__program")
         .order_by("parent__program")
         .annotate(

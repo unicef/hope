@@ -7,9 +7,10 @@ from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
 
-import pytz
 from django.db.models import QuerySet
+from django.utils import timezone
 
+import pytz
 from django_filters import OrderingFilter
 from graphql import GraphQLError
 from PIL import Image
@@ -698,6 +699,8 @@ def timezone_datetime(value):
     datetime_value = value
     if isinstance(value, date):
         datetime_value = datetime.combine(datetime_value, datetime.min.time())
-    if not (datetime_value.tzinfo is not None and datetime_value.tzinfo.utcoffset(datetime_value) is not None):
+    if isinstance(value, str):
+        datetime_value = timezone.make_aware(datetime.fromisoformat(value))
+    if datetime_value.tzinfo is None or datetime_value.tzinfo.utcoffset(datetime_value) is None:
         return datetime_value.replace(tzinfo=pytz.utc)
     return datetime_value
