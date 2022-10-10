@@ -5,7 +5,6 @@ from hct_mis_api.apps.core.management.sql import sql_drop_tables
 from hct_mis_api.apps.payment.fixtures import (
     generate_payment_plan,
     generate_real_cash_plans,
-    generate_real_payment_plans,
 )
 from hct_mis_api.apps.registration_datahub.management.commands.fix_unicef_id_imported_individuals_and_households import (
     update_mis_unicef_id_individual_and_household,
@@ -48,10 +47,9 @@ class Command(BaseCommand):
         call_command("loaddata", "hct_mis_api/apps/steficon/fixtures/data.json")
 
         call_command("search_index", "--rebuild", "-f")
-        generate_real_cash_plans()
-        generate_real_payment_plans()
         update_mis_unicef_id_individual_and_household()
         generate_payment_plan()
+        generate_real_cash_plans()
 
     def _drop_databases(self):
         for connection_name in connections:

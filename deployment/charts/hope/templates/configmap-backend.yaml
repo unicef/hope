@@ -5,7 +5,10 @@ metadata:
   labels:
     {{- include "hope.labels" . | nindent 4 }}
 data:
-  {{- include "hope.elasticsearch.config" . | nindent 2}}
+  {{- include "hope.cashassistdatahubpostgresql.config" . | nindent 2 }}
+  {{- include "hope.registrationdatahubpostgresql.config" . | nindent 2 }}
+  {{- include "hope.postgresql.config" . | nindent 2 }}
+  {{- include "hope.elasticsearch.config" . | nindent 2 }}
   DJANGO_ALLOWED_HOSTS: "{{.Values.ingress.host }},kubernetes.internal"
   DOMAIN: {{.Values.ingress.host }}
   ENV: {{ .Values.global.env }}

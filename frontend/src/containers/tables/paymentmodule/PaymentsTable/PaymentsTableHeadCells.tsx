@@ -54,7 +54,7 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Entitlement (USD)',
+    label: 'Entitlement',
     id: 'entitlement_quantity_usd',
     numeric: false,
   },

@@ -1,18 +1,18 @@
 dependencies:
 - name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  version: 11.6.0
+  repository: file://../postgresql
+  version: 0.1.0
 - name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  version: 11.6.0
+  repository: file://../postgresql
+  version: 0.1.0
 - name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  version: 11.6.0
+  repository: file://../postgresql
+  version: 0.1.0
 - name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 16.10.1
+  repository: https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami
+  version: 10.9.0
 - name: elasticsearch
-  repository: https://charts.bitnami.com/bitnami
-  version: 18.2.6
-digest: sha256:3fdbf6e6bcf2e93b7cc2d47486d381129860ba61d1582f517be1380918e1c609
-generated: "2022-06-02T11:30:48.499389-04:00"
+  repository: https://raw.githubusercontent.com/bitnami/charts/eb5f9a9513d987b519f0ecd732e7031241c50328/bitnami
+  version: 12.8.2
+digest: sha256:b4499cf6abb54fbb12831f61a80ce9b894f54ae953e6cdb976a3b1bd5bbfd05b
+generated: "2022-10-05T15:36:26.616959+02:00"
