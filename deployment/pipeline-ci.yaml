@@ -229,7 +229,6 @@ stages:
             displayName: "Setup .env and docker-compose.tst.yml"
             inputs:
               script: |
-               mv deployment/docker-compose.tst.yml docker-compose.tst.yml
                mv $(Agent.TempDirectory)/.env-django-test .env
 
           - task: DockerCompose@0
@@ -237,7 +236,7 @@ stages:
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registry)
-              dockerComposeFile: '**/docker-compose.tst.yml'
+              dockerComposeFile: '**/deployment/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend test'
               dockerComposeFileArgs: |

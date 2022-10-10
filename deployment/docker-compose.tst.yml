@@ -64,7 +64,6 @@ services:
   celery_worker:
     <<: *django_envs
     image: ${backend_image}
-    build: ../backend
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
