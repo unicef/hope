@@ -46,7 +46,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
             >
               Cash
             </span>
-            <div>
+            <div
+              data-cy="label-Cash"
+            >
               <span
                 class="sc-ifAKCX fziVZR"
                 color="textSecondary"
@@ -66,7 +68,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
             >
               In Kind
             </span>
-            <div>
+            <div
+              data-cy="label-In Kind"
+            >
               <span
                 class="sc-ifAKCX fziVZR"
                 color="textSecondary"
@@ -86,7 +90,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
             >
               Transfer
             </span>
-            <div>
+            <div
+              data-cy="label-Transfer"
+            >
               <span
                 class="sc-ifAKCX fziVZR"
                 color="textSecondary"
@@ -138,7 +144,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                   >
                     Cash (Miranda Ltd)
                   </span>
-                  <div>
+                  <div
+                    data-cy="label-Cash (Miranda Ltd)"
+                  >
                     <span
                       class="sc-ifAKCX fziVZR"
                       color="textSecondary"
@@ -163,7 +171,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                   >
                     In Kind (Frazier-Watson)
                   </span>
-                  <div>
+                  <div
+                    data-cy="label-In Kind (Frazier-Watson)"
+                  >
                     <span
                       class="sc-ifAKCX fziVZR"
                       color="textSecondary"
@@ -188,7 +198,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                   >
                     Transfer (Bray Group)
                   </span>
-                  <div>
+                  <div
+                    data-cy="label-Transfer (Bray Group)"
+                  >
                     <span
                       class="sc-ifAKCX fziVZR"
                       color="textSecondary"
