@@ -1,5 +1,4 @@
 import json
-
 from collections import defaultdict
 
 from django.core.files import File
@@ -7,12 +6,17 @@ from django.core.management import BaseCommand
 from django.db.models import F
 
 from hct_mis_api.apps.core.kobo.api import KoboAPI
-from hct_mis_api.apps.core.kobo.common import get_field_name, KOBO_FORM_INDIVIDUALS_COLUMN_NAME
+from hct_mis_api.apps.core.kobo.common import (
+    KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
+    get_field_name,
+)
 from hct_mis_api.apps.core.utils import rename_dict_keys
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import ImportedDocument, ImportData
-from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
+from hct_mis_api.apps.registration_datahub.models import ImportData, ImportedDocument
+from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+    RdiKoboCreateTask,
+)
 
 
 def _get_file(attachments, value, business_area_slug):

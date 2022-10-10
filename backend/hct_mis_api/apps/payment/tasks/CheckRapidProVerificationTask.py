@@ -6,7 +6,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
-from hct_mis_api.apps.utils.phone_number import is_right_phone_number_format
+from hct_mis_api.apps.payment.validators import is_right_phone_number_format
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,8 @@ class CheckRapidProVerificationTask:
         payment_record_verification_to_update = []
         business_area = cashplan_payment_verification.cash_plan.business_area
         payment_record_verifications_phone_number_dict = {
-            str(x.payment_record.head_of_household.phone_no): x for x in payment_record_verifications
+            str(payment_record_verification.payment_record.head_of_household.phone_no): payment_record_verification
+            for payment_record_verification in payment_record_verifications
         }
         api = RapidProAPI(business_area.slug)
         rapid_pro_results = api.get_mapped_flow_runs(cashplan_payment_verification.rapid_pro_flow_start_uuids)

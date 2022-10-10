@@ -1,9 +1,9 @@
 from django.core.management import BaseCommand, call_command
 from django.db import connections
 
-from hct_mis_api.apps.payment.models import GenericPayment
-from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
 from hct_mis_api.apps.core.management.sql import sql_drop_tables
+from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
+from hct_mis_api.apps.payment.models import GenericPayment
 
 
 def create_fsps():

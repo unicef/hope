@@ -1,12 +1,7 @@
-from django.db.models import Count, Q, F
+from django.db.models import Count, F, Q
 from django.db.models.functions import Lower
 
-from django_filters import (
-    CharFilter,
-    DateFilter,
-    FilterSet,
-    MultipleChoiceFilter,
-)
+from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
@@ -51,7 +46,7 @@ class ProgramFilter(FilterSet):
                 "paymentplan__payment_items__household",
                 filter=Q(paymentplan__payment_items__delivered_quantity__gte=0),
                 distinct=True,
-            )
+            ),
         ).annotate(total_hh_count=F("total_payment_plans_hh_count") + F("total_cash_plans_hh_count"))
         return super().filter_queryset(queryset)
 

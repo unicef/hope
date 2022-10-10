@@ -12,6 +12,7 @@ import uuid
 import django_fsm
 
 import hct_mis_api.apps.account.models
+import django.contrib.postgres.fields
 
 
 def populate_existing_payment_record_usd_amount(apps, schema_editor):
@@ -69,6 +70,33 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name="cashplanpaymentverification",
+            name="rapid_pro_flow_start_uuids",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(blank=True, max_length=255), default=list, size=None
+            ),
+        ),
+        migrations.AlterField(
+            model_name="cashplanpaymentverification",
+            name="unicef_id",
+            field=models.CharField(blank=True, max_length=255, null=True),
+        ),
+        migrations.AlterField(
+            model_name="cashplanpaymentverification",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("ACTIVE", "Active"),
+                    ("FINISHED", "Finished"),
+                    ("PENDING", "Pending"),
+                    ("INVALID", "Invalid"),
+                ],
+                db_index=True,
+                default="PENDING",
+                max_length=50,
+            ),
+        ),
         migrations.CreateModel(
             name="PaymentChannel",
             fields=[

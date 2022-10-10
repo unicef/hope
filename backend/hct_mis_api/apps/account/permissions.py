@@ -73,6 +73,7 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS = auto()
     PAYMENT_VERIFICATION_DELETE = auto()
     PAYMENT_VERIFICATION_INVALID = auto()
+    PAYMENT_VERIFICATION_MARK_AS_FAILED = auto()
 
     # Payment Module
     PAYMENT_MODULE_VIEW_LIST = auto()
@@ -167,6 +168,10 @@ class Permissions(Enum):
     # Activity Log
     ACTIVITY_LOG_VIEW = auto()
     ACTIVITY_LOG_DOWNLOAD = auto()
+
+    # Core
+    UPLOAD_STORAGE_FILE = auto()
+    DOWNLOAD_STORAGE_FILE = auto()
 
     # Django Admin
     # ...

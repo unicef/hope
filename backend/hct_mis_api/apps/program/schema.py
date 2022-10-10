@@ -2,14 +2,13 @@ from django.db.models import (
     Case,
     Count,
     DecimalField,
+    F,
     IntegerField,
     Q,
     Sum,
     Value,
     When,
-    F,
 )
-from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import relay
@@ -25,7 +24,6 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
-
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
@@ -33,13 +31,16 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord, GenericPayment
+from hct_mis_api.apps.payment.filters import CashPlanFilter
+from hct_mis_api.apps.payment.models import (
+    CashPlan,
+    CashPlanPaymentVerification,
+    GenericPayment,
+    PaymentRecord,
+)
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
-from hct_mis_api.apps.payment.filters import CashPlanFilter
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import CashPlan
-
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
@@ -148,17 +149,14 @@ class Query(graphene.ObjectType):
     cash_plan_status_choices = graphene.List(ChoiceObject)
 
     def resolve_all_programs(self, info, **kwargs):
-        return (
-            Program.objects.annotate(
-                custom_order=Case(
-                    When(status=Program.DRAFT, then=Value(1)),
-                    When(status=Program.ACTIVE, then=Value(2)),
-                    When(status=Program.FINISHED, then=Value(3)),
-                    output_field=IntegerField(),
-                )
+        return Program.objects.annotate(
+            custom_order=Case(
+                When(status=Program.DRAFT, then=Value(1)),
+                When(status=Program.ACTIVE, then=Value(2)),
+                When(status=Program.FINISHED, then=Value(3)),
+                output_field=IntegerField(),
             )
-            .order_by("custom_order", "start_date")
-        )
+        ).order_by("custom_order", "start_date")
 
     def resolve_program_status_choices(self, info, **kwargs):
         return to_choice_object(Program.STATUS_CHOICE)

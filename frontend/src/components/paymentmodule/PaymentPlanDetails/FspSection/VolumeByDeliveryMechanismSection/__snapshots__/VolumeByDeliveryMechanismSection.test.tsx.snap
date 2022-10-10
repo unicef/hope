@@ -36,7 +36,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
               >
                 Cash (Miranda Ltd)
               </span>
-              <div>
+              <div
+                data-cy="label-Cash (Miranda Ltd)"
+              >
                 <span
                   class="sc-bwzfXH emFVa"
                   color="textSecondary"
@@ -61,7 +63,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
               >
                 In Kind (Frazier-Watson)
               </span>
-              <div>
+              <div
+                data-cy="label-In Kind (Frazier-Watson)"
+              >
                 <span
                   class="sc-bwzfXH emFVa"
                   color="textSecondary"
@@ -86,7 +90,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/VolumeByDeliveryMechanismSe
               >
                 Transfer (Bray Group)
               </span>
-              <div>
+              <div
+                data-cy="label-Transfer (Bray Group)"
+              >
                 <span
                   class="sc-bwzfXH emFVa"
                   color="textSecondary"

@@ -10,7 +10,9 @@ from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import count_population
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.models import KoboImportData
-from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataInstanceValidator
+from hct_mis_api.apps.registration_datahub.validators import (
+    KoboProjectImportDataInstanceValidator,
+)
 
 
 class PullKoboSubmissions:

@@ -1,13 +1,13 @@
 from uuid import UUID
+
 from django.core.management import BaseCommand
 
-import hct_mis_api.apps.payment.fixtures as payment_fixtures
 import hct_mis_api.apps.cash_assist_datahub.fixtures as ca_fixtures
-
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory
+import hct_mis_api.apps.payment.fixtures as payment_fixtures
 from hct_mis_api.apps.cash_assist_datahub.models import Session
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
 class Command(BaseCommand):

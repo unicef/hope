@@ -673,6 +673,7 @@ export type CashPlanPaymentVerificationNode = Node & {
   completionDate?: Maybe<Scalars['DateTime']>,
   xlsxFileExporting: Scalars['Boolean'],
   xlsxFileImported: Scalars['Boolean'],
+  error?: Maybe<Scalars['String']>,
   paymentRecordVerifications: PaymentVerificationNodeConnection,
   xlsxFileWasDownloaded?: Maybe<Scalars['Boolean']>,
   hasXlsxFile?: Maybe<Scalars['Boolean']>,
@@ -710,7 +711,8 @@ export enum CashPlanPaymentVerificationStatus {
   Active = 'ACTIVE',
   Finished = 'FINISHED',
   Pending = 'PENDING',
-  Invalid = 'INVALID'
+  Invalid = 'INVALID',
+  RapidProError = 'RAPID_PRO_ERROR'
 }
 
 export type CashPlanPaymentVerificationSummaryNode = Node & {
@@ -1577,6 +1579,7 @@ export type GroupAttributeNodeFlexAttributesArgs = {
 
 export enum HouseholdCollectIndividualData {
   A = 'A_',
+  A_2 = 'A_2',
   A_1 = 'A_1',
   A_0 = 'A_0'
 }
@@ -1612,7 +1615,7 @@ export type HouseholdNode = Node & {
   residenceStatus: HouseholdResidenceStatus,
   countryOrigin?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
-  size: Scalars['Int'],
+  size?: Maybe<Scalars['Int']>,
   address: Scalars['String'],
   adminArea?: Maybe<AreaNode>,
   representatives: IndividualNodeConnection,
@@ -1644,7 +1647,7 @@ export type HouseholdNode = Node & {
   childrenDisabledCount?: Maybe<Scalars['Int']>,
   maleChildrenDisabledCount?: Maybe<Scalars['Int']>,
   femaleChildrenDisabledCount?: Maybe<Scalars['Int']>,
-  registrationDataImport: RegistrationDataImportNode,
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
   programs: ProgramNodeConnection,
   returnee?: Maybe<Scalars['Boolean']>,
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
@@ -2277,6 +2280,7 @@ export enum ImportedDocumentTypeType {
 
 export enum ImportedHouseholdCollectIndividualData {
   A = 'A_',
+  A_2 = 'A_2',
   A_1 = 'A_1',
   A_0 = 'A_0'
 }
@@ -3252,6 +3256,11 @@ export type LogEntryNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type MarkPaymentRecordAsFailedMutation = {
+   __typename?: 'MarkPaymentRecordAsFailedMutation',
+  paymentRecord?: Maybe<PaymentRecordNode>,
+};
+
 export type MergeRegistrationDataImportMutation = {
    __typename?: 'MergeRegistrationDataImportMutation',
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
@@ -3289,6 +3298,7 @@ export type Mutations = {
   chooseDeliveryMechanismsForPaymentPlan?: Maybe<ChooseDeliveryMechanismsForPaymentPlanMutation>,
   assignFspToDeliveryMechanism?: Maybe<AssignFspToDeliveryMechanismMutation>,
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
+  markPaymentRecordAsFailed?: Maybe<MarkPaymentRecordAsFailedMutation>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   actionPaymentPlanMutation?: Maybe<ActionPaymentPlanMutation>,
   createPaymentPlan?: Maybe<CreatePaymentPlanMutation>,
@@ -3522,6 +3532,11 @@ export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
   receivedAmount: Scalars['Decimal'],
   status?: Maybe<PaymentVerificationStatusForUpdate>,
   version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsMarkPaymentRecordAsFailedArgs = {
+  paymentRecordId: Scalars['ID']
 };
 
 
@@ -4213,14 +4228,16 @@ export enum PaymentRecordStatus {
   DistributionSuccessful = 'DISTRIBUTION_SUCCESSFUL',
   NotDistributed = 'NOT_DISTRIBUTED',
   TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
-  TransactionErroneous = 'TRANSACTION_ERRONEOUS'
+  TransactionErroneous = 'TRANSACTION_ERRONEOUS',
+  ForceFailed = 'FORCE_FAILED'
 }
 
 export enum PaymentStatus {
   DistributionSuccessful = 'DISTRIBUTION_SUCCESSFUL',
   NotDistributed = 'NOT_DISTRIBUTED',
   TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
-  TransactionErroneous = 'TRANSACTION_ERRONEOUS'
+  TransactionErroneous = 'TRANSACTION_ERRONEOUS',
+  ForceFailed = 'FORCE_FAILED'
 }
 
 export type PaymentVerificationLogEntryNode = Node & {
@@ -4262,6 +4279,7 @@ export type PaymentVerificationNode = Node & {
   status: PaymentVerificationStatus,
   statusDate?: Maybe<Scalars['DateTime']>,
   receivedAmount?: Maybe<Scalars['Float']>,
+  sentToRapidPro: Scalars['Boolean'],
   ticketDetails: TicketPaymentVerificationDetailsNodeConnection,
   ticketDetail: TicketPaymentVerificationDetailsNodeConnection,
   isManuallyEditable?: Maybe<Scalars['Boolean']>,
@@ -5417,6 +5435,7 @@ export type RefuseRegistrationDataImportMutation = {
 };
 
 export enum RegistrationDataImportDatahubImportDone {
+  Loading = 'LOADING',
   NotStarted = 'NOT_STARTED',
   Started = 'STARTED',
   Done = 'DONE'
@@ -5473,7 +5492,8 @@ export enum RegistrationDataImportDataSource {
   Xls = 'XLS',
   Kobo = 'KOBO',
   Diia = 'DIIA',
-  FlexRegistration = 'FLEX_REGISTRATION'
+  FlexRegistration = 'FLEX_REGISTRATION',
+  Api = 'API'
 }
 
 export type RegistrationDataImportNode = Node & {
@@ -5548,6 +5568,7 @@ export type RegistrationDataImportNodeEdge = {
 };
 
 export enum RegistrationDataImportStatus {
+  Loading = 'LOADING',
   Deduplication = 'DEDUPLICATION',
   DeduplicationFailed = 'DEDUPLICATION_FAILED',
   Importing = 'IMPORTING',
@@ -5656,7 +5677,8 @@ export type RoleNode = {
 export enum RoleSubsystem {
   Hope = 'HOPE',
   Kobo = 'KOBO',
-  Ca = 'CA'
+  Ca = 'CA',
+  Api = 'API'
 }
 
 export enum RuleCommitLanguage {
@@ -7287,7 +7309,7 @@ export type HouseholdMinimalFragment = (
 
 export type HouseholdDetailedFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'activeIndividualsCount' | 'countryOrigin' | 'country' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'flexFields'>
+  & Pick<HouseholdNode, 'activeIndividualsCount' | 'countryOrigin' | 'country' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'collectIndividualData' | 'flexFields'>
   & { individuals: (
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
@@ -7318,14 +7340,14 @@ export type HouseholdDetailedFragment = (
         & Pick<ProgramNode, 'id' | 'name'>
       )> }
     )>> }
-  ), registrationDataImport: (
+  ), registrationDataImport: Maybe<(
     { __typename?: 'RegistrationDataImportNode' }
     & Pick<RegistrationDataImportNode, 'name' | 'dataSource' | 'importDate'>
     & { importedBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName' | 'email' | 'username'>
     )> }
-  ), paymentrecordSet: (
+  )>, paymentrecordSet: (
     { __typename?: 'PaymentRecordNodeConnection' }
     & { edges: Array<Maybe<(
       { __typename?: 'PaymentRecordNodeEdge' }
@@ -7461,6 +7483,44 @@ export type IndividualDetailedFragment = (
   & IndividualMinimalFragment
 );
 
+export type PaymentRecordDetailsFragment = (
+  { __typename?: 'PaymentRecordNode' }
+  & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
+  & { verification: Maybe<(
+    { __typename?: 'PaymentVerificationNode' }
+    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
+  )>, household: (
+    { __typename?: 'HouseholdNode' }
+    & Pick<HouseholdNode, 'id' | 'status' | 'size' | 'unicefId'>
+    & { headOfHousehold: (
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
+    ) }
+  ), targetPopulation: (
+    { __typename?: 'TargetPopulationNode' }
+    & Pick<TargetPopulationNode, 'id' | 'name'>
+  ), parent: Maybe<(
+    { __typename?: 'CashPlanNode' }
+    & Pick<CashPlanNode, 'id' | 'caId'>
+    & { program: (
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name'>
+    ), verifications: (
+      { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNode' }
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
+        )> }
+      )>> }
+    ) }
+  )>, serviceProvider: (
+    { __typename?: 'ServiceProviderNode' }
+    & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
+  ) }
+);
+
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
   & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
@@ -7497,7 +7557,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'importId' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'koboAssetId' | 'rowId' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh'>
+  & Pick<ImportedHouseholdNode, 'id' | 'importId' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'koboAssetId' | 'rowId' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh' | 'collectIndividualData'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -8339,6 +8399,22 @@ export type InvalidCashPlanPaymentVerificationMutation = (
           )> }
         )>> }
       ) }
+    )> }
+  )> }
+);
+
+export type MarkPrAsFailedMutationVariables = {
+  paymentRecordId: Scalars['ID']
+};
+
+
+export type MarkPrAsFailedMutation = (
+  { __typename?: 'Mutations' }
+  & { markPaymentRecordAsFailed: Maybe<(
+    { __typename?: 'MarkPaymentRecordAsFailedMutation' }
+    & { paymentRecord: Maybe<(
+      { __typename?: 'PaymentRecordNode' }
+      & PaymentRecordDetailsFragment
     )> }
   )> }
 );
@@ -10168,40 +10244,7 @@ export type PaymentRecordQuery = (
   { __typename?: 'Query' }
   & { paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordNode' }
-    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
-    & { household: (
-      { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'status' | 'size' | 'unicefId'>
-      & { headOfHousehold: (
-        { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
-      ) }
-    ), targetPopulation: (
-      { __typename?: 'TargetPopulationNode' }
-      & Pick<TargetPopulationNode, 'id' | 'name'>
-    ), parent: Maybe<(
-      { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'caId'>
-      & { program: (
-        { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'id' | 'name'>
-      ), verifications: (
-        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
-        & { edges: Array<Maybe<(
-          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
-          & { node: Maybe<(
-            { __typename?: 'CashPlanPaymentVerificationNode' }
-            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
-          )> }
-        )>> }
-      ) }
-    )>, verification: Maybe<(
-      { __typename?: 'PaymentVerificationNode' }
-      & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
-    )>, serviceProvider: (
-      { __typename?: 'ServiceProviderNode' }
-      & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
-    ) }
+    & PaymentRecordDetailsFragment
   )> }
 );
 
@@ -10396,7 +10439,10 @@ export type PaymentRecordVerificationQuery = (
         { __typename?: 'ServiceProviderNode' }
         & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
       ) }
-    )> }
+    )>, cashPlanPaymentVerification: (
+      { __typename?: 'CashPlanPaymentVerificationNode' }
+      & Pick<CashPlanPaymentVerificationNode, 'id' | 'verificationChannel'>
+    ) }
   )> }
 );
 
@@ -11668,6 +11714,7 @@ export const HouseholdDetailedFragmentDoc = gql`
   orgEnumerator
   updatedAt
   consent
+  collectIndividualData
   individuals {
     totalCount
     edges {
@@ -11842,6 +11889,73 @@ export const IndividualDetailedFragmentDoc = gql`
   }
 }
     ${IndividualMinimalFragmentDoc}`;
+export const PaymentRecordDetailsFragmentDoc = gql`
+    fragment paymentRecordDetails on PaymentRecordNode {
+  id
+  status
+  statusDate
+  caId
+  caHashId
+  registrationCaId
+  verification {
+    id
+    status
+    statusDate
+    receivedAmount
+  }
+  household {
+    id
+    status
+    size
+    unicefId
+    headOfHousehold {
+      id
+      phoneNo
+      phoneNoAlternative
+      phoneNoValid
+      phoneNoAlternativeValid
+    }
+  }
+  fullName
+  distributionModality
+  totalPersonsCovered
+  targetPopulation {
+    id
+    name
+  }
+  parent {
+    id
+    caId
+    program {
+      id
+      name
+    }
+    verifications {
+      edges {
+        node {
+          id
+          status
+          verificationChannel
+        }
+      }
+    }
+  }
+  currency
+  entitlementQuantity
+  deliveredQuantity
+  deliveredQuantityUsd
+  deliveryDate
+  deliveryType
+  entitlementCardIssueDate
+  entitlementCardNumber
+  transactionReferenceId
+  serviceProvider {
+    id
+    fullName
+    shortName
+  }
+}
+    `;
 export const RegistrationMinimalFragmentDoc = gql`
     fragment registrationMinimal on RegistrationDataImportNode {
   id
@@ -11915,6 +12029,7 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   hasDuplicates
   fchildHoh
   childHoh
+  collectIndividualData
 }
     `;
 export const ImportedIndividualMinimalFragmentDoc = gql`
@@ -14081,6 +14196,57 @@ export function useInvalidCashPlanPaymentVerificationMutation(baseOptions?: Apol
 export type InvalidCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useInvalidCashPlanPaymentVerificationMutation>;
 export type InvalidCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<InvalidCashPlanPaymentVerificationMutation>;
 export type InvalidCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>;
+export const MarkPrAsFailedDocument = gql`
+    mutation markPRAsFailed($paymentRecordId: ID!) {
+  markPaymentRecordAsFailed(paymentRecordId: $paymentRecordId) {
+    paymentRecord {
+      ...paymentRecordDetails
+    }
+  }
+}
+    ${PaymentRecordDetailsFragmentDoc}`;
+export type MarkPrAsFailedMutationFn = ApolloReactCommon.MutationFunction<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>;
+export type MarkPrAsFailedComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>, 'mutation'>;
+
+    export const MarkPrAsFailedComponent = (props: MarkPrAsFailedComponentProps) => (
+      <ApolloReactComponents.Mutation<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables> mutation={MarkPrAsFailedDocument} {...props} />
+    );
+    
+export type MarkPrAsFailedProps<TChildProps = {}> = ApolloReactHoc.MutateProps<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables> & TChildProps;
+export function withMarkPrAsFailed<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  MarkPrAsFailedMutation,
+  MarkPrAsFailedMutationVariables,
+  MarkPrAsFailedProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables, MarkPrAsFailedProps<TChildProps>>(MarkPrAsFailedDocument, {
+      alias: 'markPrAsFailed',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useMarkPrAsFailedMutation__
+ *
+ * To run a mutation, you first call `useMarkPrAsFailedMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMarkPrAsFailedMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [markPrAsFailedMutation, { data, loading, error }] = useMarkPrAsFailedMutation({
+ *   variables: {
+ *      paymentRecordId: // value for 'paymentRecordId'
+ *   },
+ * });
+ */
+export function useMarkPrAsFailedMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>) {
+        return ApolloReactHooks.useMutation<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>(MarkPrAsFailedDocument, baseOptions);
+      }
+export type MarkPrAsFailedMutationHookResult = ReturnType<typeof useMarkPrAsFailedMutation>;
+export type MarkPrAsFailedMutationResult = ApolloReactCommon.MutationResult<MarkPrAsFailedMutation>;
+export type MarkPrAsFailedMutationOptions = ApolloReactCommon.BaseMutationOptions<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>;
 export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
     mutation updatePaymentVerificationReceivedAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $received: Boolean!) {
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, received: $received) {
@@ -18623,125 +18789,10 @@ export type PaymentQueryResult = ApolloReactCommon.QueryResult<PaymentQuery, Pay
 export const PaymentRecordDocument = gql`
     query PaymentRecord($id: ID!) {
   paymentRecord(id: $id) {
-    id
-    status
-    statusDate
-    caId
-    caHashId
-    registrationCaId
-    household {
-      id
-      status
-      size
-      unicefId
-      headOfHousehold {
-        id
-        phoneNo
-        phoneNoAlternative
-        phoneNoValid
-        phoneNoAlternativeValid
-      }
-    }
-    fullName
-    distributionModality
-    totalPersonsCovered
-    targetPopulation {
-      id
-      name
-    }
-    parent {
-      id
-      caId
-      program {
-        id
-        name
-      }
-      verifications {
-        edges {
-          node {
-            id
-            status
-            verificationChannel
-          }
-        }
-      }
-    }
-    verification {
-      id
-      status
-      statusDate
-      receivedAmount
-    }
-    currency
-    entitlementQuantity
-    deliveredQuantity
-    deliveryDate
-    deliveryDate
-    entitlementCardIssueDate
-    entitlementCardNumber
-    serviceProvider {
-      id
-      fullName
-      shortName
-    }
-    id
-    status
-    statusDate
-    caId
-    household {
-      id
-      size
-      unicefId
-      headOfHousehold {
-        id
-        phoneNo
-        phoneNoAlternative
-        phoneNoValid
-        phoneNoAlternativeValid
-      }
-    }
-    fullName
-    distributionModality
-    totalPersonsCovered
-    targetPopulation {
-      id
-      name
-    }
-    parent {
-      id
-      caId
-      program {
-        id
-        name
-      }
-      verifications {
-        edges {
-          node {
-            id
-            status
-            verificationChannel
-          }
-        }
-      }
-    }
-    currency
-    entitlementQuantity
-    deliveredQuantity
-    deliveredQuantityUsd
-    deliveryDate
-    deliveryDate
-    deliveryType
-    entitlementCardIssueDate
-    entitlementCardNumber
-    transactionReferenceId
-    serviceProvider {
-      id
-      fullName
-      shortName
-    }
+    ...paymentRecordDetails
   }
 }
-    `;
+    ${PaymentRecordDetailsFragmentDoc}`;
 export type PaymentRecordComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentRecordQuery, PaymentRecordQueryVariables>, 'query'> & ({ variables: PaymentRecordQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const PaymentRecordComponent = (props: PaymentRecordComponentProps) => (
@@ -19250,6 +19301,10 @@ export const PaymentRecordVerificationDocument = gql`
         fullName
         shortName
       }
+    }
+    cashPlanPaymentVerification {
+      id
+      verificationChannel
     }
   }
 }
@@ -22601,6 +22656,7 @@ export type ResolversTypes = {
   AssignFspToDeliveryMechanismMutation: ResolverTypeWrapper<AssignFspToDeliveryMechanismMutation>,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
+  MarkPaymentRecordAsFailedMutation: ResolverTypeWrapper<MarkPaymentRecordAsFailedMutation>,
   UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   ActionPaymentPlanInput: ActionPaymentPlanInput,
   Action: Action,
@@ -23037,6 +23093,7 @@ export type ResolversParentTypes = {
   AssignFspToDeliveryMechanismMutation: AssignFspToDeliveryMechanismMutation,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
+  MarkPaymentRecordAsFailedMutation: MarkPaymentRecordAsFailedMutation,
   UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount,
   ActionPaymentPlanInput: ActionPaymentPlanInput,
   Action: Action,
@@ -23393,6 +23450,7 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   xlsxFileExporting?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   xlsxFileImported?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
   xlsxFileWasDownloaded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   hasXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -23895,7 +23953,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
@@ -23927,7 +23985,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   childrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   maleChildrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleChildrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
   returnee?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
@@ -24459,6 +24517,10 @@ export type LogEntryNodeEdgeResolvers<ContextType = any, ParentType extends Reso
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type MarkPaymentRecordAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['MarkPaymentRecordAsFailedMutation'] = ResolversParentTypes['MarkPaymentRecordAsFailedMutation']> = {
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+};
+
 export type MergeRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['MergeRegistrationDataImportMutation'] = ResolversParentTypes['MergeRegistrationDataImportMutation']> = {
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
@@ -24494,6 +24556,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   chooseDeliveryMechanismsForPaymentPlan?: Resolver<Maybe<ResolversTypes['ChooseDeliveryMechanismsForPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsChooseDeliveryMechanismsForPaymentPlanArgs, 'input'>>,
   assignFspToDeliveryMechanism?: Resolver<Maybe<ResolversTypes['AssignFspToDeliveryMechanismMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFspToDeliveryMechanismArgs, 'input'>>,
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
+  markPaymentRecordAsFailed?: Resolver<Maybe<ResolversTypes['MarkPaymentRecordAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsMarkPaymentRecordAsFailedArgs, 'paymentRecordId'>>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
   actionPaymentPlanMutation?: Resolver<Maybe<ResolversTypes['ActionPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsActionPaymentPlanMutationArgs, 'input'>>,
   createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>,
@@ -24763,6 +24826,7 @@ export type PaymentVerificationNodeResolvers<ContextType = any, ParentType exten
   status?: Resolver<ResolversTypes['PaymentVerificationStatus'], ParentType, ContextType>,
   statusDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   receivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  sentToRapidPro?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   ticketDetails?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'], ParentType, ContextType, PaymentVerificationNodeTicketDetailsArgs>,
   ticketDetail?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'], ParentType, ContextType, PaymentVerificationNodeTicketDetailArgs>,
   isManuallyEditable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -26113,6 +26177,7 @@ export type Resolvers<ContextType = any> = {
   LogEntryNode?: LogEntryNodeResolvers<ContextType>,
   LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>,
   LogEntryNodeEdge?: LogEntryNodeEdgeResolvers<ContextType>,
+  MarkPaymentRecordAsFailedMutation?: MarkPaymentRecordAsFailedMutationResolvers<ContextType>,
   MergeRegistrationDataImportMutation?: MergeRegistrationDataImportMutationResolvers<ContextType>,
   Mutations?: MutationsResolvers<ContextType>,
   NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<ContextType>,
