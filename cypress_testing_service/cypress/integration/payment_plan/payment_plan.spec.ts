@@ -8,17 +8,15 @@ import {
 
 let programName;
 let targetPopulationName;
-let individualIds;
+let individualIds = [];
 let paymentPlanUnicefId;
 let fspXlsxFilenames;
 const downloadsFolder = Cypress.config('downloadsFolder');
-
 
 const fileName = (id) => `payment_plan_payment_list_${id}`;
 
 const xlsxFileName = (id) => `${fileName(id)}.xlsx`;
 const zipFileName = (id) => `${fileName(id)}.zip`;
-
 
 const maxInt = 2147483647;
 
@@ -52,7 +50,7 @@ Given('There are individuals and households imported', () => {
     'Test import '.concat(new Date().toISOString()),
   );
 
-  const rdiFileName = 'rdi_import_3_hh_3_ind.xlsx';
+  const rdiFileName = `rdi_import_3_hh_3_ind_seed_${uniqueSeed}.xlsx`;
   cy.fixture(rdiFileName, 'base64').then((fileContent) => {
     cy.get('[data-cy="file-input"]').upload({
       fileContent,
@@ -81,7 +79,7 @@ Given('There are individuals and households imported', () => {
   cy.reload();
   cy.get('div').contains('MERGED');
   cy.get('button > span').contains('Individuals').click({ force: true });
-  individualIds = getIndividualsFromRdiDetails(cy, 3);
+  getIndividualsFromRdiDetails(cy, 3, individualIds);
 });
 
 Given('Each imported individual has a payment channel', () => {
@@ -104,7 +102,7 @@ Given('There are steficon rules provided', () => {
 
   cy.visit('/api/unicorn/steficon/rulecommit/add/');
   cy.get('#id_rule').select(uniqueSeed);
-  cy.get('#id_definition').clear().type('result.value=100');
+  cy.get('#id_definition').clear().type('result.value=20');
   cy.get('input[name="is_release"]').click();
   cy.get('input[name="enabled"]').click();
   cy.get('input[name="version"]').type(
@@ -157,11 +155,11 @@ Given('I have target population in ready status', () => {
   cy.get('[data-cy="status-container"]').contains('Ready');
 });
 
-Given("Business area is payment plan applicable", () => {
+Given('Business area is payment plan applicable', () => {
   cy.visit('/api/unicorn/core/businessarea/');
   cy.get('th').contains('Afghanistan').parent().find('a').click();
   cy.get('#id_is_payment_plan_applicable').should('be.checked');
-})
+});
 
 When('I visit the main dashboard', () => {
   cy.visit('/');
@@ -230,15 +228,14 @@ When('I lock the Payment Plan', () => {
 });
 
 Then('I see the entitlements input', () => {
-  cy.get('[data-cy=input-entitlement-formula] > .MuiSelect-root').click({
-    force: true,
-  });
+  cy.get('[data-cy=input-entitlement-formula]').should('exist');
 });
 
 When('I choose the steficon rule', () => {
-  // cy.get('[data-cy="select-option-0"]').click();
+  cy.get('[data-cy=input-entitlement-formula] > .MuiSelect-root').click({
+    force: true,
+  });
   cy.get('[data-cy="input-entitlement-formula"]').click({ force: true });
-  // cy.get(`[data-cy="select-option-${uniqueSeed}"`).click({force: true});
   cy.get('li').contains(uniqueSeed).click({ force: true });
 });
 
@@ -252,10 +249,8 @@ Then('I see the entitlements calculated', () => {
   // TODO: check the amount
 });
 
-And('I am able to set up FSPs', () => {
-  cy.get('[data-cy="button-set-up-fsp"]', {
-    timeout: 10000,
-  }).click({ force: true });
+When('I click Set up FSP button', () => {
+  cy.get('[data-cy="button-set-up-fsp"]').click({ force: true });
 });
 
 Then('I should see the Set up FSP page', () => {
@@ -338,7 +333,7 @@ When('I download the xlsx template', () => {
 
 Then('I fill the xlsx template', () => {
   // Wait for the file to be generated
-  cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
   const name = xlsxFileName(paymentPlanUnicefId);
   const downloadedFilePath = `${downloadsFolder}/${name}`;
   cy.exec(`node cypress/scripts/fillXlsxEntitlements.js ${downloadedFilePath}`);
@@ -347,6 +342,7 @@ Then('I fill the xlsx template', () => {
 When('I upload the xlsx template', () => {
   const name = xlsxFileName(paymentPlanUnicefId);
   const filledFilePath = `out_${name}`;
+  cy.log(filledFilePath);
   cy.get('[data-cy="button-import"]').click({ force: true });
   cy.fixture(filledFilePath, 'base64').then((fileContent) => {
     cy.get('[data-cy="file-input"]').upload({
@@ -358,51 +354,54 @@ When('I upload the xlsx template', () => {
     });
   });
   cy.get('[data-cy="button-import-entitlement"').click({ force: true });
-  cy.get('[data-cy="imported-file-name"]').should('exist');
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
 });
 
-And("I see that all individuals have proper payment channels", () => {
-  cy.get("td").should("not.contain", "Missing");
-})
+And('I see that all individuals have proper payment channels', () => {
+  cy.get('td').should('not.contain', 'Missing');
+});
 
-And("I export xlsx to zip file", () => {
+And('I export xlsx to zip file', () => {
   cy.get('[data-cy="button-export-xlsx"]').click({ force: true });
   cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
   cy.get('[data-cy="button-download-xlsx"]').click({ force: true });
   cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
-})
+});
 
-When("I unarchive the zip file", () => {
+When('I unarchive the zip file', () => {
   const name = zipFileName(paymentPlanUnicefId);
   const downloadedFilePath = `${downloadsFolder}/${name}`;
   cy.exec(`unzip ${downloadedFilePath} -d ${downloadsFolder}`);
-})
+});
 
 Then('I see the {int} xlsx files', (count) => {
   const currentRunFileName = fileName(paymentPlanUnicefId);
-  cy.exec(`find ${downloadsFolder} | grep ${currentRunFileName} | grep FSP | sed 's@.*/@@'`).then((result) => {
-    fspXlsxFilenames = result.stdout.split("\n");
-    cy.log(fspXlsxFilenames)
+  cy.exec(
+    `find ${downloadsFolder} | grep ${currentRunFileName} | grep FSP | sed 's@.*/@@'`,
+  ).then((result) => {
+    fspXlsxFilenames = result.stdout.split('\n');
+    cy.log(fspXlsxFilenames);
     expect(fspXlsxFilenames.length).to.eq(count);
-  })
-})
+  });
+});
 
 When('I fill the reconciliation info', () => {
   const fspFilename = fspXlsxFilenames[0];
-  cy.log(downloadsFolder)
+  cy.log(downloadsFolder);
   const downloadedFilePath = `${downloadsFolder}/${fspFilename}`;
-  cy.log(downloadedFilePath)
-  cy.exec(`node cypress/scripts/fillXlsxReconciliation.js "${downloadedFilePath}"`);
-})
+  cy.log(downloadedFilePath);
+  cy.exec(
+    `node cypress/scripts/fillXlsxReconciliation.js "${downloadedFilePath}"`,
+  );
+});
 
 And('I upload the reconciliation info', () => {
   const fspFilename = fspXlsxFilenames[0];
 
   const filledFilePath = `out_${fspFilename}`;
-  cy.log(filledFilePath)
+  cy.log(filledFilePath);
   cy.get('[data-cy="button-import"]').click({ force: true });
   cy.fixture(filledFilePath, 'base64').then((fileContent) => {
     cy.get('[data-cy="file-input"]').upload({
@@ -418,11 +417,11 @@ And('I upload the reconciliation info', () => {
   cy.get('[data-cy="button-import-submit"').click({ force: true });
   cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
-})
+});
 
 Then('I see the delivered quantities for each payment', () => {
   cy.get('[data-cy="delivered-quantity-cell"]').each(($el) => {
     cy.wrap($el).should('contain', 'AFN');
     cy.wrap($el).should('contain', '100');
-  })
-})
+  });
+});

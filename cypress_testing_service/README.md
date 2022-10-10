@@ -38,3 +38,11 @@ Or by opening the window to play with it in the browser:
 ```
 yarn cy:open
 ```
+
+To clean up after running a lot of tests, you can just call
+
+```sh
+yarn clean
+```
+
+This command will remove the generated .xlsx files in downloads and in fixtures.

@@ -32,7 +32,7 @@ export const IndividualsFilter = ({
             label={t('Search')}
             value={filter.text}
             onChange={(e) => handleFilterChange(e, 'text')}
-            data-cy='filters-search'
+            data-cy='ind-filters-search'
           />
         </Grid>
         <Grid item>

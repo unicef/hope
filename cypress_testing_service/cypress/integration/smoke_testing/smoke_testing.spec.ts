@@ -20,5 +20,5 @@ And('I fill in the login form', () => {
 
 Then('I should see the admin panel contents', () => {
   cy.get('a').contains('HOPE Administration');
-  cy.get('p').contains('Please enter the correct username').should('not.exist');
+  cy.contains('Please enter the correct username').should('not.exist');
 });
