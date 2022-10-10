@@ -24,7 +24,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
+from hct_mis_api.apps.payment.validators import is_right_phone_number_format
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -847,6 +847,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
+        self.save()
 
     def unwithdraw(self):
         self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)

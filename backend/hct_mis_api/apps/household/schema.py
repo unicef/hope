@@ -60,7 +60,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     programs_with_delivered_quantity,
 )
-from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
+from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.schema import (
