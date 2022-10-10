@@ -115,7 +115,7 @@ def create_es_query(options):
                 query_term_fields.append({
                     "term": {
                         f"{k}.id": {
-                            "value": decode_id_string(v) if k == "assigned_to" else v
+                            "value": decode_id_string(v)
                         }
                     }
                 })
@@ -123,7 +123,7 @@ def create_es_query(options):
                 query_term_fields.append({
                     "term": {
                         k: {
-                            "value": v
+                            "value": int(v) if v.isdigit() else v
                         }
                     }
                 })
@@ -138,14 +138,14 @@ def create_es_query(options):
             else:
                 query_terms_fields.append({
                     "terms": {
-                        k: v
+                        k: [int(status) for status in v]
                     }
                 })
 
-    if grievance_status == "active":
+    if grievance_status == "active" and options.get("status") == [""]:
         query_terms_fields.append({
             "terms": {
-                "status":  ["New", "Assigned", "In Progress", "On Hold", "For Approval"]
+                "status":  [1, 2, 3, 4, 5]
             }
         })
 
