@@ -22,8 +22,8 @@ describe('components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPayme
       buttonImport.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
-    const inputFile = document.querySelector<HTMLInputElement>('input[type="file"]');
-    const buttonImportSubmit = document.querySelector('[data-cy="button-import-submit"]');
+    const inputFile = document.querySelector('[data-cy="file-input"]');
+    const buttonImportSubmit = document.querySelector('[data-cy="button-import-entitlement"]');
     const buttonClose = document.querySelector('[data-cy="close-button"]');
 
     expect(inputFile).toBeInTheDocument();
