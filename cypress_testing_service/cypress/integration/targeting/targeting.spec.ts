@@ -28,7 +28,7 @@ Given('There are individuals and households imported', () => {
   cy.visit('/');
   clearCache();
   cy.get('span')
-    .contains('Registration Data Import', { timeout: 10000 })
+    .contains('Registration Data Import')
     .click();
   cy.get('button > span').contains('IMPORT').click({ force: true });
 
@@ -89,7 +89,7 @@ When('I visit the main dashboard', () => {
 });
 
 Then('I should see the side panel with Targeting option', () => {
-  cy.get('span').contains('Targeting', { timeout: 10000 });
+  cy.get('span').contains('Targeting');
 });
 
 When('I click on Targeting option', () => {

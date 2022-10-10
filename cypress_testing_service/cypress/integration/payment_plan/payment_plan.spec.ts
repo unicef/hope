@@ -39,7 +39,7 @@ Given('There are individuals and households imported', () => {
   cy.visit('/');
   clearCache();
   cy.get('span')
-    .contains('Registration Data Import', { timeout: 10000 })
+    .contains('Registration Data Import')
     .click();
   cy.get('button > span').contains('IMPORT').click({ force: true });
 
@@ -119,7 +119,7 @@ Given('There are steficon rules provided', () => {
 Given('I have an active program', () => {
   cy.visit('/');
   cy.get('span').contains('Programme Management').click();
-  cy.get('[data-cy="button-new-program"]', { timeout: 10000 }).click({
+  cy.get('[data-cy="button-new-program"]').click({
     force: true,
   });
   programName = fillProgramForm(cy);
@@ -166,7 +166,7 @@ When('I visit the main dashboard', () => {
 });
 
 Then('I should see the side panel with Payment Module option', () => {
-  cy.get('span').contains('Payment Module', { timeout: 10000 });
+  cy.get('span').contains('Payment Module');
 });
 
 When('I click on Payment Module option', () => {
@@ -276,7 +276,7 @@ When('I select the FSPs and save', () => {
 });
 
 Then('I should see volumes by delivery mechanisms', () => {
-  cy.contains('Volume by Delivery Mechanism in USD', { timeout: 10000 });
+  cy.contains('Volume by Delivery Mechanism in USD');
 });
 
 When('I lock the FSPs', () => {
