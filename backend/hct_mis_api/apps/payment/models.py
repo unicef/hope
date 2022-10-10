@@ -868,7 +868,12 @@ class CashPlan(GenericPaymentPlan):
         else:
             params &= Q(verification__isnull=True)
 
-        payment_records = self.payment_items.filter(params).distinct()
+        payment_records = (
+            self.payment_items.select_related("head_of_household")
+            .only("parent", "head_of_household__phone_no", "head_of_household__phone_no_alternative")
+            .filter(params)
+            .distinct()
+        )
 
         if extra_validation:
             payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
@@ -1210,6 +1215,22 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
         "payment.CashPlan", on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
     )
 
+    def mark_as_active(self):
+        self.status = self.STATUS_ACTIVE
+        self.completion_date = None
+        if self.activation_date is None:
+            self.activation_date = timezone.now()
+
+    def mark_as_finished(self):
+        self.status = self.STATUS_FINISHED
+        if self.completion_date is None:
+            self.completion_date = timezone.now()
+
+    def mark_as_pending(self):
+        self.status = self.STATUS_PENDING
+        self.completion_date = None
+        self.activation_date = None
+
 
 class ApprovalProcess(TimeStampedUUIDModel):
     sent_for_approval_by = models.ForeignKey(
@@ -1264,19 +1285,3 @@ class Approval(TimeStampedUUIDModel):
         }
 
         return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type)
-
-    def mark_as_active(self):
-        self.status = self.STATUS_ACTIVE
-        self.completion_date = None
-        if self.activation_date is None:
-            self.activation_date = timezone.now()
-
-    def mark_as_finished(self):
-        self.status = self.STATUS_FINISHED
-        if self.completion_date is None:
-            self.completion_date = timezone.now()
-
-    def mark_as_pending(self):
-        self.status = self.STATUS_PENDING
-        self.completion_date = None
-        self.activation_date = None

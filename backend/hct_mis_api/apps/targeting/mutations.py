@@ -208,7 +208,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         targeting_criteria_input = input.get("targeting_criteria")
 
         if target_population.is_locked() and name:
-            msg = "Name can't be changed when Target Population is in LOCKED status"
+            msg = "Name can't be changed when Target Population is in Locked status"
             logger.error(msg)
             raise ValidationError(msg)
         if target_population.is_finalized():

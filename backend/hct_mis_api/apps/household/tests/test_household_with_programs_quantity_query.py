@@ -7,9 +7,14 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentRecordFactory,
+)
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestHouseholdWithProgramsQuantityQuery(APITestCase):

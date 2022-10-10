@@ -673,6 +673,14 @@ test = ["django-constance", "django-constance", "django-picklefield", "django-pi
 ua = ["user_agents"]
 
 [[package]]
+name = "django-fsm"
+version = "2.8.0"
+description = "Django friendly finite state machine support."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "django-hijack"
 version = "3.2.1"
 description = "django-hijack allows superusers to hijack (=login as) and work on behalf of another user."
@@ -787,6 +795,17 @@ Django = ">=2.2"
 [package.extras]
 phonenumbers = ["phonenumbers (>=7.0.2)"]
 phonenumberslite = ["phonenumberslite (>=7.0.2)"]
+
+[[package]]
+name = "django-querysetsequence"
+version = "0.16"
+description = "Chain together multiple (disparate) QuerySets to treat them as a single QuerySet."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+django = ">=2.2"
 
 [[package]]
 name = "django-redis"
@@ -1785,6 +1804,14 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "pygraphviz"
+version = "1.10"
+description = "Python interface to Graphviz"
+category = "dev"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
 name = "PyJWT"
 version = "2.5.0"
 description = "JSON Web Token implementation in Python"
@@ -2478,7 +2505,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.*"
-content-hash = "5db197213ba7c4ca025f4efc2a8e7370841b2df32de0301f45300eff13a1cee0"
+content-hash = "e708b3d762353e6763fad4846d18091377f983ad6c41002b684cca9a5f1b1ed5"
 
 [metadata.files]
 amqp = [
@@ -2790,6 +2817,10 @@ django-filter = [
 django-front-door = [
     {file = "django-front-door-0.2.0.tar.gz", hash = "sha256:ec551bb31e5e0f5e1ba892257c04327a17834fab99aa2c0923ac4371f3c8d802"},
 ]
+django-fsm = [
+    {file = "django-fsm-2.8.0.tar.gz", hash = "sha256:4649167bf5bd4b2990dd682644d71b52650f120005a98755cfffc1a047a555d2"},
+    {file = "django_fsm-2.8.0-py2.py3-none-any.whl", hash = "sha256:cb7230d84fd25d3db9f9473e0a1b9140a61aa46ea88042f73e3cb2760637e92a"},
+]
 django-hijack = [
     {file = "django-hijack-3.2.1.tar.gz", hash = "sha256:8df524fd085a43205a6bb497c53fd94483824b4f3179762fc1c31c1dea58d1ca"},
     {file = "django_hijack-3.2.1-py3-none-any.whl", hash = "sha256:b0723750b247e5b1f69f600a40b1d512404061f33918e0bffb4aa928314ea1db"},
@@ -2825,6 +2856,10 @@ django-multiselectfield = [
 django-phonenumber-field = [
     {file = "django-phonenumber-field-6.1.0.tar.gz", hash = "sha256:b1ff950f90a8911ff323ccf77c8f6fe4299a9f671fa61c8734a6994359f07446"},
     {file = "django_phonenumber_field-6.1.0-py3-none-any.whl", hash = "sha256:897b902a1654b0eb21f6268498a3359e2c4eb90af9585cb8693af186ede8c5bb"},
+]
+django-querysetsequence = [
+    {file = "django-querysetsequence-0.16.tar.gz", hash = "sha256:aa274acb20cfd395116213eff982d37dd18342ca3b31f2718554891b614471a2"},
+    {file = "django_querysetsequence-0.16-py3-none-any.whl", hash = "sha256:529ade0ed5b6c9a3e70e0c814a70f726f081c60eef59635872dc55c3388e8918"},
 ]
 django-redis = [
     {file = "django-redis-5.2.0.tar.gz", hash = "sha256:8a99e5582c79f894168f5865c52bd921213253b7fd64d16733ae4591564465de"},
@@ -3245,7 +3280,6 @@ oauthlib = [
     {file = "oauthlib-3.2.1.tar.gz", hash = "sha256:1565237372795bf6ee3e5aba5e2a85bd5a65d0e2aa5c628b9a97b7d7a0da3721"},
 ]
 odfpy = [
-    {file = "odfpy-1.4.1-py2.7.egg", hash = "sha256:fc3b8d1bc098eba4a0fda865a76d9d1e577c4ceec771426bcb169a82c5e9dfe0"},
     {file = "odfpy-1.4.1.tar.gz", hash = "sha256:db766a6e59c5103212f3cc92ec8dd50a0f3a02790233ed0b52148b70d3c438ec"},
 ]
 openpyxl = [
@@ -3428,6 +3462,9 @@ pyflakes = [
 Pygments = [
     {file = "Pygments-2.12.0-py3-none-any.whl", hash = "sha256:dc9c10fb40944260f6ed4c688ece0cd2048414940f1cea51b8b226318411c519"},
     {file = "Pygments-2.12.0.tar.gz", hash = "sha256:5eb116118f9612ff1ee89ac96437bb6b49e8f04d8a13b514ba26f620208e26eb"},
+]
+pygraphviz = [
+    {file = "pygraphviz-1.10.zip", hash = "sha256:457e093a888128903251a266a8cc16b4ba93f3f6334b3ebfed92c7471a74d867"},
 ]
 PyJWT = [
     {file = "PyJWT-2.5.0-py3-none-any.whl", hash = "sha256:8d82e7087868e94dd8d7d418e5088ce64f7daab4b36db654cbaedb46f9d1ca80"},

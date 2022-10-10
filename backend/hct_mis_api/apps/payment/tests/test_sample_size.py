@@ -77,7 +77,7 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
     def test_number_of_queries(self):
         PaymentRecordFactory.create_batch(
             4,
-            cash_plan=self.cash_plan,
+            parent=self.cash_plan,
             business_area=self.business_area,
             household=self.household,
             head_of_household_id=self.individuals[1].id,
