@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField, IntegerRangeField
-from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
     RangeMinValueValidator,
