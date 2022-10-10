@@ -95,6 +95,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     total_days = graphene.String()
     partner = graphene.Field(PartnerType)
     programme = graphene.Field(ProgramNode)
+    documentation = graphene.List(GrievanceDocumentNode)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
