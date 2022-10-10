@@ -24,7 +24,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
-
+from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -253,6 +253,39 @@ class PaymentConflictDataNode(graphene.ObjectType):
         return encode_id_base64(self["payment_id"], "Payment")
 
 
+class GenericPaymentNode(graphene.ObjectType):
+    """using this for GenericFK like in PaymentVerification (Payment and PaymentRecord models)"""
+
+    id = graphene.String()
+    obj_type = graphene.String()
+    unicef_id = graphene.String()
+    currency = graphene.String()
+    delivered_quantity = graphene.Float()
+    delivered_quantity_usd = graphene.Float()
+    household = graphene.Field(HouseholdNode)
+
+    def resolve_id(self, info):
+        return to_global_id(self.__class__.__name__ + "Node", self.id)
+
+    def resolve_obj_type(self, info):
+        return self.__class__.__name__
+
+    def resolve_unicef_id(self, info):
+        return self.unicef_id
+
+    def resolve_currency(self, info):
+        return self.currency
+
+    def resolve_delivered_quantity_usd(self, info):
+        return self.delivered_quantity_usd
+
+    def resolve_delivered_quantity(self, info):
+        return self.delivered_quantity
+
+    def resolve_household(self, info):
+        return self.household
+
+
 class PaymentNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
     payment_plan_hard_conflicted = graphene.Boolean()
@@ -405,7 +438,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
     is_manually_editable = graphene.Boolean()
-    payment = graphene.Field(PaymentNode)   # TODO: maybe add generic node for Payment and PaymentRecord
+    payment = graphene.Field(GenericPaymentNode)
 
     class Meta:
         model = PaymentVerification
@@ -550,12 +583,16 @@ class GenericPaymentPlanNode(graphene.ObjectType):
 
     id = graphene.String()
     obj_type = graphene.String()
+    payment_verification_summary = graphene.Field(PaymentVerificationSummaryNode)
 
     def resolve_id(self, info, **kwargs):
         return to_global_id(self.__class__.__name__ + "Node", self.id)
 
     def resolve_obj_type(self, info, **kwargs):
         return self.__class__.__name__
+
+    def resolve_payment_verification_summary(self, info,):
+        return self.payment_verification_summary
 
 
 class Query(graphene.ObjectType):
@@ -725,7 +762,8 @@ class Query(graphene.ObjectType):
         # TODO: FIX error
         # "'ExtendedQuerySetSequence' object has no attribute 'clone'"
         # payment_qs = get_payment_items_sequence_qs().filter(id=OuterRef("payment_object_id"))
-        payment_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
+        # payment_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
+        print(PaymentVerification.objects.all(), PaymentVerification.objects.all().count())
 
         return (
             PaymentVerification.objects.filter(

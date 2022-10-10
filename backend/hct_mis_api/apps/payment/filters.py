@@ -73,26 +73,26 @@ class PaymentVerificationFilter(FilterSet):
     # TODO refactor this one
     # 'payment' instead of 'payment_record'
     search = CharFilter(method="search_filter")
-    business_area = CharFilter(field_name="payment_record__business_area__slug")
+    business_area = CharFilter(field_name="payment__business_area___slug")
     verification_channel = CharFilter(field_name="payment_verification_plan__verification_channel")
 
     class Meta:
-        fields = ("payment_verification_plan", "status")  # TODO: add 'payment_verification_plan__payment_plan'
+        fields = ("payment_verification_plan", "status")  # TODO: add "payment_verification_plan__payment_plan" ['GenericForeignKey' object has no attribute 'get_lookup']
         model = PaymentVerification
 
     order_by = OrderingFilter(
         fields=(
-            "payment_record__ca_id",
+            "payment__ca_id",
             "payment_verification_plan__verification_channel",
             "payment_verification_plan__unicef_id",
             "status",
-            "payment_record__head_of_household__family_name",
-            "payment_record__household__unicef_id",
-            "payment_record__household__status",
-            "payment_record__delivered_quantity",
             "received_amount",
-            "payment_record__head_of_household__phone_no",
-            "payment_record__head_of_household__phone_no_alternative",
+            "payment__head_of_household__family_name",
+            "payment__household__unicef_id",
+            "payment__household__status",
+            "payment__delivered_quantity",
+            "payment__head_of_household__phone_no",
+            "payment__head_of_household__phone_no_alternative",
         )
     )
 
@@ -100,16 +100,16 @@ class PaymentVerificationFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(payment_record__ca_id__istartswith=value)
+            q_obj |= Q(payment__ca_id__istartswith=value)
             q_obj |= Q(payment_verification_plan__unicef_id__istartswith=value)
-            q_obj |= Q(received_amount__istartswith=value)
-            q_obj |= Q(payment_record__household__unicef_id__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__full_name__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__given_name__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__middle_name__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__family_name__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__phone_no__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__phone_no_alternative__istartswith=value)
+            q_obj |= Q(received__istartswith=value)
+            q_obj |= Q(payment__household__unicef_id__istartswith=value)
+            q_obj |= Q(payment__head_of_household__full_name__istartswith=value)
+            q_obj |= Q(payment__head_of_household__given_name__istartswith=value)
+            q_obj |= Q(payment__head_of_household__middle_name__istartswith=value)
+            q_obj |= Q(payment__head_of_household__family_name__istartswith=value)
+            q_obj |= Q(payment__head_of_household__phone_no__istartswith=value)
+            q_obj |= Q(payment__head_of_household__phone_no_alternative__istartswith=value)
         return qs.filter(q_obj)
 
 
