@@ -21,6 +21,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        CITextExtension(),
         migrations.CreateModel(
             name='BusinessArea',
             fields=[
