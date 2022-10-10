@@ -24,12 +24,6 @@ class TestApproveTargetPopulationMutation(APITestCase):
                   status
                   householdList {
                     totalCount
-                    edges {
-                      node {
-                        size
-                        residenceStatus
-                      }
-                    }
                   }
                 }
               }
@@ -137,12 +131,6 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
                   status
                   households {
                     totalCount
-                    edges {
-                      node {
-                        size
-                        residenceStatus
-                      }
-                    }
                   }
                 }
               }
@@ -247,21 +235,10 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
                 targetPopulation {
                   status
                   householdList{
-                    edges{
-                      node{
-                        size
-                        residenceStatus
-                      }
-                    }
+                    totalCount
                   }
                   households {
                     totalCount
-                    edges {
-                      node {
-                        size
-                        residenceStatus
-                      }
-                    }
                   }
                 }
               }

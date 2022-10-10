@@ -131,7 +131,7 @@ class TestPaymentPlanServices(APITestCase):
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock):
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
-        new_targeting = TargetPopulationFactory()
+        new_targeting = TargetPopulationFactory(program=None)
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
