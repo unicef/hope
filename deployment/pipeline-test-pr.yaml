@@ -208,3 +208,57 @@ stages:
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
 
+  - stage: test_e2e
+    dependsOn: [test_backend, test_frontend]
+    displayName: Test-E2E
+    jobs:
+      - job: cypress_tests
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[CYPRESS TEST]"
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registry)
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: '.env-django-test'
+          - task: CmdLine@2
+            displayName: "Setup .env and docker-compose.tst.yml"
+            inputs:
+              script: |
+               mv deployment/docker-compose.tst.yml docker-compose.tst.yml
+               mv $(Agent.TempDirectory)/.env-django-test .env
+          - task: DockerCompose@0
+            displayName: "Start the application"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registry)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'up -d'
+          - task: CmdLine@2
+            displayName: "Install npm"
+            inputs:
+              script: |
+               curl -sL https://deb.nodesource.com/setup_13.x | bash -
+               apt install -y nodejs
+          - task: CmdLine@2
+            displayName: "Install yarn"
+            inputs:
+              script: |
+               npm install -g yarn
+          - task: CmdLine@2
+            displayName: "Install cypress dependencies"
+            inputs:
+              script: |
+               cd cypress_testing_service
+               yarn install
+          - task: CmdLine@2
+            displayName: "Run cypress tests"
+            inputs:
+              script: |
+               cd cypress_testing_service
+               yarn cy:run
