@@ -31,20 +31,6 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_0
         'lockTargetPopulation': {
             'targetPopulation': {
                 'householdList': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ],
                     'totalCount': 2
                 },
                 'status': 'LOCKED'
@@ -98,36 +84,9 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
         'finalizeTargetPopulation': {
             'targetPopulation': {
                 'householdList': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ]
+                    'totalCount': 2
                 },
                 'households': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ],
                     'totalCount': 2
                 },
                 'status': 'PROCESSING'
@@ -161,36 +120,9 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
         'finalizeTargetPopulation': {
             'targetPopulation': {
                 'householdList': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ]
+                    'totalCount': 2
                 },
                 'households': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ],
                     'totalCount': 2
                 },
                 'status': 'PROCESSING'
@@ -224,20 +156,6 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
         'unlockTargetPopulation': {
             'targetPopulation': {
                 'households': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ],
                     'totalCount': 2
                 },
                 'status': 'OPEN'
