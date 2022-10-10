@@ -242,7 +242,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                       class="sc-bZQynM kQLhqL"
                       data-cy="status-container"
                     >
-                      ACTIVE
+                      Active
                     </div>
                   </div>
                 </td>
