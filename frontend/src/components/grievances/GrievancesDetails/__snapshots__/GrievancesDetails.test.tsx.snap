@@ -9,7 +9,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
       class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="sc-gzVnrw AoKEu"
+        class="sc-gqjmRU fcJvti"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -35,10 +35,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               </span>
               <div>
                 <div
-                  class="sc-EHOje gFjtOh"
+                  class="sc-iwsKbI dUmvrG"
                 >
                   <div
-                    class="sc-bZQynM kQLhqL"
+                    class="sc-gZMcBi kXwxiR"
                     data-cy="status-container"
                   >
                     In Progress
@@ -59,10 +59,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               </span>
               <div>
                 <div
-                  class="sc-EHOje gFjtOh"
+                  class="sc-iwsKbI dUmvrG"
                 >
                   <div
-                    class="sc-bZQynM fNRxvN"
+                    class="sc-gZMcBi fFqJEN"
                     data-cy="status-container"
                   >
                     High
@@ -83,10 +83,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               </span>
               <div>
                 <div
-                  class="sc-EHOje gFjtOh"
+                  class="sc-iwsKbI dUmvrG"
                 >
                   <div
-                    class="sc-bZQynM fNRxvN"
+                    class="sc-gZMcBi fFqJEN"
                     data-cy="status-container"
                   >
                     Very urgent
@@ -157,7 +157,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               <div>
                 <span>
                   <a
-                    class="sc-bwzfXH emFVa"
+                    class="sc-bwzfXH kvzhbg"
                     href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE="
                   >
                     HH-20-0000.0001
@@ -179,7 +179,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               <div>
                 <span>
                   <a
-                    class="sc-bwzfXH emFVa"
+                    class="sc-bwzfXH kvzhbg"
                     href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
                   >
                     IND-88-0000.0005
@@ -315,6 +315,25 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               </span>
               <div>
                 -
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Documentation
+              </span>
+              <div>
+                <div
+                  class="MuiBox-root MuiBox-root-1"
+                >
+                  -
+                </div>
               </div>
             </div>
           </div>

@@ -104,68 +104,64 @@ export function validate(
       }
 
       if (values.individualDataUpdateFieldsDocuments?.length) {
-        values.individualDataUpdateFieldsDocuments.forEach((el, index) => {
-          const doc = values.individualDataUpdateFieldsDocuments[index];
-          if (!doc.country || !doc.type || !doc.number) {
-            errors.individualDataUpdateFieldsDocuments =
-              'Document country, type and number are required';
-          }
-        });
+        values.individualDataUpdateFieldsDocuments
+          .filter((el) => el)
+          .forEach((doc) => {
+            if (!doc.country || !doc.type || !doc.number) {
+              errors.individualDataUpdateFieldsDocuments =
+                'Document country, type and number are required';
+            }
+          });
       }
       if (values.individualDataUpdateFieldsDocumentsToEdit?.length) {
-        values.individualDataUpdateFieldsDocumentsToEdit.forEach(
-          (el, index) => {
-            const doc = values.individualDataUpdateFieldsDocumentsToEdit[index];
+        values.individualDataUpdateFieldsDocumentsToEdit
+          .filter((el) => el)
+          .forEach((doc) => {
             if (!doc.country || !doc.type || !doc.number) {
               errors.individualDataUpdateFieldsDocumentsToEdit =
                 'Document country, type and number are required';
             }
-          },
-        );
+          });
       }
       if (values.individualDataUpdateFieldsIdentities?.length) {
-        values.individualDataUpdateFieldsIdentities.forEach((el, index) => {
-          const doc = values.individualDataUpdateFieldsIdentities[index];
-          if (!doc.country || !doc.agency || !doc.number) {
-            errors.individualDataUpdateFieldsIdentities =
-              'Identity country, agency and number are required';
-          }
-        });
+        values.individualDataUpdateFieldsIdentities
+          .filter((el) => el)
+          .forEach((doc) => {
+            if (!doc.country || !doc.agency || !doc.number) {
+              errors.individualDataUpdateFieldsIdentities =
+                'Identity country, agency and number are required';
+            }
+          });
       }
       if (values.individualDataUpdateFieldsIdentitiesToEdit?.length) {
-        values.individualDataUpdateFieldsIdentitiesToEdit.forEach(
-          (el, index) => {
-            const doc =
-              values.individualDataUpdateFieldsIdentitiesToEdit[index];
+        values.individualDataUpdateFieldsIdentitiesToEdit
+          .filter((el) => el)
+          .forEach((doc) => {
             if (!doc.country || !doc.agency || !doc.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity country, agency and number are required';
             }
-          },
-        );
+          });
       }
       if (values.individualDataUpdateFieldsPaymentChannelsToEdit?.length) {
-        values.individualDataUpdateFieldsPaymentChannelsToEdit.forEach(
-          (el, index) => {
-            const doc =
-              values.individualDataUpdateFieldsPaymentChannelsToEdit[index];
+        values.individualDataUpdateFieldsPaymentChannelsToEdit
+          .filter((el) => el)
+          .forEach((doc) => {
             if (!doc.bankName || !doc.bankAccountNumber) {
               errors.individualDataUpdateFieldsPaymentChannelsToEdit =
                 'Bank name and bank account number are required';
             }
-          },
-        );
+          });
       }
       if (values.individualDataUpdateFieldsPaymentChannels?.length) {
-        values.individualDataUpdateFieldsPaymentChannels.forEach(
-          (el, index) => {
-            const doc = values.individualDataUpdateFieldsPaymentChannels[index];
+        values.individualDataUpdateFieldsPaymentChannels
+          .filter((el) => el)
+          .forEach((doc) => {
             if (!doc.bankName || !doc.bankAccountNumber) {
               errors.individualDataUpdateFieldsPaymentChannels =
                 'Bank name and bank account number are required';
             }
-          },
-        );
+          });
       }
     }
   }
@@ -197,6 +193,26 @@ export function validate(
         errors.individualData = individualDataErrors;
       }
     }
+  }
+
+  if (values.documentation?.length) {
+    values.documentation
+      .filter((el) => el)
+      .forEach((doc) => {
+        if (!doc.name || !doc.file) {
+          errors.documentation = 'Documentation name and file are required';
+        }
+      });
+  }
+  if (values.documentationToUpdate?.length) {
+    values.documentationToUpdate
+      .filter((el) => el)
+      .forEach((doc) => {
+        if (!doc.name || !doc.file) {
+          errors.documentationToUpdate =
+            'Documentation name and file are required';
+        }
+      });
   }
   return errors;
 }
@@ -470,5 +486,16 @@ export function validateUsingSteps(
     }
     setValidateData(true);
   }
+
+  if (values.documentation?.length) {
+    values.documentation
+      .filter((el) => el)
+      .forEach((doc) => {
+        if (!doc.name || !doc.file) {
+          errors.documentation = 'Documentation name and file are required';
+        }
+      });
+  }
+
   return errors;
 }

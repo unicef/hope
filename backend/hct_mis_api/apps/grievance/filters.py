@@ -40,9 +40,6 @@ class GrievanceOrderingFilter(OrderingFilter):
     def filter(self, qs, value):
         if value and any(v in ["linked_tickets", "-linked_tickets"] for v in value):
             qs = super().filter(qs, value)
-
-            print(qs.filter(description="5").first().linked_tickets.all().values_list("description"))
-
             qs = (
                 qs
                 .annotate(linked=Count("linked_tickets"))
@@ -57,8 +54,6 @@ class GrievanceOrderingFilter(OrderingFilter):
                 )
                 .order_by(F("total_linked") + F("household_unicef_id_count") - 1, "unicef_id")
             )
-
-            print(qs.values_list("description", "total_linked", "household_unicef_id_count", "household_unicef_id"))
 
             if value == ["-linked_tickets"]:
                 return qs.reverse()
