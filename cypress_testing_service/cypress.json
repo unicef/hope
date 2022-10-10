@@ -10,5 +10,6 @@
     },
     "numTestsKeptInMemory": 0,
     "downloadFolder": "cypress/downloads",
-    "projectId": "hope"
+    "projectId": "hope",
+    "defaultCommandTimeout": 15000
 }

@@ -31,7 +31,7 @@ When('I visit the main dashboard', () => {
 });
 
 Then('I should see the side panel with RDI option', () => {
-  cy.get('span').contains('Registration Data Import', { timeout: 10000 });
+  cy.get('span').contains('Registration Data Import');
 });
 
 When('I click on RDI option', () => {
