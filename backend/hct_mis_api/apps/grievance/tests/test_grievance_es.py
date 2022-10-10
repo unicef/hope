@@ -13,6 +13,12 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.grievance.constants import (
+    PRIORITY_LOW,
+    PRIORITY_HIGH,
+    URGENCY_URGENT,
+    URGENCY_VERY_URGENT,
+)
 
 
 def execute_test_es_query(query_dict):
@@ -28,6 +34,7 @@ def execute_test_es_query(query_dict):
     return es_ids
 
 
+@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", False)
 class TestGrievanceQueryElasticSearch(APITestCase):
     PERMISSION = (
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
@@ -35,7 +42,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
         Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
         Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-        Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER
+        Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
     )
 
     FILTER_BY_SEARCH = """
@@ -324,7 +331,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "created_at": "2022-04-30T09:54:07.827000",
                 "household_unicef_id": "HH-20-0000.0001",
                 "priority": 1,
-                "urgency": 2
+                "urgency": 2,
             }
         )
 
@@ -333,35 +340,21 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             doc_type="_doc",
             id=cls.grievance_ticket_1.id,
             body={
-                "business_area": {
-                    "slug": cls.grievance_ticket_1.business_area.name.lower()
-                },
+                "business_area": {"slug": cls.grievance_ticket_1.business_area.name.lower()},
                 "unicef_id": cls.grievance_ticket_1.unicef_id,
-                "admin2": {
-                    "id": cls.grievance_ticket_1.admin2.id
-                },
-                "registration_data_import": {
-                    "id": None
-                },
-                "category": cls.grievance_ticket_1.get_category_display(),
-                "status": cls.grievance_ticket_1.get_status_display(),
+                "admin2": {"id": cls.grievance_ticket_1.admin2.id},
+                "registration_data_import": {"id": None},
+                "category": cls.grievance_ticket_1.category,
+                "status": cls.grievance_ticket_1.status,
                 "issue_type": None,
-                "assigned_to": {
-                    "id": cls.user.id
-                },
+                "assigned_to": {"id": cls.user.id},
                 "created_at": "2022-04-30T09:54:07.827000",
                 "household_unicef_id": "HH-20-0000.0001",
-                "priority": cls.grievance_ticket_1.get_priority_display(),
-                "urgency": cls.grievance_ticket_1.get_urgency_display(),
+                "priority": cls.grievance_ticket_1.priority,
+                "urgency": cls.grievance_ticket_1.urgency,
                 "grievance_type": "user",
-                "ticket_details": {
-                    "household": {
-                        "head_of_household": {
-                            "family_name": "Kowalska_1"
-                        }
-                    }
-                }
-            }
+                "ticket_details": {"household": {"head_of_household": {"family_name": "Kowalska_1"}}},
+            },
         )
 
         cls.grievance_ticket_2 = GrievanceTicket.objects.create(
@@ -380,7 +373,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "created_at": "2022-05-12T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0001",
                 "priority": 2,
-                "urgency": 3
+                "urgency": 3,
             }
         )
 
@@ -389,35 +382,21 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             doc_type="_doc",
             id=cls.grievance_ticket_2.id,
             body={
-                "business_area": {
-                    "slug": cls.grievance_ticket_2.business_area.name.lower()
-                },
+                "business_area": {"slug": cls.grievance_ticket_2.business_area.name.lower()},
                 "unicef_id": cls.grievance_ticket_2.unicef_id,
-                "admin2": {
-                    "id": cls.grievance_ticket_2.admin2.id
-                },
-                "registration_data_import": {
-                    "id": "04992dce-154b-4938-8e47-74341541ebcf"
-                },
-                "category": cls.grievance_ticket_2.get_category_display(),
-                "status": cls.grievance_ticket_2.get_status_display(),
-                "issue_type": "Fraud and forgery",
-                "assigned_to": {
-                    "id": cls.user2.id
-                },
+                "admin2": {"id": cls.grievance_ticket_2.admin2.id},
+                "registration_data_import": {"id": "04992dce-154b-4938-8e47-74341541ebcf"},
+                "category": cls.grievance_ticket_2.category,
+                "status": cls.grievance_ticket_2.status,
+                "issue_type": 3,
+                "assigned_to": {"id": cls.user2.id},
                 "created_at": "2022-05-12T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0002",
-                "priority": cls.grievance_ticket_2.get_priority_display(),
-                "urgency": cls.grievance_ticket_2.get_urgency_display(),
+                "priority": cls.grievance_ticket_2.priority,
+                "urgency": cls.grievance_ticket_2.urgency,
                 "grievance_type": "user",
-                "ticket_details": {
-                    "household": {
-                        "head_of_household": {
-                            "family_name": "Kowalska_2"
-                        }
-                    }
-                }
-            }
+                "ticket_details": {"household": {"head_of_household": {"family_name": "Kowalska_2"}}},
+            },
         )
 
         cls.grievance_ticket_3 = GrievanceTicket.objects.create(
@@ -435,7 +414,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                 "created_at": "2022-05-05T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0003",
                 "priority": 3,
-                "urgency": 1
+                "urgency": 1,
             }
         )
 
@@ -444,35 +423,21 @@ class TestGrievanceQueryElasticSearch(APITestCase):
             doc_type="_doc",
             id=cls.grievance_ticket_3.id,
             body={
-                "business_area": {
-                    "slug": cls.grievance_ticket_3.business_area.name.lower()
-                },
+                "business_area": {"slug": cls.grievance_ticket_3.business_area.name.lower()},
                 "unicef_id": cls.grievance_ticket_3.unicef_id,
-                "admin2": {
-                    "id": cls.grievance_ticket_3.admin2.id
-                },
-                "registration_data_import": {
-                    "id": None
-                },
-                "category": cls.grievance_ticket_3.get_category_display(),
-                "status": cls.grievance_ticket_3.get_status_display(),
+                "admin2": {"id": cls.grievance_ticket_3.admin2.id},
+                "registration_data_import": {"id": None},
+                "category": cls.grievance_ticket_3.category,
+                "status": cls.grievance_ticket_3.status,
                 "issue_type": None,
-                "assigned_to": {
-                    "id": cls.user.id
-                },
+                "assigned_to": {"id": cls.user.id},
                 "created_at": "2022-05-05T09:12:07.857000",
                 "household_unicef_id": "HH-20-0000.0003",
-                "priority": cls.grievance_ticket_3.get_priority_display(),
-                "urgency": cls.grievance_ticket_3.get_urgency_display(),
+                "priority": cls.grievance_ticket_3.priority,
+                "urgency": cls.grievance_ticket_3.urgency,
                 "grievance_type": "system",
-                "ticket_details": {
-                    "household": {
-                        "head_of_household": {
-                            "family_name": "Kowalska_3"
-                        }
-                    }
-                }
-            }
+                "ticket_details": {"household": {"head_of_household": {"family_name": "Kowalska_3"}}},
+            },
         )
 
     @staticmethod
@@ -491,8 +456,8 @@ class TestGrievanceQueryElasticSearch(APITestCase):
                         "number_of_replicas": 1,
                         "index.store.type": "mmapfs",
                     },
-                    "mappings": json.load(f)
-                }
+                    "mappings": json.load(f),
+                },
             )
 
         return es
@@ -500,10 +465,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
     @classmethod
     def tearDownClass(cls):
         es = Elasticsearch("http://elasticsearch:9200")
-        es.indices.delete(
-            index="test_es_db",
-            ignore=[400, 404]
-        )
+        es.indices.delete(index="test_es_db", ignore=[400, 404])
         super().tearDownClass()
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -543,7 +505,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CATEGORY,
             context={"user": self.user},
-            variables={"category": "Positive Feedback"},
+            variables={"category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -553,7 +515,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_STATUS,
             context={"user": self.user},
-            variables={"status": ["New"]},
+            variables={"status": [GrievanceTicket.STATUS_NEW]},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -563,7 +525,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_STATUS,
             context={"user": self.user},
-            variables={"status": ["On Hold", "In Progress"]},
+            variables={"status": [GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_IN_PROGRESS]},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -573,7 +535,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"createdAtRange": '{\"max\":\"2022-05-01\"}'},
+            variables={"createdAtRange": '{"max":"2022-05-01"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -583,7 +545,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"createdAtRange": '{\"min\":\"2022-05-10\"}'},
+            variables={"createdAtRange": '{"min":"2022-05-10"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -593,7 +555,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"createdAtRange": '{\"min\":\"2022-05-01\",\"max\":\"2022-05-10\"}'},
+            variables={"createdAtRange": '{"min":"2022-05-01","max":"2022-05-10"}'},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -613,7 +575,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ISSUE_TYPE,
             context={"user": self.user},
-            variables={"issueType": "Fraud and forgery"},
+            variables={"issueType": GrievanceTicket.ISSUE_TYPE_FRAUD_FORGERY},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -623,7 +585,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_PRIORITY,
             context={"user": self.user},
-            variables={"priority": "Low"},
+            variables={"priority": PRIORITY_LOW},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -633,7 +595,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_URGENCY,
             context={"user": self.user},
-            variables={"urgency": "Very urgent"},
+            variables={"urgency": URGENCY_VERY_URGENT},
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -648,12 +610,17 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_registration_data_import(self, mock_execute_test_es_query):
+        self.maxDiff = None
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_REGISTRATION_DATA_IMPORT,
             context={"user": self.user},
-            variables={"registrationDataImport": "04992dce-154b-4938-8e47-74341541ebcf"},
+            variables={
+                "registrationDataImport": self.id_to_base64(
+                    "04992dce-154b-4938-8e47-74341541ebcf", "RegistrationDataImportNode"
+                )
+            },
         )
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
@@ -668,15 +635,16 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_multiple_filters_should_return_grievance_1(self, mock_execute_test_es_query):
+        self.maxDiff = None
         self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_MULTIPLE_FILTERS,
             context={"user": self.user},
             variables={
-                "status": ["New"],
-                "priority": "High",
-                "urgency": "Urgent",
-                "grievanceType": "user"
+                "status": [GrievanceTicket.STATUS_NEW],
+                "priority": PRIORITY_HIGH,
+                "urgency": URGENCY_URGENT,
+                "grievanceType": "user",
             },
         )

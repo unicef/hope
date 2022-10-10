@@ -350,6 +350,15 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         return GrievanceTicket.objects.filter(id__in=ids)
 
     @property
+    def existing_tickets(self):  # temporarily linked tickets
+        all_through_objects = GrievanceTicketThrough.objects.filter(
+            Q(linked_ticket=self) | Q(main_ticket=self)
+        ).values_list("main_ticket", "linked_ticket")
+        ids = set(self.flatten(all_through_objects))
+        ids.discard(self.id)
+        return GrievanceTicket.objects.filter(id__in=ids)
+
+    @property
     def is_feedback(self):
         return self.category in (
             self.CATEGORY_NEGATIVE_FEEDBACK,
