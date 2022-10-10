@@ -83,7 +83,7 @@ class TestHopeRedirect(APITestCase):
         PaymentVerificationFactory(
             id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
             payment_verification_plan=payment_verification_plan,
-            payment_record=payment_record,
+            payment=payment_record,
             status=PaymentVerification.STATUS_PENDING,
         )
 

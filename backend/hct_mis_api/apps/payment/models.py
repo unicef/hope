@@ -978,6 +978,10 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         on_delete=models.CASCADE,
     )
 
+    @property
+    def unicef_id(self):
+        return getattr(self, "ca_id")
+
 
 class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     parent = models.ForeignKey(
