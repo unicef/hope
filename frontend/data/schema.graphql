@@ -534,6 +534,16 @@ type CreatePaymentPlanMutation {
   paymentPlan: PaymentPlanNode
 }
 
+input CreatePaymentVerificationInput {
+  sampling: String!
+  verificationChannel: String!
+  businessAreaSlug: String!
+  fullListArguments: FullListArguments
+  randomSamplingArguments: RandomSamplingArguments
+  rapidProArguments: RapidProArguments
+  paymentPlanId: ID!
+}
+
 type CreateProgram {
   validationErrors: Arg
   program: ProgramNode
@@ -589,16 +599,6 @@ input CreateTicketNoteInput {
 
 type CreateTicketNoteMutation {
   grievanceTicketNote: TicketNoteNode
-}
-
-input CreateUpdatePaymentVerificationInput {
-  paymentPlanId: ID!
-  sampling: String!
-  verificationChannel: String!
-  businessAreaSlug: String!
-  fullListArguments: FullListArguments
-  randomSamplingArguments: RandomSamplingArguments
-  rapidProArguments: RapidProArguments
 }
 
 type CreateVerificationPlanMutation {
@@ -802,6 +802,16 @@ input EditIndividualIdentityObjectType {
   number: String!
 }
 
+input EditPaymentVerificationInput {
+  sampling: String!
+  verificationChannel: String!
+  businessAreaSlug: String!
+  fullListArguments: FullListArguments
+  randomSamplingArguments: RandomSamplingArguments
+  rapidProArguments: RapidProArguments
+  paymentVerificationPlanId: ID!
+}
+
 type EditPaymentVerificationMutation {
   paymentPlan: GenericPaymentPlanNode
 }
@@ -966,7 +976,19 @@ input FullListArguments {
   excludedAdminAreas: [String]
 }
 
+type GenericPaymentNode {
+  id: String
+  objType: String
+  unicefId: String
+  currency: String
+  deliveredQuantity: Float
+  deliveredQuantityUsd: Float
+  household: HouseholdNode
+}
+
 type GenericPaymentPlanNode {
+  id: String
+  objType: String
   paymentVerificationSummary: PaymentVerificationSummaryNode
 }
 
@@ -2402,8 +2424,8 @@ type Mutations {
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
-  createPaymentVerificationPlan(input: CreateUpdatePaymentVerificationInput!): CreateVerificationPlanMutation
-  editPaymentVerificationPlan(input: CreateUpdatePaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
+  createPaymentVerificationPlan(input: CreatePaymentVerificationInput!): CreateVerificationPlanMutation
+  editPaymentVerificationPlan(input: EditPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
   createFinancialServiceProvider(businessAreaSlug: String!, inputs: CreateFinancialServiceProviderInput!): CreateFinancialServiceProviderMutation
   editFinancialServiceProvider(businessAreaSlug: String!, financialServiceProviderId: ID!, inputs: CreateFinancialServiceProviderInput!): EditFinancialServiceProviderMutation
   exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: ID!): ExportXlsxPaymentVerificationPlanFile
@@ -2959,6 +2981,7 @@ type PaymentVerificationNode implements Node {
   ticketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
   ticketDetail(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
   isManuallyEditable: Boolean
+  payment: GenericPaymentNode
 }
 
 type PaymentVerificationNodeConnection {
