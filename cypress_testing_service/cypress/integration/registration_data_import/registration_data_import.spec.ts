@@ -1,5 +1,8 @@
 import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
-import { getIndividualsFromRdiDetails } from '../../procedures/procedures';
+import {
+  getIndividualsFromRdiDetails,
+  uniqueSeed,
+} from '../../procedures/procedures';
 let householdId;
 let individualId;
 let individualIds = [];
@@ -12,7 +15,7 @@ Given('I am authenticated', () => {
 });
 
 Given('There are no RDI imports', () => {
-  cy.exec('yarn run generate-xlsx-files');
+  cy.exec(`yarn run generate-xlsx-files 1 --seed ${uniqueSeed}`);
 });
 
 const clearCache = () => {
@@ -55,7 +58,7 @@ When('I select the xlsx file', () => {
     'Test import '.concat(new Date().toISOString()),
   );
 
-  const fileName = 'rdi_import_1_hh_1_ind.xlsx';
+  const fileName = `rdi_import_1_hh_1_ind_seed_${uniqueSeed}.xlsx`;
   cy.fixture(fileName, 'base64').then((fileContent) => {
     cy.get('[data-cy="file-input"]').upload({
       fileContent,
@@ -109,11 +112,15 @@ When('I refresh the page', () => {
 
 Then('I see that the status is merged', () => {
   cy.get('div').contains('MERGED');
-  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
-    householdId = $td.text().split(' (')[0];
-  });
+  cy.get('[data-cy="imported-households-row"]')
+    .find('td:nth-child(2)')
+    .then(($td) => {
+      householdId = $td.text().split(' (')[0];
+      cy.log(`Saved householdId: ${householdId}`);
+    });
   cy.get('button > span').contains('Individuals').click({ force: true });
-  individualId = getIndividualsFromRdiDetails(cy, 1)[0];
+
+  getIndividualsFromRdiDetails(cy, 1, individualIds);
 });
 
 When('I visit the Households dashboard', () => {
@@ -122,7 +129,8 @@ When('I visit the Households dashboard', () => {
 });
 
 Then('I see a newly imported household', () => {
-  // after 10+ runs, it may fail, because there are 10 rows in this table by default
+  cy.log(`looking for householdId: ${householdId}`);
+  cy.get('[data-cy="hh-filters-search"]').find('input').type(householdId, { force: true });
   cy.get('td').should('contain', householdId);
 });
 
@@ -131,11 +139,8 @@ When('I visit the Individuals dashboard', () => {
 });
 
 Then('I see the newly imported individuals', () => {
-  // after 10+ runs, it may fail, because there are 10 rows in this table by default
+  const individualId = individualIds[0];
+  cy.log(`looking for individualId: + ${individualId}`);
+  cy.get('[data-cy="ind-filters-search"]').type(individualId);
   cy.get('td').should('contain', individualId);
-  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
-    individualId = $td.text();
-    console.log('individualId');
-    individualIds.push(individualId);
-  });
 });
