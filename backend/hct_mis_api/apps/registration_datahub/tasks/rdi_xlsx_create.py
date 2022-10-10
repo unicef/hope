@@ -86,15 +86,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         except KeyError:
             return COLLECT_TYPE_UNKNOWN
 
-    def _handle_bank_account_fields(self, value, header, row_num, individual, *args, **kwargs):
-        if value is None:
-            return
-
-        name = header.replace("_i_c", "")
-
-        self.bank_accounts[f"individual_{row_num}"]["individual"] = individual
-        self.bank_accounts[f"individual_{row_num}"][name] = value
-
     def _handle_document_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
             return

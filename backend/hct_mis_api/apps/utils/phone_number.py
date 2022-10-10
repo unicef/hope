@@ -2,6 +2,8 @@ import logging
 
 import phonenumbers
 
+logger = logging.getLogger(__name__)
+
 
 def is_right_phone_number_format(phone_number):
     # from phonenumbers.parse method description:
@@ -19,6 +21,6 @@ def is_right_phone_number_format(phone_number):
     try:
         phonenumbers.parse(phone_number)
     except phonenumbers.NumberParseException:
-        logging.warning(f"'{phone_number}' is not a valid phone number")
+        logger.warning(f"'{phone_number}' is not a valid phone number")
         return False
     return True

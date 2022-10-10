@@ -58,8 +58,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
       $approvedIdentitiesToCreate: [Int],
       $approvedIdentitiesToEdit: [Int],
       $approvedIdentitiesToRemove: [Int],
-      $approvedPaymentChannelsToCreate: [Int], 
-      $approvedPaymentChannelsToEdit: [Int], 
+      $approvedPaymentChannelsToCreate: [Int],
+      $approvedPaymentChannelsToEdit: [Int],
       $approvedPaymentChannelsToRemove: [Int]
     ) {
       approveIndividualDataChange(
@@ -72,8 +72,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         approvedIdentitiesToCreate: $approvedIdentitiesToCreate,
         approvedIdentitiesToEdit: $approvedIdentitiesToEdit,
         approvedIdentitiesToRemove: $approvedIdentitiesToRemove,
-        approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate, 
-        approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit, 
+        approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate,
+        approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit,
         approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove
       ) {
         grievanceTicket {

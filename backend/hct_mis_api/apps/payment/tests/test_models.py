@@ -37,21 +37,13 @@ class TestPaymentPlanModel(TestCase):
         hoh2 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         hh2 = HouseholdFactory(head_of_household=hoh2)
-        p1 = PaymentFactory(parent=pp, excluded=False, household=hh1, head_of_household=hoh1)
-        p2 = PaymentFactory(parent=pp, excluded=False, household=hh2, head_of_household=hoh2)
+        PaymentFactory(parent=pp, excluded=False, household=hh1, head_of_household=hoh1)
+        PaymentFactory(parent=pp, excluded=False, household=hh2, head_of_household=hoh2)
 
-        female_child = IndividualFactory(
-            household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5)
-        )
-        male_child = IndividualFactory(
-            household=hh1, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=5)
-        )
-        female_adult = IndividualFactory(
-            household=hh2, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=20)
-        )
-        male_adult = IndividualFactory(
-            household=hh2, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=20)
-        )
+        IndividualFactory(household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5))
+        IndividualFactory(household=hh1, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=5))
+        IndividualFactory(household=hh2, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=20))
+        IndividualFactory(household=hh2, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=20))
 
         pp.update_population_count_fields()
 
@@ -66,7 +58,7 @@ class TestPaymentPlanModel(TestCase):
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_money_fields(self, get_exchange_rate_mock):
         pp = PaymentPlanFactory()
-        p1 = PaymentFactory(
+        PaymentFactory(
             parent=pp,
             excluded=False,
             entitlement_quantity=100.00,
@@ -74,7 +66,7 @@ class TestPaymentPlanModel(TestCase):
             delivered_quantity=50.00,
             delivered_quantity_usd=100.00,
         )
-        p2 = PaymentFactory(
+        PaymentFactory(
             parent=pp,
             excluded=False,
             entitlement_quantity=100.00,
@@ -96,8 +88,8 @@ class TestPaymentPlanModel(TestCase):
 
     def test_not_excluded_payments(self):
         pp = PaymentPlanFactory()
-        p1 = PaymentFactory(parent=pp, excluded=False)
-        p2 = PaymentFactory(parent=pp, excluded=True)
+        PaymentFactory(parent=pp, excluded=False)
+        PaymentFactory(parent=pp, excluded=True)
 
         pp.refresh_from_db()
         self.assertEqual(pp.not_excluded_payments.count(), 1)
@@ -111,12 +103,12 @@ class TestPaymentPlanModel(TestCase):
             start_date=pp1.start_date, end_date=pp1.end_date, status=PaymentPlan.Status.LOCKED
         )
         p1 = PaymentFactory(parent=pp1, excluded=False)
-        p1_conflicted = PaymentFactory(parent=pp1_conflicted, household=p1.household, excluded=False)
+        PaymentFactory(parent=pp1_conflicted, household=p1.household, excluded=False)
         self.assertEqual(pp1.payment_items.filter(payment_plan_hard_conflicted=True).count(), 1)
         self.assertEqual(pp1.can_be_locked, False)
 
         # create not conflicted payment
-        p2 = PaymentFactory(parent=pp1, excluded=False)
+        PaymentFactory(parent=pp1, excluded=False)
         self.assertEqual(pp1.can_be_locked, True)
 
 
@@ -136,9 +128,9 @@ class TestPaymentModel(TestCase):
         pp = PaymentPlanFactory()
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        p1 = PaymentFactory(parent=pp, excluded=False, household=hh1)
+        PaymentFactory(parent=pp, excluded=False, household=hh1)
         with self.assertRaises(IntegrityError):
-            p2 = PaymentFactory(parent=pp, excluded=False, household=hh1)
+            PaymentFactory(parent=pp, excluded=False, household=hh1)
 
     def test_manager_annotations__pp_conflicts(self):
         pp1 = PaymentPlanFactory()

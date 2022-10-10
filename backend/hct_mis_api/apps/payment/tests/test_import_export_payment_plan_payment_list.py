@@ -179,12 +179,12 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         financial_service_provider2 = FinancialServiceProviderFactory(
             delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_TRANSFER]
         )
-        dms1 = DeliveryMechanismPerPaymentPlanFactory(
+        DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
             financial_service_provider=financial_service_provider1,
         )
-        dms2 = DeliveryMechanismPerPaymentPlanFactory(
+        DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=self.payment_plan,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
             financial_service_provider=financial_service_provider2,

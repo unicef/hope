@@ -132,7 +132,7 @@ class PaymentPlanService:
         if not self.payment_plan.delivery_mechanisms.filter(
             Q(financial_service_provider__isnull=False) | Q(delivery_mechanism__isnull=False)
         ).exists():
-            msg = f"There are no Delivery Mechanisms / FSPs chosen for Payment Plan"
+            msg = "There are no Delivery Mechanisms / FSPs chosen for Payment Plan"
             logging.exception(msg)
             raise GraphQLError(msg)
 
@@ -413,8 +413,7 @@ class PaymentPlanService:
         processed_payments = []
 
         with transaction.atomic():
-            for idx, mapping in enumerate(dm_to_fsp_mapping):
-
+            for mapping in dm_to_fsp_mapping:
                 delivery_mechanism_per_payment_plan = mapping["delivery_mechanism_per_payment_plan"]
                 delivery_mechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
                 fsp = mapping["fsp"]
@@ -481,4 +480,4 @@ class PaymentPlanService:
                     delivery_mechanism_per_payment_plan.save()
 
             if set(processed_payments) != set(self.payment_plan.not_excluded_payments):
-                raise GraphQLError(f"Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
+                raise GraphQLError("Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
