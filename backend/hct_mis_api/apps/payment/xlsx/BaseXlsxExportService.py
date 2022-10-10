@@ -1,16 +1,15 @@
 import logging
-import openpyxl
 
-from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
 
-from openpyxl.styles import PatternFill, Side, Border
+import openpyxl
+from openpyxl.styles import Border, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from hct_mis_api.apps.core.utils import encode_id_base64
-
 
 logger = logging.getLogger(__name__)
 

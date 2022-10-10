@@ -1,24 +1,26 @@
-from graphql import GraphQLError
 from unittest.mock import patch
-from freezegun import freeze_time
+
 from aniso8601 import parse_date
+from freezegun import freeze_time
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.household.fixtures import IndividualFactory, HouseholdFactory, IndividualRoleInHouseholdFactory
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+)
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.base_test_case import APITestCase
-
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestPaymentPlanServices(APITestCase):

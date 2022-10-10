@@ -1,18 +1,22 @@
 import json
+from datetime import datetime
 from unittest.mock import patch
 
-from django.test import TestCase
 from django.db.utils import IntegrityError
+from django.test import TestCase
 
-from hct_mis_api.apps.household.fixtures import IndividualFactory, HouseholdFactory
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentFactory
-from hct_mis_api.apps.payment.models import PaymentPlan, Payment, PaymentChannel, GenericPayment
-from hct_mis_api.apps.core.models import BusinessArea
+from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import (
+    GenericPayment,
+    Payment,
+    PaymentChannel,
+    PaymentPlan,
+)
 
 
 class TestPaymentPlanModel(TestCase):

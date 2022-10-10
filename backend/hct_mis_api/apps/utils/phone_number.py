@@ -1,5 +1,6 @@
-import phonenumbers
 import logging
+
+import phonenumbers
 
 
 def is_right_phone_number_format(phone_number):
