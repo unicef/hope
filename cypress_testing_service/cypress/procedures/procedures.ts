@@ -32,41 +32,12 @@ export const fillTargetingForm = (cy, programName, seed) => {
   cy.get(`[data-cy="select-option-${programName}"]`).click();
   cy.get('[data-cy="button-target-population-add-criteria"]').click();
 
-  // cy.get('[data-cy="button-household-rule"]', {
-  //   timeout: 10000,
-  // }).click();
-  // cy.get('[data-cy="autocomplete-target-criteria"]')
-  //   .click()
-  //   .type('residence status');
-  // cy.contains('Residence status').click();
-  // cy.get('[data-cy="select-filters[0].value"]').click();
-  // cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
-  // cy.get('li').eq(3).click(); // TODO: improve that
-
   cy.get('[data-cy="button-household-rule"]', {
     timeout: 10000,
   }).click();
   cy.get('[data-cy="autocomplete-target-criteria"]').click().type('address');
   cy.contains('Address').click();
   cy.get('[data-cy="input-filters[0].value"]').click().type(uniqueSeed);
-
-  // TODO: filter the HH/IND by some particular field
-  // (which won't cause deduplication issues)
-  // but will enable to test each run on the provided data
-  // instead of taking all from previous runs
-
-  // cy.get('[data-cy="button-individual-rule"]', {
-  //   timeout: 10000,
-  // }).click();
-  // const individualFilterSelector = "field-chooser-individualsFiltersBlocks[0].individualBlockFilters[0]";
-  // cy.get(`[data-cy="${individualFilterSelector}"`)
-  //   .click()
-  //   .type('given')
-  // cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
-  // cy.get("Given name").click(); // TODO
-  // cy.get(`[data-cy="${individualFilterSelector}.value"`)
-  //   .click()
-  //   .type(seed)
 
   return targetPopulationName;
 };
