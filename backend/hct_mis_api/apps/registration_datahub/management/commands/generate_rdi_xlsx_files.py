@@ -12,7 +12,6 @@ from faker import Faker
 faker = Faker()
 
 random_number = lambda: random.randint(1, 2**31)
-# address = lambda: faker.address()
 date = lambda: faker.date_between(start_date="-30y", end_date="today")
 name = lambda: faker.name()
 phone_number = lambda: faker.phone_number()
