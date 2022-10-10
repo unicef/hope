@@ -43,7 +43,6 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.payment.validators import is_right_phone_number_format
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.phone_number import is_right_phone_number_format

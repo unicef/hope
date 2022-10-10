@@ -56,7 +56,7 @@ class XlsxExportBaseService:
 
         for i, width in enumerate(column_widths):
             col_name = get_column_letter(min_col + i)
-            value = column_widths[i] + 2
+            value = width + 2
             ws.column_dimensions[col_name].width = value
 
     def _add_col_bgcolor(self, col=None, hex_code="A0FDB0"):

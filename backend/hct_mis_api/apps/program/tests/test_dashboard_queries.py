@@ -35,7 +35,7 @@ query chartProgrammesBySector(
         data
       }
     }
-  } 
+  }
 """
 
 
@@ -58,7 +58,7 @@ query chartTotalTransferredByMonth(
         data
       }
     }
-  } 
+  }
 """
 
 
