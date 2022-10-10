@@ -74,7 +74,9 @@ class GenerateReportService:
                 tmp.seek(0)
                 # TODO: get payment plan id from related model
                 payment_plan_id = 1000
-                xlsx_file_name = f"{self.business_area.code}-{self.fsp.name}-{self.fsp.fsp_xlsx_template.id}-{payment_plan_id}.xlsx"
+                xlsx_file_name = (
+                    f"{self.business_area.code}-{self.fsp.name}-{self.fsp.fsp_xlsx_template.id}-{payment_plan_id}.xlsx"
+                )
                 report = FinancialServiceProviderXlsxReport(
                     fsp=self.fsp,
                     business_area=self.business_area,
