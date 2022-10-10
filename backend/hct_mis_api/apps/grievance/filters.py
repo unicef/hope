@@ -1,6 +1,5 @@
 from django.db import models
 from django.db.models import Q, Count, F, Window, Func
-from django_cte import With
 
 from django_filters import (
     CharFilter,
@@ -41,8 +40,11 @@ class GrievanceOrderingFilter(OrderingFilter):
     def filter(self, qs, value):
         if value and any(v in ["linked_tickets", "-linked_tickets"] for v in value):
             qs = super().filter(qs, value)
+
+            print(qs.filter(description="5").first().linked_tickets.all().values_list("description"))
+
             qs = (
-                GrievanceTicket.objects
+                qs
                 .annotate(linked=Count("linked_tickets"))
                 .annotate(linked_related=Count("linked_tickets_related"))
                 .annotate(total_linked=F("linked") + F("linked_related"))
@@ -55,6 +57,9 @@ class GrievanceOrderingFilter(OrderingFilter):
                 )
                 .order_by(F("total_linked") + F("household_unicef_id_count") - 1, "unicef_id")
             )
+
+            print(qs.values_list("description", "total_linked", "household_unicef_id_count", "household_unicef_id"))
+
             if value == ["-linked_tickets"]:
                 return qs.reverse()
             return qs
