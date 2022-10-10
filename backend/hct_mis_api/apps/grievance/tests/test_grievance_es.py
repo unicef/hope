@@ -34,6 +34,7 @@ def execute_test_es_query(query_dict):
     return es_ids
 
 
+@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", False)
 class TestGrievanceQueryElasticSearch(APITestCase):
     PERMISSION = (
         Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
