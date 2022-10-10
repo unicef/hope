@@ -91,13 +91,6 @@ class TestPullDataFromErpDatahub(TestCase):
 
     @patch("hct_mis_api.apps.payment.models.CashPlan.get_exchange_rate", new=lambda *args, **kwargs: 2.00)
     def test_pull_data(self):
-        usd_fields = [
-            "total_entitled_quantity_usd",
-            "total_entitled_quantity_revised_usd",
-            "total_delivered_quantity_usd",
-            "total_undelivered_quantity_usd",
-        ]
-
         task = PullFromErpDatahubTask()
         task.execute()
         self.cash_plan_1.refresh_from_db()

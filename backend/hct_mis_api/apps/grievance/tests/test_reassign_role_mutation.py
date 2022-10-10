@@ -20,16 +20,16 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestRoleReassignMutation(APITestCase):
     REASSIGN_ROLE_MUTATION = """
     mutation ReassignRole(
-      $grievanceTicketId: ID!, 
-      $householdId: ID!, 
-      $individualId: ID!, 
+      $grievanceTicketId: ID!,
+      $householdId: ID!,
+      $individualId: ID!,
       $newIndividualId: ID,
       $role: String!
     ) {
       reassignRole(
-        grievanceTicketId: $grievanceTicketId, 
-        householdId: $householdId, 
-        individualId: $individualId, 
+        grievanceTicketId: $grievanceTicketId,
+        householdId: $householdId,
+        individualId: $individualId,
         newIndividualId: $newIndividualId,
         role: $role
       ) {
