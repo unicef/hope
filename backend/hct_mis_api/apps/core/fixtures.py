@@ -10,8 +10,8 @@ def create_afghanistan(
     approval_number_required=2,
     authorization_number_required=2,
     finance_review_number_required=3,
-):
-    BusinessArea.objects.create(
+) -> BusinessArea:
+    return BusinessArea.objects.create(
         **{
             "code": "0060",
             "name": "Afghanistan",

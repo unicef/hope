@@ -74,7 +74,6 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_DELETE = auto()
     PAYMENT_VERIFICATION_INVALID = auto()
     PAYMENT_VERIFICATION_MARK_AS_FAILED = auto()
-    PAYMENT_VERIFICATION_INVALID = auto()
 
     # Payment Module
     PAYMENT_MODULE_VIEW_LIST = auto()
