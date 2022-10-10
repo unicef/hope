@@ -18,7 +18,7 @@ from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import (
 
 
 class XlsxPaymentPlanImportService(XlsxImportBaseService):
-    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n")
+    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "n")
 
     def __init__(self, payment_plan: PaymentPlan, file):
         self.payment_plan = payment_plan
@@ -131,7 +131,10 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
-        payment_channels_list = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")].value.split(", ")
+        payment_channels_value = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")].value
+        if not payment_channels_value:
+            return
+        payment_channels_list = list(map(lambda x: x.strip().rstrip(), payment_channels_value.split(",")))
         payment_channel_cell = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")]
         for payment_channel in payment_channels_list:
             if payment_channel not in [x[0] for x in GenericPayment.DELIVERY_TYPE_CHOICE]:
@@ -166,7 +169,7 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                 (
                     XlsxPaymentPlanExportService.TITLE,
                     None,
-                    "There are no any updates in imported file, please add changes and try again",
+                    "There aren't any updates in imported file, please add changes and try again",
                 )
             )
 
@@ -182,21 +185,24 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
     def _import_row(self, row, exchange_rate):
         payment_id = row[XlsxPaymentPlanExportService.HEADERS.index("payment_id")].value
         entitlement_amount = row[XlsxPaymentPlanExportService.HEADERS.index("entitlement_quantity")].value
-        payment_channels_list = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")].value.split(", ")
 
         payment = self.payments_dict.get(payment_id)
 
         if payment is None:
             return
 
-        if not payment.collector.payment_channels.exists():
-            for payment_channel in payment_channels_list:
-                if payment_channel is not None and payment_channel != "":
-                    # TODO handle delivery data
-                    PaymentChannel.objects.get_or_create(
-                        individual=payment.collector,
-                        delivery_mechanism=payment_channel,
-                    )
+        payment_channels_value = row[XlsxPaymentPlanExportService.HEADERS.index("payment_channel")].value
+        if payment_channels_value:
+            payment_channels_list = list(map(lambda x: x.strip().rstrip(), payment_channels_value.split(",")))
+
+            if not payment.collector.payment_channels.exists():
+                for payment_channel in payment_channels_list:
+                    if payment_channel is not None and payment_channel != "":
+                        # TODO handle delivery data
+                        PaymentChannel.objects.get_or_create(
+                            individual=payment.collector,
+                            delivery_mechanism=payment_channel,
+                        )
 
         if entitlement_amount is not None and entitlement_amount != "":
             entitlement_amount = float_to_decimal(entitlement_amount)
@@ -209,7 +215,6 @@ class XlsxPaymentPlanImportService(XlsxImportBaseService):
                     exchange_rate=exchange_rate,
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
-
                 self.payments_to_save.append(payment)
 
     def create_import_xlsx_file(self, user):

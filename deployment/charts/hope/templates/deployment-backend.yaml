@@ -28,6 +28,17 @@ spec:
       serviceAccountName: {{ include "hope.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
+      {{- if .Values.backend.initCommand }}
+      initContainers:
+      - name: initdemo
+        image: "{{ .Values.backend.image }}"
+        command: ['sh', '-c', {{ .Values.backend.initCommand | quote }}]
+        envFrom:
+        - secretRef:
+            name: {{ include "hope.fullname" . }}-backend
+        - configMapRef:
+            name: {{ include "hope.fullname" . }}-backend
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}-backend
           securityContext:
@@ -43,8 +54,6 @@ spec:
               name: {{ include "hope.fullname" . }}-backend
           - configMapRef:
               name: {{ include "hope.fullname" . }}-backend
-          - secretRef:
-              name: {{ include "hope.fullname" .  }}-postgres-data
           readinessProbe:
             httpGet:
               path: /api/_health
@@ -54,8 +63,6 @@ spec:
                 value:  "Kubernetes-Health"
               - name: Host
                 value: "kubernetes.internal"
-          resources:
-            {{- toYaml .Values.backend.resources | nindent 12 }}
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

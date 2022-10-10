@@ -1,6 +1,8 @@
 import logging
 from decimal import Decimal
+from functools import partial
 
+from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import F, OuterRef, Q, Subquery, Sum
@@ -10,7 +12,7 @@ from django.utils import timezone
 from graphql import GraphQLError
 from psycopg2._psycopg import IntegrityError
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import (
@@ -390,7 +392,21 @@ class PaymentPlanService:
         return self.payment_plan
 
     def import_xlsx_per_fsp(self, user, file) -> PaymentPlan:
-        import_payment_plan_payment_list_per_fsp_from_xlsx.delay(self.payment_plan.pk, user.pk, file)
+        with transaction.atomic():
+            file_temp = FileTemp.objects.create(
+                object_id=self.payment_plan.pk,
+                content_type=get_content_type_for_model(self.payment_plan),
+                created_by=user,
+                file=file,
+            )
+            transaction.on_commit(
+                partial(
+                    import_payment_plan_payment_list_per_fsp_from_xlsx.delay,
+                    self.payment_plan.pk,
+                    user.pk,
+                    file_temp.pk,
+                )
+            )
         return self.payment_plan
 
     def validate_fsps_per_delivery_mechanisms(self, dm_to_fsp_mapping, update_dms=False, update_payments=False):

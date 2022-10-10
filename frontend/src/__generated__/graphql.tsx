@@ -10054,7 +10054,7 @@ export type AllPaymentsForTableQuery = (
       & Pick<PaymentNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentNode' }
-        & Pick<PaymentNode, 'id' | 'unicefId' | 'entitlementQuantityUsd' | 'currency' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'paymentPlanHardConflicted' | 'paymentPlanSoftConflicted' | 'hasPaymentChannel'>
+        & Pick<PaymentNode, 'id' | 'unicefId' | 'entitlementQuantity' | 'entitlementQuantityUsd' | 'currency' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'paymentPlanHardConflicted' | 'paymentPlanSoftConflicted' | 'hasPaymentChannel'>
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
@@ -18307,6 +18307,7 @@ export const AllPaymentsForTableDocument = gql`
             name
           }
         }
+        entitlementQuantity
         entitlementQuantityUsd
         currency
         deliveredQuantity

@@ -10,6 +10,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
     >
       <button
         class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+        data-cy="button-export-xlsx"
         tabindex="0"
         type="button"
       >
