@@ -17,6 +17,10 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
 from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_PARTIAL,
+    COLLECT_TYPE_UNKNOWN,
     HEAD,
     IDENTIFICATION_TYPE_DICT,
     NON_BENEFICIARY,
@@ -61,6 +65,26 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.individuals = []
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
+
+    def _handle_bank_account_fields(self, value, header, row_num, individual, *args, **kwargs):
+        if value is None:
+            return
+
+        name = header.replace("_i_c", "")
+
+        self.bank_accounts[f"individual_{row_num}"]["individual"] = individual
+        self.bank_accounts[f"individual_{row_num}"][name] = value
+
+    def _handle_collect_individual_data(self, value, header, row_num, individual, *args, **kwargs):
+        try:
+            return {
+                "FULL": COLLECT_TYPE_FULL,
+                "PARTIAL": COLLECT_TYPE_PARTIAL,
+                "NONE": COLLECT_TYPE_NONE,
+                "UNKNOWN": COLLECT_TYPE_UNKNOWN,
+            }[value]
+        except KeyError:
+            return COLLECT_TYPE_UNKNOWN
 
     def _handle_bank_account_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
@@ -378,6 +402,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "child_hoh_h_c": self._handle_bool_field,
                 "consent_h_c": self._handle_bool_field,
                 "first_registration_date_h_c": self._handle_datetime,
+                "collect_individual_data": self._handle_collect_individual_data,
             },
         }
 

@@ -134,18 +134,20 @@ class TestRoleReassignMutation(APITestCase):
 
 
 class TestRoleReassignMutationNewTicket(APITestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     REASSIGN_ROLE_MUTATION = """
     mutation ReassignRole(
-      $grievanceTicketId: ID!, 
-      $householdId: ID!, 
-      $individualId: ID!, 
+      $grievanceTicketId: ID!,
+      $householdId: ID!,
+      $individualId: ID!,
       $newIndividualId: ID,
       $role: String!
     ) {
       reassignRole(
-        grievanceTicketId: $grievanceTicketId, 
-        householdId: $householdId, 
-        individualId: $individualId, 
+        grievanceTicketId: $grievanceTicketId,
+        householdId: $householdId,
+        individualId: $individualId,
         newIndividualId: $newIndividualId,
         role: $role
       ) {
@@ -162,7 +164,6 @@ class TestRoleReassignMutationNewTicket(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        call_command("loadcountries")
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 

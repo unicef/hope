@@ -1,16 +1,19 @@
+from io import BytesIO
+
 from django.contrib.admin import AdminSite
+from django.contrib.admin.options import ModelAdmin
+from django.contrib.auth import get_user_model
+from django.test import RequestFactory, override_settings
+from django.urls import reverse
+
+from django_webtest import WebTest
 from factory import fuzzy
+from webtest import Upload
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.geo.admin import AreaAdmin
-from hct_mis_api.apps.geo.fixtures import AreaTypeFactory, AreaFactory
-from django.test import override_settings, RequestFactory
-from django.urls import reverse
-from django.contrib.admin.options import ModelAdmin
-from django_webtest import WebTest
-from hct_mis_api.apps.geo.models import AreaType, Area
-from django.contrib.auth import get_user_model
-from io import BytesIO
-from webtest import Upload
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.geo.models import Area, AreaType
 
 User = get_user_model()
 

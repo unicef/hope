@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand
 
-from hct_mis_api.apps.household.models import Individual, NOT_DISABLED, DISABLED
+from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED, Individual
 
 
 class Command(BaseCommand):

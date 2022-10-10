@@ -1,5 +1,4 @@
 import zipfile
-
 from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
@@ -8,32 +7,38 @@ from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 
-from hct_mis_api.apps.payment.utils import float_to_decimal
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea, FileTemp
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import XlsxPaymentPlanImportService
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismPerPaymentPlanFactory,
+    FinancialServiceProviderFactory,
+    PaymentChannelFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    RealProgramFactory,
+    ServiceProviderFactory,
+)
 from hct_mis_api.apps.payment.models import (
-    PaymentPlan,
-    ServiceProvider,
     FinancialServiceProvider,
     GenericPayment,
+    PaymentPlan,
+    ServiceProvider,
 )
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import XlsxPaymentPlanExportService
-from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportPerFspService import XlsxPaymentPlanExportPerFspService
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.payment.fixtures import (
-    ServiceProviderFactory,
-    RealProgramFactory,
-    PaymentPlanFactory,
-    PaymentFactory,
-    PaymentChannelFactory,
-    FinancialServiceProviderFactory,
-    DeliveryMechanismPerPaymentPlanFactory,
+from hct_mis_api.apps.payment.utils import float_to_decimal
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportPerFspService import (
+    XlsxPaymentPlanExportPerFspService,
 )
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea, FileTemp
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportService import (
+    XlsxPaymentPlanExportService,
+)
+from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanImportService import (
+    XlsxPaymentPlanImportService,
+)
 
 
 def valid_file():
@@ -115,7 +120,9 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service.validate()
         self.assertEqual(service.errors, error_msg)
 
-    def test_import_valid_file(self):
+    @patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateAPI.__init__")
+    def test_import_valid_file(self, mock_parent_init):
+        mock_parent_init.return_value = None
         not_excluded_payments = self.payment_plan.not_excluded_payments.all()
         # override imported payment id
         payment_id_1 = str(not_excluded_payments[0].unicef_id)

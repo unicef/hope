@@ -1,7 +1,8 @@
 from typing import Union
 
-import graphene
 from django.db.models import Prefetch
+
+import graphene
 from graphene import relay
 
 import hct_mis_api.apps.targeting.models as target_models
@@ -10,9 +11,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.schema import (
-    ChoiceObject,
-)
+from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     decode_and_get_object,
     decode_id_string,
@@ -22,7 +21,10 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.filters import HouseholdFilter
-from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode, TargetingCriteriaObjectType
+from hct_mis_api.apps.targeting.graphql_types import (
+    TargetingCriteriaObjectType,
+    TargetPopulationNode,
+)
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 
 

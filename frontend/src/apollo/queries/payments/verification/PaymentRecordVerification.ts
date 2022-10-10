@@ -67,6 +67,10 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
           shortName
         }
       }
+      cashPlanPaymentVerification {
+        id
+        verificationChannel
+      }
     }
   }
 `;
