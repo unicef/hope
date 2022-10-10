@@ -10,6 +10,7 @@ from concurrency.api import disable_concurrency
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -225,7 +226,7 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id, file):
+def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id, file_pk):
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
 
@@ -234,7 +235,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
             with configure_scope() as scope:
                 scope.set_tag("business_area", payment_plan.business_area)
 
-                service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
+                service = XlsxPaymentPlanImportPerFspService(payment_plan, FileTemp.objects.get(pk=file_pk).file)
                 service.open_workbook()
                 with transaction.atomic():
                     service.import_payment_list()

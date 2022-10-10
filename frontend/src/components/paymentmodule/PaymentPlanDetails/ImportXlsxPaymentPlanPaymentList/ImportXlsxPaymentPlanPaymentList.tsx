@@ -67,7 +67,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             },
           ],
         });
-        if (!errors && !data?.importXlsxPaymentPlanPaymentList.errors.length) {
+        if (!errors && !data?.importXlsxPaymentPlanPaymentList.errors?.length) {
           setOpenImport(false);
           showMessage(t('Your import was successful!'));
         }
@@ -140,7 +140,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               color='primary'
               variant='contained'
               onClick={() => handleImport()}
-              data-cy='button-import-submit'
+              data-cy='button-import-entitlement'
             >
               {t('IMPORT')}
             </Button>

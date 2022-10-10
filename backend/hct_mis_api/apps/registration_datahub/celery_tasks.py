@@ -267,7 +267,7 @@ def validate_xlsx_import_task(import_data_id):
     try:
         return ValidateXlsxImport().execute(import_data)
     except Exception as e:
-        logger.exception(e)
+        logger.exception("ValidateXlsxImport exception")
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
         RegistrationDataImport.objects.filter(

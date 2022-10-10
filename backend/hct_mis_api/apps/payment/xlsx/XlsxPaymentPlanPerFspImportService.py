@@ -113,7 +113,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 (
                     self.fsp.name,
                     None,
-                    "There are no any updates in imported file, please add changes and try again",
+                    "There aren't any updates in imported file, please add changes and try again",
                 )
             )
 
@@ -128,7 +128,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         for row in self.ws_payments.iter_rows(min_row=2):
             self._import_row(row, exchange_rate)
 
-        Payment.objects.bulk_update(self.payments_to_save, ("delivered_quantity", "status"))
+        Payment.objects.bulk_update(self.payments_to_save, ("delivered_quantity", "delivered_quantity_usd", "status"))
 
     def _import_row(self, row, exchange_rate):
         payment_id = row[self.expected_columns.index("payment_id")].value
@@ -139,7 +139,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             delivered_quantity = float_to_decimal(delivered_quantity)
             if delivered_quantity != payment.delivered_quantity:
                 payment.delivered_quantity = delivered_quantity
-                payment.entitlement_quantity_usd = get_quantity_in_usd(
+                payment.delivered_quantity_usd = get_quantity_in_usd(
                     amount=delivered_quantity,
                     currency=self.payment_plan.currency,
                     exchange_rate=exchange_rate,

@@ -5,10 +5,13 @@
  * /// <reference path="https://github.com/cypress-io/cypress/issues/7435" />
  */
 
-declare module "chai-string" {
+declare module 'chai-string' {
   global {
     namespace Chai {
-      interface Assertion extends LanguageChains, NumericComparison, TypeComparison {
+      interface Assertion
+        extends LanguageChains,
+          NumericComparison,
+          TypeComparison {
         startsWith(expected: string, message?: string): Assertion;
         startWith(expected: string, message?: string): Assertion;
         endsWith(expected: string, message?: string): Assertion;
@@ -20,8 +23,17 @@ declare module "chai-string" {
         singleLine(message?: string): Assertion;
         reverseOf(message?: string): Assertion;
         palindrome(message?: string): Assertion;
-        entriesCount(substr: string, expected: number, message?: string): Assertion;
-        indexOf(str: string, substr: string, index: number, msg?: string): Assertion;
+        entriesCount(
+          substr: string,
+          expected: number,
+          message?: string,
+        ): Assertion;
+        indexOf(
+          str: string,
+          substr: string,
+          index: number,
+          msg?: string,
+        ): Assertion;
       }
 
       interface Assert {
@@ -43,13 +55,18 @@ declare module "chai-string" {
         notReverseOf(val: string, exp: string, msg?: string): void;
         palindrome(val: string, msg?: string): void;
         notPalindrome(val: string, msg?: string): void;
-        entriesCount(str: string, substr: string, count: number, msg?: string): void;
+        entriesCount(
+          str: string,
+          substr: string,
+          count: number,
+          msg?: string,
+        ): void;
         indexOf(str: string, substr: string, index: number, msg?: string): void;
       }
     }
   }
 
   const chaiString: Chai.ChaiPlugin;
-  namespace chaiString { }
+  namespace chaiString {}
   export = chaiString;
 }
