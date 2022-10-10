@@ -1,11 +1,7 @@
 from django.contrib import admin
-from django.template.response import TemplateResponse
 
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.depot.widget import DepotManager
-from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
-from adminfilters.querystring import QueryStringFilter
-from smart_admin.mixins import LinkedObjectsMixin
+from adminfilters.filters import ChoicesFieldComboFilter
 
 from ..utils.admin import (
     HOPEModelAdminBase,

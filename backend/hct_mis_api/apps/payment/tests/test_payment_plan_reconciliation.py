@@ -22,7 +22,6 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
-    import_payment_plan_payment_list_per_fsp_from_xlsx,
     payment_plan_apply_steficon,
 )
 from hct_mis_api.apps.payment.fixtures import (
