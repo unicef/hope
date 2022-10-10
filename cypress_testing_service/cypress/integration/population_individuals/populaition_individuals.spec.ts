@@ -12,7 +12,7 @@ When('I visit the main dashboard', () => {
 });
 
 Then('I should see the side panel with Population option', () => {
-  cy.get('span').contains('Population', { timeout: 10000 });
+  cy.get('span').contains('Population');
 });
 
 When('I click on Population option', () => {
@@ -20,8 +20,8 @@ When('I click on Population option', () => {
 });
 
 Then('I should see Individuals and Households options', () => {
-  cy.get('span').contains('Individuals', { timeout: 10000 });
-  cy.get('span').contains('Households', { timeout: 10000 });
+  cy.get('span').contains('Individuals');
+  cy.get('span').contains('Households');
 });
 
 When('I click the Individuals option', () => {
