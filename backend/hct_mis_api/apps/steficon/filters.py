@@ -1,4 +1,4 @@
-from django_filters import CharFilter, ChoiceFilter, FilterSet
+from django_filters import ChoiceFilter, FilterSet
 
 from hct_mis_api.apps.steficon.models import Rule
 

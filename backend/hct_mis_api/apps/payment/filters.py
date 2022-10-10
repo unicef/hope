@@ -1,4 +1,4 @@
-from django.db.models import Case, CharField, Count, F, Q, Value, When
+from django.db.models import Case, CharField, Count, Q, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 

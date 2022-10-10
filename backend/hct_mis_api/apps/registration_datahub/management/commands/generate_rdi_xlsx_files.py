@@ -1,6 +1,5 @@
 import os
 import random
-import shutil
 
 from django.conf import settings
 from django.core.management import BaseCommand
