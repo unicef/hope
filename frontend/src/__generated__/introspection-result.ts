@@ -174,48 +174,6 @@
             "name": "BankAccountInfoNode"
           },
           {
-            "name": "TicketHouseholdDataUpdateDetailsNode"
-          },
-          {
-            "name": "TicketAddIndividualDetailsNode"
-          },
-          {
-            "name": "TicketDeleteHouseholdDetailsNode"
-          },
-          {
-            "name": "TargetPopulationNode"
-          },
-          {
-            "name": "RuleCommitNode"
-          },
-          {
-            "name": "SteficonRuleNode"
-          },
-          {
-            "name": "ReportNode"
-          },
-          {
-            "name": "ServiceProviderNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationNode"
-          },
-          {
-            "name": "PaymentVerificationNode"
-          },
-          {
-            "name": "TicketPaymentVerificationDetailsNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationSummaryNode"
-          },
-          {
-            "name": "PaymentVerificationLogEntryNode"
-          },
-          {
-            "name": "TicketNoteNode"
-          },
-          {
             "name": "LogEntryNode"
           },
           {
@@ -248,3 +206,4 @@
   }
 };
       export default result;
+    
