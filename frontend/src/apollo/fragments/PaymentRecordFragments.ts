@@ -34,7 +34,7 @@ export const paymentRecordDetails = gql`
       id
       name
     }
-    cashPlan {
+    parent {
       id
       caId
       program {
