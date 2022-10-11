@@ -17,9 +17,6 @@ class PowerQueryBackend(ModelBackend):
         return getattr(user_obj, key)
 
     def has_perm(self, user_obj: User, perm, obj=None):
-        # This is a bit tricky, HOPE permission system do not use standard Django
-        # authorization mechanism. BusinessArea access is granted via "custom" system
-        # where PowerQuery use default Django.
         if isinstance(obj, Report):
             if obj.owner == user_obj:
                 return True
