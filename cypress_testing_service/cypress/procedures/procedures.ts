@@ -24,12 +24,12 @@ export const fillProgramForm = (cy) => {
   return programName;
 };
 
-export const fillTargetingForm = (cy, programName, address) => {
+export const fillTargetingForm = (cy, programName, seed, address) => {
   const targetPopulationName = `test TP ${address}`;
   cy.get('[data-cy="input-name"]').first().type(targetPopulationName);
   cy.get('[data-cy="input-program"]').first().click();
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.get(`[data-cy="select-option-${programName}"]`).click();
+  cy.get(`[data-cy="select-option-${programName}-${seed}"]`).click();
   cy.get('[data-cy="button-target-population-add-criteria"]').click();
 
   cy.get('[data-cy="button-household-rule"]', {

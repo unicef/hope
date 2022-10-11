@@ -14,6 +14,10 @@ Given('I am authenticated', () => {
   cy.get('input').contains('Log in').click();
 });
 
+Given("I initialize the data", () => {
+  cy.exec(`yarn init-scenario targeting --seed ${uniqueSeed}`);
+})
+
 When('I visit the main dashboard', () => {
   cy.visit('/');
 });
@@ -44,7 +48,7 @@ Then('I should see the Create Target Population page', () => {
 });
 
 When('I fill out the form fields and save', () => {
-  fillTargetingForm(cy, programName, "TargetingVille");
+  fillTargetingForm(cy, programName, uniqueSeed, `TargetingVille-${uniqueSeed}`);
   cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click();
 });
 

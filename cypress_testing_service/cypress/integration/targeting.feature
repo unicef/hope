@@ -3,6 +3,7 @@ Feature: Targeting
 
     Background:
         Given I am authenticated
+        Given I initialize the data
 
     Scenario: Visit Targeting page and create Target Population
         When I visit the main dashboard

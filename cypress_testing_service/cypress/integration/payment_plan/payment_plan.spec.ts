@@ -137,7 +137,7 @@ Given('I have target population in ready status', () => {
   cy.get('[data-cy="button-target-population-create-new"]').click({
     force: true,
   });
-  targetPopulationName = fillTargetingForm(cy, programName, uniqueSeed);
+  targetPopulationName = fillTargetingForm(cy, programName, uniqueSeed, "Address");
   cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click();
   cy.get(
     '[data-cy=button-target-population-create] > .MuiButton-label',
