@@ -59,7 +59,7 @@ When('I select the xlsx file', () => {
 
   const fileName = `rdi_import_1_hh_1_ind_seed_${uniqueSeed}.xlsx`;
   cy.fixture(fileName, 'base64').then((fileContent) => {
-    cy.get('[data-cy="rdi-file-input"]').upload({
+    cy.get('[data-cy="file-input"]').upload({
       fileContent,
       fileName,
       mimeType:
@@ -71,13 +71,13 @@ When('I select the xlsx file', () => {
 
 Then('I see it was chosen', () => {
   cy.get('[data-cy="number-of-households"]').contains(
-    '1 Household available to Import',
+    '1 Household available to import',
     {
       timeout: 10000,
     },
   );
   cy.get('[data-cy="number-of-individuals"]').contains(
-    '1 Individual available to Import',
+    '1 Individual available to import',
   );
   cy.get('div').contains('Errors').should('not.exist');
 });
@@ -118,7 +118,6 @@ Then('I see that the status is merged', () => {
       cy.log(`Saved householdId: ${householdId}`);
     });
   cy.get('button > span').contains('Individuals').click({ force: true });
-
   getIndividualsFromRdiDetails(cy, 1, individualIds);
 });
 
@@ -134,7 +133,7 @@ Then('I see a newly imported household', () => {
 });
 
 When('I visit the Individuals dashboard', () => {
-  cy.get('span').contains('Individuals').click();
+  cy.get('span').contains('Individuals').click({ force: true });
 });
 
 Then('I see the newly imported individuals', () => {

@@ -48,6 +48,7 @@ export const getIndividualsFromRdiDetails = (cy, expectedNumber, container) => {
       .find(`tbody > tr:nth-child(${i + 1}) > td:nth-child(1)`)
       .then(($td) => {
         const individualId = $td.text().split(' (')[0];
+        cy.log(`Saved individualId: ${individualId}`);
         container.push(individualId);
       });
   }
