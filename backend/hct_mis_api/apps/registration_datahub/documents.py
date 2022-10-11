@@ -9,7 +9,20 @@ from hct_mis_api.apps.household.elasticsearch_utils import DEFAULT_SCRIPT
 from .models import ImportedIndividual
 
 
-@registry.register_document
+index_settings = {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "similarity": {
+        "default": {
+            "type": "scripted",
+            "script": {
+                "source": DEFAULT_SCRIPT,
+            },
+        },
+    },
+}
+
+
 class ImportedIndividualDocument(Document):
     id = fields.KeywordField(boost=0)
     given_name = fields.TextField(
@@ -101,21 +114,6 @@ class ImportedIndividualDocument(Document):
     def prepare_business_area(self, instance):
         return instance.registration_data_import.business_area_slug
 
-    class Index:
-        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals"
-        settings = {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
-            "similarity": {
-                "default": {
-                    "type": "scripted",
-                    "script": {
-                        "source": DEFAULT_SCRIPT,
-                    },
-                },
-            },
-        }
-
     class Django:
         model = ImportedIndividual
 
@@ -123,3 +121,25 @@ class ImportedIndividualDocument(Document):
             "relationship",
             "sex",
         ]
+
+
+@registry.register_document
+class ImportedIndividualDocumentAfghanistan(ImportedIndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_afghanistan"
+        settings = index_settings
+
+
+@registry.register_document
+class ImportedIndividualDocumentUkraine(ImportedIndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_ukraine"
+        settings = index_settings
+
+
+@registry.register_document
+class ImportedIndividualDocumentOthers(ImportedIndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_others"
+        settings = index_settings
+
