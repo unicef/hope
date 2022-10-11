@@ -8,8 +8,8 @@ from hct_mis_api.apps.payment.fixtures import (
     create_payment_verification_plan_with_status,
 )
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
-    CashPlanPaymentVerificationSummary,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
     build_summary,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -41,34 +41,34 @@ class TestBuildSummary(TestCase):
     def test_status_pending_when_zero_verifications(self):
         build_summary(self.cash_plan)
 
-        summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=self.cash_plan)
+        summary = PaymentVerificationSummary.objects.get(payment_plan=self.cash_plan)
 
-        self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_PENDING)
+        self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_PENDING)
 
     def test_status_active_when_at_least_one_active_verification(self):
-        self._create_verification_with_status(CashPlanPaymentVerification.STATUS_ACTIVE)
+        self._create_verification_with_status(PaymentVerificationPlan.STATUS_ACTIVE)
 
         build_summary(self.cash_plan)
 
-        summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=self.cash_plan)
-        self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_ACTIVE)
+        summary = PaymentVerificationSummary.objects.get(payment_plan=self.cash_plan)
+        self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_ACTIVE)
 
     def test_status_finished_when_all_verifications_finished(self):
-        self._create_verification_with_status(CashPlanPaymentVerification.STATUS_FINISHED)
+        self._create_verification_with_status(PaymentVerificationPlan.STATUS_FINISHED)
 
         build_summary(self.cash_plan)
 
-        summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=self.cash_plan)
-        self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_FINISHED)
+        summary = PaymentVerificationSummary.objects.get(payment_plan=self.cash_plan)
+        self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_FINISHED)
 
     def test_status_pending_when_add_and_removed_verification(self):
-        payment_verification_plan = self._create_verification_with_status(CashPlanPaymentVerification.STATUS_PENDING)
+        payment_verification_plan = self._create_verification_with_status(PaymentVerificationPlan.STATUS_PENDING)
         payment_verification_plan.delete()
 
         build_summary(self.cash_plan)
 
-        summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=self.cash_plan)
-        self.assertEqual(summary.status, CashPlanPaymentVerificationSummary.STATUS_PENDING)
+        summary = PaymentVerificationSummary.objects.get(payment_plan=self.cash_plan)
+        self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_PENDING)
 
     def test_query_number(self):
         with self.assertNumQueries(3):
