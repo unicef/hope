@@ -12,7 +12,7 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
-    CashPlanPaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
 )
@@ -54,7 +54,7 @@ class TestPhoneNumberVerification(TestCase):
             business_area=BusinessArea.objects.first(),
         )
         cash_plan.save()
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
+        cash_plan_payment_verification = PaymentVerificationPlanFactory(
             status=CashPlanPaymentVerification.STATUS_PENDING,
             verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
             cash_plan=cash_plan,
@@ -108,10 +108,10 @@ class TestPhoneNumberVerification(TestCase):
             business_area=BusinessArea.objects.first(),
         )
         other_cash_plan.save()
-        other_cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
+        other_cash_plan_payment_verification = PaymentVerificationPlanFactory(
             status=CashPlanPaymentVerification.STATUS_PENDING,
             verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
-            cash_plan=other_cash_plan,
+            payment_plan=other_cash_plan,
         )
         cls.other_individuals = []
         for _ in range(cls.payment_record_amount):

@@ -943,7 +943,7 @@ class CashPlan(GenericPaymentPlan):
         return self.available_payment_records().count() > 0
 
     def available_payment_records(
-        self, payment_verification_plan: Optional["CashPlanPaymentVerification"] = None, extra_validation=None
+        self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None
     ):
         params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
@@ -1183,8 +1183,8 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     def can_activate(self):
         return self.status not in (
-            CashPlanPaymentVerification.STATUS_PENDING,
-            CashPlanPaymentVerification.STATUS_RAPID_PRO_ERROR,
+            PaymentVerificationPlan.STATUS_PENDING,
+            PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
         )
 
 
@@ -1199,7 +1199,7 @@ class XlsxPaymentVerificationPlanFile(TimeStampedUUIDModel):
 
 
 def build_summary(payment_plan):
-    statuses_count = payment_plan.verifications.aggregate(
+    statuses_count = payment_plan.get_payment_verification_plans.aggregate(
         active=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_ACTIVE)),
         pending=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_PENDING)),
         finished=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_FINISHED)),
