@@ -381,7 +381,8 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
             target_population.finalized_by = user
             target_population.finalized_at = timezone.now()
             target_population.save()
-        send_target_population_task.delay(target_population.id)
+            transaction.on_commit(lambda: send_target_population_task.delay(target_population.id))
+            transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
