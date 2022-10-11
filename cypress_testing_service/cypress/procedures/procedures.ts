@@ -24,8 +24,8 @@ export const fillProgramForm = (cy) => {
   return programName;
 };
 
-export const fillTargetingForm = (cy, programName, seed) => {
-  const targetPopulationName = `test TP ${seed}`;
+export const fillTargetingForm = (cy, programName, address) => {
+  const targetPopulationName = `test TP ${address}`;
   cy.get('[data-cy="input-name"]').first().type(targetPopulationName);
   cy.get('[data-cy="input-program"]').first().click();
   cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
@@ -37,9 +37,7 @@ export const fillTargetingForm = (cy, programName, seed) => {
   }).click();
   cy.get('[data-cy="autocomplete-target-criteria"]').click().type('address');
   cy.contains('Address').click();
-  cy.get('[data-cy="input-filters[0].value"]').click().type(uniqueSeed);
-
-  return targetPopulationName;
+  cy.get('[data-cy="input-filters[0].value"]').click().type(address);
 };
 
 export const getIndividualsFromRdiDetails = (cy, expectedNumber, container) => {
