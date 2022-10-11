@@ -1,7 +1,6 @@
 import datetime
 import logging
 
-from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db.models import Case, DateField, F, Q, When
 from django.utils import timezone
@@ -52,7 +51,8 @@ from hct_mis_api.apps.grievance.models import (
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails, GrievanceTicketThrough,
+    TicketSystemFlaggingDetails,
+    GrievanceDocument,
 )
 from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -62,6 +62,16 @@ from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
+
+
+class GrievanceDocumentNode(DjangoObjectType):
+    file_path = graphene.String(source="file_path")
+    file_name = graphene.String(source="file_name")
+
+    class Meta:
+        model = GrievanceDocument
+        exclude = ("file",)
+        interfaces = (relay.Node,)
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -85,6 +95,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     total_days = graphene.String()
     partner = graphene.Field(PartnerType)
     programme = graphene.Field(ProgramNode)
+    documentation = graphene.List(GrievanceDocumentNode)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -142,7 +153,11 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
-        return grievance_ticket.linked_tickets.all()
+        return (
+            GrievanceTicket.objects.exclude(household_unicef_id__isnull=True)
+            .filter(household_unicef_id=grievance_ticket.household_unicef_id)
+            .exclude(pk=grievance_ticket.pk)
+        )
 
     @staticmethod
     def resolve_priority(grievance_ticket: GrievanceTicket, info):
@@ -159,6 +174,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_programme(grievance_ticket: GrievanceTicket, info):
         return grievance_ticket.programme
+
+    @staticmethod
+    def resolve_documentation(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.support_documents.order_by("-created_at")
 
 
 class TicketNoteNode(DjangoObjectType):
@@ -458,8 +477,8 @@ class Query(graphene.ObjectType):
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         return (
-            GrievanceTicket.objects
-            .filter(ignored=False).select_related("assigned_to", "created_by")
+            GrievanceTicket.objects.filter(ignored=False)
+            .select_related("assigned_to", "created_by")
             .annotate(
                 total=Case(
                     When(
@@ -484,6 +503,11 @@ class Query(graphene.ObjectType):
             {"name": name, "value": value}
             for value, name in GrievanceTicket.CATEGORY_CHOICES
             if value in GrievanceTicket.MANUAL_CATEGORIES
+            and value
+            not in (
+                GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+                GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            )  # feedback tickets are not available anymore via grievance ticket
         ]
 
     def resolve_grievance_ticket_system_category_choices(self, info, **kwargs):
