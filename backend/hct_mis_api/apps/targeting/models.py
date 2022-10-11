@@ -298,9 +298,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     def full_rebuild(self):
         household_queryset = Household.objects.filter(business_area=self.business_area)
-        print("self.targeting_criteria.get_query()", self.targeting_criteria.get_query())
         household_queryset = household_queryset.filter(self.targeting_criteria.get_query())
-        print("households", household_queryset.count())
         self.households.set(household_queryset)
         self.refresh_stats()
         self.build_status = TargetPopulation.BUILD_STATUS_OK

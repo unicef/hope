@@ -1,14 +1,9 @@
 import { When, Then, Given, And } from 'cypress-cucumber-preprocessor/steps';
 import {
-  fillProgramForm,
-  fillTargetingForm,
-  getIndividualsFromRdiDetails,
   uniqueSeed,
 } from '../../procedures/procedures';
 
-let programName;
-let targetPopulationName;
-let individualIds = [];
+let targetPopulationName = "PaymentPlanTargetPopulation";
 let paymentPlanUnicefId;
 let fspXlsxFilenames;
 const downloadsFolder = Cypress.config('downloadsFolder');
@@ -18,8 +13,6 @@ const fileName = (id) => `payment_plan_payment_list_${id}`;
 const xlsxFileName = (id) => `${fileName(id)}.xlsx`;
 const zipFileName = (id) => `${fileName(id)}.zip`;
 
-const maxInt = 2147483647;
-
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
   cy.get('input[name="username"]').type(Cypress.env('daUsername'));
@@ -27,133 +20,9 @@ Given('I am authenticated', () => {
   cy.get('input').contains('Log in').click();
 });
 
-const clearCache = () => {
-  cy.get('[data-cy="menu-user-profile"]').click();
-  cy.get('[data-cy="menu-item-clear-cache"]').click();
-  // hack to let the page reload
-  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
-};
-
-Given('There are individuals and households imported', () => {
-  cy.exec(`yarn run generate-xlsx-files 3 --seed ${uniqueSeed}`);
-  cy.visit('/');
-  clearCache();
-  cy.get('span')
-    .contains('Registration Data Import')
-    .click();
-  cy.get('button > span').contains('IMPORT').click({ force: true });
-
-  cy.get('[data-cy="import-type-select"]').click();
-  cy.get('[data-cy="excel-menu-item"]').click();
-
-  cy.get('[data-cy="input-name"]').type(
-    'Test import '.concat(new Date().toISOString()),
-  );
-
-  const rdiFileName = `rdi_import_3_hh_3_ind_seed_${uniqueSeed}.xlsx`;
-  cy.fixture(rdiFileName, 'base64').then((fileContent) => {
-    cy.get('[data-cy="file-input"]').upload({
-      fileContent,
-      fileName: rdiFileName,
-      mimeType:
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      encoding: 'base64',
-    });
-  });
-
-  cy.get('[data-cy="button-import-rdi"').click();
-
-  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.reload();
-  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
-  // it lets the browser load the status
-
-  cy.get('div').contains('IMPORT ERROR').should('not.exist');
-  cy.get('div').contains('IN REVIEW');
-
-  cy.get('span').contains('Merge').click({ force: true }); // top of page
-  cy.get('span').contains('MERGE').click({ force: true }); // inside modal
-
-  cy.get('div').contains('MERGING');
-  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.reload();
-  cy.get('div').contains('MERGED');
-  cy.get('button > span').contains('Individuals').click({ force: true });
-  getIndividualsFromRdiDetails(cy, 3, individualIds);
-});
-
-Given('Each imported individual has a payment channel', () => {
-  individualIds.forEach((individualId) => {
-    cy.visit('/api/unicorn/payment/paymentchannel/add/');
-    cy.get('#id_individual').select(individualId);
-    cy.get('#id_delivery_mechanism').select('Transfer');
-    cy.get('input[name="_save"]').click();
-  });
-});
-
-Given('There are steficon rules provided', () => {
-  cy.visit('/api/unicorn/steficon/rule/add/');
-  cy.get('#id_name').type(uniqueSeed);
-  cy.get('#id_type').select('Payment Plan');
-  cy.get('#id_definition_container').click().type('result.value=0');
-  cy.get('input[name="enabled"]').click();
-  cy.get('input[name="_save"]').click();
-  cy.get('p').contains('Please correct the error below.').should('not.exist');
-
-  cy.visit('/api/unicorn/steficon/rulecommit/add/');
-  cy.get('#id_rule').select(uniqueSeed);
-  cy.get('#id_definition').clear().type('result.value=20');
-  cy.get('input[name="is_release"]').click();
-  cy.get('input[name="enabled"]').click();
-  cy.get('input[name="version"]').type(
-    (parseInt(uniqueSeed) % maxInt).toString(),
-  );
-  cy.get('input[name="affected_fields"]').type('[]');
-  cy.get('input[name="_save"]').click();
-  cy.get('p').contains('Please correct the error below.').should('not.exist');
-
-  cy.visit('/');
-  clearCache();
-});
-
-Given('I have an active program', () => {
-  cy.visit('/');
-  cy.get('span').contains('Programme Management').click();
-  cy.get('[data-cy="button-new-program"]').click({
-    force: true,
-  });
-  programName = fillProgramForm(cy);
-  cy.get('[data-cy="button-save"]').click({ force: true });
-  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.get('[data-cy="button-activate-program"]').click({ force: true });
-  cy.get('[data-cy="button-activate-program-modal"]').click({ force: true });
-  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.get('[data-cy="status-container"]').contains('Active');
-});
-
-Given('I have target population in ready status', () => {
-  cy.visit('/');
-  cy.get('span').contains('Targeting').click();
-  cy.get('[data-cy="button-target-population-create-new"]').click({
-    force: true,
-  });
-  targetPopulationName = fillTargetingForm(cy, programName, uniqueSeed, "Address");
-  cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click();
-  cy.get(
-    '[data-cy=button-target-population-create] > .MuiButton-label',
-  ).click();
-  cy.get('[data-cy="button-target-population-lock"]').click({ force: true });
-  cy.get('[data-cy="button-target-population-modal-lock"]').click({
-    force: true,
-  });
-  cy.get('[data-cy="button-target-population-send-to-hope"]').click({
-    force: true,
-  });
-  cy.get('[data-cy="button-target-population-modal-send-to-hope"]').click({
-    force: true,
-  });
-  cy.get('[data-cy="status-container"]').contains('Ready');
-});
+Given("I initialize the data", () => {
+  cy.exec(`yarn init-scenario payment_plan --seed ${uniqueSeed}`);
+})
 
 Given('Business area is payment plan applicable', () => {
   cy.visit('/api/unicorn/core/businessarea/');
@@ -191,7 +60,7 @@ Then('I should see the New Payment Plan page', () => {
 When('I fill out the form fields and save', () => {
   cy.get('[data-cy="input-target-population"]').first().click();
   cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.get(`[data-cy="select-option-${targetPopulationName}"]`).click();
+  cy.get(`[data-cy="select-option-${targetPopulationName}-${uniqueSeed}"]`).click();
 
   cy.get('[data-cy="input-start-date"]').click().type('2022-12-12');
   cy.get('[data-cy="input-end-date"]').click().type('2022-12-23');
@@ -236,7 +105,7 @@ When('I choose the steficon rule', () => {
     force: true,
   });
   cy.get('[data-cy="input-entitlement-formula"]').click({ force: true });
-  cy.get('li').contains(uniqueSeed).click({ force: true });
+  cy.get('li').contains(`Rule-${uniqueSeed}`).click({ force: true });
 });
 
 And('I apply the steficon rule', () => {

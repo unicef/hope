@@ -3,12 +3,13 @@ Feature: Create Payment Plan
 
         Background:
                 Given I am authenticated
-                Given There are individuals and households imported
-                Given Each imported individual has a payment channel
-                Given I have an active program
-                Given I have target population in ready status
+                Given I initialize the data
+                # Given There are individuals and households imported
+                # Given Each imported individual has a payment channel
+                # Given I have an active program
+                # Given I have target population in ready status
+                # Given There are steficon rules provided
                 Given Business area is payment plan applicable
-                Given There are steficon rules provided
 
         Scenario: Create Payment Plan
                 When I visit the main dashboard

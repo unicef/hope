@@ -3,6 +3,15 @@ from datetime import timedelta
 from django.utils import timezone
 from django.core.management import BaseCommand
 
+from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentChannel
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.targeting.models import (
+    TargetPopulation,
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.household.models import MALE
@@ -10,6 +19,8 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 
 from faker import Faker
 
@@ -51,12 +62,77 @@ def create_household_with_individual(address):
     hh.head_of_household.household = hh
     hh.head_of_household.save()
 
+    return hh, hh.head_of_household
+
+
+def create_household_with_individual_for_payment_plan(address):
+    hh, ind = create_household_with_individual(address)
+    IndividualRoleInHousehold.objects.create(
+        role=ROLE_PRIMARY,
+        household=hh,
+        individual=ind,
+    )
+    PaymentChannel.objects.create(
+        individual=ind,
+        delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER,
+    )
+
 
 def init_targeting(seed):
-    create_household_with_individual(
-        address=f"TargetingVille-{seed}",
-    )
+    create_household_with_individual(address=f"TargetingVille-{seed}")
     ProgramFactory(name=f"TargetingProgram-{seed}", status=Program.ACTIVE)
+
+
+def init_payment_plan(seed):
+    afghanistan = BusinessArea.objects.get(name="Afghanistan")
+    addresses = [f"PaymentPlanVille-{seed}-1", f"PaymentPlanVille-{seed}-2", f"PaymentPlanVille-{seed}-3"]
+    root = User.objects.get(username="root")
+
+    create_household_with_individual_for_payment_plan(address=addresses[0])
+    create_household_with_individual_for_payment_plan(address=addresses[1])
+    create_household_with_individual_for_payment_plan(address=addresses[2])
+    program = ProgramFactory(name=f"PaymentPlanProgram-{seed}", status=Program.ACTIVE)
+
+    targeting_criteria = TargetingCriteria.objects.create()
+    TargetingCriteriaRuleFilter.objects.create(
+        targeting_criteria_rule=TargetingCriteriaRule.objects.create(
+            targeting_criteria=targeting_criteria,
+        ),
+        comparison_method="EQUALS",
+        field_name="address",
+        arguments=[addresses[0]],
+    )
+    TargetingCriteriaRuleFilter.objects.create(
+        targeting_criteria_rule=TargetingCriteriaRule.objects.create(
+            targeting_criteria=targeting_criteria,
+        ),
+        comparison_method="EQUALS",
+        field_name="address",
+        arguments=[addresses[1]],
+    )
+    TargetingCriteriaRuleFilter.objects.create(
+        targeting_criteria_rule=TargetingCriteriaRule.objects.create(
+            targeting_criteria=targeting_criteria,
+        ),
+        comparison_method="EQUALS",
+        field_name="address",
+        arguments=[addresses[2]],
+    )
+
+    target_population = TargetPopulation.objects.create(
+        name=f"PaymentPlanTargetPopulation-{seed}",
+        targeting_criteria=targeting_criteria,
+        status=TargetPopulation.STATUS_OPEN,
+        business_area=afghanistan,
+        program=program,
+        created_by=root,
+    )
+    target_population.full_rebuild()
+    target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
+    target_population.save()
+
+    rule = RuleFactory(name=f"Rule-{seed}", type=Rule.TYPE_PAYMENT_PLAN)
+    RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule)
 
 
 class Command(BaseCommand):
@@ -64,7 +140,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "scenario",
             action="store",
-            choices=["targeting"],
+            choices=["targeting", "payment_plan"],
         )
 
         parser.add_argument(
@@ -77,4 +153,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print("Initializing scenario with options:", {k: v for k, v in options.items() if k in ["scenario", "seed"]})
-        {"targeting": init_targeting}[options["scenario"]](options.get("seed"))
+        {"targeting": init_targeting, "payment_plan": init_payment_plan}[options["scenario"]](options.get("seed"))
