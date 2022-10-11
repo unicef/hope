@@ -539,6 +539,20 @@
 },
 {
   "model": "registration_datahub.registrationdataimportdatahub",
+  "pk": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+  "fields": {
+    "created_at": "2022-03-30T09:22:14.856Z",
+    "updated_at": "2022-03-30T09:22:16.791Z",
+    "name": "Test Diia",
+    "import_date": "2022-03-30T09:22:14.856Z",
+    "hct_id": "04992dce-8e47-154b-4938-743415412dce",
+    "import_data": "e38f6f0c-36e9-a1f0-4b73-84742f7d025d",
+    "import_done": "NOT_STARTED",
+    "business_area_slug": "ukraine"
+  }
+},
+{
+  "model": "registration_datahub.registrationdataimportdatahub",
   "pk": "f814f78d-6f0d-49d9-961c-79322fa172b9",
   "fields": {
     "created_at": "2022-08-10T14:02:02.454Z",
@@ -549,6 +563,23 @@
     "import_data": "f87474eb-8db9-409a-b42e-7b30f4af41f9",
     "import_done": "DONE",
     "business_area_slug": "afghanistan"
+  }
+},
+{
+  "model": "registration_datahub.importdata",
+  "pk": "e38f6f0c-36e9-a1f0-4b73-84742f7d025d",
+  "fields": {
+    "created_at": "2022-05-29T09:21:29.900Z",
+    "updated_at": "2022-04-29T09:21:34.214Z",
+    "status": "PENDING",
+    "business_area_slug": "ukraine",
+    "file": "",
+    "data_type": "DIIA",
+    "number_of_households": 0,
+    "number_of_individuals": 0,
+    "error": "",
+    "validation_errors": "",
+    "created_by_id": null
   }
 },
 {
@@ -570,60 +601,80 @@
 },
 {
   "model": "registration_datahub.importeddocumenttype",
-  "pk": "b8bf67b8-76be-4545-a762-30682db1bd5e",
+  "pk": "185d0037-a1bc-4eef-a679-749b5964c1f6",
   "fields": {
-    "created_at": "2022-08-10T14:00:37.592Z",
-    "updated_at": "2022-08-10T14:00:37.592Z",
-    "label": "Tax Number Identification",
-    "type": "TAX_ID"
-  }
-},
-{
-  "model": "registration_datahub.importeddocumenttype",
-  "pk": "005525ef-6af3-4739-9082-ab49f2f12760",
-  "fields": {
-    "created_at": "2022-08-10T14:00:37.640Z",
-    "updated_at": "2022-08-10T14:00:37.640Z",
-    "label": "Driver's License",
-    "type": "DRIVERS_LICENSE"
-  }
-},
-{
-  "model": "registration_datahub.importeddocumenttype",
-  "pk": "0072623a-8bf4-40d4-a28e-94f1e38bb5c9",
-  "fields": {
-    "created_at": "2022-08-10T14:00:37.605Z",
-    "updated_at": "2022-08-10T14:00:37.605Z",
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Electoral Card",
     "type": "ELECTORAL_CARD"
   }
 },
 {
   "model": "registration_datahub.importeddocumenttype",
-  "pk": "008bb468-2c36-4b2c-bac1-995e59df7e95",
+  "pk": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
   "fields": {
-    "created_at": "2022-08-10T14:00:37.630Z",
-    "updated_at": "2022-08-10T14:00:37.630Z",
-    "label": "National Passport",
-    "type": "NATIONAL_PASSPORT"
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "National ID",
+    "type": "NATIONAL_ID"
   }
 },
 {
   "model": "registration_datahub.importeddocumenttype",
-  "pk": "0098ef0f-d0f5-44a9-8dca-74af037d604e",
+  "pk": "6087e502-defa-44e2-9865-63f45a71471e",
   "fields": {
-    "created_at": "2022-08-10T14:00:37.638Z",
-    "updated_at": "2022-08-10T14:00:37.638Z",
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Other",
     "type": "OTHER"
   }
 },
 {
   "model": "registration_datahub.importeddocumenttype",
-  "pk": "d5498614-729b-4d93-b24b-c520f004ae47",
+  "pk": "89481e2a-3ef1-40fb-8021-6b92bcb03db4",
   "fields": {
-    "created_at": "2022-08-10T14:00:37.617Z",
-    "updated_at": "2022-08-10T14:00:37.617Z",
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Driver's License",
+    "type": "DRIVERS_LICENSE"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "92fbe664-66f1-42ea-9c9c-8c093db16f3b",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Tax Number Identification",
+    "type": "TAX_ID"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "d2c54476-0a45-4f0a-aca1-e78e78f1e2cc",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "National Passport",
+    "type": "NATIONAL_PASSPORT"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "db4b73d0-3a53-48b5-9d2b-bdf0de29ccbf",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
+    "label": "Birth Certificate",
+    "type": "BIRTH_CERTIFICATE"
+  }
+},
+{
+  "model": "registration_datahub.importeddocumenttype",
+  "pk": "ee41c19e-63d2-473b-9e6f-65eb8ff2cbe5",
+  "fields": {
+    "created_at": "2022-08-10T14:00:37.565Z",
+    "updated_at": "2022-08-10T14:00:37.565Z",
     "label": "Foreigner's Residence Permit",
     "type": "RESIDENCE_PERMIT_NO"
   }
@@ -637,8 +688,8 @@
     "document_number": "ASH221345",
     "photo": "",
     "individual": "86f8a870-360c-432d-af46-7426f7070c90",
-    "type": "b8bf67b8-76be-4545-a762-30682db1bd5e",
-    "country": "ID",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
     "doc_date": null
   }
 },
@@ -651,8 +702,8 @@
     "document_number": "JA123123",
     "photo": "",
     "individual": "86f8a870-360c-432d-af46-7426f7070c90",
-    "type": "008bb468-2c36-4b2c-bac1-995e59df7e95",
-    "country": "KN",
+    "type": "d2c54476-0a45-4f0a-aca1-e78e78f1e2cc",
+    "country": "PL",
     "doc_date": null
   }
 },
@@ -665,8 +716,8 @@
     "document_number": "BSH221315",
     "photo": "",
     "individual": "6ef3b767-5be6-4bbd-a598-6a5cc2960faf",
-    "type": "b8bf67b8-76be-4545-a762-30682db1bd5e",
-    "country": "ID",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
     "doc_date": null
   }
 },
@@ -679,8 +730,8 @@
     "document_number": "DAZ132964",
     "photo": "",
     "individual": "87201b6a-4d00-4ae2-ad1b-30dca2b83614",
-    "type": "b8bf67b8-76be-4545-a762-30682db1bd5e",
-    "country": "SE",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
     "doc_date": null
   }
 },
@@ -693,8 +744,8 @@
     "document_number": "CSH221395",
     "photo": "",
     "individual": "27a7a17b-4a3d-4643-a332-d177f0425f84",
-    "type": "b8bf67b8-76be-4545-a762-30682db1bd5e",
-    "country": "UM",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
     "doc_date": null
   }
 },
@@ -707,8 +758,8 @@
     "document_number": "WSH221365",
     "photo": "",
     "individual": "6f116cf6-04ca-4d98-b275-638acae21108",
-    "type": "b8bf67b8-76be-4545-a762-30682db1bd5e",
-    "country": "CK",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
     "doc_date": null
   }
 },
@@ -721,8 +772,8 @@
     "document_number": "TSH221375",
     "photo": "",
     "individual": "6c8d9be4-3bce-4a87-952a-e6abab468086",
-    "type": "b8bf67b8-76be-4545-a762-30682db1bd5e",
-    "country": "IT",
+    "type": "218fa71b-0d15-4f4b-85fe-86a9b9f59f0d",
+    "country": "PL",
     "doc_date": null
   }
 },
@@ -5233,6 +5284,163 @@
     "agency": 354,
     "individual": "87201b6a-4d00-4ae2-ad1b-30dca2b83614",
     "document_number": "johniak pany"
+  }
+},
+{
+  "model": "registration_datahub.diiahousehold",
+  "pk": 1,
+  "fields": {
+    "rec_id": "111111",
+    "vpo_doc": "test_file_name.jpg",
+    "vpo_doc_id": "VPO-DOC-001",
+    "vpo_doc_date": "30-04-2022",
+    "address": "Староміська майдан, 854, кв. 794, 80571, Одеса, Луганська область, Ukraine",
+    "consent": true,
+    "source_data": "",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_household": null,
+    "status": null
+  }
+},
+{
+  "model": "registration_datahub.diiahousehold",
+  "pk": 2,
+  "fields": {
+    "rec_id": "222222",
+    "vpo_doc": "test_file_name.jpg",
+    "vpo_doc_id": "VPO-DOC-2222",
+    "vpo_doc_date": "29-04-2022",
+    "address": "Ліста майдан, 3, кв. 257, 78242, Мелітополь, Чернівецька область, Ukraine",
+    "consent": true,
+    "source_data": "",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_household": null,
+    "status": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": 1,
+  "fields": {
+    "rec_id": "111111",
+    "individual_id": "111222333111",
+    "last_name": "Hurst",
+    "first_name": "Fiona",
+    "second_name": "Second",
+    "relationship": "WIFE_HUSBAND",
+    "sex": "F",
+    "birth_date": "15-10-2001",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": "False",
+    "iban": "",
+    "bank_name": "",
+    "doc_type": null,
+    "doc_serie": null,
+    "doc_number": null,
+    "doc_issue_date": null,
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": 2,
+  "fields": {
+    "rec_id": "111111",
+    "individual_id": "111222333444",
+    "last_name": "Clay",
+    "first_name": "Francis",
+    "second_name": "Mid",
+    "relationship": "HEAD",
+    "sex": "M",
+    "birth_date": "11-01-1999",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": "False",
+    "iban": "1234123412341234",
+    "bank_name": "PrivatBank",
+    "doc_type": null,
+    "doc_serie": "FA",
+    "doc_number": "123321123",
+    "doc_issue_date": "11-10-2035",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": 3,
+  "fields": {
+    "rec_id": "222222",
+    "individual_id": "123412341234 999 222",
+    "last_name": "Duarte",
+    "first_name": "Erik",
+    "second_name": "Mid",
+    "relationship": "HEAD",
+    "sex": "M",
+    "birth_date": "22-02-1989",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": "False",
+    "iban": "6543789043215678",
+    "bank_name": "MonoBank",
+    "doc_type": null,
+    "doc_serie": "KO",
+    "doc_number": "222233334444",
+    "doc_issue_date": "12-03-2023",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": 4,
+  "fields": {
+    "rec_id": "222222",
+    "individual_id": "76543113349",
+    "last_name": "Burnett",
+    "first_name": "Lydia",
+    "second_name": "Lin",
+    "relationship": "WIFE_HUSBAND",
+    "sex": "F",
+    "birth_date": "19-01-1993",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": "False",
+    "iban": "",
+    "bank_name": "",
+    "doc_type": null,
+    "doc_serie": null,
+    "doc_number": null,
+    "doc_issue_date": null,
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": 5,
+  "fields": {
+    "rec_id": "222222",
+    "individual_id": "",
+    "last_name": "Bautista",
+    "first_name": "Sam",
+    "second_name": "Bautista1",
+    "relationship": "SON_DAUGHTER",
+    "sex": "M",
+    "birth_date": "16-06-2009",
+    "birth_doc": "BRS321333",
+    "marital_status": "",
+    "disability": "True",
+    "iban": "",
+    "bank_name": "",
+    "doc_type": null,
+    "doc_serie": null,
+    "doc_number": null,
+    "doc_issue_date": null,
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
   }
 }
 ]
