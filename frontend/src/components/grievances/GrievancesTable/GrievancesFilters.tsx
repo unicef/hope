@@ -105,7 +105,7 @@ export function GrievancesFilters({
               <em>None</em>
             </MenuItem>
             {choicesData.grievanceTicketStatusChoices.map((item) => (
-              <MenuItem key={item.value} value={item.name}>
+              <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
             ))}
@@ -173,7 +173,7 @@ export function GrievancesFilters({
             </MenuItem>
             {categoryChoices.map((item) => {
               return (
-                <MenuItem key={item.value} value={item.name}>
+                <MenuItem key={item.value} value={item.value}>
                   {item.name}
                 </MenuItem>
               );
@@ -198,7 +198,7 @@ export function GrievancesFilters({
                 ]
               ].subCategories.map((item) => {
                 return (
-                  <MenuItem key={item.value} value={item.name}>
+                  <MenuItem key={item.value} value={item.value}>
                     {item.name}
                   </MenuItem>
                 );
@@ -258,7 +258,7 @@ export function GrievancesFilters({
             </MenuItem>
             {choicesData.grievanceTicketPriorityChoices.map((item) => {
               return (
-                <MenuItem key={item.value} value={item.name}>
+                <MenuItem key={item.value} value={item.value}>
                   {item.name}
                 </MenuItem>
               );
@@ -276,7 +276,7 @@ export function GrievancesFilters({
             </MenuItem>
             {choicesData.grievanceTicketUrgencyChoices.map((item) => {
               return (
-                <MenuItem key={item.value} value={item.name}>
+                <MenuItem key={item.value} value={item.value}>
                   {item.name}
                 </MenuItem>
               );

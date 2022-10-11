@@ -25,12 +25,12 @@ export const AssigneeAutocomplete = ({
   value,
   label,
 }: {
-  disabled?;
+  disabled?: boolean;
   fullWidth?: boolean;
   onFilterChange?;
-  name?;
+  name?: string;
   value?;
-  label?;
+  label?: string;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
