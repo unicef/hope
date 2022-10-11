@@ -27,3 +27,23 @@ class Config(SmartConfig):
 
         smart_register(ContentType)(ContentTypeAdmin)
         smart_register(LogEntry)(LogEntryAdmin)
+
+        from django.contrib.admin import site
+
+        from smart_admin.console import (
+            panel_error_page,
+            panel_migrations,
+            panel_redis,
+            panel_sentry,
+            panel_sysinfo,
+        )
+
+        from .panels import email, panel_elasticsearch
+
+        site.register_panel(panel_migrations)
+        site.register_panel(panel_sysinfo)
+        site.register_panel(email)
+        site.register_panel(panel_sentry)
+        site.register_panel(panel_error_page)
+        site.register_panel(panel_redis)
+        site.register_panel(panel_elasticsearch)

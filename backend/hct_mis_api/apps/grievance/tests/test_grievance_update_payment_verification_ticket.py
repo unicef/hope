@@ -13,14 +13,17 @@ from hct_mis_api.apps.grievance.fixtures import TicketPaymentVerificationDetails
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 
 
 class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):

@@ -2,12 +2,12 @@ from django.db.models import Q
 from django.db.models.functions import Lower
 
 from django_filters import (
+    BooleanFilter,
     CharFilter,
     DateTimeFilter,
     FilterSet,
     ModelMultipleChoiceFilter,
     NumericRangeFilter,
-    BooleanFilter,
 )
 
 import hct_mis_api.apps.targeting.models as target_models

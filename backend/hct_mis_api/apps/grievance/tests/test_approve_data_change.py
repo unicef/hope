@@ -49,31 +49,31 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
 
     APPROVE_INDIVIDUAL_DATA_CHANGE_GRIEVANCE_MUTATION = """
     mutation ApproveIndividualDataChange(
-      $grievanceTicketId: ID!, 
+      $grievanceTicketId: ID!,
       $individualApproveData: JSONString,
-      $flexFieldsApproveData: JSONString, 
+      $flexFieldsApproveData: JSONString,
       $approvedDocumentsToCreate: [Int],
       $approvedDocumentsToEdit: [Int],
       $approvedDocumentsToRemove: [Int],
-      $approvedIdentitiesToCreate: [Int], 
-      $approvedIdentitiesToEdit: [Int], 
+      $approvedIdentitiesToCreate: [Int],
+      $approvedIdentitiesToEdit: [Int],
       $approvedIdentitiesToRemove: [Int],
-      $approvedPaymentChannelsToCreate: [Int], 
-      $approvedPaymentChannelsToEdit: [Int], 
+      $approvedPaymentChannelsToCreate: [Int],
+      $approvedPaymentChannelsToEdit: [Int],
       $approvedPaymentChannelsToRemove: [Int]
     ) {
       approveIndividualDataChange(
-        grievanceTicketId: $grievanceTicketId, 
+        grievanceTicketId: $grievanceTicketId,
         individualApproveData: $individualApproveData,
         flexFieldsApproveData: $flexFieldsApproveData,
-        approvedDocumentsToCreate: $approvedDocumentsToCreate, 
-        approvedDocumentsToEdit: $approvedDocumentsToEdit, 
+        approvedDocumentsToCreate: $approvedDocumentsToCreate,
+        approvedDocumentsToEdit: $approvedDocumentsToEdit,
         approvedDocumentsToRemove: $approvedDocumentsToRemove,
-        approvedIdentitiesToCreate: $approvedIdentitiesToCreate, 
-        approvedIdentitiesToEdit: $approvedIdentitiesToEdit, 
+        approvedIdentitiesToCreate: $approvedIdentitiesToCreate,
+        approvedIdentitiesToEdit: $approvedIdentitiesToEdit,
         approvedIdentitiesToRemove: $approvedIdentitiesToRemove,
-        approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate, 
-        approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit, 
+        approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate,
+        approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit,
         approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove
       ) {
         grievanceTicket {
@@ -88,13 +88,13 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
 
     APPROVE_HOUSEHOLD_DATA_CHANGE_GRIEVANCE_MUTATION = """
     mutation ApproveHouseholdDataChange(
-        $grievanceTicketId: ID!, 
-        $householdApproveData: JSONString, 
+        $grievanceTicketId: ID!,
+        $householdApproveData: JSONString,
         $flexFieldsApproveData: JSONString
     ) {
       approveHouseholdDataChange(
-        grievanceTicketId: $grievanceTicketId, 
-        householdApproveData: $householdApproveData, 
+        grievanceTicketId: $grievanceTicketId,
+        householdApproveData: $householdApproveData,
         flexFieldsApproveData: $flexFieldsApproveData
       ) {
         grievanceTicket {

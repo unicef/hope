@@ -1,8 +1,5 @@
 import copy
 import logging
-import openpyxl
-
-from openpyxl.utils import get_column_letter
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
@@ -12,6 +9,9 @@ from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Count, DecimalField, Max, Min, Q, Sum
 from django.template.loader import render_to_string
+
+import openpyxl
+from openpyxl.utils import get_column_letter
 
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 from hct_mis_api.apps.geo.models import Area
@@ -878,7 +878,7 @@ class GenerateReportService:
                     except IndexError:
                         column_widths.append(len(value))
 
-        for i, width in enumerate(column_widths):
+        for i in range(len(column_widths)):
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             value = GenerateReportService.MAX_COL_WIDTH if value > GenerateReportService.MAX_COL_WIDTH else value

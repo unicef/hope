@@ -112,8 +112,6 @@ venv.bak/
 
 *.tgz
 
-.DS_Store
-/.DS_Store
 *.sql
 
 *.DS_Store

@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveField(
-            model_name="dashboardreport",
-            name="admin_area",
+            model_name='dashboardreport',
+            name='admin_area',
         ),
     ]

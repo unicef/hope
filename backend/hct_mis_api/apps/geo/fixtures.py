@@ -1,6 +1,7 @@
 import factory
-from faker import Faker
 from factory import fuzzy
+from faker import Faker
+
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 
 faker = Faker()

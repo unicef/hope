@@ -2,6 +2,7 @@ import json
 import graphene
 
 from decimal import Decimal
+
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
@@ -48,7 +49,6 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
     FinancialServiceProviderXlsxReportFilter,
@@ -81,10 +81,10 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
+from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
-from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard, get_payment_items_sequence_qs
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -763,7 +763,6 @@ class Query(graphene.ObjectType):
         # "'ExtendedQuerySetSequence' object has no attribute 'clone'"
         # payment_qs = get_payment_items_sequence_qs().filter(id=OuterRef("payment_object_id"))
         # payment_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
-        print(PaymentVerification.objects.all(), PaymentVerification.objects.all().count())
 
         return (
             PaymentVerification.objects.filter(

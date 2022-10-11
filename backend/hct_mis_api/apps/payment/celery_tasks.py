@@ -1,12 +1,13 @@
-import logging
 import datetime
+import logging
 
-from concurrency.api import disable_concurrency
-from sentry_sdk import configure_scope
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
+
+from concurrency.api import disable_concurrency
+from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -148,7 +149,9 @@ def create_payment_plan_payment_list_xlsx(payment_plan_id, user_id):
 def create_payment_plan_payment_list_xlsx_per_fsp(payment_plan_id, user_id):
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportPerFspService import XlsxPaymentPlanExportPerFspService
+        from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanExportPerFspService import (
+            XlsxPaymentPlanExportPerFspService,
+        )
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -258,8 +261,8 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_steficon(payment_plan_id, steficon_rule_id):
+    from hct_mis_api.apps.payment.models import Payment, PaymentPlan
     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
-    from hct_mis_api.apps.payment.models import PaymentPlan, Payment
 
     payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
     steficon_rule = Rule.objects.get(id=decode_id_string(steficon_rule_id))

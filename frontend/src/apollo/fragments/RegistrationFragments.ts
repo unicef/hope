@@ -75,6 +75,7 @@ export const importedHouseholdMinimal = gql`
     hasDuplicates
     fchildHoh
     childHoh
+    collectIndividualData
   }
 `;
 export const importedHouseholdDetailed = gql`

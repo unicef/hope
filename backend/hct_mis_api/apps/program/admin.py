@@ -1,10 +1,7 @@
 from django.contrib import admin
-from django.template.response import TemplateResponse
 
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter
 
 from ..utils.admin import (
     HOPEModelAdminBase,

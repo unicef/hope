@@ -23,6 +23,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
     except KoboRetriableError as exc:
         from datetime import timedelta
+
         from django.utils import timezone
 
         one_day_earlier_time = timezone.now() - timedelta(days=1)

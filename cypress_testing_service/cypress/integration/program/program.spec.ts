@@ -13,7 +13,7 @@ When('I visit the main dashboard', () => {
 });
 
 Then('I should see the side panel with Programme Management option', () => {
-  cy.get('span').contains('Programme Management', { timeout: 10000 });
+  cy.get('span').contains('Programme Management');
 });
 
 When('I click on Programme Management option', () => {

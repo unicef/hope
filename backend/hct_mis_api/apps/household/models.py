@@ -10,7 +10,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import DecimalField, JSONField
+from django.db.models import JSONField
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -131,6 +131,19 @@ YES_NO_CHOICE = (
     (YES, _("Yes")),
     (NO, _("No")),
 )
+
+COLLECT_TYPE_UNKNOWN = ""
+COLLECT_TYPE_NONE = "0"
+COLLECT_TYPE_FULL = "1"
+COLLECT_TYPE_PARTIAL = "2"
+
+COLLECT_TYPES = (
+    (COLLECT_TYPE_UNKNOWN, _("Unknown")),
+    (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
+    (COLLECT_TYPE_FULL, _("Full individual collected")),
+    (COLLECT_TYPE_NONE, _("No individual data")),
+)
+
 NOT_PROVIDED = "NOT_PROVIDED"
 WORK_STATUS_CHOICE = (
     (YES, _("Yes")),
@@ -338,7 +351,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
     country = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
-    size = models.PositiveIntegerField(db_index=True)
+    size = models.PositiveIntegerField(db_index=True, null=True)
     address = CICharField(max_length=1024, blank=True)
     """location contains lowest administrative area info"""
     admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
@@ -382,6 +395,8 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
         related_name="households",
+        blank=True,
+        null=True,
         on_delete=models.CASCADE,
     )
     programs = models.ManyToManyField(
@@ -405,7 +420,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
     village = models.CharField(max_length=250, blank=True, default=BLANK)
     registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
-    collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
+    collect_individual_data = models.CharField(max_length=250, choices=COLLECT_TYPES, default=COLLECT_TYPE_UNKNOWN)
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
@@ -444,19 +459,18 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     def status(self):
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, save=True):
+    def withdraw(self, tag=None):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
+        user_fields = self.user_fields or {}
+        user_fields["withdrawn_tag"] = tag
+        self.user_fields = user_fields
+        self.save()
 
-        if save:
-            self.save()
-
-    def unwithdraw(self, save=True):
+    def unwithdraw(self):
         self.withdrawn = False
         self.withdrawn_date = None
-
-        if save:
-            self.save()
+        self.save()
 
     def set_sys_field(self, key, value):
         if "sys" not in self.user_fields:
@@ -503,6 +517,14 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     @property
     def active_individuals(self):
         return self.individuals.filter(withdrawn=False, duplicate=False)
+
+    @cached_property
+    def primary_collector(self):
+        return self.representatives.get(households_and_roles__role=ROLE_PRIMARY)
+
+    @cached_property
+    def alternate_collector(self):
+        return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
     def __str__(self):
         return f"{self.unicef_id}"
@@ -820,19 +842,17 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def sanction_list_last_check(self):
         return cache.get("sanction_list_last_check")
 
-    def withdraw(self, save=True):
+    def withdraw(self):
+        self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
+        self.save()
 
-        if save:
-            self.save()
-
-    def unwithdraw(self, save=True):
+    def unwithdraw(self):
+        self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)
         self.withdrawn = False
         self.withdrawn_date = None
-
-        if save:
-            self.save()
+        self.save()
 
     def mark_as_duplicate(self, original_individual=None):
         if original_individual is not None:

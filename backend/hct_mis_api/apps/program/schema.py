@@ -12,7 +12,9 @@ from django.db.models import (
     Q,
     Sum,
     Value,
-    When, OuterRef, Exists,
+    When,
+    OuterRef,
+    Exists,
 )
 
 from hct_mis_api.apps.account.permissions import (
@@ -25,6 +27,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
+
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
@@ -32,15 +35,13 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.filters import (
-    CashPlanFilter,
-    PaymentVerificationPlanFilter,
-)
+from hct_mis_api.apps.payment.filters import CashPlanFilter, PaymentVerificationPlanFilter
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
     GenericPayment,
     PaymentRecord,
-    PaymentVerificationPlan, PaymentVerificationSummary,
 )
 from hct_mis_api.apps.payment.schema import PaymentVerificationPlanNode, PaymentVerificationSummaryNode
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
