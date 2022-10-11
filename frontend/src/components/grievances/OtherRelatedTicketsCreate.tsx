@@ -57,7 +57,9 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
       )
     : [];
 
-  return householdTickets.length ? (
+  const shouldShowBox = values.category && values.selectedHousehold?.id;
+
+  return shouldShowBox && householdTickets.length ? (
     <ApproveBox>
       <Title>
         <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
