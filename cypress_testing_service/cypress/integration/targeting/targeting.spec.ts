@@ -1,7 +1,6 @@
 import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
 import { fillTargetingForm, uniqueSeed } from '../../procedures/procedures';
 
-let individualIds = [];
 let programName = 'TargetingProgram';
 
 Given('I am authenticated', () => {
