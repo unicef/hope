@@ -4,7 +4,6 @@ import {
   uniqueSeed,
 } from '../../procedures/procedures';
 let householdId;
-let individualId;
 let individualIds = [];
 
 Given('I am authenticated', () => {
