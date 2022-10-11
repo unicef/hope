@@ -28,7 +28,7 @@ const WarnIcon = styled(WarningIcon)`
   margin-right: 10px;
 `;
 
-export function TicketsAlreadyExist({ values, size = 6 }): React.ReactElement {
+export const TicketsAlreadyExist = ({ values }): React.ReactElement => {
   const businessArea = useBusinessArea();
   const { t } = useTranslation();
   const { data, loading } = useExistingGrievanceTicketsQuery({
@@ -53,8 +53,12 @@ export function TicketsAlreadyExist({ values, size = 6 }): React.ReactElement {
       </ContentLink>
     </Box>
   ));
-  return edges.length ? (
-    <Grid item xs={size as GridSize}>
+  const shouldShowBox =
+    !!values.category &&
+    (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id);
+
+  return edges.length && shouldShowBox ? (
+    <Grid item xs={6}>
       <StyledBox>
         <OrangeTitle>
           <Typography variant='h6'>
@@ -75,4 +79,4 @@ export function TicketsAlreadyExist({ values, size = 6 }): React.ReactElement {
       </StyledBox>
     </Grid>
   ) : null;
-}
+};

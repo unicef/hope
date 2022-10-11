@@ -57,9 +57,11 @@ const InnerBoxPadding = styled.div`
     padding: 32px 20px;
   }
 `;
+
 const NewTicket = styled.div`
   padding: 20px;
 `;
+
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -214,16 +216,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
         </FormHelperText>
       ));
 
-  const renderAlreadyExistsBox = (values): ReactElement => {
-    if (
-      !!values.category &&
-      (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id)
-    ) {
-      return <TicketsAlreadyExist values={values} />;
-    }
-    return null;
-  };
-
   const handleNext = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -376,7 +368,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           permissions={permissions}
                         />
                       )}
-
                       <DataChangeComponent
                         values={values}
                         setFieldValue={setFieldValue}
@@ -418,11 +409,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                 <Grid item xs={12}>
                   <NewTicket>
                     <Grid container spacing={3}>
-                      {renderAlreadyExistsBox(values)}
+                      <TicketsAlreadyExist values={values} />
                       <Grid item xs={6}>
-                        {values.category && values.selectedHousehold?.id && (
-                          <OtherRelatedTicketsCreate values={values} />
-                        )}
+                        <OtherRelatedTicketsCreate values={values} />
                       </Grid>
                     </Grid>
                   </NewTicket>
