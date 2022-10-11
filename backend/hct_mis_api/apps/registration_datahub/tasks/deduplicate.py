@@ -32,12 +32,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.documents import (
-    ImportedIndividualDocument,
-    ImportedIndividualDocumentAfghanistan,
-    ImportedIndividualDocumentUkraine,
-    ImportedIndividualDocumentOthers, get_imported_individual_doc
-)
+from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 
@@ -615,7 +610,6 @@ class DeduplicateTask:
     def deduplicate_individuals_from_other_source(cls, individuals: list[Individual]):
         cls._wait_until_health_green()
         cls.set_thresholds(individuals[0].business_area)
-        # cls.business_area = individuals[0].business_area
 
         to_bulk_update_results = []
         for individual in individuals:
