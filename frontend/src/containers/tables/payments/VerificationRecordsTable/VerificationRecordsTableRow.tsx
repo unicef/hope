@@ -30,10 +30,10 @@ export function VerificationRecordsTableRow({
       <TableCell align='left'>
         {canViewRecordDetails ? (
           <BlackLink to={`/${businessArea}/verification-records/${paymentVerification.id}`}>
-            {paymentVerification.paymentRecord?.caId}
+            {paymentVerification.payment?.unicefId}
           </BlackLink>
         ) : (
-          <span>{paymentVerification.paymentRecord?.caId}</span>
+          <span>{paymentVerification.payment?.unicefId}</span>
         )}
       </TableCell>
       <TableCell align='left'>
@@ -49,34 +49,34 @@ export function VerificationRecordsTableRow({
         />
       </TableCell>
       <AnonTableCell>
-        {paymentVerification.paymentRecord.household.headOfHousehold.fullName}
+        {paymentVerification.payment.household.headOfHousehold.fullName}
       </AnonTableCell>
       <TableCell align='left'>
-        {paymentVerification.paymentRecord.household.unicefId}
+        {paymentVerification.payment.household.unicefId}
       </TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={paymentVerification.paymentRecord.household.status}
+          status={paymentVerification.payment.household.status}
           statusToColor={householdStatusToColor}
         />
       </TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
-          paymentVerification.paymentRecord.deliveredQuantity,
-          paymentVerification.paymentRecord.currency,
+          paymentVerification.payment.deliveredQuantity,
+          paymentVerification.payment.currency,
         )}
       </TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
           paymentVerification.receivedAmount,
-          paymentVerification.paymentRecord.currency,
+          paymentVerification.payment.currency,
         )}
       </TableCell>
       <TableCell align='left'>
-        {paymentVerification.paymentRecord.household.headOfHousehold.phoneNo}
+        {paymentVerification.payment.household.headOfHousehold.phoneNo}
       </TableCell>
       <TableCell align='left'>
-        {paymentVerification.paymentRecord.household.headOfHousehold.phoneNoAlternative ||
+        {paymentVerification.payment.household.headOfHousehold.phoneNoAlternative ||
           '-'}
       </TableCell>
     </TableRow>
