@@ -83,7 +83,7 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.INVALID_MUTATION,
             context={"user": self.user},
-            # TODO: upd vars after update intups
+            # TODO: upd vars after update inputs
             variables={
                 "paymentVerificationPlanId": self.id_to_base64(
                     self.payment_verification_plan.id, "PaymentVerificationPlanNode"

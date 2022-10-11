@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from django.utils import timezone
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -319,7 +318,7 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
     }
 
-    for field, field_data in household_data_with_approve_status.items():
+    for field in household_data_with_approve_status.keys():
         current_value = getattr(household, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()
@@ -357,7 +356,7 @@ def update_household_data_update_extras(root, info, input, grievance_ticket, ext
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in new_household_data.items()
     }
 
-    for field, field_data in household_data_with_approve_status.items():
+    for field in household_data_with_approve_status.keys():
         current_value = getattr(household, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()
@@ -408,7 +407,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
     }
 
-    for field, field_data in individual_data_with_approve_status.items():
+    for field in individual_data_with_approve_status.keys():
         current_value = getattr(individual, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()
@@ -506,7 +505,7 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in new_individual_data.items()
     }
 
-    for field, field_data in individual_data_with_approve_status.items():
+    for field in individual_data_with_approve_status.keys():
         current_value = getattr(individual, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()

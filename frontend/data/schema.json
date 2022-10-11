@@ -8808,13 +8808,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -9255,13 +9251,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "RegistrationDataImportNode",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "RegistrationDataImportNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -13824,6 +13816,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "LOADING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "DEDUPLICATION",
             "description": null,
@@ -21619,6 +21617,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "FORCE_FAILED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -25334,6 +25338,22 @@
             "deprecationReason": null
           },
           {
+            "name": "sentToRapidPro",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "ticketDetails",
             "description": null,
             "args": [
@@ -25877,6 +25897,18 @@
             "deprecationReason": null
           },
           {
+            "name": "error",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "paymentRecordVerifications",
             "description": null,
             "args": [
@@ -26019,6 +26051,12 @@
           },
           {
             "name": "INVALID",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "RAPID_PRO_ERROR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -31151,6 +31189,12 @@
           },
           {
             "name": "TRANSACTION_ERRONEOUS",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "FORCE_FAILED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -36754,6 +36798,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "API",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -36896,6 +36946,12 @@
           },
           {
             "name": "FLEX_REGISTRATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "API",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -39147,6 +39203,12 @@
         "enumValues": [
           {
             "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "A_2",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -46633,6 +46695,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "LOADING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "NOT_STARTED",
             "description": null,
             "isDeprecated": false,
@@ -49242,6 +49310,12 @@
         "enumValues": [
           {
             "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "A_2",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -52014,6 +52088,33 @@
             "type": {
               "kind": "OBJECT",
               "name": "UpdatePaymentVerificationStatusAndReceivedAmount",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "markPaymentRecordAsFailed",
+            "description": null,
+            "args": [
+              {
+                "name": "paymentRecordId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "MarkPaymentRecordAsFailedMutation",
               "ofType": null
             },
             "isDeprecated": false,
@@ -57102,6 +57203,29 @@
             "type": {
               "kind": "OBJECT",
               "name": "PaymentVerificationNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "MarkPaymentRecordAsFailedMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "paymentRecord",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentRecordNode",
               "ofType": null
             },
             "isDeprecated": false,

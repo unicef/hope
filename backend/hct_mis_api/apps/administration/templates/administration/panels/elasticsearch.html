@@ -1,0 +1,33 @@
+{% extends "smart_admin/console.html" %}{% load static i18n %}
+{% block left %}
+    <div class="console module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
+        <div class="changelist-form-container">
+            <table>
+                {% for k,v in config.items %}
+                    <tr>
+                        <th>{{ k }}:</th>
+                        <td>{{ v }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <form method="post">
+                {% csrf_token %}
+                {{ form }}
+                <input type="submit" value="Execute">
+            </form>
+            <table>
+
+            {% for k,v in logs.items %}
+                <tr>
+                    <th>{{ k }}:</th>
+                    <td>{{ v }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+
+        </div>
+    </div>
+{% endblock left %}
+{% block buttons %}
+    {{ block.super }}
+{% endblock %}

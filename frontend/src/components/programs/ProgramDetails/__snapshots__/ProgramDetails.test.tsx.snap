@@ -30,7 +30,9 @@ exports[`components/ProgramDetails should render 1`] = `
             >
               status
             </span>
-            <div>
+            <div
+              data-cy="label-status"
+            >
               <div
                 class="sc-ifAKCX iPKgts"
               >
@@ -38,7 +40,7 @@ exports[`components/ProgramDetails should render 1`] = `
                   class="sc-EHOje eEdtvm"
                   data-cy="status-container"
                 >
-                  FINISHED
+                  Finished
                 </div>
               </div>
             </div>
@@ -54,7 +56,9 @@ exports[`components/ProgramDetails should render 1`] = `
             >
               START DATE
             </span>
-            <div>
+            <div
+              data-cy="label-START DATE"
+            >
               <span
                 class="sc-htpNat cwQQYq"
                 color="textSecondary"
@@ -78,7 +82,9 @@ exports[`components/ProgramDetails should render 1`] = `
             >
               END DATE
             </span>
-            <div>
+            <div
+              data-cy="label-END DATE"
+            >
               <span
                 class="sc-htpNat cwQQYq"
                 color="textSecondary"
@@ -102,7 +108,9 @@ exports[`components/ProgramDetails should render 1`] = `
             >
               Sector
             </span>
-            <div>
+            <div
+              data-cy="label-Sector"
+            >
               <span
                 class="sc-htpNat cwQQYq"
                 color="textSecondary"
@@ -122,7 +130,9 @@ exports[`components/ProgramDetails should render 1`] = `
             >
               Scope
             </span>
-            <div>
+            <div
+              data-cy="label-Scope"
+            >
               <span
                 class="sc-htpNat cwQQYq"
                 color="textSecondary"
@@ -142,7 +152,9 @@ exports[`components/ProgramDetails should render 1`] = `
             >
               Frequency of Payment
             </span>
-            <div>
+            <div
+              data-cy="label-Frequency of Payment"
+            >
               <span
                 class="sc-htpNat cwQQYq"
                 color="textSecondary"
@@ -162,7 +174,9 @@ exports[`components/ProgramDetails should render 1`] = `
             >
               Administrative Areas of implementation
             </span>
-            <div>
+            <div
+              data-cy="label-Administrative Areas of implementation"
+            >
               <span
                 class="sc-htpNat cwQQYq"
                 color="textSecondary"
@@ -182,7 +196,9 @@ exports[`components/ProgramDetails should render 1`] = `
             >
               Description
             </span>
-            <div>
+            <div
+              data-cy="label-Description"
+            >
               <span
                 class="sc-htpNat cwQQYq"
                 color="textSecondary"
@@ -202,7 +218,9 @@ exports[`components/ProgramDetails should render 1`] = `
             >
               CASH+
             </span>
-            <div>
+            <div
+              data-cy="label-CASH+"
+            >
               <span
                 class="sc-htpNat cwQQYq"
                 color="textSecondary"
@@ -222,7 +240,9 @@ exports[`components/ProgramDetails should render 1`] = `
             >
               Does this programme use individuals’ data for targeting or entitlement calculation?
             </span>
-            <div>
+            <div
+              data-cy="label-Does this programme use individuals’ data for targeting or entitlement calculation?"
+            >
               <span
                 class="sc-htpNat cwQQYq"
                 color="textSecondary"
@@ -243,7 +263,9 @@ exports[`components/ProgramDetails should render 1`] = `
           >
             Total Number of Households
           </span>
-          <div>
+          <div
+            data-cy="label-Total Number of Households"
+          >
             <div
               class="sc-htoDjs psyrE"
             >

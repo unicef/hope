@@ -7,9 +7,7 @@ import responses
 from constance.test import override_config
 from django_webtest import WebTest
 
-from hct_mis_api.apps.account.admin import (
-    get_valid_kobo_username,
-)
+from hct_mis_api.apps.account.admin import get_valid_kobo_username
 from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     RoleFactory,
@@ -17,8 +15,8 @@ from hct_mis_api.apps.account.fixtures import (
     UserRoleFactory,
 )
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 class UserImportCSVTest(WebTest):

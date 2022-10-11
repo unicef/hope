@@ -1,14 +1,19 @@
 import datetime
-
 from decimal import Decimal
 from math import ceil
 
 from django.db.models import Q
 
+from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
-from hct_mis_api.apps.core.exchange_rates import ExchangeRates
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, Payment, CashPlan, PaymentPlan
+from hct_mis_api.apps.payment.models import (
+    CashPlan,
+    Payment,
+    PaymentPlan,
+    PaymentRecord,
+    PaymentVerification,
+)
 
 
 def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error):
@@ -81,7 +86,7 @@ def get_payment_items_for_dashboard(year, business_area_slug, filters, only_with
             **chart_create_filter_query(
                 filters,
                 program_id_path="parent__program__id",
-                administrative_area_path="household__admin_area_new",
+                administrative_area_path="household__admin_area",
             ),
         },
         year_filter_path="delivery_date",

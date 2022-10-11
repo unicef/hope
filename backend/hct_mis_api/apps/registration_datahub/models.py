@@ -11,6 +11,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import JSONField
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from django_countries.fields import CountryField
@@ -33,13 +34,14 @@ from hct_mis_api.apps.household.models import (
     REGISTRATION_METHOD_CHOICES,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
+    ROLE_ALTERNATE,
     ROLE_CHOICE,
     ROLE_NO_ROLE,
+    ROLE_PRIMARY,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     UNIQUE,
     WORK_STATUS_CHOICE,
-    YES_NO_CHOICE,
 )
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
@@ -65,6 +67,18 @@ DIIA_SEX_CHOICE = (
 )
 
 logger = logging.getLogger(__name__)
+
+COLLECT_TYPE_UNKNOWN = ""
+COLLECT_TYPE_NONE = "0"
+COLLECT_TYPE_FULL = "1"
+COLLECT_TYPE_PARTIAL = "2"
+
+COLLECT_TYPES = (
+    (COLLECT_TYPE_UNKNOWN, _("Unknown")),
+    (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
+    (COLLECT_TYPE_FULL, _("Full individual collected")),
+    (COLLECT_TYPE_NONE, _("No individual data")),
+)
 
 
 class ImportedHousehold(TimeStampedUUIDModel):
@@ -121,7 +135,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
     village = models.CharField(max_length=250, blank=True, default=BLANK)
     registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
-    collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
+    collect_individual_data = models.CharField(max_length=250, choices=COLLECT_TYPES, default=COLLECT_TYPE_UNKNOWN)
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
@@ -140,6 +154,17 @@ class ImportedHousehold(TimeStampedUUIDModel):
     @property
     def business_area(self):
         return self.registration_data_import.business_area
+
+    @cached_property
+    def primary_collector(self):
+        return self.individuals_and_roles.get(role=ROLE_PRIMARY).individual
+
+    @cached_property
+    def alternate_collector(self):
+        try:
+            return self.individuals_and_roles.filter(role=ROLE_ALTERNATE).first().individual
+        except AttributeError:
+            return None
 
     def __str__(self):
         return f"Household ID: {self.id}"
@@ -294,10 +319,12 @@ class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
 
 
 class RegistrationDataImportDatahub(TimeStampedUUIDModel):
+    LOADING = "LOADING"
     NOT_STARTED = "NOT_STARTED"
     STARTED = "STARTED"
     DONE = "DONE"
     IMPORT_DONE_CHOICES = (
+        (LOADING, _("Loading")),
         (NOT_STARTED, _("Not Started")),
         (STARTED, _("Started")),
         (DONE, _("Done")),
@@ -318,6 +345,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
 
     class Meta:
         ordering = ("name",)
+        permissions = (["api_upload", "Can upload"],)
 
     def __str__(self):
         return self.name
@@ -325,6 +353,12 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
     @property
     def business_area(self):
         return self.business_area_slug
+
+    @property
+    def linked_rdi(self):
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
+        return RegistrationDataImport.objects.get(datahub_id=self.id)
 
 
 class ImportData(TimeStampedUUIDModel):
@@ -578,7 +612,6 @@ DIIA_DISABILITY_CHOICES = (
         "not disabled",
     ),
 )
-
 
 DIIA_RELATIONSHIP_HEAD = "HEAD"
 DIIA_RELATIONSHIP_SON = "SON"
