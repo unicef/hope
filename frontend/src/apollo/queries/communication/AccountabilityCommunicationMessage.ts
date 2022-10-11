@@ -9,6 +9,7 @@ export const AccountabilityCommunicationMessage = gql`
         id
         firstName
         lastName
+        email
       }
       createdAt
       targetPopulation {

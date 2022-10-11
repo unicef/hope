@@ -1,6 +1,8 @@
 import random
+from io import BytesIO
 
 import factory
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -22,6 +24,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
     TicketPaymentVerificationDetails,
+    GrievanceDocument,
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
@@ -86,7 +89,13 @@ class GrievanceComplaintTicketFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketComplaintDetails
 
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT)
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=random.choice(
+            list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT].keys())
+        ),
+    )
     household = None
     individual = None
     payment_record = None
@@ -123,7 +132,13 @@ class GrievanceComplaintTicketWithoutExtrasFactory(factory.DjangoModelFactory):
     class Meta:
         model = TicketComplaintDetails
 
-    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT)
+    ticket = factory.SubFactory(
+        GrievanceTicketFactory,
+        category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        issue_type=random.choice(
+            list(GrievanceTicket.ISSUE_TYPES_CHOICES[GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT].keys())
+        ),
+    )
     household = None
     individual = None
     payment_record = None
@@ -284,3 +299,21 @@ class TicketPaymentVerificationDetailsFactory(factory.DjangoModelFactory):
     payment_verification = factory.SubFactory(
         PaymentVerificationFactory, status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
     )
+
+
+class GrievanceDocumentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = GrievanceDocument
+
+    file = InMemoryUploadedFile(
+        name="xyz.jpg",
+        file=BytesIO(b"xxxxxxxxxxx"),
+        charset=None,
+        field_name="0",
+        size=2 * 1024 * 1024,
+        content_type="image/jpeg",
+    )
+    name = "xyz"
+    file_size = 2 * 1024 * 1024
+    content_type = "image/jpeg"
+    grievance_ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)

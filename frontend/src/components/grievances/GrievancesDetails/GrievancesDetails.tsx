@@ -1,4 +1,4 @@
-import { Grid, GridSize, Typography } from '@material-ui/core';
+import { Box, Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -19,6 +19,7 @@ import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder'
 import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';
 import { OverviewContainer } from '../../core/OverviewContainer';
+import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
@@ -50,7 +51,6 @@ export const GrievancesDetails = ({
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
-
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
         .filter((el) => el.category === ticket.category.toString())[0]
@@ -60,13 +60,42 @@ export const GrievancesDetails = ({
     : '-';
 
   const showIssueType =
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString() ||
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
-  ticket.category.toString() === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString();
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString() ||
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString();
   const showProgramme =
     ticket.issueType !== +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
+
+  const mappedDocumentation = (): React.ReactElement => {
+    return (
+      <Box display='flex' flexDirection='column'>
+        {ticket.documentation?.length
+          ? ticket.documentation.map((doc) => {
+              if (doc.contentType.includes('image')) {
+                return (
+                  <PhotoModal
+                    key={doc.id}
+                    src={doc.filePath}
+                    variant='link'
+                    linkText={doc.name}
+                  />
+                );
+              }
+              return (
+                <ContentLink key={doc.id} download href={doc.filePath}>
+                  {doc.name}
+                </ContentLink>
+              );
+            })
+          : '-'}
+      </Box>
+    );
+  };
 
   return (
     <Grid item xs={12}>
@@ -221,6 +250,11 @@ export const GrievancesDetails = ({
               {
                 label: t('Languages Spoken'),
                 value: ticket.language,
+                size: 3,
+              },
+              {
+                label: t('Documentation'),
+                value: mappedDocumentation(),
                 size: 3,
               },
               {
