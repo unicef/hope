@@ -9,7 +9,20 @@ from .elasticsearch_utils import DEFAULT_SCRIPT
 from .models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
 
-@registry.register_document
+index_settings = {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "similarity": {
+        "default": {
+            "type": "scripted",
+            "script": {
+                "source": DEFAULT_SCRIPT,
+            },
+        },
+    },
+}
+
+
 class IndividualDocument(Document):
     id = fields.KeywordField(boost=0)
     given_name = fields.TextField(
@@ -108,21 +121,6 @@ class IndividualDocument(Document):
     def prepare_business_area(self, instance):
         return instance.business_area.slug
 
-    class Index:
-        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals"
-        settings = {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
-            "similarity": {
-                "default": {
-                    "type": "scripted",
-                    "script": {
-                        "source": DEFAULT_SCRIPT,
-                    },
-                },
-            },
-        }
-
     class Django:
         model = Individual
 
@@ -140,6 +138,34 @@ class IndividualDocument(Document):
             return related_instance.individual
         if isinstance(related_instance, Household):
             return related_instance.individuals.all()
+
+
+@registry.register_document
+class IndividualDocumentAfghanistan(IndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_afghanistan"
+        settings = index_settings
+
+
+@registry.register_document
+class IndividualDocumentUkraine(IndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_ukraine"
+        settings = index_settings
+
+
+@registry.register_document
+class IndividualDocumentOthers(IndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_others"
+        settings = index_settings
+
+
+def get_individual_doc(business_area_slug):
+    return {
+        "afghanistan": IndividualDocumentAfghanistan,
+        "ukraine": IndividualDocumentUkraine,
+    }.get(business_area_slug, IndividualDocumentOthers)
 
 
 @registry.register_document

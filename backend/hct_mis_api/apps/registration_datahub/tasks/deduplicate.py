@@ -19,7 +19,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.documents import IndividualDocument, get_individual_doc
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
@@ -32,7 +32,12 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
+from hct_mis_api.apps.registration_datahub.documents import (
+    ImportedIndividualDocument,
+    ImportedIndividualDocumentAfghanistan,
+    ImportedIndividualDocumentUkraine,
+    ImportedIndividualDocumentOthers, get_imported_individual_doc
+)
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 
@@ -371,7 +376,7 @@ class DeduplicateTask:
                 original_individuals_ids_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - duplicate_score
                 results_data["duplicates"].append(results_core_data)
-            elif document == IndividualDocument:
+            elif document == get_individual_doc(individual.registration_data_import.business_area):
                 possible_duplicates.append(individual_hit.id)
                 original_individuals_ids_possible_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - cls.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE
@@ -473,7 +478,7 @@ class DeduplicateTask:
         return cls._get_duplicates_tuple(
             query_dict,
             cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
-            ImportedIndividualDocument,
+            get_imported_individual_doc(individual.registration_data_import.business_area),
             individual,
         )
 
@@ -545,7 +550,7 @@ class DeduplicateTask:
         return cls._get_duplicates_tuple(
             query_dict,
             cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
-            IndividualDocument,
+            get_imported_individual_doc(individual.registration_data_import.business_area),
             individual,
         )
 
@@ -679,7 +684,9 @@ class DeduplicateTask:
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )
-        populate_index(imported_individuals, ImportedIndividualDocument)
+
+        populate_index(imported_individuals, get_imported_individual_doc(business_area.slug))
+
         cls._wait_until_health_green()
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         allowed_duplicates_batch_amount = round(
@@ -704,6 +711,7 @@ class DeduplicateTask:
                 _,
                 results_data_imported,
             ) = cls.deduplicate_single_imported_individual(imported_individual)
+
             imported_individual.deduplication_batch_results = results_data_imported
             post_process_dedupe_results(imported_individual)
 

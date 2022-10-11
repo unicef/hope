@@ -143,3 +143,9 @@ class ImportedIndividualDocumentOthers(ImportedIndividualDocument):
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_others"
         settings = index_settings
 
+
+def get_imported_individual_doc(business_area_slug):
+    return {
+        "afghanistan": ImportedIndividualDocumentAfghanistan,
+        "ukraine": ImportedIndividualDocumentUkraine,
+    }.get(business_area_slug, ImportedIndividualDocumentOthers)
