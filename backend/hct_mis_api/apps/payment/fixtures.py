@@ -7,9 +7,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
 import factory
-from factory import fuzzy
-
-import factory.fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
