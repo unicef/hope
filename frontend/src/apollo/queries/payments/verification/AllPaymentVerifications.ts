@@ -41,24 +41,24 @@ export const AllPaymentVerifications = gql`
             unicefId
             verificationChannel
           }
-          # paymentRecord {
-          #   id
-          #   caId
-          #   deliveredQuantity
-          #   currency
-          #   household {
-          #     status
-          #     unicefId
-          #     id
-          #     headOfHousehold {
-          #       id
-          #       fullName
-          #       familyName
-          #       phoneNo
-          #       phoneNoAlternative
-          #     }
-          #   }
-          # }
+          payment {
+            id
+            unicefId
+            deliveredQuantity
+            currency
+            household {
+              status
+              unicefId
+              id
+              headOfHousehold {
+                id
+                fullName
+                familyName
+                phoneNo
+                phoneNoAlternative
+              }
+            }
+          }
           status
           receivedAmount
         }

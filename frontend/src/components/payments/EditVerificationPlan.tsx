@@ -54,11 +54,15 @@ function prepareVariables(
   values,
   businessArea,
   cashPlanId = null,
+  paymentVerificationPlanId = null,
 ) {
   return {
     input: {
       ...(paymentPlanId && {
         paymentPlanId,
+      }),
+      ...(paymentVerificationPlanId && {
+        paymentVerificationPlanId,
       }),
       ...(cashPlanId && { cashPlanId }),
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
@@ -178,10 +182,11 @@ export function EditVerificationPlan({
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
       variables: prepareVariables(
-        paymentPlanId,
+        null,
         selectedTab,
         values,
         businessArea,
+        paymentPlanId,
       ),
       refetchQueries,
     });

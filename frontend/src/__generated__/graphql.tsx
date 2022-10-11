@@ -8296,10 +8296,7 @@ export type CreatePaymentVerificationPlanMutation = (
     { __typename?: 'CreateVerificationPlanMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'GenericPaymentPlanNode' }
-      & { paymentVerificationSummary: Maybe<(
-        { __typename?: 'PaymentVerificationSummaryNode' }
-        & Pick<PaymentVerificationSummaryNode, 'id'>
-      )> }
+      & Pick<GenericPaymentPlanNode, 'id'>
     )> }
   )> }
 );
@@ -8367,10 +8364,7 @@ export type EditPaymentVerificationPlanMutation = (
     { __typename?: 'EditPaymentVerificationMutation' }
     & { paymentPlan: Maybe<(
       { __typename?: 'GenericPaymentPlanNode' }
-      & { paymentVerificationSummary: Maybe<(
-        { __typename?: 'PaymentVerificationSummaryNode' }
-        & Pick<PaymentVerificationSummaryNode, 'id' | 'status'>
-      )> }
+      & Pick<GenericPaymentPlanNode, 'id'>
     )> }
   )> }
 );
@@ -10188,7 +10182,7 @@ export type CashPlanQuery = (
       )>> }
     )>, paymentVerificationSummary: Maybe<(
       { __typename?: 'PaymentVerificationSummaryNode' }
-      & Pick<PaymentVerificationSummaryNode, 'id' | 'status'>
+      & Pick<PaymentVerificationSummaryNode, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'activationDate' | 'completionDate'>
     )>, program: (
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'caId'>
@@ -10432,7 +10426,18 @@ export type AllPaymentVerificationsQuery = (
         & { paymentVerificationPlan: (
           { __typename?: 'PaymentVerificationPlanNode' }
           & Pick<PaymentVerificationPlanNode, 'id' | 'unicefId' | 'verificationChannel'>
-        ) }
+        ), payment: Maybe<(
+          { __typename?: 'GenericPaymentNode' }
+          & Pick<GenericPaymentNode, 'id' | 'unicefId' | 'deliveredQuantity' | 'currency'>
+          & { household: Maybe<(
+            { __typename?: 'HouseholdNode' }
+            & Pick<HouseholdNode, 'status' | 'unicefId' | 'id'>
+            & { headOfHousehold: (
+              { __typename?: 'IndividualNode' }
+              & Pick<IndividualNode, 'id' | 'fullName' | 'familyName' | 'phoneNo' | 'phoneNoAlternative'>
+            ) }
+          )> }
+        )> }
       )> }
     )>> }
   )> }
@@ -13702,9 +13707,7 @@ export const CreatePaymentVerificationPlanDocument = gql`
     mutation CreatePaymentVerificationPlan($input: CreatePaymentVerificationInput!) {
   createPaymentVerificationPlan(input: $input) {
     paymentPlan {
-      paymentVerificationSummary {
-        id
-      }
+      id
     }
   }
 }
@@ -13891,10 +13894,7 @@ export const EditPaymentVerificationPlanDocument = gql`
     mutation EditPaymentVerificationPlan($input: EditPaymentVerificationInput!) {
   editPaymentVerificationPlan(input: $input) {
     paymentPlan {
-      paymentVerificationSummary {
-        id
-        status
-      }
+      id
     }
   }
 }
@@ -18473,7 +18473,11 @@ export const CashPlanDocument = gql`
     }
     paymentVerificationSummary {
       id
+      createdAt
+      updatedAt
       status
+      activationDate
+      completionDate
     }
     program {
       id
@@ -19016,6 +19020,24 @@ export const AllPaymentVerificationsDocument = gql`
           id
           unicefId
           verificationChannel
+        }
+        payment {
+          id
+          unicefId
+          deliveredQuantity
+          currency
+          household {
+            status
+            unicefId
+            id
+            headOfHousehold {
+              id
+              fullName
+              familyName
+              phoneNo
+              phoneNoAlternative
+            }
+          }
         }
         status
         receivedAmount
