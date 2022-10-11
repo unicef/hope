@@ -76,64 +76,32 @@ class TestActionMessageMutation(APITestCase):
                 "with_permission_and_full_list_tp",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
                 Message.SamplingChoices.FULL_LIST,
-                "targetPopulation",
             ),
             (
                 "with_permission_and_random_tp",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
                 Message.SamplingChoices.RANDOM,
-                "targetPopulation",
             ),
-            (
-                "with_permission_and_full_list_households",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-                Message.SamplingChoices.FULL_LIST,
-                "households",
-            ),
-            (
-                "with_permission_and_random_households",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-                Message.SamplingChoices.RANDOM,
-                "households",
-            ),
-            (
-                "with_permission_and_full_list_rdi",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-                Message.SamplingChoices.FULL_LIST,
-                "registration_data_import",
-            ),
-            (
-                "with_permission_and_random_rdi",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-                Message.SamplingChoices.RANDOM,
-                "registration_data_import",
-            ),
-            ("without_permission_full_list_tp", [], Message.SamplingChoices.FULL_LIST, "targetPopulation"),
-            ("without_permission_random_tp", [], Message.SamplingChoices.RANDOM, "targetPopulation"),
+            ("without_permission_full_list_tp", [], Message.SamplingChoices.FULL_LIST),
+            ("without_permission_random_tp", [], Message.SamplingChoices.RANDOM),
         )
     )
-    def test_create_communication_message(
-        self, _: str, permissions: Sequence[str], sampling_type: str, look_up_with: str
+    def test_get_communication_message_sample_size_for_target_population(
+        self, _: str, permissions: Sequence[str], sampling_type: str
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         data = {
             "businessArea": self.business_area.slug,
             "inputs": {
-                "title": f"{sampling_type} message title",
-                "body": f"{sampling_type} message body",
-                look_up_with: self.tp.id
-                if look_up_with == "targetPopulation"
-                else self.rdi_id
-                if look_up_with == "registration_data_import"
-                else [household.id for household in self.households],
+                "targetPopulation": self.tp.id,
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },
         }
 
         self.snapshot_graphql_request(
-            request_string=self.MUTATION_NEW_MESSAGE,
+            request_string=self.MUTATION_SAMPLE_SIZE,
             context={"user": self.user},
             variables=data,
         )
@@ -141,58 +109,60 @@ class TestActionMessageMutation(APITestCase):
     @parameterized.expand(
         (
             (
-                "with_permission_and_full_list_tp",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-                Message.SamplingChoices.FULL_LIST,
-                "targetPopulation",
-            ),
-            (
-                "with_permission_and_random_tp",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-                Message.SamplingChoices.RANDOM,
-                "targetPopulation",
-            ),
-            (
                 "with_permission_and_full_list_households",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
                 Message.SamplingChoices.FULL_LIST,
-                "households",
             ),
             (
                 "with_permission_and_random_households",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
                 Message.SamplingChoices.RANDOM,
-                "households",
             ),
-            (
-                "with_permission_and_full_list_rdi",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-                Message.SamplingChoices.FULL_LIST,
-                "registration_data_import",
-            ),
-            (
-                "with_permission_and_random_rdi",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-                Message.SamplingChoices.RANDOM,
-                "registration_data_import",
-            ),
-            ("without_permission_full_list_tp", [], Message.SamplingChoices.FULL_LIST, "targetPopulation"),
-            ("without_permission_random_tp", [], Message.SamplingChoices.RANDOM, "targetPopulation"),
         )
     )
-    def test_get_communication_message_sample_size(
-        self, _: str, permissions: Sequence[str], sampling_type: str, look_up_with: str
+    def test_get_communication_message_sample_size_for_households(
+        self, _: str, permissions: Sequence[str], sampling_type: str
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         data = {
             "businessArea": self.business_area.slug,
             "inputs": {
-                look_up_with: self.tp.id
-                if look_up_with == "targetPopulation"
-                else self.rdi_id
-                if look_up_with == "registration_data_import"
-                else [household.id for household in self.households],
+                "households": [household.id for household in self.households],
+                "samplingType": sampling_type,
+                **self.sampling_data[sampling_type],
+            },
+        }
+
+        self.snapshot_graphql_request(
+            request_string=self.MUTATION_SAMPLE_SIZE,
+            context={"user": self.user},
+            variables=data,
+        )
+
+    @parameterized.expand(
+        (
+            (
+                "with_permission_and_full_list_rdi",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+                Message.SamplingChoices.FULL_LIST,
+            ),
+            (
+                "with_permission_and_random_rdi",
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+                Message.SamplingChoices.RANDOM,
+            ),
+        )
+    )
+    def test_get_communication_message_sample_size_for_rdi(
+        self, _: str, permissions: Sequence[str], sampling_type: str
+    ) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        data = {
+            "businessArea": self.business_area.slug,
+            "inputs": {
+                "registration_data_import": self.rdi_id,
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },
