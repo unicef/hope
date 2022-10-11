@@ -556,9 +556,7 @@ export const EditGrievancePage = (): React.ReactElement => {
               </Grid>
               <Grid item xs={6}>
                 <NewTicket>
-                  {values.category && values.selectedHousehold?.id ? (
-                    <OtherRelatedTicketsCreate values={values} />
-                  ) : null}
+                  <OtherRelatedTicketsCreate values={values} />
                 </NewTicket>
               </Grid>
             </Grid>
