@@ -1,6 +1,5 @@
 import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
 import {
-  getIndividualsFromRdiDetails,
   uniqueSeed,
 } from '../../procedures/procedures';
 let householdId;
@@ -118,7 +117,16 @@ Then('I see that the status is merged', () => {
       cy.log(`Saved householdId: ${householdId}`);
     });
   cy.get('button > span').contains('Individuals').click({ force: true });
-  getIndividualsFromRdiDetails(cy, 1, individualIds);
+
+  for (let i = 0; i < 1; i++) {
+    cy.get('[data-cy="imported-individuals-table"]')
+      .find(`tbody > tr:nth-child(${i + 1}) > td:nth-child(1)`)
+      .then(($td) => {
+        const individualId = $td.text().split(' (')[0];
+        cy.log(`Saved individualId: ${individualId}`);
+        individualIds.push(individualId);
+      });
+  }
 });
 
 When('I visit the Households dashboard', () => {

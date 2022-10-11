@@ -1,5 +1,5 @@
 import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
-import { fillTargetingForm, uniqueSeed } from '../../procedures/procedures';
+import { uniqueSeed } from '../../procedures/procedures';
 
 let programName = 'TargetingProgram';
 
@@ -44,12 +44,21 @@ Then('I should see the Create Target Population page', () => {
 });
 
 When('I fill out the form fields and save', () => {
-  fillTargetingForm(
-    cy,
-    programName,
-    uniqueSeed,
-    `TargetingVille-${uniqueSeed}`,
-  );
+  const targetPopulationName = `test TP ${uniqueSeed}`;
+  cy.get('[data-cy="input-name"]').first().type(targetPopulationName);
+  cy.get('[data-cy="input-program"]').first().click();
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.get(`[data-cy="select-option-${programName}-${uniqueSeed}"]`).click();
+  cy.get('[data-cy="button-target-population-add-criteria"]').click();
+
+  cy.get('[data-cy="button-household-rule"]', {
+    timeout: 10000,
+  }).click();
+  cy.get('[data-cy="autocomplete-target-criteria"]').click().type('address');
+  cy.contains('Address').click();
+  cy.get('[data-cy="input-filters[0].value"]')
+    .click()
+    .type(`TargetingVille-${uniqueSeed}`);
   cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click();
 });
 
