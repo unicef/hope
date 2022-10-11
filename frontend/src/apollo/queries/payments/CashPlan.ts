@@ -62,11 +62,11 @@ export const CashPlan = gql`
       }
       paymentVerificationSummary {
         id
-        # createdAt
-        # updatedAt
+        createdAt
+        updatedAt
         status
-        # activationDate
-        # completionDate
+        activationDate
+        completionDate
       }
       program {
         id

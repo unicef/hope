@@ -40,10 +40,10 @@ export function PaymentVerificationTable({
       query={useAllCashPlansAndPaymentPlansQuery}
       queriedObjectName='allCashPlansAndPaymentPlans'
       initialVariables={initialVariables}
-      renderRow={(row) => (
+      renderRow={(cashPlanAndPaymentPlanNode) => (
         <PaymentVerificationTableRow
-          key={row.id}
-          plan={row}
+          key={cashPlanAndPaymentPlanNode.id}
+          plan={cashPlanAndPaymentPlanNode}
           canViewDetails={canViewDetails}
         />
       )}

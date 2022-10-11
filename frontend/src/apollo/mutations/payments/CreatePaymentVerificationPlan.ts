@@ -4,9 +4,11 @@ export const CREATE_PAYMENT_VERIFICATION_MUTATION = gql`
 mutation CreatePaymentVerificationPlan($input: CreatePaymentVerificationInput!) {
   createPaymentVerificationPlan(input: $input) {
     paymentPlan {
-      paymentVerificationSummary {
-        id
-      }
+      id
+      # paymentVerificationSummary {
+      #   id
+      #   status
+      # }
     }
   }
 }
