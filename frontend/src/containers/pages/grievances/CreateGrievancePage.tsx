@@ -1,19 +1,28 @@
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid,
-  GridSize,
-  Step,
-  StepLabel,
-  Stepper,
-  Typography,
-} from '@material-ui/core';
-import { Field, Formik } from 'formik';
+import { Box, Button, FormHelperText, Grid } from '@material-ui/core';
+import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
+import { LoadingButton } from '../../../components/core/LoadingButton';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { AddIndividualDataChange } from '../../../components/grievances/AddIndividualDataChange';
+import { CreateGrievanceStepper } from '../../../components/grievances/CreateGrievance/CreateGrievanceStepper/CreateGrievanceStepper';
+import { Description } from '../../../components/grievances/CreateGrievance/Description/Description';
+import { Selection } from '../../../components/grievances/CreateGrievance/Selection/Selection';
+import { Verification } from '../../../components/grievances/CreateGrievance/Verification/Verification';
+import { EditHouseholdDataChange } from '../../../components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
+import { EditIndividualDataChange } from '../../../components/grievances/EditIndividualDataChange/EditIndividualDataChange';
+import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
+import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
+import { TicketsAlreadyExist } from '../../../components/grievances/TicketsAlreadyExist';
+import { prepareVariables } from '../../../components/grievances/utils/createGrievanceUtils';
+import { validateUsingSteps } from '../../../components/grievances/utils/validateGrievance';
+import { validationSchemaWithSteps } from '../../../components/grievances/utils/validationSchema';
 import {
   hasPermissionInModule,
   hasPermissions,
@@ -23,10 +32,6 @@ import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
   GrievanceSteps,
   GRIEVANCE_CATEGORIES,
@@ -35,7 +40,6 @@ import {
 import {
   decodeIdString,
   isInvalid,
-  reduceChoices,
   thingForSpecificGrievanceType,
 } from '../../../utils/utils';
 import {
@@ -47,40 +51,7 @@ import {
   useGrievancesChoiceDataQuery,
   useUserChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { AddIndividualDataChange } from '../../../components/grievances/AddIndividualDataChange';
-import { Consent } from '../../../components/grievances/Consent';
-import { EditHouseholdDataChange } from '../../../components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
-import { EditIndividualDataChange } from '../../../components/grievances/EditIndividualDataChange/EditIndividualDataChange';
-import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
-import { TicketsAlreadyExist } from '../../../components/grievances/TicketsAlreadyExist';
-import { prepareVariables } from '../../../components/grievances/utils/createGrievanceUtils';
-import { validateUsingSteps } from '../../../components/grievances/utils/validateGrievance';
-import { validationSchemaWithSteps } from '../../../components/grievances/utils/validationSchema';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { LabelizedField } from '../../../components/core/LabelizedField';
-import { OverviewContainer } from '../../../components/core/OverviewContainer';
-import { ContentLink } from '../../../components/core/ContentLink';
-import { LookUpRelatedTickets } from '../../../components/grievances/LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
-import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
-import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { HouseholdQuestionnaire } from '../../../components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
-import { IndividualQuestionnaire } from '../../../components/grievances/IndividualQuestionnnaire/IndividualQuestionnaire';
-import { Title } from '../../../components/core/Title';
-import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
 
-const BoxPadding = styled.div`
-  padding: 15px 0;
-`;
-const NoRootPadding = styled.div`
-  .MuiStepper-root {
-    padding: 0 !important;
-  }
-`;
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
     padding: 32px 20px;
@@ -88,10 +59,6 @@ const InnerBoxPadding = styled.div`
 `;
 const NewTicket = styled.div`
   padding: 20px;
-`;
-const BoxWithBorderBottom = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  padding: 15px 0;
 `;
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -157,11 +124,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const { data: userChoices } = useUserChoiceDataQuery();
   const [mutate, { loading }] = useCreateGrievanceMutation();
 
-  const priorityChoicesData = choicesData?.grievanceTicketPriorityChoices;
-  const urgencyChoicesData = choicesData?.grievanceTicketUrgencyChoices;
-  const categoryChoices: {
-    [id: number]: string;
-  } = reduceChoices(choicesData?.grievanceTicketCategoryChoices || []);
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
@@ -178,11 +140,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const householdFieldsDict = useArrayToDict(
     householdFieldsData?.allEditHouseholdFieldsAttributes,
     'name',
-    '*',
-  );
-  const issueTypeDict = useArrayToDict(
-    choicesData?.grievanceTicketIssueTypeChoices,
-    'category',
     '*',
   );
 
@@ -231,11 +188,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
   )
     return null;
 
-  const canAddDocumentation = hasPermissions(
-    PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
-    permissions,
-  );
-
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
@@ -262,22 +214,10 @@ export const CreateGrievancePage = (): React.ReactElement => {
         </FormHelperText>
       ));
 
-  const hasCategorySelected = (values): boolean => {
-    return !!values.category;
-  };
-
-  const hasHouseholdSelected = (values): boolean => {
-    return !!values.selectedHousehold?.id;
-  };
-
-  const hasIndividualSelected = (values): boolean => {
-    return !!values.selectedIndividual?.id;
-  };
-
   const renderAlreadyExistsBox = (values): ReactElement => {
     if (
-      hasCategorySelected(values) &&
-      (hasHouseholdSelected(values) || hasIndividualSelected(values))
+      !!values.category &&
+      (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id)
     ) {
       return <TicketsAlreadyExist values={values} />;
     }
@@ -308,7 +248,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
     'Identity Verification',
     'Description',
   ];
-
   // if creating a linked G&F ticket from Feedback page skip Look Up
   if (linkedFeedbackId) {
     steps = ['Category Selection', 'Identity Verification', 'Description'];
@@ -318,7 +257,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
-        if (activeStep === steps.length - 1) {
+        if (activeStep === GrievanceSteps.Description) {
           try {
             const response = await mutate(
               prepareVariables(businessArea, values),
@@ -395,52 +334,18 @@ export const CreateGrievancePage = (): React.ReactElement => {
                 <NewTicket>
                   <InnerBoxPadding>
                     <ContainerColumnWithBorder>
-                      <NoRootPadding>
-                        <Stepper activeStep={activeStep}>
-                          {steps.map((label) => {
-                            const stepProps: { completed?: boolean } = {};
-                            const labelProps: {
-                              optional?: React.ReactNode;
-                            } = {};
-                            return (
-                              <Step key={label} {...stepProps}>
-                                <StepLabel {...labelProps}>{label}</StepLabel>
-                              </Step>
-                            );
-                          })}
-                        </Stepper>
-                      </NoRootPadding>
+                      <CreateGrievanceStepper
+                        activeStep={activeStep}
+                        steps={steps}
+                      />
                       {activeStep === GrievanceSteps.Selection && (
-                        <Grid container spacing={3}>
-                          <Grid item xs={6}>
-                            <Field
-                              name='category'
-                              label='Category*'
-                              onChange={(e) => {
-                                setFieldValue('issueType', null);
-                                handleChange(e);
-                              }}
-                              variant='outlined'
-                              choices={
-                                choicesData.grievanceTicketManualCategoryChoices
-                              }
-                              component={FormikSelectField}
-                            />
-                          </Grid>
-                          {showIssueType(values) && (
-                            <Grid item xs={6}>
-                              <Field
-                                name='issueType'
-                                label='Issue Type*'
-                                variant='outlined'
-                                choices={
-                                  issueTypeDict[values.category].subCategories
-                                }
-                                component={FormikSelectField}
-                              />
-                            </Grid>
-                          )}
-                        </Grid>
+                        <Selection
+                          handleChange={handleChange}
+                          choicesData={choicesData}
+                          setFieldValue={setFieldValue}
+                          showIssueType={showIssueType}
+                          values={values}
+                        />
                       )}
                       {activeStep === GrievanceSteps.Lookup && (
                         <BoxWithBorders>
@@ -455,276 +360,27 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         </BoxWithBorders>
                       )}
                       {activeStep === GrievanceSteps.Verification && (
-                        <BoxWithBorders>
-                          {values.selectedHousehold && (
-                            <>
-                              <Typography variant='subtitle1'>
-                                {t(
-                                  'Select correctly answered questions (minimum 5)',
-                                )}
-                              </Typography>
-                              <Box py={4}>
-                                <Typography variant='subtitle2'>
-                                  {t('Household Questionnaire')}
-                                </Typography>
-                                <Box py={4}>
-                                  <HouseholdQuestionnaire values={values} />
-                                </Box>
-                              </Box>
-                              <Typography variant='subtitle2'>
-                                {t('Individual Questionnaire')}
-                              </Typography>
-                              <Box py={4}>
-                                <IndividualQuestionnaire values={values} />
-                              </Box>
-                              <BoxWithBorderBottom />
-                            </>
-                          )}
-                          <Consent />
-                          <Field
-                            name='consent'
-                            label={t('Received Consent*')}
-                            color='primary'
-                            fullWidth
-                            container={false}
-                            component={FormikCheckboxField}
-                          />
-                        </BoxWithBorders>
+                        <Verification values={values} />
                       )}
-                      {activeStep === steps.length - 1 && (
-                        <BoxPadding>
-                          <OverviewContainer>
-                            <Grid container spacing={6}>
-                              {[
-                                {
-                                  label: t('Category'),
-                                  value: (
-                                    <span>
-                                      {categoryChoices[values.category]}
-                                    </span>
-                                  ),
-                                  size: 3,
-                                },
-                                showIssueType(values) && {
-                                  label: t('Issue Type'),
-                                  value: (
-                                    <span>{selectedIssueType(values)}</span>
-                                  ),
-                                  size: 9,
-                                },
-                                {
-                                  label: t('HOUSEHOLD ID'),
-                                  value: (
-                                    <span>
-                                      {values.selectedHousehold?.id ? (
-                                        <ContentLink
-                                          href={`/${businessArea}/population/household/${values.selectedHousehold.id}`}
-                                        >
-                                          {values.selectedHousehold.unicefId}
-                                        </ContentLink>
-                                      ) : (
-                                        '-'
-                                      )}
-                                    </span>
-                                  ),
-                                  size: 3,
-                                },
-                                {
-                                  label: t('INDIVIDUAL ID'),
-                                  value: (
-                                    <span>
-                                      {values.selectedIndividual?.id ? (
-                                        <ContentLink
-                                          href={`/${businessArea}/population/individuals/${values.selectedIndividual.id}`}
-                                        >
-                                          {values.selectedIndividual.unicefId}
-                                        </ContentLink>
-                                      ) : (
-                                        '-'
-                                      )}
-                                    </span>
-                                  ),
-                                  size: 3,
-                                },
-                              ]
-                                .filter((el) => el)
-                                .map((el) => (
-                                  <Grid
-                                    key={el.label}
-                                    item
-                                    xs={el.size as GridSize}
-                                  >
-                                    <LabelizedField label={el.label}>
-                                      {el.value}
-                                    </LabelizedField>
-                                  </Grid>
-                                ))}
-                            </Grid>
-                          </OverviewContainer>
-                          <BoxWithBorderBottom />
-                          <BoxPadding />
-                          <Grid container spacing={3}>
-                            {values.issueType ===
-                              GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT && (
-                              <Grid item xs={3}>
-                                <Field
-                                  name='partner'
-                                  fullWidth
-                                  variant='outlined'
-                                  label={t('Partner*')}
-                                  choices={userChoices.userPartnerChoices}
-                                  component={FormikSelectField}
-                                />
-                              </Grid>
-                            )}
-                            <Grid item xs={12}>
-                              <Field
-                                name='description'
-                                multiline
-                                fullWidth
-                                variant='outlined'
-                                label={
-                                  values.issueType ===
-                                    GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
-                                  values.issueType ===
-                                    GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
-                                    ? t('Withdrawal Reason*')
-                                    : t('Description*')
-                                }
-                                component={FormikTextField}
-                              />
-                            </Grid>
-                            <Grid item xs={12}>
-                              <Field
-                                name='comments'
-                                multiline
-                                fullWidth
-                                variant='outlined'
-                                label={t('Comments')}
-                                component={FormikTextField}
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name='admin'
-                                label={t('Administrative Level 2')}
-                                variant='outlined'
-                                component={FormikAdminAreaAutocomplete}
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name='area'
-                                fullWidth
-                                variant='outlined'
-                                label={t('Area / Village / Pay point')}
-                                component={FormikTextField}
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name='language'
-                                multiline
-                                fullWidth
-                                variant='outlined'
-                                label={t('Languages Spoken')}
-                                component={FormikTextField}
-                              />
-                            </Grid>
-                            <Grid item xs={3}>
-                              <Field
-                                name='priority'
-                                multiline
-                                fullWidth
-                                variant='outlined'
-                                label={t('Priority')}
-                                choices={priorityChoicesData}
-                                component={FormikSelectField}
-                              />
-                            </Grid>
-                            <Grid item xs={3}>
-                              <Field
-                                name='urgency'
-                                multiline
-                                fullWidth
-                                variant='outlined'
-                                label={t('Urgency')}
-                                choices={urgencyChoicesData}
-                                component={FormikSelectField}
-                              />
-                            </Grid>
-                            {+values.issueType !==
-                              +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
-                              <Grid item xs={6}>
-                                <Field
-                                  name='programme'
-                                  fullWidth
-                                  variant='outlined'
-                                  label={t('Programme Title')}
-                                  choices={mappedPrograms}
-                                  component={FormikSelectField}
-                                />
-                              </Grid>
-                            )}
-                          </Grid>
-                          <Box pt={5}>
-                            <BoxWithBorders>
-                              <Grid container spacing={4}>
-                                <Grid item xs={6}>
-                                  <Box py={3}>
-                                    <LookUpRelatedTickets
-                                      values={values}
-                                      onValueChange={setFieldValue}
-                                    />
-                                  </Box>
-                                </Grid>
-                                {(values.issueType ===
-                                  GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
-                                  values.issueType ===
-                                    GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
-                                  <Grid item xs={6}>
-                                    <Box py={3}>
-                                      <LookUpPaymentRecord
-                                        values={values}
-                                        onValueChange={setFieldValue}
-                                      />
-                                    </Box>
-                                    <FormHelperText
-                                      key='selectedPaymentRecords'
-                                      error
-                                    >
-                                      {errors.selectedPaymentRecords}
-                                    </FormHelperText>
-                                  </Grid>
-                                )}
-                              </Grid>
-                            </BoxWithBorders>
-                          </Box>
-                        </BoxPadding>
+                      {activeStep === GrievanceSteps.Description && (
+                        <Description
+                          values={values}
+                          showIssueType={showIssueType}
+                          selectedIssueType={selectedIssueType}
+                          businessArea={businessArea}
+                          choicesData={choicesData}
+                          userChoices={userChoices}
+                          mappedPrograms={mappedPrograms}
+                          setFieldValue={setFieldValue}
+                          errors={errors}
+                          permissions={permissions}
+                        />
                       )}
-                      {activeStep === steps.length - 1 && (
-                        <>
-                          {canAddDocumentation && (
-                            <Box mt={3}>
-                              <Title>
-                                <Typography variant='h6'>
-                                  {t('Documentation')}
-                                </Typography>
-                              </Title>
 
-                              <NewDocumentationFieldArray
-                                values={values}
-                                setFieldValue={setFieldValue}
-                                errors={errors}
-                              />
-                            </Box>
-                          )}
-                          <DataChangeComponent
-                            values={values}
-                            setFieldValue={setFieldValue}
-                          />
-                        </>
-                      )}
+                      <DataChangeComponent
+                        values={values}
+                        setFieldValue={setFieldValue}
+                      />
                       {dataChangeErrors(errors, touched)}
                       <Box pt={3} display='flex' flexDirection='row'>
                         <Box mr={3}>
@@ -748,7 +404,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             variant='contained'
                             onClick={submitForm}
                           >
-                            {activeStep === steps.length - 1
+                            {activeStep === GrievanceSteps.Description
                               ? t('Save')
                               : t('Next')}
                           </LoadingButton>
@@ -758,7 +414,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                   </InnerBoxPadding>
                 </NewTicket>
               </Grid>
-              {activeStep === steps.length - 1 && (
+              {activeStep === GrievanceSteps.Selection && (
                 <Grid item xs={12}>
                   <NewTicket>
                     <Grid container spacing={3}>
