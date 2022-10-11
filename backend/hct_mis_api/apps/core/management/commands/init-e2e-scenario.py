@@ -157,4 +157,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print("Initializing scenario with options:", {k: v for k, v in options.items() if k in ["scenario", "seed"]})
-        {"targeting": init_targeting, "payment_plan": init_payment_plan}[options["scenario"]](options.get("seed"))
+        {"targeting": init_targeting, "payment_plan": init_payment_plan}[options["scenario"]](options["seed"])
