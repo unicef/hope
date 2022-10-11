@@ -5,6 +5,7 @@ import graphene
 from base64 import b64decode
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -44,16 +45,20 @@ from hct_mis_api.apps.payment.models import (
     GenericPayment,
     PaymentChannel,
     PaymentPlan,
+    PaymentRecord,
     PaymentVerification,
+    PaymentVerificationPlan,
 )
 from hct_mis_api.apps.payment.schema import (
     FinancialServiceProviderNode,
     GenericPaymentPlanNode,
     PaymentPlanNode,
+    PaymentRecordNode,
     PaymentVerificationNode,
 )
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.payment.services.mark_as_failed import mark_as_failed
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
 )
@@ -70,7 +75,7 @@ from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import (
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
 )
-from hct_mis_api.apps.program.schema import CashPlanNode, PaymentVerificationPlan
+from hct_mis_api.apps.program.schema import CashPlanNode
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -573,6 +578,35 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
         return ImportXlsxPaymentVerificationPlanFile(cashplan_payment_verification.cash_plan, import_service.errors)
 
 
+class MarkPaymentRecordAsFailedMutation(PermissionMutation):
+    payment_record = graphene.Field(PaymentRecordNode)
+
+    class Arguments:
+        payment_record_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls,
+        root,
+        info,
+        payment_record_id,
+        **kwargs,
+    ):
+        payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
+
+        try:
+            mark_as_failed(payment_record)
+        except ValidationError as e:
+            logger.error(e.message)
+            raise GraphQLError(e.message) from e
+
+        return MarkPaymentRecordAsFailedMutation(payment_record)
+
+
 class CreateFinancialServiceProviderMutation(PermissionMutation):
     financial_service_provider = graphene.Field(FinancialServiceProviderNode)
 
@@ -1063,6 +1097,7 @@ class Mutations(graphene.ObjectType):
     choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
     assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
+    mark_payment_record_as_failed = MarkPaymentRecordAsFailedMutation.Field()
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
     )

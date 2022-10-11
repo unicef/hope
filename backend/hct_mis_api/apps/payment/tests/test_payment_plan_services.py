@@ -1,24 +1,26 @@
-from graphql import GraphQLError
 from unittest.mock import patch
-from freezegun import freeze_time
+
 from aniso8601 import parse_date
+from freezegun import freeze_time
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.household.fixtures import IndividualFactory, HouseholdFactory, IndividualRoleInHouseholdFactory
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+)
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-
-
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.base_test_case import APITestCase
-
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestPaymentPlanServices(APITestCase):
@@ -63,7 +65,7 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         with self.assertRaisesMessage(GraphQLError, "PaymentPlan can not be created in provided Business Area"):
-            pp = PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService().create(input_data=input_data, user=self.user)
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
 
@@ -71,19 +73,19 @@ class TestPaymentPlanServices(APITestCase):
             GraphQLError,
             f"TargetPopulation id:{targeting.id} does not exist or is not in status 'Ready for Payment Module'",
         ):
-            pp = PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService().create(input_data=input_data, user=self.user)
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         targeting.save()
 
         with self.assertRaisesMessage(GraphQLError, "TargetPopulation should have related Program defined"):
-            pp = PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService().create(input_data=input_data, user=self.user)
         targeting.program = ProgramFactory()
         targeting.save()
 
         with self.assertRaisesMessage(
             GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
         ):
-            pp = PaymentPlanService().create(input_data=input_data, user=self.user)
+            PaymentPlanService().create(input_data=input_data, user=self.user)
 
     @freeze_time("2020-10-10")
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -100,8 +102,8 @@ class TestPaymentPlanServices(APITestCase):
         hoh2 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         hh2 = HouseholdFactory(head_of_household=hoh2)
-        primary_collector_1 = IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
-        primary_collector_2 = IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
+        IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
+        IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
         targeting.households.set([hh1, hh2])
@@ -129,14 +131,14 @@ class TestPaymentPlanServices(APITestCase):
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock):
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
-        new_targeting = TargetPopulationFactory()
+        new_targeting = TargetPopulationFactory(program=None)
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         hh2 = HouseholdFactory(head_of_household=hoh2)
-        primary_collector_1 = IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
-        primary_collector_2 = IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
+        IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
+        IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
         new_targeting.households.set([hh1, hh2])
         new_targeting.save()
@@ -170,7 +172,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaisesMessage(
             GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
         ):
-            pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
+            PaymentPlanService(payment_plan=pp).update(input_data=input_data)
 
     @freeze_time("2020-10-10")
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -178,7 +180,7 @@ class TestPaymentPlanServices(APITestCase):
         pp = PaymentPlanFactory(total_households_count=1)
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
-        p1 = PaymentFactory(parent=pp, excluded=False, household=hh1)
+        PaymentFactory(parent=pp, excluded=False, household=hh1)
         self.assertEqual(pp.payment_items.count(), 1)
 
         new_targeting = TargetPopulationFactory()
@@ -188,8 +190,8 @@ class TestPaymentPlanServices(APITestCase):
         hoh2 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         hh2 = HouseholdFactory(head_of_household=hoh2)
-        primary_collector_1 = IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
-        primary_collector_2 = IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
+        IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
+        IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
         new_targeting.households.set([hh1, hh2])
         new_targeting.save()
@@ -210,7 +212,6 @@ class TestPaymentPlanServices(APITestCase):
             # test targeting update, payments recreation triggered
             old_pp_targeting = updated_pp_1.target_population
             old_pp_exchange_rate = updated_pp_1.exchange_rate
-            old_pp_total_households_count = updated_pp_1.total_households_count
 
             updated_pp_2 = PaymentPlanService(payment_plan=pp).update(
                 input_data=dict(targeting_id=self.id_to_base64(new_targeting.id, "Targeting"))

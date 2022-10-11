@@ -12,11 +12,12 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentVerificationPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
     CashPlanFactory,
-    PaymentPlanFactory, PaymentFactory
+    PaymentFactory,
+    PaymentPlanFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerificationSummary
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -124,13 +125,13 @@ class TestGenerateReportService(TestCase):
         PaymentRecordFactory(
             household=self.households[0],
             business_area=self.business_area,
-            delivery_date="2020-01-01T14:30+00:00",
+            delivery_date="2020-01-01",
             parent=self.cash_plan_1,
         )
         PaymentRecordFactory(
             household=self.households[1],
             business_area=self.business_area,
-            delivery_date="2020-01-01T14:30+00:00",
+            delivery_date="2020-01-01",
             parent=self.cash_plan_2,
         )
         payment_1 = PaymentFactory(
@@ -163,21 +164,21 @@ class TestGenerateReportService(TestCase):
         [
             ("individuals_no_filter", Report.INDIVIDUALS, False, False, 6),
             ("individuals_filter_admin_area", Report.INDIVIDUALS, True, False, 8),
-            # ("households_no_filter", Report.HOUSEHOLD_DEMOGRAPHICS, False, False, 3),
-            # ("households_filter_admin_area", Report.HOUSEHOLD_DEMOGRAPHICS, True, False, 4),
-            # ("cash_plan_verifications_no_filter", Report.CASH_PLAN_VERIFICATION, False, False, 2),
-            # ("cash_plan_verifications_program", Report.CASH_PLAN_VERIFICATION, False, True, 1),
-            # ("payments_no_filter", Report.PAYMENTS, False, False, 2),
-            # ("payments_filter_admin_area", Report.PAYMENTS, True, False, 1),
-            # ("payment_verifications_no_filter", Report.PAYMENT_VERIFICATION, False, False, 2),  # TODO:
-            # ("payment_verifications_program", Report.PAYMENT_VERIFICATION, False, True, 1),  # TODO:
-            # ("cash_plans_no_filter", Report.CASH_PLAN, False, False, 2),
-            # ("cash_plans_program", Report.CASH_PLAN, False, True, 1),
-            # ("programs_no_filter", Report.PROGRAM, False, False, 1),
-            # ("individuals_payments_no_filter", Report.INDIVIDUALS_AND_PAYMENT, False, False, 4),
-            # ("individuals_payments_admin_area", Report.INDIVIDUALS_AND_PAYMENT, True, False, 2),
-            # ("individuals_payments_program", Report.INDIVIDUALS_AND_PAYMENT, False, True, 2),
-            # ("individuals_payments_admin_area_and_program", Report.INDIVIDUALS_AND_PAYMENT, True, True, 2),
+            ("households_no_filter", Report.HOUSEHOLD_DEMOGRAPHICS, False, False, 3),
+            ("households_filter_admin_area", Report.HOUSEHOLD_DEMOGRAPHICS, True, False, 4),
+            ("cash_plan_verifications_no_filter", Report.CASH_PLAN_VERIFICATION, False, False, 2),
+            ("cash_plan_verifications_program", Report.CASH_PLAN_VERIFICATION, False, True, 1),
+            ("payments_no_filter", Report.PAYMENTS, False, False, 2),
+            ("payments_filter_admin_area", Report.PAYMENTS, True, False, 1),
+            ("payment_verifications_no_filter", Report.PAYMENT_VERIFICATION, False, False, 2),
+            ("payment_verifications_program", Report.PAYMENT_VERIFICATION, False, True, 1),
+            ("cash_plans_no_filter", Report.CASH_PLAN, False, False, 2),
+            ("cash_plans_program", Report.CASH_PLAN, False, True, 1),
+            ("programs_no_filter", Report.PROGRAM, False, False, 1),
+            ("individuals_payments_no_filter", Report.INDIVIDUALS_AND_PAYMENT, False, False, 4),
+            ("individuals_payments_admin_area", Report.INDIVIDUALS_AND_PAYMENT, True, False, 2),
+            ("individuals_payments_program", Report.INDIVIDUALS_AND_PAYMENT, False, True, 2),
+            ("individuals_payments_admin_area_and_program", Report.INDIVIDUALS_AND_PAYMENT, True, True, 2),
         ]
     )
     def test_report_types(self, _, report_type, should_set_admin_area, should_set_program, number_of_records):

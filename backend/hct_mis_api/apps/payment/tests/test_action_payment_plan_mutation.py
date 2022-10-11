@@ -5,20 +5,23 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals, IndividualRoleInHouseholdFactory
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import (
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentPlanFactory,
-    RealProgramFactory,
-    PaymentFactory,
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentChannelFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    RealProgramFactory,
 )
 from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 class TestActionPaymentPlanMutation(APITestCase):

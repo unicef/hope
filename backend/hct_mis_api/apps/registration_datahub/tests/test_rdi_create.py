@@ -8,6 +8,7 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
+from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 
@@ -67,6 +68,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
@@ -341,6 +343,15 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         result = task._cast_value("MALE", "gender_i_c")
         self.assertEqual(result, "MALE")
+
+        result = task._cast_value("TRUE", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("true", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("True", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
 
     def test_store_row_id(self):
         task = self.RdiXlsxCreateTask()
@@ -792,7 +803,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
 
         result = []
 
-        for i in range(10000):
+        for _ in range(10000):
             copy = {**base_form}
 
             new_individuals = []

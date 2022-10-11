@@ -72,7 +72,7 @@ class VerificationPlanStatusChangeServices:
         )
 
     def activate(self) -> PaymentVerificationPlan:
-        if self.payment_verification_plan.status != PaymentVerificationPlan.STATUS_PENDING:
+        if self.payment_verification_plan.can_activate():
             raise GraphQLError("You can activate only PENDING verification")
 
         if self._can_activate_via_rapidpro():
@@ -93,15 +93,29 @@ class VerificationPlanStatusChangeServices:
         business_area_slug = self.payment_verification_plan.business_area.slug
         api = RapidProAPI(business_area_slug)
         pv_id = self.payment_verification_plan.id
-        phone_numbers = list(
-            Individual.objects.filter(
-                heading_household__paymentrecord__verification__payment_verification_plan=pv_id
-            ).values_list("phone_no", flat=True)
+        individuals = Individual.objects.filter(
+            heading_household__paymentrecord__verification__payment_verification_plan=pv_id,
+            heading_household__paymentrecord__verification__sent_to_rapid_pro=False,
         )
-        flow_start_info_list = api.start_flow(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
-        self.payment_verification_plan.rapid_pro_flow_start_uuids = [
-            flow_start_info.get("uuid") for flow_start_info in flow_start_info_list
-        ]
+        phone_numbers = list(individuals.values_list("phone_no", flat=True))
+        flow_start_info_list, error = api.start_flows(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
+        for (flow_start_info, _) in flow_start_info_list:
+            self.payment_verification_plan.rapid_pro_flow_start_uuids.append(flow_start_info.get("uuid"))
+
+        all_urns = []
+        for (_, urns) in flow_start_info_list:
+            all_urns.extend(urn.split(":")[-1] for urn in urns)
+        processed_individuals = individuals.filter(phone_no__in=all_urns)
+        PaymentVerificationPlan.objects.get(id=pv_id).payment_record_verifications.filter(
+            payment_record__head_of_household__in=processed_individuals
+        ).update(sent_to_rapid_pro=True)
+        self.payment_verification_plan.save()
+
+        if error is not None:
+            self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR
+            self.payment_verification_plan.error = str(error)
+            self.payment_verification_plan.save()
+            raise error
 
     def finish(self) -> PaymentVerificationPlan:
         self.payment_verification_plan.status = PaymentVerificationPlan.STATUS_FINISHED
