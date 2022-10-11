@@ -1,28 +1,32 @@
 from datetime import timedelta
 
-from django.utils import timezone
 from django.core.management import BaseCommand
+from django.utils import timezone
 
-from hct_mis_api.apps.steficon.models import Rule
+from faker import Faker
+
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.models import (
+    MALE,
+    ROLE_PRIMARY,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.models import GenericPayment, PaymentChannel
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
+from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.models import (
-    TargetPopulation,
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
+    TargetPopulation,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.household.models import MALE
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
-
-from faker import Faker
 
 faker = Faker()
 
