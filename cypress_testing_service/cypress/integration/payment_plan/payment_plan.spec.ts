@@ -1,9 +1,7 @@
 import { When, Then, Given, And } from 'cypress-cucumber-preprocessor/steps';
-import {
-  uniqueSeed,
-} from '../../procedures/procedures';
+import { uniqueSeed } from '../../procedures/procedures';
 
-let targetPopulationName = "PaymentPlanTargetPopulation";
+let targetPopulationName = 'PaymentPlanTargetPopulation';
 let paymentPlanUnicefId;
 let fspXlsxFilenames;
 const downloadsFolder = Cypress.config('downloadsFolder');
@@ -20,9 +18,9 @@ Given('I am authenticated', () => {
   cy.get('input').contains('Log in').click();
 });
 
-Given("I initialize the data", () => {
+Given('I initialize the data', () => {
   cy.exec(`yarn init-scenario payment_plan --seed ${uniqueSeed}`);
-})
+});
 
 Given('Business area is payment plan applicable', () => {
   cy.visit('/api/unicorn/core/businessarea/');
@@ -60,7 +58,9 @@ Then('I should see the New Payment Plan page', () => {
 When('I fill out the form fields and save', () => {
   cy.get('[data-cy="input-target-population"]').first().click();
   cy.wait(200); // eslint-disable-line cypress/no-unnecessary-waiting
-  cy.get(`[data-cy="select-option-${targetPopulationName}-${uniqueSeed}"]`).click();
+  cy.get(
+    `[data-cy="select-option-${targetPopulationName}-${uniqueSeed}"]`,
+  ).click();
 
   cy.get('[data-cy="input-start-date"]').click().type('2022-12-12');
   cy.get('[data-cy="input-end-date"]').click().type('2022-12-23');

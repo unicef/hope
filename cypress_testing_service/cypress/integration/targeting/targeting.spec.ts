@@ -1,11 +1,8 @@
 import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
-import {
-  fillTargetingForm,
-  uniqueSeed,
-} from '../../procedures/procedures';
+import { fillTargetingForm, uniqueSeed } from '../../procedures/procedures';
 
 let individualIds = [];
-let programName = "TargetingProgram"
+let programName = 'TargetingProgram';
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -14,9 +11,9 @@ Given('I am authenticated', () => {
   cy.get('input').contains('Log in').click();
 });
 
-Given("I initialize the data", () => {
+Given('I initialize the data', () => {
   cy.exec(`yarn init-scenario targeting --seed ${uniqueSeed}`);
-})
+});
 
 When('I visit the main dashboard', () => {
   cy.visit('/');
@@ -48,7 +45,12 @@ Then('I should see the Create Target Population page', () => {
 });
 
 When('I fill out the form fields and save', () => {
-  fillTargetingForm(cy, programName, uniqueSeed, `TargetingVille-${uniqueSeed}`);
+  fillTargetingForm(
+    cy,
+    programName,
+    uniqueSeed,
+    `TargetingVille-${uniqueSeed}`,
+  );
   cy.get('[data-cy="button-target-population-add-criteria"]').eq(1).click();
 });
 
