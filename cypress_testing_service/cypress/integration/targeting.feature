@@ -3,8 +3,9 @@ Feature: Targeting
 
     Background:
         Given I am authenticated
-        Given There are individuals and households imported
-        Given I have an active program
+    # TODO: make this via initcypress
+    # Given There are individuals and households imported
+    # Given I have an active program
 
     Scenario: Visit Targeting page and create Target Population
         When I visit the main dashboard
