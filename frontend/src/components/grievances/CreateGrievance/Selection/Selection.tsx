@@ -6,10 +6,10 @@ import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 
 export interface SelectionProps {
-  handleChange;
+  handleChange: (e: React.ChangeEvent<any>) => void;
   choicesData: GrievancesChoiceDataQuery;
-  setFieldValue;
-  showIssueType;
+  setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
+  showIssueType: (values: any) => boolean;
   values;
 }
 
