@@ -9,6 +9,10 @@ from django_filters import (
     NumericRangeFilter,
 )
 
+from hct_mis_api.apps.core.filters import (
+    DateRangeFilter,
+)
+
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
@@ -74,6 +78,7 @@ class TargetPopulationFilter(FilterSet):
     )
     business_area = CharFilter(field_name="business_area__slug")
     program = ModelMultipleChoiceFilter(field_name="program", to_field_name="id", queryset=Program.objects.all())
+    created_at_range = DateRangeFilter(field_name="created_at__date")
 
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
