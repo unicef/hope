@@ -19,7 +19,7 @@ class TestXlsxVerificationExport(APITestCase):
         mutation exportXlsxPaymentVerificationPlanFile($paymentVerificationPlanId: ID!) {
           exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: $paymentVerificationPlanId) {
             paymentPlan{
-              verifications{
+              verificationPlans{
                 edges{
                   node{
                     status
