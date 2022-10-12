@@ -1,12 +1,12 @@
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, ChoiceFilter, FilterSet
+from django_filters import CharFilter, ChoiceFilter, FilterSet, UUIDFilter
 
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
 
-from .models import Message
+from .models import Feedback, Message, FeedbackMessage
 
 
 class MessagesFilter(FilterSet):
@@ -28,7 +28,9 @@ class MessagesFilter(FilterSet):
             "created_by": ["exact"],
         }
 
-    order_by = CustomOrderingFilter(fields=(Lower("title"), "number_of_recipients", "sampling_type", "created_by", "id", "created_at"))
+    order_by = CustomOrderingFilter(
+        fields=(Lower("title"), "number_of_recipients", "sampling_type", "created_by", "id", "created_at")
+    )
 
 
 class MessageRecipientsMapFilter(FilterSet):
@@ -61,3 +63,40 @@ class MessageRecipientsMapFilter(FilterSet):
             "head_of_household__first_registration_date",
         )
     )
+
+
+class FeedbackFilter(FilterSet):
+    business_area_slug = CharFilter(field_name="business_area__slug", required=True)
+    issue_type = ChoiceFilter(field_name="issue_type", choices=Feedback.ISSUE_TYPE_CHOICES)
+    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_by = CharFilter(method="filter_created_by")
+    feedback_id = CharFilter(method="filter_feedback_id")
+
+    def filter_created_by(self, queryset, name, value):
+        return queryset.filter(created_by__pk=value)
+
+    def filter_feedback_id(self, queryset, name, value):
+        return queryset.filter(unicef_id=value)
+
+    class Meta:
+        model = Feedback
+        fields = ()
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            "unicef_id",
+            "issue_type",
+            "household_lookup",
+            "created_by",
+            "created_at",
+            "linked_grievance",
+        )
+    )
+
+
+class FeedbackMessageFilter(FilterSet):
+    feedback = UUIDFilter(field_name="feedback", required=True)
+
+    class Meta:
+        fields = ("id",)
+        model = FeedbackMessage

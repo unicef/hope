@@ -92,6 +92,13 @@ export const GrievanceSteps = {
   Description: 3,
 };
 
+export const FeedbackSteps = {
+  Selection: 0,
+  Lookup: 1,
+  Verification: 2,
+  Description: 3,
+};
+
 export const ISSUE_TYPE_CATEGORIES = {
   DATA_CHANGE: 'Data Change',
   SENSITIVE_GRIEVANCE: 'Sensitive Grievance',
