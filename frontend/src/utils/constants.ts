@@ -33,8 +33,6 @@ export const GRIEVANCE_CATEGORIES = {
   SYSTEM_FLAGGING: '9',
 };
 
-
-
 export const GRIEVANCE_ISSUE_TYPES = {
   EDIT_HOUSEHOLD: '13',
   EDIT_INDIVIDUAL: '14',
@@ -105,4 +103,16 @@ export const ISSUE_TYPE_CATEGORIES = {
   DATA_CHANGE: 'Data Change',
   SENSITIVE_GRIEVANCE: 'Sensitive Grievance',
   GRIEVANCE_COMPLAINT: 'Grievance Complaint',
+};
+
+export const CommunicationSteps = {
+  LookUp: 0,
+  SampleSize: 1,
+  Details: 2,
+};
+
+export const CommunicationTabsValues = {
+  HOUSEHOLD: 0,
+  TARGET_POPULATION: 1,
+  RDI: 2,
 };

@@ -12,7 +12,10 @@ import { RegistrationFilters } from '../../../components/rdi/RegistrationFilter'
 export function RegistrationDataImportPage(): React.ReactElement {
   const permissions = usePermissions();
   const { t } = useTranslation();
-  const [filter, setFilter] = useState({});
+  const [filter, setFilter] = useState({
+    size: { min: undefined, max: undefined },
+    importDateRange: { min: undefined, max: undefined },
+  });
   const debounceFilter = useDebounce(filter, 500);
   if (permissions === null) return null;
 
