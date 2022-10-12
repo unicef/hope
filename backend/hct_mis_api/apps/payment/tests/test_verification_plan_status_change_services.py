@@ -85,7 +85,7 @@ class TestPhoneNumberVerification(TestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=cash_plan_payment_verification,
-                payment_record=payment_record,
+                payment=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
@@ -139,7 +139,7 @@ class TestPhoneNumberVerification(TestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=other_cash_plan_payment_verification,
-                payment_record=other_payment_record,
+                payment=other_payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=other_household)

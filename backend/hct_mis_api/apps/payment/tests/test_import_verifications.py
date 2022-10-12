@@ -75,7 +75,7 @@ class TestXlsxVerificationImport(APITestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=payment_verification_plan,
-                payment_record=payment_record,
+                payment=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
