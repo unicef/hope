@@ -1,4 +1,4 @@
-import { Radio } from '@material-ui/core';
+import { Checkbox, Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
@@ -17,14 +17,36 @@ interface LookUpHouseholdTableRowProps {
   ) => void;
   selectedHousehold: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
   choicesData: HouseholdChoiceDataQuery;
+  checkboxClickHandler?: (
+    event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    number,
+  ) => void;
+  selected?: Array<string>;
+  householdMultiSelect: boolean;
 }
 
 export function LookUpHouseholdTableRow({
   household,
   radioChangeHandler,
   selectedHousehold,
+  checkboxClickHandler,
+  selected,
+  householdMultiSelect,
 }: LookUpHouseholdTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
+  const isSelected = (id: string): boolean => selected.includes(id);
+  const isItemSelected = isSelected(household.id);
+
+  const handleClick = (event): void => {
+    event.preventDefault();
+    if (householdMultiSelect) {
+      checkboxClickHandler(event, household.id);
+    } else {
+      radioChangeHandler(household);
+    }
+  };
   const renderPrograms = (): string => {
     const programNames = household.programs?.edges?.map(
       (edge) => edge.node.name,
@@ -33,24 +55,33 @@ export function LookUpHouseholdTableRow({
   };
   return (
     <ClickableTableRow
-      onClick={() => {
-        radioChangeHandler(household);
+      onClick={(event) => {
+        handleClick(event);
       }}
       hover
       role='checkbox'
       key={household.id}
     >
       <TableCell padding='checkbox'>
-        <Radio
-          color='primary'
-          checked={selectedHousehold?.id === household.id}
-          onChange={() => {
-            radioChangeHandler(household);
-          }}
-          value={household.id}
-          name='radio-button-household'
-          inputProps={{ 'aria-label': household.id }}
-        />
+        {householdMultiSelect ? (
+          <Checkbox
+            color='primary'
+            onClick={(event) => checkboxClickHandler(event, household.id)}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': household.id }}
+          />
+        ) : (
+          <Radio
+            color='primary'
+            checked={selectedHousehold?.id === household.id}
+            onChange={() => {
+              radioChangeHandler(household);
+            }}
+            value={household.id}
+            name='radio-button-household'
+            inputProps={{ 'aria-label': household.id }}
+          />
+        )}
       </TableCell>
       <TableCell align='left'>
         <BlackLink to={`/${businessArea}/population/household/${household.id}`}>
