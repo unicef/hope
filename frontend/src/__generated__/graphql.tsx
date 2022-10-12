@@ -6926,6 +6926,23 @@ export type TargetPopulationDetailedFragment = (
   )> }
 );
 
+export type CreateAccountabilityCommunicationMessageMutationVariables = {
+  businessAreaSlug: Scalars['String'],
+  inputs: CreateAccountabilityCommunicationMessageInput
+};
+
+
+export type CreateAccountabilityCommunicationMessageMutation = (
+  { __typename?: 'Mutations' }
+  & { createAccountabilityCommunicationMessage: Maybe<(
+    { __typename?: 'CreateCommunicationMessageMutation' }
+    & { message: Maybe<(
+      { __typename?: 'CommunicationMessageNode' }
+      & Pick<CommunicationMessageNode, 'id'>
+    )> }
+  )> }
+);
+
 export type CheckAgainstSanctionListUploadMutationVariables = {
   file: Scalars['Upload']
 };
@@ -11236,6 +11253,58 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   }
 }
     `;
+export const CreateAccountabilityCommunicationMessageDocument = gql`
+    mutation CreateAccountabilityCommunicationMessage($businessAreaSlug: String!, $inputs: CreateAccountabilityCommunicationMessageInput!) {
+  createAccountabilityCommunicationMessage(businessAreaSlug: $businessAreaSlug, inputs: $inputs) {
+    message {
+      id
+    }
+  }
+}
+    `;
+export type CreateAccountabilityCommunicationMessageMutationFn = ApolloReactCommon.MutationFunction<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables>;
+export type CreateAccountabilityCommunicationMessageComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables>, 'mutation'>;
+
+    export const CreateAccountabilityCommunicationMessageComponent = (props: CreateAccountabilityCommunicationMessageComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables> mutation={CreateAccountabilityCommunicationMessageDocument} {...props} />
+    );
+    
+export type CreateAccountabilityCommunicationMessageProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables> & TChildProps;
+export function withCreateAccountabilityCommunicationMessage<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateAccountabilityCommunicationMessageMutation,
+  CreateAccountabilityCommunicationMessageMutationVariables,
+  CreateAccountabilityCommunicationMessageProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables, CreateAccountabilityCommunicationMessageProps<TChildProps>>(CreateAccountabilityCommunicationMessageDocument, {
+      alias: 'createAccountabilityCommunicationMessage',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateAccountabilityCommunicationMessageMutation__
+ *
+ * To run a mutation, you first call `useCreateAccountabilityCommunicationMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAccountabilityCommunicationMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAccountabilityCommunicationMessageMutation, { data, loading, error }] = useCreateAccountabilityCommunicationMessageMutation({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      inputs: // value for 'inputs'
+ *   },
+ * });
+ */
+export function useCreateAccountabilityCommunicationMessageMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables>(CreateAccountabilityCommunicationMessageDocument, baseOptions);
+      }
+export type CreateAccountabilityCommunicationMessageMutationHookResult = ReturnType<typeof useCreateAccountabilityCommunicationMessageMutation>;
+export type CreateAccountabilityCommunicationMessageMutationResult = ApolloReactCommon.MutationResult<CreateAccountabilityCommunicationMessageMutation>;
+export type CreateAccountabilityCommunicationMessageMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables>;
 export const CheckAgainstSanctionListUploadDocument = gql`
     mutation CheckAgainstSanctionListUpload($file: Upload!) {
   checkAgainstSanctionList(file: $file) {

@@ -15,32 +15,36 @@ interface TargetPopulationFiltersProps {
   onFilterChange;
   filter;
   programs: ProgramNode[];
+  addBorder?: boolean;
 }
 export function TargetPopulationFilters({
   // targetPopulations,
   onFilterChange,
   filter,
   programs,
+  addBorder = true,
 }: TargetPopulationFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
-  return (
-    <ContainerWithBorder>
+  const renderTable = (): React.ReactElement => {
+    return (
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.name || ''}
             onChange={(e) => handleFilterChange(e, 'name')}
             data-cy='filters-search'
+            fullWidth
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'status')}
             label={t('Status')}
             icon={<Person />}
+            fullWidth
           >
             <MenuItem value=''>{TARGETING_STATES.NONE}</MenuItem>
             <MenuItem value='DRAFT'>{TARGETING_STATES.DRAFT}</MenuItem>
@@ -53,12 +57,13 @@ export function TargetPopulationFilters({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'program')}
             label={t('Programme')}
             value={filter.program || ''}
             icon={<FlashOnIcon />}
+            fullWidth
           >
             <MenuItem value=''>
               <em>{t('None')}</em>
@@ -70,42 +75,49 @@ export function TargetPopulationFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item>
-          <NumberTextField
-            id='minFilter'
-            topLabel={t('Number of Households')}
-            value={filter.numIndividuals.min}
-            placeholder={t('From')}
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                numIndividuals: {
-                  ...filter.numIndividuals,
-                  min: e.target.value || undefined,
-                },
-              })
-            }
-            icon={<Group />}
-          />
-        </Grid>
-        <Grid item>
-          <NumberTextField
-            id='maxFilter'
-            value={filter.numIndividuals.max}
-            placeholder={t('To')}
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                numIndividuals: {
-                  ...filter.numIndividuals,
-                  max: e.target.value || undefined,
-                },
-              })
-            }
-            icon={<Group />}
-          />
+        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+          <Grid item xs={6}>
+            <NumberTextField
+              id='minFilter'
+              topLabel={t('Number of Households')}
+              value={filter.numIndividuals.min}
+              placeholder={t('From')}
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  numIndividuals: {
+                    ...filter.numIndividuals,
+                    min: e.target.value || undefined,
+                  },
+                })
+              }
+              icon={<Group />}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <NumberTextField
+              id='maxFilter'
+              value={filter.numIndividuals.max}
+              placeholder={t('To')}
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  numIndividuals: {
+                    ...filter.numIndividuals,
+                    max: e.target.value || undefined,
+                  },
+                })
+              }
+              icon={<Group />}
+            />
+          </Grid>
         </Grid>
       </Grid>
-    </ContainerWithBorder>
+    );
+  };
+  return addBorder ? (
+    <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
+  ) : (
+    renderTable()
   );
 }

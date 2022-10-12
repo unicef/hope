@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../../utils/utils';
@@ -21,6 +21,7 @@ interface LookUpHouseholdTableProps {
   setSelectedIndividual?;
   setSelectedHousehold?;
   noTableStyling?;
+  householdMultiSelect?: boolean;
 }
 
 const NoTableStyling = styled.div`
@@ -39,6 +40,7 @@ export const LookUpHouseholdTable = ({
   setSelectedIndividual,
   setSelectedHousehold,
   noTableStyling = false,
+  householdMultiSelect,
 }: LookUpHouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
@@ -50,9 +52,48 @@ export const LookUpHouseholdTable = ({
     familySize: JSON.stringify(filter.size),
     withdrawn: false,
   };
+  const [selected, setSelected] = useState<string[]>([...selectedHousehold]);
+
   if (filter.program) {
     initialVariables.programs = [filter.program];
   }
+
+  const handleCheckboxClick = (event, name): void => {
+    const selectedIndex = selected.indexOf(name);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, name);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1),
+      );
+    }
+
+    if (setSelectedIndividual === undefined && householdMultiSelect) {
+      setSelectedHousehold(newSelected);
+    }
+    setSelected(newSelected);
+  };
+
+  const handleSelectAllCheckboxesClick = (event, rows): void => {
+    event.preventDefault();
+    let newSelecteds = [];
+    if (!selected.length) {
+      newSelecteds = rows.map((row) => row.id);
+      setSelected(newSelecteds);
+    } else {
+      setSelected([]);
+    }
+    if (setSelectedIndividual === undefined && householdMultiSelect) {
+      setSelectedHousehold(newSelecteds);
+    }
+  };
 
   const handleRadioChange = (
     household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
@@ -60,20 +101,27 @@ export const LookUpHouseholdTable = ({
     setSelectedHousehold(household);
     setFieldValue('selectedHousehold', household);
     setFieldValue('selectedIndividual', null);
-    setSelectedIndividual(null);
+    if (setSelectedIndividual !== undefined) {
+      setSelectedIndividual(null);
+    }
     setFieldValue('identityVerified', false);
   };
+
   const renderTable = (): React.ReactElement => {
     return (
       <UniversalTable<
         AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
         AllHouseholdsQueryVariables
       >
-        headCells={headCells}
+        headCells={householdMultiSelect ? headCells.slice(1) : headCells}
         rowsPerPageOptions={[5, 10, 15, 20]}
         query={useAllHouseholdsQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
+        onSelectAllClick={
+          householdMultiSelect && handleSelectAllCheckboxesClick
+        }
+        numSelected={householdMultiSelect && selected.length}
         renderRow={(row) => (
           <LookUpHouseholdTableRow
             key={row.id}
@@ -81,6 +129,9 @@ export const LookUpHouseholdTable = ({
             radioChangeHandler={handleRadioChange}
             selectedHousehold={selectedHousehold}
             choicesData={choicesData}
+            checkboxClickHandler={handleCheckboxClick}
+            selected={selected}
+            householdMultiSelect={householdMultiSelect}
           />
         )}
       />

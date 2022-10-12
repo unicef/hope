@@ -17,13 +17,26 @@ const StyledTextField = styled(TextField)`
   }
 `;
 
+const Container = styled.div`
+  display: flex;
+  flex: 1;
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  && > div {
+    margin: 5px;
+  }
+`;
+
 interface RegistrationFiltersProps {
   onFilterChange;
   filter;
+  addBorder?: boolean;
 }
 export function RegistrationFilters({
   onFilterChange,
   filter,
+  addBorder = true,
 }: RegistrationFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -33,58 +46,66 @@ export function RegistrationFilters({
     return null;
   }
 
-  return (
-    <ContainerWithBorder>
-      <StyledTextField
-        variant='outlined'
-        label={t('Search')}
-        margin='dense'
-        onChange={(e) => handleFilterChange(e, 'search')}
-        value={filter.search}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-      />
-      <DatePickerFilter
-        label={t('Import Date')}
-        onChange={(date) => onFilterChange({ ...filter, importDate: date })}
-        value={filter.importDate}
-      />
-      <UsersAutocomplete
-        onInputTextChange={(value) =>
-          onFilterChange({ ...filter, userInputValue: value })
-        }
-        inputValue={filter.userInputValue}
-        onChange={(e, option) => {
-          if (!option) {
-            onFilterChange({ ...filter, importedBy: undefined });
-            return;
+  const renderTable = (): React.ReactElement => {
+    return (
+      <Container>
+        <StyledTextField
+          variant='outlined'
+          label={t('Search')}
+          margin='dense'
+          onChange={(e) => handleFilterChange(e, 'search')}
+          value={filter.search}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <DatePickerFilter
+          label={t('Import Date')}
+          onChange={(date) => onFilterChange({ ...filter, importDate: date })}
+          value={filter.importDate}
+        />
+        <UsersAutocomplete
+          onInputTextChange={(value) =>
+            onFilterChange({ ...filter, userInputValue: value })
           }
-          onFilterChange({ ...filter, importedBy: option.node.id });
-        }}
-        value={filter.importedBy}
-      />
+          inputValue={filter.userInputValue}
+          onChange={(e, option) => {
+            if (!option) {
+              onFilterChange({ ...filter, importedBy: undefined });
+              return;
+            }
+            onFilterChange({ ...filter, importedBy: option.node.id });
+          }}
+          value={filter.importedBy}
+        />
 
-      <SelectFilter
-        value={filter.status || ''}
-        label={t('Status')}
-        onChange={(e) => handleFilterChange(e, 'status')}
-      >
-        <MenuItem value=''>
-          <em>{t('None')}</em>
-        </MenuItem>
-        {registrationChoicesData.registrationDataStatusChoices.map((item) => {
-          return (
-            <MenuItem key={item.value} value={item.value}>
-              {item.name}
-            </MenuItem>
-          );
-        })}
-      </SelectFilter>
-    </ContainerWithBorder>
+        <SelectFilter
+          value={filter.status || ''}
+          label={t('Status')}
+          onChange={(e) => handleFilterChange(e, 'status')}
+        >
+          <MenuItem value=''>
+            <em>{t('None')}</em>
+          </MenuItem>
+          {registrationChoicesData.registrationDataStatusChoices.map((item) => {
+            return (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            );
+          })}
+        </SelectFilter>
+      </Container>
+    );
+  };
+
+  return addBorder ? (
+    <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
+  ) : (
+    renderTable()
   );
 }
