@@ -942,30 +942,6 @@ class CashPlan(GenericPaymentPlan):
     def can_create_payment_verification_plan(self):
         return self.available_payment_records().count() > 0
 
-    def available_payment_records(
-        self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None
-    ):
-        params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
-
-        if payment_verification_plan:
-            params &= Q(
-                Q(verification__isnull=True) | Q(verification__cash_plan_payment_verification=payment_verification_plan)
-            )
-        else:
-            params &= Q(verification__isnull=True)
-
-        payment_records = (
-            self.payment_items.select_related("head_of_household")
-            .only("parent", "head_of_household__phone_no", "head_of_household__phone_no_alternative")
-            .filter(params)
-            .distinct()
-        )
-
-        if extra_validation:
-            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
-
-        return PaymentRecord.objects.filter(pk__in=payment_records)
-
     @property
     def unicef_id(self):
         return getattr(self, "ca_id")
@@ -1204,7 +1180,7 @@ def build_summary(payment_plan):
         pending=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_PENDING)),
         finished=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_FINISHED)),
     )
-    summary = PaymentVerificationSummary.objects.get(cash_plan=payment_plan)
+    summary = PaymentVerificationSummary.objects.get(payment_plan=payment_plan)
     if statuses_count["active"] >= 1:
         summary.mark_as_active()
     elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
