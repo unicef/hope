@@ -475,6 +475,7 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -1779,6 +1780,7 @@ export type HouseholdNodeTargetPopulationsArgs = {
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3931,6 +3933,7 @@ export type ProgramNodeTargetpopulationSetArgs = {
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4646,6 +4649,7 @@ export type QueryAllTargetPopulationArgs = {
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4891,6 +4895,8 @@ export type QueryAllRegistrationDataImportsArgs = {
   name?: Maybe<Scalars['String']>,
   name_Startswith?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
+  importDateRange?: Maybe<Scalars['String']>,
+  size?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5251,6 +5257,7 @@ export type RuleCommitNodeTargetPopulationsArgs = {
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6497,6 +6504,7 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6648,6 +6656,7 @@ export type UserNodeTargetPopulationsArgs = {
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6676,6 +6685,7 @@ export type UserNodeLockedTargetPopulationsArgs = {
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6704,6 +6714,7 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -10467,7 +10478,9 @@ export type AllRegistrationDataImportsQueryVariables = {
   importedBy_Id?: Maybe<Scalars['UUID']>,
   status?: Maybe<Scalars['String']>,
   importDate?: Maybe<Scalars['Date']>,
-  businessArea?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>,
+  importDateRange?: Maybe<Scalars['String']>,
+  size?: Maybe<Scalars['String']>
 };
 
 
@@ -10906,7 +10919,8 @@ export type AllTargetPopulationsQueryVariables = {
   numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
   numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
-  program?: Maybe<Array<Maybe<Scalars['ID']>>>
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>
 };
 
 
@@ -19913,8 +19927,8 @@ export type AllKoboProjectsQueryHookResult = ReturnType<typeof useAllKoboProject
 export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboProjectsLazyQuery>;
 export type AllKoboProjectsQueryResult = ApolloReactCommon.QueryResult<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
-    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date, $businessArea: String) {
-  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate, businessArea: $businessArea) {
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date, $businessArea: String, $importDateRange: String, $size: String) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate, businessArea: $businessArea, importDateRange: $importDateRange, size: $size) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -19971,6 +19985,8 @@ export function withAllRegistrationDataImports<TProps, TChildProps = {}>(operati
  *      status: // value for 'status'
  *      importDate: // value for 'importDate'
  *      businessArea: // value for 'businessArea'
+ *      importDateRange: // value for 'importDateRange'
+ *      size: // value for 'size'
  *   },
  * });
  */
@@ -21131,8 +21147,8 @@ export type AllTargetPopulationForChoicesQueryHookResult = ReturnType<typeof use
 export type AllTargetPopulationForChoicesLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesLazyQuery>;
 export type AllTargetPopulationForChoicesQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, numberOfHouseholdsMin: $numberOfHouseholdsMin, numberOfHouseholdsMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, numberOfHouseholdsMin: $numberOfHouseholdsMin, numberOfHouseholdsMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange) {
     edges {
       node {
         ...targetPopulationMinimal
@@ -21185,6 +21201,7 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      numberOfHouseholdsMax: // value for 'numberOfHouseholdsMax'
  *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
+ *      createdAtRange: // value for 'createdAtRange'
  *   },
  * });
  */

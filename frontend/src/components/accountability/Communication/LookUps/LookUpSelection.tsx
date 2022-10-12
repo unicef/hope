@@ -35,8 +35,10 @@ export const LookUpSelection = ({
 }): React.ReactElement => {
   const filtersInitial = {
     lastRegistrationDate: { min: undefined, max: undefined },
+    createdAtRange: { min: undefined, max: undefined },
     size: { min: undefined, max: undefined },
     numIndividuals: { min: undefined, max: undefined },
+    importDateRange: { min: undefined, max: undefined },
   };
   const [filtersHouseholdApplied, setFiltersHouseholdApplied] = useState(
     filtersInitial,

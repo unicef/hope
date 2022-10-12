@@ -5,16 +5,13 @@ import { InputAdornment } from '@material-ui/core';
 import PersonIcon from '@material-ui/icons/Person';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import {
-  AllUsersQuery,
-  useAllUsersQuery,
-} from '../../__generated__/graphql';
+import { AllUsersQuery, useAllUsersQuery } from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
 import TextField from '../../shared/TextField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
-  width: 232px;
+  width: ${(props) => props.fullWidth || '232px'};
   .MuiFormControl-marginDense {
     margin-top: 4px;
   }
@@ -25,6 +22,7 @@ export function UsersAutocomplete({
   onChange,
   onInputTextChange,
   inputValue,
+  fullWidth = false,
 }): React.ReactElement {
   const [open, setOpen] = React.useState(false);
   const businessArea = useBusinessArea();
@@ -40,6 +38,7 @@ export function UsersAutocomplete({
   useEffect(() => setNewValue(value), [data, value]);
   return (
     <StyledAutocomplete<AllUsersQuery['allUsers']['edges'][number]>
+      fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
       onChange={onChange}
