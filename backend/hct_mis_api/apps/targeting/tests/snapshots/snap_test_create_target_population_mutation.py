@@ -9,22 +9,31 @@ snapshots = Snapshot()
 
 snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permission 1'] = {
     'data': {
-        'createTargetPopulation': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
-            'path': [
-                'createTargetPopulation'
-            ]
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'name': 'Example name 5',
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'rules': [
+                        {
+                            'filters': [
+                                {
+                                    'arguments': [
+                                        3
+                                    ],
+                                    'comparisonMethod': 'EQUALS',
+                                    'fieldName': 'size',
+                                    'isFlexField': False
+                                }
+                            ]
+                        }
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
         }
-    ]
+    }
 }
 
 snapshots['TestCreateTargetPopulationMutation::test_create_mutation_1_without_permission 1'] = {
