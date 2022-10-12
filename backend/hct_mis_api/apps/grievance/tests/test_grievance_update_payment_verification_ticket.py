@@ -100,7 +100,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             business_area=cls.business_area,
         )
         payment_verification_plan = PaymentVerificationPlanFactory(
-            cash_plan=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
+            payment_plan=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
         )
 
         target_population = TargetPopulationFactory(
@@ -118,7 +118,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         payment_verification = PaymentVerificationFactory(
             id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
             payment_verification_plan=payment_verification_plan,
-            payment_record=payment_record,
+            payment=payment_record,
             status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
         )
         cls.ticket = TicketPaymentVerificationDetailsFactory(payment_verification=payment_verification)
