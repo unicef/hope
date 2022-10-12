@@ -5,8 +5,8 @@ let individualId;
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
-  cy.get('input[name="username"]').type(Cypress.env('username'));
-  cy.get('input[name="password"]').type(Cypress.env('password'));
+  cy.get('input[name="username"]').type(Cypress.env('daUsername'));
+  cy.get('input[name="password"]').type(Cypress.env('daPassword'));
   cy.get('input').contains('Log in').click();
 });
 

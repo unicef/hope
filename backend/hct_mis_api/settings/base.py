@@ -66,6 +66,15 @@ MEDIA_ROOT = env("HCT_MIS_UPLOADS_PATH") or os.path.join(DATA_VOLUME, UPLOADS_DI
 FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25mb
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 
+GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
+GRIEVANCE_UPLOAD_CONTENT_TYPES = (
+    "image/jpeg",
+    "image/png",
+    "image/tiff",
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+)
+
 # static resources related. See documentation at: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 STATIC_URL = "/api/static/"
 STATIC_ROOT = f"{DATA_VOLUME}/staticserve"
@@ -446,11 +455,11 @@ PHONENUMBER_DEFAULT_REGION = "US"
 SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 
 # ELASTICSEARCH SETTINGS
-ELASTICSEARCH_DSL_AUTOSYNC = True
+ELASTICSEARCH_DSL_AUTOSYNC = False
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
 ELASTICSEARCH_INDEX_PREFIX = ""
 
-GRIEVANCE_POSTGRES_ENABLED = os.getenv("GRIEVANCE_POSTGRES_ENABLED", False)
+GRIEVANCE_POSTGRES_ENABLED = os.getenv("GRIEVANCE_POSTGRES_ENABLED", True)
 
 ELASTICSEARCH_BASE_SETTINGS = {"number_of_shards": 1, "number_of_replicas": 0}
 

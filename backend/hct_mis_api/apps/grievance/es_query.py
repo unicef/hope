@@ -43,7 +43,7 @@ def create_es_query(options):
     query_term_fields = []
     query_terms_fields = []
 
-    options["admin2"] = options.pop("admin")
+    options["admin2"] = options.pop("admin", None)
 
     grievance_status = options.pop("grievance_status", "active")
     created_at_range = options.pop("created_at_range", None)
@@ -115,7 +115,7 @@ def create_es_query(options):
                 query_term_fields.append({
                     "term": {
                         f"{k}.id": {
-                            "value": decode_id_string(v) if k == "assigned_to" else v
+                            "value": decode_id_string(v)
                         }
                     }
                 })
@@ -123,12 +123,12 @@ def create_es_query(options):
                 query_term_fields.append({
                     "term": {
                         k: {
-                            "value": v
+                            "value": int(v) if v.isdigit() else v
                         }
                     }
                 })
 
-        if k in TERMS_FIELDS and v not in ([""], [None]):
+        if k in TERMS_FIELDS and v not in ([""], [None], None):
             if k == "admin2":
                 query_terms_fields.append({
                     "terms": {
@@ -138,14 +138,14 @@ def create_es_query(options):
             else:
                 query_terms_fields.append({
                     "terms": {
-                        k: v
+                        k: [int(status) for status in v]
                     }
                 })
 
-    if grievance_status == "active":
+    if grievance_status == "active" and options.get("status") == [""]:
         query_terms_fields.append({
             "terms": {
-                "status":  ["New", "Assigned", "In Progress", "On Hold", "For Approval"]
+                "status":  [1, 2, 3, 4, 5]
             }
         })
 
