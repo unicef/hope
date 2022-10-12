@@ -13,7 +13,7 @@ import { LookUpSelectionTables } from './LookUpSelectionTables';
 
 const communicationTabs = ['Household', 'Target Population', 'RDI'];
 
-const BoxWithBorderBottom = styled.div`
+const BoxWithBorderBottom = styled(Box)`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
@@ -89,30 +89,34 @@ export const LookUpSelection = ({
 
   return (
     <Box>
-      <BoxWithBorderBottom>
-        <Box p={4} m={4} display='flex' alignItems='center' bgcolor='#F5F5F5'>
-          <Box pr={5} fontWeight='500' fontSize='medium'>
-            {t('Look up for')}
-          </Box>
-          <RadioGroup
-            aria-labelledby='selection-radio-buttons-group'
-            value={selectedTab}
-            row
-            name='radio-buttons-group'
-          >
-            {communicationTabs.map((tab, index) => (
-              <FormControlLabel
-                value={index}
-                onChange={() => {
-                  setSelectedTab(index);
-                }}
-                control={<Radio />}
-                label={tab}
-                key={tab}
-              />
-            ))}
-          </RadioGroup>
+      <BoxWithBorderBottom
+        p={4}
+        m={4}
+        display='flex'
+        alignItems='center'
+        bgcolor='#F5F5F5'
+      >
+        <Box pr={5} fontWeight='500' fontSize='medium'>
+          {t('Look up for')}
         </Box>
+        <RadioGroup
+          aria-labelledby='selection-radio-buttons-group'
+          value={selectedTab}
+          row
+          name='radio-buttons-group'
+        >
+          {communicationTabs.map((tab, index) => (
+            <FormControlLabel
+              value={index}
+              onChange={() => {
+                setSelectedTab(index);
+              }}
+              control={<Radio />}
+              label={tab}
+              key={tab}
+            />
+          ))}
+        </RadioGroup>
       </BoxWithBorderBottom>
       <Box p={4} mt={4}>
         <LookUpSelectionFilters
