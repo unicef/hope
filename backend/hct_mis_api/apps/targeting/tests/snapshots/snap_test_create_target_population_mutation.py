@@ -4,35 +4,27 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permission 1'] = {
     'data': {
-        'createTargetPopulation': {
-            'targetPopulation': {
-                'name': 'Example name 5',
-                'status': 'OPEN',
-                'targetingCriteria': {
-                    'rules': [
-                        {
-                            'filters': [
-                                {
-                                    'arguments': [
-                                        3
-                                    ],
-                                    'comparisonMethod': 'EQUALS',
-                                    'fieldName': 'size',
-                                    'isFlexField': False
-                                }
-                            ]
-                        }
-                    ]
-                },
-                'totalHouseholdsCount': None,
-                'totalIndividualsCount': None
-            }
+        'createTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
+            'path': [
+                'createTargetPopulation'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['TestCreateTargetPopulationMutation::test_create_mutation_1_without_permission 1'] = {
