@@ -11,7 +11,7 @@ export const LookUpHouseholdIndividualSelection = ({
   errors,
   touched,
 }: {
-  onValueChange;
+  onValueChange: (field: string, value: any, shouldValidate?: boolean) => void;
   values;
   disabled?: boolean;
   errors?;

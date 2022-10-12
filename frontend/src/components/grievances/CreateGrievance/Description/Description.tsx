@@ -14,7 +14,10 @@ import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
 import { reduceChoices } from '../../../../utils/utils';
-import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
+import {
+  GrievancesChoiceDataQuery,
+  UserChoiceDataQuery,
+} from '../../../../__generated__/graphql';
 import { ContentLink } from '../../../core/ContentLink';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
@@ -41,15 +44,18 @@ const BoxWithBorderBottom = styled.div`
 
 export interface DescriptionProps {
   values;
-  showIssueType;
-  selectedIssueType;
-  businessArea;
+  showIssueType: (values: any) => boolean;
+  selectedIssueType: (values: any) => string;
+  businessArea: string;
   choicesData: GrievancesChoiceDataQuery;
-  userChoices;
-  mappedPrograms;
-  setFieldValue;
+  userChoices: UserChoiceDataQuery;
+  mappedPrograms: {
+    name: string;
+    value: string;
+  }[];
+  setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
   errors;
-  permissions;
+  permissions: string[];
 }
 
 export const Description = ({
