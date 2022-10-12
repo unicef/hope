@@ -19,7 +19,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_0_wrong_args_cou
                     'line': 3
                 }
             ],
-            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
+            'message': "['Comparison method - EQUALS expect 1 arguments, 2 given']",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -39,7 +39,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_1_wrong_comparis
                     'line': 3
                 }
             ],
-            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
+            'message': "['size is INTEGER type filter and does not accept - CONTAINS comparison method']",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -109,22 +109,32 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_4_unknown_core_f
 
 snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_variables_0_with_permission_draft 1'] = {
     'data': {
-        'updateTargetPopulation': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 5,
-                    'line': 3
-                }
-            ],
-            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
-            'path': [
-                'updateTargetPopulation'
-            ]
+        'updateTargetPopulation': {
+            'targetPopulation': {
+                'name': 'with_permission_draft updated',
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'rules': [
+                        {
+                            'filters': [
+                                {
+                                    'arguments': [
+                                        3
+                                    ],
+                                    'comparisonMethod': 'EQUALS',
+                                    'fieldName': 'size',
+                                    'isFlexField': False
+                                }
+                            ]
+                        }
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            },
+            'validationErrors': None
         }
-    ]
+    }
 }
 
 snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_variables_1_without_permission_draft 1'] = {
