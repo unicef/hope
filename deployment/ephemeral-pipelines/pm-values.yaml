@@ -1,5 +1,5 @@
 global:
-  env: dev
+  env: staging
   storageClass: default
 
 backend:
