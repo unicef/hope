@@ -1,10 +1,10 @@
 from io import BytesIO
 from pathlib import Path
 
-from parameterized import parameterized
-
 from django.conf import settings
 from django.core.files import File
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -13,10 +13,13 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
     CashPlanPaymentVerificationFactory,
 )
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, XlsxCashPlanPaymentVerificationFile
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    XlsxCashPlanPaymentVerificationFile,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 

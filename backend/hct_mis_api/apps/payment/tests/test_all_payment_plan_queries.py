@@ -1,7 +1,7 @@
-from unittest.mock import patch
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
+from unittest.mock import patch
 
+from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 from pytz import utc
 
@@ -11,9 +11,9 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentFactory
-from hct_mis_api.apps.household.fixtures import IndividualFactory, HouseholdFactory
-from hct_mis_api.apps.payment.models import PaymentPlan, ApprovalProcess
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import ApprovalProcess, PaymentPlan
 
 
 class TestPaymentPlanQueries(APITestCase):
@@ -141,7 +141,7 @@ class TestPaymentPlanQueries(APITestCase):
             hoh2 = IndividualFactory(household=None)
             hh1 = HouseholdFactory(head_of_household=hoh1)
             hh2 = HouseholdFactory(head_of_household=hoh2)
-            p1 = PaymentFactory(
+            PaymentFactory(
                 parent=cls.pp,
                 excluded=False,
                 household=hh1,
@@ -173,7 +173,7 @@ class TestPaymentPlanQueries(APITestCase):
             cls.pp_conflicted.unicef_id = "PP-02"
             cls.pp_conflicted.save()
 
-            p_conflicted = PaymentFactory(
+            PaymentFactory(
                 parent=cls.pp_conflicted,
                 household=p2.household,
                 excluded=False,
@@ -182,7 +182,7 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
             )
-            p_not_conflicted = PaymentFactory(
+            PaymentFactory(
                 parent=cls.pp_conflicted,
                 excluded=True,
                 entitlement_quantity=00.00,
@@ -191,18 +191,10 @@ class TestPaymentPlanQueries(APITestCase):
                 delivered_quantity_usd=00.00,
             )
 
-            female_child = IndividualFactory(
-                household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5)
-            )
-            male_child = IndividualFactory(
-                household=hh1, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=5)
-            )
-            female_adult = IndividualFactory(
-                household=hh2, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=20)
-            )
-            male_adult = IndividualFactory(
-                household=hh2, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=20)
-            )
+            IndividualFactory(household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5))
+            IndividualFactory(household=hh1, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=5))
+            IndividualFactory(household=hh2, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=20))
+            IndividualFactory(household=hh2, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=20))
 
             ApprovalProcess.objects.create(payment_plan=cls.pp)
 

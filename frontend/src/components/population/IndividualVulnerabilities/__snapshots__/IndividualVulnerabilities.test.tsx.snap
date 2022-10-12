@@ -28,7 +28,9 @@ exports[`components/population/IndividualVulnerabilities should render 1`] = `
             >
               muac
             </span>
-            <div>
+            <div
+              data-cy="label-muac"
+            >
               <span
                 class="sc-bwzfXH emFVa"
                 color="textSecondary"
@@ -48,7 +50,9 @@ exports[`components/population/IndividualVulnerabilities should render 1`] = `
             >
               school enrolled
             </span>
-            <div>
+            <div
+              data-cy="label-school enrolled"
+            >
               <span
                 class="sc-bwzfXH emFVa"
                 color="textSecondary"
@@ -68,7 +72,9 @@ exports[`components/population/IndividualVulnerabilities should render 1`] = `
             >
               school enrolled before
             </span>
-            <div>
+            <div
+              data-cy="label-school enrolled before"
+            >
               <span
                 class="sc-bwzfXH emFVa"
                 color="textSecondary"

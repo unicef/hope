@@ -1,16 +1,15 @@
 import logging
-import openpyxl
 
-from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
 
-from openpyxl.styles import PatternFill, Side, Border
+import openpyxl
+from openpyxl.styles import Border, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from hct_mis_api.apps.core.utils import encode_id_base64
-
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +56,7 @@ class XlsxExportBaseService:
 
         for i, width in enumerate(column_widths):
             col_name = get_column_letter(min_col + i)
-            value = column_widths[i] + 2
+            value = width + 2
             ws.column_dimensions[col_name].width = value
 
     def _add_col_bgcolor(self, col=None, hex_code="A0FDB0"):

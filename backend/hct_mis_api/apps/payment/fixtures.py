@@ -1,54 +1,62 @@
-from uuid import UUID
-import factory
-
 from datetime import timedelta
 from decimal import Decimal
 from random import randint
+from uuid import UUID
 
 from django.utils import timezone
-from factory import fuzzy
+
+import factory.fuzzy
 from pytz import utc
 
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.models import (
-    TargetPopulation,
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-)
-from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory
-from hct_mis_api.apps.household.models import Household, ROLE_PRIMARY, Individual, MALE, REFUGEE
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.fixtures import (
+    EntitlementCardFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household,
+)
+from hct_mis_api.apps.household.models import (
+    MALE,
+    REFUGEE,
+    ROLE_PRIMARY,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.payment.models import (
+    CashPlan,
     CashPlanPaymentVerification,
+    CashPlanPaymentVerificationSummary,
+    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
     FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
+    GenericPayment,
+    Payment,
+    PaymentChannel,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    CashPlanPaymentVerificationSummary,
-    PaymentPlan,
-    Payment,
-    GenericPayment,
-    PaymentChannel,
-    DeliveryMechanismPerPaymentPlan,
 )
-from hct_mis_api.apps.program.fixtures import (
-    ProgramFactory,
-)
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import CashPlan
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
-    TargetPopulationFactory,
-    TargetingCriteriaRuleFactory,
     TargetingCriteriaFactory,
+    TargetPopulationFactory,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.targeting.models import (
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetPopulation,
+)
 
 
 class CashPlanPaymentVerificationSummaryFactory(factory.DjangoModelFactory):
@@ -68,7 +76,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
         after_now=True,
         tzinfo=utc,
     )
-    status = fuzzy.FuzzyChoice(
+    status = factory.fuzzy.FuzzyChoice(
         CashPlan.STATUS_CHOICE,
         getter=lambda c: c[0],
     )
@@ -98,7 +106,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    delivery_type = fuzzy.FuzzyChoice(
+    delivery_type = factory.fuzzy.FuzzyChoice(
         PaymentRecord.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],
     )
@@ -158,14 +166,14 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
     vision_vendor_number = factory.Faker("ssn")
     delivery_mechanisms = factory.List(
         [
-            fuzzy.FuzzyChoice(
+            factory.fuzzy.FuzzyChoice(
                 GenericPayment.DELIVERY_TYPE_CHOICE,
                 getter=lambda c: c[0],
             )
         ]
     )
-    distribution_limit = fuzzy.FuzzyDecimal(pow(10, 5), pow(10, 6))
-    communication_channel = fuzzy.FuzzyChoice(
+    distribution_limit = factory.fuzzy.FuzzyDecimal(pow(10, 5), pow(10, 6))
+    communication_channel = factory.fuzzy.FuzzyChoice(
         FinancialServiceProvider.COMMUNICATION_CHANNEL_CHOICES, getter=lambda c: c[0]
     )
     data_transfer_configuration = factory.Faker("json")
@@ -177,7 +185,7 @@ class PaymentChannelFactory(factory.DjangoModelFactory):
         model = PaymentChannel
 
     individual = factory.SubFactory(IndividualFactory)
-    delivery_mechanism = fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
+    delivery_mechanism = factory.fuzzy.FuzzyChoice(GenericPayment.DELIVERY_TYPE_CHOICE, getter=lambda c: c[0])
     delivery_data = factory.Faker("json")
 
 
@@ -193,7 +201,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
         model = PaymentRecord
 
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
-    status = fuzzy.FuzzyChoice(
+    status = factory.fuzzy.FuzzyChoice(
         PaymentRecord.STATUS_CHOICE,
         getter=lambda c: c[0],
     )
@@ -217,7 +225,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     )
     target_population = factory.SubFactory(TargetPopulationFactory)
     entitlement_card_number = factory.Faker("ssn")
-    entitlement_card_status = fuzzy.FuzzyChoice(
+    entitlement_card_status = factory.fuzzy.FuzzyChoice(
         PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
@@ -227,7 +235,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    delivery_type = fuzzy.FuzzyChoice(
+    delivery_type = factory.fuzzy.FuzzyChoice(
         PaymentRecord.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],
     )
@@ -246,24 +254,24 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
 
 
 class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
-    status = fuzzy.FuzzyChoice(
+    status = factory.fuzzy.FuzzyChoice(
         ((CashPlanPaymentVerification.STATUS_PENDING, "pending"),),
         getter=lambda c: c[0],
     )
-    sampling = fuzzy.FuzzyChoice(
+    sampling = factory.fuzzy.FuzzyChoice(
         CashPlanPaymentVerification.SAMPLING_CHOICES,
         getter=lambda c: c[0],
     )
-    verification_channel = fuzzy.FuzzyChoice(
+    verification_channel = factory.fuzzy.FuzzyChoice(
         CashPlanPaymentVerification.VERIFICATION_CHANNEL_CHOICES,
         getter=lambda c: c[0],
     )
     cash_plan = factory.Iterator(CashPlan.objects.all())
-    sample_size = fuzzy.FuzzyInteger(0, 100)
-    responded_count = fuzzy.FuzzyInteger(20, 90)
-    received_count = fuzzy.FuzzyInteger(30, 70)
-    not_received_count = fuzzy.FuzzyInteger(0, 10)
-    received_with_problems_count = fuzzy.FuzzyInteger(0, 10)
+    sample_size = factory.fuzzy.FuzzyInteger(0, 100)
+    responded_count = factory.fuzzy.FuzzyInteger(20, 90)
+    received_count = factory.fuzzy.FuzzyInteger(30, 70)
+    not_received_count = factory.fuzzy.FuzzyInteger(0, 10)
+    received_with_problems_count = factory.fuzzy.FuzzyInteger(0, 10)
     rapid_pro_flow_start_uuids = factory.LazyFunction(list)
 
     class Meta:
@@ -275,7 +283,7 @@ class PaymentVerificationFactory(factory.DjangoModelFactory):
     payment_record = factory.LazyAttribute(
         lambda o: PaymentRecord.objects.filter(parent=o.cash_plan_payment_verification.cash_plan).order_by("?").first()
     )
-    status = fuzzy.FuzzyChoice(
+    status = factory.fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,
         getter=lambda c: c[0],
     )
@@ -297,7 +305,7 @@ class RealProgramFactory(factory.DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    status = fuzzy.FuzzyChoice(
+    status = factory.fuzzy.FuzzyChoice(
         Program.STATUS_CHOICE,
         getter=lambda c: c[0],
     )
@@ -315,19 +323,19 @@ class RealProgramFactory(factory.DjangoModelFactory):
         ext_word_list=None,
     )
     budget = factory.fuzzy.FuzzyDecimal(1000000.0, 900000000.0)
-    frequency_of_payments = fuzzy.FuzzyChoice(
+    frequency_of_payments = factory.fuzzy.FuzzyChoice(
         Program.FREQUENCY_OF_PAYMENTS_CHOICE,
         getter=lambda c: c[0],
     )
-    sector = fuzzy.FuzzyChoice(
+    sector = factory.fuzzy.FuzzyChoice(
         Program.SECTOR_CHOICE,
         getter=lambda c: c[0],
     )
-    scope = fuzzy.FuzzyChoice(
+    scope = factory.fuzzy.FuzzyChoice(
         Program.SCOPE_CHOICE,
         getter=lambda c: c[0],
     )
-    cash_plus = fuzzy.FuzzyChoice((True, False))
+    cash_plus = factory.fuzzy.FuzzyChoice((True, False))
     population_goal = factory.fuzzy.FuzzyDecimal(50000.0, 600000.0)
     administrative_areas_of_implementation = factory.Faker(
         "sentence",
@@ -335,7 +343,7 @@ class RealProgramFactory(factory.DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    individual_data_needed = fuzzy.FuzzyChoice((True, False))
+    individual_data_needed = factory.fuzzy.FuzzyChoice((True, False))
 
 
 class RealCashPlanFactory(factory.DjangoModelFactory):
@@ -352,7 +360,7 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    status = fuzzy.FuzzyChoice(
+    status = factory.fuzzy.FuzzyChoice(
         CashPlan.STATUS_CHOICE,
         getter=lambda c: c[0],
     )
@@ -382,7 +390,7 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    delivery_type = fuzzy.FuzzyChoice(
+    delivery_type = factory.fuzzy.FuzzyChoice(
         PaymentRecord.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],
     )
@@ -414,7 +422,7 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
         model = PaymentRecord
 
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
-    status = fuzzy.FuzzyChoice(
+    status = factory.fuzzy.FuzzyChoice(
         PaymentRecord.STATUS_CHOICE,
         getter=lambda c: c[0],
     )
@@ -438,7 +446,7 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     )
     target_population = factory.SubFactory(TargetPopulationFactory)
     entitlement_card_number = factory.Faker("ssn")
-    entitlement_card_status = fuzzy.FuzzyChoice(
+    entitlement_card_status = factory.fuzzy.FuzzyChoice(
         PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
@@ -448,7 +456,7 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    delivery_type = fuzzy.FuzzyChoice(
+    delivery_type = factory.fuzzy.FuzzyChoice(
         PaymentRecord.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],
     )
@@ -517,6 +525,37 @@ def generate_real_cash_plans_for_households(households):
     )
 
 
+def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
+    cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
+    cash_plan_payment_verification.status = status
+    cash_plan_payment_verification.save(update_fields=("status",))
+    registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
+    for _ in range(5):
+        household, _ = create_household(
+            {
+                "registration_data_import": registration_data_import,
+                "admin_area": Area.objects.order_by("?").first(),
+            },
+            {"registration_data_import": registration_data_import},
+        )
+
+        household.programs.add(program)
+
+        payment_record = PaymentRecordFactory(
+            parent=cash_plan,
+            household=household,
+            target_population=target_population,
+        )
+
+        PaymentVerificationFactory(
+            cash_plan_payment_verification=cash_plan_payment_verification,
+            payment_record=payment_record,
+            status=PaymentVerification.STATUS_PENDING,
+        )
+        EntitlementCardFactory(household=household)
+    return cash_plan_payment_verification
+
+
 class PaymentPlanFactory(factory.DjangoModelFactory):
     class Meta:
         model = PaymentPlan
@@ -551,7 +590,7 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     unicef_id = factory.Faker("uuid4")
     target_population = factory.SubFactory(TargetPopulationFactory)
     program = factory.SubFactory(RealProgramFactory)
-    currency = fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
+    currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
     dispersion_start_date = factory.Faker(
         "date_time_this_decade",
@@ -591,7 +630,7 @@ class PaymentFactory(factory.DjangoModelFactory):
             )
         ).individual
     )
-    delivery_type = fuzzy.FuzzyChoice(
+    delivery_type = factory.fuzzy.FuzzyChoice(
         GenericPayment.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],
     )
@@ -632,7 +671,7 @@ class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    delivery_mechanism = fuzzy.FuzzyChoice(
+    delivery_mechanism = factory.fuzzy.FuzzyChoice(
         GenericPayment.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],
     )

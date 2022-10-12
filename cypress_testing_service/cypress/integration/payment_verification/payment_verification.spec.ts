@@ -12,7 +12,7 @@ When('I visit the main dashboard', () => {
 });
 
 Then('I should see the side panel with Payment Verification option', () => {
-  cy.get('span').contains('Payment Verification', { timeout: 10000 });
+  cy.get('span').contains('Payment Verification');
 });
 
 When('I click on Payment Verification option', () => {

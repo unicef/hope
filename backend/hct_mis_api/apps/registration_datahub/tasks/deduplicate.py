@@ -4,9 +4,10 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
 from time import sleep
 
-from constance import config
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat
+
+from constance import config
 from django_countries.fields import Country
 from elasticsearch_dsl import connections
 from psycopg2._psycopg import IntegrityError
@@ -14,7 +15,10 @@ from psycopg2._psycopg import IntegrityError
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_dict
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import (

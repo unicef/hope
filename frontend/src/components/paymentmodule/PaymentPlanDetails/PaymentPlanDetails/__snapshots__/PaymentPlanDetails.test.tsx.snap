@@ -33,7 +33,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               >
                 Created By
               </span>
-              <div>
+              <div
+                data-cy="label-Created By"
+              >
                 Matthew Sosa
               </div>
             </div>
@@ -48,7 +50,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               >
                 Programme
               </span>
-              <div>
+              <div
+                data-cy="label-Programme"
+              >
                 <a
                   class="sc-bdVaJa jPYjeL"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NWJhMjEzY2UtNmNlOS00NTc4LThhNDgtYjFmMDgyM2Q2MDAy"
@@ -68,7 +72,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               >
                 Target Population
               </span>
-              <div>
+              <div
+                data-cy="label-Target Population"
+              >
                 <a
                   class="sc-bdVaJa jPYjeL"
                   href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MzlmMjQ0YzEtZGRiMC00ZGZmLWE0MzEtN2JiMDFhMTdiMThm"
@@ -88,7 +94,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               >
                 Currency
               </span>
-              <div>
+              <div
+                data-cy="label-Currency"
+              >
                 PLN
               </div>
             </div>
@@ -103,7 +111,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               >
                 Start Date
               </span>
-              <div>
+              <div
+                data-cy="label-Start Date"
+              >
                 <time
                   datetime="1603756800000"
                 >
@@ -122,7 +132,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               >
                 End Date
               </span>
-              <div>
+              <div
+                data-cy="label-End Date"
+              >
                 <time
                   datetime="1631059200000"
                 >
@@ -141,7 +153,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               >
                 Dispersion Start Date
               </span>
-              <div>
+              <div
+                data-cy="label-Dispersion Start Date"
+              >
                 <time
                   datetime="1842307200000"
                 >
@@ -160,7 +174,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
               >
                 Dispersion End Date
               </span>
-              <div>
+              <div
+                data-cy="label-Dispersion End Date"
+              >
                 <time
                   datetime="1880755200000"
                 >

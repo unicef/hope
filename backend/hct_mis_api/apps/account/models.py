@@ -103,6 +103,12 @@ class User(AbstractUser, UUIDModel):
         )
         return query.count() > 0
 
+    def can_download_storage_files(self):
+        return any(
+            self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
+            for role in self.user_roles.all()
+        )
+
     class Meta:
         permissions = (
             ("can_load_from_ad", "Can load users from ActiveDirectory"),
@@ -139,6 +145,7 @@ class UserRole(TimeStampedUUIDModel):
 
 
 class Role(TimeStampedUUIDModel):
+    API = "API"
     HOPE = "HOPE"
     KOBO = "KOBO"
     CA = "CA"
@@ -146,6 +153,7 @@ class Role(TimeStampedUUIDModel):
         (HOPE, "HOPE"),
         (KOBO, "Kobo"),
         (CA, "CashAssist"),
+        (API, "API"),
     )
 
     name = models.CharField(
