@@ -92,7 +92,7 @@ class TargetingCriteriaRuleFilterInputValidator:
             logger.error(f"Unknown comparison method - {rule_filter.comparison_method}")
             raise ValidationError(f"Unknown comparison method - {rule_filter.comparison_method}")
         args_count = comparison_attribute.get("arguments")
-        given_args_count = len(rule_filter.parametrizer)
+        given_args_count = len(rule_filter.arguments)
         select_many = get_attr_value("type", attribute) == "SELECT_MANY"
         if select_many:
             if given_args_count < 1:
