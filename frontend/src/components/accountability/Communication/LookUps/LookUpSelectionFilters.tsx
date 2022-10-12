@@ -14,10 +14,10 @@ interface LookUpSelectionFiltersProps {
   selectedTab: number;
   choicesData: HouseholdChoiceDataQuery;
   programs: ProgramNode[];
-  setFiltersHouseholdApplied?;
-  setFiltersTargetPopulationApplied?;
-  setFiltersRDIApplied?;
-  filtersInitial?;
+  setFiltersHouseholdApplied;
+  setFiltersTargetPopulationApplied;
+  setFiltersRDIApplied;
+  filtersInitial;
 }
 export function LookUpSelectionFilters({
   selectedTab,
@@ -44,7 +44,7 @@ export function LookUpSelectionFilters({
     if (selectedTab === CommunicationTabsValues.HOUSEHOLD) {
       setFiltersHouseholdApplied(filtersInitial);
       setFilterHousehold(filtersInitial);
-    } else if (selectedTab === CommunicationTabsValues.TARGETPOPULATION) {
+    } else if (selectedTab === CommunicationTabsValues.TARGET_POPULATION) {
       setFiltersTargetPopulationApplied(filtersInitial);
       setFilterTargetPopulation(filtersInitial);
     } else {
@@ -62,7 +62,7 @@ export function LookUpSelectionFilters({
   const applyFilter = useCallback(() => {
     if (selectedTab === CommunicationTabsValues.HOUSEHOLD) {
       setFiltersHouseholdApplied(filterHousehold);
-    } else if (selectedTab === CommunicationTabsValues.TARGETPOPULATION) {
+    } else if (selectedTab === CommunicationTabsValues.TARGET_POPULATION) {
       setFiltersTargetPopulationApplied(filterTargetPopulation);
     } else {
       setFiltersRDIApplied(filterRDI);
@@ -89,7 +89,7 @@ export function LookUpSelectionFilters({
             addBorder={false}
           />
         )}
-        {selectedTab === CommunicationTabsValues.TARGETPOPULATION && (
+        {selectedTab === CommunicationTabsValues.TARGET_POPULATION && (
           <TargetPopulationFilters
             filter={filterTargetPopulation}
             programs={programs}

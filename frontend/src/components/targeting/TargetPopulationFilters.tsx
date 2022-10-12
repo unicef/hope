@@ -11,14 +11,12 @@ import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
 
 interface TargetPopulationFiltersProps {
-  //targetPopulations: TargetPopulationNode[],
   onFilterChange;
   filter;
   programs: ProgramNode[];
   addBorder?: boolean;
 }
 export function TargetPopulationFilters({
-  // targetPopulations,
   onFilterChange,
   filter,
   programs,

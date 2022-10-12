@@ -106,13 +106,13 @@ export const ISSUE_TYPE_CATEGORIES = {
 };
 
 export const CommunicationSteps = {
-  Lookup: 0,
+  LookUp: 0,
   SampleSize: 1,
   Details: 2,
 };
 
 export const CommunicationTabsValues = {
   HOUSEHOLD: 0,
-  TARGETPOPULATION: 1,
+  TARGET_POPULATION: 1,
   RDI: 2,
 };
