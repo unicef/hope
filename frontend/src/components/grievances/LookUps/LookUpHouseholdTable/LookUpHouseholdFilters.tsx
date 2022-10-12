@@ -157,24 +157,26 @@ export function LookUpHouseholdFilters({
             }
           />
         </Grid>
-        <Grid container justify='flex-end'>
-          <Button
-            color='primary'
-            onClick={() => {
-              setFilterHouseholdApplied(householdFilterInitial);
-              onFilterChange(householdFilterInitial);
-            }}
-          >
-            {t('Clear')}
-          </Button>
-          <Button
-            color='primary'
-            variant='outlined'
-            onClick={() => setFilterHouseholdApplied(filter)}
-          >
-            {t('Apply')}
-          </Button>
-        </Grid>
+        {householdFilterInitial && (
+          <Grid container justify='flex-end'>
+            <Button
+              color='primary'
+              onClick={() => {
+                setFilterHouseholdApplied(householdFilterInitial);
+                onFilterChange(householdFilterInitial);
+              }}
+            >
+              {t('Clear')}
+            </Button>
+            <Button
+              color='primary'
+              variant='outlined'
+              onClick={() => setFilterHouseholdApplied(filter)}
+            >
+              {t('Apply')}
+            </Button>
+          </Grid>
+        )}
       </Grid>
     );
   };
