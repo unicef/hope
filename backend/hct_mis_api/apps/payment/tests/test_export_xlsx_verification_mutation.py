@@ -16,9 +16,9 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestXlsxVerificationExport(APITestCase):
 
     EXPORT_MUTATION = """
-        mutation exportXlsxCashPlanVerification($cashPlanVerificationId: ID!) {
-          exportXlsxCashPlanVerification(cashPlanVerificationId: $cashPlanVerificationId) {
-            cashPlan{
+        mutation exportXlsxPaymentVerificationPlanFile($paymentVerificationPlanId: ID!) {
+          exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: $paymentVerificationPlanId) {
+            paymentPlan{
               verifications{
                 edges{
                   node{
@@ -67,7 +67,7 @@ class TestXlsxVerificationExport(APITestCase):
             request_string=self.EXPORT_MUTATION,
             context={"user": self.user},
             variables={
-                "cashPlanVerificationId": self.id_to_base64(
+                "paymentVerificationPlanId": self.id_to_base64(
                     self.payment_verification_plan.id, "PaymentVerificationPlanNode"
                 ),
             },

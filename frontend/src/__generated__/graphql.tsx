@@ -72,7 +72,7 @@ export type ActionPaymentPlanMutation = {
 export type ActivatePaymentVerificationPlan = {
    __typename?: 'ActivatePaymentVerificationPlan',
   validationErrors?: Maybe<Scalars['Arg']>,
-  cashPlan?: Maybe<CashPlanNode>,
+  paymentPlan?: Maybe<CashPlanNode>,
 };
 
 export type AddIndividualDataObjectType = {
@@ -981,7 +981,7 @@ export type DeletePaymentPlanMutation = {
 
 export type DeletePaymentVerificationPlan = {
    __typename?: 'DeletePaymentVerificationPlan',
-  cashPlan?: Maybe<CashPlanNode>,
+  paymentPlan?: Maybe<CashPlanNode>,
 };
 
 export type DeleteProgram = {
@@ -1061,7 +1061,7 @@ export enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
 
 export type DiscardPaymentVerificationPlan = {
    __typename?: 'DiscardPaymentVerificationPlan',
-  cashPlan?: Maybe<CashPlanNode>,
+  paymentPlan?: Maybe<CashPlanNode>,
 };
 
 export type DjangoDebug = {
@@ -1209,7 +1209,7 @@ export type ExportXlsxPaymentPlanPaymentListPerFspMutation = {
 
 export type ExportXlsxPaymentVerificationPlanFile = {
    __typename?: 'ExportXlsxPaymentVerificationPlanFile',
-  cashPlan?: Maybe<CashPlanNode>,
+  paymentPlan?: Maybe<CashPlanNode>,
 };
 
 export type FieldAttributeNode = {
@@ -1384,7 +1384,7 @@ export type FinancialServiceProviderXlsxTemplateNodeEdge = {
 
 export type FinishPaymentVerificationPlan = {
    __typename?: 'FinishPaymentVerificationPlan',
-  cashPlan?: Maybe<CashPlanNode>,
+  paymentPlan?: Maybe<CashPlanNode>,
 };
 
 
@@ -2710,7 +2710,7 @@ export type ImportXlsxPaymentPlanPaymentListPerFspMutation = {
 
 export type ImportXlsxPaymentVerificationPlanFile = {
    __typename?: 'ImportXlsxPaymentVerificationPlanFile',
-  cashPlan?: Maybe<CashPlanNode>,
+  paymentPlan?: Maybe<CashPlanNode>,
   errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
 };
 
@@ -3124,7 +3124,7 @@ export type IndividualUpdateDataObjectType = {
 
 export type InvalidPaymentVerificationPlan = {
    __typename?: 'InvalidPaymentVerificationPlan',
-  cashPlan?: Maybe<CashPlanNode>,
+  paymentPlan?: Maybe<CashPlanNode>,
 };
 
 export type IssueTypeExtrasInput = {
@@ -4274,8 +4274,8 @@ export type PaymentVerificationNode = Node & {
   updatedAt: Scalars['DateTime'],
   version: Scalars['BigInt'],
   paymentVerificationPlan: PaymentVerificationPlanNode,
-  paymentContentType?: Maybe<ContentTypeObjectType>,
-  paymentObjectId?: Maybe<Scalars['String']>,
+  paymentContentType: ContentTypeObjectType,
+  paymentObjectId: Scalars['String'],
   status: PaymentVerificationStatus,
   statusDate?: Maybe<Scalars['DateTime']>,
   receivedAmount?: Maybe<Scalars['Float']>,
@@ -4326,8 +4326,8 @@ export type PaymentVerificationPlanNode = Node & {
   version: Scalars['BigInt'],
   unicefId?: Maybe<Scalars['String']>,
   status: PaymentVerificationPlanStatus,
-  paymentPlanContentType?: Maybe<ContentTypeObjectType>,
-  paymentPlanObjectId?: Maybe<Scalars['String']>,
+  paymentPlanContentType: ContentTypeObjectType,
+  paymentPlanObjectId: Scalars['String'],
   sampling: PaymentVerificationPlanSampling,
   verificationChannel: PaymentVerificationPlanVerificationChannel,
   sampleSize?: Maybe<Scalars['Int']>,
@@ -4417,8 +4417,8 @@ export type PaymentVerificationSummaryNode = Node & {
   status: PaymentVerificationSummaryStatus,
   activationDate?: Maybe<Scalars['DateTime']>,
   completionDate?: Maybe<Scalars['DateTime']>,
-  paymentPlanContentType?: Maybe<ContentTypeObjectType>,
-  paymentPlanObjectId?: Maybe<Scalars['String']>,
+  paymentPlanContentType: ContentTypeObjectType,
+  paymentPlanObjectId: Scalars['String'],
 };
 
 export type PaymentVerificationSummaryNodeConnection = {
@@ -8325,7 +8325,7 @@ export type ActivatePaymentVerificationPlanMutation = (
   & { activatePaymentVerificationPlan: Maybe<(
     { __typename?: 'ActivatePaymentVerificationPlan' }
     & Pick<ActivatePaymentVerificationPlan, 'validationErrors'>
-    & { cashPlan: Maybe<(
+    & { paymentPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
       & { verificationPlans: Maybe<(
@@ -8370,7 +8370,7 @@ export type DeletePaymentVerificationPlanMutation = (
   { __typename?: 'Mutations' }
   & { deletePaymentVerificationPlan: Maybe<(
     { __typename?: 'DeletePaymentVerificationPlan' }
-    & { cashPlan: Maybe<(
+    & { paymentPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
       & { verificationPlans: Maybe<(
@@ -8396,7 +8396,7 @@ export type DiscardPaymentVerificationPlanMutation = (
   { __typename?: 'Mutations' }
   & { discardPaymentVerificationPlan: Maybe<(
     { __typename?: 'DiscardPaymentVerificationPlan' }
-    & { cashPlan: Maybe<(
+    & { paymentPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
       & { verificationPlans: Maybe<(
@@ -8438,7 +8438,7 @@ export type ExportXlsxPaymentVerificationPlanFileMutation = (
   { __typename?: 'Mutations' }
   & { exportXlsxPaymentVerificationPlanFile: Maybe<(
     { __typename?: 'ExportXlsxPaymentVerificationPlanFile' }
-    & { cashPlan: Maybe<(
+    & { paymentPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id'>
     )> }
@@ -8454,7 +8454,7 @@ export type FinishPaymentVerificationPlanMutation = (
   { __typename?: 'Mutations' }
   & { finishPaymentVerificationPlan: Maybe<(
     { __typename?: 'FinishPaymentVerificationPlan' }
-    & { cashPlan: Maybe<(
+    & { paymentPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
       & { verificationPlans: Maybe<(
@@ -8484,7 +8484,7 @@ export type ImportXlsxPaymentVerificationPlanFileMutation = (
   { __typename?: 'Mutations' }
   & { importXlsxPaymentVerificationPlanFile: Maybe<(
     { __typename?: 'ImportXlsxPaymentVerificationPlanFile' }
-    & { cashPlan: Maybe<(
+    & { paymentPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id'>
     )>, errors: Maybe<Array<Maybe<(
@@ -8503,7 +8503,7 @@ export type InvalidPaymentVerificationPlanMutation = (
   { __typename?: 'Mutations' }
   & { invalidPaymentVerificationPlan: Maybe<(
     { __typename?: 'InvalidPaymentVerificationPlan' }
-    & { cashPlan: Maybe<(
+    & { paymentPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id'>
       & { verificationPlans: Maybe<(
@@ -13784,7 +13784,7 @@ export type SetSteficonRuleOnPpListMutationOptions = ApolloReactCommon.BaseMutat
 export const ActivatePaymentVerificationPlanDocument = gql`
     mutation ActivatePaymentVerificationPlan($paymentVerificationPlanId: ID!) {
   activatePaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
-    cashPlan {
+    paymentPlan {
       id
       status
       statusDate
@@ -13902,7 +13902,7 @@ export type CreatePaymentVerificationPlanMutationOptions = ApolloReactCommon.Bas
 export const DeletePaymentVerificationPlanDocument = gql`
     mutation DeletePaymentVerificationPlan($paymentVerificationPlanId: ID!) {
   deletePaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
-    cashPlan {
+    paymentPlan {
       id
       status
       statusDate
@@ -13970,7 +13970,7 @@ export type DeletePaymentVerificationPlanMutationOptions = ApolloReactCommon.Bas
 export const DiscardPaymentVerificationPlanDocument = gql`
     mutation DiscardPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
   discardPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
-    cashPlan {
+    paymentPlan {
       id
       status
       statusDate
@@ -14089,7 +14089,7 @@ export type EditPaymentVerificationPlanMutationOptions = ApolloReactCommon.BaseM
 export const ExportXlsxPaymentVerificationPlanFileDocument = gql`
     mutation ExportXlsxPaymentVerificationPlanFile($paymentVerificationPlanId: ID!) {
   exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: $paymentVerificationPlanId) {
-    cashPlan {
+    paymentPlan {
       id
     }
   }
@@ -14140,7 +14140,7 @@ export type ExportXlsxPaymentVerificationPlanFileMutationOptions = ApolloReactCo
 export const FinishPaymentVerificationPlanDocument = gql`
     mutation FinishPaymentVerificationPlan($cashPlanVerificationId: ID!) {
   finishPaymentVerificationPlan(paymentVerificationPlanId: $cashPlanVerificationId) {
-    cashPlan {
+    paymentPlan {
       id
       status
       statusDate
@@ -14206,7 +14206,7 @@ export type FinishPaymentVerificationPlanMutationOptions = ApolloReactCommon.Bas
 export const ImportXlsxPaymentVerificationPlanFileDocument = gql`
     mutation ImportXlsxPaymentVerificationPlanFile($paymentVerificationPlanId: ID!, $file: Upload!) {
   importXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: $paymentVerificationPlanId, file: $file) {
-    cashPlan {
+    paymentPlan {
       id
     }
     errors {
@@ -14263,7 +14263,7 @@ export type ImportXlsxPaymentVerificationPlanFileMutationOptions = ApolloReactCo
 export const InvalidPaymentVerificationPlanDocument = gql`
     mutation InvalidPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
   invalidPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
-    cashPlan {
+    paymentPlan {
       id
       verificationPlans {
         edges {
@@ -23380,7 +23380,7 @@ export type ActionPaymentPlanMutationResolvers<ContextType = any, ParentType ext
 
 export type ActivatePaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivatePaymentVerificationPlan'] = ResolversParentTypes['ActivatePaymentVerificationPlan']> = {
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  paymentPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export type AgeFilterObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgeFilterObject'] = ResolversParentTypes['AgeFilterObject']> = {
@@ -23799,7 +23799,7 @@ export type DeletePaymentPlanMutationResolvers<ContextType = any, ParentType ext
 };
 
 export type DeletePaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeletePaymentVerificationPlan'] = ResolversParentTypes['DeletePaymentVerificationPlan']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  paymentPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
@@ -23850,7 +23850,7 @@ export type DeliveryMechanismNodeEdgeResolvers<ContextType = any, ParentType ext
 };
 
 export type DiscardPaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscardPaymentVerificationPlan'] = ResolversParentTypes['DiscardPaymentVerificationPlan']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  paymentPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export type DjangoDebugResolvers<ContextType = any, ParentType extends ResolversParentTypes['DjangoDebug'] = ResolversParentTypes['DjangoDebug']> = {
@@ -23927,7 +23927,7 @@ export type ExportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType 
 };
 
 export type ExportXlsxPaymentVerificationPlanFileResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportXlsxPaymentVerificationPlanFile'] = ResolversParentTypes['ExportXlsxPaymentVerificationPlanFile']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  paymentPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FieldAttributeNode'] = ResolversParentTypes['FieldAttributeNode']> = {
@@ -24027,7 +24027,7 @@ export type FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<ContextType = 
 };
 
 export type FinishPaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinishPaymentVerificationPlan'] = ResolversParentTypes['FinishPaymentVerificationPlan']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  paymentPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export interface FlexFieldsScalarScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['FlexFieldsScalar'], any> {
@@ -24492,7 +24492,7 @@ export type ImportXlsxPaymentPlanPaymentListPerFspMutationResolvers<ContextType 
 };
 
 export type ImportXlsxPaymentVerificationPlanFileResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXlsxPaymentVerificationPlanFile'] = ResolversParentTypes['ImportXlsxPaymentVerificationPlanFile']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  paymentPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
   errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
 };
 
@@ -24631,7 +24631,7 @@ export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType
 };
 
 export type InvalidPaymentVerificationPlanResolvers<ContextType = any, ParentType extends ResolversParentTypes['InvalidPaymentVerificationPlan'] = ResolversParentTypes['InvalidPaymentVerificationPlan']> = {
-  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  paymentPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export type IssueTypesObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['IssueTypesObject'] = ResolversParentTypes['IssueTypesObject']> = {
@@ -25042,8 +25042,8 @@ export type PaymentVerificationNodeResolvers<ContextType = any, ParentType exten
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   paymentVerificationPlan?: Resolver<ResolversTypes['PaymentVerificationPlanNode'], ParentType, ContextType>,
-  paymentContentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
-  paymentObjectId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  paymentContentType?: Resolver<ResolversTypes['ContentTypeObjectType'], ParentType, ContextType>,
+  paymentObjectId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentVerificationStatus'], ParentType, ContextType>,
   statusDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   receivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
@@ -25073,8 +25073,8 @@ export type PaymentVerificationPlanNodeResolvers<ContextType = any, ParentType e
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentVerificationPlanStatus'], ParentType, ContextType>,
-  paymentPlanContentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
-  paymentPlanObjectId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  paymentPlanContentType?: Resolver<ResolversTypes['ContentTypeObjectType'], ParentType, ContextType>,
+  paymentPlanObjectId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   sampling?: Resolver<ResolversTypes['PaymentVerificationPlanSampling'], ParentType, ContextType>,
   verificationChannel?: Resolver<ResolversTypes['PaymentVerificationPlanVerificationChannel'], ParentType, ContextType>,
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -25119,8 +25119,8 @@ export type PaymentVerificationSummaryNodeResolvers<ContextType = any, ParentTyp
   status?: Resolver<ResolversTypes['PaymentVerificationSummaryStatus'], ParentType, ContextType>,
   activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  paymentPlanContentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
-  paymentPlanObjectId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  paymentPlanContentType?: Resolver<ResolversTypes['ContentTypeObjectType'], ParentType, ContextType>,
+  paymentPlanObjectId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
 export type PaymentVerificationSummaryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationSummaryNodeConnection'] = ResolversParentTypes['PaymentVerificationSummaryNodeConnection']> = {

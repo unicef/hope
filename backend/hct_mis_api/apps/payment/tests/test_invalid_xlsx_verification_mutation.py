@@ -28,7 +28,7 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
     INVALID_MUTATION = """
         mutation invalidPaymentVerificationPlan($paymentVerificationPlanId: ID!) {
           invalidPaymentVerificationPlan(paymentVerificationPlanId: $paymentVerificationPlanId) {
-            cashPlan{
+            paymentPlan{
               verificationPlans{
                 edges{
                   node{
@@ -57,7 +57,7 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
         cls.payment_verification_plan = PaymentVerificationPlanFactory(
-            cash_plan=cash_plan,
+            payment_plan=cash_plan,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
             status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
