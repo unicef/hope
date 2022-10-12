@@ -1,4 +1,3 @@
-
 import camelCase from 'lodash/camelCase';
 import { GraphQLError } from 'graphql';
 import localForage from 'localforage';
@@ -7,10 +6,19 @@ import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
-  ProgramStatus, TargetPopulationBuildStatus,
+  PaymentPlanBackgroundActionStatus,
+  PaymentPlanStatus,
+  ProgramStatus,
+  TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
+  PAYMENT_PLAN_STATES,
+  PROGRAM_STATES,
+  TARGETING_STATES,
+} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -48,11 +56,11 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'DRAFT':
+    case ProgramStatus.Draft:
       return theme.hctPalette.gray;
-    case 'ACTIVE':
+    case ProgramStatus.Active:
       return theme.hctPalette.green;
-    case 'FINISHED':
+    case ProgramStatus.Finished:
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.oragne;
@@ -175,6 +183,8 @@ export function targetPopulationStatusToColor(
     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
     [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
+    [TargetPopulationStatus.ReadyForPaymentModule]: theme.hctPalette.green,
+    [TargetPopulationStatus.Assigned]: theme.hctPalette.green,
     [TargetPopulationStatus.SteficonWait]: theme.hctPalette.oragne,
     [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
     [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
@@ -202,6 +212,48 @@ export function targetPopulationBuildStatusToColor(
   return theme.palette.error.main;
 }
 
+export function paymentPlanStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
+    [PaymentPlanStatus.Locked]: theme.hctPalette.oragne,
+    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.oragne,
+    [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
+    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
+    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
+    [PaymentPlanStatus.Reconciled]: theme.hctPalette.green,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
+
+export function paymentPlanBackgroundActionStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanBackgroundActionStatus.SteficonRun]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.SteficonError]: theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxExporting]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxExportError]:
+      theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XlsxImportError]:
+      theme.palette.error.main,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
 
 export function userStatusToColor(
   theme: typeof themeObj,
@@ -415,6 +467,18 @@ export function formatThousands(value: string): string {
 
 export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
+}
+
+export function programStatusMapping(status): string {
+  return PROGRAM_STATES[status];
+}
+
+export function paymentPlanStatusMapping(status): string {
+  return PAYMENT_PLAN_STATES[status];
+}
+
+export function paymentPlanBackgroundActionStatusMapping(status): string {
+  return PAYMENT_PLAN_BACKGROUND_ACTION_STATES[status];
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

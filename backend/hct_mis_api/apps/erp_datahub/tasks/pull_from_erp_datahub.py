@@ -1,8 +1,8 @@
+from django.db.models import Q
 from django.db.transaction import atomic
 
-from hct_mis_api.apps.erp_datahub import utils
-from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.payment.models import CashPlan, PaymentRecord
+from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 
 
 class PullFromErpDatahubTask:
@@ -11,22 +11,48 @@ class PullFromErpDatahubTask:
         self.update_cash_plans()
         self.update_payment_records()
 
-    def update_cash_plans(self):
+    @staticmethod
+    def update_cash_plans():
         cash_plans_without_exchange_rate = CashPlan.objects.filter(exchange_rate__isnull=True)
 
         for cash_plan in cash_plans_without_exchange_rate:
-            cash_plan.exchange_rate = utils.get_exchange_rate_for_cash_plan(cash_plan)
+            cash_plan.exchange_rate = cash_plan.get_exchange_rate()
 
-        CashPlan.objects.bulk_update(cash_plans_without_exchange_rate, ["exchange_rate"])
+            for usd_field in CashPlan.usd_fields:
+                setattr(
+                    cash_plan,
+                    usd_field,
+                    get_quantity_in_usd(
+                        amount=getattr(cash_plan, usd_field.removesuffix("_usd")),
+                        currency=cash_plan.currency,
+                        exchange_rate=cash_plan.exchange_rate,
+                        currency_exchange_date=cash_plan.currency_exchange_date,
+                    ),
+                )
 
-    def update_payment_records(self):
+        CashPlan.objects.bulk_update(cash_plans_without_exchange_rate, ["exchange_rate"] + CashPlan.usd_fields)
+
+    @staticmethod
+    def update_payment_records():
         payment_records_to_update = PaymentRecord.objects.filter(
-            delivered_quantity_usd__isnull=True,
-            delivered_quantity__isnull=False,
-            cash_plan__isnull=False,
-            cash_plan__exchange_rate__isnull=False,
+            Q(delivered_quantity_usd__isnull=True, delivered_quantity__isnull=False)
+            | Q(entitlement_quantity_usd__isnull=True, entitlement_quantity__isnull=False),
+            parent__isnull=False,
+            parent__exchange_rate__isnull=False,
         )
-        for payment_record in payment_records_to_update:
-            payment_record.delivered_quantity_usd = utils.get_payment_record_delivered_quantity_in_usd(payment_record)
 
-        PaymentRecord.objects.bulk_update(payment_records_to_update, ["delivered_quantity_usd"])
+        for payment_record in payment_records_to_update:
+            for usd_field in PaymentRecord.usd_fields:
+                if getattr(payment_record, usd_field) is None:
+                    setattr(
+                        payment_record,
+                        usd_field,
+                        get_quantity_in_usd(
+                            amount=getattr(payment_record, usd_field.removesuffix("_usd")),
+                            currency=payment_record.currency,
+                            exchange_rate=payment_record.parent.exchange_rate,
+                            currency_exchange_date=payment_record.parent.currency_exchange_date,
+                        ),
+                    )
+
+        PaymentRecord.objects.bulk_update(payment_records_to_update, PaymentRecord.usd_fields)

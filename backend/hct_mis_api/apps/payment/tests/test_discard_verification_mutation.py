@@ -8,6 +8,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
     CashPlanPaymentVerificationFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
@@ -16,7 +17,7 @@ from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentVerification,
 )
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -91,7 +92,7 @@ class TestDiscardVerificationMutation(APITestCase):
             household.programs.add(program)
 
             payment_record = PaymentRecordFactory(
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 household=household,
                 target_population=target_population,
             )

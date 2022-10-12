@@ -6,6 +6,7 @@ trigger:
     - staging
     - master
     - ops/*
+    - feature/payment-module
   paths:
     exclude:
     -  docs/*
@@ -25,16 +26,18 @@ variables:
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registry: "ICTD-HOPE-DEV-ACR"
     Docker.url: "uniappsakshopedev.azurecr.io"
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ else }}:
     Docker.registry: "ICTD-HOPE-PRD-ACR"
     Docker.url: "uniappsakshope.azurecr.io"
   ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
     Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
-  ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'staging') }}:
     Sentry.frontend.dsn: $(STG_SENTRY_FRONTEND_DSN)
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}:
     Sentry.frontend.dsn: $(PRD_SENTRY_FRONTEND_DSN)
     Sentry.frontend.trn_dsn: $(TRN_SENTRY_FRONTEND_DSN)
+  ${{ else }}:
+    Sentry.frontend.dsn: $(SENTRY_FRONTEND_DSN)
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
 
 stages:
@@ -226,7 +229,6 @@ stages:
             displayName: "Setup .env and docker-compose.tst.yml"
             inputs:
               script: |
-               mv deployment/docker-compose.tst.yml docker-compose.tst.yml
                mv $(Agent.TempDirectory)/.env-django-test .env
 
           - task: DockerCompose@0
@@ -234,9 +236,9 @@ stages:
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registry)
-              dockerComposeFile: '**/docker-compose.tst.yml'
+              dockerComposeFile: '**/deployment/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run backend ./docker-test-entrypoint.sh'
+              dockerComposeCommand: 'run backend test'
               dockerComposeFileArgs: |
                 backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.SourceVersion)
 

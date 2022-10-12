@@ -135,12 +135,12 @@ export const householdDetailed = gql`
         username
       }
     }
-    paymentRecords {
+    paymentrecordSet {
       edges {
         node {
           id
           fullName
-          cashPlan {
+          parent {
             id
             totalPersonsCovered
             program {

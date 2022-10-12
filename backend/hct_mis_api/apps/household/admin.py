@@ -123,6 +123,7 @@ class HouseholdAdmin(
         "head_of_household",
         "size",
         "withdrawn",
+        "registration_data_import",
     )
     list_filter = (
         DepotManager,
@@ -132,6 +133,7 @@ class HouseholdAdmin(
         ("business_area", AutoCompleteFilter),
         "org_enumerator",
         "last_registration_date",
+        QueryStringFilter,
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")

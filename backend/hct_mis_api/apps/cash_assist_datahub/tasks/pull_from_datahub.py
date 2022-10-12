@@ -10,11 +10,8 @@ from hct_mis_api.apps.cash_assist_datahub.models import Session
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
 from hct_mis_api.apps.core.utils import build_arg_dict
-from hct_mis_api.apps.erp_datahub.utils import (
-    get_exchange_rate_for_cash_plan,
-    get_payment_record_delivered_quantity_in_usd,
-)
 from hct_mis_api.apps.payment.models import (
+    CashPlan,
     CashPlanPaymentVerificationSummary,
     PaymentRecord,
     ServiceProvider,
@@ -22,7 +19,8 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
 )
-from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.payment.utils import get_quantity_in_usd
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 logger = logging.getLogger(__name__)
@@ -161,10 +159,22 @@ class PullFromDatahubTask:
             if created:
                 CashPlanPaymentVerificationSummary.objects.create(cash_plan=cash_plan)
 
-            if not cash_plan.exchange_rate:
                 try:
-                    cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, self.exchange_rates_client)
-                    cash_plan.save(update_fields=["exchange_rate"])
+                    if not cash_plan.exchange_rate:
+                        cash_plan.exchange_rate = cash_plan.get_exchange_rate(self.exchange_rates_client)
+                        cash_plan.save(update_fields=["exchange_rate"])
+                    for usd_field in CashPlan.usd_fields:
+                        setattr(
+                            cash_plan,
+                            usd_field,
+                            get_quantity_in_usd(
+                                amount=getattr(cash_plan, usd_field.removesuffix("_usd")),
+                                currency=cash_plan.currency,
+                                exchange_rate=cash_plan.exchange_rate,
+                                currency_exchange_date=cash_plan.currency_exchange_date,
+                            ),
+                        )
+                    cash_plan.save(update_fields=CashPlan.usd_fields)
                 except Exception as e:
                     logger.exception(e)
 
@@ -191,21 +201,30 @@ class PullFromDatahubTask:
             payment_record_args["service_provider"] = ServiceProvider.objects.get(
                 ca_id=dh_payment_record.service_provider_ca_id
             )
-            payment_record_args["cash_plan"] = CashPlan.objects.get(ca_id=dh_payment_record.cash_plan_ca_id)
+            payment_record_args["parent"] = CashPlan.objects.get(ca_id=dh_payment_record.cash_plan_ca_id)
             (
                 payment_record,
                 created,
             ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
             try:
-                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
-                    payment_record, self.exchange_rates_client
-                )
-                payment_record.save(update_fields=["delivered_quantity_usd"])
+                for usd_field in PaymentRecord.usd_fields:
+                    setattr(
+                        payment_record,
+                        usd_field,
+                        get_quantity_in_usd(
+                            amount=getattr(payment_record, usd_field.removesuffix("_usd")),
+                            currency=payment_record.currency,
+                            exchange_rate=payment_record.parent.exchange_rate,
+                            currency_exchange_date=payment_record.parent.currency_exchange_date,
+                            exchange_rates_client=self.exchange_rates_client,
+                        ),
+                    )
+                payment_record.save(update_fields=PaymentRecord.usd_fields)
             except Exception as e:
                 logger.exception(e)
             household_ids.append(payment_record.household_id)
-            if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
-                payment_record.household.programs.add(payment_record.cash_plan.program)
+            if payment_record.household and payment_record.parent and payment_record.parent.program:
+                payment_record.household.programs.add(payment_record.parent.program)
         handle_total_cash_in_specific_households(household_ids)
 
     def copy_service_providers(self, session):

@@ -52,7 +52,6 @@ class TestKoboTemplateUpload(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.maxDiff = None
         cls.client = Client()
         cls.factory = RequestFactory()
         cls.site = AdminSite()

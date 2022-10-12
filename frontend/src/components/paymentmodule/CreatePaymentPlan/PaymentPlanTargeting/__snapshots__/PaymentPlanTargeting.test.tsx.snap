@@ -1,0 +1,110 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root sc-ifAKCX lpinpR MuiPaper-elevation1 MuiPaper-rounded"
+  >
+    <div
+      class="sc-bxivhb jsIVNl"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6"
+      >
+        Targeting
+      </h6>
+    </div>
+    <div
+      class="sc-htpNat eMBxKf"
+    >
+      <div
+        class="MuiBox-root MuiBox-root-1 sc-EHOje YINzU"
+      >
+        <div
+          class="sc-bdVaJa jiAojl"
+        >
+          Select Target Population
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-container"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          >
+            <div
+              choices="[object Object]"
+              class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+              data-cy="input-target-population"
+              label="Target Population"
+            >
+              <label
+                class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined Mui-required Mui-required"
+                data-shrink="false"
+              >
+                Target Population
+                <span
+                  aria-hidden="true"
+                  class="MuiFormLabel-asterisk MuiInputLabel-asterisk"
+                >
+                   
+                  *
+                </span>
+              </label>
+              <div
+                choices="[object Object]"
+                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-marginDense MuiOutlinedInput-marginDense"
+                data-cy="input-target-population"
+                required=""
+              >
+                <div
+                  aria-haspopup="listbox"
+                  aria-labelledby="textField-targetingId"
+                  class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
+                  data-cy="select-targetingId"
+                  id="textField-targetingId"
+                  role="button"
+                  tabindex="0"
+                >
+                  <span>
+                    ​
+                  </span>
+                </div>
+                <input
+                  aria-hidden="true"
+                  class="MuiSelect-nativeInput"
+                  name="targetingId"
+                  required=""
+                  tabindex="-1"
+                  value=""
+                />
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSelect-icon MuiSelect-iconOutlined"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M7 10l5 5 5-5z"
+                  />
+                </svg>
+                <fieldset
+                  aria-hidden="true"
+                  class="PrivateNotchedOutline-root-2 MuiOutlinedInput-notchedOutline"
+                >
+                  <legend
+                    class="PrivateNotchedOutline-legendLabelled-4"
+                  >
+                    <span>
+                      Target Population
+                    </span>
+                  </legend>
+                </fieldset>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

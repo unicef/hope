@@ -139,7 +139,7 @@ class GenerateDashboardReportContentHelpers:
         filter_vars = cls._format_filters(
             report,
             {},
-            "cash_plans__payment_records__delivery_date",
+            "cashplan__payment_items__delivery_date",
             "admin_areas",
             "id",
             "business_area",
@@ -149,13 +149,13 @@ class GenerateDashboardReportContentHelpers:
         def get_filter_query(cash: bool, month: int):
             if cash:
                 return Q(
-                    cash_plans__payment_records__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH,
-                    cash_plans__payment_records__delivery_date__month=month,
+                    cashplan__payment_items__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH,
+                    cashplan__payment_items__delivery_date__month=month,
                 )
             else:
                 return Q(
-                    cash_plans__payment_records__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER,
-                    cash_plans__payment_records__delivery_date__month=month,
+                    cashplan__payment_items__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER,
+                    cashplan__payment_items__delivery_date__month=month,
                 )
 
         def get_annotation(index_number: int, cash=True):
@@ -163,7 +163,7 @@ class GenerateDashboardReportContentHelpers:
             label = f"{key_label}_cash" if cash else f"{key_label}_voucher"
             return {
                 label: Sum(
-                    "cash_plans__payment_records__delivered_quantity_usd",
+                    "cashplan__payment_items__delivered_quantity_usd",
                     filter=get_filter_query(cash, index_number + 1),
                     output_field=DecimalField(),
                 )
@@ -174,14 +174,14 @@ class GenerateDashboardReportContentHelpers:
             .distinct()
             .annotate(
                 successful_payments=Count(
-                    "cash_plans__payment_records",
-                    filter=Q(cash_plans__payment_records__delivered_quantity_usd__gt=0),
+                    "cashplan__payment_items",
+                    filter=Q(cashplan__payment_items__delivered_quantity_usd__gt=0),
                 )
             )
             .annotate(
                 unsuccessful_payments=Count(
-                    "cash_plans__payment_records",
-                    filter=Q(cash_plans__payment_records__delivered_quantity_usd=0),
+                    "cashplan__payment_items",
+                    filter=Q(cashplan__payment_items__delivered_quantity_usd=0),
                 )
             )
         )
@@ -269,11 +269,11 @@ class GenerateDashboardReportContentHelpers:
         if report.admin_area:
             filter_vars["payment_record__household__admin_area"] = report.admin_area
         if report.program:
-            filter_vars["payment_record__cash_plan__program"] = report.program
+            filter_vars["payment_record__parent__program"] = report.program
         if not cls._is_report_global(report):
             filter_vars["payment_record__business_area"] = report.business_area
         valid_verifications = PaymentVerification.objects.filter(**filter_vars)
-        path_to_payment_record_verifications = "cash_plans__verifications__payment_record_verifications"
+        path_to_payment_record_verifications = "cashplan__verifications__payment_record_verifications"
 
         def format_status_filter(status):
             return Q(**{f"{path_to_payment_record_verifications}__status": status})
@@ -281,7 +281,7 @@ class GenerateDashboardReportContentHelpers:
         programs = (
             Program.objects.filter(**{f"{path_to_payment_record_verifications}__in": valid_verifications})
             .distinct()
-            .annotate(total_cash_plan_verifications=Count("cash_plans__verifications", distinct=True))
+            .annotate(total_cash_plan_verifications=Count("cashplan__verifications", distinct=True))
             .annotate(
                 total_households=Count(
                     f"{path_to_payment_record_verifications}__payment_record__household",
@@ -290,18 +290,18 @@ class GenerateDashboardReportContentHelpers:
             )
             .annotate(
                 total_payment_records=Count(
-                    "cash_plans__payment_records",
+                    "cashplan__payment_items",
                     distinct=True,
                 )
             )
             .annotate(
                 all_possible_payment_records=Count(
-                    "cash_plans__payment_records",
+                    "cashplan__payment_items",
                     distinct=True,
                     filter=Q(
-                        cash_plans__verifications__isnull=False,
-                        cash_plans__payment_records__status=PaymentRecord.STATUS_SUCCESS,
-                        cash_plans__payment_records__delivered_quantity__gt=0,
+                        cashplan__verifications__isnull=False,
+                        cashplan__payment_items__status=PaymentRecord.STATUS_SUCCESS,
+                        cashplan__payment_items__delivered_quantity__gt=0,
                     ),
                 )
             )
@@ -375,11 +375,11 @@ class GenerateDashboardReportContentHelpers:
         admin_areas = (
             Area.objects.filter(
                 area_type__area_level=2,
-                household__payment_records__in=valid_payment_records,
+                household__paymentrecord__in=valid_payment_records,
             )
             .distinct()
             .annotate(
-                total_transferred=Sum("household__payment_records__delivered_quantity_usd", output_field=DecimalField())
+                total_transferred=Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField())
             )
             .annotate(num_households=Count("household", distinct=True))
         )
@@ -596,7 +596,7 @@ class GenerateDashboardReportContentHelpers:
             valid_payment_records_in_instance_filter_key = "business_area"
         else:
             business_area_code_path = "business_area__code"
-            instances = Program.objects.filter(cash_plans__payment_records__in=valid_payment_records)
+            instances = Program.objects.filter(cashplan__payment_items__in=valid_payment_records)
             valid_payment_records_in_instance_filter_key = "cash_plan__program"
 
         instances = (

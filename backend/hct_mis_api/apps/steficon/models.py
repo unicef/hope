@@ -22,6 +22,14 @@ class RuleManager(models.Manager):
 
 
 class Rule(models.Model):
+    TYPE_PAYMENT_PLAN = "PAYMENT_PLAN"
+    TYPE_TARGETING = "TARGETING"
+
+    TYPE_CHOICES = (
+        (TYPE_PAYMENT_PLAN, "Payment Plan"),
+        (TYPE_TARGETING, "Targeting"),
+    )
+
     LANGUAGES = [[a.label.lower(), a.label] for a in interpreters]
     version = AutoIncVersionField()
     name = CICharField(
@@ -50,6 +58,9 @@ class Rule(models.Model):
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    type = models.CharField(
+        choices=TYPE_CHOICES, max_length=50, default=TYPE_TARGETING, help_text="Use Rule for Targeting or Payment Plan"
+    )
 
     flags = JSONField(default=dict, blank=True)
 

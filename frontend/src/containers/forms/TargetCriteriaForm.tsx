@@ -290,6 +290,7 @@ export function TargetCriteriaForm({
                     }
                     color='primary'
                     startIcon={<AddCircleOutline />}
+                    data-cy='button-household-rule'
                   >
                     ADD HOUSEHOLD RULE
                   </Button>
@@ -330,6 +331,7 @@ export function TargetCriteriaForm({
               <Box display='flex' flexDirection='column'>
                 <ButtonBox>
                   <Button
+                    data-cy='button-individual-rule'
                     onClick={() =>
                       individualsFiltersBlocksWrapperRef.current
                         .getArrayHelpers()

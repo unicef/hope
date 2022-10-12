@@ -3,6 +3,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.hope_redirect import HopeRedirect, get_hope_redirect
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
     CashPlanPaymentVerificationFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
@@ -11,7 +12,7 @@ from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentVerification,
 )
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
@@ -74,7 +75,7 @@ class TestHopeRedirect(APITestCase):
             business_area=business_area,
         )
         payment_record = PaymentRecordFactory(
-            cash_plan=cash_plan,
+            parent=cash_plan,
             household=household,
             target_population=target_population,
             ca_id="P8F-21-CSH-00031-0000006",

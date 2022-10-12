@@ -186,9 +186,6 @@ def registration_xlsx_import_hourly_task():
 @log_start_and_end
 @sentry_tags
 def merge_registration_data_import_task(registration_data_import_id):
-    logger.info(
-        f"merge_registration_data_import_task started for registration_data_import_id: {registration_data_import_id}"
-    )
     with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}"):
         try:
             from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import (
@@ -204,10 +201,6 @@ def merge_registration_data_import_task(registration_data_import_id):
                 id=registration_data_import_id,
             ).update(status=RegistrationDataImport.MERGE_ERROR)
             raise
-
-    logger.info(
-        f"merge_registration_data_import_task finished for registration_data_import_id: {registration_data_import_id}"
-    )
 
 
 @app.task(queue="priority")
@@ -274,7 +267,7 @@ def validate_xlsx_import_task(import_data_id):
     try:
         return ValidateXlsxImport().execute(import_data)
     except Exception as e:
-        logger.exception(e)
+        logger.exception("ValidateXlsxImport exception")
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
         RegistrationDataImport.objects.filter(

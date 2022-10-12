@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.validators import MinValueValidator
 from django.db.models import JSONField
@@ -7,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
-from model_utils.models import SoftDeletableModel
+from model_utils.models import SoftDeletableModel, TimeStampedModel
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
@@ -89,6 +90,11 @@ class BusinessArea(TimeStampedUUIDModel):
     )
     screen_beneficiary = models.BooleanField(default=False)
     deduplication_ignore_withdraw = models.BooleanField(default=False)
+    approval_number_required = models.PositiveIntegerField(default=1)
+    authorization_number_required = models.PositiveIntegerField(default=1)
+    finance_review_number_required = models.PositiveIntegerField(default=1)
+
+    is_payment_plan_applicable = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
@@ -353,3 +359,15 @@ class StorageFile(models.Model):
 
     def __str__(self):
         return self.file.name
+
+
+class FileTemp(TimeStampedModel):
+    """Use this model for temporary store files"""
+
+    object_id = models.CharField(max_length=120, null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    file = models.FileField()
+
+    def __str__(self):
+        return f"{self.file.name} - {self.created}"

@@ -15,6 +15,12 @@ import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
 import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
+import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
+import { EditPaymentPlanPage } from './pages/paymentmodule/EditPaymentPlanPage';
+import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
+import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
+import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
+import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
 import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsPage';
@@ -102,6 +108,24 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/csh-payment-verification/:id'>
             <CashPlanVerificationRedirectPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/new-plan'>
+            <CreatePaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute exact path='/:businessArea/payment-module'>
+            <PaymentModulePage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
+            <SetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/edit'>
+            <EditSetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/edit'>
+            <EditPaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id'>
+            <PaymentPlanDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
             <CreateGrievancePage />

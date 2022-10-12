@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_cash_plan_payment_verification_0_with_permission_was_downloaded_false 1'] = {

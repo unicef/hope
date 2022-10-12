@@ -11,8 +11,8 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestGrievanceCreateComplaintTicketQuery(APITestCase):
@@ -66,13 +66,13 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             household=cls.household,
             full_name=cls.individuals[0].full_name,
             business_area=cls.business_area,
-            cash_plan=cash_plan,
+            parent=cash_plan,
         )
         cls.second_payment_record = PaymentRecordFactory(
             household=cls.household,
             full_name=f"{cls.individuals[0].full_name} second Individual",
             business_area=cls.business_area,
-            cash_plan=cash_plan,
+            parent=cash_plan,
         )
 
     @parameterized.expand(

@@ -35,7 +35,7 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
           id
           name
         }
-        cashPlan {
+        parent {
           id
           caId
           program {

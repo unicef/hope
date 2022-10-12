@@ -6,9 +6,8 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
 class TestCreatePaymentVerificationMutation(APITestCase):
@@ -43,7 +42,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         (household, _) = create_household(household_args={"size": 1})
         PaymentRecordFactory.create(
-            cash_plan=self.cash_plan,
+            parent=self.cash_plan,
             business_area=self.cash_plan.business_area,
             delivered_quantity=1000,
             delivered_quantity_usd=None,

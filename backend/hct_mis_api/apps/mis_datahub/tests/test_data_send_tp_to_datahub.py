@@ -121,7 +121,6 @@ class TestDataSendTpToDatahub(TestCase):
         cls.household.save()
 
     def test_program_data_is_send_correctly(self):
-        self.maxDiff = None
         self.target_population.refresh_from_db()
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population)
@@ -144,7 +143,6 @@ class TestDataSendTpToDatahub(TestCase):
         self.assertDictEqual(expected_program_dict, dh_program_dict)
 
     def test_target_population_data_is_send_correctly(self):
-        self.maxDiff = None
         self.target_population.refresh_from_db()
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population)
@@ -163,7 +161,6 @@ class TestDataSendTpToDatahub(TestCase):
         self.assertDictEqual(expected_target_population_dict, dh_target_population_dict)
 
     def test_target_population_entry_data_is_send_correctly(self):
-        self.maxDiff = None
         self.target_population.refresh_from_db()
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population)
@@ -182,7 +179,6 @@ class TestDataSendTpToDatahub(TestCase):
         self.assertDictEqual(expected_target_population_entry_dict, dh_target_population_entry_dict)
 
     def test_individual_send_correctly(self):
-        self.maxDiff = None
         self.target_population.refresh_from_db()
         task = SendTPToDatahubTask()
         task.send_target_population(self.target_population)

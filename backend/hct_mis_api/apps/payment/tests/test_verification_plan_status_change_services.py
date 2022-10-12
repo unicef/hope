@@ -11,6 +11,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
     CashPlanPaymentVerificationFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
@@ -22,7 +23,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -75,7 +76,7 @@ class TestPhoneNumberVerification(TestCase):
             household.programs.add(program)
 
             payment_record = PaymentRecordFactory(
-                cash_plan=cash_plan,
+                parent=cash_plan,
                 household=household,
                 head_of_household=household.head_of_household,
                 target_population=target_population,
@@ -129,7 +130,7 @@ class TestPhoneNumberVerification(TestCase):
             other_household.programs.add(program)
 
             other_payment_record = PaymentRecordFactory(
-                cash_plan=other_cash_plan,
+                parent=other_cash_plan,
                 household=other_household,
                 head_of_household=other_household.head_of_household,
                 target_population=other_target_population,

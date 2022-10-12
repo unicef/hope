@@ -17,8 +17,8 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestAlreadyExistingFilterTickets(APITestCase):
@@ -87,13 +87,13 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             household=cls.household,
             full_name=cls.individuals[0].full_name,
             business_area=cls.business_area,
-            cash_plan=cash_plan,
+            parent=cash_plan,
         )
         cls.payment_record2 = PaymentRecordFactory(
             household=cls.household,
             full_name=cls.individuals[0].full_name,
             business_area=cls.business_area,
-            cash_plan=cash_plan,
+            parent=cash_plan,
         )
         grievance_1 = GrievanceTicketFactory(
             id="0fdbf2fc-e94e-4c64-acce-6e7edd4bbd87",

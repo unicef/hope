@@ -9,8 +9,7 @@ from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
     PullFromErpDatahubTask,
 )
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 
 
 class TestPullDataFromErpDatahub(TestCase):
@@ -36,29 +35,37 @@ class TestPullDataFromErpDatahub(TestCase):
         cls.cash_plan_4 = CashPlanFactory(funds_commitment="111111", exchange_rate=None)
 
         cls.payment_record_1 = PaymentRecordFactory(
-            cash_plan=cls.cash_plan_1,
+            parent=cls.cash_plan_1,
             business_area=cls.cash_plan_1.business_area,
+            entitlement_quantity=1000,
+            entitlement_quantity_usd=None,
             delivered_quantity=1000,
             delivered_quantity_usd=None,
             household=household,
         )
         cls.payment_record_2 = PaymentRecordFactory(
-            cash_plan=cls.cash_plan_2,
+            parent=cls.cash_plan_2,
             business_area=cls.cash_plan_2.business_area,
+            entitlement_quantity=2000,
+            entitlement_quantity_usd=None,
             delivered_quantity=2000,
             delivered_quantity_usd=None,
             household=household,
         )
         cls.payment_record_3 = PaymentRecordFactory(
-            cash_plan=cls.cash_plan_3,
+            parent=cls.cash_plan_3,
             business_area=cls.cash_plan_3.business_area,
+            entitlement_quantity=3000,
+            entitlement_quantity_usd=None,
             delivered_quantity=3000,
             delivered_quantity_usd=None,
             household=household,
         )
         cls.payment_record_4 = PaymentRecordFactory(
-            cash_plan=cls.cash_plan_4,
+            parent=cls.cash_plan_4,
             business_area=cls.cash_plan_4.business_area,
+            entitlement_quantity=1000,
+            entitlement_quantity_usd=None,
             delivered_quantity=1000,
             delivered_quantity_usd=None,
             household=household,
@@ -82,24 +89,63 @@ class TestPullDataFromErpDatahub(TestCase):
         cls._setup_in_app_data()
         cls._setup_datahub_data()
 
-    @patch("hct_mis_api.apps.erp_datahub.utils.get_exchange_rate_for_cash_plan", new=lambda *arg: 2)
-    @patch("hct_mis_api.apps.erp_datahub.utils.get_payment_record_delivered_quantity_in_usd", new=lambda *arg: 2)
+    @patch("hct_mis_api.apps.payment.models.CashPlan.get_exchange_rate", new=lambda *args, **kwargs: 2.00)
     def test_pull_data(self):
         task = PullFromErpDatahubTask()
         task.execute()
         self.cash_plan_1.refresh_from_db()
         self.assertEqual(self.cash_plan_1.exchange_rate, Decimal(2))
+        self.assertEqual(
+            self.cash_plan_1.total_entitled_quantity_usd,
+            Decimal(self.cash_plan_1.total_entitled_quantity / Decimal(2)).quantize(Decimal(".01")),
+        )
+        self.assertEqual(
+            self.cash_plan_1.total_entitled_quantity_revised_usd,
+            Decimal(self.cash_plan_1.total_entitled_quantity_revised / Decimal(2)).quantize(Decimal(".01")),
+        )
+        self.assertEqual(
+            self.cash_plan_1.total_delivered_quantity_usd,
+            Decimal(self.cash_plan_1.total_delivered_quantity / Decimal(2)).quantize(Decimal(".01")),
+        )
+        self.assertEqual(
+            self.cash_plan_1.total_undelivered_quantity_usd,
+            Decimal(self.cash_plan_1.total_undelivered_quantity / Decimal(2)).quantize(Decimal(".01")),
+        )
         self.cash_plan_2.refresh_from_db()
-        self.assertEqual(self.cash_plan_2.exchange_rate, Decimal("2"))
+        self.assertEqual(self.cash_plan_2.exchange_rate, Decimal(2))
         self.cash_plan_3.refresh_from_db()
-        self.assertEqual(self.cash_plan_3.exchange_rate, 2)
+        self.assertEqual(self.cash_plan_3.exchange_rate, Decimal(2))
         self.payment_record_1.refresh_from_db()
-        self.assertEqual(self.payment_record_1.delivered_quantity_usd, Decimal(2.0))
+        self.assertEqual(
+            self.payment_record_1.delivered_quantity_usd, Decimal(self.payment_record_1.delivered_quantity / Decimal(2))
+        )
+        self.assertEqual(
+            self.payment_record_1.entitlement_quantity_usd,
+            Decimal(self.payment_record_1.entitlement_quantity / Decimal(2)),
+        )
         self.payment_record_2.refresh_from_db()
-        self.assertEqual(self.payment_record_2.delivered_quantity_usd, Decimal("2"))
+        self.assertEqual(
+            self.payment_record_2.delivered_quantity_usd, Decimal(self.payment_record_2.delivered_quantity / Decimal(2))
+        )
+        self.assertEqual(
+            self.payment_record_2.entitlement_quantity_usd,
+            Decimal(self.payment_record_2.entitlement_quantity / Decimal(2)),
+        )
         self.payment_record_3.refresh_from_db()
-        self.assertEqual(self.payment_record_3.delivered_quantity_usd, 2)
+        self.assertEqual(
+            self.payment_record_3.delivered_quantity_usd, Decimal(self.payment_record_3.delivered_quantity / Decimal(2))
+        )
+        self.assertEqual(
+            self.payment_record_3.entitlement_quantity_usd,
+            Decimal(self.payment_record_3.entitlement_quantity / Decimal(2)),
+        )
         self.cash_plan_4.refresh_from_db()
-        self.assertEqual(self.cash_plan_4.exchange_rate, 2)
+        self.assertEqual(self.cash_plan_4.exchange_rate, Decimal(2))
         self.payment_record_4.refresh_from_db()
-        self.assertEqual(self.payment_record_4.delivered_quantity_usd, 2)
+        self.assertEqual(
+            self.payment_record_4.delivered_quantity_usd, Decimal(self.payment_record_4.delivered_quantity / Decimal(2))
+        )
+        self.assertEqual(
+            self.payment_record_4.entitlement_quantity_usd,
+            Decimal(self.payment_record_4.entitlement_quantity / Decimal(2)),
+        )

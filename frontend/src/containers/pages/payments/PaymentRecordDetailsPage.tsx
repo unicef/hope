@@ -49,12 +49,12 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
       to: `/${businessArea}/programs/`,
     },
     {
-      title: data.paymentRecord.cashPlan.program.name,
-      to: `/${businessArea}/programs/${data.paymentRecord.cashPlan.program.id}/`,
+      title: data.paymentRecord.parent.program.name,
+      to: `/${businessArea}/programs/${data.paymentRecord.parent.program.id}/`,
     },
     {
-      title: `Cash Plan #${data.paymentRecord.cashPlan.caId}`,
-      to: `/${businessArea}/cashplans/${data.paymentRecord.cashPlan.id}`,
+      title: `Cash Plan #${data.paymentRecord.parent.caId}`,
+      to: `/${businessArea}/cashplans/${data.paymentRecord.parent.id}`,
     },
   ];
   const paymentRecord = data.paymentRecord as PaymentRecordNode;

@@ -1,7 +1,9 @@
 import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
-
+import {
+  uniqueSeed,
+} from '../../procedures/procedures';
 let householdId;
-let individualId;
+let individualIds = [];
 
 Given('I am authenticated', () => {
   cy.visit('/api/unicorn/');
@@ -11,7 +13,7 @@ Given('I am authenticated', () => {
 });
 
 Given('There are no RDI imports', () => {
-  cy.exec('yarn run generate-xlsx-files 1');
+  cy.exec(`yarn run generate-xlsx-files 1 --seed ${uniqueSeed}`);
 });
 
 const clearCache = () => {
@@ -27,7 +29,7 @@ When('I visit the main dashboard', () => {
 });
 
 Then('I should see the side panel with RDI option', () => {
-  cy.get('span').contains('Registration Data Import', { timeout: 10000 });
+  cy.get('span').contains('Registration Data Import');
 });
 
 When('I click on RDI option', () => {
@@ -54,9 +56,9 @@ When('I select the xlsx file', () => {
     'Test import '.concat(new Date().toISOString()),
   );
 
-  const fileName = 'rdi_import_1_hh_1_ind.xlsx';
+  const fileName = `rdi_import_1_hh_1_ind_seed_${uniqueSeed}.xlsx`;
   cy.fixture(fileName, 'base64').then((fileContent) => {
-    cy.get('[data-cy="rdi-file-input"]').upload({
+    cy.get('[data-cy="file-input"]').upload({
       fileContent,
       fileName,
       mimeType:
@@ -67,8 +69,15 @@ When('I select the xlsx file', () => {
 });
 
 Then('I see it was chosen', () => {
-  cy.get('div').contains('1 Household available to import', { timeout: 10000 });
-  cy.get('div').contains('1 Individual available to import');
+  cy.get('[data-cy="number-of-households"]').contains(
+    '1 Household available to import',
+    {
+      timeout: 10000,
+    },
+  );
+  cy.get('[data-cy="number-of-individuals"]').contains(
+    '1 Individual available to import',
+  );
   cy.get('div').contains('Errors').should('not.exist');
 });
 
@@ -77,7 +86,7 @@ When('I press import', () => {
 });
 
 Then('I should see a new import with status in review', () => {
-  cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
   cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
   // it lets the browser load the status
@@ -101,13 +110,23 @@ When('I refresh the page', () => {
 
 Then('I see that the status is merged', () => {
   cy.get('div').contains('MERGED');
-  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
-    householdId = $td.text().split(' (')[0];
-  });
+  cy.get('[data-cy="imported-households-row"]')
+    .find('td:nth-child(2)')
+    .then(($td) => {
+      householdId = $td.text().split(' (')[0];
+      cy.log(`Saved householdId: ${householdId}`);
+    });
   cy.get('button > span').contains('Individuals').click({ force: true });
-  cy.get('tbody > tr > td:nth-child(2)').then(($td) => {
-    individualId = $td.text().split(' (')[0];
-  });
+
+  for (let i = 0; i < 1; i++) {
+    cy.get('[data-cy="imported-individuals-table"]')
+      .find(`tbody > tr:nth-child(${i + 1}) > td:nth-child(1)`)
+      .then(($td) => {
+        const individualId = $td.text().split(' (')[0];
+        cy.log(`Saved individualId: ${individualId}`);
+        individualIds.push(individualId);
+      });
+  }
 });
 
 When('I visit the Households dashboard', () => {
@@ -116,7 +135,10 @@ When('I visit the Households dashboard', () => {
 });
 
 Then('I see a newly imported household', () => {
-  // after 10+ runs, it may fail, because there are 10 rows in this table by default
+  cy.log(`looking for householdId: ${householdId}`);
+  cy.get('[data-cy="hh-filters-search"]')
+    .find('input')
+    .type(householdId, { force: true });
   cy.get('td').should('contain', householdId);
 });
 
@@ -125,14 +147,16 @@ When('I visit the Individuals dashboard', () => {
 });
 
 Then('I see the newly imported individuals', () => {
-  // after 10+ runs, it may fail, because there are 10 rows in this table by default
+  const individualId = individualIds[0];
+  cy.log(`looking for individualId: + ${individualId}`);
+  cy.get('[data-cy="ind-filters-search"]').type(individualId);
   cy.get('td').should('contain', individualId);
 });
 
 When('I check the household details', () => {
   cy.get('td').contains(householdId).click();
-})
+});
 
 Then('I see the household has the correct data', () => {
   cy.get('[data-cy="label-COLLECT TYPE"]').contains('Full');
-})
+});

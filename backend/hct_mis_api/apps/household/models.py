@@ -10,7 +10,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import DecimalField, JSONField
+from django.db.models import JSONField
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -24,13 +24,13 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
 )
+from hct_mis_api.apps.utils.phone_number import is_right_phone_number_format
 
 BLANK = ""
 IDP = "IDP"
@@ -513,22 +513,6 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     @property
     def sanction_list_confirmed_match(self):
         return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
-
-    @property
-    def total_cash_received_realtime(self):
-        return (
-            self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity", output_field=DecimalField()))
-            .get("delivered_quantity__sum")
-        )
-
-    @property
-    def total_cash_received_usd_realtime(self):
-        return (
-            self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
-            .get("delivered_quantity_usd__sum")
-        )
 
     @property
     def active_individuals(self):

@@ -9,11 +9,12 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
+    CashPlanFactory,
     CashPlanPaymentVerificationFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
 )
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.reporting.fixtures import ReportFactory
 from hct_mis_api.apps.reporting.models import Report
 
@@ -84,13 +85,13 @@ class TestGenerateReportService(TestCase):
             household=self.households[0],
             business_area=self.business_area,
             delivery_date="2020-01-01",
-            cash_plan=self.cash_plan_1,
+            parent=self.cash_plan_1,
         )
         PaymentRecordFactory(
             household=self.households[1],
             business_area=self.business_area,
             delivery_date="2020-01-01",
-            cash_plan=self.cash_plan_2,
+            parent=self.cash_plan_2,
         )
         PaymentVerificationFactory(cash_plan_payment_verification=self.cash_plan_verification_1)
         PaymentVerificationFactory(cash_plan_payment_verification=self.cash_plan_verification_2)
@@ -117,7 +118,6 @@ class TestGenerateReportService(TestCase):
         ]
     )
     def test_report_types(self, _, report_type, should_set_admin_area, should_set_program, number_of_records):
-
         report = ReportFactory.create(
             created_by=self.user,
             business_area=self.business_area,

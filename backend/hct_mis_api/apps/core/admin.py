@@ -117,6 +117,62 @@ class GroupConcat(Aggregate):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "code",
+                    "name",
+                    "slug",
+                    "long_name",
+                    "region_code",
+                    "region_name",
+                    "countries",
+                )
+            },
+        ),
+        (
+            "Advanced options",
+            {
+                "fields": (
+                    "kobo_username",
+                    "rapid_pro_host",
+                    "rapid_pro_api_key",
+                    "custom_fields",
+                ),
+            },
+        ),
+        (
+            "Settings",
+            {
+                "fields": (
+                    "has_data_sharing_agreement",
+                    "postpone_deduplication",
+                    "deduplication_duplicate_score",
+                    "deduplication_possible_duplicate_score",
+                    "deduplication_batch_duplicates_percentage",
+                    "deduplication_batch_duplicates_allowed",
+                    "deduplication_golden_record_duplicates_percentage",
+                    "deduplication_golden_record_duplicates_allowed",
+                    "deduplication_golden_record_duplicates_percentage",
+                    "screen_beneficiary",
+                    "deduplication_ignore_withdraw",
+                    "approval_number_required",
+                    "authorization_number_required",
+                    "finance_review_number_required",
+                    "is_payment_plan_applicable",
+                ),
+            },
+        ),
+        (
+            "Read Only",
+            {
+                "fields": ("parent", "is_split"),
+            },
+        ),
+    )
+
     list_display = (
         "name",
         "slug",

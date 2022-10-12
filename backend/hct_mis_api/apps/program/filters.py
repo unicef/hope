@@ -1,18 +1,11 @@
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.db.models.functions import Lower
 
-from django_filters import (
-    CharFilter,
-    DateFilter,
-    FilterSet,
-    MultipleChoiceFilter,
-    OrderingFilter,
-)
+from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
-from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.program.models import Program
 
 
 class ProgramFilter(FilterSet):
@@ -44,12 +37,17 @@ class ProgramFilter(FilterSet):
 
     def filter_queryset(self, queryset):
         queryset = queryset.annotate(
-            total_hh_count=Count(
-                "cash_plans__payment_records__household",
-                filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
+            total_payment_plans_hh_count=Count(
+                "cashplan__payment_items__household",
+                filter=Q(cashplan__payment_items__delivered_quantity__gte=0),
                 distinct=True,
-            )
-        )
+            ),
+            total_cash_plans_hh_count=Count(
+                "paymentplan__payment_items__household",
+                filter=Q(paymentplan__payment_items__delivered_quantity__gte=0),
+                distinct=True,
+            ),
+        ).annotate(total_hh_count=F("total_payment_plans_hh_count") + F("total_cash_plans_hh_count"))
         return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):
@@ -57,62 +55,6 @@ class ProgramFilter(FilterSet):
         q_obj = Q()
         for value in values:
             q_obj |= Q(name__istartswith=value)
-        return qs.filter(q_obj)
-
-
-class CashPlanFilter(FilterSet):
-    search = CharFilter(method="search_filter")
-    delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE)
-    verification_status = MultipleChoiceFilter(
-        field_name="cash_plan_payment_verification_summary__status", choices=CashPlanPaymentVerification.STATUS_CHOICES
-    )
-    business_area = CharFilter(
-        field_name="business_area__slug",
-    )
-
-    class Meta:
-        fields = {
-            "program": ["exact"],
-            "assistance_through": ["exact", "startswith"],
-            "service_provider__full_name": ["exact", "startswith"],
-            "start_date": ["exact", "lte", "gte"],
-            "end_date": ["exact", "lte", "gte"],
-            "business_area": ["exact"],
-        }
-        model = CashPlan
-
-    order_by = OrderingFilter(
-        fields=(
-            "ca_id",
-            "status",
-            "total_number_of_hh",
-            "total_entitled_quantity",
-            ("cash_plan_payment_verification_summary__status", "verification_status"),
-            "total_persons_covered",
-            "total_delivered_quantity",
-            "total_undelivered_quantity",
-            "dispersion_date",
-            "assistance_measurement",
-            "assistance_through",
-            "delivery_type",
-            "start_date",
-            "end_date",
-            "program__name",
-            "id",
-            "updated_at",
-            "service_provider__full_name",
-        )
-    )
-
-    def filter_queryset(self, queryset):
-        queryset = queryset.annotate(total_number_of_hh=Count("payment_records"))
-        return super().filter_queryset(queryset)
-
-    def search_filter(self, qs, name, value):
-        values = value.split(" ")
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(ca_id__istartswith=value)
         return qs.filter(q_obj)
 
 

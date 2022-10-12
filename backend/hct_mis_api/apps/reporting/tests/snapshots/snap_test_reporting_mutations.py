@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestReportingMutation::test_create_report_with_no_extra_filters_0_with_permission_individuals_report_with_earlier_dateTo 1'] = {
@@ -83,7 +84,7 @@ snapshots['TestReportingMutation::test_restart_create_report_0_with_permission 1
         'restartCreateReport': {
             'report': {
                 'reportType': 1,
-                'status': 1
+                'status': 2
             }
         }
     }

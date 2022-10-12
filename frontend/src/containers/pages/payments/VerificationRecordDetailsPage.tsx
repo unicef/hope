@@ -35,6 +35,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   if (!data || !choicesData || permissions === null) return null;
 
   const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
@@ -51,9 +52,9 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
       ? [
           {
             title: `${t('Cash Plan')} ${decodeIdString(
-              paymentVerification.paymentRecord.cashPlan.id,
+              paymentVerification.paymentRecord.parent.id,
             )}`,
-            to: `/${businessArea}/payment-verification/${paymentVerification.paymentRecord.cashPlan.id}`,
+            to: `/${businessArea}/payment-verification/${paymentVerification.paymentRecord.parent.id}`,
           },
         ]
       : []),

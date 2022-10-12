@@ -55,6 +55,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
             >
               <h6
                 class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+                data-cy="table-title"
               >
                 Users List
               </h6>

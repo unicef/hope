@@ -131,6 +131,11 @@ class IndividualIdentityFactory(factory.DjangoModelFactory):
     number = factory.Faker("pystr", min_chars=None, max_chars=20)
 
 
+class IndividualRoleInHouseholdFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = IndividualRoleInHousehold
+
+
 class IndividualFactory(factory.DjangoModelFactory):
     class Meta:
         model = Individual

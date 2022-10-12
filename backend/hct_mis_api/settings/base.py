@@ -819,4 +819,4 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
-MAX_STORAGE_FILE_SIZE = 30
+USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"

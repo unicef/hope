@@ -62,7 +62,7 @@ export function LookUpPaymentRecordTableRow({
           '-'
         )}
       </TableCell>
-      <TableCell align='left'>{paymentRecord.cashPlan.name}</TableCell>
+      <TableCell align='left'>{paymentRecord.parent.name}</TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
           paymentRecord.deliveredQuantity,

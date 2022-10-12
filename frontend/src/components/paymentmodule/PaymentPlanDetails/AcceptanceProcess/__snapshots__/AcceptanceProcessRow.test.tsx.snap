@@ -1,0 +1,204 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessRow should render 1`] = `
+<div>
+  <div
+    class="MuiBox-root MuiBox-root-1 sc-gqjmRU gggsyL"
+  >
+    <div
+      class="MuiPaper-root MuiStepper-root MuiStepper-horizontal MuiPaper-elevation0"
+    >
+      <div
+        class="MuiStep-root MuiStep-horizontal MuiStep-completed"
+      >
+        <span
+          class="MuiStepLabel-root MuiStepLabel-horizontal"
+        >
+          <span
+            class="MuiStepLabel-iconContainer"
+          >
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-completed"
+              focusable="false"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
+              />
+            </svg>
+          </span>
+          <span
+            class="MuiStepLabel-labelContainer"
+          >
+            <span
+              class="MuiTypography-root MuiStepLabel-label MuiStepLabel-completed MuiTypography-body2 MuiTypography-displayBlock"
+            >
+              Approval (1/1)
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiStepConnector-root MuiStepConnector-horizontal MuiStepConnector-active"
+      >
+        <span
+          class="MuiStepConnector-line MuiStepConnector-lineHorizontal"
+        />
+      </div>
+      <div
+        class="MuiStep-root MuiStep-horizontal"
+      >
+        <span
+          class="MuiStepLabel-root MuiStepLabel-horizontal"
+        >
+          <span
+            class="MuiStepLabel-iconContainer"
+          >
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-active"
+              focusable="false"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="12"
+              />
+              <text
+                class="MuiStepIcon-text"
+                text-anchor="middle"
+                x="12"
+                y="16"
+              >
+                2
+              </text>
+            </svg>
+          </span>
+          <span
+            class="MuiStepLabel-labelContainer"
+          >
+            <span
+              class="MuiTypography-root MuiStepLabel-label MuiStepLabel-active MuiTypography-body2 MuiTypography-displayBlock"
+            >
+              Authorization (0/1)
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled"
+      >
+        <span
+          class="MuiStepConnector-line MuiStepConnector-lineHorizontal"
+        />
+      </div>
+      <div
+        class="MuiStep-root MuiStep-horizontal"
+      >
+        <span
+          class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled"
+        >
+          <span
+            class="MuiStepLabel-iconContainer"
+          >
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiStepIcon-root"
+              focusable="false"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="12"
+              />
+              <text
+                class="MuiStepIcon-text"
+                text-anchor="middle"
+                x="12"
+                y="16"
+              >
+                3
+              </text>
+            </svg>
+          </span>
+          <span
+            class="MuiStepLabel-labelContainer"
+          >
+            <span
+              class="MuiTypography-root MuiStepLabel-label MuiTypography-body2 MuiTypography-displayBlock"
+            >
+              Finance Review (0/1)
+            </span>
+          </span>
+        </span>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+      >
+        <div
+          class="MuiBox-root MuiBox-root-2"
+        >
+          <div
+            class="MuiBox-root MuiBox-root-3"
+          >
+            <div
+              class="sc-dnqmqq gDPaov"
+            >
+              Sent for approval by Root Rootkowski
+               on 
+              <time
+                datetime="1661843731428"
+              >
+                30 Aug 2022
+              </time>
+            </div>
+          </div>
+          <div
+            class="MuiBox-root MuiBox-root-4 sc-gZMcBi kZvOgO"
+          >
+            <div
+              class="MuiBox-root MuiBox-root-5"
+            >
+              Approved by Root Rootkowski
+              <div
+                class="MuiBox-root MuiBox-root-6"
+              >
+                <div
+                  class="sc-htoDjs kacwMH"
+                >
+                  on 
+                  <time
+                    datetime="1661843741787"
+                  >
+                    30 Aug 2022
+                  </time>
+                </div>
+              </div>
+              <div
+                class="MuiBox-root MuiBox-root-7"
+              >
+                <div
+                  class="sc-iwsKbI bzHTth"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+      />
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+      />
+    </div>
+  </div>
+</div>
+`;

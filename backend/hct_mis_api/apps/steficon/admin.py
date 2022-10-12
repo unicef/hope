@@ -211,7 +211,7 @@ class RuleResource(ModelResource):
 @register(Rule)
 class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
-    list_filter = ("language", "enabled", "deprecated")
+    list_filter = ("language", "enabled", "deprecated", "type")
     search_fields = ("name",)
     form = RuleForm
     readonly_fields = (
@@ -229,7 +229,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             None,
             {
                 "fields": (
-                    ("name", "version"),
+                    ("name", "type", "version"),
                     ("enabled", "deprecated"),
                 )
             },
@@ -498,7 +498,7 @@ class RuleCommitAdmin(
     list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
-    readonly_fields = ("updated_by", "rule", "affected_fields", "version")
+    readonly_fields = ("updated_by",)
     change_form_template = None
     change_list_template = None
     resource_class = RuleCommitResource

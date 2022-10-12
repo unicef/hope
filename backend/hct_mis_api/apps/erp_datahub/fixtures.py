@@ -3,7 +3,7 @@ from pytz import utc
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.erp_datahub.models import FundsCommitment
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.payment.models import CashPlan
 
 
 class FundsCommitmentFactory(factory.DjangoModelFactory):

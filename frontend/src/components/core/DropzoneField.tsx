@@ -19,6 +19,7 @@ const DropzoneContainer = styled.div`
   justify-content: center;
   align-items: center;
   margin-top: ${({ theme }) => theme.spacing(5)}px;
+  padding: ${({ theme }) => theme.spacing(5)}px;
   cursor: pointer;
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
@@ -27,9 +28,13 @@ export function DropzoneField({
   onChange,
   loading,
   dontShowFilename,
+}: {
+  onChange: (acceptedFiles: File[]) => void;
+  loading: boolean;
+  dontShowFilename: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const onDrop = useCallback((acceptedFiles) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
     onChange(acceptedFiles);
   }, []);
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
@@ -43,7 +48,7 @@ export function DropzoneField({
     <Box display='flex' justifyContent='center' p={5}>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
-        <input {...getInputProps()} data-cy='rdi-file-input' />
+        <input {...getInputProps()} data-cy='file-input' />
         {dontShowFilename || !acceptedFilename
           ? t('UPLOAD FILE')
           : acceptedFilename}

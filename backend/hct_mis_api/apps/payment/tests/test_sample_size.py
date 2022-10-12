@@ -4,9 +4,8 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
 def create_query_variables(cash_plan, verification_channel):
@@ -53,7 +52,7 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
 
     def test_sample_size_in_manual_verification_plan(self):
         PaymentRecordFactory(
-            cash_plan=self.cash_plan,
+            parent=self.cash_plan,
             business_area=self.business_area,
             household=self.household,
             head_of_household_id=self.individuals[0].id,
@@ -73,12 +72,12 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
             variables=rapid_pro_sample_query_variables,
             context={"user": self.user},
         )
-        self.assertTrue(rapid_pro_response["data"]["sampleSize"]["paymentRecordCount"] == 0)
+        self.assertEqual(rapid_pro_response["data"]["sampleSize"]["paymentRecordCount"], 0)
 
     def test_number_of_queries(self):
         PaymentRecordFactory.create_batch(
             4,
-            cash_plan=self.cash_plan,
+            parent=self.cash_plan,
             business_area=self.business_area,
             household=self.household,
             head_of_household_id=self.individuals[1].id,

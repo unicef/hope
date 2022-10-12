@@ -33,6 +33,14 @@ interface LogRowProps {
   logEntry: LogEntryNode;
 }
 
+const formatted = (value): string => {
+  const timeWithTimeZoneRegex = /(\d{2}:\d{2}:\d{2})([+-])(\d{2}):(\d{2})$/;
+  if (timeWithTimeZoneRegex.test(value)) {
+    return value.replace(timeWithTimeZoneRegex, '');
+  }
+  return value;
+};
+
 export function LogRow({ logEntry }: LogRowProps): ReactElement {
   const { changes } = logEntry;
   const [expanded, setExpanded] = useState(false);
@@ -51,8 +59,12 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
             : null}
         </Cell>
         <Cell weight={headCells[2].weight}>{keys[0]}</Cell>
-        <Cell weight={headCells[3].weight}>{changes[keys[0]].from}</Cell>
-        <Cell weight={headCells[4].weight}>{changes[keys[0]].to}</Cell>
+        <Cell weight={headCells[3].weight}>
+          {formatted(changes[keys[0]].from)}
+        </Cell>
+        <Cell weight={headCells[4].weight}>
+          {formatted(changes[keys[0]].to)}
+        </Cell>
         <ButtonPlaceHolder />
       </Row>
     );
@@ -90,8 +102,12 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
               <Cell weight={headCells[0].weight} />
               <Cell weight={headCells[1].weight} />
               <Cell weight={headCells[2].weight}>{key}</Cell>
-              <Cell weight={headCells[3].weight}>{changes[key].from}</Cell>
-              <Cell weight={headCells[4].weight}>{changes[key].to}</Cell>
+              <Cell weight={headCells[3].weight}>
+                {formatted(changes[key].from)}
+              </Cell>
+              <Cell weight={headCells[4].weight}>
+                {formatted(changes[key].to)}
+              </Cell>
               <ButtonPlaceHolder />
             </Row>
           );

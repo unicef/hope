@@ -2,6 +2,7 @@ from django.db.models import Q
 from django.db.models.functions import Lower
 
 from django_filters import (
+    BooleanFilter,
     CharFilter,
     DateTimeFilter,
     FilterSet,
@@ -56,6 +57,8 @@ class TargetPopulationFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
     program = ModelMultipleChoiceFilter(field_name="program", to_field_name="id", queryset=Program.objects.all())
 
+    payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
+
     @staticmethod
     def filter_created_by_name(queryset, model_field, value):
         """Gets full name of the associated user from query."""
@@ -63,6 +66,26 @@ class TargetPopulationFilter(FilterSet):
         lname_query_key = f"{model_field}__family_name__icontains"
         for name in value.strip().split():
             queryset = queryset.filter(Q(**{fname_query_key: name}) | Q(**{lname_query_key: name}))
+        return queryset
+
+    def filter_number_of_households_min(self, queryset, model_field, value):
+        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_OPEN).filter(
+            number_of_households__gte=value
+        )
+        return queryset
+
+    def filter_number_of_households_max(self, queryset, model_field, value):
+        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_OPEN).filter(
+            number_of_households__lte=value
+        )
+        return queryset
+
+    def filter_payment_plan_applicable(self, queryset, model_field, value):
+        if value is True:
+            return queryset.filter(
+                Q(business_area__is_payment_plan_applicable=True)
+                & Q(status=target_models.TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
+            )
         return queryset
 
     class Meta:

@@ -1,0 +1,63 @@
+trigger: none
+pr: none
+resources:
+  pipelines:
+  - pipeline: ci-hope
+    source: '[CI] HOPE'
+    trigger: 
+      branches:
+      - feature/payment-module
+
+
+variables:
+  # ========================================================================
+  #                          Mandatory variables 
+  # ========================================================================
+  Kubernetes.serviceConnection: "aks-hope-pm-azure-devops-sa"
+  Kubernetes.namespace: "ictd-hope-pm"
+  Docker.backend.repository: "hope-backend"
+  Docker.frontend.repository: "hope-frontend"
+  Docker.registry: "uniappsakshopedev.azurecr.io"
+
+stages:
+  - stage: deploy
+    displayName: DEPLOY
+    jobs:
+      - job: deploy_hope
+        pool:
+          vmImage: 'ubuntu-latest'
+        displayName: "[HOPE] Deployment"
+        steps:
+          - task: HelmDeploy@0
+            displayName: "Update Chart dependencies"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
+              command: package
+              updatedependency: true
+              chartPath: '**/deployment/charts/hope'
+          - task: HelmDeploy@0
+            displayName: "DEPLOY"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)
+              namespace: $(Kubernetes.namespace)
+              command: 'upgrade'
+              chartType: 'FilePath'
+              chartPath: '**/deployment/charts/hope'
+              releaseName: 'hope-pm'
+              install: true
+              waitForExecution: false
+              failOnStderr: false
+              valueFile: '**/deployment/ephemeral-pipelines/pm-values.yaml'
+              arguments: "--timeout 600s"
+              overrideValues: "
+                backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
+                celery.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
+                frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
+                backend.secret.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
+                backend.secret.STORAGE_AZURE_ACCOUNT_KEY=$(STORAGE_AZURE_ACCOUNT_KEY),\
+                backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
+                backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
+                backend.secret.KOBO_MASTER_API_TOKEN=$(KOBO_MASTER_API_TOKEN),\
+                backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY)"

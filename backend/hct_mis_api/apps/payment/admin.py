@@ -1,5 +1,9 @@
+from django import forms
 from django.contrib import admin, messages
+from django.core.exceptions import ValidationError
+from django.db.models import Q, QuerySet
 from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
@@ -13,7 +17,15 @@ from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.payment.models import (
+    CashPlan,
     CashPlanPaymentVerification,
+    DeliveryMechanismPerPaymentPlan,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
+    Payment,
+    PaymentChannel,
+    PaymentPlan,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
@@ -33,7 +45,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("target_population", AutoCompleteFilter),
-        ("cash_plan", AutoCompleteFilter),
+        ("parent", AutoCompleteFilter),
         ("service_provider", AutoCompleteFilter),
         # ValueFilter.factory("cash_plan__id", "CashPlan ID"),
         # ValueFilter.factory("target_population__id", "TargetPopulation ID"),
@@ -42,13 +54,13 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         "status",
         "delivery_date",
         ("service_provider__name", "Service Provider"),
-        ("cash_plan__name", "CashPlan"),
+        ("parent__name", "CashPlan"),
         ("target_population__name", "TargetPopulation"),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = (
         "business_area",
-        "cash_plan",
+        "parent",
         "household",
         "head_of_household",
         "target_population",
@@ -56,12 +68,10 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
     )
 
     def cash_plan_name(self, obj):
-        return obj.cash_plan.name
+        return obj.parent.name
 
     def get_queryset(self, request):
-        return (
-            super().get_queryset(request).select_related("household", "cash_plan", "target_population", "business_area")
-        )
+        return super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
 
 
 @admin.register(CashPlanPaymentVerification)
@@ -156,3 +166,173 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     list_display = ("full_name", "short_name", "country")
     search_fields = ("full_name", "vision_id", "short_name")
     list_filter = (("business_area", AutoCompleteFilter),)
+
+
+@admin.register(CashPlan)
+class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+    list_display = ("name", "program", "delivery_type", "status", "verification_status", "ca_id")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
+        ("delivery_type", ChoicesFieldComboFilter),
+        ("cash_plan_payment_verification_summary__status", ChoicesFieldComboFilter),
+        ("program__id", ValueFilter),
+        ("vision_id", ValueFilter),
+    )
+    raw_id_fields = ("business_area", "program", "service_provider")
+    search_fields = ("name",)
+
+    def verification_status(self, obj):
+        return obj.cash_plan_payment_verification_summary.status
+
+    @button()
+    def payments(self, request, pk):
+        context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
+
+        return TemplateResponse(request, "admin/cashplan/payments.html", context)
+
+
+@admin.register(PaymentPlan)
+class PaymentPlanAdmin(HOPEModelAdminBase):
+    list_display = ("unicef_id", "program", "status", "target_population")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
+        ("program__id", ValueFilter),
+        ("target_population", AutoCompleteFilter),
+    )
+    raw_id_fields = ("business_area", "program", "target_population")
+    search_fields = ("id", "unicef_id")
+
+
+@admin.register(Payment)
+class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+    list_display = ("unicef_id", "household", "status", "parent")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
+        ("parent", AutoCompleteFilter),
+        ("financial_service_provider", AutoCompleteFilter),
+    )
+    advanced_filter_fields = (
+        "status",
+        "delivery_date",
+        ("financial_service_provider__name", "Service Provider"),
+        ("parent", "Payment Plan"),
+    )
+    date_hierarchy = "updated_at"
+    raw_id_fields = (
+        "business_area",
+        "parent",
+        "household",
+        "head_of_household",
+        "financial_service_provider",
+    )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("household", "parent", "business_area")
+
+
+@admin.register(DeliveryMechanismPerPaymentPlan)
+class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
+    list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
+
+
+@admin.register(PaymentChannel)
+class PaymentChannelAdmin(HOPEModelAdminBase):
+    list_display = ("individual", "delivery_mechanism_display_name")
+
+    def delivery_mechanism_display_name(self, obj):
+        return obj.delivery_mechanism
+
+
+@admin.register(FinancialServiceProviderXlsxTemplate)
+class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
+    list_display = (
+        "name",
+        "total_selected_columns",
+        "created_by",
+    )
+    list_filter = (("created_by", AutoCompleteFilter),)
+    search_fields = ("name",)
+    fields = (
+        "name",
+        "columns",
+    )
+
+    def total_selected_columns(self, obj):
+        return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES)}"
+
+    total_selected_columns.short_description = "# of columns"
+
+    def save_model(self, request, obj: FinancialServiceProviderXlsxTemplate, form, change: bool) -> None:
+        if not change:
+            obj.created_by = request.user
+        return super().save_model(request, obj, form, change)
+
+
+class FinancialServiceProviderAdminForm(forms.ModelForm):
+    @staticmethod
+    def locked_payment_plans_for_fsp(obj: FinancialServiceProvider) -> QuerySet[PaymentPlan]:
+        return PaymentPlan.objects.filter(
+            ~Q(
+                status__in=[
+                    PaymentPlan.Status.OPEN,
+                    PaymentPlan.Status.RECONCILED,
+                ],
+            ),
+            delivery_mechanisms__financial_service_provider=obj,
+        ).distinct()
+
+    def clean(self):
+        if self.instance:
+            payment_plans = self.locked_payment_plans_for_fsp(self.instance)
+            if payment_plans.exists():
+                raise ValidationError(
+                    f"Cannot modify {self.instance}, it is assigned to following Payment Plans: {list(payment_plans)}"
+                )
+
+        return super().clean()
+
+
+@admin.register(FinancialServiceProvider)
+class FinancialServiceProviderAdmin(HOPEModelAdminBase):
+    form = FinancialServiceProviderAdminForm
+
+    list_display = (
+        "name",
+        "created_by",
+        "vision_vendor_number",
+        "distribution_limit",
+        "communication_channel",
+    )
+    search_fields = ("name",)
+    list_filter = ("delivery_mechanisms",)
+    autocomplete_fields = ("created_by", "fsp_xlsx_template")
+    list_select_related = ("created_by", "fsp_xlsx_template")
+    fields = (
+        ("name", "vision_vendor_number"),
+        ("delivery_mechanisms", "distribution_limit"),
+        ("communication_channel", "fsp_xlsx_template"),
+        ("data_transfer_configuration",),
+    )
+
+    def save_model(self, request, obj: FinancialServiceProvider, form, change: bool) -> None:
+        if not change:
+            obj.created_by = request.user
+        return super().save_model(request, obj, form, change)
+
+
+@admin.register(FinancialServiceProviderXlsxReport)
+class FinancialServiceProviderXlsxReportAdmin(HOPEModelAdminBase):
+    list_display = ("id", "status", "file")
+    list_filter = ("status",)
+    list_select_related = ("financial_service_provider",)
+    # search_fields = ("id",)
+    readonly_fields = ("file", "status", "financial_service_provider")
+
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False

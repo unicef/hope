@@ -4,7 +4,25 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
+
+snapshots['TestProgramChoices::test_dashboard_years_choices 1'] = {
+    'data': {
+        'dashboardYearsChoices': [
+            '2021',
+            '2020'
+        ]
+    }
+}
+
+snapshots['TestProgramChoices::test_dashboard_years_choices__no_objects 1'] = {
+    'data': {
+        'dashboardYearsChoices': [
+            '2023'
+        ]
+    }
+}
 
 snapshots['TestProgramChoices::test_report_types_choices 1'] = {
     'data': {
@@ -14,7 +32,7 @@ snapshots['TestProgramChoices::test_report_types_choices 1'] = {
                 'value': '1'
             },
             {
-                'name': 'Household Demographics',
+                'name': 'Households',
                 'value': '2'
             },
             {
@@ -30,16 +48,24 @@ snapshots['TestProgramChoices::test_report_types_choices 1'] = {
                 'value': '5'
             },
             {
+                'name': 'Payment Plan',
+                'value': '10'
+            },
+            {
                 'name': 'Cash Plan',
                 'value': '6'
             },
             {
-                'name': 'Program',
+                'name': 'Programme',
                 'value': '7'
             },
             {
-                'name': 'Individuals and Payment',
+                'name': 'Individuals & Payment',
                 'value': '8'
+            },
+            {
+                'name': 'Grievances',
+                'value': '9'
             }
         ]
     }

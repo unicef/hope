@@ -1,0 +1,227 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess should render 1`] = `
+<div>
+  <div
+    class="MuiBox-root MuiBox-root-1"
+  >
+    <div
+      class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
+    >
+      <div
+        class="MuiBox-root MuiBox-root-2"
+      >
+        <div
+          class="sc-bwzfXH glegqy"
+        >
+          <h6
+            class="MuiTypography-root MuiTypography-h6"
+          >
+            Acceptance Process
+          </h6>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root MuiBox-root-3 sc-jTzLTM hDLiwJ"
+      >
+        <div
+          class="MuiPaper-root MuiStepper-root MuiStepper-horizontal MuiPaper-elevation0"
+        >
+          <div
+            class="MuiStep-root MuiStep-horizontal MuiStep-completed"
+          >
+            <span
+              class="MuiStepLabel-root MuiStepLabel-horizontal"
+            >
+              <span
+                class="MuiStepLabel-iconContainer"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-completed"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm-2 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"
+                  />
+                </svg>
+              </span>
+              <span
+                class="MuiStepLabel-labelContainer"
+              >
+                <span
+                  class="MuiTypography-root MuiStepLabel-label MuiStepLabel-completed MuiTypography-body2 MuiTypography-displayBlock"
+                >
+                  Approval (1/1)
+                </span>
+              </span>
+            </span>
+          </div>
+          <div
+            class="MuiStepConnector-root MuiStepConnector-horizontal MuiStepConnector-active"
+          >
+            <span
+              class="MuiStepConnector-line MuiStepConnector-lineHorizontal"
+            />
+          </div>
+          <div
+            class="MuiStep-root MuiStep-horizontal"
+          >
+            <span
+              class="MuiStepLabel-root MuiStepLabel-horizontal"
+            >
+              <span
+                class="MuiStepLabel-iconContainer"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-active"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="12"
+                  />
+                  <text
+                    class="MuiStepIcon-text"
+                    text-anchor="middle"
+                    x="12"
+                    y="16"
+                  >
+                    2
+                  </text>
+                </svg>
+              </span>
+              <span
+                class="MuiStepLabel-labelContainer"
+              >
+                <span
+                  class="MuiTypography-root MuiStepLabel-label MuiStepLabel-active MuiTypography-body2 MuiTypography-displayBlock"
+                >
+                  Authorization (0/1)
+                </span>
+              </span>
+            </span>
+          </div>
+          <div
+            class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled"
+          >
+            <span
+              class="MuiStepConnector-line MuiStepConnector-lineHorizontal"
+            />
+          </div>
+          <div
+            class="MuiStep-root MuiStep-horizontal"
+          >
+            <span
+              class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled"
+            >
+              <span
+                class="MuiStepLabel-iconContainer"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiStepIcon-root"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="12"
+                  />
+                  <text
+                    class="MuiStepIcon-text"
+                    text-anchor="middle"
+                    x="12"
+                    y="16"
+                  >
+                    3
+                  </text>
+                </svg>
+              </span>
+              <span
+                class="MuiStepLabel-labelContainer"
+              >
+                <span
+                  class="MuiTypography-root MuiStepLabel-label MuiTypography-body2 MuiTypography-displayBlock"
+                >
+                  Finance Review (0/1)
+                </span>
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-container"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          >
+            <div
+              class="MuiBox-root MuiBox-root-4"
+            >
+              <div
+                class="MuiBox-root MuiBox-root-5"
+              >
+                <div
+                  class="sc-gZMcBi iLflOl"
+                >
+                  Sent for approval by Root Rootkowski
+                   on 
+                  <time
+                    datetime="1661843731428"
+                  >
+                    30 Aug 2022
+                  </time>
+                </div>
+              </div>
+              <div
+                class="MuiBox-root MuiBox-root-6 sc-VigVT dYssCQ"
+              >
+                <div
+                  class="MuiBox-root MuiBox-root-7"
+                >
+                  Approved by Root Rootkowski
+                  <div
+                    class="MuiBox-root MuiBox-root-8"
+                  >
+                    <div
+                      class="sc-iwsKbI cmTGgT"
+                    >
+                      on 
+                      <time
+                        datetime="1661843741787"
+                      >
+                        30 Aug 2022
+                      </time>
+                    </div>
+                  </div>
+                  <div
+                    class="MuiBox-root MuiBox-root-9"
+                  >
+                    <div
+                      class="sc-gqjmRU dAXogI"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          />
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess should render empty without Approval Process 1`] = `<div />`;
