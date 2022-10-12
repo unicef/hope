@@ -29,7 +29,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        super().setUpTestData()
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
@@ -162,6 +161,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             cls.document6,
             cls.document7,
         ]
+        super().setUpTestData()
 
     def refresh_all_documents(self):
         for document in self.all_documents:
