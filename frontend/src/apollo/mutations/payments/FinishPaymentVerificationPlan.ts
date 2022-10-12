@@ -5,7 +5,7 @@ export const FINISH_CASH_PLAN_PAYMENT_VERIFICATION = gql`
     finishPaymentVerificationPlan(
       paymentVerificationPlanId: $cashPlanVerificationId
     ) {
-      cashPlan {
+      paymentPlan {
         id
         status
         statusDate

@@ -5,7 +5,7 @@ export const DELETE_CASH_PLAN_PAYMENT_VERIFICATION = gql`
     deletePaymentVerificationPlan(
       paymentVerificationPlanId: $paymentVerificationPlanId
     ) {
-      cashPlan {
+      paymentPlan {
         id
         status
         statusDate

@@ -65,7 +65,7 @@ class TestHopeRedirect(APITestCase):
             business_area=business_area,
         )
         payment_verification_plan = PaymentVerificationPlanFactory(
-            cash_plan=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
+            payment_plan=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
         )
 
         target_population = TargetPopulationFactory(

@@ -5,7 +5,7 @@ export const InvalidPaymentVerificationPlan = gql`
     invalidPaymentVerificationPlan(
       paymentVerificationPlanId: $paymentVerificationPlanId
     ) {
-      cashPlan {
+      paymentPlan {
         id
         verificationPlans {
           edges {
