@@ -218,7 +218,7 @@ class HouseholdAdmin(
     def _toggle_withdraw_status(self, request, hh: Household, tickets: Iterable = None, comment=None, tag=None):
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
-        if not tickets:
+        if tickets is None:
             tickets = GrievanceTicket.objects.belong_household(hh)
             if hh.withdrawn:
                 tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
@@ -227,20 +227,22 @@ class HouseholdAdmin(
         service = HouseholdWithdraw(hh)
         service.change_tickets_status(tickets)
         if hh.withdrawn:
-            hh.withdraw()
-            message = "{} has been restored by {}. {}"
+            hh.unwithdraw()
+            message = "{target} has been restored by {user}. {comment}"
             ticket_message = "Ticket reopened due to Household restore"
         else:
             hh.withdraw(tag=tag)
-            message = "{} has been withdrawn by {}. {}"
+            message = "{target} has been withdrawn by {user}. {comment}"
             ticket_message = "Ticket closed due to Household withdrawn"
 
         for individual in service.individuals:
-            self.log_change(request, individual, message.format("Individual"))
+            self.log_change(
+                request, individual, message.format(target="Individual", user=request.user.username, comment=comment)
+            )
 
         for ticket in tickets:
             self.log_change(request, ticket.ticket, ticket_message)
-        self.log_change(request, hh, message.format("Household", request.user.username, comment))
+        self.log_change(request, hh, message.format(target="Household", user=request.user.username, comment=comment))
 
         return service
 
@@ -286,8 +288,14 @@ class HouseholdAdmin(
             form = RestoreForm(request.POST)
             if form.is_valid():
                 with atomic():
+                    if form.cleaned_data["reopen_tickets"]:
+                        tickets = None
+                    else:
+                        tickets = []
                     for hh in qs.filter(withdrawn=True):
-                        service = self._toggle_withdraw_status(request, hh, comment=form.cleaned_data["reason"])
+                        service = self._toggle_withdraw_status(
+                            request, hh, tickets=tickets, comment=form.cleaned_data["reason"]
+                        )
                         if not service.household.withdraw:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
@@ -295,7 +303,9 @@ class HouseholdAdmin(
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
         else:
-            context["form"] = RestoreForm(initial={"_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME)})
+            context["form"] = RestoreForm(
+                initial={"reopen_tickets": True, "_selected_action": request.POST.getlist(ACTION_CHECKBOX_NAME)}
+            )
             return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
 
     mass_withdraw.allowed_permissions = ["withdrawn"]

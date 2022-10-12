@@ -80,12 +80,6 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser or (obj and obj.owner == request.user)
 
-    # @button(visible=lambda btn: "/change" in btn.context["request"].path)
-    # def create_report(self, request, pk):
-    #     obj = self.get_object(request, pk)
-    #     url = reverse("admin:power_query_report_add")
-    #     return HttpResponseRedirect(f"{url}?q={obj.pk}")
-    #
     @button()
     def datasets(self, request, pk):
         obj = self.get_object(request, pk)
@@ -167,34 +161,6 @@ class DatasetAdmin(HOPEModelAdminBase):
 
     def target_type(self, obj):
         return obj.query.target
-
-    # @button(visible=lambda btn: "change" in btn.context["request"].path)
-    # def export(self, request, pk):
-    #     obj = self.get_object(request, pk)
-    #     try:
-    #         context = self.get_common_context(request, pk, title="Export")
-    #         if request.method == "POST":
-    #             form = ExportForm(request.POST)
-    #             if form.is_valid():
-    #                 formatter: Formatter = form.cleaned_data["formatter"]
-    #                 report_context = {
-    #                     "dataset": obj,
-    #                     "query": obj.query,
-    #                 }
-    #                 output = formatter.render(report_context)
-    #                 if formatter.content_type == "xls":
-    #                     response = HttpResponse(output, content_type=formatter.content_type)
-    #                     response["Content-Disposition"] = "attachment; filename=Dataset Report.xls"
-    #                     return response
-    #                 return HttpResponse(output)
-    #         else:
-    #             context["extra_buttons"] = ""
-    #             form = ExportForm()
-    #         context["form"] = form
-    #         return render(request, "admin/power_query/dataset/export.html", context)
-    #     except Exception as e:
-    #         logger.exception(e)
-    #         self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def preview(self, request, pk):
@@ -339,8 +305,6 @@ class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("title", "content_type", "arguments", "size")
     list_filter = (("report", AutoCompleteFilter),)
     readonly_fields = ("arguments", "report", "dataset", "content_type")
-    # def info(self, obj: ReportResult):
-    #     return obj.dataset.info
 
     def size(self, obj: ReportDocument):
         return len(obj.output or "")
