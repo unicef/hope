@@ -125,7 +125,8 @@ class HouseholdFactory(factory.DjangoModelFactory):
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
-        if "head_of_household" not in kwargs:
+        hoh = kwargs.get("head_of_household", None)
+        if not hoh:
             hoh = IndividualFactory(household=None)
             kwargs["head_of_household"] = hoh
         ret = super()._create(model_class, *args, **kwargs)
