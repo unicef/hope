@@ -93,6 +93,6 @@ export const TargetPopulationTable = ({
   return noTableStyling ? (
     <NoTableStyling>{renderTable()}</NoTableStyling>
   ) : (
-    <TableWrapper>{renderTable()}</TableWrapper>
+    renderTable()
   );
 };

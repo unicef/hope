@@ -96,6 +96,6 @@ export function RegistrationDataImportTable({
   return noTableStyling ? (
     <NoTableStyling>{renderTable()}</NoTableStyling>
   ) : (
-    <TableWrapper>{renderTable()}</TableWrapper>
+    renderTable()
   );
 }
