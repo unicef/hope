@@ -17,7 +17,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
+    PaymentVerificationPlan,
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
@@ -55,9 +55,9 @@ class TestPhoneNumberVerification(TestCase):
         )
         cash_plan.save()
         cash_plan_payment_verification = PaymentVerificationPlanFactory(
-            status=CashPlanPaymentVerification.STATUS_PENDING,
-            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
-            cash_plan=cash_plan,
+            status=PaymentVerificationPlan.STATUS_PENDING,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
+            payment_plan=cash_plan,
         )
         cls.individuals = []
         for _ in range(cls.payment_record_amount):
@@ -84,7 +84,7 @@ class TestPhoneNumberVerification(TestCase):
             )
 
             PaymentVerificationFactory(
-                cash_plan_payment_verification=cash_plan_payment_verification,
+                payment_verification_plan=cash_plan_payment_verification,
                 payment_record=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
@@ -109,8 +109,8 @@ class TestPhoneNumberVerification(TestCase):
         )
         other_cash_plan.save()
         other_cash_plan_payment_verification = PaymentVerificationPlanFactory(
-            status=CashPlanPaymentVerification.STATUS_PENDING,
-            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
+            status=PaymentVerificationPlan.STATUS_PENDING,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
             payment_plan=other_cash_plan,
         )
         cls.other_individuals = []
@@ -138,7 +138,7 @@ class TestPhoneNumberVerification(TestCase):
             )
 
             PaymentVerificationFactory(
-                cash_plan_payment_verification=other_cash_plan_payment_verification,
+                payment_verification_plan=other_cash_plan_payment_verification,
                 payment_record=other_payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
@@ -171,24 +171,24 @@ class TestPhoneNumberVerification(TestCase):
                 self.fail("Should have raised HTTPError")
 
         self.verification.refresh_from_db()
-        self.assertEqual(self.verification.status, CashPlanPaymentVerification.STATUS_RAPID_PRO_ERROR)
+        self.assertEqual(self.verification.status, PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR)
         self.assertIsNotNone(self.verification.error)
 
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.verification, status=PaymentVerification.STATUS_PENDING
             ).count(),
             self.payment_record_amount,
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.other_verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.other_verification, status=PaymentVerification.STATUS_PENDING
             ).count(),
             self.payment_record_amount,
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.verification,
+                payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
             ).count(),
@@ -196,7 +196,7 @@ class TestPhoneNumberVerification(TestCase):
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.other_verification,
+                payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
             ).count(),
@@ -204,7 +204,7 @@ class TestPhoneNumberVerification(TestCase):
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.verification,
+                payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
             ).count(),
@@ -212,7 +212,7 @@ class TestPhoneNumberVerification(TestCase):
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.other_verification,
+                payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
             ).count(),
@@ -227,24 +227,24 @@ class TestPhoneNumberVerification(TestCase):
             VerificationPlanStatusChangeServices(self.verification).activate()
 
         self.verification.refresh_from_db()
-        self.assertEqual(self.verification.status, CashPlanPaymentVerification.STATUS_ACTIVE)
+        self.assertEqual(self.verification.status, PaymentVerificationPlan.STATUS_ACTIVE)
         self.assertIsNone(self.verification.error)
 
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.verification, status=PaymentVerification.STATUS_PENDING
             ).count(),
             self.payment_record_amount,
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.other_verification, status=PaymentVerification.STATUS_PENDING
+                payment_verification_plan=self.other_verification, status=PaymentVerification.STATUS_PENDING
             ).count(),
             self.payment_record_amount,
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.verification,
+                payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
             ).count(),
@@ -252,7 +252,7 @@ class TestPhoneNumberVerification(TestCase):
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.other_verification,
+                payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=True,
             ).count(),
@@ -260,7 +260,7 @@ class TestPhoneNumberVerification(TestCase):
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.verification,
+                payment_verification_plan=self.verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
             ).count(),
@@ -268,7 +268,7 @@ class TestPhoneNumberVerification(TestCase):
         )
         self.assertEqual(
             PaymentVerification.objects.filter(
-                cash_plan_payment_verification=self.other_verification,
+                payment_verification_plan=self.other_verification,
                 status=PaymentVerification.STATUS_PENDING,
                 sent_to_rapid_pro=False,
             ).count(),

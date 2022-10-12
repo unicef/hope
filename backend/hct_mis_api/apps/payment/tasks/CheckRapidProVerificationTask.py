@@ -36,7 +36,7 @@ class CheckRapidProVerificationTask:
             "payment_record__head_of_household"
         )
         payment_record_verification_to_update = []
-        business_area = cashplan_payment_verification.cash_plan.business_area
+        business_area = cashplan_payment_verification.payment_plan.business_area
         payment_record_verifications_phone_number_dict = {
             str(payment_record_verification.payment_record.head_of_household.phone_no): payment_record_verification
             for payment_record_verification in payment_record_verifications
