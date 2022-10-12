@@ -129,6 +129,7 @@ export function CreateCommunicationPage(): React.ReactElement {
   );
   const [selectedSampleSizeType, setSelectedSampleSizeType] = useState(0);
   const [formValues, setFormValues] = useState(initialValues);
+  const [validateData, setValidateData] = useState(false);
 
   const { data } = useAllAdminAreasQuery({
     variables: {
@@ -172,6 +173,7 @@ export function CreateCommunicationPage(): React.ReactElement {
         .min(2, t('Too short'))
         .required(t('Message is required'));
     }
+    setValidateData(true);
 
     return Yup.object().shape(datum);
   }, [activeStep, t]);
@@ -218,6 +220,7 @@ export function CreateCommunicationPage(): React.ReactElement {
 
   const handleNext = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    setValidateData(false);
   };
 
   const handleBack = (): void => {
@@ -270,6 +273,8 @@ export function CreateCommunicationPage(): React.ReactElement {
       initialValues={initialValues}
       validationSchema={validationSchema}
       validate={(values) => validate(values)}
+      validateOnBlur={validateData}
+      validateOnChange={validateData}
       onSubmit={async (values) => {
         if (activeStep === steps.length - 1) {
           try {
@@ -346,6 +351,7 @@ export function CreateCommunicationPage(): React.ReactElement {
                         <FormControlLabel
                           value={index}
                           onChange={() => {
+                            setFormValues(initialValues);
                             setSelectedSampleSizeType(index);
                           }}
                           key={tab}
