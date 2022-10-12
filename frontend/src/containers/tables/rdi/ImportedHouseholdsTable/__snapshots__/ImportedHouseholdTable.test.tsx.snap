@@ -200,6 +200,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
         >
           <tr
             class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+            data-cy="imported-households-row"
             role="checkbox"
           >
             <td

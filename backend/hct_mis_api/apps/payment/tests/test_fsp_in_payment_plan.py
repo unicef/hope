@@ -1,24 +1,30 @@
 from graphql import GraphQLError
 
-from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, DeliveryMechanismPerPaymentPlanFactory
-from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.household.fixtures import IndividualRoleInHouseholdFactory
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory, TargetingCriteriaFactory
-from hct_mis_api.apps.payment.fixtures import PaymentChannelFactory
-from hct_mis_api.apps.payment.models import GenericPayment
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.household.fixtures import (
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, Individual
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismPerPaymentPlanFactory,
+    FinancialServiceProviderFactory,
+    PaymentChannelFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+)
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
@@ -778,9 +784,9 @@ class TestFSPAssignment(APITestCase):
         self.payment_plan.refresh_from_db()
         assert self.payment_plan.delivery_mechanisms.filter(financial_service_provider=self.santander_fsp).count() == 1
         payment1.refresh_from_db()
-        assert payment1.financial_service_provider == None
-        assert payment1.assigned_payment_channel == None
-        assert payment1.delivery_type == None
+        assert payment1.financial_service_provider is None
+        assert payment1.assigned_payment_channel is None
+        assert payment1.delivery_type is None
 
 
 class TestSpecialTreatmentWithCashDeliveryMechanism(APITestCase):
@@ -952,7 +958,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                     }
                 }
             }
-            
         """
 
         too_early_get_volume_by_delivery_mechanism_response = self.graphql_request(
@@ -1098,7 +1103,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             )
 
     def test_not_all_payments_covered_with_chosen_fsps(self):
-        payment1 = PaymentFactory(
+        PaymentFactory(
             parent=self.payment_plan,
             collector=self.individuals_2[0],  # DELIVERY_TYPE_TRANSFER
             entitlement_quantity=1000000,
@@ -1110,7 +1115,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             financial_service_provider=None,
             assigned_payment_channel=None,
         )
-        payment2 = PaymentFactory(
+        PaymentFactory(
             parent=self.payment_plan,
             collector=self.individuals_1[0],  # DELIVERY_TYPE_VOUCHER
             entitlement_quantity=1000000,
@@ -1137,7 +1142,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         ]
         with self.assertRaisesMessage(
             GraphQLError,
-            f"Some Payments were not assigned to selected DeliveryMechanisms/FSPs",
+            "Some Payments were not assigned to selected DeliveryMechanisms/FSPs",
         ):
             PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
                 dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True
@@ -1172,7 +1177,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         self.bank_of_america_fsp.distribution_limit = 1000
         self.bank_of_america_fsp.save()
         new_payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED_FSP)
-        new_dm = DeliveryMechanismPerPaymentPlanFactory(
+        DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=new_payment_plan,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,
             financial_service_provider=self.bank_of_america_fsp,
@@ -1282,7 +1287,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         assert payment1.delivery_type == GenericPayment.DELIVERY_TYPE_VOUCHER
 
     def test_not_all_payments_covered_because_of_fsp_limit(self):
-        payment1 = PaymentFactory(
+        PaymentFactory(
             parent=self.payment_plan,
             collector=self.individuals_2[0],  # DELIVERY_TYPE_TRANSFER
             entitlement_quantity=100,
@@ -1294,7 +1299,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             financial_service_provider=None,
             assigned_payment_channel=None,
         )
-        payment2 = PaymentFactory(
+        PaymentFactory(
             parent=self.payment_plan,
             collector=self.individuals_3[0],  # DELIVERY_TYPE_TRANSFER
             entitlement_quantity=100,
@@ -1324,7 +1329,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
 
         with self.assertRaisesMessage(
             GraphQLError,
-            f"Some Payments were not assigned to selected DeliveryMechanisms/FSPs",
+            "Some Payments were not assigned to selected DeliveryMechanisms/FSPs",
         ):
             PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
                 dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True

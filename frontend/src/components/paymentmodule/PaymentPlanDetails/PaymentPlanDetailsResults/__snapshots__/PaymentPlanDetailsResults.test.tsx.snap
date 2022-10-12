@@ -34,7 +34,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               >
                 Female Children
               </span>
-              <div>
+              <div
+                data-cy="label-Female Children"
+              >
                 <span
                   class="sc-bwzfXH emFVa"
                   color="textSecondary"
@@ -59,7 +61,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               >
                 Female Adults
               </span>
-              <div>
+              <div
+                data-cy="label-Female Adults"
+              >
                 <span
                   class="sc-bwzfXH emFVa"
                   color="textSecondary"
@@ -84,7 +88,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               >
                 Male Children
               </span>
-              <div>
+              <div
+                data-cy="label-Male Children"
+              >
                 <span
                   class="sc-bwzfXH emFVa"
                   color="textSecondary"
@@ -109,7 +115,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               >
                 Male Adults
               </span>
-              <div>
+              <div
+                data-cy="label-Male Adults"
+              >
                 <span
                   class="sc-bwzfXH emFVa"
                   color="textSecondary"
@@ -153,7 +161,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
             >
               Total Number of Households
             </span>
-            <div>
+            <div
+              data-cy="label-Total Number of Households"
+            >
               <div
                 class="sc-gzVnrw kojZPw"
               >
@@ -172,7 +182,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
             >
               Targeted Individuals
             </span>
-            <div>
+            <div
+              data-cy="label-Targeted Individuals"
+            >
               <div
                 class="sc-gzVnrw kojZPw"
               >

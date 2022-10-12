@@ -1,7 +1,7 @@
-from hct_mis_api.apps.account.models import Role, UserRole, User
-from hct_mis_api.apps.core.models import BusinessArea
-
 from django.core.management import BaseCommand
+
+from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.core.models import BusinessArea
 
 emails = [
     "gerba",
@@ -19,7 +19,6 @@ emails = [
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         afg = BusinessArea.objects.get(name="Afghanistan")
         role = Role.objects.get(name="Role with all permissions")

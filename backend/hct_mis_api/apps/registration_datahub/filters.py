@@ -1,10 +1,15 @@
 from django.db.models import Q
 from django.db.models.functions import Lower
+
 from django_filters import BooleanFilter, CharFilter, FilterSet, OrderingFilter
 
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import DUPLICATE
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual, DUPLICATE_IN_BATCH, ImportedHousehold
+from hct_mis_api.apps.registration_datahub.models import (
+    DUPLICATE_IN_BATCH,
+    ImportedHousehold,
+    ImportedIndividual,
+)
 
 
 class ImportedIndividualFilter(FilterSet):

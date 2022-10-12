@@ -27,7 +27,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Full Name
           </span>
-          <div>
+          <div
+            data-cy="label-Full Name"
+          >
             Alicja Kowalska
           </div>
         </div>
@@ -42,7 +44,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Given Name
           </span>
-          <div>
+          <div
+            data-cy="label-Given Name"
+          >
             Alicja
           </div>
         </div>
@@ -57,7 +61,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Middle Name
           </span>
-          <div>
+          <div
+            data-cy="label-Middle Name"
+          >
             -
           </div>
         </div>
@@ -72,7 +78,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Family Name
           </span>
-          <div>
+          <div
+            data-cy="label-Family Name"
+          >
             Kowalska
           </div>
         </div>
@@ -87,7 +95,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Gender
           </span>
-          <div>
+          <div
+            data-cy="label-Gender"
+          >
             Female
           </div>
         </div>
@@ -102,7 +112,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Age
           </span>
-          <div>
+          <div
+            data-cy="label-Age"
+          >
             80
           </div>
         </div>
@@ -117,7 +129,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Date of Birth
           </span>
-          <div>
+          <div
+            data-cy="label-Date of Birth"
+          >
             <time
               datetime="-894672000000"
             >
@@ -136,7 +150,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Estimated Date of Birth
           </span>
-          <div>
+          <div
+            data-cy="label-Estimated Date of Birth"
+          >
             No
           </div>
         </div>
@@ -151,7 +167,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Marital Status
           </span>
-          <div>
+          <div
+            data-cy="label-Marital Status"
+          >
             Married
           </div>
         </div>
@@ -166,7 +184,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Work Status
           </span>
-          <div>
+          <div
+            data-cy="label-Work Status"
+          >
             Not provided
           </div>
         </div>
@@ -181,7 +201,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Pregnant
           </span>
-          <div>
+          <div
+            data-cy="label-Pregnant"
+          >
             Yes
           </div>
         </div>
@@ -196,7 +218,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Household ID
           </span>
-          <div>
+          <div
+            data-cy="label-Household ID"
+          >
             -
           </div>
         </div>
@@ -211,7 +235,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Role
           </span>
-          <div>
+          <div
+            data-cy="label-Role"
+          >
             Alternate collector
           </div>
         </div>
@@ -226,7 +252,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Relationship to HOH
           </span>
-          <div>
+          <div
+            data-cy="label-Relationship to HOH"
+          >
             Not a Family Member. Can only act as a recipient.
           </div>
         </div>
@@ -248,7 +276,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Observed disabilities
           </span>
-          <div>
+          <div
+            data-cy="label-Observed disabilities"
+          >
             -
           </div>
         </div>
@@ -263,7 +293,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Seeing disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Seeing disability severity"
+          >
             None
           </div>
         </div>
@@ -278,7 +310,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Hearing disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Hearing disability severity"
+          >
             None
           </div>
         </div>
@@ -293,7 +327,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Physical disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Physical disability severity"
+          >
             None
           </div>
         </div>
@@ -308,7 +344,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Remembering or concentrating disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Remembering or concentrating disability severity"
+          >
             None
           </div>
         </div>
@@ -323,7 +361,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Self-care disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Self-care disability severity"
+          >
             None
           </div>
         </div>
@@ -338,7 +378,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Communicating disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Communicating disability severity"
+          >
             None
           </div>
         </div>
@@ -353,7 +395,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Disability
           </span>
-          <div>
+          <div
+            data-cy="label-Disability"
+          >
             Not Disabled
           </div>
         </div>
@@ -381,7 +425,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
               >
                 National ID
               </span>
-              <div>
+              <div
+                data-cy="label-National ID"
+              >
                 BSH221315
               </div>
             </div>
@@ -393,7 +439,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             >
               issued
             </span>
-            <div>
+            <div
+              data-cy="label-issued"
+            >
               Poland
             </div>
           </div>
@@ -416,7 +464,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Phone Number
           </span>
-          <div>
+          <div
+            data-cy="label-Phone Number"
+          >
             Invalid Phone Number
           </div>
         </div>
@@ -431,7 +481,9 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             Alternate Phone Number
           </span>
-          <div>
+          <div
+            data-cy="label-Alternate Phone Number"
+          >
             -
           </div>
         </div>

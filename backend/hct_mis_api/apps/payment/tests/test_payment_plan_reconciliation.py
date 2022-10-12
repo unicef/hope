@@ -1,35 +1,42 @@
 import os
 import tempfile
-
-from zipfile import ZipFile
 from datetime import timedelta
 from unittest.mock import patch
+from zipfile import ZipFile
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils import timezone
+
 from openpyxl import load_workbook
 
-from django.utils import timezone
-from django.core.files.uploadedfile import SimpleUploadedFile
-
-from hct_mis_api.apps.payment.celery_tasks import (
-    create_payment_plan_payment_list_xlsx_per_fsp,
-    import_payment_plan_payment_list_per_fsp_from_xlsx,
-)
-from hct_mis_api.apps.payment.models import PaymentPlan, Payment, FinancialServiceProviderXlsxTemplate
-from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals, IndividualRoleInHouseholdFactory
+from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+from hct_mis_api.apps.household.fixtures import (
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.celery_tasks import payment_plan_apply_steficon
-from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory, PaymentChannelFactory
-from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.payment.celery_tasks import (
+    create_payment_plan_payment_list_xlsx_per_fsp,
+    payment_plan_apply_steficon,
+)
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    PaymentChannelFactory,
+    PaymentFactory,
+)
+from hct_mis_api.apps.payment.models import (
+    FinancialServiceProviderXlsxTemplate,
+    GenericPayment,
+    Payment,
+    PaymentPlan,
+)
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.steficon.fixtures import RuleFactory, RuleCommitFactory
-
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 
 CREATE_PROGRAMME_MUTATION = """
 mutation CreateProgram($programData: CreateProgramInput!) {

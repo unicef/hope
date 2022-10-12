@@ -1,12 +1,11 @@
+import logging
+from contextlib import contextmanager
+
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
 
-import logging
-from contextlib import contextmanager
-from sentry_sdk import configure_scope
-
-from django.core.cache import cache
 from redis.exceptions import LockError
 from sentry_sdk import configure_scope
 
@@ -15,11 +14,24 @@ from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 logger = logging.getLogger(__name__)
+
+
+def handle_rdi_exception(datahub_rdi_id, e):
+    try:
+        from sentry_sdk import capture_exception
+
+        err = capture_exception(e)
+    except Exception:
+        err = "N/A"
+
+    RegistrationDataImport.objects.filter(
+        datahub_id=datahub_rdi_id,
+    ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
 
 
 @contextmanager
@@ -48,7 +60,6 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
-        from hct_mis_api.apps.core.models import BusinessArea
 
         with configure_scope() as scope:
             scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
@@ -59,7 +70,6 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
             )
     except Exception as e:
         logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
@@ -68,9 +78,8 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
             id=registration_data_import_id,
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
-        RegistrationDataImport.objects.filter(
-            datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR)
+        handle_rdi_exception(registration_data_import_id, e)
+
         raise
 
 
@@ -83,7 +92,6 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
-        from hct_mis_api.apps.core.models import BusinessArea
 
         with configure_scope() as scope:
             scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
@@ -95,25 +103,15 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
             )
     except Exception as e:
         logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
-
-        try:
-            from sentry_sdk import capture_exception
-
-            err = capture_exception(e)
-        except Exception:
-            err = "N/A"
 
         RegistrationDataImportDatahub.objects.filter(
             id=registration_data_import_id,
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
-        RegistrationDataImport.objects.filter(
-            datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
+        handle_rdi_exception(registration_data_import_id, e)
 
         raise
 
@@ -226,11 +224,9 @@ def rdi_deduplication_task(registration_data_import_id):
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
     except Exception as e:
         logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
-        RegistrationDataImport.objects.filter(
-            datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR)
+        handle_rdi_exception(registration_data_import_id, e)
+
         raise
 
 
@@ -386,10 +382,10 @@ def check_and_set_taxid(queryset):
 @log_start_and_end
 @sentry_tags
 def automate_registration_diia_import_task(page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters):
+    from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
-    from hct_mis_api.apps.core.models import BusinessArea
 
     with locked_cache(key="automate_rdi_diia_creation_task"):
         try:
@@ -411,10 +407,10 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
 @log_start_and_end
 @sentry_tags
 def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters):
+    from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
-    from hct_mis_api.apps.core.models import BusinessArea
 
     with locked_cache(key="registration_diia_import_task"):
         try:
@@ -437,14 +433,15 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
 @sentry_tags
 def deduplicate_documents():
     with locked_cache(key="deduplicate_documents"):
-        with transaction.atomic():
-            grouped_rdi = (
-                Document.objects.filter(status=Document.STATUS_PENDING)
-                .values("individual__registration_data_import")
-                .annotate(count=Count("individual__registration_data_import"))
-            )
-            rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
-            for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
+        grouped_rdi = (
+            Document.objects.filter(status=Document.STATUS_PENDING)
+            .values("individual__registration_data_import")
+            .annotate(count=Count("individual__registration_data_import"))
+        )
+        rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
+        for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
+            print(rdi)
+            with transaction.atomic():
                 documents_query = Document.objects.filter(
                     status=Document.STATUS_PENDING, individual__registration_data_import=rdi
                 )
@@ -452,6 +449,8 @@ def deduplicate_documents():
                     documents_query,
                     registration_data_import=rdi,
                 )
+
+        with transaction.atomic():
             documents_query = Document.objects.filter(
                 status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True
             )

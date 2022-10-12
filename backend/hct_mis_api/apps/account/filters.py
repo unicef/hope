@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
-from django_filters import CharFilter, FilterSet, MultipleChoiceFilter
-
 from django.db.models import Q
 from django.db.models.functions import Lower
+
+from django_filters import CharFilter, FilterSet, MultipleChoiceFilter
 
 from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role
 from hct_mis_api.apps.core.utils import CustomOrderingFilter

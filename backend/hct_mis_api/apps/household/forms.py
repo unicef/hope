@@ -63,3 +63,20 @@ class UpdateByXlsxStage2Form(forms.Form):
 class UpdateIndividualsIBANFromXlsxForm(forms.Form):
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
     file = forms.FileField()
+
+
+class WithdrawForm(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    reason = forms.CharField(label="Log message", max_length=100, required=False)
+    tag = forms.SlugField(
+        max_length=100, required=False, help_text="HH will have a user_field with this name with value 'True'"
+    )
+
+
+class RestoreForm(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    reason = forms.CharField(label="Log message", max_length=100, required=False)
+
+
+class MassWithdrawForm(WithdrawForm):
+    pass

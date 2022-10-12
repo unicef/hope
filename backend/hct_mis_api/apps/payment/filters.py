@@ -1,20 +1,23 @@
-from django.db.models import Count, Q, Case, When, Value, CharField, F
+from django.db.models import Case, CharField, Count, Q, Value, When
 from django.db.models.functions import Lower
+from django.shortcuts import get_object_or_404
 
 from django_filters import (
     CharFilter,
-    FilterSet,
-    OrderingFilter,
-    NumberFilter,
-    UUIDFilter,
-    MultipleChoiceFilter,
     DateFilter,
+    FilterSet,
+    MultipleChoiceFilter,
+    NumberFilter,
+    OrderingFilter,
+    UUIDFilter,
 )
-from django.shortcuts import get_object_or_404
-
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid, decode_id_string
+from hct_mis_api.apps.core.utils import (
+    CustomOrderingFilter,
+    decode_id_string,
+    is_valid_uuid,
+)
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.models import (
     CashPlan,
@@ -22,11 +25,11 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
     FinancialServiceProviderXlsxTemplate,
-    PaymentRecord,
-    PaymentVerification,
-    PaymentPlan,
     GenericPayment,
     Payment,
+    PaymentPlan,
+    PaymentRecord,
+    PaymentVerification,
 )
 
 
@@ -47,7 +50,6 @@ class PaymentRecordFilter(FilterSet):
             "status",
             Lower("name"),
             "status_date",
-            "cash_assist_id",
             Lower("head_of_household__full_name"),
             "total_person_covered",
             "distribution_modality",

@@ -10,6 +10,26 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name="businessarea",
+            name="is_payment_plan_applicable",
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name="businessarea",
+            name="approval_number_required",
+            field=models.PositiveIntegerField(default=0),
+        ),
+        migrations.AddField(
+            model_name="businessarea",
+            name="authorization_number_required",
+            field=models.PositiveIntegerField(default=0),
+        ),
+        migrations.AddField(
+            model_name="businessarea",
+            name="finance_review_number_required",
+            field=models.PositiveIntegerField(default=0),
+        ),
         migrations.AlterField(
             model_name="businessarea",
             name="approval_number_required",
