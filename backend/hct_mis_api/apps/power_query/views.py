@@ -1,7 +1,13 @@
+from calendar import timegm
+from hashlib import md5
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.utils.cache import get_conditional_response
+from django.utils.http import http_date
+from django.views.decorators.http import etag
 
 from .models import Report, ReportDocument
 from .utils import basicauth
@@ -27,15 +33,26 @@ def report(request, pk):
 @login_required()
 def document(request, report, pk):
     doc: ReportDocument = get_object_or_404(ReportDocument, pk=pk, report_id=report)
-    if request.user.has_perm("power_query.view_reportdocument", doc):
-        if doc.content_type == "xls":
-            response = HttpResponse(data, content_type=doc.content_type)
-            response["Content-Disposition"] = f"attachment; filename={doc.title}.xls"
-            return response
-        else:
-            return HttpResponse(doc.data, content_type=doc.content_type)
-    else:
+    res_etag = md5(doc.data.encode()).hexdigest()
+    res_last_modified = timegm(doc.timestamp.utctimetuple())
+
+    if not request.user.has_perm("power_query.view_reportdocument", doc):
         return HttpResponseForbidden()
+
+    response = get_conditional_response(
+        request,
+        etag=res_etag,
+        last_modified=res_last_modified,
+    )
+    if response is None:
+        response = HttpResponse(doc.data, content_type=doc.content_type)
+        if doc.content_type == "xls":
+            response["Content-Disposition"] = f"attachment; filename={doc.title}.xls"
+        else:
+            response.headers["Cache-Control"] = "private"
+            response.headers["Last-Modified"] = http_date(res_last_modified)
+            response.headers["ETag"] = res_etag
+    return response
 
 
 @basicauth
