@@ -102,7 +102,7 @@ if settings.CYPRESS_TESTING:
             call_command("init-e2e-scenario", scenario, seed=seed)
             return JsonResponse({"message": "ok"})
         except Exception as exception:
-            return JsonResponse({"message": str(exception)}, status=400)
+            return JsonResponse({"error": str(exception)}, status=400)
 
     api_patterns.append(path("cypress/<str:scenario>/<int:seed>", cypress_endpoint))
 
