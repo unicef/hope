@@ -104,6 +104,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             label="Tax Number Identification",
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
+        super().setUpTestData()
 
     def test_execute(self):
         task = self.RdiXlsxCreateTask()
@@ -463,6 +464,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         )
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
+        super().setUpTestData()
 
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
