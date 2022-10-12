@@ -350,7 +350,7 @@ class RdiMergeTask:
 
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
-                        get_individual_doc(obj_hct.business_area)
+                        get_individual_doc(obj_hct.business_area.slug)
                     )
                     populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
 
@@ -390,6 +390,10 @@ class RdiMergeTask:
 
             self._update_individuals_and_households(individual_ids)
 
-        except Exception:
-            remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
+        except Exception as e:
+            logger.error(e)
+
+            remove_elasticsearch_documents_by_matching_ids(
+                individual_ids, get_individual_doc(obj_hct.business_area.slug)
+            )
             raise
