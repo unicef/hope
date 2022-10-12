@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Count, JSONField, Q, Sum, UniqueConstraint
@@ -272,6 +272,13 @@ class GenericPayment(TimeStampedUUIDModel):
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
+    payment_verifications = GenericRelation(
+        "payment.PaymentVerification",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment",
+        related_name="payments",
+    )
 
     class Meta:
         abstract = True
@@ -1090,8 +1097,8 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         (VERIFICATION_CHANNEL_XLSX, "XLSX"),
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
-    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_plan_object_id = models.CharField(max_length=50, null=True)
+    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    payment_plan_object_id = models.CharField(max_length=50)
     payment_plan = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
@@ -1115,6 +1122,9 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     class Meta:
         ordering = ("created_at",)
+        indexes = [
+            models.Index(fields=["payment_plan_content_type", "payment_plan_object_id"]),
+        ]
 
     @property
     def business_area(self):
@@ -1162,6 +1172,13 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
             PaymentVerificationPlan.STATUS_PENDING,
             PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
         )
+
+    @property
+    def get_payment_plan(self):
+        try:
+            return self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
+        except ObjectDoesNotExist:
+            return None
 
 
 class XlsxPaymentVerificationPlanFile(TimeStampedUUIDModel):
@@ -1236,8 +1253,8 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         on_delete=models.CASCADE,
         related_name="payment_record_verifications",
     )
-    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_object_id = models.CharField(max_length=50, null=True)
+    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    payment_object_id = models.CharField(max_length=50)
     payment = GenericForeignKey("payment_content_type", "payment_object_id")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
     status_date = models.DateTimeField(null=True)
@@ -1250,12 +1267,22 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     sent_to_rapid_pro = models.BooleanField(default=False)
 
     class Meta:
+        indexes = [
+            models.Index(fields=["payment_content_type", "payment_object_id"]),
+        ]
         constraints = [
             UniqueConstraint(
                 fields=["payment_content_type", "payment_object_id"],
                 name="payment_content_type_and_payment_id",
             )
         ]
+
+    @property
+    def get_payment(self):
+        try:
+            return self.payment_content_type.model_class().objects.get(pk=self.payment_object_id)
+        except ObjectDoesNotExist:
+            return None
 
     @property
     def is_manually_editable(self):
@@ -1288,11 +1315,14 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
     )
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
-    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_plan_object_id = models.CharField(max_length=50, null=True)
+    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    payment_plan_object_id = models.CharField(max_length=50)
     payment_plan = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
 
     class Meta:
+        indexes = [
+            models.Index(fields=["payment_plan_content_type", "payment_plan_object_id"]),
+        ]
         constraints = [
             UniqueConstraint(
                 fields=["payment_plan_content_type", "payment_plan_object_id"],
