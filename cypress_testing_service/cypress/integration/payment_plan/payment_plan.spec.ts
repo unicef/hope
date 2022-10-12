@@ -19,7 +19,7 @@ Given('I am authenticated', () => {
 });
 
 Given('I initialize the data', () => {
-  cy.exec(`yarn init-scenario payment_plan --seed ${uniqueSeed}`);
+  cy.exec(`yarn init-scenario payment_plan/${uniqueSeed}`);
 });
 
 Given('Business area is payment plan applicable', () => {

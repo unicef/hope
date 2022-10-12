@@ -35,6 +35,7 @@ DEFAULTS = {
     "CELERY_RESULT_BACKEND": (str, ""),
     "CELERY_TASK_ALWAYS_EAGER": (bool, False),
     "ADMIN_PANEL_URL": (str, "unicorn"),
+    "CYPRESS_TESTING": (str, "no"),
 }
 
 env = Env(**DEFAULTS)

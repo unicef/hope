@@ -12,7 +12,7 @@
     "initdb": "yarn backend ./manage.py initcypress --skip-drop",
     "generate-xlsx-files": "./generate_xlsx_files.sh",
     "clean": "rm -rf cypress/fixtures/*.xlsx ; rm -rf cypress/downloads/*.{xlsx,zip} ; yarn backend ./manage.py clean_generated",
-    "init-scenario": "yarn backend ./manage.py init-e2e-scenario"
+    "init-scenario": "./call_backend.sh"
   },
   "devDependencies": {
     "@types/cypress-cucumber-preprocessor": "^1.14.1",

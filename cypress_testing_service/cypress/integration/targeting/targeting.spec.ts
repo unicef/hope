@@ -11,7 +11,7 @@ Given('I am authenticated', () => {
 });
 
 Given('I initialize the data', () => {
-  cy.exec(`yarn init-scenario targeting --seed ${uniqueSeed}`);
+  cy.exec(`yarn init-scenario targeting/${uniqueSeed}`);
 });
 
 When('I visit the main dashboard', () => {

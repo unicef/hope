@@ -5,6 +5,8 @@ from django.contrib.admin import site
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.core.management import call_command
 
 import adminactions.actions as actions
 from graphene_file_upload.django import FileUploadGraphQLView
@@ -88,6 +90,22 @@ api_patterns = [
 
 if settings.PROFILING:
     api_patterns.append(path("silk/", include("silk.urls", namespace="silk")))
+
+if settings.CYPRESS_TESTING:
+    # for testing purposes so the cypress pipeline can use the dockerized app
+    # without the need to call docker-compose
+    @csrf_exempt
+    def cypress_endpoint(request, scenario, seed):
+        try:
+            if request.method != "POST":
+                return JsonResponse({"error": "Only POST allowed"}, status=400)
+            call_command("init-e2e-scenario", scenario, seed=seed)
+            return JsonResponse({"message": "ok"})
+        except Exception as exception:
+            return JsonResponse({"message": str(exception)}, status=400)
+
+    api_patterns.append(path("cypress/<str:scenario>/<int:seed>", cypress_endpoint))
+
 
 urlpatterns = (
     [path("", homepage), path("_health", homepage), path("api/", include(api_patterns))]

@@ -820,3 +820,5 @@ SWAGGER_SETTINGS = {
 }
 
 USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"
+
+CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
