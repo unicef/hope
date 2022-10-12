@@ -115,8 +115,7 @@ class TestAllFinancialServiceProviders(APITestCase):
             cls.user, permissions, BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG)
         )
         FinancialServiceProviderFactory.create_batch(
-            10,
-            fsp_xlsx_template=FinancialServiceProviderXlsxTemplateFactory(name="TestName123")
+            10, fsp_xlsx_template=FinancialServiceProviderXlsxTemplateFactory(name="TestName123")
         )
 
     def test_fetch_count_financial_service_providers(self):

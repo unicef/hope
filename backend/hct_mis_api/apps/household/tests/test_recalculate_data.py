@@ -1,12 +1,12 @@
 import datetime
-from django.utils import timezone
 
 from django.test import TestCase
+from django.utils import timezone
 
 from freezegun import freeze_time
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     AUNT_UNCLE,
@@ -19,7 +19,9 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     Household,
 )
-from hct_mis_api.apps.household.services.household_recalculate_data import recalculate_data
+from hct_mis_api.apps.household.services.household_recalculate_data import (
+    recalculate_data,
+)
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 

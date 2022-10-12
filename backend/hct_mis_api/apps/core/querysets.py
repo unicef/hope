@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 
-from queryset_sequence import QuerySetSequence, ModelIterable
+from queryset_sequence import ModelIterable, QuerySetSequence
 
 logger = logging.getLogger(__name__)
 

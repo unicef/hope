@@ -1,8 +1,8 @@
 import json
 from decimal import Decimal
 
+from django.db.models import Case, CharField, Count, F, Q, Sum, Value, When
 from django.db.models.functions import Coalesce
-from django.db.models import Case, CharField, Count, Q, Sum, Value, When, F
 from django.shortcuts import get_object_or_404
 
 import graphene
@@ -65,17 +65,15 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+    does_payment_record_have_right_hoh_phone_number,
+)
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
     SectionTotalNode,
     TableTotalCashTransferred,
-)
-
-
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
-    does_payment_record_have_right_hoh_phone_number,
 )
 
 

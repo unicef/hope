@@ -1,31 +1,33 @@
-from functools import partial
 import logging
-
 from decimal import Decimal
+from functools import partial
 
-from django.db import transaction
-from django.db.models import Q, Sum, Subquery, OuterRef, F
-from django.db.models.functions import Coalesce
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.db.models import F, OuterRef, Q, Subquery, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
+
 from graphql import GraphQLError
 from psycopg2._psycopg import IntegrityError
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import (
-    decode_id_string,
-)
-from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProcess, Payment, PaymentChannel
+from hct_mis_api.apps.core.models import BusinessArea, FileTemp
+from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
 )
+from hct_mis_api.apps.payment.models import (
+    Approval,
+    ApprovalProcess,
+    Payment,
+    PaymentChannel,
+    PaymentPlan,
+)
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.core.models import FileTemp
-
 
 User = get_user_model()
 
@@ -130,7 +132,7 @@ class PaymentPlanService:
         if not self.payment_plan.delivery_mechanisms.filter(
             Q(financial_service_provider__isnull=False) | Q(delivery_mechanism__isnull=False)
         ).exists():
-            msg = f"There are no Delivery Mechanisms / FSPs chosen for Payment Plan"
+            msg = "There are no Delivery Mechanisms / FSPs chosen for Payment Plan"
             logging.exception(msg)
             raise GraphQLError(msg)
 
@@ -411,8 +413,7 @@ class PaymentPlanService:
         processed_payments = []
 
         with transaction.atomic():
-            for idx, mapping in enumerate(dm_to_fsp_mapping):
-
+            for mapping in dm_to_fsp_mapping:
                 delivery_mechanism_per_payment_plan = mapping["delivery_mechanism_per_payment_plan"]
                 delivery_mechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
                 fsp = mapping["fsp"]
@@ -479,4 +480,4 @@ class PaymentPlanService:
                     delivery_mechanism_per_payment_plan.save()
 
             if set(processed_payments) != set(self.payment_plan.not_excluded_payments):
-                raise GraphQLError(f"Some Payments were not assigned to selected DeliveryMechanisms/FSPs")
+                raise GraphQLError("Some Payments were not assigned to selected DeliveryMechanisms/FSPs")

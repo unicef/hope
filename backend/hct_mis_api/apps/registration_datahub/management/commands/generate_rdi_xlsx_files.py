@@ -1,18 +1,15 @@
 import os
 import random
-import shutil
-import openpyxl
 
-from django.core.management import BaseCommand
 from django.conf import settings
+from django.core.management import BaseCommand
 
+import openpyxl
 from faker import Faker
-
 
 faker = Faker()
 
 random_number = lambda: random.randint(1, 2**31)
-address = lambda: faker.address()
 date = lambda: faker.date_between(start_date="-30y", end_date="today")
 name = lambda: faker.name()
 phone_number = lambda: faker.phone_number()
@@ -26,7 +23,7 @@ household_header_mapping = {
     "D": ("consent_sign_h_c", None),
     "E": ("consent_origin_h_c", "POL"),
     "F": ("country_h_c", "POL"),
-    "G": ("address_h_c", address),
+    "G": ("address_h_c", ""),  # SPECIAL
     "H": ("admin1_h_c", "AF11"),
     "I": ("admin2_h_c", "AF1115"),
     "J": ("hh_geopoint_h_c", "70.210209, 172.085021"),
@@ -91,6 +88,7 @@ household_header_mapping = {
     "BQ": ("condiments_h_f", None),
     "BR": ("assistance_type_h_f", None),
     "BS": ("assistance_source_h_f", None),
+    "BT": ("collect_individual_data_h_c", "1"),  # 1 == YES == FULL
 }
 
 individual_header_mapping = {
@@ -190,34 +188,35 @@ class Command(BaseCommand):
         print(f"Generating xlsx file ({amount}x HHs & INDs) with seed {seed}")
 
         generated_dir = os.path.join(settings.PROJECT_ROOT, "..", "generated")
-        if os.path.exists(generated_dir):
-            shutil.rmtree(generated_dir)
-        os.makedirs(generated_dir)
+        if not os.path.exists(generated_dir):
+            os.makedirs(generated_dir)
 
-        filepath = os.path.join(generated_dir, f"rdi_import_{amount}_hh_{amount}_ind.xlsx")
+        filepath = os.path.join(generated_dir, f"rdi_import_{amount}_hh_{amount}_ind_seed_{seed}.xlsx")
         wb = openpyxl.Workbook()
         wb.remove_sheet(wb.get_sheet_by_name(wb.get_sheet_names()[0]))
 
         households = wb.create_sheet("Households")
-        for index, (_, (header, value)) in enumerate(household_header_mapping.items()):
+        for index, (_, (header, _)) in enumerate(household_header_mapping.items()):
             households.cell(row=1, column=index + 1).value = header
             households.cell(row=2, column=index + 1).value = "description"
         for count in range(amount):
-            for index, (key, (header, value)) in enumerate(household_header_mapping.items()):
+            for index, (key, (_, value)) in enumerate(household_header_mapping.items()):
                 if value is None:
                     continue
-                to_write = value() if callable(value) else value
-                # TODO: unique seed to household somewhere?
+                if key == "G":
+                    to_write = seed  # address is seed (for targeting filter by address)
+                else:
+                    to_write = value() if callable(value) else value
                 households.cell(row=3 + count, column=index + 1).value = to_write
                 if key == "A":
                     household_ids.append(to_write)
 
         individuals = wb.create_sheet("Individuals")
-        for index, (_, (header, value)) in enumerate(individual_header_mapping.items()):
+        for index, (_, (header, _)) in enumerate(individual_header_mapping.items()):
             individuals.cell(row=1, column=index + 1).value = header
             individuals.cell(row=2, column=index + 1).value = "description"
         for count in range(amount):
-            for index, (key, (header, value)) in enumerate(individual_header_mapping.items()):
+            for index, (key, (_, value)) in enumerate(individual_header_mapping.items()):
                 if value is None:
                     continue
                 if key in ["AY", "A"]:

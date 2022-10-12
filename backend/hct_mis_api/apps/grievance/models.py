@@ -14,7 +14,11 @@ from django.utils.translation import gettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hct_mis_api.apps.utils.models import (
+    ConcurrencyModel,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -352,7 +356,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
-        for key, value in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
+        for value in GrievanceTicket.ISSUE_TYPES_CHOICES.values():
             issue_type_choices_dict.update(value)
         return issue_type_choices_dict[self.issue_type]
 
@@ -660,15 +664,15 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     @property
     def household(self):
-        return self.payment_verification.payment_record.household
+        return getattr(self.payment_record, "household", None)
 
     @property
     def individual(self):
-        return self.payment_verification.payment_record.head_of_household
+        return getattr(self.payment_record, "head_of_household", None)
 
     @property
     def payment_record(self):
-        return self.payment_verification.payment_record
+        return getattr(self.payment_verification, "payment_record", None)
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):

@@ -6,8 +6,8 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 
 import graphene
-from graphql import GraphQLError
 from graphene_file_upload.scalars import Upload
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -23,21 +23,21 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
+    pull_kobo_submissions_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
     registration_xlsx_import_task,
-    pull_kobo_submissions_task,
     validate_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
-    RegistrationDataImportDatahub,
     KoboImportData,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
-    XlsxRowErrorNode,
     KoboImportDataNode,
+    XlsxRowErrorNode,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -328,12 +328,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
             created_by_id=info.context.user.id,
             business_area_slug=business_area_slug,
         )
-        transaction.on_commit(
-            partial(
-                validate_xlsx_import_task.delay,
-                import_data.id
-            )
-        )
+        transaction.on_commit(partial(validate_xlsx_import_task.delay, import_data.id))
         return UploadImportDataXLSXFileAsync(import_data, [])
 
 
