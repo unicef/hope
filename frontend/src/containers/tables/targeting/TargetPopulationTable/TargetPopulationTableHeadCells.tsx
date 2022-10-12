@@ -4,6 +4,13 @@ import { TargetPopulationNode } from '../../../../__generated__/graphql';
 export const headCells: HeadCell<TargetPopulationNode>[] = [
   {
     disablePadding: false,
+    label: '',
+    id: 'radio',
+    numeric: false,
+    dataCy: 'radio-id',
+  },
+  {
+    disablePadding: false,
     label: 'Name',
     id: 'name',
     numeric: false,

@@ -28,6 +28,7 @@ export function TargetPopulationsPage(): React.ReactElement {
       min: undefined,
       max: undefined,
     },
+    createdAtRange: { min: undefined, max: undefined },
     name: '',
     status: '',
   });
