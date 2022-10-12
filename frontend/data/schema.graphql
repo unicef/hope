@@ -1090,6 +1090,7 @@ type GroupAttributeNode {
 
 enum HouseholdCollectIndividualData {
   A_
+  A_2
   A_1
   A_0
 }
@@ -1123,7 +1124,7 @@ type HouseholdNode implements Node {
   residenceStatus: HouseholdResidenceStatus!
   countryOrigin: String
   country: String
-  size: Int!
+  size: Int
   address: String!
   adminArea: AreaNode
   representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -1155,7 +1156,7 @@ type HouseholdNode implements Node {
   childrenDisabledCount: Int
   maleChildrenDisabledCount: Int
   femaleChildrenDisabledCount: Int
-  registrationDataImport: RegistrationDataImportNode!
+  registrationDataImport: RegistrationDataImportNode
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean
   flexFields: FlexFieldsScalar
@@ -1645,6 +1646,7 @@ enum ImportedDocumentTypeType {
 
 enum ImportedHouseholdCollectIndividualData {
   A_
+  A_2
   A_1
   A_0
 }
@@ -2403,6 +2405,10 @@ type LogEntryNodeEdge {
   cursor: String!
 }
 
+type MarkPaymentRecordAsFailedMutation {
+  paymentRecord: PaymentRecordNode
+}
+
 type MergeRegistrationDataImportMutation {
   registrationDataImport: RegistrationDataImportNode
 }
@@ -2438,6 +2444,7 @@ type Mutations {
   chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
   assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
+  markPaymentRecordAsFailed(paymentRecordId: ID!): MarkPaymentRecordAsFailedMutation
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   actionPaymentPlanMutation(input: ActionPaymentPlanInput!): ActionPaymentPlanMutation
   createPaymentPlan(input: CreatePaymentPlanInput!): CreatePaymentPlanMutation
@@ -2933,6 +2940,7 @@ enum PaymentRecordStatus {
   NOT_DISTRIBUTED
   TRANSACTION_SUCCESSFUL
   TRANSACTION_ERRONEOUS
+  FORCE_FAILED
 }
 
 enum PaymentStatus {
@@ -2940,6 +2948,7 @@ enum PaymentStatus {
   NOT_DISTRIBUTED
   TRANSACTION_SUCCESSFUL
   TRANSACTION_ERRONEOUS
+  FORCE_FAILED
 }
 
 type PaymentVerificationLogEntryNode implements Node {
@@ -2978,6 +2987,7 @@ type PaymentVerificationNode implements Node {
   status: PaymentVerificationStatus!
   statusDate: DateTime
   receivedAmount: Float
+  sentToRapidPro: Boolean!
   ticketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
   ticketDetail(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
   isManuallyEditable: Boolean
@@ -3023,6 +3033,7 @@ type PaymentVerificationPlanNode implements Node {
   completionDate: DateTime
   xlsxFileExporting: Boolean!
   xlsxFileImported: Boolean!
+  error: String
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   xlsxFileWasDownloaded: Boolean
   hasXlsxFile: Boolean
@@ -3051,6 +3062,7 @@ enum PaymentVerificationPlanStatus {
   FINISHED
   PENDING
   INVALID
+  RAPID_PRO_ERROR
 }
 
 enum PaymentVerificationPlanVerificationChannel {
@@ -3379,9 +3391,11 @@ enum RegistrationDataImportDataSource {
   KOBO
   DIIA
   FLEX_REGISTRATION
+  API
 }
 
 enum RegistrationDataImportDatahubImportDone {
+  LOADING
   NOT_STARTED
   STARTED
   DONE
@@ -3455,6 +3469,7 @@ type RegistrationDataImportNodeEdge {
 }
 
 enum RegistrationDataImportStatus {
+  LOADING
   DEDUPLICATION
   DEDUPLICATION_FAILED
   IMPORTING
@@ -3546,6 +3561,7 @@ enum RoleSubsystem {
   HOPE
   KOBO
   CA
+  API
 }
 
 enum RuleCommitLanguage {

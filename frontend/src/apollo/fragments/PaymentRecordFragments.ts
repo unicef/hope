@@ -41,7 +41,7 @@ export const paymentRecordDetails = gql`
         id
         name
       }
-      verifications {
+      verificationPlans {
         edges {
           node {
             id
