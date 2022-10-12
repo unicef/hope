@@ -66,6 +66,12 @@
             "name": "ReportNode"
           },
           {
+            "name": "FeedbackNode"
+          },
+          {
+            "name": "FeedbackMessageNode"
+          },
+          {
             "name": "ServiceProviderNode"
           },
           {
@@ -148,6 +154,9 @@
           },
           {
             "name": "TicketNoteNode"
+          },
+          {
+            "name": "GrievanceDocumentNode"
           },
           {
             "name": "CommunicationMessageRecipientMapNode"

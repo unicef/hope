@@ -1,21 +1,25 @@
+import { List } from '@material-ui/core';
+import { Assessment } from '@material-ui/icons';
 import Assignment from '@material-ui/icons/Assignment';
 import AttachMoney from '@material-ui/icons/AttachMoney';
 import AutorenewIcon from '@material-ui/icons/AutorenewRounded';
 import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import FaceIcon from '@material-ui/icons/Face';
 import Feedback from '@material-ui/icons/Feedback';
+import InfoIcon from '@material-ui/icons/Info';
+import MessageIcon from '@material-ui/icons/Message';
+import RateReviewIcon from '@material-ui/icons/RateReview';
+import BallotIcon from '@material-ui/icons/Ballot';
 import ListAltRounded from '@material-ui/icons/ListAltRounded';
+import ForumIcon from '@material-ui/icons/Forum';
 import LocalLibrary from '@material-ui/icons/LocalLibrary';
-import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import PaymentIcon from '@material-ui/icons/Payment';
+import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import PeopleIcon from '@material-ui/icons/PeopleRounded';
 import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
 import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
-import Assessment from '@material-ui/icons/Assessment';
-import List from '@material-ui/icons/List';
-import InfoIcon from '@material-ui/icons/Info';
 import React from 'react';
 import { PERMISSIONS } from '../../../config/permissions';
 
@@ -123,7 +127,7 @@ export const menuItems = [
     name: 'Accountability',
     href: '/accountability/communication',
     selectedRegexp: /^\/accountability\/communication.*$/,
-    icon: <Feedback />,
+    icon: <ForumIcon />,
     collapsable: true,
     // TODO: Update the permissions
     permissionModule: 'ACCOUNTABILITY',
@@ -132,14 +136,14 @@ export const menuItems = [
         name: 'Communication',
         href: '/accountability/communication',
         selectedRegexp: /^\/accountability\/communication.*$/,
-        icon: <></>,
+        icon: <MessageIcon />,
         permissionModule: 'COMMUNICATION_MESSAGE',
       },
       {
         name: 'Feedback',
         href: '/accountability/feedback',
         selectedRegexp: /^\/accountability\/feedback.*$/,
-        icon: <></>,
+        icon: <RateReviewIcon />,
         // TODO: Update the permissions
         permissionModule: 'INDIVIDUALS',
       },
@@ -147,7 +151,7 @@ export const menuItems = [
         name: 'Surveys',
         href: '/accountability/surveys',
         selectedRegexp: /^\/accountability\/surveys.*$/,
-        icon: <></>,
+        icon: <BallotIcon />,
         // TODO: Update the permissions
         permissionModule: 'INDIVIDUALS',
       },

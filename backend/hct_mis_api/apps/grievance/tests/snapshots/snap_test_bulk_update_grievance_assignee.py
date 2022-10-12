@@ -25,7 +25,7 @@ snapshots['TestUpdateGrievanceTickets::test_bulk_update_grievance_assignee_0_wit
                     'assignedTo': {
                         'firstName': 'user_two'
                     }
-                },
+                }
             ]
         }
     }

@@ -59,3 +59,87 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
 
     def __str__(self) -> str:
         return f"{self.title} ({self.number_of_recipients} recipients)"
+
+
+class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "description",
+            "comments",
+            "admin2",
+            "area",
+            "language",
+            "program",
+            "linked_grievance",
+        ]
+    )
+
+    POSITIVE_FEEDBACK = "POSITIVE_FEEDBACK"
+    NEGATIVE_FEEDBACK = "NEGATIVE_FEEDBACK"
+
+    ISSUE_TYPE_CHOICES = (
+        (POSITIVE_FEEDBACK, _("Positive feedback")),
+        (NEGATIVE_FEEDBACK, _("Negative feedback")),
+    )
+
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    issue_type = models.CharField(verbose_name=_("Issue type"), choices=ISSUE_TYPE_CHOICES, max_length=20)
+    household_lookup = models.ForeignKey(
+        "household.Household",
+        related_name="feedbacks",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Household lookup"),
+    )
+    individual_lookup = models.ForeignKey(
+        "household.Individual",
+        related_name="feedbacks",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Individual lookup"),
+    )
+    description = models.TextField()
+    comments = models.TextField(blank=True, null=True)
+    admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
+    area = models.CharField(max_length=250, blank=True)
+    language = models.TextField(blank=True)
+    consent = models.BooleanField(default=True)
+    program = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="feedbacks",
+        null=True,
+        blank=True,
+        verbose_name=_("Created by"),
+    )
+    linked_grievance = models.OneToOneField(
+        "grievance.GrievanceTicket",
+        on_delete=models.SET_NULL,
+        related_name="feedback",
+        null=True,
+        blank=True,
+        verbose_name=_("Linked grievance"),
+    )
+
+
+class FeedbackMessage(TimeStampedUUIDModel):
+    description = models.TextField(
+        verbose_name=_("Description"),
+        help_text=_("The content of the feedback message."),
+    )
+    feedback = models.ForeignKey(
+        Feedback,
+        related_name="feedback_messages",
+        on_delete=models.CASCADE,
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="feedback_messages",
+        blank=True,
+        null=True,
+        verbose_name=_("Created by"),
+    )

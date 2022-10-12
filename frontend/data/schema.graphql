@@ -113,6 +113,7 @@ type AreaNode implements Node {
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
 }
 
 type AreaNodeConnection {
@@ -225,6 +226,7 @@ type BusinessAreaNode implements Node {
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
 }
 
 type BusinessAreaNodeConnection {
@@ -540,6 +542,33 @@ input CreateDashboardReportInput {
   program: ID
 }
 
+input CreateFeedbackInput {
+  businessAreaSlug: String!
+  issueType: String!
+  householdLookup: ID
+  individualLookup: ID
+  description: String!
+  comments: String
+  admin2: ID
+  area: String
+  language: String
+  consent: Boolean
+  program: ID
+}
+
+input CreateFeedbackMessageInput {
+  description: String!
+  feedback: ID!
+}
+
+type CreateFeedbackMessageMutation {
+  feedbackMessage: FeedbackMessageNode
+}
+
+type CreateFeedbackMutation {
+  feedback: FeedbackNode
+}
+
 input CreateGrievanceTicketExtrasInput {
   category: CategoryExtrasInput
   issueType: IssueTypeExtrasInput
@@ -562,6 +591,8 @@ input CreateGrievanceTicketInput {
   partner: Int
   programme: ID
   comments: String
+  linkedFeedbackId: ID
+  documentation: [GrievanceDocumentInput]
 }
 
 type CreateGrievanceTicketMutation {
@@ -801,6 +832,64 @@ type ExportXlsxCashPlanVerification {
   cashPlan: CashPlanNode
 }
 
+enum FeedbackIssueType {
+  POSITIVE_FEEDBACK
+  NEGATIVE_FEEDBACK
+}
+
+type FeedbackMessageNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  description: String!
+  createdBy: UserNode
+}
+
+type FeedbackMessageNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FeedbackMessageNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type FeedbackMessageNodeEdge {
+  node: FeedbackMessageNode
+  cursor: String!
+}
+
+type FeedbackNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  unicefId: String
+  businessArea: UserBusinessAreaNode!
+  issueType: FeedbackIssueType!
+  householdLookup: HouseholdNode
+  individualLookup: IndividualNode
+  description: String!
+  comments: String
+  admin2: AreaNode
+  area: String!
+  language: String!
+  consent: Boolean!
+  program: ProgramNode
+  createdBy: UserNode
+  linkedGrievance: GrievanceTicketNode
+  feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
+}
+
+type FeedbackNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FeedbackNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type FeedbackNodeEdge {
+  node: FeedbackNode
+  cursor: String!
+}
+
 type FieldAttributeNode {
   id: String
   type: String
@@ -866,6 +955,40 @@ input GrievanceComplaintTicketExtras {
   paymentRecord: [ID]
 }
 
+input GrievanceDocumentInput {
+  name: String!
+  file: Upload!
+}
+
+type GrievanceDocumentNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String
+  createdBy: UserNode
+  grievanceTicket: GrievanceTicketNode
+  fileSize: Int
+  contentType: String!
+  filePath: String
+  fileName: String
+}
+
+type GrievanceDocumentNodeConnection {
+  pageInfo: PageInfo!
+  edges: [GrievanceDocumentNodeEdge]!
+}
+
+type GrievanceDocumentNodeEdge {
+  node: GrievanceDocumentNode
+  cursor: String!
+}
+
+input GrievanceDocumentUpdateInput {
+  id: ID!
+  name: String
+  file: Upload
+}
+
 type GrievanceStatusChangeMutation {
   grievanceTicket: GrievanceTicketNode
 }
@@ -914,6 +1037,8 @@ type GrievanceTicketNode implements Node {
   positiveFeedbackTicketDetails: TicketPositiveFeedbackDetailsNode
   negativeFeedbackTicketDetails: TicketNegativeFeedbackDetailsNode
   referralTicketDetails: TicketReferralDetailsNode
+  supportDocuments(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceDocumentNodeConnection!
+  feedback: FeedbackNode
   household: HouseholdNode
   individual: IndividualNode
   paymentRecord: PaymentRecordNode
@@ -921,6 +1046,7 @@ type GrievanceTicketNode implements Node {
   admin: String
   existingTickets: [GrievanceTicketNode]
   totalDays: String
+  documentation: [GrievanceDocumentNode]
 }
 
 type GrievanceTicketNodeConnection {
@@ -1050,6 +1176,7 @@ type HouseholdNode implements Node {
   targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelection!]!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   adminAreaTitle: String
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
@@ -2039,6 +2166,7 @@ type IndividualNode implements Node {
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   bankAccountInfo: BankAccountInfoNode
+  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   status: String
   role: String
   age: Int
@@ -2254,6 +2382,9 @@ enum MessageSamplingType {
 
 type Mutations {
   createAccountabilityCommunicationMessage(businessAreaSlug: String!, inputs: CreateAccountabilityCommunicationMessageInput!): CreateCommunicationMessageMutation
+  createFeedback(input: CreateFeedbackInput!): CreateFeedbackMutation
+  updateFeedback(input: UpdateFeedbackInput!): UpdateFeedbackMutation
+  createFeedbackMessage(input: CreateFeedbackMessageInput!): CreateFeedbackMessageMutation
   createReport(reportData: CreateReportInput!): CreateReport
   restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
@@ -2517,6 +2648,7 @@ type ProgramNode implements Node {
   cashPlans(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   totalEntitledQuantity: Decimal
   totalDeliveredQuantity: Decimal
   totalUndeliveredQuantity: Decimal
@@ -2568,6 +2700,9 @@ type Query {
   accountabilityCommunicationMessageRecipient(id: ID!): CommunicationMessageRecipientMapNode
   allAccountabilityCommunicationMessageRecipients(offset: Int, before: String, after: String, first: Int, last: Int, messageId: String!, recipientId: String, fullName: String, phoneNo: String, sex: String, orderBy: String): CommunicationMessageRecipientMapNodeConnection
   accountabilityCommunicationMessageSampleSize(businessAreaSlug: String!, inputs: GetAccountabilityCommunicationMessageSampleSizeInput): GetCommunicationMessageSampleSizeObject
+  feedback(id: ID!): FeedbackNode
+  allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessAreaSlug: String!, issueType: String, createdAtRange: String, createdBy: String, feedbackId: String, orderBy: String): FeedbackNodeConnection
+  feedbackIssueTypeChoices: [ChoiceObject]
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
@@ -3709,6 +3844,24 @@ input UpdateAddIndividualIssueTypeExtras {
   individualData: AddIndividualDataObjectType!
 }
 
+input UpdateFeedbackInput {
+  feedbackId: ID!
+  issueType: String
+  householdLookup: ID
+  individualLookup: ID
+  description: String
+  comments: String
+  admin2: ID
+  area: String
+  language: String
+  consent: Boolean
+  program: ID
+}
+
+type UpdateFeedbackMutation {
+  feedback: FeedbackNode
+}
+
 input UpdateGrievanceTicketExtrasInput {
   householdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras
   individualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras
@@ -3734,6 +3887,9 @@ input UpdateGrievanceTicketInput {
   partner: Int
   programme: ID
   comments: String
+  documentation: [GrievanceDocumentInput]
+  documentationToUpdate: [GrievanceDocumentUpdateInput]
+  documentationToDelete: [ID]
 }
 
 type UpdateGrievanceTicketMutation {
@@ -3841,6 +3997,7 @@ type UserBusinessAreaNode implements Node {
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   permissions: [String]
 }
 
@@ -3887,6 +4044,8 @@ type UserNode implements Node {
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
+  feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
 }
 
