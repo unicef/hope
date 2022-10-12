@@ -74,7 +74,7 @@ api_patterns = [
         include("advanced_filters.urls"),
     ),
     path(
-        f"power_query/",
+        "power_query/",
         include("hct_mis_api.apps.power_query.urls"),
     ),
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
