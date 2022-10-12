@@ -1,12 +1,5 @@
 import json
-import graphene
-
 from decimal import Decimal
-
-from graphene import relay
-from graphene_django import DjangoObjectType
-from graphql_relay import to_global_id
-from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
 from django.db.models import (
     Case,
@@ -25,7 +18,12 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
-from hct_mis_api.apps.household.schema import HouseholdNode
+import graphene
+from graphene import relay
+from graphene_django import DjangoObjectType
+from graphql_relay import to_global_id
+from graphql_relay.connection.arrayconnection import connection_from_list_slice
+
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -49,6 +47,7 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
     FinancialServiceProviderXlsxReportFilter,
@@ -81,10 +80,10 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
-from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     does_payment_record_have_right_hoh_phone_number,
 )
+from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -591,7 +590,10 @@ class GenericPaymentPlanNode(graphene.ObjectType):
     def resolve_obj_type(self, info, **kwargs):
         return self.__class__.__name__
 
-    def resolve_payment_verification_summary(self, info,):
+    def resolve_payment_verification_summary(
+        self,
+        info,
+    ):
         return self.payment_verification_summary
 
 
@@ -695,6 +697,7 @@ class Query(graphene.ObjectType):
     )
 
     payment_plan = relay.Node.Field(PaymentPlanNode)
+    # TODO: Keep of remove??? in favour of all_cash_plans_and_payment_plans
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
@@ -714,6 +717,7 @@ class Query(graphene.ObjectType):
         FspChoices,
         input=AvailableFspsForDeliveryMechanismsInput(),
     )
+    # cash_plan_or_payment_plan
     all_cash_plans_and_payment_plans = graphene.Field(
         PaginatedCashPlanAndPaymentPlanNode,
         business_area=graphene.String(required=True),
@@ -846,15 +850,15 @@ class Query(graphene.ObjectType):
         payment_verifications = chart_get_filtered_qs(
             PaymentVerification.objects,
             year,
-            business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
+            business_area_slug_filter={"payment__business_area__slug": business_area_slug},
             additional_filters={
                 **chart_create_filter_query(
                     filters,
-                    program_id_path="payment_record__parent__program__id",
-                    administrative_area_path="payment_record__household__admin_area",
+                    program_id_path="payment__parent__program__id",
+                    administrative_area_path="payment__household__admin_area",
                 )
             },
-            year_filter_path="payment_record__delivery_date",
+            year_filter_path="payment__delivery_date",
         )
 
         verifications_by_status = payment_verifications.values("status").annotate(count=Count("status"))
@@ -870,7 +874,7 @@ class Query(graphene.ObjectType):
             for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
         ]
 
-        samples_count = payment_verifications.distinct("payment_record").count()
+        samples_count = payment_verifications.distinct("payment").count()
         all_payment_records_for_created_verifications = (
             PaymentRecord.objects.filter(
                 parent__in=payment_verifications.distinct("payment_verification_plan__payment_plan").values_list(
@@ -887,7 +891,7 @@ class Query(graphene.ObjectType):
         return {
             "labels": ["Payment Verification"],
             "datasets": dataset_percentage_done,
-            "households": payment_verifications.distinct("payment_record__household").count(),
+            "households": payment_verifications.distinct("payment__household").count(),
             "average_sample_size": average_sample_size,
         }
 
