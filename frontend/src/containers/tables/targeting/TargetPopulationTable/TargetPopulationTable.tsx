@@ -45,6 +45,7 @@ export const TargetPopulationTable = ({
     numberOfHouseholdsMax: filter.numIndividuals.max,
     status: filter.status,
     businessArea,
+    createdAtRange: JSON.stringify(filter.createdAtRange),
   };
 
   const handleRadioChange = (id: string): void => {

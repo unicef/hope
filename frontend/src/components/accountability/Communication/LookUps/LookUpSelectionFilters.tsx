@@ -36,9 +36,13 @@ export function LookUpSelectionFilters({
   });
   const [filterTargetPopulation, setFilterTargetPopulation] = useState({
     numIndividuals: { min: undefined, max: undefined },
+    createdAtRange: { min: undefined, max: undefined },
   });
 
-  const [filterRDI, setFilterRDI] = useState({});
+  const [filterRDI, setFilterRDI] = useState({
+    size: { min: undefined, max: undefined },
+    importDateRange: { min: undefined, max: undefined },
+  });
 
   const clearFilter = useCallback(() => {
     if (selectedTab === CommunicationTabsValues.HOUSEHOLD) {

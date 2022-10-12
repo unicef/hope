@@ -1,11 +1,13 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { Group, Person } from '@material-ui/icons';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
+import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TARGETING_STATES } from '../../utils/constants';
 import { ProgramNode } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
@@ -107,6 +109,39 @@ export function TargetPopulationFilters({
                 })
               }
               icon={<Group />}
+            />
+          </Grid>
+        </Grid>
+        <Grid container item xs={3} spacing={3} alignItems='flex-end'>
+          <Grid item xs={6}>
+            <DatePickerFilter
+              topLabel={t('Date Created')}
+              placeholder={t('From')}
+              onChange={(date) =>
+                onFilterChange({
+                  ...filter,
+                  createdAtRange: {
+                    ...filter.createdAtRange,
+                    min: date ? moment(date).format('YYYY-MM-DD') : null,
+                  },
+                })
+              }
+              value={filter.createdAtRange.min}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <DatePickerFilter
+              placeholder={t('To')}
+              onChange={(date) =>
+                onFilterChange({
+                  ...filter,
+                  createdAtRange: {
+                    ...filter.createdAtRange,
+                    max: date ? moment(date).format('YYYY-MM-DD') : null,
+                  },
+                })
+              }
+              value={filter.createdAtRange.max}
             />
           </Grid>
         </Grid>
