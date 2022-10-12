@@ -7,7 +7,6 @@ from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.cache import get_conditional_response
 from django.utils.http import http_date
-from django.views.decorators.http import etag
 
 from .models import Report, ReportDocument
 from .utils import basicauth
