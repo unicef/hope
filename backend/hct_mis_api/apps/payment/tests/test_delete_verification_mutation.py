@@ -20,9 +20,9 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 class TestDeleteVerificationMutation(APITestCase):
     MUTATION = """
-        mutation DeleteVerification($cashPlanVerificationId: ID!){
-          deletePaymentVerificationPlan(cashPlanVerificationId:$cashPlanVerificationId) {
-            cashPlan{
+        mutation DeleteVerification($paymentVerificationPlanId: ID!){
+          deletePaymentVerificationPlan(paymentVerificationPlanId:$paymentVerificationPlanId) {
+            paymentPlan{
                 name
                 verificationPlans {
                     edges {
@@ -71,7 +71,7 @@ class TestDeleteVerificationMutation(APITestCase):
             request_string=self.MUTATION,
             context={"user": self.user},
             variables={
-                "cashPlanVerificationId": [
+                "paymentVerificationPlanId": [
                     self.id_to_base64(payment_verification_plan.id, "PaymentVerificationPlanNode")
                 ]
             },
@@ -92,7 +92,7 @@ class TestDeleteVerificationMutation(APITestCase):
             request_string=self.MUTATION,
             context={"user": self.user},
             variables={
-                "cashPlanVerificationId": [
+                "paymentVerificationPlanId": [
                     self.id_to_base64(payment_verification_plan.id, "PaymentVerificationPlanNode")
                 ]
             },

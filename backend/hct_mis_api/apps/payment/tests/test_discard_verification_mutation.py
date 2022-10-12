@@ -27,7 +27,7 @@ class TestDiscardVerificationMutation(APITestCase):
     DISCARD_MUTATION = """
         mutation DiscardVerification($paymentVerificationPlanId: ID!){
           discardPaymentVerificationPlan(paymentVerificationPlanId:$paymentVerificationPlanId) {
-            cashPlan{
+            paymentPlan{
                 name
                 verificationPlans {
                     edges {
@@ -70,7 +70,7 @@ class TestDiscardVerificationMutation(APITestCase):
             business_area=cls.business_area,
         )
         payment_verification_plan = PaymentVerificationPlanFactory(
-            cash_plan=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+            payment_plan=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         )
         payment_verification_plan.status = PaymentVerificationPlan.STATUS_ACTIVE
         payment_verification_plan.save()
@@ -95,7 +95,7 @@ class TestDiscardVerificationMutation(APITestCase):
             )
             PaymentVerificationFactory(
                 payment_verification_plan=payment_verification_plan,
-                payment_record=payment_record,
+                payment=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)

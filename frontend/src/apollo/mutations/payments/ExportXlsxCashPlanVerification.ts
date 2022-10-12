@@ -3,7 +3,7 @@ import { gql } from 'apollo-boost';
 export const ExportXlsxPaymentVerificationPlanFile = gql`
   mutation ExportXlsxPaymentVerificationPlanFile($paymentVerificationPlanId: ID!) {
     exportXlsxPaymentVerificationPlanFile(paymentVerificationPlanId: $paymentVerificationPlanId) {
-      cashPlan {
+      paymentPlan {
         id
         # verificationPlans {
         #   edges {

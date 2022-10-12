@@ -9,7 +9,7 @@ export const ImportXlsxPaymentVerificationPlanFile = gql`
       paymentVerificationPlanId: $paymentVerificationPlanId
       file: $file
     ) {
-      cashPlan {
+      paymentPlan {
         id
       }
       errors {

@@ -27,7 +27,7 @@ type ActionPaymentPlanMutation {
 
 type ActivatePaymentVerificationPlan {
   validationErrors: Arg
-  cashPlan: CashPlanNode
+  paymentPlan: CashPlanNode
 }
 
 input AddIndividualDataObjectType {
@@ -625,7 +625,7 @@ type DeletePaymentPlanMutation {
 }
 
 type DeletePaymentVerificationPlan {
-  cashPlan: CashPlanNode
+  paymentPlan: CashPlanNode
 }
 
 type DeleteProgram {
@@ -697,7 +697,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
 }
 
 type DiscardPaymentVerificationPlan {
-  cashPlan: CashPlanNode
+  paymentPlan: CashPlanNode
 }
 
 type DjangoDebug {
@@ -825,7 +825,7 @@ type ExportXLSXPaymentPlanPaymentListPerFSPMutation {
 }
 
 type ExportXlsxPaymentVerificationPlanFile {
-  cashPlan: CashPlanNode
+  paymentPlan: CashPlanNode
 }
 
 input FSPToDeliveryMechanismMappingInput {
@@ -957,7 +957,7 @@ type FinancialServiceProviderXlsxTemplateNodeEdge {
 }
 
 type FinishPaymentVerificationPlan {
-  cashPlan: CashPlanNode
+  paymentPlan: CashPlanNode
 }
 
 scalar FlexFieldsScalar
@@ -1342,7 +1342,7 @@ type ImportXLSXPaymentPlanPaymentListPerFSPMutation {
 }
 
 type ImportXlsxPaymentVerificationPlanFile {
-  cashPlan: CashPlanNode
+  paymentPlan: CashPlanNode
   errors: [XlsxErrorNode]
 }
 
@@ -2299,7 +2299,7 @@ input IndividualUpdateDataObjectType {
 }
 
 type InvalidPaymentVerificationPlan {
-  cashPlan: CashPlanNode
+  paymentPlan: CashPlanNode
 }
 
 input IssueTypeExtrasInput {
@@ -2982,8 +2982,8 @@ type PaymentVerificationNode implements Node {
   updatedAt: DateTime!
   version: BigInt!
   paymentVerificationPlan: PaymentVerificationPlanNode!
-  paymentContentType: ContentTypeObjectType
-  paymentObjectId: String
+  paymentContentType: ContentTypeObjectType!
+  paymentObjectId: String!
   status: PaymentVerificationStatus!
   statusDate: DateTime
   receivedAmount: Float
@@ -3013,8 +3013,8 @@ type PaymentVerificationPlanNode implements Node {
   version: BigInt!
   unicefId: String
   status: PaymentVerificationPlanStatus!
-  paymentPlanContentType: ContentTypeObjectType
-  paymentPlanObjectId: String
+  paymentPlanContentType: ContentTypeObjectType!
+  paymentPlanObjectId: String!
   sampling: PaymentVerificationPlanSampling!
   verificationChannel: PaymentVerificationPlanVerificationChannel!
   sampleSize: Int
@@ -3092,8 +3092,8 @@ type PaymentVerificationSummaryNode implements Node {
   status: PaymentVerificationSummaryStatus!
   activationDate: DateTime
   completionDate: DateTime
-  paymentPlanContentType: ContentTypeObjectType
-  paymentPlanObjectId: String
+  paymentPlanContentType: ContentTypeObjectType!
+  paymentPlanObjectId: String!
 }
 
 type PaymentVerificationSummaryNodeConnection {

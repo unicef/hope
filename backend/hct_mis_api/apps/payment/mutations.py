@@ -153,7 +153,8 @@ class EditPaymentVerificationMutation(PermissionMutation):
 
 
 class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutationMixin):
-    cash_plan = graphene.Field(CashPlanNode)
+    # TODO upd to GenericPaymentPlanNode
+    payment_plan = graphene.Field(CashPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -180,11 +181,12 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return ActivatePaymentVerificationPlan(cash_plan=payment_verification_plan.cash_plan)  # TODO update .payment_plan
+        return ActivatePaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan)
 
 
 class FinishPaymentVerificationPlan(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+    # TODO upd to GenericPaymentPlanNode
+    payment_plan = graphene.Field(CashPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -212,11 +214,12 @@ class FinishPaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return FinishPaymentVerificationPlan(cash_plan=payment_verification_plan.cash_plan)
+        return FinishPaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan)
 
 
 class DiscardPaymentVerificationPlan(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+    # TODO upd to GenericPaymentPlanNode
+    payment_plan = graphene.Field(CashPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -244,11 +247,12 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return cls(cash_plan=payment_verification_plan.cash_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan)
 
 
 class InvalidPaymentVerificationPlan(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+    # TODO upd to GenericPaymentPlanNode
+    payment_plan = graphene.Field(CashPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -276,11 +280,12 @@ class InvalidPaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return cls(cash_plan=payment_verification_plan.cash_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan)
 
 
 class DeletePaymentVerificationPlan(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+    # TODO upd to GenericPaymentPlanNode
+    payment_plan = graphene.Field(CashPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -292,7 +297,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
     def mutate(cls, root, info, payment_verification_plan_id, **kwargs):
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
-        cash_plan = payment_verification_plan.cash_plan
+        payment_plan = payment_verification_plan.payment_plan
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
@@ -309,12 +314,11 @@ class DeletePaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             None,
         )
-        return cls(cash_plan=cash_plan)
+        return cls(payment_plan=payment_plan)
 
 
 class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
     # TODO I don't think this is being used now, add permission if in use
-
     payment_verification = graphene.Field(PaymentVerificationNode)
 
     class Arguments:
@@ -356,7 +360,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
             raise GraphQLError(
                 f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
-        delivered_amount = payment_verification.payment_record.delivered_quantity
+        delivered_amount = payment_verification.get_payment.delivered_quantity
         if status == PaymentVerification.STATUS_PENDING and received_amount is not None:
             logger.error(
                 f"Wrong status {PaymentVerification.STATUS_PENDING} when received_amount ({received_amount}) is not empty",
@@ -460,7 +464,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         if not payment_verification.is_manually_editable:
             logger.error("You can only edit payment verification in first 10 minutes")
             raise GraphQLError("You can only edit payment verification in first 10 minutes")
-        delivered_amount = payment_verification.payment_record.delivered_quantity
+        delivered_amount = payment_verification.get_payment.delivered_quantity
 
         if received is None and received_amount is not None and received_amount == 0:
             logger.error(f"You can't set received_amount {received_amount} and not set received to NO")
@@ -512,7 +516,8 @@ class XlsxErrorNode(graphene.ObjectType):
 
 
 class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+    # TODO upd to GenericPaymentPlanNode
+    payment_plan = graphene.Field(CashPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -541,11 +546,12 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
         payment_verification_plan.xlsx_file_exporting = True
         payment_verification_plan.save()
         create_payment_verification_plan_xlsx.delay(pk, info.context.user.pk)
-        return cls(cash_plan=payment_verification_plan.cash_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan)
 
 
 class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
-    cash_plan = graphene.Field(CashPlanNode)
+    # TODO upd to GenericPaymentPlanNode
+    payment_plan = graphene.Field(CashPlanNode)
     errors = graphene.List(XlsxErrorNode)
 
     class Arguments:
@@ -575,7 +581,7 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
         calculate_counts(cashplan_payment_verification)
         cashplan_payment_verification.xlsx_file_imported = True
         cashplan_payment_verification.save()
-        return ImportXlsxPaymentVerificationPlanFile(cashplan_payment_verification.cash_plan, import_service.errors)
+        return ImportXlsxPaymentVerificationPlanFile(cashplan_payment_verification.payment_plan, import_service.errors)
 
 
 class MarkPaymentRecordAsFailedMutation(PermissionMutation):

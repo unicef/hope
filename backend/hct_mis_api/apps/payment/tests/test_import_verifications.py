@@ -51,7 +51,7 @@ class TestXlsxVerificationImport(APITestCase):
         )
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
-        payment_verification_plan = PaymentVerificationPlanFactory(cash_plan=cash_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan=cash_plan)
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=cls.user, business_area=BusinessArea.objects.first()
