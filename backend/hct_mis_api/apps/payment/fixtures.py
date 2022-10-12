@@ -571,8 +571,8 @@ def create_payment_verification_plan_with_status(cash_plan, user, business_area,
         )
 
         PaymentVerificationFactory(
-            cash_plan_payment_verification=cash_plan_payment_verification,
-            payment_record=payment_record,
+            payment_verification_plan=cash_plan_payment_verification,
+            payment=payment_record,
             status=PaymentVerification.STATUS_PENDING,
         )
         EntitlementCardFactory(household=household)

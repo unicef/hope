@@ -1197,7 +1197,7 @@ def build_summary(payment_plan):
         pending=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_PENDING)),
         finished=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_FINISHED)),
     )
-    summary = PaymentVerificationSummary.objects.get(payment_plan=payment_plan)
+    summary = payment_plan.payment_verification_summary
     if statuses_count["active"] >= 1:
         summary.mark_as_active()
     elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
