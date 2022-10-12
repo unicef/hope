@@ -1,4 +1,4 @@
-import { InputAdornment, MenuItem } from '@material-ui/core';
+import { Box, InputAdornment, MenuItem } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,17 +14,6 @@ const StyledTextField = styled(TextField)`
   flex: 1;
   && {
     min-width: 150px;
-  }
-`;
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  flex-direction: row;
-  align-items: center;
-  && > div {
-    margin: 5px;
   }
 `;
 
@@ -48,7 +37,7 @@ export function RegistrationFilters({
 
   const renderTable = (): React.ReactElement => {
     return (
-      <Container>
+      <Box display="flex" alignItems="center">
         <StyledTextField
           variant='outlined'
           label={t('Search')}
@@ -99,7 +88,7 @@ export function RegistrationFilters({
             );
           })}
         </SelectFilter>
-      </Container>
+      </Box>
     );
   };
 

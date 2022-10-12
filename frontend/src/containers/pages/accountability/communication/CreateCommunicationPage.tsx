@@ -123,7 +123,7 @@ export function CreateCommunicationPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const [activeStep, setActiveStep] = useState(CommunicationSteps.Lookup);
+  const [activeStep, setActiveStep] = useState(CommunicationSteps.LookUp);
   const [selectedTab, setSelectedTab] = useState(
     CommunicationTabsValues.HOUSEHOLD,
   );
@@ -318,7 +318,7 @@ export function CreateCommunicationPage(): React.ReactElement {
               </Stepper>
             </Grid>
             <Form>
-              {activeStep === CommunicationSteps.Lookup && (
+              {activeStep === CommunicationSteps.LookUp && (
                 <Box display='flex' flexDirection='column'>
                   <LookUpSelection
                     businessArea={businessArea}
@@ -546,10 +546,11 @@ export function CreateCommunicationPage(): React.ReactElement {
                     <Grid item xs={12}>
                       <Field
                         name='title'
+                        required
                         multiline
                         fullWidth
                         variant='outlined'
-                        label={t('Title*')}
+                        label={t('Title')}
                         component={FormikTextField}
                       />
                     </Grid>
@@ -557,10 +558,11 @@ export function CreateCommunicationPage(): React.ReactElement {
                   <Grid item xs={12}>
                     <Field
                       name='body'
+                      required
                       multiline
                       fullWidth
                       variant='outlined'
-                      label={t('Message*')}
+                      label={t('Message')}
                       component={FormikTextField}
                     />
                   </Grid>
@@ -579,7 +581,7 @@ export function CreateCommunicationPage(): React.ReactElement {
               </Box>
               <Box display='flex' ml='auto'>
                 <Button
-                  disabled={activeStep === CommunicationSteps.Lookup}
+                  disabled={activeStep === CommunicationSteps.LookUp}
                   onClick={handleBack}
                 >
                   {t('Back')}

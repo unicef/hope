@@ -31,55 +31,52 @@ export function LookUpSelectionTables({
 }: LookUpSelectionTablesProps): React.ReactElement {
   const permissions = usePermissions();
 
-  const renderTable = (): React.ReactElement => {
-    return (
-      <>
-        {selectedTab === CommunicationTabsValues.HOUSEHOLD && (
-          <LookUpHouseholdTable
-            filter={filtersHouseholdApplied}
-            businessArea={businessArea}
-            choicesData={choicesData}
-            noTableStyling
-            setFieldValue={onValueChange}
-            selectedHousehold={values.households}
-            setSelectedHousehold={(value) => {
-              handleChange(CommunicationTabsValues.HOUSEHOLD, value);
-            }}
-            householdMultiSelect
-          />
-        )}
-        {selectedTab === CommunicationTabsValues.TARGETPOPULATION && (
-          <TargetPopulationTable
-            filter={filtersTargetPopulationApplied}
-            canViewDetails={hasPermissions(
-              PERMISSIONS.TARGETING_VIEW_DETAILS,
-              permissions,
-            )}
-            enableRadioButton
-            selectedTargetPopulation={values.targetPopulation}
-            handleChange={(value) => {
-              handleChange(CommunicationTabsValues.TARGETPOPULATION, value);
-            }}
-            noTableStyling
-          />
-        )}
-        {selectedTab === CommunicationTabsValues.RDI && (
-          <RegistrationDataImportTable
-            filter={filtersRDIApplied}
-            canViewDetails={hasPermissions(
-              PERMISSIONS.RDI_VIEW_DETAILS,
-              permissions,
-            )}
-            enableRadioButton
-            selectedRDI={values.registrationDataImport}
-            handleChange={(value) => {
-              handleChange(CommunicationTabsValues.RDI, value);
-            }}
-            noTableStyling
-          />
-        )}
-      </>
-    );
-  };
-  return renderTable();
+  return (
+    <>
+      {selectedTab === CommunicationTabsValues.HOUSEHOLD && (
+        <LookUpHouseholdTable
+          filter={filtersHouseholdApplied}
+          businessArea={businessArea}
+          choicesData={choicesData}
+          noTableStyling
+          setFieldValue={onValueChange}
+          selectedHousehold={values.households}
+          setSelectedHousehold={(value) => {
+            handleChange(CommunicationTabsValues.HOUSEHOLD, value);
+          }}
+          householdMultiSelect
+        />
+      )}
+      {selectedTab === CommunicationTabsValues.TARGET_POPULATION && (
+        <TargetPopulationTable
+          filter={filtersTargetPopulationApplied}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.TARGETING_VIEW_DETAILS,
+            permissions,
+          )}
+          enableRadioButton
+          selectedTargetPopulation={values.targetPopulation}
+          handleChange={(value) => {
+            handleChange(CommunicationTabsValues.TARGET_POPULATION, value);
+          }}
+          noTableStyling
+        />
+      )}
+      {selectedTab === CommunicationTabsValues.RDI && (
+        <RegistrationDataImportTable
+          filter={filtersRDIApplied}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.RDI_VIEW_DETAILS,
+            permissions,
+          )}
+          enableRadioButton
+          selectedRDI={values.registrationDataImport}
+          handleChange={(value) => {
+            handleChange(CommunicationTabsValues.RDI, value);
+          }}
+          noTableStyling
+        />
+      )}
+    </>
+  );
 }

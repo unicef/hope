@@ -11,7 +11,7 @@ import {
 import { LookUpSelectionFilters } from './LookUpSelectionFilters';
 import { LookUpSelectionTables } from './LookUpSelectionTables';
 
-const CommunicationTabs = ['Household', 'Target Population', 'RDI'];
+const communicationTabs = ['Household', 'Target Population', 'RDI'];
 
 const BoxWithBorderBottom = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -72,7 +72,7 @@ export const LookUpSelection = ({
           ? value
           : [],
       targetPopulation:
-        type === CommunicationTabsValues.TARGETPOPULATION &&
+        type === CommunicationTabsValues.TARGET_POPULATION &&
         typeof value === 'string'
           ? value
           : '',
@@ -98,7 +98,7 @@ export const LookUpSelection = ({
             row
             name='radio-buttons-group'
           >
-            {CommunicationTabs.map((tab, index) => (
+            {communicationTabs.map((tab, index) => (
               <FormControlLabel
                 value={index}
                 onChange={() => {
