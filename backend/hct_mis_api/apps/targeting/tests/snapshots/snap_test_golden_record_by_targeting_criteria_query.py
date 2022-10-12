@@ -4,16 +4,27 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_flex_field_0_with_permission 1'] = {
     'data': {
-        'goldenRecordByTargetingCriteria': {
-            'edges': [
+        'goldenRecordByTargetingCriteria': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
             ],
-            'totalCount': 0
+            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
+            'path': [
+                'goldenRecordByTargetingCriteria'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_flex_field_1_without_permission 1'] = {
@@ -28,7 +39,7 @@ snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_tar
                     'line': 3
                 }
             ],
-            'message': 'Permission Denied',
+            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
             'path': [
                 'goldenRecordByTargetingCriteria'
             ]
@@ -38,18 +49,22 @@ snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_tar
 
 snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_residence_status_0_with_permission 1'] = {
     'data': {
-        'goldenRecordByTargetingCriteria': {
-            'edges': [
+        'goldenRecordByTargetingCriteria': None
+    },
+    'errors': [
+        {
+            'locations': [
                 {
-                    'node': {
-                        'residenceStatus': 'REFUGEE',
-                        'size': 2
-                    }
+                    'column': 7,
+                    'line': 3
                 }
             ],
-            'totalCount': 1
+            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
+            'path': [
+                'goldenRecordByTargetingCriteria'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_residence_status_1_without_permission 1'] = {
@@ -64,7 +79,7 @@ snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_tar
                     'line': 3
                 }
             ],
-            'message': 'Permission Denied',
+            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
             'path': [
                 'goldenRecordByTargetingCriteria'
             ]
@@ -74,12 +89,22 @@ snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_tar
 
 snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_select_many_0_with_permission 1'] = {
     'data': {
-        'goldenRecordByTargetingCriteria': {
-            'edges': [
+        'goldenRecordByTargetingCriteria': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
             ],
-            'totalCount': 0
+            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
+            'path': [
+                'goldenRecordByTargetingCriteria'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_select_many_1_without_permission 1'] = {
@@ -94,7 +119,7 @@ snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_tar
                     'line': 3
                 }
             ],
-            'message': 'Permission Denied',
+            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
             'path': [
                 'goldenRecordByTargetingCriteria'
             ]
@@ -104,18 +129,22 @@ snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_tar
 
 snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_size_0_with_permission 1'] = {
     'data': {
-        'goldenRecordByTargetingCriteria': {
-            'edges': [
+        'goldenRecordByTargetingCriteria': None
+    },
+    'errors': [
+        {
+            'locations': [
                 {
-                    'node': {
-                        'residenceStatus': 'REFUGEE',
-                        'size': 2
-                    }
+                    'column': 7,
+                    'line': 3
                 }
             ],
-            'totalCount': 1
+            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
+            'path': [
+                'goldenRecordByTargetingCriteria'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_targeting_criteria_size_1_without_permission 1'] = {
@@ -130,7 +159,7 @@ snapshots['GoldenRecordTargetingCriteriaQueryTestCase::test_golden_record_by_tar
                     'line': 3
                 }
             ],
-            'message': 'Permission Denied',
+            'message': "'TargetingCriteriaRuleFilterObjectType' object has no attribute 'parametrizer'",
             'path': [
                 'goldenRecordByTargetingCriteria'
             ]

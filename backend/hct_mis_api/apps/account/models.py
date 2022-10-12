@@ -86,38 +86,29 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         super().save(*args, **kwargs)
 
     def permissions_in_business_area(self, business_area_slug):
-        if not hasattr(self, "business_area_perms"):
-            self.business_area_perms = {}
-        if business_area_slug not in self.business_area_perms:
-            all_roles_permissions_list = list(
-                Role.objects.filter(
-                    user_roles__user=self,
-                    user_roles__business_area__slug=business_area_slug,
-                ).values_list("permissions", flat=True)
-            )
-            self.business_area_perms[business_area_slug] = [
-                permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
-            ]
-
-        return self.business_area_perms[business_area_slug]
+        all_roles_permissions_list = list(
+            Role.objects.filter(
+                user_roles__user=self,
+                user_roles__business_area__slug=business_area_slug,
+            ).values_list("permissions", flat=True)
+        )
+        return [
+            permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
+        ]
 
     def has_permission(self, permission, business_area, write=False):
-        return permission in self.permissions_in_business_area(business_area)
-
-    # def has_permission(self, permission, business_area, write=False):
-    #     query = Role.objects.filter(
-    #         permissions__contains=[permission],
-    #         user_roles__user=self,
-    #         user_roles__business_area=business_area,
-    #     )
-    #     return query.count() > 0
+        query = Role.objects.filter(
+            permissions__contains=[permission],
+            user_roles__user=self,
+            user_roles__business_area=business_area,
+        )
+        return query.count() > 0
 
     def can_download_storage_files(self):
-        return
-        # return any(
-        #     self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
-        #     for role in self.user_roles.all()
-        # )
+        return any(
+            self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
+            for role in self.user_roles.all()
+        )
 
     class Meta:
         permissions = (
