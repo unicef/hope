@@ -30,8 +30,6 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        super().setUpTestData()
-
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
         task = LoadSanctionListXMLTask(full_sanction_list_path)
         task.execute()
@@ -117,8 +115,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
         country = geo_models.Country.objects.get(iso_code3="AFG")
         doc_type = DocumentTypeFactory(label="National ID", type=IDENTIFICATION_TYPE_NATIONAL_ID)
         DocumentFactory(document_number="55130", individual=ind, type=doc_type, country=country)
-
-        cls.rebuild_search_index()
+        super().setUpTestData()
 
     def test_execute(self):
         CheckAgainstSanctionListPreMergeTask.execute()

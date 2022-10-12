@@ -57,7 +57,7 @@ def handle_add_document(document, individual):
     if document_already_exists:
         raise GraphQLError(f"Document with number {number} of type {type_name} already exist")
 
-    return Document(document_number=number, individual=individual, type=document_type, photo=photo)
+    return Document(document_number=number, individual=individual, type=document_type, photo=photo, country=country)
 
 
 def handle_edit_document(document_data: dict):
@@ -95,6 +95,7 @@ def handle_edit_document(document_data: dict):
 
     document.document_number = number
     document.type = document_type
+    document.country = country
     document.photo = photo
     return document
 

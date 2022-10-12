@@ -9,6 +9,7 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
+    IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     NOT_DISABLED,
     ORG_ENUMERATOR_CHOICES,
@@ -174,13 +175,13 @@ class DocumentTypeFactory(factory.DjangoModelFactory):
         model = DocumentType
         django_get_or_create = ("type",)
 
-    type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
+    type = factory.fuzzy.FuzzyChoice([value for value, _ in IDENTIFICATION_TYPE_CHOICE])
 
 
 class DocumentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Document
-        django_get_or_create = ("type", "country")
+        django_get_or_create = ("document_number", "type", "country")
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
     type = factory.SubFactory(DocumentTypeFactory)
