@@ -12,8 +12,8 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import (
     IndividualDocumentAfghanistan,
-    IndividualDocumentUkraine,
     IndividualDocumentOthers,
+    IndividualDocumentUkraine,
     get_individual_doc,
 )
 from hct_mis_api.apps.household.models import (

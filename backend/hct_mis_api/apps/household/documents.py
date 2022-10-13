@@ -2,7 +2,6 @@ from django.conf import settings
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from elasticsearch_dsl import Q
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 
@@ -142,7 +141,6 @@ class IndividualDocument(Document):
 
 @registry.register_document
 class IndividualDocumentAfghanistan(IndividualDocument):
-
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_afghanistan"
         settings = index_settings
@@ -153,7 +151,6 @@ class IndividualDocumentAfghanistan(IndividualDocument):
 
 @registry.register_document
 class IndividualDocumentUkraine(IndividualDocument):
-
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_ukraine"
         settings = index_settings
@@ -164,7 +161,6 @@ class IndividualDocumentUkraine(IndividualDocument):
 
 @registry.register_document
 class IndividualDocumentOthers(IndividualDocument):
-
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_others"
         settings = index_settings
