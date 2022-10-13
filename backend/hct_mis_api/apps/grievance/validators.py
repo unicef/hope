@@ -1,5 +1,3 @@
-import logging
-
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 

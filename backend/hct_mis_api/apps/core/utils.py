@@ -12,8 +12,8 @@ from django.utils import timezone
 
 import pytz
 from django_filters import OrderingFilter
-from graphql import GraphQLError
 from PIL import Image
+
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
@@ -425,7 +425,6 @@ def to_snake_case(camel_case_string):
 def check_concurrency_version_in_mutation(version, target):
     if version is None:
         return
-    from graphql import GraphQLError
 
     if version != target.version:
         log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")

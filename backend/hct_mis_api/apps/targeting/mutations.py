@@ -6,7 +6,6 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 import graphene
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
     PermissionMutation,
@@ -47,6 +46,7 @@ from hct_mis_api.apps.targeting.validators import (
     TargetValidator,
     UnlockTargetPopulationValidator,
 )
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -55,7 +55,6 @@ from .celery_tasks import (
     target_population_full_rebuild,
     target_population_rebuild_stats,
 )
-from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 

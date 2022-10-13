@@ -7,7 +7,6 @@ from django.db.models import Q
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -54,8 +53,8 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
-from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
+from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
 

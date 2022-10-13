@@ -120,8 +120,6 @@ def handle_update_payment_channel(payment_channel):
 
 
 def handle_add_identity(identity, individual):
-    from graphql import GraphQLError
-
     from hct_mis_api.apps.household.models import Agency, IndividualIdentity
 
     agency_name = identity.get("agency")
@@ -147,8 +145,6 @@ def handle_add_identity(identity, individual):
 
 def handle_edit_identity(identity_data: dict):
     from django.shortcuts import get_object_or_404
-
-    from graphql import GraphQLError
 
     from hct_mis_api.apps.core.utils import decode_id_string
     from hct_mis_api.apps.household.models import Agency, IndividualIdentity

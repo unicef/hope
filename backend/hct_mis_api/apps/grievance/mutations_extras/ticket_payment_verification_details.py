@@ -1,7 +1,6 @@
 import logging
 
 import graphene
-from graphql import GraphQLError
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.utils.exceptions import log_and_raise
