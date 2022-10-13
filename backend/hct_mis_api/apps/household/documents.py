@@ -8,7 +8,6 @@ from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_a
 from .elasticsearch_utils import DEFAULT_SCRIPT
 from .models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
-
 index_settings = {
     "number_of_shards": 1,
     "number_of_replicas": 0,
