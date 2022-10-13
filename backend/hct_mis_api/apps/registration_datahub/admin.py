@@ -1,5 +1,4 @@
 import base64
-from django.utils import timezone
 import logging
 
 from django import forms
@@ -8,6 +7,7 @@ from django.core.signing import BadSignature, Signer
 from django.db.models import F
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 import requests
@@ -27,6 +27,8 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     process_flex_records_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    DiiaHousehold,
+    DiiaIndividual,
     ImportData,
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -38,8 +40,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     Record,
     RegistrationDataImportDatahub,
-    DiiaHousehold,
-    DiiaIndividual,
 )
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (

@@ -8,9 +8,9 @@ from django.db import transaction
 from django.db.models import JSONField, Q
 from django.db.transaction import atomic
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.shortcuts import redirect
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
@@ -29,16 +29,13 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
-from hct_mis_api.apps.household.celery_tasks import update_individuals_iban_from_xlsx_task
+from hct_mis_api.apps.household.celery_tasks import (
+    update_individuals_iban_from_xlsx_task,
+)
 from hct_mis_api.apps.household.forms import (
     UpdateByXlsxStage1Form,
     UpdateByXlsxStage2Form,
     UpdateIndividualsIBANFromXlsxForm,
-)
-from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
-from hct_mis_api.apps.household.services.individual_xlsx_update import (
-    IndividualXlsxUpdate,
-    InvalidColumnsError,
 )
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -54,6 +51,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
     XlsxUpdateFile,
+)
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.household.services.individual_xlsx_update import (
+    IndividualXlsxUpdate,
+    InvalidColumnsError,
 )
 from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
 from hct_mis_api.apps.utils.admin import (

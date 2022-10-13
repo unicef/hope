@@ -13,8 +13,8 @@ from django.utils import timezone
 from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN, BankAccountInfo
 
 logger = logging.getLogger(__name__)

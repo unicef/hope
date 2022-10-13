@@ -2,8 +2,8 @@ import random
 
 import factory
 from factory import enums, fuzzy
-from pytz import utc
 from faker import Faker
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.geo import models as geo_models

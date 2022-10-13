@@ -8,18 +8,14 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from graphene_file_upload.scalars import Upload
-
-from hct_mis_api.apps.accountability.models import Feedback
-from hct_mis_api.apps.grievance.documents import bulk_update_assigned_to
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import PaymentRecord
 
 import graphene
+from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
@@ -30,7 +26,17 @@ from hct_mis_api.apps.core.utils import (
     to_snake_case,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote, GrievanceDocument
+from hct_mis_api.apps.grievance.documents import bulk_update_assigned_to
+from hct_mis_api.apps.grievance.inputs import (
+    CreateGrievanceTicketInput,
+    CreateTicketNoteInput,
+    UpdateGrievanceTicketInput,
+)
+from hct_mis_api.apps.grievance.models import (
+    GrievanceDocument,
+    GrievanceTicket,
+    TicketNote,
+)
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     close_add_individual_grievance_ticket,
     close_delete_household_ticket,
@@ -49,9 +55,7 @@ from hct_mis_api.apps.grievance.mutations_extras.feedback import (
 from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import (
     save_grievance_complaint_extras,
 )
-from hct_mis_api.apps.grievance.mutations_extras.main import (
-    _no_operation_close_method,
-)
+from hct_mis_api.apps.grievance.mutations_extras.main import _no_operation_close_method
 from hct_mis_api.apps.grievance.mutations_extras.payment_verification import (
     save_payment_verification_extras,
 )
@@ -74,15 +78,22 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     verify_required_arguments,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode, GrievanceDocumentNode
+from hct_mis_api.apps.grievance.schema import (
+    GrievanceDocumentNode,
+    GrievanceTicketNode,
+    TicketNoteNode,
+)
 from hct_mis_api.apps.grievance.utils import (
+    create_grievance_documents,
+    delete_grievance_documents,
     get_individual,
     traverse_sibling_tickets,
-    create_grievance_documents,
     update_grievance_documents,
-    delete_grievance_documents,
 )
-from hct_mis_api.apps.grievance.validators import DataChangeValidator, validate_grievance_documents_size
+from hct_mis_api.apps.grievance.validators import (
+    DataChangeValidator,
+    validate_grievance_documents_size,
+)
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -92,11 +103,8 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.grievance.inputs import (
-    CreateGrievanceTicketInput,
-    CreateTicketNoteInput,
-    UpdateGrievanceTicketInput,
-)
+from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 

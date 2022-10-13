@@ -3,7 +3,7 @@ import random
 import factory
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.accountability.models import FeedbackMessage, Feedback
+from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 

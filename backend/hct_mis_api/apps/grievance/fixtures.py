@@ -1,14 +1,16 @@
 import random
 from io import BytesIO
 
-import factory
 from django.core.files.uploadedfile import InMemoryUploadedFile
+
+import factory
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
+    GrievanceDocument,
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
@@ -19,12 +21,11 @@ from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketNegativeFeedbackDetails,
     TicketNote,
+    TicketPaymentVerificationDetails,
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
-    TicketPaymentVerificationDetails,
-    GrievanceDocument,
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (

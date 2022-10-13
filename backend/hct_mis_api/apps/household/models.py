@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
@@ -20,18 +21,17 @@ from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
-from django.contrib.postgres.search import SearchVectorField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
 )
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 BLANK = ""
 IDP = "IDP"
