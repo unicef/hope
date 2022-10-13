@@ -19,7 +19,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.documents import IndividualDocument, get_individual_doc
+from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
