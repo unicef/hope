@@ -10,7 +10,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
-from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument, get_individual_doc
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
@@ -350,7 +350,7 @@ class RdiMergeTask:
 
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
-                        get_individual_doc(obj_hct.business_area.slug)
+                        get_individual_doc(obj_hct.business_area.slug),
                     )
                     populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
 
