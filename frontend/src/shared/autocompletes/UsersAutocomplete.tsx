@@ -7,7 +7,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { AllUsersQuery, useAllUsersQuery } from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../../shared/TextField';
+import TextField from '../TextField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
@@ -17,13 +17,13 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function UsersAutocomplete({
+export const UsersAutocomplete = ({
   value,
   onChange,
   onInputTextChange,
   inputValue,
   fullWidth = false,
-}): React.ReactElement {
+}): React.ReactElement => {
   const [open, setOpen] = React.useState(false);
   const businessArea = useBusinessArea();
   const debouncedInputText = useDebounce(inputValue, 500);
@@ -91,4 +91,4 @@ export function UsersAutocomplete({
       )}
     />
   );
-}
+};

@@ -6,13 +6,13 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../../shared/TextField';
+import TextField from '../TextField';
 import {
   AllAdminAreasQuery,
   useAllAdminAreasQuery,
 } from '../../__generated__/graphql';
-import { FieldLabel } from '../core/FieldLabel';
-import { LoadingComponent } from '../core/LoadingComponent';
+import { FieldLabel } from '../../components/core/FieldLabel';
+import { LoadingComponent } from '../../components/core/LoadingComponent';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 232px;

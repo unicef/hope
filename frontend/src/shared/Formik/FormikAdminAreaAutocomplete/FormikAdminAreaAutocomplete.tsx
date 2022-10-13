@@ -1,5 +1,5 @@
 import React from 'react';
-import { AdminAreaFixedAutocomplete } from '../../../components/population/AdminAreaFixedAutocomplete';
+import { AdminAreaFixedAutocomplete } from '../../autocompletes/AdminAreaFixedAutocomplete';
 
 export const FormikAdminAreaAutocomplete = ({
   field,
