@@ -21,8 +21,6 @@ ES_MAPPING_INDEX_MODEL = {
 class Command(BaseCommand):
     help = "Re-index elasticsearch documents for given index and business_area"
 
-    # ELASTICSEARCH_HOST = "http://elasticsearch:9200"
-
     def add_arguments(self, parser):
         parser.add_argument("index", type=str)
         parser.add_argument("business_area", type=str)

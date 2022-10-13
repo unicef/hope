@@ -26,8 +26,6 @@ class TestPowerQuery(TestCase):
         cls.ba2 = BusinessAreaFactory()
         cls.hh1 = create_household({"business_area": cls.ba1})
         cls.hh2 = create_household({"business_area": cls.ba2})
-        # hh1 = HouseholdFactory(business_area=ba1)
-        # hh2 = HouseholdFactory(business_area=ba2)
         cls.user1 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
         cls.user2 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
         cls.user3 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
@@ -37,7 +35,6 @@ class TestPowerQuery(TestCase):
 
         cls.query1: Query = QueryFactory(name="Query1", code="result=conn.all()", parametrizer=p)
         cls.query1.execute_matrix()
-        # cls.query2: Query = QueryFactory(name="Query2", code=f"result=invoke({cls.query1.pk}, arguments)")
         cls.formatter: Formatter = FormatterFactory(name="Queryset To HTML")
         cls.report1: Report = ReportFactory(formatter=cls.formatter, query=cls.query1)
         cls.report1.execute()

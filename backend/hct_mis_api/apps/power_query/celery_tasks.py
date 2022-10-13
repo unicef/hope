@@ -41,7 +41,6 @@ def run_background_query(query_id, **kwargs):
 @sentry_tags
 def refresh_reports():
     try:
-        # for query in Query.objects.filter()
         for report in Report.objects.filter(active=True, refresh_daily=True):
             run_background_query.delay()
             with atomic():
