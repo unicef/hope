@@ -133,7 +133,7 @@ class TestRapidProVerificationTask(TestCase):
             )
             EntitlementCardFactory(household=household)
         cls.cash_plan = cash_plan
-        cls.verification = cash_plan.get_payment_verification_plans().first()
+        cls.verification = cash_plan.get_payment_verification_plans.first()
 
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_filtering_by_start_id(self, mock_parent_init):

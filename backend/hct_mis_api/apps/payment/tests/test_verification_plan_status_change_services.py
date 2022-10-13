@@ -90,7 +90,7 @@ class TestPhoneNumberVerification(TestCase):
             )
             EntitlementCardFactory(household=household)
         cls.cash_plan = cash_plan
-        cls.verification = cash_plan.verifications.first()
+        cls.verification = cash_plan.get_payment_verification_plans.first()
 
         ###
 
@@ -144,7 +144,7 @@ class TestPhoneNumberVerification(TestCase):
             )
             EntitlementCardFactory(household=other_household)
         cls.other_cash_plan = other_cash_plan
-        cls.other_verification = other_cash_plan.verifications.first()
+        cls.other_verification = other_cash_plan.get_payment_verification_plans.first()
 
     def test_failing_rapid_pro_during_cash_plan_payment_verification(self):
         self.assertEqual(self.verification.status, PaymentVerification.STATUS_PENDING)
