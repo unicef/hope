@@ -29,12 +29,3 @@ class TestPowerQueryCelery(TestCase):
 
         run_background_query.delay(self.query1.pk)
         assert self.query1.datasets.exists()
-
-    #
-    # def test_report_execution(self):
-    #     result = self.report.execute()
-    #     self.assertIn("<h1>Query", result)
-
-    # def test_nested_query(self):
-    #     result = self.query2.execute_matrix()
-    #     self.assertIsInstance(result, QuerySet)

@@ -145,11 +145,7 @@ class HouseholdAdmin(
         DepotManager,
         ("business_area", AutoCompleteFilter),
         QueryStringFilter,
-        # ("registration_data_import", AutoCompleteFilter),
         "withdrawn",
-        # ("withdrawn", ChoicesFieldComboFilter),
-        # "org_enumerator",
-        # "last_registration_date",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
@@ -211,9 +207,6 @@ class HouseholdAdmin(
 
     def has_delete_permission(self, request, obj=None):
         return False
-
-    # def has_change_permission(self, request):
-    #     return request
 
     def _toggle_withdraw_status(self, request, hh: Household, tickets: Iterable = None, comment=None, tag=None):
         from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -454,7 +447,6 @@ class IndividualAdmin(
     LastSyncDateResetMixin,
     LinkedObjectsMixin,
     SmartFieldsetMixin,
-    AdminAdvancedFiltersMixin,
     CursorPaginatorAdmin,
     HOPEModelAdminBase,
 ):
@@ -483,7 +475,6 @@ class IndividualAdmin(
     search_fields = ("family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at", "registration_data_import")
     exclude = ("created_at", "updated_at")
-    # inlines = [IndividualRoleInHouseholdInline, BankAccountInfoStackedInline]
     list_filter = (
         DepotManager,
         QueryStringFilter,

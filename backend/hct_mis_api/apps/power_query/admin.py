@@ -167,7 +167,6 @@ class DatasetAdmin(HOPEModelAdminBase):
         obj = self.get_object(request, pk)
         try:
             context = self.get_common_context(request, pk, title="Results")
-            # data = pickle.loads(obj.result)
             context["dataset"] = to_dataset(obj.data)
             return render(request, "admin/power_query/query/preview.html", context)
         except Exception as e:
