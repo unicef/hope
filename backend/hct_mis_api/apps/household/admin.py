@@ -150,10 +150,13 @@ class HouseholdAdmin(
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("representatives", "programs")
     raw_id_fields = (
-        "registration_data_import",
         "admin_area",
-        "head_of_household",
         "business_area",
+        "country",
+        "country_origin",
+        "currency",
+        "head_of_household",
+        "registration_data_import",
     )
     fieldsets = [
         (None, {"fields": (("unicef_id", "head_of_household"),)}),
@@ -186,7 +189,7 @@ class HouseholdAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
-    actions = ["mass_withdraw", "mass_unwithdraw"]
+    actions = ["mass_withdraw", "mass_unwithdraw", "count_queryset"]
     cursor_ordering_field = "unicef_id"
 
     def get_queryset(self, request):
@@ -527,6 +530,7 @@ class IndividualAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
+    actions = ["count_queryset"]
 
     def get_queryset(self, request):
         return (
@@ -630,8 +634,14 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     list_display = ("agency", "individual", "number")
     list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
-    autocomplete_fields = ["agency"]
-    raw_id_fields = ("individual",)
+    # autocomplete_fields = ["agency", "individual"]
+    raw_id_fields = (
+        "individual",
+        "agency",
+    )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("individual", "agency")
 
 
 @admin.register(EntitlementCard)

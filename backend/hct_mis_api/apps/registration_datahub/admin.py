@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 import requests
+from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button, link
 from adminactions.mass_update import mass_update
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -336,7 +337,7 @@ class AlexisFilter(SimpleListFilter):
 
 
 @admin.register(Record)
-class RecordDatahubAdmin(HOPEModelAdminBase):
+class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "status", "ignored")
     readonly_fields = (
         "id",
@@ -347,12 +348,11 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
         "status",
         "error_message",
     )
-    list_editable = ("ignored",)
+    # list_editable = ("ignored",)
     exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
-        AlexisFilter,
         ("registration_data_import", AutoCompleteFilter),
         "status",
         ("source_id", NumberFilter),
@@ -361,9 +361,9 @@ class RecordDatahubAdmin(HOPEModelAdminBase):
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
-    change_list_template = "registration_datahub/admin/record/change_list.html"
+    # change_list_template = "registration_datahub/admin/record/change_list.html"
 
-    actions = [mass_update, "extract", "async_extract", "create_rdi"]
+    actions = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
 
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
