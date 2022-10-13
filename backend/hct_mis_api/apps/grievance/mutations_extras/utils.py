@@ -16,6 +16,7 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN, BankAccountInfo
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -139,8 +140,7 @@ def handle_add_identity(identity, individual):
 
     identity_already_exists = IndividualIdentity.objects.filter(number=number, agency=agency_type).exists()
     if identity_already_exists:
-        logger.error(f"Identity with number {number}, agency: {agency_name} already exist")
-        raise GraphQLError(f"Identity with number {number}, agency: {agency_name} already exist")
+        log_and_raise(f"Identity with number {number}, agency: {agency_name} already exists")
 
     return IndividualIdentity(number=number, individual=individual, agency=agency_type)
 
@@ -177,8 +177,7 @@ def handle_edit_identity(identity_data: dict):
         IndividualIdentity.objects.exclude(pk=identity_id).filter(number=number, agency=agency_type).exists()
     )
     if identity_already_exists:
-        logger.error(f"Identity with number {number}, agency: {agency_name} already exist")
-        raise GraphQLError(f"Identity with number {number}, agency: {agency_name} already exist")
+        log_and_raise(f"Identity with number {number}, agency: {agency_name} already exists")
 
     identity.number = number
     identity.agency = agency_type
@@ -376,8 +375,6 @@ def handle_bank_transfer_payment_method(pc):
 
 
 def verify_required_arguments(input_data, field_name, options):
-    from graphql import GraphQLError
-
     from hct_mis_api.apps.core.utils import nested_dict_get
 
     for key, value in options.items():
@@ -385,12 +382,10 @@ def verify_required_arguments(input_data, field_name, options):
             continue
         for required in value.get("required"):
             if nested_dict_get(input_data, required) is None:
-                logger.error(f"You have to provide {required} in {key}")
-                raise GraphQLError(f"You have to provide {required} in {key}")
+                log_and_raise(f"You have to provide {required} in {key}")
         for not_allowed in value.get("not_allowed"):
             if nested_dict_get(input_data, not_allowed) is not None:
-                logger.error(f"You can't provide {not_allowed} in {key}")
-                raise GraphQLError(f"You can't provide {not_allowed} in {key}")
+                log_and_raise(f"You can't provide {not_allowed} in {key}")
 
 
 def remove_parsed_data_fields(data_dict, fields_list):
@@ -553,16 +548,14 @@ def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_dat
     is_one_individual = household_to_remove.individuals.count() == 1 if household_to_remove else False
 
     if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
-        logger.error("Ticket cannot be closed, not all roles have been reassigned")
-        raise GraphQLError("Ticket cannot be closed, not all roles have been reassigned")
+        log_and_raise("Ticket cannot be closed, not all roles have been reassigned")
 
     if (
         all(HEAD not in key for key in role_reassign_data.keys())
         and individual_to_remove.is_head()
         and not is_one_individual
     ):
-        logger.error("Ticket cannot be closed head of household has not been reassigned")
-        raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
+        log_and_raise("Ticket cannot be closed head of household has not been reassigned")
 
     if roles_to_bulk_update:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])

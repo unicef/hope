@@ -55,6 +55,7 @@ from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -96,9 +97,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         if user.has_permission(perm, business_area) or check_creator or check_assignee:
             return True
 
-        msg = f"User is not active creator/assignee and does not have '{perm}' permission"
-        logger.error(msg)
-        raise GraphQLError(msg)
+        log_and_raise(f"User is not active creator/assignee and does not have '{perm}' permission")
 
     class Meta:
         model = GrievanceTicket

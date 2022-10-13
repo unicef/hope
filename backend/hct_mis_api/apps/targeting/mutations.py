@@ -55,6 +55,7 @@ from .celery_tasks import (
     target_population_full_rebuild,
     target_population_rebuild_stats,
 )
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -525,8 +526,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             steficon_rule_commit = steficon_rule.latest
             if not steficon_rule.enabled or steficon_rule.deprecated:
-                logger.error("This steficon rule is not enabled or is deprecated.")
-                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
+                log_and_raise("This steficon rule is not enabled or is deprecated")
             target_population.steficon_rule = steficon_rule_commit
             target_population.status = TargetPopulation.STATUS_STEFICON_WAIT
             target_population.save()
