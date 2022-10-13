@@ -14,6 +14,7 @@ from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     XlsxPaymentVerificationPlanFile,
+    PaymentVerificationPlan,
 )
 from hct_mis_api.apps.payment.xlsx.BaseXlsxExportService import XlsxExportBaseService
 
@@ -49,7 +50,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
     VERSION = "1.2"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
 
-    def __init__(self, payment_verification_plan):
+    def __init__(self, payment_verification_plan: PaymentVerificationPlan):
         self.payment_verification_plan = payment_verification_plan
         self.payment_record_verifications = payment_verification_plan.payment_record_verifications.all()
 
@@ -77,21 +78,21 @@ class XlsxVerificationExportService(XlsxExportBaseService):
         return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
 
     def _add_payment_record_verification_row(self, payment_record_verification):
-        household = payment_record_verification.payment_record.household
-        head_of_household = payment_record_verification.payment_record.head_of_household
+        household = payment_record_verification.get_payment.household
+        head_of_household = payment_record_verification.get_payment.head_of_household
 
         payment_record_verification_row = (
-            str(payment_record_verification.payment_record_id),
-            str(payment_record_verification.payment_record.ca_id),
+            str(payment_record_verification.payment_object_id),
+            str(payment_record_verification.get_payment.ca_id) if payment_record_verification.get_payment else "",
             self._to_received_column(payment_record_verification),
             str(head_of_household.full_name) if head_of_household else "",
             str(household.admin1.name) if household.admin1 else "",
             str(household.admin2.name) if household.admin2 else "",
             str(household.village),
             str(household.address),
-            str(payment_record_verification.payment_record.household_id),
+            str(payment_record_verification.get_payment.household_id),
             str(household.unicef_id),
-            payment_record_verification.payment_record.delivered_quantity,
+            payment_record_verification.get_payment.delivered_quantity,
             payment_record_verification.received_amount,
         )
         self.ws_export_list.append(payment_record_verification_row)

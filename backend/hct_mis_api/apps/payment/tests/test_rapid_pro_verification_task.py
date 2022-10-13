@@ -102,7 +102,7 @@ class TestRapidProVerificationTask(TestCase):
         payment_verification_plan = PaymentVerificationPlanFactory(
             status=PaymentVerificationPlan.STATUS_ACTIVE,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-            payment_plan=cash_plan,
+            generic_fk_obj=cash_plan,
         )
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
@@ -128,7 +128,7 @@ class TestRapidProVerificationTask(TestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=payment_verification_plan,
-                payment=payment_record,
+                generic_fk_obj=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)

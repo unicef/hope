@@ -57,7 +57,7 @@ class TestPhoneNumberVerification(TestCase):
         cash_plan_payment_verification = PaymentVerificationPlanFactory(
             status=PaymentVerificationPlan.STATUS_PENDING,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-            payment_plan=cash_plan,
+            generic_fk_obj=cash_plan,
         )
         cls.individuals = []
         for _ in range(cls.payment_record_amount):
@@ -85,7 +85,7 @@ class TestPhoneNumberVerification(TestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=cash_plan_payment_verification,
-                payment=payment_record,
+                generic_fk_obj=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
@@ -111,7 +111,7 @@ class TestPhoneNumberVerification(TestCase):
         other_cash_plan_payment_verification = PaymentVerificationPlanFactory(
             status=PaymentVerificationPlan.STATUS_PENDING,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-            payment_plan=other_cash_plan,
+            generic_fk_obj=other_cash_plan,
         )
         cls.other_individuals = []
         for _ in range(cls.payment_record_amount):
@@ -139,7 +139,7 @@ class TestPhoneNumberVerification(TestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=other_cash_plan_payment_verification,
-                payment=other_payment_record,
+                generic_fk_obj=other_payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=other_household)

@@ -25,13 +25,13 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         self.errors = []
         self.cashplan_payment_verification = cashplan_payment_verification
         payment_record_verification_obj = self.cashplan_payment_verification.payment_record_verifications
-        self.payment_record_verifications = payment_record_verification_obj.all().prefetch_related("payment_record")
-        self.payment_record_ids = [str(x.payment_record_id) for x in self.payment_record_verifications]
+        self.payment_record_verifications = payment_record_verification_obj.all()  # .prefetch_related("payment")
+        self.payment_record_ids = [str(x.payment_object_id) for x in self.payment_record_verifications]
         self.payment_record_verifications_dict = {
-            str(x.payment_record_id): x for x in self.payment_record_verifications
+            str(x.payment_object_id): x for x in self.payment_record_verifications
         }
         self.payment_records_dict = {
-            str(x.payment_record_id): x.payment_record for x in self.payment_record_verifications
+            str(x.payment_object_id): x.get_payment for x in self.payment_record_verifications
         }
         self.payment_verifications_to_save = []
         self.was_validation_run = False
