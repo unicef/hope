@@ -2,6 +2,7 @@ from django.conf import settings
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
+from elasticsearch_dsl import Q
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hct_mis_api.apps.household.elasticsearch_utils import DEFAULT_SCRIPT
@@ -128,12 +129,18 @@ class ImportedIndividualDocumentAfghanistan(ImportedIndividualDocument):
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_afghanistan"
         settings = index_settings
 
+    def get_queryset(self):
+        return ImportedIndividual.objects.filter(registration_data_import__business_area_slug="afghanistan")
+
 
 @registry.register_document
 class ImportedIndividualDocumentUkraine(ImportedIndividualDocument):
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_ukraine"
         settings = index_settings
+
+    def get_queryset(self):
+        return ImportedIndividual.objects.filter(registration_data_import__business_area_slug="ukraine")
 
 
 @registry.register_document
