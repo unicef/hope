@@ -11,7 +11,7 @@ import {
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { AssigneeAutocomplete } from '../../../grievances/GrievancesTable/AssigneeAutocomplete';
+import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
 
 interface CommunicationFiltersProps {
   onFilterChange;

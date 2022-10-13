@@ -1,19 +1,14 @@
-import { InputAdornment } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useTranslation } from 'react-i18next';
+import get from 'lodash/get';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../../shared/TextField';
-import {
-  AreaNodeEdge,
-  AllAdminAreasQuery,
-  useAllAdminAreasLazyQuery,
-} from '../../__generated__/graphql';
+import TextField from '../TextField';
+import { renderUserName } from '../../utils/utils';
+import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
@@ -22,47 +17,51 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function AdminAreaAutocomplete({
+export const AssigneeAutocomplete = ({
   disabled,
   fullWidth,
   onFilterChange,
   name,
   value,
+  label,
 }: {
-  disabled?;
+  disabled?: boolean;
   fullWidth?: boolean;
-  onFilterChange;
-  name: string;
-  value?: AreaNodeEdge;
-}): React.ReactElement {
+  onFilterChange?;
+  name?: string;
+  value?;
+  label?: string;
+}): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
-
   const debouncedInputText = useDebounce(inputValue, 500);
   const businessArea = useBusinessArea();
-  const [loadAdminAreas, { data, loading }] = useAllAdminAreasLazyQuery({
+
+  const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
     variables: {
-      first: 20,
-      name: debouncedInputText,
       businessArea,
-      level: 2,
+      first: 20,
+      orderBy: 'first_name,last_name,email',
+      search: debouncedInputText,
     },
   });
+
   useEffect(() => {
     if (open) {
-      loadAdminAreas();
+      loadData();
     }
-  }, [open, debouncedInputText, loadAdminAreas]);
+  }, [open, debouncedInputText, loadData]);
 
   const onChangeMiddleware = (e, selectedValue): void => {
     onFilterChange((filters) => ({
       ...filters,
-      [name]: selectedValue || undefined,
+      [name]: selectedValue?.node?.id || undefined,
     }));
   };
+
   return (
-    <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
+    <StyledAutocomplete
       value={value}
       fullWidth={fullWidth}
       open={open}
@@ -79,30 +78,20 @@ export function AdminAreaAutocomplete({
       getOptionSelected={(option, value1) => {
         return value1?.node?.id === option.node.id;
       }}
-      getOptionLabel={(option) => {
-        if (!option.node) {
-          return '';
-        }
-        return `${option.node.name}`;
-      }}
+      getOptionLabel={(option) => `${renderUserName(option.node)}`}
       disabled={disabled}
-      options={get(data, 'allAdminAreas.edges', [])}
+      options={get(data, 'allUsers.edges', [])}
       loading={loading}
       renderInput={(params) => (
         <TextField
           {...params}
-          label={t('Admin Level 2')}
+          label={label || t('Assignee')}
           variant='outlined'
           margin='dense'
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
           InputProps={{
             ...params.InputProps,
-            startAdornment: (
-              <InputAdornment position='start'>
-                <RoomRoundedIcon style={{ color: '#5f6368' }} />
-              </InputAdornment>
-            ),
             endAdornment: (
               <>
                 {loading ? (
@@ -116,4 +105,4 @@ export function AdminAreaAutocomplete({
       )}
     />
   );
-}
+};
