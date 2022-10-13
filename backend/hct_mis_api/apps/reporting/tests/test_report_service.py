@@ -149,14 +149,13 @@ class TestGenerateReportService(TestCase):
         )
         PaymentVerificationFactory(
             payment_verification_plan=self.payment_plan_verification_1,
-            generic_fk_obj = payment_1,
+            generic_fk_obj=payment_1,
         )
         PaymentVerificationFactory(
             payment_verification_plan=self.payment_plan_verification_2,
-            generic_fk_obj=payment_2.pk,
+            generic_fk_obj=payment_2,
         )
 
-    # TODO: FIX tests
     @parameterized.expand(
         [
             ("individuals_no_filter", Report.INDIVIDUALS, False, False, 6),

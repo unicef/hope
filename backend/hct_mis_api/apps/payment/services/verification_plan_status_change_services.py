@@ -92,11 +92,12 @@ class VerificationPlanStatusChangeServices:
     def _activate_rapidpro(self):
         business_area_slug = self.payment_verification_plan.business_area.slug
         api = RapidProAPI(business_area_slug)
-        pv_id = self.payment_verification_plan.id
-        individuals = Individual.objects.filter(
-            heading_household__paymentrecord__verification__payment_verification_plan=pv_id,
-            heading_household__paymentrecord__verification__sent_to_rapid_pro=False,
-        )
+
+        hoh_ids = [
+            pv.get_payment.household.head_of_household.pk for pv in
+            self.payment_verification_plan.payment_record_verifications.filter(sent_to_rapid_pro=False)
+        ]
+        individuals = Individual.objects.filter(pk__in=hoh_ids)
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
         flow_start_info_list, error = api.start_flows(self.payment_verification_plan.rapid_pro_flow_id, phone_numbers)
         for (flow_start_info, _) in flow_start_info_list:
@@ -106,9 +107,14 @@ class VerificationPlanStatusChangeServices:
         for (_, urns) in flow_start_info_list:
             all_urns.extend(urn.split(":")[-1] for urn in urns)
         processed_individuals = individuals.filter(phone_no__in=all_urns)
-        PaymentVerificationPlan.objects.get(id=pv_id).payment_record_verifications.filter(
-            payment_record__head_of_household__in=processed_individuals
-        ).update(sent_to_rapid_pro=True)
+
+        payment_verifications_to_upd = []
+        for pv in self.payment_verification_plan.payment_record_verifications.all():
+            if pv.get_payment.head_of_household in processed_individuals:
+                pv.sent_to_rapid_pro = True
+                payment_verifications_to_upd.append(pv)
+        PaymentVerification.objects.bulk_update(payment_verifications_to_upd, ("sent_to_rapid_pro",), 1000)
+
         self.payment_verification_plan.save()
 
         if error is not None:
