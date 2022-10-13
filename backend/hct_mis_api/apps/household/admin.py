@@ -27,7 +27,6 @@ from adminfilters.filters import (
     ValueFilter,
 )
 from adminfilters.querystring import QueryStringFilter
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin

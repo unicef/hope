@@ -12,7 +12,6 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 import requests
-from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button, link
 from adminactions.mass_update import mass_update
 from adminfilters.autocomplete import AutoCompleteFilter
