@@ -4,12 +4,53 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
+
+snapshots['TestDeleteVerificationMutation::test_delete_active_verification_plan_0_with_permission 1'] = {
+    'data': {
+        'deletePaymentVerificationPlan': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 3
+                }
+            ],
+            'message': 'You can delete only PENDING verification',
+            'path': [
+                'deletePaymentVerificationPlan'
+            ]
+        }
+    ]
+}
+
+snapshots['TestDeleteVerificationMutation::test_delete_active_verification_plan_1_without_permission 1'] = {
+    'data': {
+        'deletePaymentVerificationPlan': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'deletePaymentVerificationPlan'
+            ]
+        }
+    ]
+}
 
 snapshots['TestDeleteVerificationMutation::test_delete_pending_verification_plan_0_with_permission 1'] = {
     'data': {
-        'deleteCashPlanPaymentVerification': {
-            'cashPlan': {
+        'deletePaymentVerificationPlan': {
+            'paymentPlan': {
                 'name': 'TEST',
                 'verificationPlans': {
                     'edges': [
@@ -27,7 +68,7 @@ snapshots['TestDeleteVerificationMutation::test_delete_pending_verification_plan
 
 snapshots['TestDeleteVerificationMutation::test_delete_pending_verification_plan_1_without_permission 1'] = {
     'data': {
-        'deleteCashPlanPaymentVerification': None
+        'deletePaymentVerificationPlan': None
     },
     'errors': [
         {
@@ -39,47 +80,7 @@ snapshots['TestDeleteVerificationMutation::test_delete_pending_verification_plan
             ],
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
-                'deleteCashPlanPaymentVerification'
-            ]
-        }
-    ]
-}
-
-snapshots['TestDeleteVerificationMutation::test_delete_active_verification_plan_0_with_permission 1'] = {
-    'data': {
-        'deleteCashPlanPaymentVerification': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 11,
-                    'line': 3
-                }
-            ],
-            'message': 'You can delete only PENDING verification',
-            'path': [
-                'deleteCashPlanPaymentVerification'
-            ]
-        }
-    ]
-}
-
-snapshots['TestDeleteVerificationMutation::test_delete_active_verification_plan_1_without_permission 1'] = {
-    'data': {
-        'deleteCashPlanPaymentVerification': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 11,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'deleteCashPlanPaymentVerification'
+                'deletePaymentVerificationPlan'
             ]
         }
     ]

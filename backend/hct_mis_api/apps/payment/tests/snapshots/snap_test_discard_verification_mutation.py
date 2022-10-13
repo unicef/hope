@@ -9,8 +9,8 @@ snapshots = Snapshot()
 
 snapshots['TestDiscardVerificationMutation::test_discard_active_0_with_permission 1'] = {
     'data': {
-        'discardCashPlanPaymentVerification': {
-            'cashPlan': {
+        'discardPaymentVerificationPlan': {
+            'paymentPlan': {
                 'name': 'TEST',
                 'verificationPlans': {
                     'edges': [
@@ -82,7 +82,7 @@ snapshots['TestDiscardVerificationMutation::test_discard_active_0_with_permissio
 
 snapshots['TestDiscardVerificationMutation::test_discard_active_1_without_permission 1'] = {
     'data': {
-        'discardCashPlanPaymentVerification': None
+        'discardPaymentVerificationPlan': None
     },
     'errors': [
         {
@@ -94,7 +94,7 @@ snapshots['TestDiscardVerificationMutation::test_discard_active_1_without_permis
             ],
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
-                'discardCashPlanPaymentVerification'
+                'discardPaymentVerificationPlan'
             ]
         }
     ]
