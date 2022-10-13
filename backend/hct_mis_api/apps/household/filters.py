@@ -141,6 +141,7 @@ class HouseholdFilter(FilterSet):
 
     def _search_db(self, qs, value):
         import logging
+
         logger = logging.getLogger(__name__)
         logger.info(qs)
         logger.info(value)

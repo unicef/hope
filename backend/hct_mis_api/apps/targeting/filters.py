@@ -9,12 +9,8 @@ from django_filters import (
     NumericRangeFilter,
 )
 
-from hct_mis_api.apps.core.filters import (
-    DateRangeFilter,
-)
-
 import hct_mis_api.apps.targeting.models as target_models
-from hct_mis_api.apps.core.filters import IntegerFilter
+from hct_mis_api.apps.core.filters import DateRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.program.models import Program
 

@@ -2,9 +2,10 @@ import logging
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from graphql import GraphQLError
-from hct_mis_api.apps.core.utils import decode_id_string
 
+from graphql import GraphQLError
+
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import GrievanceDocument
 
 logger = logging.getLogger(__name__)

@@ -2,15 +2,13 @@ from django.contrib import admin
 
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
     GrievanceDocument,
+    GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
     TicketDeleteHouseholdDetails,
@@ -131,6 +129,4 @@ class TicketReferralDetailsAdmin(HOPEModelAdminBase):
 
 @admin.register(GrievanceDocument)
 class TicketReferralDetailsAdmin(HOPEModelAdminBase):
-    list_display = (
-        "file_name",
-    )
+    list_display = ("file_name",)

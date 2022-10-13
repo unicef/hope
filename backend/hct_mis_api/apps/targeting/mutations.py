@@ -1,11 +1,12 @@
 import logging
 
-import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
@@ -49,6 +50,7 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
+
 from .celery_tasks import target_population_apply_steficon
 
 logger = logging.getLogger(__name__)
@@ -500,9 +502,8 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
         encoded_steficon_rule_id = kwargs.get("steficon_rule_id")
         if encoded_steficon_rule_id is not None:
             steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)
-            if (
-                target_population.allowed_steficon_rule is not None
-                and steficon_rule_id != str(target_population.allowed_steficon_rule.id)
+            if target_population.allowed_steficon_rule is not None and steficon_rule_id != str(
+                target_population.allowed_steficon_rule.id
             ):
                 logger.error(
                     "Another formula was applied to a previous target population for this programme. You can only apply the same formula"

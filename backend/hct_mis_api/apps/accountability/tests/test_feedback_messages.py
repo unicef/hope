@@ -4,12 +4,15 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.accountability.factories import (
+    FeedbackFactory,
+    FeedbackMessageFactory,
+)
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.accountability.factories import FeedbackFactory, FeedbackMessageFactory
 
 
 class TestTicketNotes(APITestCase):
@@ -80,7 +83,7 @@ class TestTicketNotes(APITestCase):
                     "feedback": self.id_to_base64(self.feedback.id, "FeedbackNode"),
                     "description": "You should see this message in snapshot",
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -95,14 +98,10 @@ class TestTicketNotes(APITestCase):
     def test_feedback_query_shows_feedback_messages(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        FeedbackMessageFactory(
-            feedback=self.feedback,
-            description="Feedback message you see",
-            created_by=self.user
-        )
+        FeedbackMessageFactory(feedback=self.feedback, description="Feedback message you see", created_by=self.user)
 
         self.snapshot_graphql_request(
             request_string=self.FEEDBACK_QUERY,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.feedback.id, "FeedbackNode")}
+            variables={"id": self.id_to_base64(self.feedback.id, "FeedbackNode")},
         )
