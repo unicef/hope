@@ -44,6 +44,7 @@ import { FeedbackPage } from './pages/accountability/feedback/FeedbackPage';
 import { FeedbackDetailsPage } from './pages/accountability/feedback/FeedbackDetailsPage';
 import { CreateFeedbackPage } from './pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from './pages/accountability/feedback/EditFeedbackPage';
+import { SurveysPage } from './pages/accountability/surveys/SurveysPage';
 
 const Root = styled.div`
   display: flex;
@@ -152,6 +153,9 @@ export function HomeRouter(): React.ReactElement {
           </SentryRoute>
           <SentryRoute path='/:businessArea/accountability/feedback'>
             <FeedbackPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/accountability/surveys'>
+            <SurveysPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/population/household'>
             <PopulationHouseholdPage />
