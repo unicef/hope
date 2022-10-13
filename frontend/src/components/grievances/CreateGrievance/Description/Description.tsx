@@ -44,8 +44,8 @@ const BoxWithBorderBottom = styled.div`
 
 export interface DescriptionProps {
   values;
-  showIssueType: (values: any) => boolean;
-  selectedIssueType: (values: any) => string;
+  showIssueType: (values) => boolean;
+  selectedIssueType: (values) => string;
   businessArea: string;
   choicesData: GrievancesChoiceDataQuery;
   userChoices: UserChoiceDataQuery;
@@ -53,7 +53,7 @@ export interface DescriptionProps {
     name: string;
     value: string;
   }[];
-  setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void;
+  setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
   permissions: string[];
 }
