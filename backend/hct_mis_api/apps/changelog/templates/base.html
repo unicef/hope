@@ -1,0 +1,19 @@
+{% load static %}
+<html>
+  <head>
+    <title>HOPE - ChangeLog</title>
+    <link rel="stylesheet" href="{% static 'explorer/css/bootstrap.min.css' %}" crossorigin="anonymous">
+  </head>
+  <body>
+    <div id="content" class="container">
+      <h2></h2>
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title"></h5>
+          <p class="card-text">{% block content %}{% endblock %}</p>
+        </div>
+      </div>
+    </div>
+  
+  </body>
+</html>
