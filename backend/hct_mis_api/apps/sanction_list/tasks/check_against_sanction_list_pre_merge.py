@@ -10,7 +10,12 @@ from hct_mis_api.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.documents import (
+    IndividualDocumentAfghanistan,
+    IndividualDocumentUkraine,
+    IndividualDocumentOthers,
+    get_individual_doc
+)
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Individual,
@@ -65,11 +70,8 @@ class CheckAgainstSanctionListPreMergeTask:
         return query_dict
 
     @classmethod
-    def execute(cls, individuals=None, registration_data_import=None):
-        if individuals is None:
-            individuals = SanctionListIndividual.objects.all()
+    def create_deduplication_tickets(cls, individuals, document, registration_data_import):
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
-        document = IndividualDocument
 
         tickets_to_create = []
         ticket_details_to_create = []
@@ -128,3 +130,19 @@ class CheckAgainstSanctionListPreMergeTask:
                 GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
             )
         TicketSystemFlaggingDetails.objects.bulk_create(ticket_details_to_create)
+
+    @classmethod
+    def execute(cls, individuals=None, registration_data_import=None):
+        if individuals is None:
+            individuals = SanctionListIndividual.objects.all()
+
+        if registration_data_import is None:
+            for document in (
+                IndividualDocumentAfghanistan,
+                IndividualDocumentUkraine,
+                IndividualDocumentOthers
+            ):
+                cls.create_deduplication_tickets(individuals, document, registration_data_import)
+        else:
+            document = get_individual_doc(registration_data_import.business_area.slug)
+            cls.create_deduplication_tickets(individuals, document, registration_data_import)
