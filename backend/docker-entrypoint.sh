@@ -19,6 +19,13 @@ else
       python manage.py migratealldb
       python manage.py runserver 0.0.0.0:8000
       ;;
+    "cypress")
+      wait_for_db db
+      python manage.py collectstatic --no-input
+      python manage.py migratealldb
+      python manage.py initcypress --skip-drop
+      python manage.py runserver
+      ;;
     "test")
       wait_for_db db
       wait_for_db cash_assist_datahub_db

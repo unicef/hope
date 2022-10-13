@@ -1,0 +1,165 @@
+version: '3.7'
+
+volumes:
+  backend-data:
+  db:
+  db_ca:
+  db_mis:
+  db_erp:
+  db_reg:
+  data_es:
+  data_es_test:
+  ipython_data_local:
+
+services:
+  # TODO: cypress
+  
+  proxy:
+    image: unicef/hct-mis-proxy
+    environment:
+      - DJANGO_APPLICATION_SERVICE_HOST=backend
+      - FRONTEND_HOST=frontend:3000
+    build:
+      context: ./proxy
+      dockerfile: ./Dockerfile
+    ports:
+      - "8082:80"
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - backend-data:/data
+
+  frontend:
+    image: unicef/hct-mis-frontend
+    env_file:
+      - .env
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+      target: dev
+      args:
+        ENV: dev
+    ports:
+      - "8088:80"
+      - "3000:3000"
+    volumes:
+      - ./frontend/:/code
+      - /code/node_modules
+    command: sh -c 'npm start'
+
+
+  redis:
+    restart: always
+    image: redis:4.0.11-alpine3.8
+    expose:
+      - "6379"
+
+  backend:
+    stdin_open: true
+    entrypoint: ./docker-entrypoint.sh
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+      - PYTHONUNBUFFERED=1
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+      args:
+        APP_ENV: DEV
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+      - ipython_data_local:/root/.ipython
+    command: "cypress"
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+
+  celery_worker:
+    stdin_open: true
+    tty: true
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    restart: always
+    command: "celery-worker"
+    depends_on:
+      - backend
+      - db
+      - redis
+      - elasticsearch
+
+  celery-beat:
+    stdin_open: true
+    tty: true
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    restart: always
+    command: "celery-beat"
+    depends_on:
+      - backend
+      - db
+      - redis
+      - elasticsearch
+
+  celery-flower:
+    image: johniak/flower:1.6
+    command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]
+    environment:
+      - FLOWER_AUTH_PROVIDER=""
+      - FLOWER_DEBUG="1"
+      - FLOWER_ADDRESS=0.0.0.0
+    ports:
+      - "5555:5555"
+    restart: always
+    depends_on:
+      - redis
+
+  db:
+    image: johniak/postgis:11-alpine
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_MULTIPLE_DATABASES: unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+
+  elasticsearch:
+    image: unicef/hct-elasticsearch
+    build:
+      context: elasticsearch
+      dockerfile: Dockerfile
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - cluster.initial_master_nodes=es01
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data_es:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
