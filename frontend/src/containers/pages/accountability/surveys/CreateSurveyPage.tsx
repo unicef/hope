@@ -48,7 +48,7 @@ import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
-const SampleSizeTabs = ['Full List', 'Random Sampling'];
+const sampleSizeTabs = ['Full List', 'Random Sampling'];
 
 const Border = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -296,7 +296,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
       {({ submitForm, setValues, values, setFieldValue, errors }) => (
         <>
           <PageHeader
-            title='New Message'
+            title='New Survey'
             breadCrumbs={
               hasPermissions(
                 PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
@@ -347,7 +347,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                       row
                       name='radio-buttons-group'
                     >
-                      {SampleSizeTabs.map((tab, index) => (
+                      {sampleSizeTabs.map((tab, index) => (
                         <FormControlLabel
                           value={index}
                           onChange={() => {
