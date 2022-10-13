@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Q
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
@@ -164,6 +165,9 @@ class IndividualDocumentOthers(IndividualDocument):
     class Index:
         name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_others"
         settings = index_settings
+
+    def get_queryset(self):
+        return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
 
 
 def get_individual_doc(business_area_slug):
