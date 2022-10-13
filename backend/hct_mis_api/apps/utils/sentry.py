@@ -1,4 +1,5 @@
 from functools import wraps
+
 from sentry_sdk import configure_scope
 
 

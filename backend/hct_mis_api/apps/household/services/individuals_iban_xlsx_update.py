@@ -1,14 +1,17 @@
 import logging
 
-import openpyxl
-
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.household.models import Individual, XlsxUpdateFile, BankAccountInfo
+import openpyxl
 
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.household.models import (
+    BankAccountInfo,
+    Individual,
+    XlsxUpdateFile,
+)
 
 logger = logging.getLogger(__name__)
 

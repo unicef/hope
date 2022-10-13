@@ -1,11 +1,10 @@
 import logging
 
-from sentry_sdk import configure_scope
-
 from django.db.transaction import atomic
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
+from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.utils.sentry import sentry_tags

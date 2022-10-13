@@ -7,12 +7,12 @@ from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
     IDENTIFICATION_TYPE_NATIONAL_ID,
+    IDENTIFICATION_TYPE_TAX_ID,
     MALE,
     SON_DAUGHTER,
     WIFE_HUSBAND,
     Document,
     DocumentType,
-    IDENTIFICATION_TYPE_TAX_ID,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask

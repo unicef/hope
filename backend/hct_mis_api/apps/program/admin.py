@@ -4,10 +4,7 @@ from django.template.response import TemplateResponse
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-    ValueFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 
 from ..utils.admin import (
     HOPEModelAdminBase,

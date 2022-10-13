@@ -4,10 +4,14 @@ from typing import List
 
 from django.shortcuts import get_object_or_404
 
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails, GrievanceDocument
+from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.grievance.models import (
+    GrievanceDocument,
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
 from hct_mis_api.apps.grievance.validators import validate_file
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.core.utils import decode_id_string
 
 logger = logging.getLogger(__name__)
 
@@ -79,8 +83,7 @@ def update_grievance_documents(documents):
 
 def delete_grievance_documents(ticket_id, ids_to_delete):
     documents_to_delete = GrievanceDocument.objects.filter(
-        grievance_ticket_id=ticket_id,
-        id__in=[decode_id_string(document_id) for document_id in ids_to_delete]
+        grievance_ticket_id=ticket_id, id__in=[decode_id_string(document_id) for document_id in ids_to_delete]
     )
 
     for document in documents_to_delete:

@@ -1,8 +1,9 @@
 import itertools
 
-import graphene
-from django.db.models import Case, CharField, Count, When, Value, Q, Avg, F
+from django.db.models import Avg, Case, CharField, Count, F, Q, Value, When
 from django.utils.encoding import force_str
+
+import graphene
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode
@@ -16,7 +17,7 @@ TICKET_ORDERING_KEYS = [
     "Positive Feedback",
     "Referral",
     "Sensitive Grievance",
-    "System Flagging"
+    "System Flagging",
 ]
 
 TICKET_ORDERING = {
@@ -28,7 +29,7 @@ TICKET_ORDERING = {
     "Positive Feedback": 5,
     "Referral": 6,
     "Sensitive Grievance": 7,
-    "System Flagging": 8
+    "System Flagging": 8,
 }
 
 
@@ -39,12 +40,7 @@ def transform_to_chart_dataset(qs):
         labels.append(label)
         data.append(value)
 
-    return {
-        "labels": labels,
-        "datasets": [
-            {"data": data}
-        ]
-    }
+    return {"labels": labels, "datasets": [{"data": data}]}
 
 
 def display_value(choices, field, default_field=None):
@@ -107,8 +103,7 @@ class Query(graphene.ObjectType):
         user_generated, system_generated = create_type_generated_queries()
 
         qs = (
-            GrievanceTicket.objects
-            .filter(business_area__slug=kwargs.get("business_area_slug"))
+            GrievanceTicket.objects.filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(
                 category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
                 days_diff=F("updated_at__day") - F("created_at__day"),
@@ -131,8 +126,7 @@ class Query(graphene.ObjectType):
 
     def resolve_tickets_by_category(self, info, **kwargs):
         qs = (
-            GrievanceTicket.objects
-            .filter(business_area__slug=kwargs.get("business_area_slug"))
+            GrievanceTicket.objects.filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
             .values("category_name")
             .annotate(count=Count("category"))
@@ -144,8 +138,7 @@ class Query(graphene.ObjectType):
 
     def resolve_tickets_by_status(self, info, **kwargs):
         qs = (
-            GrievanceTicket.objects
-            .filter(business_area__slug=kwargs.get("business_area_slug"))
+            GrievanceTicket.objects.filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(status_name=display_value(GrievanceTicket.STATUS_CHOICES, "status"))
             .values("status_name")
             .annotate(count=Count("status"))
@@ -161,8 +154,7 @@ class Query(graphene.ObjectType):
             .filter(business_area__slug=kwargs.get("business_area_slug"))
             .values_list("admin2__name", "category")
             .annotate(
-                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
-                count=Count("category")
+                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"), count=Count("category")
             )
             .order_by("admin2__name", "-count")
         )

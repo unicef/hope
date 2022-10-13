@@ -1,22 +1,22 @@
+import logging
+from contextlib import contextmanager
+
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
-import logging
-from contextlib import contextmanager
-from sentry_sdk import configure_scope
 
-from django.core.cache import cache
 from redis.exceptions import LockError
+from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
-
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +43,10 @@ def locked_cache(key):
 @sentry_tags
 def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
     try:
+        from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
-        from hct_mis_api.apps.core.models import BusinessArea
 
         with configure_scope() as scope:
             scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
@@ -77,10 +77,10 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
 @sentry_tags
 def registration_kobo_import_task(registration_data_import_id, import_data_id, business_area):
     try:
+        from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
-        from hct_mis_api.apps.core.models import BusinessArea
 
         with configure_scope() as scope:
             scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area))
@@ -387,10 +387,10 @@ def check_and_set_taxid(queryset):
 @log_start_and_end
 @sentry_tags
 def automate_registration_diia_import_task(page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters):
+    from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
-    from hct_mis_api.apps.core.models import BusinessArea
 
     with locked_cache(key="automate_rdi_diia_creation_task"):
         try:
@@ -412,10 +412,10 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
 @log_start_and_end
 @sentry_tags
 def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters):
+    from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
-    from hct_mis_api.apps.core.models import BusinessArea
 
     with locked_cache(key="registration_diia_import_task"):
         try:

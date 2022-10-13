@@ -13,9 +13,7 @@ from django.utils.safestring import mark_safe
 from admin_extra_buttons.api import ExtraButtonsMixin, confirm_action
 from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.core.models import BusinessArea

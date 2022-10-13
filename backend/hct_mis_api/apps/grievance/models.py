@@ -12,11 +12,17 @@ from django.db.models import JSONField, Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+
 from model_utils.models import UUIDModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
-from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, PRIORITY_LOW, URGENCY_CHOICES, URGENCY_NOT_URGENT
+from hct_mis_api.apps.grievance.constants import (
+    PRIORITY_CHOICES,
+    PRIORITY_LOW,
+    URGENCY_CHOICES,
+    URGENCY_NOT_URGENT,
+)
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,

@@ -72,7 +72,7 @@ GRIEVANCE_UPLOAD_CONTENT_TYPES = (
     "image/png",
     "image/tiff",
     "application/pdf",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 )
 
 # static resources related. See documentation at: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/

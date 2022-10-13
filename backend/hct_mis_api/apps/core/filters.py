@@ -1,8 +1,15 @@
 import json
 from datetime import date, timedelta
-from django.utils import timezone
 
-from django.forms import DateField, DateTimeField, DecimalField, Field, IntegerField, CharField
+from django.forms import (
+    CharField,
+    DateField,
+    DateTimeField,
+    DecimalField,
+    Field,
+    IntegerField,
+)
+from django.utils import timezone
 
 from dateutil.parser import parse
 from django_filters import Filter

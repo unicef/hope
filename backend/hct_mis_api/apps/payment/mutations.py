@@ -19,6 +19,9 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
+from hct_mis_api.apps.payment.celery_tasks import (
+    create_cash_plan_payment_verification_xls,
+)
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
@@ -31,7 +34,6 @@ from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_payment_verification_xls
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
