@@ -12,14 +12,14 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
-    VerificationPlanStatusChangeServices,
-)
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
+)
+from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
+    VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -99,8 +99,8 @@ class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HO
                 request,
                 self.execute_sync_rapid_pro,
                 mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                        <h3>Import will only be simulated</h3> 
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                        <h3>Import will only be simulated</h3>
                         """
                 ),
                 "Successfully executed",

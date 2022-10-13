@@ -64,10 +64,9 @@ class HUBAdminMixin(ExtraButtonsMixin, HOPEModelAdminBase):
                 self.truncate,
                 mark_safe(
                     """
-<h1 class="color-red"><b>This is a low level system feature</b></h1>                                      
+<h1 class="color-red"><b>This is a low level system feature</b></h1>
 <h1 class="color-red"><b>Continuing irreversibly delete all table content</b></h1>
-
-                                       """
+"""
                 ),
                 "Successfully executed",
             )

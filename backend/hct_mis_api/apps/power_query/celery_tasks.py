@@ -50,7 +50,6 @@ def refresh_reports():
                     f"Report {report.name} refreshed",
                     f"""Report {report.name} hase been refreshed.
 It can be downloaded here: {url}.
-
 """,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[u.email for u in report.notify_to],

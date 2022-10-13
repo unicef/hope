@@ -171,6 +171,7 @@ class RdiMergeTask:
 
             if country_origin := countries.get(country_origin.code):
                 household_data["country_origin"] = country_origin
+
             household = Household(
                 **household_data,
                 registration_data_import=obj_hct,
@@ -385,6 +386,6 @@ class RdiMergeTask:
 
             self._update_individuals_and_households(individual_ids)
 
-        except:
+        except Exception:
             remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
             raise
