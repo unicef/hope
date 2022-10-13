@@ -1,0 +1,15 @@
+{
+    "baseUrl": "http://proxy/",
+    "testFiles": "**/*.feature",
+    "viewportWidth": 1366,
+    "viewportHeight": 768,
+    "reporter": "mocha-junit-reporter",
+    "reporterOptions": {
+      "mochaFile": "cypress/reports/junit/test-results.[hash].xml",
+      "testsuitesTitle": false
+    },
+    "numTestsKeptInMemory": 0,
+    "downloadFolder": "cypress/downloads",
+    "projectId": "hope",
+    "defaultCommandTimeout": 15000
+}

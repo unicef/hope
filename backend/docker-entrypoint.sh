@@ -24,7 +24,7 @@ else
       python manage.py collectstatic --no-input
       python manage.py migratealldb
       python manage.py initcypress --skip-drop
-      python manage.py runserver
+      python manage.py runserver 0.0.0.0:8000
       ;;
     "test")
       wait_for_db db

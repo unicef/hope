@@ -12,8 +12,16 @@ volumes:
   ipython_data_local:
 
 services:
-  # TODO: cypress
-  
+  cypress:
+    build:
+      context: ./cypress_testing_service
+      dockerfile: ./Dockerfile
+    depends_on:
+      - proxy
+    volumes:
+      - ./cypress_testing_service/:/code
+      - ./cypress_testing_service/cypress.ci.json:/code/cypress.json
+
   proxy:
     image: unicef/hct-mis-proxy
     environment:
@@ -41,13 +49,11 @@ services:
       args:
         ENV: dev
     ports:
-      - "8088:80"
       - "3000:3000"
     volumes:
       - ./frontend/:/code
       - /code/node_modules
     command: sh -c 'npm start'
-
 
   redis:
     restart: always
