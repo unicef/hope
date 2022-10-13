@@ -67,7 +67,6 @@ def data(request, pk):
                 return JsonResponse({"error": "This report is not currently available"}, status=400)
             else:
                 return HttpResponse("This report is not currently available", content_type="text/plain", status=400)
-        # data = pickle.loads(result.data)
         return HttpResponse(doc.data, content_type=report.formatter.get_content_type_display())
     else:
         return HttpResponseForbidden()

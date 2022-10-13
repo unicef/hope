@@ -38,26 +38,6 @@ class TestPowerQueryViews(TestCase):
         )
         cls.report2.execute()
 
-    # def test_pending_report(self):
-    #     with self.settings(POWER_QUERY_DB_ALIAS="default"):
-    #         url = reverse("power_query:report", args=[self.report1.documents.first().pk])
-    #         response = self.client.get(url)
-    #         self.assertEqual(response.status_code, 302)
-    #         self.client.force_login(self.report1.owner)
-    #         response = self.client.get(url)
-    #         self.assertEqual(response.status_code, 400)
-    #
-    # def test_pending_fetch(self):
-    #     with self.settings(POWER_QUERY_DB_ALIAS="default"):
-    #         url = reverse("power_query:data", args=[self.report2.documents.first().pk])
-    #         response = self.client.get(url)
-    #         self.assertEqual(response.status_code, 401)
-    #         self.client.force_login(self.report1.owner)
-    #
-    #         response = self.client.get(url)
-    #         self.assertEqual(response.status_code, 400)
-    #         self.assertContains(response, b"This report is not currently available", status_code=400)
-
     def test_valid_report(self):
         url = reverse("power_query:report", args=[self.report2.pk])
         self.client.login(username=self.report2.owner.username, password="password")
@@ -110,17 +90,6 @@ class TestPowerQueryBasicAuth(TestCase):
         cls.report1: Report = ReportFactory(formatter=cls.formatter_json, query=cls.query, owner=cls.user1)
         cls.report2: Report = ReportFactory(formatter=cls.formatter_json, query=cls.query, owner=cls.user2)
         cls.report2.execute()
-
-    # def test_pending_fetch(self):
-    #     url = reverse("power_query:data", args=[self.report1.documents.first().pk])
-    #     response = self.client.get(url)
-    #     self.assertEqual(response.status_code, 401)
-    #
-    #     username, password = self.report1.owner.username, self.USER_PASSWORD
-    #     headers = {"HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii")}
-    #     response = self.client.get(url, **headers)
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertContains(response, b"This report is not currently available", status_code=400)
 
     def test_valid_fetch(self):
         url = reverse("power_query:data", args=[self.report2.documents.first().pk])
