@@ -14,7 +14,7 @@ from hct_mis_api.apps.household.documents import (
     IndividualDocumentAfghanistan,
     IndividualDocumentUkraine,
     IndividualDocumentOthers,
-    get_individual_doc
+    get_individual_doc,
 )
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -137,11 +137,7 @@ class CheckAgainstSanctionListPreMergeTask:
             individuals = SanctionListIndividual.objects.all()
 
         if registration_data_import is None:
-            for document in (
-                IndividualDocumentAfghanistan,
-                IndividualDocumentUkraine,
-                IndividualDocumentOthers
-            ):
+            for document in (IndividualDocumentAfghanistan, IndividualDocumentUkraine, IndividualDocumentOthers):
                 cls.create_deduplication_tickets(individuals, document, registration_data_import)
         else:
             document = get_individual_doc(registration_data_import.business_area.slug)
