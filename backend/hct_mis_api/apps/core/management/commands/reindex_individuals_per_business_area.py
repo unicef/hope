@@ -7,7 +7,6 @@ from elasticsearch.helpers import bulk
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.models import Individual
 
-
 BATCH_SIZE = 5_000
 
 

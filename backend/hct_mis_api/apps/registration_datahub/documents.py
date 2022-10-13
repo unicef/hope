@@ -8,7 +8,6 @@ from hct_mis_api.apps.household.elasticsearch_utils import DEFAULT_SCRIPT
 
 from .models import ImportedIndividual
 
-
 index_settings = {
     "number_of_shards": 1,
     "number_of_replicas": 0,
