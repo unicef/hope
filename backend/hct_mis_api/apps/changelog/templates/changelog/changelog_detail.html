@@ -1,0 +1,19 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    
+<p>
+    <a class="btn btn-light" href="{% url 'changelog_Changelog_list' %}">
+    < Changelog Listing
+    </a>
+</p>
+    
+<table class="table">
+    <tr><td>Description</td><td>{{ object.description }}</td></tr>
+    <tr><td>Version</td><td>{{ object.version }}</td></tr>
+    <tr><td>Active</td><td>{{ object.active }}</td></tr>
+    <tr><td>Date</td><td>{{ object.date }}</td></tr>
+</table>
+
+{% endblock %}
