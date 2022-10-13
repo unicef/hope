@@ -6,7 +6,6 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 import graphene
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
     PermissionMutation,
@@ -47,6 +46,7 @@ from hct_mis_api.apps.targeting.validators import (
     TargetValidator,
     UnlockTargetPopulationValidator,
 )
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -525,8 +525,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             steficon_rule_commit = steficon_rule.latest
             if not steficon_rule.enabled or steficon_rule.deprecated:
-                logger.error("This steficon rule is not enabled or is deprecated.")
-                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
+                log_and_raise("This steficon rule is not enabled or is deprecated")
             target_population.steficon_rule = steficon_rule_commit
             target_population.status = TargetPopulation.STATUS_STEFICON_WAIT
             target_population.save()
