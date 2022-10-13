@@ -1,5 +1,4 @@
 import { Box, Button } from '@material-ui/core';
-// import { PublishOutlined, GetAppOutlined } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';

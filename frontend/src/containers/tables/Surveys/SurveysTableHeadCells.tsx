@@ -4,26 +4,26 @@ import { FeedbackNode } from '../../../__generated__/graphql';
 export const headCells: HeadCell<FeedbackNode>[] = [
   {
     disablePadding: false,
-    label: 'Feedback ID',
+    label: 'Survey ID',
     id: 'unicef_id',
     numeric: false,
   },
   {
     disablePadding: false,
-    label: 'Issue Type',
-    id: 'issue_type',
+    label: 'Survey Title',
+    id: 'title',
     numeric: false,
   },
   {
     disablePadding: false,
-    label: 'Household ID',
-    id: 'household_lookup',
+    label: 'Category',
+    id: 'category',
     numeric: false,
   },
   {
     disablePadding: false,
-    label: 'Linked Grievance',
-    id: 'linked_grievance',
+    label: 'Number of Recipients',
+    id: 'number_of_recipients',
     numeric: false,
   },
   {

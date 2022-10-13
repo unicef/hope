@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../../shared/TextField';
+import TextField from '../TextField';
 import {
   AllAdminAreasQuery,
   useAllAdminAreasQuery,

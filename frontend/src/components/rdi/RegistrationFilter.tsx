@@ -9,7 +9,7 @@ import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-import { UsersAutocomplete } from '../core/UsersAutocomplete';
+import { UsersAutocomplete } from '../../shared/autocompletes/UsersAutocomplete';
 
 interface RegistrationFiltersProps {
   onFilterChange;

@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AccountBalance } from '@material-ui/icons';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
+import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
 import {
   GrievanceSearchTypes,
   GrievanceStatuses,
@@ -19,8 +19,8 @@ import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { FieldLabel } from '../../core/FieldLabel';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
-import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { AssigneeAutocomplete } from './AssigneeAutocomplete';
+import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
+import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
 
 interface GrievancesFiltersProps {
   onFilterChange;
