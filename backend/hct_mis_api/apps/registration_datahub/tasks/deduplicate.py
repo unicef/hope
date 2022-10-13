@@ -542,10 +542,16 @@ class DeduplicateTask:
         query_dict["query"]["bool"]["filter"] = [
             {"term": {"business_area": cls.business_area.slug}},
         ]
+
+        if isinstance(individual, ImportedIndividual):
+            document = get_individual_doc(individual.registration_data_import.business_area)
+        else:
+            document = get_individual_doc(individual.registration_data_import.business_area.slug)
+
         return cls._get_duplicates_tuple(
             query_dict,
             cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
-            get_imported_individual_doc(individual.registration_data_import.business_area),
+            document,
             individual,
         )
 
