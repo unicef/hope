@@ -52,7 +52,9 @@ export const LookUpHouseholdTable = ({
     familySize: JSON.stringify(filter.size),
     withdrawn: false,
   };
-  const [selected, setSelected] = useState<string[]>([...selectedHousehold]);
+  const [selected, setSelected] = useState<string[]>(
+    householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
+  );
 
   if (filter.program) {
     initialVariables.programs = [filter.program];
