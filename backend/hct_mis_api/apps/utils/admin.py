@@ -82,6 +82,10 @@ class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin)
             del actions["delete_selected"]
         return actions
 
+    def count_queryset(self, request, queryset):
+        count = queryset.count()
+        self.message_user(request, f"Selection contains {count} records")
+
 
 class HUBBusinessAreaFilter(SimpleListFilter):
     parameter_name = "ba"
