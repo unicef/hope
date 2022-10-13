@@ -45,27 +45,10 @@ class CheckAgainstSanctionListPreMergeTask:
             {"match": {"birth_date": {"query": dob.date, "boost": 1}}} for dob in individual.dates_of_birth.all()
         ]
 
-        # alias_names_queries = [
-        #     {
-        #         "multi_match": {
-        #             "query": alias_name.name,
-        #             "fields": [
-        #                 "full_name",
-        #                 "first_name",
-        #                 "middle_name",
-        #                 "family_name",
-        #             ],
-        #             "boost": 1.3,
-        #         }
-        #     }
-        #     for alias_name in individual.alias_names.all()
-        # ]
-
         queries = [
             {"match": {"full_name": {"query": individual.full_name, "boost": 4, "operator": "and"}}},
         ]
         queries.extend(document_queries)
-        # queries.extend(alias_names_queries)
         queries.extend(birth_dates_queries)
 
         query_dict = {
