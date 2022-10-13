@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import get from 'lodash/get';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../TextField';
-import { renderUserName } from '../../utils/utils';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import get from 'lodash/get';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useDebounce } from '../../hooks/useDebounce';
+import { useAllTargetPopulationForChoicesLazyQuery } from '../../__generated__/graphql';
+import TextField from '../TextField';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
@@ -38,12 +37,15 @@ export const TargetPopulationAutocomplete = ({
   const debouncedInputText = useDebounce(inputValue, 500);
   const businessArea = useBusinessArea();
 
-  const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
+  const [
+    loadData,
+    { data, loading },
+  ] = useAllTargetPopulationForChoicesLazyQuery({
     variables: {
       businessArea,
       first: 20,
-      orderBy: 'first_name,last_name,email',
-      search: debouncedInputText,
+      orderBy: 'name',
+      name: debouncedInputText,
     },
   });
 
@@ -76,16 +78,16 @@ export const TargetPopulationAutocomplete = ({
         onInputTextChange('');
       }}
       getOptionSelected={(option, value1) => {
-        return value1?.node?.id === option.node.id;
+        return value1?.node?.id === option.node?.id;
       }}
-      getOptionLabel={(option) => `${renderUserName(option.node)}`}
+      getOptionLabel={(option) => option.node?.name}
       disabled={disabled}
-      options={get(data, 'allUsers.edges', [])}
+      options={get(data, 'allTargetPopulation.edges', [])}
       loading={loading}
       renderInput={(params) => (
         <TextField
           {...params}
-          label={label || t('Assignee')}
+          label={label || t('Target Population')}
           variant='outlined'
           margin='dense'
           value={inputValue}
