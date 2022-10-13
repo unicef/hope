@@ -60,7 +60,28 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-class PaymentVerificationSummaryFactory(factory.DjangoModelFactory):
+class PaymentGFKFactory(factory.django.DjangoModelFactory):
+    payment_object_id = factory.SelfAttribute("generic_fk_obj.id")
+    payment_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
+
+    class Meta:
+        exclude = ["generic_fk_obj"]
+        abstract = True
+
+
+class PaymentPlanGFKFactory(factory.django.DjangoModelFactory):
+    payment_plan_object_id = factory.SelfAttribute("generic_fk_obj.id")
+    payment_plan_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
+
+    class Meta:
+        exclude = ["generic_fk_obj"]
+        abstract = True
+
+
+
+class PaymentVerificationSummaryFactory(PaymentPlanGFKFactory):
+    generic_fk_obj = factory.SubFactory("payment.fixtures.CashPlanFactory")
+
     class Meta:
         model = PaymentVerificationSummary
 
@@ -136,7 +157,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
         if not create:
             return
 
-        PaymentVerificationSummaryFactory(payment_plan=self)
+        PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
 
 class ServiceProviderFactory(factory.DjangoModelFactory):
@@ -254,7 +275,8 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     registration_ca_id = factory.Faker("uuid4")
 
 
-class PaymentVerificationPlanFactory(factory.DjangoModelFactory):
+class PaymentVerificationPlanFactory(PaymentPlanGFKFactory):
+    generic_fk_obj = factory.SubFactory(CashPlanFactory)
     status = factory.fuzzy.FuzzyChoice(
         ((PaymentVerificationPlan.STATUS_PENDING, "pending"),),
         getter=lambda c: c[0],
@@ -277,19 +299,9 @@ class PaymentVerificationPlanFactory(factory.DjangoModelFactory):
     class Meta:
         model = PaymentVerificationPlan
 
-    @factory.post_generation
-    def add_payment_plan_obj(obj, create, extracted, **kwargs):
-        if not create:
-            return
 
-        if not obj.payment_plan_object_id and not obj.payment_plan_content_type:
-            cash_plan_ct, _ = ContentType.objects.get_or_create(app_label="payment", model="cashplan")
-            obj.payment_plan_object_id = CashPlanFactory().pk
-            obj.payment_plan_content_type = cash_plan_ct
-            obj.save()
-
-
-class PaymentVerificationFactory(factory.DjangoModelFactory):
+class PaymentVerificationFactory(PaymentGFKFactory):
+    generic_fk_obj = factory.SubFactory(PaymentRecordFactory)
     payment_verification_plan = factory.Iterator(
         PaymentVerificationPlan.objects.filter(
             payment_plan_content_type=ContentType.objects.get(app_label="payment", model="cashplan")
@@ -303,17 +315,6 @@ class PaymentVerificationFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = PaymentVerification
-
-    @factory.post_generation
-    def add_payment_obj(obj, create, extracted, **kwargs):
-        if not create:
-            return
-
-        if not obj.payment_object_id and not obj.payment_content_type:
-            cash_plan_ct, _ = ContentType.objects.get_or_create(app_label="payment", model="paymentrecord")
-            obj.payment_object_id = PaymentRecordFactory().pk
-            obj.payment_content_type = cash_plan_ct
-            obj.save()
 
 
 class RealProgramFactory(factory.DjangoModelFactory):
@@ -437,7 +438,7 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
         if not create:
             return
 
-        PaymentVerificationSummaryFactory(payment_plan=self)
+        PaymentVerificationSummaryFactory(generic_fk_obj=self)
 
 
 class RealPaymentRecordFactory(factory.DjangoModelFactory):
@@ -549,7 +550,7 @@ def generate_real_cash_plans_for_households(households):
 
 
 def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
-    cash_plan_payment_verification = PaymentVerificationPlanFactory(payment_plan=cash_plan)
+    cash_plan_payment_verification = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
     cash_plan_payment_verification.status = status
     cash_plan_payment_verification.save(update_fields=("status",))
     registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
@@ -572,7 +573,7 @@ def create_payment_verification_plan_with_status(cash_plan, user, business_area,
 
         PaymentVerificationFactory(
             payment_verification_plan=cash_plan_payment_verification,
-            payment=payment_record,
+            generic_fk_obj=payment_record,
             status=PaymentVerification.STATUS_PENDING,
         )
         EntitlementCardFactory(household=household)

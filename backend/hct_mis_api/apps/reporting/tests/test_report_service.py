@@ -1,6 +1,5 @@
 import datetime
 
-from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
 from parameterized import parameterized
@@ -100,35 +99,29 @@ class TestGenerateReportService(TestCase):
         )
         PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_1)
         PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_2)
-        ct_cash_plan = ContentType.objects.get(app_label="payment", model="cashplan")
-        ct_payment_plan = ContentType.objects.get(app_label="payment", model="paymentplan")
         self.cash_plan_verification_1 = PaymentVerificationPlanFactory(
-            payment_plan_object_id=self.cash_plan_1.pk,
-            payment_plan_content_type=ct_cash_plan,
+            generic_fk_obj=self.cash_plan_1,
             completion_date="2020-01-01T14:30+00:00"
         )
         self.cash_plan_verification_2 = PaymentVerificationPlanFactory(
-            payment_plan_object_id=self.cash_plan_2.pk,
-            payment_plan_content_type=ct_cash_plan,
+            generic_fk_obj=self.cash_plan_2,
             completion_date="2020-01-01T14:30+00:00"
         )
         self.payment_plan_verification_1 = PaymentVerificationPlanFactory(
-            payment_plan_object_id=self.payment_plan_1.pk,
-            payment_plan_content_type=ct_payment_plan,
+            generic_fk_obj=self.payment_plan_1,
             completion_date="2020-01-01T14:30+00:00"
         )
         self.payment_plan_verification_2 = PaymentVerificationPlanFactory(
-            payment_plan_object_id=self.payment_plan_2.pk,
-            payment_plan_content_type=ct_payment_plan,
+            generic_fk_obj=self.payment_plan_2,
             completion_date="2020-01-01T14:30+00:00"
         )
-        PaymentRecordFactory(
+        record_1 = PaymentRecordFactory(
             household=self.households[0],
             business_area=self.business_area,
             delivery_date="2020-01-01",
             parent=self.cash_plan_1,
         )
-        PaymentRecordFactory(
+        record_2 = PaymentRecordFactory(
             household=self.households[1],
             business_area=self.business_area,
             delivery_date="2020-01-01",
@@ -146,17 +139,21 @@ class TestGenerateReportService(TestCase):
             delivery_date="2020-01-01T14:30+00:00",
             parent=self.payment_plan_2,
         )
-        PaymentVerificationFactory(payment_verification_plan=self.cash_plan_verification_1)
-        PaymentVerificationFactory(payment_verification_plan=self.cash_plan_verification_2)
+        PaymentVerificationFactory(
+            payment_verification_plan=self.cash_plan_verification_1,
+            generic_fk_obj=record_1,
+        )
+        PaymentVerificationFactory(
+            payment_verification_plan=self.cash_plan_verification_2,
+            generic_fk_obj=record_2,
+        )
         PaymentVerificationFactory(
             payment_verification_plan=self.payment_plan_verification_1,
-            payment_object_id = payment_1.pk,
-            payment_content_type = "",
+            generic_fk_obj = payment_1,
         )
         PaymentVerificationFactory(
             payment_verification_plan=self.payment_plan_verification_2,
-            payment_object_id=payment_2.pk,
-            payment_content_type="",
+            generic_fk_obj=payment_2.pk,
         )
 
     # TODO: FIX tests
