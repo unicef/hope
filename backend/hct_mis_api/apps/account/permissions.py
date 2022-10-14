@@ -73,6 +73,7 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS = auto()
     PAYMENT_VERIFICATION_DELETE = auto()
     PAYMENT_VERIFICATION_INVALID = auto()
+    PAYMENT_VERIFICATION_MARK_AS_FAILED = auto()
 
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()
@@ -153,6 +154,10 @@ class Permissions(Enum):
     # Activity Log
     ACTIVITY_LOG_VIEW = auto()
     ACTIVITY_LOG_DOWNLOAD = auto()
+
+    # Core
+    UPLOAD_STORAGE_FILE = auto()
+    DOWNLOAD_STORAGE_FILE = auto()
 
     # Communication
     ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST = auto()

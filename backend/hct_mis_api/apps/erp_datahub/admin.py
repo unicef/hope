@@ -1,6 +1,7 @@
 from operator import itemgetter
 
 from django import forms
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.options import IncorrectLookupParameters
@@ -139,7 +140,7 @@ class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 obj.mis_sync_flag = True
                 obj.mis_sync_date = timezone.now()
                 obj.save()
-                return redirect(f"/api/admin/erp_datahub/fundscommitment/{pk}/")
+                return redirect(f"{settings.ADMIN_PANEL_URL}/erp_datahub/fundscommitment/{pk}/")
 
         context["form"] = form
         return TemplateResponse(request, "admin/erp_datahub/funds_commitment/assign_business_office.html", context)
@@ -160,8 +161,8 @@ class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 request,
                 self.execute_exchange_rate_sync,
                 mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                        <h3>Import will only be simulated</h3> 
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                        <h3>Import will only be simulated</h3>
                         """
                 ),
                 "Successfully executed",
@@ -231,7 +232,7 @@ class DownPaymentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 obj.mis_sync_date = timezone.now()
                 obj.save()
                 mis_down_payment.save()
-                return redirect(f"/api/admin/erp_datahub/downpayment/{pk}/")
+                return redirect(f"{settings.ADMIN_PANEL_URL}/erp_datahub/downpayment/{pk}/")
 
         context["form"] = form
         return TemplateResponse(request, "admin/erp_datahub/funds_commitment/assign_business_office.html", context)

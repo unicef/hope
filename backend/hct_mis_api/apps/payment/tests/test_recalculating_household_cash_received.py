@@ -49,18 +49,6 @@ class TestRecalculatingCash(APITestCase):
           id
           name
           status
-          candidateListTotalHouseholds
-          candidateListTotalIndividuals
-            candidateListTargetingCriteria{
-            rules{
-              filters{
-                comparisionMethod
-                fieldName
-                arguments
-                isFlexField
-              }
-            }
-          }
         }
       }
     }
@@ -76,9 +64,9 @@ class TestRecalculatingCash(APITestCase):
     }
     """
 
-    APPROVE_TARGET_POPULATION_MUTATION = """
-    mutation ApproveTP($id: ID!) {
-        approveTargetPopulation(id: $id) {
+    LOCK_TARGET_POPULATION_MUTATION = """
+    mutation LockTP($id: ID!) {
+        lockTargetPopulation(id: $id) {
             targetPopulation {
                 __typename
             }
@@ -134,7 +122,7 @@ class TestRecalculatingCash(APITestCase):
                         {
                             "filters": [
                                 {
-                                    "comparisionMethod": "EQUALS",
+                                    "comparisonMethod": "EQUALS",
                                     "fieldName": "consent",
                                     "isFlexField": False,
                                     "arguments": [True],
@@ -182,7 +170,7 @@ class TestRecalculatingCash(APITestCase):
 
     def lock_target_population(self, target_population_id):
         return self.send_successful_graphql_request(
-            request_string=self.APPROVE_TARGET_POPULATION_MUTATION,
+            request_string=self.LOCK_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables={"id": target_population_id},
         )

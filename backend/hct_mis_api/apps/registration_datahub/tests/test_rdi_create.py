@@ -344,6 +344,15 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         result = task._cast_value("MALE", "gender_i_c")
         self.assertEqual(result, "MALE")
 
+        result = task._cast_value("TRUE", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("true", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
+        result = task._cast_value("True", "estimated_birth_date_i_c")
+        self.assertEqual(result, True)
+
     def test_store_row_id(self):
         task = self.RdiXlsxCreateTask()
         task.execute(
@@ -617,7 +626,6 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             }
         ]
         individual = ImportedIndividualFactory()
-        individuals_dict = {individual.get_hash_key: individual}
         documents_and_identities = [
             {
                 "birth_certificate": {
@@ -795,7 +803,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
 
         result = []
 
-        for i in range(10000):
+        for _ in range(10000):
             copy = {**base_form}
 
             new_individuals = []

@@ -82,7 +82,7 @@ class UserImportCSVTest(WebTest):
     @responses.activate
     def test_import_csv_do_not_change_partner(self):
         partner2 = PartnerFactory(name="Partner2")
-        u: User = UserFactory(email="test@example.com", partner=self.partner)
+        u: User = UserFactory(email="test@example.com", partner=self.partner)  # noqa: F841
 
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)

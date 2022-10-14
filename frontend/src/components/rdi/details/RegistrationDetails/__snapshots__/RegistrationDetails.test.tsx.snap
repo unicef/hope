@@ -39,7 +39,9 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   >
                     status
                   </span>
-                  <div>
+                  <div
+                    data-cy="label-status"
+                  >
                     <div
                       class="sc-ifAKCX iPKgts"
                     >
@@ -65,7 +67,9 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                 >
                   Source of Data
                 </span>
-                <div>
+                <div
+                  data-cy="label-Source of Data"
+                >
                   <span
                     class="sc-htpNat cwQQYq"
                     color="textSecondary"
@@ -85,7 +89,9 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                 >
                   Import Date
                 </span>
-                <div>
+                <div
+                  data-cy="label-Import Date"
+                >
                   <span
                     class="sc-htpNat cwQQYq"
                     color="textSecondary"
@@ -109,7 +115,9 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                 >
                   Imported by
                 </span>
-                <div>
+                <div
+                  data-cy="label-Imported by"
+                >
                   <span
                     class="sc-htpNat cwQQYq"
                     color="textSecondary"
@@ -142,7 +150,9 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   >
                     Total Number of Households
                   </span>
-                  <div>
+                  <div
+                    data-cy="label-Total Number of Households"
+                  >
                     <div
                       class="sc-VigVT cfztFP"
                     >
@@ -167,7 +177,9 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   >
                     Total Number of Individuals
                   </span>
-                  <div>
+                  <div
+                    data-cy="label-Total Number of Individuals"
+                  >
                     <div
                       class="sc-VigVT cfztFP"
                     >

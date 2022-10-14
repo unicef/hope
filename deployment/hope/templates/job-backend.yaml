@@ -25,7 +25,7 @@ spec:
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           envFrom:
           - secretRef:
-              name: {{ include "hope.fullname" . }}-backend
+              name: {{ include "hope.fullname" . }}-job-backend
           - configMapRef:
               name: {{ include "hope.fullname" . }}-backend
           resources:

@@ -171,6 +171,7 @@ class RdiMergeTask:
 
             if country_origin := countries.get(country_origin.code):
                 household_data["country_origin"] = country_origin
+
             household = Household(
                 **household_data,
                 registration_data_import=obj_hct,
@@ -282,12 +283,14 @@ class RdiMergeTask:
         try:
             with transaction.atomic(using="default"):
                 with transaction.atomic(using="registration_datahub"):
-                    obj_hub = RegistrationDataImportDatahub.objects.get(
-                        hct_id=registration_data_import_id,
-                    )
                     obj_hct = RegistrationDataImport.objects.get(
                         id=registration_data_import_id,
                     )
+
+                    obj_hub = RegistrationDataImportDatahub.objects.get(
+                        hct_id=registration_data_import_id,
+                    )
+
                     old_obj_hct = copy_model_object(obj_hct)
                     imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
                     imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
@@ -378,11 +381,11 @@ class RdiMergeTask:
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
-                    deduplicate_documents.delay()
+                    transaction.on_commit(lambda: deduplicate_documents.delay())
                     log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
 
             self._update_individuals_and_households(individual_ids)
 
-        except:
+        except Exception:
             remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
             raise

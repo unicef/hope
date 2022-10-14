@@ -25,6 +25,7 @@ wheels/
 *.egg
 MANIFEST
 backend/test-results/
+backend/lint-results/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -84,6 +85,7 @@ celerybeat-schedule
 
 # Environments
 .env
+.envrc
 .venv
 env/
 venv/

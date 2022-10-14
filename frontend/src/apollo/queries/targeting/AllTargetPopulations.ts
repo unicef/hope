@@ -23,8 +23,8 @@ export const AllTargetPopulations = gql`
       orderBy: $orderBy
       name: $name
       status: $status
-      numberOfHouseholdsMin: $numberOfHouseholdsMin
-      numberOfHouseholdsMax: $numberOfHouseholdsMax
+      totalHouseholdsCountMin: $numberOfHouseholdsMin
+      totalHouseholdsCountMax: $numberOfHouseholdsMax
       businessArea: $businessArea
       program: $program
       createdAtRange: $createdAtRange

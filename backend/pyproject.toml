@@ -8,6 +8,7 @@ exclude = '''
   | \.mypy_cache
   | \.tox
   | \.venv
+  | venv
   | _build
   | buck-out
   | build
@@ -16,7 +17,9 @@ exclude = '''
   | snapshots
 )/
 '''
+# TODO: remove migrations exclude rule once it won't create much conflicts between feature branches and develop
 [tool.isort]
+py_version = 39
 profile = "black"
 default_section = "THIRDPARTY"
 known_first_party = [
@@ -43,32 +46,32 @@ known_first_party = [
 known_django = "django"
 sections = ["FUTURE","STDLIB","DJANGO","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
 include_trailing_comma = true
-skip = "migrations,snapshots"
+skip = ["migrations", "snapshots", "venv"]
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "2022.8.2"
+version = "2022.10.1"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
 [tool.poetry.dependencies]
-python = "3.9.12"
-Django = "3.2.13"
+python = "3.9.*"
+Django = "3.2.15"
 Jinja2 = "3.1.2"
 PyJWT = "^2.4.0"
 PyYAML = "^6.0"
-black = "^22.3.0"
+black = "22.8.0"
 celery = {extras = ["redis"], version = "^5.2.7"}
 defusedxml = "0.7.0rc1"
 django-advanced-filters = "2.0.0"
-django-admin-extra-buttons = "^1.4.2"
-django-adminactions = "^1.15"
-django-adminfilters = "2.0.2"
-django-auditlog = { url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip" }
+django-admin-extra-buttons = ">=1.5.4"
+django-admin-sync = ">=0.3"
+django-adminactions = "^2"
+django-adminfilters = "^2"
 django-celery-beat = "^2.3.0"
 django-celery-results = "^2.3.1"
 django-concurrency = "^2.4"
-django-constance = { version = "2.9.0", extras = ["redis"] }
+django-constance = { version = "^2.9", extras = ["redis"] }
 django-cors-headers = "3.13.0"
 django-countries = "^7.3.2"
 django-elasticsearch-dsl = "7.2.2"
@@ -82,7 +85,7 @@ django-mptt = "0.13.4"
 django-multiselectfield = "0.1.12"
 django-phonenumber-field = "6.1.0"
 django-redis = "^5.2.0"
-django-smart-admin = "1.9"
+django-smart-admin = "^2"
 django-sql-explorer = {extras = ["xls"], version = "^2.4"}
 django-storages = { version = "1.12.3", extras = ["azure"] }
 django-sysinfo = ">=2.6.0"
@@ -102,7 +105,7 @@ pillow = "9.2.0"
 prompt-toolkit = "3.0.29"
 psycopg2 = "2.9.3"
 ptyprocess = "0.7.0"
-pycountry = "22.3.5"
+pycountry = "^22.3"
 pygments = "2.12.0"
 pytz = "2022.1"
 sentry-sdk = "1.5.12"
@@ -121,6 +124,12 @@ pytesseract = "^0.3.9"
 newrelic = "^7.10.0"
 djangorestframework = "^3.13.1"
 django-silk = "5.0.1"
+django-reversion = "^5.0.2"
+natural-keys = "^2.0.0"
+drf-yasg = "^1.21.3"
+django-front-door = "^0.2.0"
+drf-jwt = "^1.19.2"
+django-auditlog = "^2.1.1"
 
 [tool.poetry.dev-dependencies]
 django-webtest = "^1.9.10"
@@ -128,6 +137,7 @@ factory-boy = "2.12.0"
 faker = "13.12.1"
 freezegun = "0.3.14"
 ipdb = "0.13.9"
+isort = "5.10.1"
 parameterized = "0.8.1"
 requests-mock = "^1.9.3"
 responses = "^0.21.0"
@@ -138,6 +148,8 @@ wasmer = "1.1.0"
 parso = "0.8.3"
 argh = "^0.26.2"
 flake8 = "4.0.1"
+flake8-formatter-junit-xml = "^0.0.6"
+flake8-bugbear = "22.9.23"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,2 +1,7 @@
+import tomli
+
+
 def get_full_version():
-    return "N/A"
+    with open("pyproject.toml", mode="rb") as fp:
+        config = tomli.load(fp)
+    return config["tool"]["poetry"]["version"]
