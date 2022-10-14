@@ -242,6 +242,7 @@ And('I export xlsx to zip file', () => {
 When('I unarchive the zip file', () => {
   const name = zipFileName(paymentPlanUnicefId);
   const downloadedFilePath = `${downloadsFolder}/${name}`;
+  cy.log(`Unzipping ${downloadedFilePath} to ${downloadsFolder}`);
   cy.exec(`unzip ${downloadedFilePath} -d ${downloadsFolder}`);
 });
 
