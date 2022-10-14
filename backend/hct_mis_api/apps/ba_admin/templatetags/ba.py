@@ -2,7 +2,7 @@ from django import template
 from django.contrib.admin.models import LogEntry
 from django.template import TemplateSyntaxError
 from django.template.base import kwarg_re
-from django.template.defaulttags import URLNode, url
+from django.template.defaulttags import URLNode
 from django.utils.html import conditional_escape
 
 register = template.Library()
