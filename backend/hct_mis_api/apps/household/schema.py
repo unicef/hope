@@ -214,11 +214,11 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_country_origin(parent: Household, info):
-        return parent.country_origin.name
+        return getattr(parent.country_origin, "name", "")
 
     @staticmethod
     def resolve_country(parent: Household, info):
-        return parent.country.name
+        return getattr(parent.country, "name", "")
 
     def resolve_admin1(parent, info):
         return parent.admin1
@@ -236,16 +236,6 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_programs_with_delivered_quantity(parent, info):
         return programs_with_delivered_quantity(parent)
-
-    def resolve_country(parent, info):
-        if parent.country:
-            return parent.country.name
-        return ""
-
-    def resolve_country_origin(parent, info):
-        if parent.country_origin:
-            return parent.country_origin.name
-        return ""
 
     def resolve_selection(parent, info):
         selection = parent.selections.first()
