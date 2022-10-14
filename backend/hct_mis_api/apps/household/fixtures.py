@@ -148,7 +148,7 @@ class IndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.LazyAttribute(lambda _: f"{faker.country_calling_code()} {faker.msisdn()[3:]}")
+    phone_no = factory.LazyAttribute(lambda _: f"+380 {faker.msisdn()[:9]}")
     phone_no_alternative = ""
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
