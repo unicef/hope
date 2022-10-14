@@ -104,7 +104,7 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
                         'fullName': 'Jenna Franklin',
                         'givenName': 'Jenna',
                         'phoneNo': '001-296-358-5428-607',
-                        'phoneNoValid': True
+                        'phoneNoValid': False
                     }
                 },
                 {
@@ -211,7 +211,7 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_0_with_p
                         'fullName': 'Jenna Franklin',
                         'givenName': 'Jenna',
                         'phoneNo': '001-296-358-5428-607',
-                        'phoneNoValid': True
+                        'phoneNoValid': False
                     }
                 }
             ]
