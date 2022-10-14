@@ -4,4 +4,4 @@ set -eu
 
 curl -X POST http://proxy/api/cypress-xlsx/$1
 
-cp ../backend/generated/* cypress/fixtures/
+cp /backend_generated/* cypress/fixtures/
