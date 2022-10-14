@@ -4,7 +4,7 @@ WORKDIR /code
 
 RUN apt update \
     && DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y \
-    curl ca-certificates npm \
+    curl ca-certificates npm unzip \
     libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb \
     && apt clean && rm -rf /var/lib/apt/lists/*
 

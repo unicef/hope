@@ -94,8 +94,11 @@ if settings.PROFILING:
 if settings.CYPRESS_TESTING:
     # for testing purposes so the cypress pipeline can use the dockerized app
     # without the need to call docker-compose
+
+    # TODO: refactor common part
+
     @csrf_exempt
-    def cypress_endpoint(request, scenario, seed):
+    def scenario_endpoint(request, scenario, seed):
         try:
             if request.method != "POST":
                 return JsonResponse({"error": "Only POST allowed"}, status=400)
@@ -104,7 +107,19 @@ if settings.CYPRESS_TESTING:
         except Exception as exception:
             return JsonResponse({"error": str(exception)}, status=400)
 
-    api_patterns.append(path("cypress/<str:scenario>/<int:seed>", cypress_endpoint))
+    api_patterns.append(path("cypress-scenario/<str:scenario>/<int:seed>", scenario_endpoint))
+
+    @csrf_exempt
+    def xlsx_endpoint(request, amount, seed):
+        try:
+            if request.method != "POST":
+                return JsonResponse({"error": "Only POST allowed"}, status=400)
+            call_command("generate_rdi_xlsx_files", amount, seed=seed)
+            return JsonResponse({"message": "ok"})
+        except Exception as exception:
+            return JsonResponse({"error": str(exception)}, status=400)
+
+    api_patterns.append(path("cypress-xlsx/<int:amount>/<int:seed>", xlsx_endpoint))
 
 
 urlpatterns = (

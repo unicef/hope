@@ -21,6 +21,8 @@ services:
     volumes:
       - ./cypress_testing_service/:/code
       - ./cypress_testing_service/cypress.ci.json:/code/cypress.json
+      - ./cypress_testing_service/generate_xlsx_files_ci.sh:/code/generate_xlsx_files.sh
+      - ./cypress_testing_service/init_backend_ci.sh:/code/init_backend.sh
 
   proxy:
     image: unicef/hct-mis-proxy

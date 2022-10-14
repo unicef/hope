@@ -13,7 +13,7 @@ Given('I am authenticated', () => {
 });
 
 Given('There are no RDI imports', () => {
-  cy.exec(`yarn run generate-xlsx-files 1 --seed ${uniqueSeed}`);
+  cy.exec(`yarn run generate-xlsx-files 1/${uniqueSeed}`);
 });
 
 const clearCache = () => {

@@ -46,3 +46,9 @@ yarn clean
 ```
 
 This command will remove the generated .xlsx files in downloads and in fixtures.
+
+To run it like the pipeline does, call:
+
+```sh
+docker-compose -f docker-compose.cypress.yml up --build --exit-code-from cypress
+```
