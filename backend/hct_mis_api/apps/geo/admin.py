@@ -199,8 +199,9 @@ class AreaAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEMode
                                         p_code=row[admin_area[ids]], name=row[area_types[ids]]
                                     )
                                     area.save()
-                    except Exception as e:
-                        self.message_user(request, f"Unable to load areas, please check the format", messages.ERROR)
+                    except Exception:
+                        self.message_user(request, "Unable to load areas, please check the format", messages.ERROR)
+
                         raise
 
                 self.message_user(request, f"Updated all areas for {country}")

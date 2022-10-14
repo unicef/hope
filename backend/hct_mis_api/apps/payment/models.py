@@ -313,15 +313,6 @@ class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
     created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
 
 
-class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
-    file = models.FileField()
-    cash_plan_payment_verification = models.OneToOneField(
-        CashPlanPaymentVerification, related_name="xlsx_cashplan_payment_verification_file", on_delete=models.CASCADE
-    )
-    was_downloaded = models.BooleanField(default=False)
-    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
-
-
 def build_summary(cash_plan):
     statuses_count = cash_plan.verifications.aggregate(
         active=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE)),

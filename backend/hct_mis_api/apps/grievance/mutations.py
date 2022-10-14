@@ -1,5 +1,4 @@
 import logging
-import os
 from enum import Enum
 from typing import Union
 
@@ -10,7 +9,6 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 import graphene
-from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner
@@ -32,11 +30,7 @@ from hct_mis_api.apps.grievance.inputs import (
     CreateTicketNoteInput,
     UpdateGrievanceTicketInput,
 )
-from hct_mis_api.apps.grievance.models import (
-    GrievanceDocument,
-    GrievanceTicket,
-    TicketNote,
-)
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     close_add_individual_grievance_ticket,
     close_delete_household_ticket,
@@ -78,11 +72,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     verify_required_arguments,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.grievance.schema import (
-    GrievanceDocumentNode,
-    GrievanceTicketNode,
-    TicketNoteNode,
-)
+from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
 from hct_mis_api.apps.grievance.utils import (
     create_grievance_documents,
     delete_grievance_documents,

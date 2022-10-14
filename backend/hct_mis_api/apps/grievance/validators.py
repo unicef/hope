@@ -49,14 +49,6 @@ def validate_files_size(files):
         raise GraphQLError("Total size of files can not be larger than 25mb.")
 
 
-def validate_file(file):
-    if file.content_type in settings.GRIEVANCE_UPLOAD_CONTENT_TYPES:
-        if file.size > settings.GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE:
-            raise GraphQLError(_(f"File {file.name} of size {file.size} is above max size limit"))
-    else:
-        raise GraphQLError(_("File type not supported"))
-
-
 def validate_grievance_documents_size(ticket_id, new_documents, is_updated=False):
     grievance_documents = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id)
 
