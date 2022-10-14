@@ -329,5 +329,7 @@ class TestPhoneNumberVerification(TestCase):
 
         assert not is_right_phone_number_format("123-not-really-a-phone-number")
 
+        assert not is_right_phone_number_format("+38063754115")
+        assert is_right_phone_number_format("+380637541150")
         assert is_right_phone_number_format("+380 123 234 345")
         assert not is_right_phone_number_format("+380 23 234 345")
