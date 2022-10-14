@@ -50,13 +50,15 @@ def handle_add_document(document, individual):
     photoraw = document.get("photoraw")
     if photo:
         photo = photoraw
-    document_type = DocumentType.objects.get(country=country, type=type_name)
+    document_type = DocumentType.objects.get(type=type_name)
 
-    document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
+    document_already_exists = Document.objects.filter(
+        document_number=number, type=document_type, country=country
+    ).exists()
     if document_already_exists:
-        raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
+        raise GraphQLError(f"Document with number {number} of type {type_name} already exist")
 
-    return Document(document_number=number, individual=individual, type=document_type, photo=photo)
+    return Document(document_number=number, individual=individual, type=document_type, photo=photo, country=country)
 
 
 def handle_edit_document(document_data: dict):
@@ -82,16 +84,19 @@ def handle_edit_document(document_data: dict):
     document_id = decode_id_string(document_id)
     document = get_object_or_404(Document, id=document_id)
 
-    document_type = DocumentType.objects.get(country=country, type=type_name)
+    document_type = DocumentType.objects.get(type=type_name)
 
     document_already_exists = (
-        Document.objects.exclude(pk=document_id).filter(document_number=number, type=document_type).exists()
+        Document.objects.exclude(pk=document_id)
+        .filter(document_number=number, type=document_type, country=country)
+        .exists()
     )
     if document_already_exists:
-        raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
+        raise GraphQLError(f"Document with number {number} of type {type_name} already exist")
 
     document.document_number = number
     document.type = document_type
+    document.country = country
     document.photo = photo
     return document
 
@@ -195,7 +200,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
             "document_number": document.document_number,
             "individual": encode_id_base64(document.individual.id, "Individual"),
             "type": document.type.type,
-            "country": document.type.country.iso_code3,
+            "country": document.country.iso_code3,
         }
 
     return previous_documents
@@ -211,8 +216,8 @@ def prepare_edit_documents(documents_to_edit):
 
     for document_to_edit in documents_to_edit:
         encoded_id = document_to_edit.get("id")
-        country = document_to_edit.get("country")
         document_type = document_to_edit.get("type")
+        country = document_to_edit.get("country")
         document_number = document_to_edit.get("number")
         document_photo = document_to_edit.get("photo")
         document_photoraw = document_to_edit.get("photoraw")
@@ -227,16 +232,16 @@ def prepare_edit_documents(documents_to_edit):
                 "approve_status": False,
                 "value": {
                     "id": encoded_id,
-                    "country": country,
                     "type": document_type,
+                    "country": country,
                     "number": document_number,
                     "photo": document_photo,
                     "photoraw": document_photo,
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "country": document.type.country.iso_code3,
                     "type": document.type.type,
+                    "country": document.country.iso_code3,
                     "number": document.document_number,
                     "photo": document.photo.name,
                     "photoraw": document.photo.name,
