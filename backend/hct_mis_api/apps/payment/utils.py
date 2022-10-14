@@ -20,7 +20,7 @@ def is_right_phone_number_format(phone_number):
     if not isinstance(phone_number, str):
         phone_number = str(phone_number)
 
-    phone_number = phone_number.strip().replace(" ", "")
+    phone_number = phone_number.replace(" ", "")
     if phone_number.startswith("00"):
         phone_number = f"+{phone_number[2:]}"
 
