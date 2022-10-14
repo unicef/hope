@@ -20,9 +20,9 @@ class AccountabilityCommunicationMessageRandomSamplingArguments(AccountabilityCo
 
 
 class GetAccountabilityCommunicationMessageSampleSizeInput(graphene.InputObjectType):
-    households = graphene.List(graphene.String)
-    target_population = graphene.String()
-    registration_data_import = graphene.String()
+    households = graphene.List(graphene.ID)
+    target_population = graphene.ID()
+    registration_data_import = graphene.ID()
     sampling_type = graphene.Enum.from_enum(Message.SamplingChoices)(required=True)
     full_list_arguments = AccountabilityCommunicationMessageFullListArguments()
     random_sampling_arguments = AccountabilityCommunicationMessageRandomSamplingArguments()

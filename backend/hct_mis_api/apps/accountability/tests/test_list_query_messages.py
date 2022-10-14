@@ -52,14 +52,7 @@ class TestActionMessageMutation(APITestCase):
         sex: $sex
         orderBy: $orderBy
       ) {
-        edges {
-          node {
-            size
-            headOfHousehold {
-              fullName
-            }
-          }
-        }
+        totalCount
       }
     }
 """
@@ -163,13 +156,6 @@ class TestActionMessageMutation(APITestCase):
                 "with_view_details_permission",
                 [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR],
                 {},
-            ),
-            (
-                "with_view_details_permission",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
-                {
-                    "sex": "MALE",
-                },
             ),
             (
                 "without_permission",

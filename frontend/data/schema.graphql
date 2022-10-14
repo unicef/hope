@@ -3,6 +3,23 @@ schema {
   mutation: Mutations
 }
 
+input AccountabilityCommunicationMessageAgeInput {
+  min: Int
+  max: Int
+}
+
+input AccountabilityCommunicationMessageFullListArguments {
+  excludedAdminAreas: [String]
+}
+
+input AccountabilityCommunicationMessageRandomSamplingArguments {
+  excludedAdminAreas: [String]
+  confidenceInterval: Float!
+  marginOfError: Float!
+  age: AccountabilityCommunicationMessageAgeInput
+  sex: String
+}
+
 type ActivateCashPlanVerificationMutation {
   validationErrors: Arg
   cashPlan: CashPlanNode
@@ -92,6 +109,7 @@ type AreaNode implements Node {
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
 }
 
 type AreaNodeConnection {
@@ -160,6 +178,10 @@ input BankTransferObjectType {
 
 scalar BigInt
 
+type BulkUpdateGrievanceTicketsAssigneesMutation {
+  grievanceTickets: [GrievanceTicketNode]
+}
+
 type BusinessAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -196,9 +218,11 @@ type BusinessAreaNode implements Node {
   programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   registrationdataimportSet(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
-  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
+  messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
 }
 
 type BusinessAreaNodeConnection {
@@ -398,6 +422,60 @@ type ChoiceObject {
   value: String
 }
 
+type ChoiceObjectInt {
+  name: String
+  value: Int
+}
+
+type CommunicationMessageNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  unicefId: String
+  title: String!
+  body: String!
+  createdBy: UserNode
+  numberOfRecipients: Int!
+  businessArea: UserBusinessAreaNode!
+  households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  targetPopulation: TargetPopulationNode
+  registrationDataImport: RegistrationDataImportNode
+  samplingType: MessageSamplingType!
+  fullListArguments: JSONString
+  randomSamplingArguments: JSONString
+  sampleSize: Int!
+}
+
+type CommunicationMessageNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CommunicationMessageNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type CommunicationMessageNodeEdge {
+  node: CommunicationMessageNode
+  cursor: String!
+}
+
+type CommunicationMessageRecipientMapNode implements Node {
+  id: ID!
+  size: Int
+  headOfHousehold: IndividualNode!
+}
+
+type CommunicationMessageRecipientMapNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CommunicationMessageRecipientMapNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type CommunicationMessageRecipientMapNodeEdge {
+  node: CommunicationMessageRecipientMapNode
+  cursor: String!
+}
+
 type ContentTypeObjectType {
   id: ID!
   appLabel: String!
@@ -435,6 +513,21 @@ type CountAndPercentageNode {
   percentage: Float
 }
 
+input CreateAccountabilityCommunicationMessageInput {
+  households: [ID]
+  targetPopulation: ID
+  registrationDataImport: ID
+  samplingType: SamplingChoices!
+  fullListArguments: AccountabilityCommunicationMessageFullListArguments
+  randomSamplingArguments: AccountabilityCommunicationMessageRandomSamplingArguments
+  title: String!
+  body: String!
+}
+
+type CreateCommunicationMessageMutation {
+  message: CommunicationMessageNode
+}
+
 type CreateDashboardReport {
   success: Boolean
 }
@@ -447,6 +540,33 @@ input CreateDashboardReportInput {
   program: ID
 }
 
+input CreateFeedbackInput {
+  businessAreaSlug: String!
+  issueType: String!
+  householdLookup: ID
+  individualLookup: ID
+  description: String!
+  comments: String
+  admin2: ID
+  area: String
+  language: String
+  consent: Boolean
+  program: ID
+}
+
+input CreateFeedbackMessageInput {
+  description: String!
+  feedback: ID!
+}
+
+type CreateFeedbackMessageMutation {
+  feedbackMessage: FeedbackMessageNode
+}
+
+type CreateFeedbackMutation {
+  feedback: FeedbackNode
+}
+
 input CreateGrievanceTicketExtrasInput {
   category: CategoryExtrasInput
   issueType: IssueTypeExtrasInput
@@ -454,7 +574,7 @@ input CreateGrievanceTicketExtrasInput {
 
 input CreateGrievanceTicketInput {
   description: String!
-  assignedTo: ID!
+  assignedTo: ID
   category: Int!
   issueType: Int
   admin: String
@@ -464,6 +584,13 @@ input CreateGrievanceTicketInput {
   businessArea: ID!
   linkedTickets: [ID]
   extras: CreateGrievanceTicketExtrasInput
+  priority: Int
+  urgency: Int
+  partner: Int
+  programme: ID
+  comments: String
+  linkedFeedbackId: ID
+  documentation: [GrievanceDocumentInput]
 }
 
 type CreateGrievanceTicketMutation {
@@ -703,6 +830,64 @@ type ExportXlsxCashPlanVerification {
   cashPlan: CashPlanNode
 }
 
+enum FeedbackIssueType {
+  POSITIVE_FEEDBACK
+  NEGATIVE_FEEDBACK
+}
+
+type FeedbackMessageNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  description: String!
+  createdBy: UserNode
+}
+
+type FeedbackMessageNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FeedbackMessageNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type FeedbackMessageNodeEdge {
+  node: FeedbackMessageNode
+  cursor: String!
+}
+
+type FeedbackNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  unicefId: String
+  businessArea: UserBusinessAreaNode!
+  issueType: FeedbackIssueType!
+  householdLookup: HouseholdNode
+  individualLookup: IndividualNode
+  description: String!
+  comments: String
+  admin2: AreaNode
+  area: String!
+  language: String!
+  consent: Boolean!
+  program: ProgramNode
+  createdBy: UserNode
+  linkedGrievance: GrievanceTicketNode
+  feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
+}
+
+type FeedbackNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FeedbackNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type FeedbackNodeEdge {
+  node: FeedbackNode
+  cursor: String!
+}
+
 type FieldAttributeNode {
   id: String
   type: String
@@ -732,6 +917,15 @@ input FullListArguments {
 
 scalar GeoJSON
 
+input GetAccountabilityCommunicationMessageSampleSizeInput {
+  households: [ID]
+  targetPopulation: ID
+  registrationDataImport: ID
+  samplingType: SamplingChoices!
+  fullListArguments: AccountabilityCommunicationMessageFullListArguments
+  randomSamplingArguments: AccountabilityCommunicationMessageRandomSamplingArguments
+}
+
 input GetCashplanVerificationSampleSizeInput {
   cashPlanId: ID
   cashPlanPaymentVerificationId: ID
@@ -748,10 +942,49 @@ type GetCashplanVerificationSampleSizeObject {
   sampleSize: Int
 }
 
+type GetCommunicationMessageSampleSizeObject {
+  numberOfRecipients: Int
+  sampleSize: Int
+}
+
 input GrievanceComplaintTicketExtras {
   household: ID
   individual: ID
   paymentRecord: [ID]
+}
+
+input GrievanceDocumentInput {
+  name: String!
+  file: Upload!
+}
+
+type GrievanceDocumentNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String
+  createdBy: UserNode
+  grievanceTicket: GrievanceTicketNode
+  fileSize: Int
+  contentType: String!
+  filePath: String
+  fileName: String
+}
+
+type GrievanceDocumentNodeConnection {
+  pageInfo: PageInfo!
+  edges: [GrievanceDocumentNodeEdge]!
+}
+
+type GrievanceDocumentNodeEdge {
+  node: GrievanceDocumentNode
+  cursor: String!
+}
+
+input GrievanceDocumentUpdateInput {
+  id: ID!
+  name: String
+  file: Upload
 }
 
 type GrievanceStatusChangeMutation {
@@ -782,6 +1015,11 @@ type GrievanceTicketNode implements Node {
   extras: JSONString!
   ignored: Boolean!
   householdUnicefId: String
+  priority: Int
+  urgency: Int
+  partner: PartnerType
+  programme: ProgramNode
+  comments: String
   linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -797,12 +1035,16 @@ type GrievanceTicketNode implements Node {
   positiveFeedbackTicketDetails: TicketPositiveFeedbackDetailsNode
   negativeFeedbackTicketDetails: TicketNegativeFeedbackDetailsNode
   referralTicketDetails: TicketReferralDetailsNode
+  supportDocuments(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceDocumentNodeConnection!
+  feedback: FeedbackNode
   household: HouseholdNode
   individual: IndividualNode
   paymentRecord: PaymentRecordNode
   relatedTickets: [GrievanceTicketNode]
   admin: String
   existingTickets: [GrievanceTicketNode]
+  totalDays: String
+  documentation: [GrievanceDocumentNode]
 }
 
 type GrievanceTicketNodeConnection {
@@ -847,6 +1089,8 @@ input HouseholdDeleteIssueTypeExtras {
 
 type HouseholdNode implements Node {
   id: ID!
+  size: Int
+  headOfHousehold: IndividualNode!
   createdAt: DateTime!
   updatedAt: DateTime!
   isRemoved: Boolean!
@@ -861,7 +1105,6 @@ type HouseholdNode implements Node {
   residenceStatus: HouseholdResidenceStatus!
   countryOrigin: String
   country: String
-  size: Int
   address: String!
   adminArea: AreaNode
   representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -899,7 +1142,6 @@ type HouseholdNode implements Node {
   flexFields: FlexFieldsScalar
   firstRegistrationDate: DateTime!
   lastRegistrationDate: DateTime!
-  headOfHousehold: IndividualNode!
   fchildHoh: Boolean
   childHoh: Boolean
   unicefId: String!
@@ -930,8 +1172,10 @@ type HouseholdNode implements Node {
   referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
-  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelection!]!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   adminAreaTitle: String
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
@@ -1921,6 +2165,7 @@ type IndividualNode implements Node {
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   bankAccountInfo: BankAccountInfoNode
+  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   status: String
   role: String
   age: Int
@@ -2137,13 +2382,23 @@ type MergeRegistrationDataImportMutation {
   registrationDataImport: RegistrationDataImportNode
 }
 
+enum MessageSamplingType {
+  FULL_LIST
+  RANDOM
+}
+
 type Mutations {
+  createAccountabilityCommunicationMessage(businessAreaSlug: String!, inputs: CreateAccountabilityCommunicationMessageInput!): CreateCommunicationMessageMutation
+  createFeedback(input: CreateFeedbackInput!): CreateFeedbackMutation
+  updateFeedback(input: UpdateFeedbackInput!): UpdateFeedbackMutation
+  createFeedbackMessage(input: CreateFeedbackMessageInput!): CreateFeedbackMessageMutation
   createReport(reportData: CreateReportInput!): CreateReport
   restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
+  bulkUpdateGrievanceAssignee(assignedTo: String, businessAreaSlug: String!, grievanceTicketUnicefIds: [ID]): BulkUpdateGrievanceTicketsAssigneesMutation
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
   approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
@@ -2214,6 +2469,7 @@ type PartnerType {
   name: String!
   isUn: Boolean!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
 }
 
 type PaymentDetailsApproveMutation {
@@ -2398,10 +2654,12 @@ type ProgramNode implements Node {
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
   individualDataNeeded: Boolean
+  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   cashPlans(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
-  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   totalEntitledQuantity: Decimal
   totalDeliveredQuantity: Decimal
   totalUndeliveredQuantity: Decimal
@@ -2448,6 +2706,14 @@ type ProgramsWithDeliveredQuantityNode {
 }
 
 type Query {
+  accountabilityCommunicationMessage(id: ID!): CommunicationMessageNode
+  allAccountabilityCommunicationMessages(offset: Int, before: String, after: String, first: Int, last: Int, numberOfRecipients: Int, numberOfRecipients_Gte: Int, numberOfRecipients_Lte: Int, targetPopulation: ID, createdBy: ID, businessArea: String!, program: String, createdAtRange: String, title: String, body: String, samplingType: String, orderBy: String): CommunicationMessageNodeConnection
+  accountabilityCommunicationMessageRecipient(id: ID!): CommunicationMessageRecipientMapNode
+  allAccountabilityCommunicationMessageRecipients(offset: Int, before: String, after: String, first: Int, last: Int, messageId: String!, recipientId: String, fullName: String, phoneNo: String, sex: String, orderBy: String): CommunicationMessageRecipientMapNodeConnection
+  accountabilityCommunicationMessageSampleSize(businessAreaSlug: String!, inputs: GetAccountabilityCommunicationMessageSampleSizeInput): GetCommunicationMessageSampleSizeObject
+  feedback(id: ID!): FeedbackNode
+  allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessAreaSlug: String!, issueType: String, createdAtRange: String, createdBy: String, feedbackId: String, orderBy: String): FeedbackNodeConnection
+  feedbackIssueTypeChoices: [ChoiceObject]
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
@@ -2460,8 +2726,12 @@ type Query {
   dashboardYearsChoices(businessAreaSlug: String!): [String]
   sanctionListIndividual(id: ID!): SanctionListIndividualNode
   allSanctionListIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Startswith: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
+  ticketsByType(businessAreaSlug: String!): TicketByType
+  ticketsByCategory(businessAreaSlug: String!): ChartDatasetNode
+  ticketsByStatus(businessAreaSlug: String!): ChartDatasetNode
+  ticketsByLocationAndCategory(businessAreaSlug: String!): ChartDetailedDatasetsNode
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, priority: String, urgency: String, grievanceType: String, grievanceStatus: String, totalDays: Int, orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
@@ -2470,7 +2740,10 @@ type Query {
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
   grievanceTicketManualCategoryChoices: [ChoiceObject]
+  grievanceTicketSystemCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
+  grievanceTicketPriorityChoices: [ChoiceObjectInt]
+  grievanceTicketUrgencyChoices: [ChoiceObjectInt]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   paymentRecordVerification(id: ID!): PaymentVerificationNode
@@ -2513,7 +2786,7 @@ type Query {
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
   targetPopulation(id: ID!): TargetPopulationNode
-  allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection
+  allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection
   goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, excludedIds: String!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationHouseholds(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
@@ -2557,7 +2830,7 @@ type Query {
   deduplicationBatchStatusChoices: [ChoiceObject]
   deduplicationGoldenRecordStatusChoices: [ChoiceObject]
   registrationDataImport(id: ID!): RegistrationDataImportNode
-  allRegistrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Startswith: String, businessArea: String, orderBy: String): RegistrationDataImportNodeConnection
+  allRegistrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Startswith: String, businessArea: String, importDateRange: String, size: String, orderBy: String): RegistrationDataImportNodeConnection
   registrationDataStatusChoices: [ChoiceObject]
   _debug: DjangoDebug
 }
@@ -2681,6 +2954,7 @@ type RegistrationDataImportNode implements Node {
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   batchDuplicatesCountAndPercentage: CountAndPercentageNode
   goldenRecordDuplicatesCountAndPercentage: CountAndPercentageNode
   batchPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
@@ -2814,7 +3088,7 @@ type RuleCommitNode implements Node {
   affectedFields: [String!]!
   before: JSONString!
   after: JSONString!
-  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
 }
 
 type RuleCommitNodeConnection {
@@ -2837,6 +3111,11 @@ enum RuleSecurity {
   A_0
   A_2
   A_4
+}
+
+enum SamplingChoices {
+  FULL_LIST
+  RANDOM
 }
 
 type SanctionListIndividualAliasNameNode implements Node {
@@ -2992,7 +3271,6 @@ type SectionTotalNode {
 input SensitiveGrievanceTicketExtras {
   household: ID
   individual: ID
-  paymentRecord: [ID]
 }
 
 type ServiceProviderNode implements Node {
@@ -3113,6 +3391,7 @@ type TargetPopulationNode implements Node {
   adultFemaleCount: Int
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   totalFamilySize: Int
   householdList(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
 }
@@ -3251,6 +3530,15 @@ type TicketAddIndividualDetailsNodeConnection {
 type TicketAddIndividualDetailsNodeEdge {
   node: TicketAddIndividualDetailsNode
   cursor: String!
+}
+
+type TicketByType {
+  userGeneratedCount: Int
+  systemGeneratedCount: Int
+  closedUserGeneratedCount: Int
+  closedSystemGeneratedCount: Int
+  userGeneratedAvgResolution: Float
+  systemGeneratedAvgResolution: Float
 }
 
 type TicketComplaintDetailsNode implements Node {
@@ -3570,6 +3858,24 @@ input UpdateAddIndividualIssueTypeExtras {
   individualData: AddIndividualDataObjectType!
 }
 
+input UpdateFeedbackInput {
+  feedbackId: ID!
+  issueType: String
+  householdLookup: ID
+  individualLookup: ID
+  description: String
+  comments: String
+  admin2: ID
+  area: String
+  language: String
+  consent: Boolean
+  program: ID
+}
+
+type UpdateFeedbackMutation {
+  feedback: FeedbackNode
+}
+
 input UpdateGrievanceTicketExtrasInput {
   householdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras
   individualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras
@@ -3588,7 +3894,16 @@ input UpdateGrievanceTicketInput {
   linkedTickets: [ID]
   household: ID
   individual: ID
+  paymentRecord: ID
   extras: UpdateGrievanceTicketExtrasInput
+  priority: Int
+  urgency: Int
+  partner: Int
+  programme: ID
+  comments: String
+  documentation: [GrievanceDocumentInput]
+  documentationToUpdate: [GrievanceDocumentUpdateInput]
+  documentationToDelete: [ID]
 }
 
 type UpdateGrievanceTicketMutation {
@@ -3692,9 +4007,11 @@ type UserBusinessAreaNode implements Node {
   programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   registrationdataimportSet(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
-  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
+  messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   permissions: [String]
 }
 
@@ -3735,11 +4052,14 @@ type UserNode implements Node {
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   registrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
-  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
-  changedTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
-  finalizedTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
+  changedTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
+  finalizedTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], createdAtRange: String, orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
+  messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
+  feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
+  feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
 }
 
