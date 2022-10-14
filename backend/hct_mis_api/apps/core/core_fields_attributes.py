@@ -50,9 +50,9 @@ from hct_mis_api.apps.household.models import (
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
-    YES_NO_CHOICE,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -507,10 +507,10 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Will you be collecting all member Individuals' data?"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in YES_NO_CHOICE],
+        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in COLLECT_TYPES],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "collect_individual_data_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE, Scope.XLSX],
     },
     {
         "id": "1c2e3c42-8b32-4198-bd4f-06a61e2ecf0e",

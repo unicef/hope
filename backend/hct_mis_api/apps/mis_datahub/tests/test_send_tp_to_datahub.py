@@ -1,4 +1,5 @@
 from django.core.management import call_command
+from django.db.utils import IntegrityError
 from django.test import TestCase
 
 from parameterized import parameterized
@@ -26,6 +27,7 @@ from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahu
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
+    HouseholdSelectionFactory,
     TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
     TargetPopulationFactory,
@@ -56,13 +58,6 @@ class TestSendTpToDatahub(TestCase):
             "changed_by": None,
             "finalized_at": None,
             "finalized_by": None,
-            "candidate_list_total_households": None,
-            "candidate_list_total_individuals": None,
-            "final_list_total_households": None,
-            "final_list_total_individuals": None,
-            "selection_computation_metadata": None,
-            "candidate_list_targeting_criteria": None,
-            "final_list_targeting_criteria": None,
         }
 
         return TargetPopulation.objects.create(
@@ -85,7 +80,6 @@ class TestSendTpToDatahub(TestCase):
         admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR")
-        test_agency = Agency.objects.create(type="test", label="test")
 
         cls.program_individual_data_needed_true = ProgramFactory(
             individual_data_needed=True,
@@ -193,6 +187,8 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_first.households.set([cls.household])
+        cls.target_population_first.refresh_stats()
+        cls.target_population_first.save()
 
         cls.target_population_second = cls._create_target_population(
             sent_to_datahub=False,
@@ -202,6 +198,8 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_second.households.set([cls.household])
+        cls.target_population_second.refresh_stats()
+        cls.target_population_second.save()
 
         cls.target_population_third = cls._create_target_population(
             sent_to_datahub=False,
@@ -211,6 +209,8 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_third.households.set([cls.household_second])
+        cls.target_population_third.refresh_stats()
+        cls.target_population_third.save()
 
     def test_individual_data_needed_true(self):
         task = SendTPToDatahubTask()
@@ -277,7 +277,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         target_population_first.households.set([household])
-
+        target_population_first.refresh_stats()
         target_population_second = self._create_target_population(
             sent_to_datahub=False,
             name="Test TP xD 2",
@@ -286,7 +286,7 @@ class TestSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         target_population_second.households.set([household])
-
+        target_population_second.refresh_stats()
         task = SendTPToDatahubTask()
         task.send_target_population(target_population_first)
         dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
@@ -327,8 +327,9 @@ class TestSendTpToDatahub(TestCase):
         target_population = TargetPopulationFactory(
             program=program,
             status=TargetPopulation.STATUS_PROCESSING,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
+        target_population.refresh_stats()
 
         task = SendTPToDatahubTask()
         task.send_target_population(target_population)
@@ -351,8 +352,9 @@ class TestSendTpToDatahub(TestCase):
         target_population = TargetPopulationFactory(
             program=program,
             status=TargetPopulation.STATUS_PROCESSING,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
         )
+        target_population.refresh_stats()
 
         task = SendTPToDatahubTask()
         task.send_target_population(target_population)
@@ -361,3 +363,30 @@ class TestSendTpToDatahub(TestCase):
 
         self.assertEqual(len(dh_target_population.targeting_criteria), 194)
         self.assertFalse("..." in dh_target_population.targeting_criteria)
+
+    def test_not_creating_duplicate_households(self):
+        business_area = BusinessArea.objects.first()
+
+        program = ProgramFactory(
+            individual_data_needed=True,
+            business_area=business_area,
+        )
+
+        targeting_criteria = TargetingCriteriaFactory()
+        TargetingCriteriaRuleFactory.create_batch(50, targeting_criteria=targeting_criteria)
+        target_population = TargetPopulationFactory(
+            program=program,
+            status=TargetPopulation.STATUS_PROCESSING,
+            targeting_criteria=targeting_criteria,
+        )
+
+        try:
+            for _ in range(2):
+                HouseholdSelectionFactory(
+                    household=self.household,
+                    target_population=target_population,
+                )
+        except IntegrityError:
+            pass
+        else:
+            self.fail("Should raise IntegrityError")

@@ -31,8 +31,8 @@ class XlsxExportTargetingService:
 
     @cached_property
     def households(self):
-        if self.target_population.status == TargetPopulation.STATUS_DRAFT:
-            return self.target_population.candidate_list
+        if self.target_population.status == TargetPopulation.STATUS_OPEN:
+            return self.target_population.open_household_list
         return self.target_population.vulnerability_score_filtered_households
 
     @cached_property
@@ -138,7 +138,7 @@ class XlsxExportTargetingService:
                     except IndexError:
                         column_widths.append(len(value))
 
-        for i, width in enumerate(column_widths):
+        for i in range(len(column_widths)):
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             ws.column_dimensions[col_name].width = value

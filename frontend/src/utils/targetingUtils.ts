@@ -41,7 +41,7 @@ export function mapFiltersToInitialValues(filters): any[] {
   const mappedFilters = [];
   if (filters) {
     filters.map((each) => {
-      switch (each.comparisionMethod) {
+      switch (each.comparisonMethod) {
         case 'RANGE':
           return mappedFilters.push({
             ...each,
@@ -116,44 +116,44 @@ export function mapCriteriaToInitialValues(criteria) {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function formatCriteriaFilters(filters) {
   return filters.map((each) => {
-    let comparisionMethod;
+    let comparisonMethod;
     let values;
     switch (each.fieldAttribute.type) {
       case 'SELECT_ONE':
-        comparisionMethod = 'EQUALS';
+        comparisonMethod = 'EQUALS';
         values = [each.value];
         break;
       case 'SELECT_MANY':
-        comparisionMethod = 'CONTAINS';
+        comparisonMethod = 'CONTAINS';
         values = [...each.value];
         break;
       case 'STRING':
-        comparisionMethod = 'CONTAINS';
+        comparisonMethod = 'CONTAINS';
         values = [each.value];
         break;
       case 'DECIMAL':
       case 'INTEGER':
       case 'DATE':
         if (each.value.from && each.value.to) {
-          comparisionMethod = 'RANGE';
+          comparisonMethod = 'RANGE';
           values = [each.value.from, each.value.to];
         } else if (each.value.from && !each.value.to) {
-          comparisionMethod = 'GREATER_THAN';
+          comparisonMethod = 'GREATER_THAN';
           values = [each.value.from];
         } else {
-          comparisionMethod = 'LESS_THAN';
+          comparisonMethod = 'LESS_THAN';
           values = [each.value.to];
         }
         break;
       case 'BOOL':
-        comparisionMethod = 'EQUALS';
+        comparisonMethod = 'EQUALS';
         values = [each.value];
         break;
       default:
-        comparisionMethod = 'CONTAINS';
+        comparisonMethod = 'CONTAINS';
     }
     return {
-      comparisionMethod,
+      comparisonMethod,
       arguments: values,
       fieldName: each.fieldName,
       isFlexField: each.isFlexField,
@@ -175,13 +175,13 @@ export function formatCriteriaIndividualsFiltersBlocks(
 function mapFilterToVariable(
   filter,
 ): {
-  comparisionMethod: string;
+  comparisonMethod: string;
   arguments;
   fieldName: string;
   isFlexField: boolean;
 } {
   return {
-    comparisionMethod: filter.comparisionMethod,
+    comparisonMethod: filter.comparisonMethod,
     arguments: filter.arguments,
     fieldName: filter.fieldName,
     isFlexField: filter.isFlexField,

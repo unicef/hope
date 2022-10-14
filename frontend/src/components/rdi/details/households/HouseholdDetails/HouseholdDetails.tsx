@@ -11,6 +11,7 @@ import {
   ImportedHouseholdDetailedFragment,
 } from '../../../../../__generated__/graphql';
 import { Title } from '../../../../core/Title';
+import { COLLECT_TYPES_MAPPING } from '../../../../../utils/constants';
 
 const Overview = styled.div`
   display: flex;
@@ -87,6 +88,11 @@ export function HouseholdDetails({
           <Grid item xs={3}>
             <LabelizedField label={t('ADMINISTRATIVE LEVEL 2')}>
               {household.admin2Title}
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label={t('COLLECT TYPE')}>
+              {COLLECT_TYPES_MAPPING[household.collectIndividualData]}
             </LabelizedField>
           </Grid>
         </Grid>

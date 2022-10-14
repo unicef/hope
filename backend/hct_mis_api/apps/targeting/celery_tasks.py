@@ -1,5 +1,7 @@
 import logging
 
+from django.core.cache import cache
+from django.db import transaction
 from django.db.transaction import atomic
 from django.utils import timezone
 
@@ -52,3 +54,43 @@ def target_population_apply_steficon(target_population_id):
         target_population.status = TargetPopulation.STATUS_STEFICON_ERROR
         target_population.save()
         raise
+
+
+@app.task(queue="priority")
+def target_population_rebuild_stats(target_population_id):
+    with cache.lock(
+        f"target_population_rebuild_stats_{target_population_id}", blocking_timeout=60 * 10, timeout=60 * 60 * 2
+    ):
+        target_population = TargetPopulation.objects.get(pk=target_population_id)
+        target_population.build_status = TargetPopulation.BUILD_STATUS_BUILDING
+        target_population.save()
+        try:
+            with transaction.atomic():
+                target_population.refresh_stats()
+                target_population.save()
+        except Exception as e:
+            logger.exception(e)
+            target_population.refresh_from_db()
+            target_population.build_status = TargetPopulation.BUILD_STATUS_FAILED
+            target_population.save()
+
+
+@app.task(queue="priority")
+def target_population_full_rebuild(target_population_id):
+    with cache.lock(
+        f"target_population_full_rebuild_{target_population_id}", blocking_timeout=60 * 10, timeout=60 * 60 * 2
+    ):
+        target_population = TargetPopulation.objects.get(pk=target_population_id)
+        target_population.build_status = TargetPopulation.BUILD_STATUS_BUILDING
+        target_population.save()
+        try:
+            with transaction.atomic():
+                if not target_population.is_open():
+                    raise Exception("Target population is not in open status")
+                target_population.full_rebuild()
+                target_population.save()
+        except Exception as e:
+            logger.exception(e)
+            target_population.refresh_from_db()
+            target_population.build_status = TargetPopulation.BUILD_STATUS_FAILED
+            target_population.save()

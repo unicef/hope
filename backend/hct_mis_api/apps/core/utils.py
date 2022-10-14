@@ -3,10 +3,14 @@ import io
 import itertools
 import logging
 import string
-from collections import MutableMapping, OrderedDict
+from collections import OrderedDict
+from collections.abc import MutableMapping
+from datetime import date, datetime
 
 from django.db.models import QuerySet
+from django.utils import timezone
 
+import pytz
 from django_filters import OrderingFilter
 from graphql import GraphQLError
 from PIL import Image
@@ -101,7 +105,7 @@ def _slug_strip(value, separator="-"):
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("{}+".format(re_sep, separator, value))
+        value = re.sub("{}+".format(re_sep, separator, value))  # noqa: F523 # TODO: bug?
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -687,3 +691,16 @@ def cached_business_areas_slug_id_dict():
     from hct_mis_api.apps.core.models import BusinessArea
 
     return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}
+
+
+def timezone_datetime(value):
+    if not value:
+        return value
+    datetime_value = value
+    if isinstance(value, date):
+        datetime_value = datetime.combine(datetime_value, datetime.min.time())
+    if isinstance(value, str):
+        datetime_value = timezone.make_aware(datetime.fromisoformat(value))
+    if datetime_value.tzinfo is None or datetime_value.tzinfo.utcoffset(datetime_value) is None:
+        return datetime_value.replace(tzinfo=pytz.utc)
+    return datetime_value

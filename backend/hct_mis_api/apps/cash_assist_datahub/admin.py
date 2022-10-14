@@ -15,6 +15,7 @@ from admin_extra_buttons.decorators import link
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from adminfilters.mixin import AdminFiltersMixin
+from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
     CashPlan,
@@ -111,8 +112,8 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 request,
                 self.simulate_import,
                 mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                <h3>Import will only be simulated</h3> 
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                <h3>Import will only be simulated</h3>
                 """
                 ),
                 "Successfully executed",
@@ -240,7 +241,7 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 
 @admin.register(PaymentRecord)
-class PaymentRecordAdmin(ExtraButtonsMixin, AdminFiltersMixin, admin.ModelAdmin):
+class PaymentRecordAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, admin.ModelAdmin):
     list_display = ("session", "business_area", "status", "full_name", "service_provider_ca_id")
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
