@@ -21,16 +21,13 @@ import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { LoadingButton } from '../../../../components/core/LoadingButton';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { LookUpSelection } from '../../../../components/accountability/Communication/LookUps/LookUpSelection';
+import { LookUpSelection } from '../../../../components/accountability/Surveys/LookUps/LookUpSelection';
 import { PaperContainer } from '../../../../components/targeting/PaperContainer';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import {
-  CommunicationSteps,
-  CommunicationTabsValues,
-} from '../../../../utils/constants';
+import { SurveySteps, SurveyTabsValues } from '../../../../utils/constants';
 import {
   CreateAccountabilityCommunicationMessageMutationVariables,
   useAllAdminAreasQuery,
@@ -55,7 +52,7 @@ const Border = styled.div`
 `;
 
 const initialValues = {
-  households: [],
+  program: '',
   targetPopulation: '',
   registrationDataImport: '',
   confidenceInterval: 95,
@@ -123,10 +120,8 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const [activeStep, setActiveStep] = useState(CommunicationSteps.LookUp);
-  const [selectedTab, setSelectedTab] = useState(
-    CommunicationTabsValues.HOUSEHOLD,
-  );
+  const [activeStep, setActiveStep] = useState(SurveySteps.LookUp);
+  const [selectedTab, setSelectedTab] = useState(SurveyTabsValues.PROGRAM);
   const [selectedSampleSizeType, setSelectedSampleSizeType] = useState(0);
   const [formValues, setFormValues] = useState(initialValues);
   const [validateData, setValidateData] = useState(false);
@@ -164,7 +159,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
       body: Yup.string(),
     };
 
-    if (activeStep === CommunicationSteps.Details) {
+    if (activeStep === SurveySteps.Details) {
       datum.title = Yup.string()
         .min(2, t('Too short'))
         .max(255, t('Too long'))
@@ -179,15 +174,9 @@ export const CreateSurveyPage = (): React.ReactElement => {
   }, [activeStep, t]);
 
   const validate = (values): { error?: string } => {
-    const { households } = values;
-    const { targetPopulation } = values;
-    const { registrationDataImport } = values;
+    const { program, targetPopulation } = values;
     const errors: { [key: string]: string | { [key: string]: string } } = {};
-    if (
-      households.length === 0 &&
-      !targetPopulation &&
-      !registrationDataImport
-    ) {
+    if (!targetPopulation && !program) {
       errors.error = t('Field Selection is required');
     }
     return errors;
@@ -201,8 +190,11 @@ export const CreateSurveyPage = (): React.ReactElement => {
     : [];
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
-    return <PermissionDenied />;
+  //TODO: add permissions
+  // if (
+  //   !hasPermissions(PERMISSIONS.ACCOUNTABILITY_SURVEYS_VIEW_CREATE, permissions)
+  // )
+  //   return <PermissionDenied />;
 
   const getSampleSizePercentage = (): string => {
     return `(${getPercentage(
@@ -213,8 +205,8 @@ export const CreateSurveyPage = (): React.ReactElement => {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: t('Communication'),
-      to: `/${businessArea}/accountability/communication`,
+      title: t('Surveys'),
+      to: `/${businessArea}/accountability/surveys`,
     },
   ];
 
@@ -281,8 +273,8 @@ export const CreateSurveyPage = (): React.ReactElement => {
             const response = await mutate({
               variables: prepareMutationVariables(values),
             });
-            showMessage(t('Communication Ticket created.'), {
-              pathname: `/${businessArea}/accountability/communication/${response.data.createAccountabilityCommunicationMessage.message.id}`,
+            showMessage(t('Survey created.'), {
+              pathname: `/${businessArea}/accountability/surveys/${response.data.createAccountabilityCommunicationMessage.message.id}`,
               historyMethod: 'push',
             });
           } catch (e) {
@@ -323,7 +315,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
               </Stepper>
             </Grid>
             <Form>
-              {activeStep === CommunicationSteps.LookUp && (
+              {activeStep === SurveySteps.LookUp && (
                 <Box display='flex' flexDirection='column'>
                   <LookUpSelection
                     businessArea={businessArea}
@@ -335,7 +327,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                   />
                 </Box>
               )}
-              {activeStep === CommunicationSteps.SampleSize && (
+              {activeStep === SurveySteps.SampleSize && (
                 <Box px={8}>
                   <Box display='flex' alignItems='center'>
                     <Box pr={5} fontWeight='500' fontSize='medium'>
@@ -545,7 +537,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                   </TabPanel>
                 </Box>
               )}
-              {activeStep === CommunicationSteps.Details && (
+              {activeStep === SurveySteps.Details && (
                 <>
                   <Border />
                   <Box my={3}>
@@ -580,14 +572,14 @@ export const CreateSurveyPage = (): React.ReactElement => {
               <Box mr={3}>
                 <Button
                   component={Link}
-                  to={`/${businessArea}/grievance-and-feedback/tickets`}
+                  to={`/${businessArea}/accountability/surveys`}
                 >
                   {t('Cancel')}
                 </Button>
               </Box>
               <Box display='flex' ml='auto'>
                 <Button
-                  disabled={activeStep === CommunicationSteps.LookUp}
+                  disabled={activeStep === SurveySteps.LookUp}
                   onClick={handleBack}
                 >
                   {t('Back')}

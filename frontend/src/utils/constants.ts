@@ -116,3 +116,15 @@ export const CommunicationTabsValues = {
   TARGET_POPULATION: 1,
   RDI: 2,
 };
+
+export const SurveySteps = {
+  LookUp: 0,
+  SampleSize: 1,
+  Details: 2,
+};
+
+export const SurveyTabsValues = {
+  PROGRAM: 0,
+  TARGET_POPULATION: 1,
+  RDI: 2,
+};
