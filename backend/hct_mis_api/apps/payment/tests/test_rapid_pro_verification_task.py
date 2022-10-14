@@ -328,3 +328,6 @@ class TestPhoneNumberVerification(TestCase):
         assert is_right_phone_number_format("+1 (201) 555-0123")
 
         assert not is_right_phone_number_format("123-not-really-a-phone-number")
+
+        assert is_right_phone_number_format("+380 123 234 345")
+        assert not is_right_phone_number_format("+380 23 234 345")

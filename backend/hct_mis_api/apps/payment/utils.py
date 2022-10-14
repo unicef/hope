@@ -19,12 +19,16 @@ def is_right_phone_number_format(phone_number):
     if not isinstance(phone_number, str):
         phone_number = str(phone_number)
 
-    phone_number = phone_number.strip()
+    phone_number = phone_number.strip().replace(" ", "")
     if phone_number.startswith("00"):
         phone_number = f"+{phone_number[2:]}"
 
+    region = None
+    if phone_number.startswith("+380"):
+        region = "UA"
+
     try:
-        phonenumbers.parse(phone_number)
+        phonenumbers.parse(phone_number, region=region)
     except phonenumbers.NumberParseException:
         logging.warning(f"'{phone_number}' is not a valid phone number")
         return False
