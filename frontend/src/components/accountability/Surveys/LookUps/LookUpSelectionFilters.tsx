@@ -52,7 +52,7 @@ export const LookUpSelectionFilters = ({
 
   const applyFilter = useCallback(() => {
     if (selectedTab === SurveyTabsValues.PROGRAM) {
-      setFiltersTargetPopulationApplied(filterProgram);
+      setFiltersProgramApplied(filterProgram);
     } else if (selectedTab === SurveyTabsValues.TARGET_POPULATION) {
       setFiltersTargetPopulationApplied(filterTargetPopulation);
     }
@@ -61,6 +61,7 @@ export const LookUpSelectionFilters = ({
     filterTargetPopulation,
     selectedTab,
     setFiltersTargetPopulationApplied,
+    setFiltersProgramApplied,
   ]);
 
   const renderTable = (): React.ReactElement => {
