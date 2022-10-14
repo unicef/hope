@@ -101,10 +101,10 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import.save()
         cls.business_area = BusinessArea.objects.first()
         ImportedDocumentType.objects.create(
-            country=Country("AFG"),
             label="Tax Number Identification",
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
+        super().setUpTestData()
 
     def test_execute(self):
         task = self.RdiXlsxCreateTask()
@@ -291,7 +291,6 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         individual = ImportedIndividualFactory()
         task.business_area = self.business_area
         doc_type = ImportedDocumentType.objects.create(
-            country=Country("AFG"),
             label="Birth Certificate",
             type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         )
@@ -420,7 +419,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:
-            document_types.append(ImportedDocumentType(country=Country("AFG"), label=label, type=doc_type))
+            document_types.append(ImportedDocumentType(label=label, type=doc_type))
         ImportedDocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
         content = Path(
@@ -465,6 +464,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         )
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
+        super().setUpTestData()
 
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",

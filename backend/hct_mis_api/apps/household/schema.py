@@ -84,15 +84,6 @@ INDIVIDUALS_CHART_LABELS = [
 
 
 class DocumentTypeNode(DjangoObjectType):
-    country = graphene.String(description="Country name")
-    country_iso3 = graphene.String(description="Country ISO3")
-
-    def resolve_country(parent: DocumentType, info):
-        return parent.country.name
-
-    def resolve_country_iso3(parent: DocumentType, info):
-        return parent.country.iso_code3
-
     class Meta:
         model = DocumentType
 
@@ -130,10 +121,14 @@ class IndividualIdentityNode(DjangoObjectType):
 
 class DocumentNode(DjangoObjectType):
     country = graphene.String(description="Document country")
+    country_iso3 = graphene.String(description="Country ISO3")
     photo = graphene.String(description="Photo url")
 
     def resolve_country(parent, info):
-        return getattr(parent.type.country, "name", parent.type.country)
+        return getattr(parent.country, "name", parent.country)
+
+    def resolve_country_iso3(parent: DocumentType, info):
+        return parent.country.iso_code3
 
     def resolve_photo(parent, info):
         if parent.photo:
