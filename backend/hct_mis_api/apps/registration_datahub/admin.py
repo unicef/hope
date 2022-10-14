@@ -197,15 +197,15 @@ class ImportDataAdmin(HOPEModelAdminBase):
 
 @admin.register(ImportedDocumentType)
 class ImportedDocumentTypeAdmin(HOPEModelAdminBase):
-    list_display = ("label", "country")
-    list_filter = (("country", ChoicesFieldComboFilter), "label", QueryStringFilter)
+    list_display = ("label",)
+    list_filter = ("label", QueryStringFilter)
 
 
 @admin.register(ImportedDocument)
 class ImportedDocumentAdmin(HOPEModelAdminBase):
     list_display = ("document_number", "type", "individual")
     raw_id_fields = ("individual", "type")
-    list_filter = (("type", AutoCompleteFilter), QueryStringFilter)
+    list_filter = (("type", AutoCompleteFilter), ("country", ChoicesFieldComboFilter), QueryStringFilter)
     date_hierarchy = "created_at"
 
 

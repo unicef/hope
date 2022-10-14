@@ -28,7 +28,8 @@ class TestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUp(self):
         ImportedDocumentType.objects.create(
-            type=IDENTIFICATION_TYPE_TAX_ID, label=IDENTIFICATION_TYPE_TAX_ID, country="UA"
+            type=IDENTIFICATION_TYPE_TAX_ID,
+            label=IDENTIFICATION_TYPE_TAX_ID,
         )
         BusinessArea.objects.create(
             **{

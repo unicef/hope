@@ -81,6 +81,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -420,8 +421,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         )
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
-            logger.error("Grievance Ticket on status Closed is not editable")
-            raise GraphQLError("Grievance Ticket on status Closed is not editable")
+            log_and_raise("Grievance Ticket in status Closed is not editable")
 
         if grievance_ticket.issue_type:
             verify_required_arguments(input, "issue_type", cls.EXTRAS_OPTIONS)
@@ -702,8 +702,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if grievance_ticket.is_feedback:
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
-            logger.error("New status is incorrect")
-            raise GraphQLError("New status is incorrect")
+            log_and_raise("New status is incorrect")
         if status == GrievanceTicket.STATUS_CLOSED:
             ticket_details = grievance_ticket.ticket_details
             if getattr(grievance_ticket.ticket_details, "is_multiple_duplicates_version", False):
@@ -1015,15 +1014,13 @@ class ReassignRoleMutation(graphene.Mutation):
     @classmethod
     def verify_role_choices(cls, role):
         if role not in (ROLE_PRIMARY, ROLE_ALTERNATE, HEAD):
-            logger.error("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
-            raise GraphQLError("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
+            log_and_raise("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
     @classmethod
     def verify_if_role_exists(cls, household, current_individual, role):
         if role == HEAD:
             if household.head_of_household.id != current_individual.id:
-                logger.error("This individual is not a head of provided household")
-                raise GraphQLError("This individual is not a head of provided household")
+                log_and_raise("This individual is not a head of provided household")
         else:
             get_object_or_404(
                 IndividualRoleInHousehold,
@@ -1124,8 +1121,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         selected_individual_ids = kwargs.get("selected_individual_ids", None)
 
         if selected_individual_id and selected_individual_ids:
-            logger.error("Only one option for selected individuals is available")
-            raise GraphQLError("Only one option for selected individuals is available")
+            log_and_raise("Only one option for selected individuals is available")
 
         ticket_details = grievance_ticket.ticket_details
 
@@ -1136,8 +1132,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
                 ticket_details.golden_records_individual,
                 ticket_details.possible_duplicate,
             ):
-                logger.error("The selected individual is not valid, must be one of those attached to the ticket")
-                raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
+                log_and_raise("The selected individual is not valid, must be one of those attached to the ticket")
 
             ticket_details.selected_individual = selected_individual
             ticket_details.role_reassign_data = {}
@@ -1179,8 +1174,7 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         )
 
         if grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
-            logger.error("Payment Details changes can approve only for Grievance Ticket on status For Approval")
-            raise GraphQLError("Payment Details changes can approve only for Grievance Ticket on status For Approval")
+            log_and_raise("Payment Details changes can approve only for Grievance Ticket in status For Approval")
 
         old_payment_verification_ticket_details = (  # noqa F841
             grievance_ticket.payment_verification_ticket_details
