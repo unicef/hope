@@ -351,8 +351,9 @@ class FlexRegistrationService:
 
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
-            document_type = ImportedDocumentType.objects.get(type=document_type_string, country="UA")
+            document_type = ImportedDocumentType.objects.get(type=document_type_string)
             document_kwargs = {
+                "country": "UA",
                 "type": document_type,
                 "document_number": document_number,
                 "individual": individual,

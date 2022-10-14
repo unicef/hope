@@ -186,11 +186,11 @@ class RdiMergeTask:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
             document_type, _ = DocumentType.objects.get_or_create(
-                country=geo_models.Country.objects.get(iso_code2=imported_document.type.country.code),
                 type=imported_document.type.type,
             )
             document = Document(
                 document_number=imported_document.document_number,
+                country=imported_document.country.code,
                 type=document_type,
                 individual=individual,
                 photo=imported_document.photo,
