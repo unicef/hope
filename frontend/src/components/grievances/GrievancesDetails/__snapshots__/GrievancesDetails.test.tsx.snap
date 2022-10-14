@@ -34,7 +34,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Status
               </span>
               <div
-                data-cy="label-STATUS"
+                data-cy="label-Status"
               >
                 <div
                   class="sc-iwsKbI dUmvrG"
@@ -59,7 +59,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Priority
               </span>
-              <div>
+              <div
+                data-cy="label-Priority"
+              >
                 <div
                   class="sc-iwsKbI dUmvrG"
                 >
@@ -83,7 +85,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Urgency
               </span>
-              <div>
+              <div
+                data-cy="label-Urgency"
+              >
                 <div
                   class="sc-iwsKbI dUmvrG"
                 >
@@ -107,7 +111,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Assigned to
               </span>
-              <div>
+              <div
+                data-cy="label-Assigned to"
+              >
                 Maciej Szewczyk
               </div>
             </div>
@@ -123,7 +129,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Category
               </span>
               <div
-                data-cy="label-CATEGORY"
+                data-cy="label-Category"
               >
                 <span>
                   Data Change
@@ -161,7 +167,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Household ID
               </span>
               <div
-                data-cy="label-HOUSEHOLD ID"
+                data-cy="label-Household ID"
               >
                 <span>
                   <a
@@ -185,7 +191,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Individual ID
               </span>
               <div
-                data-cy="label-INDIVIDUAL ID"
+                data-cy="label-Individual ID"
               >
                 <span>
                   <a
@@ -209,7 +215,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Payment ID
               </span>
               <div
-                data-cy="label-PAYMENT ID"
+                data-cy="label-Payment ID"
               >
                 <span>
                   -
@@ -228,9 +234,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Programme
               </span>
               <div
-                data-cy="label-CONSENT"
+                data-cy="label-Programme"
               >
-                Yes
+                -
               </div>
             </div>
           </div>
@@ -245,7 +251,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Created By
               </span>
               <div
-                data-cy="label-CREATED BY"
+                data-cy="label-Created By"
               >
                 Maciej Szewczyk
               </div>
@@ -262,7 +268,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Date Created
               </span>
               <div
-                data-cy="label-DATE CREATED"
+                data-cy="label-Date Created"
               >
                 <time
                   datetime="1644571534682"
@@ -283,7 +289,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Last Modified Date
               </span>
               <div
-                data-cy="label-LAST MODIFIED DATE"
+                data-cy="label-Last Modified Date"
               >
                 <time
                   datetime="1644571964102"
@@ -304,9 +310,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Administrative Level 2
               </span>
               <div
-                data-cy="label-DESCRIPTION"
+                data-cy="label-Administrative Level 2"
               >
-                dwdw
+                -
               </div>
             </div>
           </div>
@@ -321,9 +327,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Area / Village / Pay point
               </span>
               <div
-                data-cy="label-ASSIGNED TO"
+                data-cy="label-Area / Village / Pay point"
               >
-                Maciej Szewczyk
+                -
               </div>
             </div>
           </div>
@@ -338,7 +344,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Languages Spoken
               </span>
               <div
-                data-cy="label-ADMINISTRATIVE LEVEL 2"
+                data-cy="label-Languages Spoken"
               >
                 -
               </div>
@@ -355,9 +361,13 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Documentation
               </span>
               <div
-                data-cy="label-AREA / VILLAGE / PAY POINT"
+                data-cy="label-Documentation"
               >
-                -
+                <div
+                  class="MuiBox-root MuiBox-root-1"
+                >
+                  -
+                </div>
               </div>
             </div>
           </div>
@@ -371,7 +381,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Description
               </span>
-              <div>
+              <div
+                data-cy="label-Description"
+              >
                 dwdw
               </div>
             </div>
@@ -387,7 +399,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 Comments
               </span>
               <div
-                data-cy="label-LANGUAGES SPOKEN"
+                data-cy="label-Comments"
               >
                 -
               </div>

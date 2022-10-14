@@ -1,5 +1,3 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -8,14 +6,16 @@ from hct_mis_api.apps.accountability.factories import (
     FeedbackFactory,
     FeedbackMessageFactory,
 )
+from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 
 
-class TestTicketNotes(APITestCase):
+class TestFeedbackMessages(APITestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     CREATE_FEEDBACK_MESSAGE_MUTATION = """
     mutation CreateFeedbackMessage($input: CreateFeedbackMessageInput!) {
       createFeedbackMessage(input: $input) {
@@ -49,9 +49,7 @@ class TestTicketNotes(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_afghanistan()
-        call_command("loadcountries")
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -62,7 +60,7 @@ class TestTicketNotes(APITestCase):
         AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         cls.user = UserFactory.create(first_name="John", last_name="Doe")
-        cls.feedback = FeedbackFactory(id="1761d020-ead2-489f-95a8-61853fbe568e")
+        cls.feedback = FeedbackFactory(id="1761d020-ead2-489f-95a8-61853fbe568e", issue_type=Feedback.NEGATIVE_FEEDBACK)
 
     @parameterized.expand(
         [
@@ -98,7 +96,12 @@ class TestTicketNotes(APITestCase):
     def test_feedback_query_shows_feedback_messages(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        FeedbackMessageFactory(feedback=self.feedback, description="Feedback message you see", created_by=self.user)
+        FeedbackMessageFactory(
+            id="c86d8a58-c4b8-4066-9821-98e236b17742",
+            feedback=self.feedback,
+            description="Feedback message you see",
+            created_by=self.user,
+        )
 
         self.snapshot_graphql_request(
             request_string=self.FEEDBACK_QUERY,

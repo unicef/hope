@@ -1,6 +1,6 @@
 import random
 
-import factory
+import factory.fuzzy
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
