@@ -12,8 +12,9 @@ from django.utils import timezone
 
 import pytz
 from django_filters import OrderingFilter
-from graphql import GraphQLError
 from PIL import Image
+
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -424,11 +425,9 @@ def to_snake_case(camel_case_string):
 def check_concurrency_version_in_mutation(version, target):
     if version is None:
         return
-    from graphql import GraphQLError
 
     if version != target.version:
-        logger.error(f"Someone has modified this {target} record, versions {version} != {target.version}")
-        raise GraphQLError("Someone has modified this record")
+        log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")
 
 
 def update_labels_mapping(csv_file):
@@ -557,8 +556,7 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
             if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
-            logger.error("Permission Denied")
-            raise GraphQLError("Permission Denied")
+            log_and_raise("Permission Denied")
 
     return resolve_f
 
