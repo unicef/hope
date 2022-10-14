@@ -1,0 +1,141 @@
+{% extends "admin/index.html" %}{% load i18n static log smart ba %}
+{% block nav-sidebar %}
+    {% include "admin/nav_sidebar.html" with groups=groups %}
+{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+        <input type="text" style="width: 578px;padding:10px;margin-bottom:10px" id="filterInput"  placeholder="Search for names..">
+        {% if section %}
+            <div class="module">
+                <table style="width: 100%" class="section">
+                    <caption>
+                        <a class="section" href="{% url "admin:group_list" section.0 %}">{{ section.0 }}</a>
+                    </caption>
+                    {% for model in section.1 %}
+                        <tr>
+                            {% if model.admin_url %}
+                                <td scope="row"><a href="{{ model.admin_url }}">{{ model.label }}</a></td>
+                            {% else %}
+                                <td scope="row">{{ model.model_name }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% elif groups %}
+            {% for section, apps in groups.items %}
+                {% if section != '_hidden_' %}
+                    <div class="module">
+                        <table style="width: 100%" class="section">
+                            <caption>
+                                <a class="section" href="{% url "admin:group_list" section %}">{{ section }}</a>
+                            </caption>
+                            {% for model in apps %}
+                                <tr>
+                                    {% if model.admin_url %}
+                                        <td scope="row"><a href="{{ model.admin_url }}">{{ model.label }}</a></td>
+                                    {% else %}
+                                        <td scope="row">{{ model.model_name }}</td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>{% trans "You don't have permission to view or edit anything." %}</p>
+        {% endif %}
+    </div>
+{% endblock %}
+{% block sidebar %}
+    <div id="content-related">
+        <div class="module" id="recent-actions-module">
+            {% if bookmarks %}
+                <h2>{% trans 'Quick Links' %}</h2>
+                <ul class="actionlist">
+                    {% for entry in bookmarks %}
+                        {{ entry }}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <h2>{% trans 'Recent actions' %}</h2>
+
+            <h3>{% if smart_settings.ANYUSER_LOG %}
+                {% url "admin:admin_logentry_changelist" as aaaa%}
+                <a href="{{ aaaa }}">{% trans 'Actions' %}</a>
+                {% get_admin_log 10 as admin_log %}
+            {% else %}
+                <a href="">{% trans 'My actions' %}</a>
+                {% get_admin_log 10 as admin_log for_user user %}
+            {% endif %}</h3>
+            {% if not admin_log %}
+                <p>{% trans 'None available' %}</p>
+            {% else %}
+                <ul class="actionlist">
+                    {% for entry in admin_log %}
+                        <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                            {% if entry.is_deletion or not entry.get_admin_url %}
+                                {{ entry.object_repr }}
+                            {% else %}
+                                {% get_admin_url_name entry.content_type.app_label entry.content_type.model "change" as url_name %}
+                                {% url2 url_name entry.object_id as change_url %}
+                                <a href="{{ change_url }}">{{ entry.object_repr }}</a>
+                            {% endif %}
+                            <br>
+                            {% if entry.content_type %}
+                                <span class="mini quiet">{% filter capfirst %}
+                                    {{ entry.content_type }}{% endfilter %}</span>
+                            {% else %}
+                                <span class="mini quiet">{% trans 'Unknown content' %}</span>
+                            {% endif %}
+                            {% if smart_settings.ANYUSER_LOG %}
+                                (<a href="{% url "admin:admin_logentry_changelist" %}?user__id__exact={{ entry.user.pk }}">{{ entry.user }}</a>)
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>{% endblock sidebar %}
+{% block footer %}
+    <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
+    <script>
+
+        function delay(callback, ms) {
+            var timer = 0;
+            return function () {
+                var context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    callback.apply(context, args);
+                }, ms || 0);
+            };
+        }
+
+        (function ($) {
+            $("#filterInput").on("keyup", delay(function () {
+                let filter = this.value.toUpperCase();
+                $("table.section tr").each(function (i, el) {
+                    let txt = $(el).find("td,caption").text();
+                    if (txt.toUpperCase().indexOf(filter) > -1) {
+                        $(el).closest(".section").show();
+                        $(el).show();
+                    } else {
+                        $(el).hide();
+                    }
+                    $("table.section").each(function (i, t) {
+                        if ($(t).find("tr:visible").length === 0) {
+                            $(t).hide();
+                        }
+                    });
+                });
+            }, 300)).trigger("keyup").focus();
+
+        })(django.jQuery);
+
+    </script>
+    <div id="footer"></div>{% endblock %}

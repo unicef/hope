@@ -1,5 +1,3 @@
-from django.contrib.admin import TabularInline
-
 from adminfilters.combo import RelatedFieldComboFilter
 
 from hct_mis_api.apps.account.models import User, UserRole
@@ -38,3 +36,7 @@ class UserAdmin(BAModelAdmin):
 class UserRoleAdmin(BAModelAdmin):
     model = UserRole
     target_field = "business_area__slug"
+    search_fields = ("user__username",)
+    list_display = ("user", "role")
+    list_select_related = ("business_area", "user", "role")
+    list_filter = ("role",)

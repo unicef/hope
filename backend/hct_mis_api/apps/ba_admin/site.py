@@ -2,8 +2,6 @@ from functools import update_wrapper
 
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import never_cache
 
 from smart_admin.site import SmartAdminSite
 
@@ -18,6 +16,8 @@ class BusinessAreaAdminSite(SmartAdminSite):
     enable_nav_sidebar = False
 
     index_template = "ba_admin/index.html"
+    smart_index_template = "ba_admin/smart_index.html"
+
     ba_cookie_name = "selected_ba"
     app_index_template = "ba_admin/app_index.html"
 
@@ -55,6 +55,9 @@ class BusinessAreaAdminSite(SmartAdminSite):
 
         return urlpatterns
 
+    def get_smart_settings(self, request):
+        return {"BOOKMARKS": [], "ANYUSER_LOG": True}
+
     def index(self, request, extra_context=None):
         if not self.selected_business_area(request):
             return redirect(f"{self.name}:select_ba")
@@ -70,6 +73,7 @@ class BusinessAreaAdminSite(SmartAdminSite):
     def each_context(self, request):
         selected_business_area = self.selected_business_area(request)
         ret = super().each_context(request)
+        ret["bookmarks"] = []
         ret["site_title"] = "site_title"
         ret["site_header"] = f"{selected_business_area} Control Panel"
         ret["site_name"] = self.name
@@ -85,7 +89,7 @@ class BusinessAreaAdminSite(SmartAdminSite):
         return request.user.is_active
 
     def is_smart_enabled(self, request):
-        return False
+        return True
 
 
 ba_site = BusinessAreaAdminSite()

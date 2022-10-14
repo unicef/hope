@@ -12,7 +12,7 @@
             <table>
                 {% for row in e.data %}
                     <tr>
-                        <td>{% get_admin_href admin_site row 'pk' %}</td>
+                        <td>{% get_admin_href row 'pk' %}</td>
                         <td>{{ row }}</td>
                     </tr>
                 {% endfor %}
