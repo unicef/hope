@@ -20,7 +20,9 @@ Feature: Registration Data Import
         Then I see that the status is merging
         When I refresh the page
         Then I see that the status is merged
-        When I visit the Households dashboard
-        Then I see a newly imported household
         When I visit the Individuals dashboard
         Then I see the newly imported individuals
+        When I visit the Households dashboard
+        Then I see a newly imported household
+        When I check the household details
+        Then I see the household has the correct data

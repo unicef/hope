@@ -39,22 +39,27 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.household, cls.individuals = create_household(household_args={"size": 1})
+        cls.household, cls.individuals = create_household(household_args={"size": 2})
+
+        cls.cash_plan = CashPlanFactory()
 
         cls.individuals[0].phone_no = "invalid-phone-no"
         cls.individuals[0].phone_no_alternative = "invalid-phone-no"
         cls.individuals[0].save()
 
+        cls.individuals[1].phone_no = "934-25-25-197"
+        cls.individuals[1].phone_no_alternative = "934-25-25-197"
+        cls.individuals[1].save()
+
     def test_sample_size_in_manual_verification_plan(self):
-        cash_plan = CashPlanFactory()
         PaymentRecordFactory(
-            cash_plan=cash_plan,
+            cash_plan=self.cash_plan,
             business_area=self.business_area,
             household=self.household,
             head_of_household_id=self.individuals[0].id,
             status=PaymentRecord.STATUS_SUCCESS,
         )
-        manual_sample_query_variables = create_query_variables(cash_plan, "MANUAL")
+        manual_sample_query_variables = create_query_variables(self.cash_plan, "MANUAL")
         manual_response = self.graphql_request(
             request_string=self.SAMPLE_SIZE_QUERY,
             variables=manual_sample_query_variables,
@@ -62,10 +67,29 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
         )
         self.assertTrue(manual_response["data"]["sampleSize"]["paymentRecordCount"] == 1)
 
-        rapid_pro_sample_query_variables = create_query_variables(cash_plan, "RAPIDPRO")
+        rapid_pro_sample_query_variables = create_query_variables(self.cash_plan, "RAPIDPRO")
         rapid_pro_response = self.graphql_request(
             request_string=self.SAMPLE_SIZE_QUERY,
             variables=rapid_pro_sample_query_variables,
             context={"user": self.user},
         )
         self.assertTrue(rapid_pro_response["data"]["sampleSize"]["paymentRecordCount"] == 0)
+
+    def test_number_of_queries(self):
+        PaymentRecordFactory.create_batch(
+            4,
+            cash_plan=self.cash_plan,
+            business_area=self.business_area,
+            household=self.household,
+            head_of_household_id=self.individuals[1].id,
+            status=PaymentRecord.STATUS_SUCCESS,
+        )
+
+        rapid_pro_sample_query_variables = create_query_variables(self.cash_plan, "RAPIDPRO")
+
+        with self.assertNumQueries(3):
+            self.graphql_request(
+                request_string=self.SAMPLE_SIZE_QUERY,
+                variables=rapid_pro_sample_query_variables,
+                context={"user": self.user},
+            )

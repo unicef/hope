@@ -169,20 +169,21 @@ class BankAccountInfoFactory(factory.DjangoModelFactory):
     bank_account_number = random.randint(10**26, 10**27 - 1)
 
 
-class DocumentFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Document
-
-    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
-    type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by("?").first())
-    individual = factory.SubFactory(IndividualFactory)
-
-
 class DocumentTypeFactory(factory.DjangoModelFactory):
     class Meta:
         model = DocumentType
 
     type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
+
+
+class DocumentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Document
+        django_get_or_create = ("type",)
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.SubFactory(DocumentTypeFactory)
+    individual = factory.SubFactory(IndividualFactory)
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
@@ -301,7 +302,9 @@ def create_household_and_individuals(household_data=None, individuals_data=None,
 
 
 def create_individual_document(individual, document_type=None):
+    additional_fields = {}
     if document_type:
-        DocumentTypeFactory(type=document_type)
-    document = DocumentFactory(individual=individual)
+        document_type = DocumentTypeFactory(type=document_type)
+        additional_fields["type"] = document_type
+    document = DocumentFactory(individual=individual, **additional_fields)
     return document

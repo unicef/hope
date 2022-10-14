@@ -3,6 +3,7 @@ import logging
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin import SimpleListFilter
 from django.core.signing import BadSignature, Signer
 from django.db.models import F
 from django.template.response import TemplateResponse
@@ -276,9 +277,6 @@ class ValidateForm(RemeberDataForm):
     SYNC_COOKIE = "ocr"
     picture_field = forms.CharField()
     number_field = forms.CharField()
-
-
-from django.contrib.admin import SimpleListFilter
 
 
 class AlexisFilter(SimpleListFilter):

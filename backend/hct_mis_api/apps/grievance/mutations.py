@@ -570,6 +570,9 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
 
+        admin = input.pop("admin", None)
+        if admin:
+            grievance_ticket.admin2 = get_object_or_404(Area, p_code=admin)
         grievance_ticket.partner = get_partner(input.pop("partner", None))
         grievance_ticket.user_modified = timezone.now()
         grievance_ticket.save()
@@ -1269,7 +1272,9 @@ class PaymentDetailsApproveMutation(PermissionMutation):
             logger.error("Payment Details changes can approve only for Grievance Ticket on status For Approval")
             raise GraphQLError("Payment Details changes can approve only for Grievance Ticket on status For Approval")
 
-        old_payment_verification_ticket_details = grievance_ticket.payment_verification_ticket_details
+        old_payment_verification_ticket_details = (  # noqa F841
+            grievance_ticket.payment_verification_ticket_details
+        )  # TODO: is this a bug?
         grievance_ticket.payment_verification_ticket_details.approve_status = kwargs.get("approve_status", False)
         grievance_ticket.payment_verification_ticket_details.save()
 

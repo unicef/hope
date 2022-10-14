@@ -33,7 +33,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Status
               </span>
-              <div>
+              <div
+                data-cy="label-STATUS"
+              >
                 <div
                   class="sc-iwsKbI dUmvrG"
                 >
@@ -120,7 +122,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Category
               </span>
-              <div>
+              <div
+                data-cy="label-CATEGORY"
+              >
                 <span>
                   Data Change
                 </span>
@@ -137,7 +141,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Issue Type
               </span>
-              <div>
+              <div
+                data-cy="label-Issue Type"
+              >
                 <span>
                   Withdraw Individual
                 </span>
@@ -154,7 +160,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Household ID
               </span>
-              <div>
+              <div
+                data-cy="label-HOUSEHOLD ID"
+              >
                 <span>
                   <a
                     class="sc-bwzfXH kvzhbg"
@@ -176,7 +184,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Individual ID
               </span>
-              <div>
+              <div
+                data-cy="label-INDIVIDUAL ID"
+              >
                 <span>
                   <a
                     class="sc-bwzfXH kvzhbg"
@@ -198,7 +208,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Payment ID
               </span>
-              <div>
+              <div
+                data-cy="label-PAYMENT ID"
+              >
                 <span>
                   -
                 </span>
@@ -215,8 +227,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Programme
               </span>
-              <div>
-                -
+              <div
+                data-cy="label-CONSENT"
+              >
+                Yes
               </div>
             </div>
           </div>
@@ -230,7 +244,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Created By
               </span>
-              <div>
+              <div
+                data-cy="label-CREATED BY"
+              >
                 Maciej Szewczyk
               </div>
             </div>
@@ -245,7 +261,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Date Created
               </span>
-              <div>
+              <div
+                data-cy="label-DATE CREATED"
+              >
                 <time
                   datetime="1644571534682"
                 >
@@ -264,7 +282,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Last Modified Date
               </span>
-              <div>
+              <div
+                data-cy="label-LAST MODIFIED DATE"
+              >
                 <time
                   datetime="1644571964102"
                 >
@@ -283,8 +303,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Administrative Level 2
               </span>
-              <div>
-                -
+              <div
+                data-cy="label-DESCRIPTION"
+              >
+                dwdw
               </div>
             </div>
           </div>
@@ -298,8 +320,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Area / Village / Pay point
               </span>
-              <div>
-                -
+              <div
+                data-cy="label-ASSIGNED TO"
+              >
+                Maciej Szewczyk
               </div>
             </div>
           </div>
@@ -313,7 +337,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Languages Spoken
               </span>
-              <div>
+              <div
+                data-cy="label-ADMINISTRATIVE LEVEL 2"
+              >
                 -
               </div>
             </div>
@@ -328,12 +354,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Documentation
               </span>
-              <div>
-                <div
-                  class="MuiBox-root MuiBox-root-1"
-                >
-                  -
-                </div>
+              <div
+                data-cy="label-AREA / VILLAGE / PAY POINT"
+              >
+                -
               </div>
             </div>
           </div>
@@ -362,7 +386,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Comments
               </span>
-              <div>
+              <div
+                data-cy="label-LANGUAGES SPOKEN"
+              >
                 -
               </div>
             </div>

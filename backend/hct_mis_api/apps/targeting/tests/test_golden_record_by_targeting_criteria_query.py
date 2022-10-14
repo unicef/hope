@@ -30,7 +30,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
             "rules": [
                 {
                     "filters": [
-                        {"comparisionMethod": "EQUALS", "arguments": [2], "fieldName": "size", "isFlexField": False}
+                        {"comparisonMethod": "EQUALS", "arguments": [2], "fieldName": "size", "isFlexField": False}
                     ]
                 }
             ]
@@ -43,7 +43,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
                 {
                     "filters": [
                         {
-                            "comparisionMethod": "EQUALS",
+                            "comparisonMethod": "EQUALS",
                             "arguments": ["REFUGEE"],
                             "fieldName": "residence_status",
                             "isFlexField": False,
@@ -59,7 +59,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
                 {
                     "filters": [
                         {
-                            "comparisionMethod": "EQUALS",
+                            "comparisonMethod": "EQUALS",
                             "arguments": ["0"],
                             "fieldName": "unaccompanied_child_h_f",
                             "isFlexField": True,
@@ -77,7 +77,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
                 {
                     "filters": [
                         {
-                            "comparisionMethod": "CONTAINS",
+                            "comparisonMethod": "CONTAINS",
                             "arguments": ["other_public", "pharmacy", "other_private"],
                             "fieldName": "treatment_facility_h_f",
                             "isFlexField": True,

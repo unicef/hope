@@ -6,18 +6,11 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanPaymentVerificationFactory,
-    PaymentRecordFactory,
-    PaymentVerificationFactory,
+    create_payment_verification_plan_with_status,
 )
-from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
-    PaymentVerification,
-)
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
@@ -52,7 +45,7 @@ class TestDeleteVerificationMutation(APITestCase):
         cls.program.admin_areas.set(Area.objects.order_by("?")[:3])
         cls.target_population = TargetPopulationFactory(
             created_by=cls.user,
-            candidate_list_targeting_criteria=(TargetingCriteriaFactory()),
+            targeting_criteria=(TargetingCriteriaFactory()),
             business_area=cls.business_area,
         )
         cls.cash_plan = CashPlanFactory(
@@ -105,39 +98,21 @@ class TestDeleteVerificationMutation(APITestCase):
         )
 
     def create_pending_payment_verification_plan(self):
-        return self.create_payment_verification_plan_with_status(CashPlanPaymentVerification.STATUS_PENDING)
+        return create_payment_verification_plan_with_status(
+            self.cash_plan,
+            self.user,
+            self.business_area,
+            self.program,
+            self.target_population,
+            CashPlanPaymentVerification.STATUS_PENDING,
+        )
 
     def create_active_payment_verification_plan(self):
-        return self.create_payment_verification_plan_with_status(CashPlanPaymentVerification.STATUS_ACTIVE)
-
-    def create_payment_verification_plan_with_status(self, status):
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=self.cash_plan)
-        cash_plan_payment_verification.status = status
-        cash_plan_payment_verification.save()
-        for _ in range(5):
-            registration_data_import = RegistrationDataImportFactory(
-                imported_by=self.user, business_area=self.business_area
-            )
-            household, _ = create_household(
-                {
-                    "registration_data_import": registration_data_import,
-                    "admin_area": Area.objects.order_by("?").first(),
-                },
-                {"registration_data_import": registration_data_import},
-            )
-
-            household.programs.add(self.program)
-
-            payment_record = PaymentRecordFactory(
-                cash_plan=self.cash_plan,
-                household=household,
-                target_population=self.target_population,
-            )
-
-            PaymentVerificationFactory(
-                cash_plan_payment_verification=cash_plan_payment_verification,
-                payment_record=payment_record,
-                status=PaymentVerification.STATUS_PENDING,
-            )
-            EntitlementCardFactory(household=household)
-        return cash_plan_payment_verification
+        return create_payment_verification_plan_with_status(
+            self.cash_plan,
+            self.user,
+            self.business_area,
+            self.program,
+            self.target_population,
+            CashPlanPaymentVerification.STATUS_ACTIVE,
+        )

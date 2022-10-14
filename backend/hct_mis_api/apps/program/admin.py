@@ -4,7 +4,10 @@ from django.template.response import TemplateResponse
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
+from adminfilters.querystring import QueryStringFilter
+from smart_admin.mixins import LinkedObjectsMixin
 
 from ..utils.admin import (
     HOPEModelAdminBase,
@@ -28,9 +31,11 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdm
 
 
 @admin.register(CashPlan)
-class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class CashPlanAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("name", "program", "delivery_type", "status", "verification_status", "ca_id")
     list_filter = (
+        DepotManager,
+        QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("delivery_type", ChoicesFieldComboFilter),

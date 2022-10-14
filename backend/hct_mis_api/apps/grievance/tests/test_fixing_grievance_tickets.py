@@ -1,5 +1,3 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
@@ -7,6 +5,9 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketIndividualDataUpdateDetailsFactory,
+)
+from hct_mis_api.apps.grievance.management.commands.fix_grievance_tickets import (
+    fix_disability_fields,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -112,7 +113,7 @@ class TestFixingGrievanceTickets(APITestCase):
             previous_value,
         )
 
-        call_command("fix_grievance_tickets")
+        fix_disability_fields()
 
         ticket.refresh_from_db()
         self.assertEqual(
@@ -163,5 +164,5 @@ class TestFixingGrievanceTickets(APITestCase):
         )
         self.assertEqual(GrievanceTicket.objects.count(), 1)
 
-        call_command("fix_grievance_tickets")
+        fix_disability_fields()
         # didn't throw, so it skipped ticket with not existing TicketIndividualDataUpdateDetailsFactory

@@ -21,6 +21,19 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 logger = logging.getLogger(__name__)
 
 
+def handle_rdi_exception(datahub_rdi_id, e):
+    try:
+        from sentry_sdk import capture_exception
+
+        err = capture_exception(e)
+    except Exception:
+        err = "N/A"
+
+    RegistrationDataImport.objects.filter(
+        datahub_id=datahub_rdi_id,
+    ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
+
+
 @contextmanager
 def locked_cache(key):
     try:
@@ -57,7 +70,6 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
             )
     except Exception as e:
         logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
@@ -66,9 +78,8 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
             id=registration_data_import_id,
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
-        RegistrationDataImport.objects.filter(
-            datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR)
+        handle_rdi_exception(registration_data_import_id, e)
+
         raise
 
 
@@ -92,25 +103,15 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
             )
     except Exception as e:
         logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
-
-        try:
-            from sentry_sdk import capture_exception
-
-            err = capture_exception(e)
-        except Exception:
-            err = "N/A"
 
         RegistrationDataImportDatahub.objects.filter(
             id=registration_data_import_id,
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
-        RegistrationDataImport.objects.filter(
-            datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
+        handle_rdi_exception(registration_data_import_id, e)
 
         raise
 
@@ -188,18 +189,21 @@ def merge_registration_data_import_task(registration_data_import_id):
     logger.info(
         f"merge_registration_data_import_task started for registration_data_import_id: {registration_data_import_id}"
     )
-    try:
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+    with locked_cache(key=f"merge_registration_data_import_task-{registration_data_import_id}"):
+        try:
+            from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import (
+                RdiMergeTask,
+            )
 
-        RdiMergeTask().execute(registration_data_import_id)
-    except Exception as e:
-        logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+            RdiMergeTask().execute(registration_data_import_id)
+        except Exception as e:
+            logger.exception(e)
+            from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
-        RegistrationDataImport.objects.filter(
-            id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.MERGE_ERROR)
-        raise
+            RegistrationDataImport.objects.filter(
+                id=registration_data_import_id,
+            ).update(status=RegistrationDataImport.MERGE_ERROR)
+            raise
 
     logger.info(
         f"merge_registration_data_import_task finished for registration_data_import_id: {registration_data_import_id}"
@@ -227,11 +231,9 @@ def rdi_deduplication_task(registration_data_import_id):
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
     except Exception as e:
         logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
-        RegistrationDataImport.objects.filter(
-            datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR)
+        handle_rdi_exception(registration_data_import_id, e)
+
         raise
 
 
@@ -438,14 +440,14 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
 @sentry_tags
 def deduplicate_documents():
     with locked_cache(key="deduplicate_documents"):
-        with transaction.atomic():
-            grouped_rdi = (
-                Document.objects.filter(status=Document.STATUS_PENDING)
-                .values("individual__registration_data_import")
-                .annotate(count=Count("individual__registration_data_import"))
-            )
-            rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
-            for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
+        grouped_rdi = (
+            Document.objects.filter(status=Document.STATUS_PENDING)
+            .values("individual__registration_data_import")
+            .annotate(count=Count("individual__registration_data_import"))
+        )
+        rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
+        for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
+            with transaction.atomic():
                 documents_query = Document.objects.filter(
                     status=Document.STATUS_PENDING, individual__registration_data_import=rdi
                 )
@@ -453,6 +455,8 @@ def deduplicate_documents():
                     documents_query,
                     registration_data_import=rdi,
                 )
+
+        with transaction.atomic():
             documents_query = Document.objects.filter(
                 status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True
             )
