@@ -129,5 +129,5 @@ class TicketReferralDetailsAdmin(LinkedObjectsMixin, ExtraButtonsMixin, HOPEMode
 
 
 @admin.register(GrievanceDocument)
-class TicketReferralDetailsAdmin(HOPEModelAdminBase):
+class GrievanceDocumentAdmin(HOPEModelAdminBase):
     list_display = ("file_name",)

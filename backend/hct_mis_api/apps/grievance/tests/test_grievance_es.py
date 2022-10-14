@@ -268,14 +268,14 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     FILTER_BY_MULTIPLE_FILTERS = """
         query AllGrievanceTickets(
-          $status: [String], 
-          $priority: String, 
-          $urgency: String, 
+          $status: [String],
+          $priority: String,
+          $urgency: String,
           $grievanceType: String
         ) {
           allGrievanceTicket(
-            businessArea: "afghanistan", 
-            orderBy: "created_at", 
+            businessArea: "afghanistan",
+            orderBy: "created_at",
             status: $status,
             priority: $priority,
             urgency: $urgency,

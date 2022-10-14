@@ -1,5 +1,3 @@
-import random
-
 import factory
 from factory import fuzzy
 from faker import Faker
