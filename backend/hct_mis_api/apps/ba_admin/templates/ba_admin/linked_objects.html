@@ -12,7 +12,6 @@
             <table>
                 {% for row in e.data %}
                     <tr>
-{#                        <td><a href="{{ row|get_admin_link }}">{{ row.pk }}</a></td>#}
                         <td>{% get_admin_href admin_site row 'pk' %}</td>
                         <td>{{ row }}</td>
                     </tr>
@@ -20,6 +19,7 @@
             </table>
         </fieldset>
     {% endfor %}
+    {% if show_empty %}
     <fieldset class="module">
         <h2 class="">Empty Relationships</h2>
         <ul>
@@ -28,6 +28,7 @@
             {% endfor %}
         </ul>
     </fieldset>
+    {% endif %}
 {% endblock content %}
 {% block footer %}
     <div id="footer"></div>

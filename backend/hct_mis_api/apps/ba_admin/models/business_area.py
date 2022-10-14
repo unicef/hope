@@ -28,3 +28,6 @@ class BusinessAreaAdmin(BAModelAdmin):
         if ordering:
             qs = qs.order_by(*ordering)
         return qs.filter(**self.get_business_area_filter(request))
+
+    def has_add_permission(self, request):
+        return False

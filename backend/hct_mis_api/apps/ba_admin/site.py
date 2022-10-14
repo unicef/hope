@@ -2,6 +2,8 @@ from functools import update_wrapper
 
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 
 from smart_admin.site import SmartAdminSite
 
@@ -81,6 +83,9 @@ class BusinessAreaAdminSite(SmartAdminSite):
 
     def has_permission(self, request):
         return request.user.is_active
+
+    def is_smart_enabled(self, request):
+        return False
 
 
 ba_site = BusinessAreaAdminSite()

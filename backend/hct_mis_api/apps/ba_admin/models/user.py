@@ -8,6 +8,15 @@ from hct_mis_api.apps.ba_admin.options import BAModelAdmin, BATabularInline
 
 class UserRoleInline(BATabularInline):
     model = UserRole
+    extra = 0
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        field = super(UserRoleInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == "business_area":
+            ba = self.admin_site.selected_business_area(request)
+            field.queryset = field.queryset.filter(id=ba.id)
+
+        return field
 
 
 class UserAdmin(BAModelAdmin):

@@ -4,6 +4,7 @@ from django.contrib.admin import TabularInline
 from django.forms import MediaDefiningClass
 from django.views.generic import RedirectView
 
+from adminactions.helpers import AdminActionPermMixin
 from smart_admin.mixins import LinkedObjectsMixin
 from smart_admin.modeladmin import SmartModelAdmin
 
@@ -34,7 +35,7 @@ class BATabularInline(TabularInline):
     #
 
 
-class BAModelAdmin(SmartModelAdmin, LinkedObjectsMixin, metaclass=AutoRegisterMetaClass):
+class BAModelAdmin(SmartModelAdmin, AdminActionPermMixin, LinkedObjectsMixin, metaclass=AutoRegisterMetaClass):
     model = None
     target_field = None
     change_list_template = "ba_admin/change_list.html"
@@ -42,6 +43,7 @@ class BAModelAdmin(SmartModelAdmin, LinkedObjectsMixin, metaclass=AutoRegisterMe
     linked_objects_template = "ba_admin/linked_objects.html"
     writeable_fields = []
     exclude = []
+    linked_objects_hide_empty = True
 
     def get_inlines(self, request, obj=None):
         flt = list(filter(lambda x: not issubclass(x, BATabularInline), self.inlines))
@@ -104,17 +106,17 @@ class BAModelAdmin(SmartModelAdmin, LinkedObjectsMixin, metaclass=AutoRegisterMe
     def get_changeform_buttons(self, context):
         return super().get_changeform_buttons(context)
 
-    # def has_module_permission(self, request):
-    #     return True
-    #
-    # def has_add_permission(self, request):
-    #     return False
+    def has_module_permission(self, request):
+        return True
 
-    # def has_change_permission(self, request, obj=None):
-    #     return True
+    def has_add_permission(self, request):
+        return False
 
-    # def has_delete_permission(self, request, obj=None):
-    #     return False
-    #
-    # def has_view_permission(self, request, obj=None):
-    #     return True
+    def has_change_permission(self, request, obj=None):
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        return True
