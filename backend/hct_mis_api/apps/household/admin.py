@@ -90,8 +90,8 @@ class AgencyAdmin(HOPEModelAdminBase):
 
 @admin.register(Document)
 class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
-    search_fields = ("document_number",)
-    list_display = ("document_number", "type", "status", "individual")
+    search_fields = ("document_number", "country")
+    list_display = ("document_number", "type", "country", "status", "individual")
     raw_id_fields = ("individual",)
     list_filter = (
         ("type", RelatedFieldComboFilter),
@@ -105,12 +105,11 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 
 @admin.register(DocumentType)
 class DocumentTypeAdmin(HOPEModelAdminBase):
-    search_fields = ("label", "country")
-    list_display = ("label", "country", "type")
+    search_fields = ("label",)
+    list_display = ("label", "type")
     list_filter = (
         "type",
         "label",
-        ("country", ValueFilter.factory(label="Country ISO CODE 2")),
     )
 
     def get_queryset(self, request):
