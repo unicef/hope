@@ -173,7 +173,7 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
 
 @admin.register(ImportedIndividualIdentity)
 class ImportedIndividualIdentityAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "agency", "document_number")
+    list_display = ("individual", "document_number")
     raw_id_fields = ("individual",)
 
 

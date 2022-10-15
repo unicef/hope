@@ -134,14 +134,14 @@ class EditIndividualDocumentObjectType(graphene.InputObjectType):
 
 class IndividualIdentityObjectType(graphene.InputObjectType):
     country = graphene.String(required=True)
-    agency = graphene.String(required=True)
+    partner = graphene.String(required=True)
     number = graphene.String(required=True)
 
 
 class EditIndividualIdentityObjectType(graphene.InputObjectType):
     id = graphene.Field(graphene.ID, required=True)
     country = graphene.String(required=True)
-    agency = graphene.String(required=True)
+    partner = graphene.String(required=True)
     number = graphene.String(required=True)
 
 
@@ -833,7 +833,12 @@ def close_update_individual_grievance_ticket(grievance_ticket, info) -> None:
     Document.objects.filter(id__in=documents_to_remove).delete()
 
     IndividualIdentity.objects.bulk_create(identities_to_create)
-    IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "agency"])
+    IndividualIdentity.objects.bulk_update(
+        identities_to_update,
+        [
+            "number",
+        ],
+    )
     IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
 
     BankAccountInfo.objects.bulk_create(payment_channels_to_create)

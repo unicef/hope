@@ -245,9 +245,6 @@ class DeduplicateTask:
         document_type_key = "type"
         prefix = "identities" if data_type.lower() == "identity" else "documents"
 
-        if data_type.lower() == "identity":
-            document_type_key = "agency"
-
         for item in data:
             doc_number = item.get("document_number") or item.get("number")
             doc_type = item.get(document_type_key)
@@ -403,7 +400,7 @@ class DeduplicateTask:
         )
         dict_fields = {
             "documents": ("document_number", "type.type", "country"),
-            "identities": ("document_number", "agency.type"),
+            "identities": ("document_number", "partner.name"),
             "household": (
                 "residence_status",
                 "country_origin",
@@ -476,7 +473,7 @@ class DeduplicateTask:
         )
         dict_fields = {
             "documents": ("document_number", "type.type", "country"),
-            "identities": ("number", "agency.type"),
+            "identities": ("number", "partner.name"),
             "household": (
                 "residence_status",
                 "country_origin",

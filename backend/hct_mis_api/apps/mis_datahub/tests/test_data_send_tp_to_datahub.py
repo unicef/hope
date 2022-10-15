@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -16,7 +17,6 @@ from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFact
 from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     UNHCR,
-    Agency,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
@@ -108,9 +108,9 @@ class TestDataSendTpToDatahub(TestCase):
         cls.household = HouseholdFactory.build(
             size=1, registration_data_import=rdi, admin_area=admin_area, unhcr_id="UNHCR-1337", country=country
         )
-        unhcr_agency = Agency.objects.create(type=UNHCR)
+        unhcr, _ = Partner.objects.get_or_create(name=UNHCR, defaults={"is_un": True})
         cls.individual = IndividualFactory(household=cls.household, relationship="HEAD", registration_data_import=rdi)
-        IndividualIdentity.objects.create(agency=unhcr_agency, number="UN-TEST", individual=cls.individual)
+        IndividualIdentity.objects.create(partner=unhcr, number="UN-TEST", individual=cls.individual)
         IndividualRoleInHousehold.objects.create(
             individual=cls.individual,
             household=cls.household,
