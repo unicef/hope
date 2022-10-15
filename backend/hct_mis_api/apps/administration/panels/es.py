@@ -63,6 +63,7 @@ class ElasticsearchPanel:
         else:
             form = EsForm()
 
+        context["title"] = "Elasticsearch"
         context["form"] = form
         context["logs"] = logs
         return render(request, "administration/panels/elasticsearch.html", context)
