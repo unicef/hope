@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from graphql import GraphQLError
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.geo import models as geo_models
@@ -137,63 +138,43 @@ def handle_update_payment_channel(payment_channel) -> Optional[BankAccountInfo]:
 
 
 def handle_add_identity(identity, individual) -> IndividualIdentity:
-    from hct_mis_api.apps.household.models import Agency
+    from hct_mis_api.apps.household.models import IndividualIdentity
 
-    agency_name = identity.get("agency")
-    country_code = identity.get("country")
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    partner_name = identity.get("partner")
     number = identity.get("number")
-    agency_type, _ = Agency.objects.get_or_create(
-        country=country,
-        type=agency_name,
-        defaults={
-            "country": country,
-            "type": agency_name,
-            "label": f"{country.name} - {agency_name}",
-        },
-    )
+    partner, _ = Partner.objects.get_or_create(name=partner_name)
 
-    identity_already_exists = IndividualIdentity.objects.filter(number=number, agency=agency_type).exists()
+    identity_already_exists = IndividualIdentity.objects.filter(number=number, partner=partner).exists()
     if identity_already_exists:
-        log_and_raise(f"Identity with number {number}, agency: {agency_name} already exists")
+        log_and_raise(f"Identity with number {number}, partner: {partner_name} already exists")
 
-    return IndividualIdentity(number=number, individual=individual, agency=agency_type)
+    return IndividualIdentity(number=number, individual=individual, partner=partner)
 
 
 def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
-    from hct_mis_api.apps.household.models import Agency
+    from hct_mis_api.apps.household.models import IndividualIdentity
 
     updated_identity = identity_data.get("value", {})
-    agency_name = updated_identity.get("agency")
-    country_code = updated_identity.get("country")
-    country = geo_models.Country.objects.get(iso_code3=country_code)
+    partner_name = updated_identity.get("partner")
     number = updated_identity.get("number")
     identity_id = updated_identity.get("id")
 
     identity_id = decode_id_string(identity_id)
     identity = get_object_or_404(IndividualIdentity, id=identity_id)
 
-    agency_type, _ = Agency.objects.get_or_create(
-        country=country,
-        type=agency_name,
-        defaults={
-            "country": country,
-            "type": agency_name,
-            "label": f"{country.name} - {agency_name}",
-        },
-    )
+    partner, _ = Partner.objects.get_or_create(name=partner_name)
 
     identity_already_exists = (
-        IndividualIdentity.objects.exclude(pk=identity_id).filter(number=number, agency=agency_type).exists()
+        IndividualIdentity.objects.exclude(pk=identity_id).filter(number=number, partner=partner).exists()
     )
     if identity_already_exists:
-        log_and_raise(f"Identity with number {number}, agency: {agency_name} already exists")
+        log_and_raise(f"Identity with number {number}, partner: {partner_name} already exists")
 
     identity.number = number
-    identity.agency = agency_type
+    identity.partner = partner
     return identity
 
 
@@ -282,8 +263,7 @@ def prepare_previous_identities(identities_to_remove_with_approve_status) -> Dic
             "id": identity.id,
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
-            "agency": identity.agency.type,
-            "country": identity.agency.country.iso_code3,
+            "partner": identity.partner.name,
         }
 
     return previous_identities
@@ -320,7 +300,7 @@ def prepare_edit_identities(identities) -> List[Dict]:
     for identity_data in identities:
         encoded_id = identity_data.get("id")
         number = identity_data.get("number")
-        agency = identity_data.get("agency")
+        partner = identity_data.get("partner")
         country = identity_data.get("country")
 
         identity_id = decode_id_string(encoded_id)
@@ -332,14 +312,13 @@ def prepare_edit_identities(identities) -> List[Dict]:
                 "value": {
                     "id": encoded_id,
                     "country": country,
-                    "agency": agency,
+                    "partner": partner,
                     "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": number,
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "country": identity.agency.country.iso_code3,
-                    "agency": identity.agency.type,
+                    "partner": identity.partner.name,
                     "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": identity.number,
                 },

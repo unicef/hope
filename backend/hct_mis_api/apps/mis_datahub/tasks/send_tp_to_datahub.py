@@ -192,7 +192,7 @@ class SendTPToDatahubTask:
 
     def _prepare_unhcr_dict(self, individuals_to_sync) -> None:
         individual_identities = IndividualIdentity.objects.filter(
-            agency__type="UNHCR", individual__in=individuals_to_sync
+            partner__name="UNHCR", individual__in=individuals_to_sync
         ).distinct()
         self.unhcr_id_dict = {identity.individual_id: identity.number for identity in individual_identities}
 
