@@ -23,6 +23,8 @@ class PowerQueryBackend(ModelBackend):
         elif isinstance(obj, ReportDocument):
             if obj.report.owner == user_obj:
                 return True
+            if "business_area" not in obj.arguments:
+                return False
             if "business_area" in obj.arguments:
                 ba = obj.arguments["business_area"]
                 return user_obj.is_active and perm in self.get_office_permissions(user_obj, ba)
