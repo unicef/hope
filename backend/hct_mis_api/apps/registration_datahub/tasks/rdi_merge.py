@@ -16,7 +16,6 @@ from hct_mis_api.apps.household.models import (
     DUPLICATE,
     HEAD,
     NEEDS_ADJUDICATION,
-    Agency,
     BankAccountInfo,
     Document,
     DocumentType,
@@ -198,18 +197,16 @@ class RdiMergeTask:
             )
             documents_to_create.append(document)
         identities_to_create = []
-        for imported_identity in imported_individual.identities.all():
-            agency, _ = Agency.objects.get_or_create(
-                type=imported_identity.agency.type,
-                country=geo_models.Country.objects.get(iso_code2=imported_identity.agency.country.code),
-                label=imported_identity.agency.label,
-            )
-            identity = IndividualIdentity(
-                agency=agency,
-                number=imported_identity.document_number,
-                individual=individual,
-            )
-            identities_to_create.append(identity)
+        # for imported_identity in imported_individual.identities.all():
+        #     partner, _ = Partner.objects.get_or_create(
+        #         name=imported_identity.partner.name,
+        #     )
+        #     identity = IndividualIdentity(
+        #         partner=partner,
+        #         number=imported_identity.document_number,
+        #         individual=individual,
+        #     )
+        #     identities_to_create.append(identity)
 
         return documents_to_create, identities_to_create
 
