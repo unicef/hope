@@ -689,7 +689,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                         },
                     )
                     assert (
-                            import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]["errors"] is None
+                        import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]["errors"] is None
                     ), import_mutation_response
                     assert mock_import.on_commit.call_count == 1
                     mock_import.on_commit.call_args[0][0]()  # call real func
