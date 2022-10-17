@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='paymentverificationplan',
             name='payment_plan_object_id',
-            field=models.CharField(max_length=50, null=True),
+            field=models.UUIDField(null=True),
         ),
         migrations.AddField(
             model_name='paymentverificationsummary',
@@ -30,6 +30,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='paymentverificationsummary',
             name='payment_plan_object_id',
-            field=models.CharField(max_length=50, null=True),
+            field=models.UUIDField(null=True),
         ),
     ]

@@ -9,7 +9,7 @@ from collections.abc import MutableMapping
 from datetime import date, datetime
 
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from django.utils import timezone
 
 from django_filters import OrderingFilter
@@ -518,16 +518,31 @@ def chart_get_filtered_qs(
     business_area_slug_filter: dict = None,
     additional_filters: dict = None,
     year_filter_path: str = None,
+    payment_verification_gfk: bool = False,
 ) -> QuerySet:
+    # if payment_verification_gfk True will use Q() object for filtering by PaymentPlan and CashPlan
+    q_obj = Q()
     if additional_filters is None:
         additional_filters = {}
+    if isinstance(additional_filters, Q):
+        q_obj, additional_filters = additional_filters, {}
     if year_filter_path is None:
         year_filter = {"created_at__year": year}
     else:
         year_filter = {f"{year_filter_path}__year": year}
+        if payment_verification_gfk:
+            year_filter = {}
+            for k in year_filter_path.split(","):
+                q_obj |= Q(**{f"{k}__year": year})
+
     if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
         business_area_slug_filter = {}
-    return qs.filter(**year_filter, **business_area_slug_filter, **additional_filters)
+
+    if payment_verification_gfk and len(business_area_slug_filter) > 1:
+        for key, value in business_area_slug_filter.items():
+            q_obj |= Q(**{key: value})
+
+    return qs.filter(q_obj, **year_filter, **business_area_slug_filter, **additional_filters)
 
 
 def parse_list_values_to_int(list_to_parse):
@@ -568,17 +583,29 @@ def chart_filters_decoder(filters):
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
-def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
-    filter_query = {}
+def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas", payment_verification_gfk=False):
+    filter_query = {} if not payment_verification_gfk else Q()
     if filters.get("program") is not None:
-        filter_query.update({program_id_path: filters.get("program")})
+        if not payment_verification_gfk:
+            filter_query.update({program_id_path: filters.get("program")})
+        else:
+            for path in program_id_path.split(","):
+                filter_query |= Q(**{path: filters.get("program")})
     if filters.get("administrative_area") is not None:
-        filter_query.update(
-            {
-                f"{administrative_area_path}__id": filters.get("administrative_area"),
-                f"{administrative_area_path}__area_type__area_level": 2,
-            }
-        )
+        if not payment_verification_gfk:
+            filter_query.update(
+                {
+                    f"{administrative_area_path}__id": filters.get("administrative_area"),
+                    f"{administrative_area_path}__area_type__area_level": 2,
+                }
+            )
+        else:
+            for path in administrative_area_path.split(","):
+                filter_query |= Q(
+                    Q(**{f"{path}__id": filters.get("administrative_area")}) &
+                    Q(**{f"{path}__area_type__area_level": 2})
+                )
+
     return filter_query
 
 

@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='paymentverification',
             name='payment_object_id',
-            field=models.CharField(max_length=50),
+            field=models.UUIDField(),
         ),
         migrations.AlterField(
             model_name='paymentverificationplan',
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='paymentverificationplan',
             name='payment_plan_object_id',
-            field=models.CharField(max_length=50),
+            field=models.UUIDField(),
         ),
         migrations.AlterField(
             model_name='paymentverificationplan',
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='paymentverificationsummary',
             name='payment_plan_object_id',
-            field=models.CharField(max_length=50),
+            field=models.UUIDField(),
         ),
         migrations.AddIndex(
             model_name='paymentverification',
