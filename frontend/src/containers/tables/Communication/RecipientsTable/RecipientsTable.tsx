@@ -1,12 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../components/core/TableWrapper';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
   AllAccountabilityCommunicationMessageRecipientsQueryVariables,
   CommunicationMessageRecipientMapNode,
   useAllAccountabilityCommunicationMessageRecipientsQuery,
-} from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
+} from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
 

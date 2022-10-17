@@ -1,12 +1,12 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
-import { CommunicationMessageNode } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { renderUserName } from '../../../utils/utils';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { renderUserName } from '../../../../utils/utils';
+import { CommunicationMessageNode } from '../../../../__generated__/graphql';
+import { BlackLink } from '../../../../components/core/BlackLink';
 
 interface CommunicationTableRowProps {
   message: CommunicationMessageNode;
