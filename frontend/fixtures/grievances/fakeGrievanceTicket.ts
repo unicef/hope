@@ -54,13 +54,12 @@ export const fakeGrievanceTicket = {
             id:
               'RG9jdW1lbnROb2RlOjg5ZTE2YzQ4LWYwOWMtNGVlMC1iYWYyLTZiOWFiYjZjMjVlNg==',
             country: 'Poland',
+            countryIso3: 'POL',
             documentNumber: 'TSH221375',
             photo: null,
             type: {
-              country: 'Poland',
               label: 'National ID',
               type: 'NATIONAL_ID',
-              countryIso3: 'POL',
               __typename: 'DocumentTypeNode',
             },
             __typename: 'DocumentNode',
@@ -258,13 +257,12 @@ export const fakeGrievanceTicket = {
                     id:
                       'RG9jdW1lbnROb2RlOjYzYjM1NzA4LWZhNzYtNDExMy1iMmIyLWE5MGU1YWE2OTZiOA==',
                     country: 'Poland',
+                    countryIso3: 'POL',
                     documentNumber: 'BSH221315',
                     photo: null,
                     type: {
-                      country: 'Poland',
                       label: 'National ID',
                       type: 'NATIONAL_ID',
-                      countryIso3: 'POL',
                       __typename: 'DocumentTypeNode',
                     },
                     __typename: 'DocumentNode',
@@ -311,13 +309,12 @@ export const fakeGrievanceTicket = {
                     id:
                       'RG9jdW1lbnROb2RlOjg5ZTE2YzQ4LWYwOWMtNGVlMC1iYWYyLTZiOWFiYjZjMjVlNg==',
                     country: 'Poland',
+                    countryIso3: 'POL',
                     documentNumber: 'TSH221375',
                     photo: null,
                     type: {
-                      country: 'Poland',
                       label: 'National ID',
                       type: 'NATIONAL_ID',
-                      countryIso3: 'POL',
                       __typename: 'DocumentTypeNode',
                     },
                     __typename: 'DocumentNode',
@@ -401,13 +398,12 @@ export const fakeGrievanceTicket = {
                     id:
                       'RG9jdW1lbnROb2RlOjM0NjQwYmU2LTc4ZTgtNDc2Zi1iYWM2LWFjOTIwZTIwYmExOQ==',
                     country: 'Poland',
+                    countryIso3: 'POL',
                     documentNumber: 'CSH221395',
                     photo: null,
                     type: {
-                      country: 'Poland',
                       label: 'National ID',
                       type: 'NATIONAL_ID',
-                      countryIso3: 'POL',
                       __typename: 'DocumentTypeNode',
                     },
                     __typename: 'DocumentNode',
