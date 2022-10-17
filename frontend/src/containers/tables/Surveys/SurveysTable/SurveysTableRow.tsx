@@ -1,15 +1,15 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
+import { BlackLink } from '../../../../components/core/BlackLink';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { renderSomethingOrDash, renderUserName } from '../../../../utils/utils';
 import {
-  FeedbackIssueType,
   FeedbackNode,
-} from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { renderSomethingOrDash, renderUserName } from '../../../utils/utils';
+  FeedbackIssueType,
+} from '../../../../__generated__/graphql';
 
 interface SurveysTableRowProps {
   feedback: FeedbackNode;
@@ -22,7 +22,7 @@ export const SurveysTableRow = ({
 }: SurveysTableRowProps): React.ReactElement => {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const feedbackDetailsPath = `/${businessArea}/accountability/feedback/${feedback.id}`;
+  const feedbackDetailsPath = `/${businessArea}/accountability/surveys/${feedback.id}`;
   const householdDetailsPath = `/${businessArea}/population/households/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = `/${businessArea}/grievance-and-feedback/${feedback.linkedGrievance?.id}`;
 

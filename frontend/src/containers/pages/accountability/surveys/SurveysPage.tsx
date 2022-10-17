@@ -11,8 +11,8 @@ import { useDebounce } from '../../../../hooks/useDebounce';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { SurveysTable } from '../../../tables/Surveys/SurveysTable';
 import { SurveysFilters } from '../../../../components/accountability/Surveys/SurveysTable/SurveysFilters';
+import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
 
 export const SurveysPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
