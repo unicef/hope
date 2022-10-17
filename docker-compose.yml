@@ -143,15 +143,3 @@ services:
       - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-
-  kibana:
-    container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.4.0
-    restart: always
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - 5601:5601
-    depends_on:
-      - elasticsearch
-
