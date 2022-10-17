@@ -154,7 +154,7 @@ Then('I see the newly imported individuals', () => {
 });
 
 When('I check the household details', () => {
-  cy.get('td').contains(householdId).click();
+  cy.get('td').contains(householdId).click({ force: true });
 });
 
 Then('I see the household has the correct data', () => {
