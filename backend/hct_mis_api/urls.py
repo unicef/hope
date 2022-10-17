@@ -3,10 +3,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.admin import site
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.core.management import call_command
+from django.http import JsonResponse
 from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.core.management import call_command
 
 import adminactions.actions as actions
 from graphene_file_upload.django import FileUploadGraphQLView
