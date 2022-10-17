@@ -122,7 +122,7 @@ export const LookUpSelection = ({
               onChange={() => {
                 setSelectedTab(index);
               }}
-              control={<Radio />}
+              control={<Radio color='primary' />}
               label={tab}
               key={tab}
             />

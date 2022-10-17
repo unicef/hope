@@ -55,6 +55,7 @@ export function LookUpSelectionTables({
             handleChange(SurveyTabsValues.TARGET_POPULATION, value);
           }}
           noTableStyling
+          noTitle
         />
       )}
     </>
