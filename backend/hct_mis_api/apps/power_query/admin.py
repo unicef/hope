@@ -269,7 +269,6 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
                 message_level = messages.WARNING
             self.message_user(request, f"{result}", message_level)
         except Exception as e:
-            raise
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
