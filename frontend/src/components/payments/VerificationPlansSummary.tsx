@@ -1,7 +1,7 @@
 import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CashPlanNode } from '../../__generated__/graphql';
+import { CashPlanOrPaymentPlanQuery } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
 import { paymentVerificationStatusToColor } from '../../utils/utils';
 import { StatusBox } from '../core/StatusBox';
@@ -9,13 +9,18 @@ import { UniversalMoment } from '../core/UniversalMoment';
 import { Title } from '../core/Title';
 
 interface VerificationPlansSummaryProps {
-  cashPlan: CashPlanNode;
+  cashPlan: CashPlanOrPaymentPlanQuery['cashPlanOrPaymentPlan'];
 }
 
 export function VerificationPlansSummary({
   cashPlan,
 }: VerificationPlansSummaryProps): React.ReactElement {
   const { t } = useTranslation();
+  
+  if (!cashPlan.paymentVerificationSummary) {
+    return <></>;
+  }
+
   const {status, activationDate, completionDate} = cashPlan.paymentVerificationSummary;
 
   return (
