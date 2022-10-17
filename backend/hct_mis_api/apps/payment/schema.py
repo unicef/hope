@@ -597,6 +597,107 @@ class GenericPaymentPlanNode(graphene.ObjectType):
         return self.payment_verification_summary
 
 
+class CashPlanOrPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
+    permission_classes = (
+        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+    )
+
+    id = graphene.ID()
+    can_create_payment_verification_plan = graphene.Boolean()
+    available_payment_records_count = graphene.Int()
+    start_date = graphene.Date()
+    end_date = graphene.Date()
+    updated_at = graphene.DateTime()
+    status = graphene.String()
+    delivery_type = graphene.String()
+    program = graphene.Field("hct_mis_api.apps.program.schema.ProgramNode")
+    payment_items = graphene.List(PaymentNode, required=False)
+    # payment_record_items = graphene.List(PaymentRecordNode, source="payment_items")
+    # payment_items = DjangoPermissionFilterConnectionField(
+    #     PaymentNode,
+    #     filterset_class=PaymentFilter,
+    # )
+    payment_record_items = DjangoPermissionFilterConnectionField(
+        PaymentRecordNode,
+        source="payment_items",
+        filterset_class=PaymentRecordFilter,
+    )
+
+    unicef_id = graphene.String()
+    bank_reconciliation_success = graphene.Int()
+    bank_reconciliation_error = graphene.Int()
+    delivery_type = graphene.String()
+    total_number_of_households = graphene.Int()
+    currency = graphene.String(source="currency")
+    total_delivered_quantity = graphene.Float()
+    total_entitled_quantity = graphene.Float()
+    total_undelivered_quantity = graphene.Float()
+    verification_plans = DjangoPermissionFilterConnectionField(
+        "hct_mis_api.apps.payment.schema.PaymentVerificationPlanNode",
+        source="payment_verification_plans",
+        filterset_class=PaymentVerificationPlanFilter,
+    )
+    payment_verification_summary = graphene.Field(PaymentVerificationSummaryNode)
+
+    # TODO: Think what to do to make it compatible with CashPlanNode
+    # Added these fields to for compatibility with CashPlanNode
+    name = graphene.String()
+    funds_commitment = graphene.String()
+    down_payment = graphene.String()
+    dispersion_date = graphene.String()
+    assistance_through = graphene.String()
+    service_provider = graphene.Field(ServiceProviderNode)
+    ca_id = graphene.String()
+    ca_hash_id = graphene.String()
+
+    def resolve_id(self, info, **kwargs):
+        return to_global_id(self.__class__.__name__ + "Node", self.id)
+
+    def resolve_unicef_id(self, info):
+        return getattr(self, "unicef_id", None)
+
+    def resolve_total_number_of_households(self, info, **kwargs):
+        return getattr(self, "total_households_count", None)
+
+    def resolve_can_create_payment_verification_plan(self, info, **kwargs):
+        return getattr(self, "can_create_payment_verification_plan", False)
+
+    def resolve_available_payment_records_count(self, info, **kwargs):
+        return self.payment_items.filter(
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
+        ).count()
+
+    def resolve_name(self, info):
+        return getattr(self, "name", None)
+
+    def resolve_funds_commitment(self, info):
+        return getattr(self, "funds_commitment", None)
+
+    def resolve_down_payment(self, info):
+        return getattr(self, "down_payment", None)
+
+    def resolve_dispersion_date(self, info):
+        return getattr(self, "dispersion_date", None)
+
+    def resolve_assistance_through(self, info):
+        return getattr(self, "assistance_through", None)
+
+    def resolve_service_provider(self, info):
+        return getattr(self, "service_provider", None)
+
+    def resolve_ca_id(self, info):
+        return getattr(self, "ca_id", None)
+
+    def resolve_ca_hash_id(self, info):
+        return getattr(self, "ca_hash_id", None)
+
+    def resolve_payment_items(self, info, **kwargs):
+        if self.payment_items.count() > 0:
+            return self.payment_items.all()
+        return []
+
+
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
@@ -697,7 +798,7 @@ class Query(graphene.ObjectType):
     )
 
     payment_plan = relay.Node.Field(PaymentPlanNode)
-    # TODO: Keep of remove??? in favour of all_cash_plans_and_payment_plans
+    # TODO: Keep or remove??? in favour of all_cash_plans_and_payment_plans
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
@@ -717,7 +818,12 @@ class Query(graphene.ObjectType):
         FspChoices,
         input=AvailableFspsForDeliveryMechanismsInput(),
     )
-    # cash_plan_or_payment_plan
+    cash_plan_or_payment_plan = graphene.Field(
+        CashPlanOrPaymentPlanNode,
+        description="Get a cash plan or payment plan by id",
+        id=graphene.ID(required=True),
+        plan_type=graphene.String(required=True),
+    )
     all_cash_plans_and_payment_plans = graphene.Field(
         PaginatedCashPlanAndPaymentPlanNode,
         business_area=graphene.String(required=True),
@@ -734,6 +840,16 @@ class Query(graphene.ObjectType):
         before=graphene.String(),
         after=graphene.String(),
     )
+
+    def resolve_cash_plan_or_payment_plan(self, info, id, plan_type, **kwargs):
+        if plan_type == "CashPlan":
+            data = CashPlan.objects.get(id=decode_id_string(id))
+        elif plan_type == "PaymentPlan":
+            data = PaymentPlan.objects.get(id=decode_id_string(id))
+        else:
+            raise Exception("Invalid plan type")
+
+        return data
 
     def resolve_available_fsps_for_delivery_mechanisms(self, info, input, **kwargs):
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))

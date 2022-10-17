@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { countPercentage } from '../../utils/utils';
-import { CashPlanNode } from '../../__generated__/graphql';
+import { CashPlanOrPaymentPlanQuery } from '../../__generated__/graphql';
 import { BlackLink } from '../core/BlackLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { Title } from '../core/Title';
@@ -23,7 +23,7 @@ const BorderLeftBox = styled.div`
 `;
 
 interface CashPlanDetailsSectionProps {
-  cashPlan: CashPlanNode;
+  cashPlan: CashPlanOrPaymentPlanQuery['cashPlanOrPaymentPlan'];
 }
 
 export const CashPlanDetailsSection = ({
@@ -34,12 +34,12 @@ export const CashPlanDetailsSection = ({
 
   const bankReconciliationSuccessPercentage = countPercentage(
     cashPlan.bankReconciliationSuccess,
-    cashPlan.paymentItems.totalCount,
+    cashPlan.paymentRecordItems.totalCount,
   );
 
   const bankReconciliationErrorPercentage = countPercentage(
     cashPlan.bankReconciliationError,
-    cashPlan.paymentItems.totalCount,
+    cashPlan.paymentRecordItems.totalCount,
   );
 
   return (
