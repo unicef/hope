@@ -8,7 +8,6 @@ from django.utils import timezone
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -16,10 +15,16 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
+from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE, FieldFactory, Scope
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr, ChoiceObjectInt
+from hct_mis_api.apps.core.schema import (
+    ChoiceObject,
+    ChoiceObjectInt,
+    FieldAttributeNode,
+    sort_by_attr,
+)
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_get_filtered_qs,
@@ -37,6 +42,7 @@ from hct_mis_api.apps.grievance.filters import (
     TicketNoteFilter,
 )
 from hct_mis_api.apps.grievance.models import (
+    GrievanceDocument,
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
@@ -52,13 +58,12 @@ from hct_mis_api.apps.grievance.models import (
     TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
-    GrievanceDocument,
 )
-from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
@@ -117,9 +122,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         if user.has_permission(perm, business_area) or check_creator or check_assignee:
             return True
 
-        msg = "User is not active creator/assignee and does not have '{perm}' permission"
-        logger.error(msg)
-        raise GraphQLError(msg)
+        log_and_raise(f"User is not active creator/assignee and does not have '{perm}' permission")
 
     class Meta:
         model = GrievanceTicket

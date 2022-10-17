@@ -2,6 +2,7 @@ import uuid
 
 from django.core.management import call_command
 from django.test import override_settings
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -11,7 +12,10 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.fixtures import ReferralTicketWithoutExtrasFactory, GrievanceDocumentFactory
+from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceDocumentFactory,
+    ReferralTicketWithoutExtrasFactory,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 
@@ -86,19 +90,19 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
             "description": "Test Feedback",
             "assignedTo": cls.id_to_base64(cls.user.id, "UserNode"),
             "admin": cls.admin_area.p_code,
-            "language": "Polish, English"
+            "language": "Polish, English",
         }
 
         cls.grievance_data_to_create = {
             **cls.grievance_data,
             "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
             "consent": True,
-            "businessArea": "afghanistan"
+            "businessArea": "afghanistan",
         }
 
         cls.grievance_data_to_update = {
             **cls.grievance_data,
-            "ticketId": cls.id_to_base64(cls.ticket_2.ticket.id, "GrievanceTicketNode")
+            "ticketId": cls.id_to_base64(cls.ticket_2.ticket.id, "GrievanceTicketNode"),
         }
 
     @parameterized.expand(
@@ -119,30 +123,28 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "scanned_document1",
                             "file": self.create_fixture_file(
-                                name="scanned_document_1.jpg",
-                                size=100,
-                                content_type="image/jpeg"
-                            )
+                                name="scanned_document_1.jpg", size=100, content_type="image/jpeg"
+                            ),
                         },
                         {
                             "name": "scanned_document2",
                             "file": self.create_fixture_file(
-                                name="scanned_document_2.jpg",
-                                size=200,
-                                content_type="image/jpeg"
-                            )
-                        }
-                    ]
+                                name="scanned_document_2.jpg", size=200, content_type="image/jpeg"
+                            ),
+                        },
+                    ],
                 }
-            }
+            },
         )
 
-    @parameterized.expand([
-        ("some_document.jpg", "image/jpeg"),
-        ("some_document.png", "image/png"),
-        ("some_document.tiff", "image/tiff"),
-        ("some_document.pdf", "application/pdf")
-    ])
+    @parameterized.expand(
+        [
+            ("some_document.jpg", "image/jpeg"),
+            ("some_document.png", "image/png"),
+            ("some_document.tiff", "image/tiff"),
+            ("some_document.pdf", "application/pdf"),
+        ]
+    )
     def test_mutation_creates_file_for_allowed_types(self, name, content_type):
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD], self.business_area
@@ -156,21 +158,14 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     "documentation": [
                         {
                             "name": "scanned_document1",
-                            "file": self.create_fixture_file(
-                                name=name,
-                                size=1024,
-                                content_type=content_type
-                            )
+                            "file": self.create_fixture_file(name=name, size=1024, content_type=content_type),
                         }
-                    ]
+                    ],
                 }
-            }
+            },
         )
 
-    @parameterized.expand([
-        ("some_document.css", "text/css"),
-        ("some_document.html", "text/html")
-    ])
+    @parameterized.expand([("some_document.css", "text/css"), ("some_document.html", "text/html")])
     def test_mutation_raises_error_when_not_allowed_type_file_is_uploaded(self, name, content_type):
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD], self.business_area
@@ -184,15 +179,11 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                     "documentation": [
                         {
                             "name": "scanned_document1",
-                            "file": self.create_fixture_file(
-                                name=name,
-                                size=1024,
-                                content_type=content_type
-                            )
+                            "file": self.create_fixture_file(name=name, size=1024, content_type=content_type),
                         }
-                    ]
+                    ],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -213,14 +204,12 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "scanned_document1",
                             "file": self.create_fixture_file(
-                                name="some_big_file.jpg",
-                                size=5 * 1024 * 1024,
-                                content_type="image/jpeg"
-                            )
+                                name="some_big_file.jpg", size=5 * 1024 * 1024, content_type="image/jpeg"
+                            ),
                         }
-                    ]
+                    ],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -241,15 +230,13 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "scanned_document1",
                             "file": self.create_fixture_file(
-                                name="some_file.jpg",
-                                size=2 * 1024 * 1024,
-                                content_type="image/jpeg"
-                            )
+                                name="some_file.jpg", size=2 * 1024 * 1024, content_type="image/jpeg"
+                            ),
                         }
                         for _ in range(15)
-                    ]
+                    ],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -271,14 +258,12 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "scanned_document1",
                             "file": self.create_fixture_file(
-                                name="scanned_document_1.jpg",
-                                size=2048,
-                                content_type="image/jpeg"
-                            )
+                                name="scanned_document_1.jpg", size=2048, content_type="image/jpeg"
+                            ),
                         }
-                    ]
+                    ],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -303,14 +288,12 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg",
-                                size=1024 * 1024,
-                                content_type="image/jpeg"
-                            )
+                                name="scanned_document_update.jpg", size=1024 * 1024, content_type="image/jpeg"
+                            ),
                         }
-                    ]
+                    ],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -329,9 +312,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
             variables={
                 "input": {
                     **self.grievance_data_to_update,
-                    "documentationToDelete": [self.id_to_base64(grievance_document.id, "GrievanceDocumentNode")]
+                    "documentationToDelete": [self.id_to_base64(grievance_document.id, "GrievanceDocumentNode")],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -354,15 +337,13 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "created_scanned_document1",
                             "file": self.create_fixture_file(
-                                name="created_scanned_document1.jpg",
-                                size=2048,
-                                content_type="image/jpeg"
-                            )
+                                name="created_scanned_document1.jpg", size=2048, content_type="image/jpeg"
+                            ),
                         }
                     ],
-                    "documentationToDelete": [self.id_to_base64(grievance_document.id, "GrievanceDocumentNode")]
+                    "documentationToDelete": [self.id_to_base64(grievance_document.id, "GrievanceDocumentNode")],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -385,10 +366,8 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "created_scanned_document1",
                             "file": self.create_fixture_file(
-                                name="created_scanned_document1.jpg",
-                                size=666,
-                                content_type="image/jpeg"
-                            )
+                                name="created_scanned_document1.jpg", size=666, content_type="image/jpeg"
+                            ),
                         }
                     ],
                     "documentationToUpdate": [
@@ -396,14 +375,12 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg",
-                                size=1024 * 1024,
-                                content_type="image/jpeg"
-                            )
+                                name="scanned_document_update.jpg", size=1024 * 1024, content_type="image/jpeg"
+                            ),
                         }
-                    ]
+                    ],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -421,9 +398,9 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
             variables={
                 "input": {
                     **self.grievance_data_to_update,
-                    "documentationToDelete": [self.id_to_base64(uuid.uuid4(), "GrievanceDocumentNode")]
+                    "documentationToDelete": [self.id_to_base64(uuid.uuid4(), "GrievanceDocumentNode")],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -446,14 +423,12 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(uuid.uuid4(), "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg",
-                                size=1024 * 1024,
-                                content_type="image/jpeg"
-                            )
+                                name="scanned_document_update.jpg", size=1024 * 1024, content_type="image/jpeg"
+                            ),
                         }
-                    ]
+                    ],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -467,8 +442,7 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
         grievance_document_to_update = GrievanceDocumentFactory(grievance_ticket=self.ticket_2.ticket)
 
         grievance_document_to_delete = GrievanceDocumentFactory(
-            grievance_ticket=self.ticket_2.ticket,
-            name="this_document_should_be_deleted"
+            grievance_ticket=self.ticket_2.ticket, name="this_document_should_be_deleted"
         )
 
         self.snapshot_graphql_request(
@@ -481,10 +455,8 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "created_scanned_document1",
                             "file": self.create_fixture_file(
-                                name="created_scanned_document1.jpg",
-                                size=666,
-                                content_type="image/jpeg"
-                            )
+                                name="created_scanned_document1.jpg", size=666, content_type="image/jpeg"
+                            ),
                         }
                     ],
                     "documentationToUpdate": [
@@ -492,15 +464,15 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(grievance_document_to_update.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg",
-                                size=1024 * 1024,
-                                content_type="image/jpeg"
-                            )
+                                name="scanned_document_update.jpg", size=1024 * 1024, content_type="image/jpeg"
+                            ),
                         }
                     ],
-                    "documentationToDelete": [self.id_to_base64(grievance_document_to_delete.id, "GrievanceDocumentNode")]
+                    "documentationToDelete": [
+                        self.id_to_base64(grievance_document_to_delete.id, "GrievanceDocumentNode")
+                    ],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -523,10 +495,8 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "created_scanned_document1",
                             "file": self.create_fixture_file(
-                                name="created_scanned_document1.jpg",
-                                size=3 * 1024 * 1024,
-                                content_type="image/jpeg"
-                            )
+                                name="created_scanned_document1.jpg", size=3 * 1024 * 1024, content_type="image/jpeg"
+                            ),
                         }
                     ],
                     "documentationToUpdate": [
@@ -534,14 +504,12 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg",
-                                size=30 * 1024 * 1024,
-                                content_type="image/jpeg"
-                            )
+                                name="scanned_document_update.jpg", size=30 * 1024 * 1024, content_type="image/jpeg"
+                            ),
                         }
-                    ]
+                    ],
                 }
-            }
+            },
         )
 
     @parameterized.expand(
@@ -564,10 +532,8 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                         {
                             "name": "created_scanned_document1",
                             "file": self.create_fixture_file(
-                                name="created_scanned_document1.jpg",
-                                size=3 * 1024 * 1024,
-                                content_type="image/jpeg"
-                            )
+                                name="created_scanned_document1.jpg", size=3 * 1024 * 1024, content_type="image/jpeg"
+                            ),
                         }
                     ],
                     "documentationToUpdate": [
@@ -575,12 +541,10 @@ class TestGrievanceDocumentsUpload(UploadDocumentsBase):
                             "id": self.id_to_base64(grievance_document.id, "GrievanceDocumentNode"),
                             "name": "updated_document.jpg",
                             "file": self.create_fixture_file(
-                                name="scanned_document_update.jpg",
-                                size=5 * 1024 * 1024,
-                                content_type="image/jpeg"
-                            )
+                                name="scanned_document_update.jpg", size=5 * 1024 * 1024, content_type="image/jpeg"
+                            ),
                         }
-                    ]
+                    ],
                 }
-            }
+            },
         )

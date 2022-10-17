@@ -1,6 +1,7 @@
 from datetime import datetime
-from django.utils import timezone
 from typing import Optional
+
+from django.utils import timezone
 
 from dateutil.parser import parse
 

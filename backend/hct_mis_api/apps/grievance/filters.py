@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Q, Count, F, Window, Func
+from django.db.models import Count, F, Func, Q, Window
 
 from django_filters import (
     CharFilter,
@@ -16,17 +16,17 @@ from django_filters import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.es_filters import ElasticSearchFilterSet
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
+from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.geo.models import Area, ValidityQuerySet
-from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
+from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.core.utils import choices_to_dict
 
 
 class IsNull(Func):
-    template = '%(expressions)s IS NULL'
+    template = "%(expressions)s IS NULL"
 
 
 class GrievanceOrderingFilter(OrderingFilter):
@@ -41,8 +41,7 @@ class GrievanceOrderingFilter(OrderingFilter):
         if value and any(v in ["linked_tickets", "-linked_tickets"] for v in value):
             qs = super().filter(qs, value)
             qs = (
-                qs
-                .annotate(linked=Count("linked_tickets"))
+                qs.annotate(linked=Count("linked_tickets"))
                 .annotate(linked_related=Count("linked_tickets_related"))
                 .annotate(total_linked=F("linked") + F("linked_related"))
                 .annotate(

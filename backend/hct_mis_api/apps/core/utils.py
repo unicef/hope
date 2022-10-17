@@ -3,13 +3,18 @@ import io
 import itertools
 import logging
 import string
-from collections import MutableMapping, OrderedDict
+from collections import OrderedDict
+from collections.abc import MutableMapping
+from datetime import date, datetime
 
 from django.db.models import QuerySet
+from django.utils import timezone
 
+import pytz
 from django_filters import OrderingFilter
-from graphql import GraphQLError
 from PIL import Image
+
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +106,7 @@ def _slug_strip(value, separator="-"):
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("{}+".format(re_sep, separator, value))
+        value = re.sub("{}+".format(re_sep, separator, value))  # noqa: F523 # TODO: bug?
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -420,11 +425,9 @@ def to_snake_case(camel_case_string):
 def check_concurrency_version_in_mutation(version, target):
     if version is None:
         return
-    from graphql import GraphQLError
 
     if version != target.version:
-        logger.error(f"Someone has modified this {target} record, versions {version} != {target.version}")
-        raise GraphQLError("Someone has modified this record")
+        log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")
 
 
 def update_labels_mapping(csv_file):
@@ -553,8 +556,7 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
             if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
-            logger.error("Permission Denied")
-            raise GraphQLError("Permission Denied")
+            log_and_raise("Permission Denied")
 
     return resolve_f
 
@@ -687,3 +689,16 @@ def cached_business_areas_slug_id_dict():
     from hct_mis_api.apps.core.models import BusinessArea
 
     return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}
+
+
+def timezone_datetime(value):
+    if not value:
+        return value
+    datetime_value = value
+    if isinstance(value, date):
+        datetime_value = datetime.combine(datetime_value, datetime.min.time())
+    if isinstance(value, str):
+        datetime_value = timezone.make_aware(datetime.fromisoformat(value))
+    if datetime_value.tzinfo is None or datetime_value.tzinfo.utcoffset(datetime_value) is None:
+        return datetime_value.replace(tzinfo=pytz.utc)
+    return datetime_value

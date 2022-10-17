@@ -33,7 +33,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               >
                 Status
               </span>
-              <div>
+              <div
+                data-cy="label-Status"
+              >
                 <div
                   class="sc-EHOje gFjtOh"
                 >
@@ -57,7 +59,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               >
                 Plan Start Date
               </span>
-              <div>
+              <div
+                data-cy="label-Plan Start Date"
+              >
                 <span
                   class="sc-bxivhb FSIfE"
                   color="textSecondary"
@@ -81,7 +85,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               >
                 Plan End Date
               </span>
-              <div>
+              <div
+                data-cy="label-Plan End Date"
+              >
                 <span
                   class="sc-bxivhb FSIfE"
                   color="textSecondary"
@@ -105,7 +111,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               >
                 cash plan name
               </span>
-              <div>
+              <div
+                data-cy="label-cash plan name"
+              >
                 <span
                   class="sc-bxivhb FSIfE"
                   color="textSecondary"
@@ -125,7 +133,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               >
                 delivery type
               </span>
-              <div>
+              <div
+                data-cy="label-delivery type"
+              >
                 <span
                   class="sc-bxivhb FSIfE"
                   color="textSecondary"
@@ -145,7 +155,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               >
                 assistance through
               </span>
-              <div>
+              <div
+                data-cy="label-assistance through"
+              >
                 -
               </div>
             </div>
@@ -160,7 +172,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               >
                 dispertion date
               </span>
-              <div>
+              <div
+                data-cy="label-dispertion date"
+              >
                 <span
                   class="sc-bxivhb FSIfE"
                   color="textSecondary"
@@ -184,7 +198,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               >
                 fc id
               </span>
-              <div>
+              <div
+                data-cy="label-fc id"
+              >
                 <span
                   class="sc-bxivhb FSIfE"
                   color="textSecondary"
@@ -204,7 +220,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               >
                 dp id
               </span>
-              <div>
+              <div
+                data-cy="label-dp id"
+              >
                 <span
                   class="sc-bxivhb FSIfE"
                   color="textSecondary"
@@ -224,7 +242,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               >
                 Target population(s)
               </span>
-              <div>
+              <div
+                data-cy="label-Target population(s)"
+              >
                 <span
                   class="sc-bxivhb FSIfE"
                   color="textSecondary"
@@ -289,7 +309,9 @@ exports[`components/core/CashPlanDetails should render 1`] = `
             >
               Total Number of Households
             </span>
-            <div>
+            <div
+              data-cy="label-Total Number of Households"
+            >
               <div
                 class="sc-dnqmqq dXXPUY"
               >

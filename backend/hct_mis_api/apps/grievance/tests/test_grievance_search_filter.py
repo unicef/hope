@@ -17,7 +17,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
     fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     FILTER_BY_SEARCH = """
-    query AllGrievanceTicket($search: String) 
+    query AllGrievanceTicket($search: String)
     {
       allGrievanceTicket(businessArea: "afghanistan", search: $search) {
         totalCount

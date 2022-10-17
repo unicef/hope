@@ -1,11 +1,11 @@
 from datetime import date, datetime
-from django.utils import timezone
 from itertools import permutations
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.template.loader import render_to_string
+from django.utils import timezone
 
 import dateutil.parser
 from openpyxl import Workbook, load_workbook

@@ -409,7 +409,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             'disability': {
                                 'approve_status': False,
                                 'previous_value': 'not disabled',
-                                'value': 'disabled'
+                                'value': "disabled"
                             },
                             'documents': [
                                 {

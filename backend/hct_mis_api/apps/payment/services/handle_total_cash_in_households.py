@@ -1,4 +1,4 @@
-from django.db.models import Sum, Subquery, OuterRef
+from django.db.models import OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 
 from hct_mis_api.apps.household.models import Household
