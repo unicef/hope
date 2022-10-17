@@ -156,7 +156,6 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const validationSchema = useCallback(() => {
     const datum = {
       title: Yup.string(),
-      body: Yup.string(),
     };
 
     if (activeStep === SurveySteps.Details) {
@@ -164,9 +163,6 @@ export const CreateSurveyPage = (): React.ReactElement => {
         .min(2, t('Too short'))
         .max(255, t('Too long'))
         .required(t('Title is required'));
-      datum.body = Yup.string()
-        .min(2, t('Too short'))
-        .required(t('Message is required'));
     }
     setValidateData(true);
 
@@ -299,7 +295,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
             }
           />
           <PaperContainer>
-            <Grid xs={9} item>
+            <Grid xs={12} item>
               <Stepper activeStep={activeStep}>
                 {steps.map((label) => {
                   const stepProps: { completed?: boolean } = {};
