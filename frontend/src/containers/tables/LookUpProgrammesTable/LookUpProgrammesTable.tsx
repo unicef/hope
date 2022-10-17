@@ -1,5 +1,4 @@
 import React, { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { TableWrapper } from '../../../components/core/TableWrapper';
 import {
@@ -36,7 +35,6 @@ export const LookUpProgrammesTable = ({
   handleChange,
   setFieldValue,
 }: LookUpProgrammesTableProps): ReactElement => {
-  const { t } = useTranslation();
   const initialVariables: AllProgramsQueryVariables = {
     businessArea,
     search: filter.search,
@@ -57,7 +55,6 @@ export const LookUpProgrammesTable = ({
     <NoTableStyling>
       <TableWrapper>
         <UniversalTable<ProgramNode, AllProgramsQueryVariables>
-          title={t('Programmes')}
           headCells={headCells}
           query={useAllProgramsQuery}
           queriedObjectName='allPrograms'

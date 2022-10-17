@@ -43,6 +43,7 @@ import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { getPercentage } from '../../../../utils/utils';
 import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
+import { Missing } from '../../../../components/core/Missing';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const sampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -68,7 +69,6 @@ const initialValues = {
   ageCheckbox: false,
   sexCheckbox: false,
   title: '',
-  body: '',
   samplingType: 'FULL_LIST',
 };
 
@@ -347,7 +347,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                             setSelectedSampleSizeType(index);
                           }}
                           key={tab}
-                          control={<Radio />}
+                          control={<Radio color='primary' />}
                           label={tab}
                         />
                       ))}
@@ -548,21 +548,20 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         multiline
                         fullWidth
                         variant='outlined'
-                        label={t('Title')}
+                        label={t('Survey Title')}
                         component={FormikTextField}
                       />
                     </Grid>
                   </Box>
                   <Grid item xs={12}>
-                    <Field
-                      name='body'
-                      required
-                      multiline
-                      fullWidth
-                      variant='outlined'
-                      label={t('Message')}
-                      component={FormikTextField}
-                    />
+                    <Box
+                      pb={3}
+                      pt={3}
+                      fontSize={16}
+                      fontWeight='fontWeightBold'
+                    >
+                      {t('Number of selected recipients')}: <Missing />
+                    </Box>
                   </Grid>
                 </>
               )}
