@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='paymentverification',
             name='payment_object_id',
-            field=models.CharField(max_length=50, null=True),
+            field=models.UUIDField(null=True),
         ),
         migrations.AddConstraint(
             model_name='paymentverification',
