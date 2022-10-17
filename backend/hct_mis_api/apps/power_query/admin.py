@@ -74,9 +74,6 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
         return super(QueryAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_readonly_fields(self, request, obj=None):
-        return super().get_readonly_fields(request, obj)
-
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser or (obj and obj.owner == request.user)
 
