@@ -22,13 +22,13 @@ from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     CheckRapidProVerificationTask,
 )
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 
 class TestRapidProVerificationTask(TestCase):
@@ -90,7 +90,7 @@ class TestRapidProVerificationTask(TestCase):
 
         target_population = TargetPopulationFactory(
             created_by=user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
             business_area=BusinessArea.objects.first(),
         )
         cash_plan = CashPlanFactory(
@@ -319,12 +319,17 @@ class TestRapidProVerificationTask(TestCase):
 
 class TestPhoneNumberVerification(TestCase):
     def test_phone_numbers(self):
-        assert is_right_phone_number_format("+40032215789")
+        self.assertTrue(is_right_phone_number_format("+40032215789"))
 
-        assert is_right_phone_number_format("+48 123 234 345")
-        assert is_right_phone_number_format("0048 123 234 345")
+        self.assertTrue(is_right_phone_number_format("+48 123 234 345"))
+        self.assertTrue(is_right_phone_number_format("0048 123 234 345"))
 
-        assert not is_right_phone_number_format("(201) 555-0123")
-        assert is_right_phone_number_format("+1 (201) 555-0123")
+        self.assertFalse(is_right_phone_number_format("(201) 555-0123"))
+        self.assertTrue(is_right_phone_number_format("+1 (201) 555-0123"))
 
-        assert not is_right_phone_number_format("123-not-really-a-phone-number")
+        self.assertFalse(is_right_phone_number_format("123-not-really-a-phone-number"))
+
+        self.assertFalse(is_right_phone_number_format("+38063754115"))
+        self.assertTrue(is_right_phone_number_format("+380637541150"))
+        self.assertTrue(is_right_phone_number_format("+380 123 234 345"))
+        self.assertFalse(is_right_phone_number_format("+380 23 234 345"))

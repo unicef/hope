@@ -15,8 +15,12 @@ from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import SheetImageLoader
+from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
 from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_PARTIAL,
+    COLLECT_TYPE_UNKNOWN,
     HEAD,
     IDENTIFICATION_TYPE_DICT,
     NON_BENEFICIARY,
@@ -61,6 +65,17 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.individuals = []
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
+
+    def _handle_collect_individual_data(self, value, header, row_num, individual, *args, **kwargs):
+        try:
+            return {
+                "FULL": COLLECT_TYPE_FULL,
+                "PARTIAL": COLLECT_TYPE_PARTIAL,
+                "NONE": COLLECT_TYPE_NONE,
+                "UNKNOWN": COLLECT_TYPE_UNKNOWN,
+            }[value]
+        except KeyError:
+            return COLLECT_TYPE_UNKNOWN
 
     def _handle_bank_account_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
@@ -193,6 +208,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         return Point(x=float(longitude), y=float(latitude), srid=4326)
 
+    def _handle_datetime(self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs):
+        return timezone_datetime(cell.value)
+
     def _handle_identity_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
             return
@@ -275,13 +293,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         docs_to_create = []
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
-            doc_type = ImportedDocumentType.objects.get(
-                country=issuing_country,
-                type=document_data["type"],
-            )
+            doc_type = ImportedDocumentType.objects.get(type=document_data["type"])
             photo = document_data.get("photo")
             individual = document_data.get("individual")
             obj = ImportedDocument(
+                country=issuing_country,
                 document_number=document_data.get("value"),
                 photo=photo,
                 individual=individual,
@@ -366,6 +382,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "bank_name_i_c": self._handle_bank_account_fields,
                 "bank_account_number_i_c": self._handle_bank_account_fields,
                 "debit_card_number_i_c": self._handle_bank_account_fields,
+                "first_registration_date_i_c": self._handle_datetime,
             },
             "households": {
                 "consent_sign_h_c": self._handle_image_field,
@@ -373,6 +390,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "fchild_hoh_h_c": self._handle_bool_field,
                 "child_hoh_h_c": self._handle_bool_field,
                 "consent_h_c": self._handle_bool_field,
+                "first_registration_date_h_c": self._handle_datetime,
+                "collect_individual_data": self._handle_collect_individual_data,
             },
         }
 

@@ -3,11 +3,13 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
+
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -32,5 +34,4 @@ def download_cash_plan_payment_verification(request, verification_id):
             cash_plan_payment_verification.xlsx_cashplan_payment_verification_file.save()
         return redirect(cash_plan_payment_verification.xlsx_cash_plan_payment_verification_file_link)
     else:
-        logger.error(f"File not found. CashPlanPaymentVerification ID: {verification_id}")
-        raise GraphQLError("File not found")
+        log_and_raise(f"File not found. CashPlanPaymentVerification ID: {verification_id}")

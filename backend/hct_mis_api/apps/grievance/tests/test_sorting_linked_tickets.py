@@ -11,7 +11,10 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory, ReferralTicketWithoutExtrasFactory
+from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceTicketFactory,
+    ReferralTicketWithoutExtrasFactory,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 
@@ -86,7 +89,6 @@ class TestGrievanceQuery(APITestCase):
 
         cls.ticket_1.linked_tickets.add(cls.ticket_5)
 
-
     @parameterized.expand(
         [
             (
@@ -107,7 +109,7 @@ class TestGrievanceQuery(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             ),
             ("without_permission", []),
         ]
@@ -115,6 +117,5 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_query_sort_by_linked_tickets_descending(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
-            request_string=self.SORT_GRIEVANCE_QUERY_BY_LINKED_TICKETS_DESC,
-            context={"user": self.user}
+            request_string=self.SORT_GRIEVANCE_QUERY_BY_LINKED_TICKETS_DESC, context={"user": self.user}
         )

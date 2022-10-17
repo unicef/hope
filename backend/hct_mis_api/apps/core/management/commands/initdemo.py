@@ -1,5 +1,5 @@
 from django.core.management import BaseCommand, call_command
-from django.db import connections, OperationalError
+from django.db import OperationalError, connections
 
 from hct_mis_api.apps.core.management.sql import sql_drop_tables
 from hct_mis_api.apps.payment.fixtures import generate_real_cash_plans

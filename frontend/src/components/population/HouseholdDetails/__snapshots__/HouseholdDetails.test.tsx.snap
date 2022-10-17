@@ -30,7 +30,9 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             >
               Household Size
             </span>
-            <div>
+            <div
+              data-cy="label-Household Size"
+            >
               4
             </div>
           </div>
@@ -45,7 +47,9 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             >
               Residence Status
             </span>
-            <div>
+            <div
+              data-cy="label-Residence Status"
+            >
               Displaced  |  Refugee / Asylum Seeker
             </div>
           </div>
@@ -60,7 +64,9 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             >
               Head of Household
             </span>
-            <div>
+            <div
+              data-cy="label-Head of Household"
+            >
               <a
                 class="sc-bdVaJa eyPVh"
                 href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
@@ -80,7 +86,9 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             >
               FEMALE CHILD HEADED HOUSEHOLD
             </span>
-            <div>
+            <div
+              data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
+            >
               No
             </div>
           </div>
@@ -95,7 +103,9 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             >
               CHILD HEADED HOUSEHOLD
             </span>
-            <div>
+            <div
+              data-cy="label-CHILD HEADED HOUSEHOLD"
+            >
               No
             </div>
           </div>
@@ -110,7 +120,9 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             >
               Country
             </span>
-            <div>
+            <div
+              data-cy="label-Country"
+            >
               Isle of Man
             </div>
           </div>
@@ -125,7 +137,9 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             >
               Country of Origin
             </span>
-            <div>
+            <div
+              data-cy="label-Country of Origin"
+            >
               San Marino
             </div>
           </div>
@@ -140,7 +154,9 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             >
               Address
             </span>
-            <div>
+            <div
+              data-cy="label-Address"
+            >
               938 Luna Cliffs Apt. 551
 Jameschester, SC 24934
             </div>
@@ -156,7 +172,9 @@ Jameschester, SC 24934
             >
               Village
             </span>
-            <div>
+            <div
+              data-cy="label-Village"
+            >
               -
             </div>
           </div>
@@ -171,7 +189,9 @@ Jameschester, SC 24934
             >
               Administrative Level 1
             </span>
-            <div>
+            <div
+              data-cy="label-Administrative Level 1"
+            >
               Nangarhar
             </div>
           </div>
@@ -186,7 +206,9 @@ Jameschester, SC 24934
             >
               Administrative Level 2
             </span>
-            <div>
+            <div
+              data-cy="label-Administrative Level 2"
+            >
               Achin
             </div>
           </div>
@@ -201,7 +223,9 @@ Jameschester, SC 24934
             >
               Geolocation
             </span>
-            <div>
+            <div
+              data-cy="label-Geolocation"
+            >
               70.210209, 172.085021
             </div>
           </div>
@@ -216,7 +240,9 @@ Jameschester, SC 24934
             >
               UNHCR CASE ID
             </span>
-            <div>
+            <div
+              data-cy="label-UNHCR CASE ID"
+            >
               -
             </div>
           </div>
@@ -231,7 +257,9 @@ Jameschester, SC 24934
             >
               LENGTH OF TIME SINCE ARRIVAL
             </span>
-            <div>
+            <div
+              data-cy="label-LENGTH OF TIME SINCE ARRIVAL"
+            >
               12
             </div>
           </div>
@@ -246,7 +274,9 @@ Jameschester, SC 24934
             >
               NUMBER OF TIMES DISPLACED
             </span>
-            <div>
+            <div
+              data-cy="label-NUMBER OF TIMES DISPLACED"
+            >
               -
             </div>
           </div>
@@ -261,13 +291,15 @@ Jameschester, SC 24934
             >
               IS THIS A RETURNEE HOUSEHOLD?
             </span>
-            <div>
+            <div
+              data-cy="label-IS THIS A RETURNEE HOUSEHOLD?"
+            >
               No
             </div>
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
         >
           <div>
             <span
@@ -276,7 +308,9 @@ Jameschester, SC 24934
             >
               Linked Grievances
             </span>
-            <div>
+            <div
+              data-cy="label-Linked Grievances"
+            >
               <span
                 class="sc-htpNat cwQQYq"
                 color="textSecondary"
@@ -285,6 +319,23 @@ Jameschester, SC 24934
                   -
                 </span>
               </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              COLLECT TYPE
+            </span>
+            <div
+              data-cy="label-COLLECT TYPE"
+            >
+              -
             </div>
           </div>
         </div>
@@ -423,7 +474,9 @@ Jameschester, SC 24934
             >
               Total Cash Received
             </span>
-            <div>
+            <div
+              data-cy="label-Total Cash Received"
+            >
               <div
                 class="sc-jTzLTM dhULVO"
               >

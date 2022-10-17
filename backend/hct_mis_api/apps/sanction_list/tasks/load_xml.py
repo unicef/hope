@@ -6,7 +6,7 @@ from typing import Any, Iterable, Union
 from urllib.request import urlopen
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q, QuerySet
+from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.utils import timezone
 from django.utils.functional import cached_property

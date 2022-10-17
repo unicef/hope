@@ -11,7 +11,6 @@ from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.models import Role, UserRole
-from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 
@@ -56,9 +55,8 @@ class APITestCase(SnapshotTestTestCase):
     def generate_document_types_for_all_countries(cls):
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
-        for country in Country.objects.all():
-            for doc_type, label in identification_type_choice:
-                document_types.append(DocumentType(country=country, label=label, type=doc_type))
+        for doc_type, label in identification_type_choice:
+            document_types.append(DocumentType(label=label, type=doc_type))
 
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 

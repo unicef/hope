@@ -24,19 +24,19 @@ from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 class TestAlreadyExistingFilterTickets(APITestCase):
     FILTER_EXISTING_GRIEVANCES_QUERY = """
     query ExistingGrievanceTickets(
-      $businessArea: String!, 
-      $category: String!, 
-      $issueType: String, 
-      $household: ID, 
-      $individual: ID, 
+      $businessArea: String!,
+      $category: String!,
+      $issueType: String,
+      $household: ID,
+      $individual: ID,
       $paymentRecord: [ID]
     ) {
       existingGrievanceTickets(
-        businessArea: $businessArea, 
-        category: $category, 
-        issueType: $issueType, 
-        household: $household, 
-        individual: $individual, 
+        businessArea: $businessArea,
+        category: $category,
+        issueType: $issueType,
+        household: $household,
+        individual: $individual,
         paymentRecord: $paymentRecord,
         orderBy: "id"
       ) {

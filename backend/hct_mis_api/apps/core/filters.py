@@ -1,12 +1,20 @@
 import json
 from datetime import date, timedelta
-from django.utils import timezone
 
-from django.forms import DateField, DateTimeField, DecimalField, Field, IntegerField, CharField
+from django.forms import (
+    CharField,
+    DateField,
+    DateTimeField,
+    DecimalField,
+    Field,
+    IntegerField,
+)
+from django.utils import timezone
 
 from dateutil.parser import parse
 from django_filters import Filter
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 
 
@@ -177,5 +185,10 @@ class BusinessAreaSlugFilter(Filter):
     field_class = CharField
 
     def filter(self, qs, business_area_slug):
-        business_area_id = cached_business_areas_slug_id_dict()[business_area_slug]
+        cached_dict = cached_business_areas_slug_id_dict()
+        business_area_id = (
+            cached_dict[business_area_slug]
+            if business_area_slug in cached_dict
+            else BusinessArea.objects.get(slug=business_area_slug).id
+        )
         return qs.filter(business_area_id=business_area_id)

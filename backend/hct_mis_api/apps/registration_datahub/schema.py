@@ -34,7 +34,10 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
 )
-from hct_mis_api.apps.registration_datahub.filters import ImportedHouseholdFilter, ImportedIndividualFilter
+from hct_mis_api.apps.registration_datahub.filters import (
+    ImportedHouseholdFilter,
+    ImportedIndividualFilter,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedDocument,
@@ -266,7 +269,7 @@ class ImportedDocumentNode(DjangoObjectType):
     photo = graphene.String(description="Photo url")
 
     def resolve_country(parent, info):
-        return getattr(parent.type.country, "name", parent.type.country)
+        return getattr(parent.country, "name", parent.country)
 
     def resolve_photo(parent, info):
         if parent.photo:

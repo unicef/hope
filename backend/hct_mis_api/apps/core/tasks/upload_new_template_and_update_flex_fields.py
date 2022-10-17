@@ -1,6 +1,7 @@
 import logging
-from django.utils import timezone
 from io import BytesIO
+
+from django.utils import timezone
 
 import requests
 
