@@ -129,19 +129,6 @@ services:
       - redis
       - elasticsearch
 
-  celery-flower:
-    image: johniak/flower:1.6
-    command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]
-    environment:
-      - FLOWER_AUTH_PROVIDER=""
-      - FLOWER_DEBUG="1"
-      - FLOWER_ADDRESS=0.0.0.0
-    ports:
-      - "5555:5555"
-    restart: always
-    depends_on:
-      - redis
-
   db:
     image: johniak/postgis:11-alpine
     volumes:
