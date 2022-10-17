@@ -97,19 +97,6 @@ services:
       - redis
       - elasticsearch
 
-  celery-flower:
-    image: johniak/flower:1.6
-    command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]
-    environment:
-      - FLOWER_AUTH_PROVIDER=""
-      - FLOWER_DEBUG="1"
-      - FLOWER_ADDRESS=0.0.0.0
-    ports:
-      - "5555:5555"
-    restart: always
-    depends_on:
-      - redis
-
   db:
     image: johniak/postgis:11-alpine
     volumes:
@@ -143,15 +130,3 @@ services:
       - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-
-  kibana:
-    container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.4.0
-    restart: always
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - 5601:5601
-    depends_on:
-      - elasticsearch
-
