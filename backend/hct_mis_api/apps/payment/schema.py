@@ -960,21 +960,26 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
-        # TODO MB refactor when PaymentVerification is adjusted to PaymentPlan
         filters = chart_filters_decoder(kwargs)
         status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
+        additional_filters = (
+            chart_create_filter_query(
+                filters,
+                program_id_path="payment__parent__program__id,payment_record__parent__program__id",
+                administrative_area_path="payment__household__admin_area,payment_record__parent__program__id",
+                payment_verification_gfk=True,
+            )
+        )
         payment_verifications = chart_get_filtered_qs(
             PaymentVerification.objects,
             year,
-            business_area_slug_filter={"payment__business_area__slug": business_area_slug},
-            additional_filters={
-                **chart_create_filter_query(
-                    filters,
-                    program_id_path="payment__parent__program__id",
-                    administrative_area_path="payment__household__admin_area",
-                )
+            business_area_slug_filter={
+                "payment__business_area__slug": business_area_slug,
+                "payment_record__business_area__slug": business_area_slug,
             },
-            year_filter_path="payment__delivery_date",
+            additional_filters=additional_filters if isinstance(additional_filters, Q) else {**additional_filters},
+            year_filter_path="payment__delivery_date,payment_record__delivery_date",
+            payment_verification_gfk=True,
         )
 
         verifications_by_status = payment_verifications.values("status").annotate(count=Count("status"))

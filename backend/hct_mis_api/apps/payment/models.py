@@ -11,7 +11,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Count, JSONField, Q, Sum, UniqueConstraint
+from django.db.models import Count, JSONField, Q, Sum, UniqueConstraint, UUIDField
 from django.db.models.functions import Coalesce
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
@@ -93,11 +93,6 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     )
     total_undelivered_quantity_usd = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
-    )
-    payment_verification_plans = GenericRelation(
-        "payment.PaymentVerificationPlan",
-        content_type_field="payment_plan_content_type",
-        object_id_field="payment_plan_object_id",
     )
 
     class Meta:
@@ -272,13 +267,6 @@ class GenericPayment(TimeStampedUUIDModel):
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
-    payment_verifications = GenericRelation(
-        "payment.PaymentVerification",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment",
-        related_name="payments",
-    )
 
     class Meta:
         abstract = True
@@ -386,6 +374,19 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
+    payment_verification_summary = GenericRelation(
+        "payment.PaymentVerificationSummary",
+        content_type_field="payment_plan_content_type",
+        object_id_field="payment_plan_object_id",
+        related_query_name="payment_plan",
+
+    )
+    payment_verification_plans = GenericRelation(
+        "payment.PaymentVerificationPlan",
+        content_type_field="payment_plan_content_type",
+        object_id_field="payment_plan_object_id",
+        related_query_name="payment_plan",
+    )
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -915,6 +916,19 @@ class CashPlan(GenericPaymentPlan):
     validation_alerts_count = models.IntegerField()
     total_persons_covered = models.IntegerField(db_index=True)
     total_persons_covered_revised = models.IntegerField(db_index=True)
+    payment_verification_summary = GenericRelation(
+        "payment.PaymentVerificationSummary",
+        content_type_field="payment_plan_content_type",
+        object_id_field="payment_plan_object_id",
+        related_query_name="cash_plan",
+
+    )
+    payment_verification_plan = GenericRelation(
+        "payment.PaymentVerificationPlan",
+        content_type_field="payment_plan_content_type",
+        object_id_field="payment_plan_object_id",
+        related_query_name="cash_plan",
+    )
 
     def __str__(self):
         return self.name
@@ -951,6 +965,7 @@ class CashPlan(GenericPaymentPlan):
 
     @property
     def unicef_id(self):
+        # TODO: maybe 'ca_id' rename to 'unicef_id'?
         return getattr(self, "ca_id")
 
     class Meta:
@@ -997,6 +1012,20 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         "payment.ServiceProvider",
         on_delete=models.CASCADE,
     )
+    payment_verification = GenericRelation(
+        "payment.PaymentVerification",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment_record",
+        # related_name="payment_records",
+    )
+    payment_verification_summary = GenericRelation(
+        "payment.PaymentVerificationSummary",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment_record",
+        # related_name="payment_records",
+    )
 
     @property
     def unicef_id(self):
@@ -1016,6 +1045,20 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
     assigned_payment_channel = models.ForeignKey("payment.PaymentChannel", on_delete=models.CASCADE, null=True)
+    payment_verification = GenericRelation(
+        "payment.PaymentVerification",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment",
+        # related_name="payments",
+    )
+    payment_verification_summary = GenericRelation(
+        "payment.PaymentVerificationSummary",
+        content_type_field="payment_content_type",
+        object_id_field="payment_object_id",
+        related_query_name="payment",
+        # related_name="payments",
+    )
 
     objects = PaymentManager()
 
@@ -1098,8 +1141,8 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    payment_plan_object_id = models.CharField(max_length=50)
-    payment_plan = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
+    payment_plan_object_id = UUIDField()
+    payment_plan_obj = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
     verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)
@@ -1254,8 +1297,8 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="payment_record_verifications",
     )
     payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    payment_object_id = models.CharField(max_length=50)
-    payment = GenericForeignKey("payment_content_type", "payment_object_id")
+    payment_object_id = UUIDField()
+    payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
     status_date = models.DateTimeField(null=True)
     received_amount = models.DecimalField(
@@ -1316,8 +1359,8 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
     payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    payment_plan_object_id = models.CharField(max_length=50)
-    payment_plan = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
+    payment_plan_object_id = UUIDField()
+    payment_plan_obj = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
 
     class Meta:
         indexes = [
