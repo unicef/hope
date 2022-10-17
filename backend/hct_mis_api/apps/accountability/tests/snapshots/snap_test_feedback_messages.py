@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestTicketNotes::test_create_feedback_message_0_with_permission 1'] = {
+snapshots['TestFeedbackMessages::test_create_feedback_message_0_with_permission 1'] = {
     'data': {
         'createFeedbackMessage': {
             'feedbackMessage': {
@@ -21,7 +21,7 @@ snapshots['TestTicketNotes::test_create_feedback_message_0_with_permission 1'] =
     }
 }
 
-snapshots['TestTicketNotes::test_create_feedback_message_1_without_permission 1'] = {
+snapshots['TestFeedbackMessages::test_create_feedback_message_1_without_permission 1'] = {
     'data': {
         'createFeedbackMessage': None
     },
@@ -41,7 +41,7 @@ snapshots['TestTicketNotes::test_create_feedback_message_1_without_permission 1'
     ]
 }
 
-snapshots['TestTicketNotes::test_feedback_query_shows_feedback_messages_0_with_permission 1'] = {
+snapshots['TestFeedbackMessages::test_feedback_query_shows_feedback_messages_0_with_permission 1'] = {
     'data': {
         'feedback': {
             'feedbackMessages': {
@@ -49,7 +49,7 @@ snapshots['TestTicketNotes::test_feedback_query_shows_feedback_messages_0_with_p
                     {
                         'node': {
                             'description': 'Feedback message you see',
-                            'id': 'RmVlZGJhY2tNZXNzYWdlTm9kZTpjMzZiZjM3MC0xOThhLTRkNDItYTgzNi1iNWFmOTRhYzAzYzU='
+                            'id': 'RmVlZGJhY2tNZXNzYWdlTm9kZTpjODZkOGE1OC1jNGI4LTQwNjYtOTgyMS05OGUyMzZiMTc3NDI='
                         }
                     }
                 ]
@@ -60,7 +60,7 @@ snapshots['TestTicketNotes::test_feedback_query_shows_feedback_messages_0_with_p
     }
 }
 
-snapshots['TestTicketNotes::test_feedback_query_shows_feedback_messages_1_without_permission 1'] = {
+snapshots['TestFeedbackMessages::test_feedback_query_shows_feedback_messages_1_without_permission 1'] = {
     'data': {
         'feedback': None
     },

@@ -4,8 +4,8 @@ from django.test import TestCase
 from hct_mis_api.apps.account.admin import UserRoleAdminForm, UserRoleInlineFormSet
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 class UserRolesTest(TestCase):

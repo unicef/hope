@@ -27,7 +27,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Full Name
           </span>
-          <div>
+          <div
+            data-cy="label-Full Name"
+          >
             Jan Romaniak
           </div>
         </div>
@@ -42,7 +44,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Given Name
           </span>
-          <div>
+          <div
+            data-cy="label-Given Name"
+          >
             Jan
           </div>
         </div>
@@ -57,7 +61,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Middle Name
           </span>
-          <div>
+          <div
+            data-cy="label-Middle Name"
+          >
             -
           </div>
         </div>
@@ -72,7 +78,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Family Name
           </span>
-          <div>
+          <div
+            data-cy="label-Family Name"
+          >
             Romaniak
           </div>
         </div>
@@ -87,7 +95,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Gender
           </span>
-          <div>
+          <div
+            data-cy="label-Gender"
+          >
             Male
           </div>
         </div>
@@ -102,7 +112,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Age
           </span>
-          <div>
+          <div
+            data-cy="label-Age"
+          >
             121
           </div>
         </div>
@@ -117,7 +129,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Date of Birth
           </span>
-          <div>
+          <div
+            data-cy="label-Date of Birth"
+          >
             <time
               datetime="-2176675200000"
             >
@@ -136,7 +150,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Estimated Date of Birth
           </span>
-          <div>
+          <div
+            data-cy="label-Estimated Date of Birth"
+          >
             No
           </div>
         </div>
@@ -151,7 +167,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Marital Status
           </span>
-          <div>
+          <div
+            data-cy="label-Marital Status"
+          >
             Married
           </div>
         </div>
@@ -166,7 +184,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Work Status
           </span>
-          <div>
+          <div
+            data-cy="label-Work Status"
+          >
             Not provided
           </div>
         </div>
@@ -181,7 +201,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Pregnant
           </span>
-          <div>
+          <div
+            data-cy="label-Pregnant"
+          >
             No
           </div>
         </div>
@@ -196,7 +218,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Household ID
           </span>
-          <div>
+          <div
+            data-cy="label-Household ID"
+          >
             <a
               class="sc-bdVaJa eyPVh"
               href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTowMTk1YTEzYi0wYThkLTRiYTEtYjM0OS00MDY4YWNmOTViNDE="
@@ -216,7 +240,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Role
           </span>
-          <div>
+          <div
+            data-cy="label-Role"
+          >
             None
           </div>
         </div>
@@ -231,7 +257,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Relationship to HOH
           </span>
-          <div>
+          <div
+            data-cy="label-Relationship to HOH"
+          >
             Brother / Sister
           </div>
         </div>
@@ -246,7 +274,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Linked Households
           </span>
-          <div>
+          <div
+            data-cy="label-Linked Households"
+          >
             -
           </div>
         </div>
@@ -268,7 +298,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Observed disabilities
           </span>
-          <div>
+          <div
+            data-cy="label-Observed disabilities"
+          >
             -
           </div>
         </div>
@@ -283,7 +315,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Seeing disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Seeing disability severity"
+          >
             None
           </div>
         </div>
@@ -298,7 +332,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Hearing disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Hearing disability severity"
+          >
             None
           </div>
         </div>
@@ -313,7 +349,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Physical disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Physical disability severity"
+          >
             None
           </div>
         </div>
@@ -328,7 +366,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Remembering or concentrating disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Remembering or concentrating disability severity"
+          >
             None
           </div>
         </div>
@@ -343,7 +383,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Self-care disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Self-care disability severity"
+          >
             None
           </div>
         </div>
@@ -358,7 +400,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Communicating disability severity
           </span>
-          <div>
+          <div
+            data-cy="label-Communicating disability severity"
+          >
             None
           </div>
         </div>
@@ -373,7 +417,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Disability
           </span>
-          <div>
+          <div
+            data-cy="label-Disability"
+          >
             Not Disabled
           </div>
         </div>
@@ -401,7 +447,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
               >
                 National ID
               </span>
-              <div>
+              <div
+                data-cy="label-National ID"
+              >
                 WSH221365
               </div>
             </div>
@@ -413,7 +461,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
             >
               issued
             </span>
-            <div>
+            <div
+              data-cy="label-issued"
+            >
               Poland
             </div>
           </div>
@@ -436,7 +486,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Phone Number
           </span>
-          <div>
+          <div
+            data-cy="label-Phone Number"
+          >
             Invalid Phone Number
           </div>
         </div>
@@ -451,7 +503,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Alternative Phone Number
           </span>
-          <div>
+          <div
+            data-cy="label-Alternative Phone Number"
+          >
             -
           </div>
         </div>
@@ -473,7 +527,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Date of last screening against sanctions list
           </span>
-          <div>
+          <div
+            data-cy="label-Date of last screening against sanctions list"
+          >
             <time
               datetime="1644305739718"
             >
@@ -492,7 +548,9 @@ exports[`components/population/IndividualBioData should render 1`] = `
           >
             Linked Grievances
           </span>
-          <div>
+          <div
+            data-cy="label-Linked Grievances"
+          >
             <span
               class="sc-htpNat cwQQYq"
               color="textSecondary"

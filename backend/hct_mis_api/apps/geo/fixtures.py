@@ -1,7 +1,7 @@
 import factory
-from faker import Faker
-import random
 from factory import fuzzy
+from faker import Faker
+
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 
 faker = Faker()
@@ -19,7 +19,7 @@ def create_fake_multipolygon():
 class CountryFactory(factory.DjangoModelFactory):
     class Meta:
         model = Country
-        django_get_or_create = ('name', 'short_name', 'iso_code2', 'iso_code3', 'iso_num')
+        django_get_or_create = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
 
     name = "Afghanistan"
     short_name = "Afghanistan"
@@ -32,7 +32,7 @@ class CountryFactory(factory.DjangoModelFactory):
 class AreaTypeFactory(factory.DjangoModelFactory):
     class Meta:
         model = AreaType
-        django_get_or_create = ('name', 'country', 'area_level')
+        django_get_or_create = ("name", "country", "area_level")
 
     name = factory.LazyFunction(faker.domain_word)
     country = factory.SubFactory(CountryFactory)
@@ -43,13 +43,11 @@ class AreaTypeFactory(factory.DjangoModelFactory):
 class AreaFactory(factory.DjangoModelFactory):
     class Meta:
         model = Area
-        django_get_or_create = ('name', 'p_code', 'area_type')
+        django_get_or_create = ("name", "p_code", "area_type")
 
     name = factory.LazyFunction(faker.city)
     parent = None
-    p_code = faker.bothify(text='AF@@@@@@')
+    p_code = faker.bothify(text="AF@@@@@@")
     area_type = factory.SubFactory(AreaTypeFactory)
     geom = factory.LazyFunction(create_fake_multipolygon)
     point = None
-
-

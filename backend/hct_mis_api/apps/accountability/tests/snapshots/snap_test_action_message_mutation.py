@@ -26,19 +26,21 @@ snapshots['TestActionMessageMutation::test_get_communication_message_sample_size
 }
 
 snapshots['TestActionMessageMutation::test_get_communication_message_sample_size_for_rdi_0_with_permission_and_full_list_rdi 1'] = {
-    'errors': [
-        {
-            'message': 'Object of type UUID is not JSON serializable'
+    'data': {
+        'accountabilityCommunicationMessageSampleSize': {
+            'numberOfRecipients': 0,
+            'sampleSize': 0
         }
-    ]
+    }
 }
 
 snapshots['TestActionMessageMutation::test_get_communication_message_sample_size_for_rdi_1_with_permission_and_random_rdi 1'] = {
-    'errors': [
-        {
-            'message': 'Object of type UUID is not JSON serializable'
+    'data': {
+        'accountabilityCommunicationMessageSampleSize': {
+            'numberOfRecipients': 0,
+            'sampleSize': 0
         }
-    ]
+    }
 }
 
 snapshots['TestActionMessageMutation::test_get_communication_message_sample_size_for_target_population_0_with_permission_and_full_list_tp 1'] = {

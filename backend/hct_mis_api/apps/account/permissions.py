@@ -13,9 +13,9 @@ from graphene_django.filter.utils import (
     get_filtering_args_from_filterset,
     get_filterset_class,
 )
-from graphql import GraphQLError
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +73,7 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS = auto()
     PAYMENT_VERIFICATION_DELETE = auto()
     PAYMENT_VERIFICATION_INVALID = auto()
+    PAYMENT_VERIFICATION_MARK_AS_FAILED = auto()
 
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()
@@ -153,6 +154,10 @@ class Permissions(Enum):
     # Activity Log
     ACTIVITY_LOG_VIEW = auto()
     ACTIVITY_LOG_DOWNLOAD = auto()
+
+    # Core
+    UPLOAD_STORAGE_FILE = auto()
+    DOWNLOAD_STORAGE_FILE = auto()
 
     # Communication
     ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST = auto()
@@ -257,8 +262,7 @@ class BaseNodePermissionMixin:
     def check_node_permission(cls, info, object_instance):
         business_area = object_instance.business_area
         if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
-            logger.error("Permission Denied")
-            raise GraphQLError("Permission Denied")
+            log_and_raise("Permission Denied")
 
     @classmethod
     def get_node(cls, info, object_id):
@@ -287,8 +291,7 @@ class BaseNodePermissionMixin:
             or (is_creator and user.has_permission(creator_permission, business_area))
             or (is_owner and user.has_permission(owner_permission, business_area))
         ):
-            logger.error("Permission Denied")
-            raise GraphQLError("Permission Denied")
+            log_and_raise("Permission Denied")
 
 
 class DjangoPermissionFilterConnectionField(DjangoConnectionField):
@@ -349,8 +352,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
     ):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
         if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
-            logger.error("Permission Denied")
-            raise GraphQLError("Permission Denied")
+            log_and_raise("Permission Denied")
         if "permissions" in filtering_args:
             filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
                 filter_kwargs.get("business_area")

@@ -1,8 +1,8 @@
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     reassign_roles_on_disable_individual,
 )

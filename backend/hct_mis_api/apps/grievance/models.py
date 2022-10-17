@@ -12,11 +12,17 @@ from django.db.models import JSONField, Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+
 from model_utils.models import UUIDModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
-from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, PRIORITY_LOW, URGENCY_CHOICES, URGENCY_NOT_URGENT
+from hct_mis_api.apps.grievance.constants import (
+    PRIORITY_CHOICES,
+    PRIORITY_LOW,
+    URGENCY_CHOICES,
+    URGENCY_NOT_URGENT,
+)
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -389,7 +395,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
-        for key, value in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
+        for value in GrievanceTicket.ISSUE_TYPES_CHOICES.values():
             issue_type_choices_dict.update(value)
         return issue_type_choices_dict[self.issue_type]
 
@@ -632,7 +638,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
     is_multiple_duplicates_version = models.BooleanField(default=False)
     possible_duplicate = models.ForeignKey(
-        "household.Individual", related_name="+", on_delete=models.CASCADE
+        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True
     )  # this field will be deprecated
     possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
     selected_individual = models.ForeignKey(
@@ -704,15 +710,15 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     @property
     def household(self):
-        return self.payment_verification.payment_record.household
+        return getattr(self.payment_record, "household", None)
 
     @property
     def individual(self):
-        return self.payment_verification.payment_record.head_of_household
+        return getattr(self.payment_record, "head_of_household", None)
 
     @property
     def payment_record(self):
-        return self.payment_verification.payment_record
+        return getattr(self.payment_verification, "payment_record", None)
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):

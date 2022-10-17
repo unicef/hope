@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
-from hct_mis_api.apps.account.models import UserRole, Role
+from hct_mis_api.apps.account.models import Role, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 
 

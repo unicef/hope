@@ -1,33 +1,33 @@
-from django.utils import timezone
+from django.db.models import QuerySet
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
 
 
 class HouseholdWithdraw:
-    def execute(self, household: Household, tickets):
-        withdrawn = not household.withdrawn
-        household.withdrawn_date = timezone.now() if withdrawn else None
-        household.withdrawn = withdrawn
+    def __init__(self, household: Household):
+        self.household: Household = household
+        self.individuals: QuerySet[Individual] = self.household.individuals.filter(duplicate=False)
+        self.documents = None
 
-        individuals_ids = list(household.individuals.values_list("id", flat=True))
+    def withdraw(self, tag=None):
+        self.household.withdraw(tag)
 
-        individuals = []
+        for individual in self.individuals:
+            individual.withdraw()
 
-        for individual in Individual.objects.filter(id__in=individuals_ids, duplicate=False):
-            individual.withdrawn = withdrawn
-            individual.save()
-            individuals.append(individual)
+    def unwithdraw(self):
+        self.household.unwithdraw()
 
+        for individual in self.individuals:
+            individual.unwithdraw()
+
+    def change_tickets_status(self, tickets):
         for ticket in tickets:
-            if withdrawn:
+            if self.household.withdrawn:
                 ticket.ticket.extras["status_before_withdrawn"] = ticket.ticket.status
                 ticket.ticket.status = GrievanceTicket.STATUS_CLOSED
             elif ticket.ticket.extras.get("status_before_withdrawn"):
                 ticket.ticket.status = ticket.ticket.extras["status_before_withdrawn"]
                 ticket.ticket.extras["status_before_withdrawn"] = ""
             ticket.ticket.save()
-
-        household.save()
-
-        return household, individuals
