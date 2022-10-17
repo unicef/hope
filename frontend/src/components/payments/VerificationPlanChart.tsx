@@ -2,10 +2,10 @@ import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { CashPlanNode } from '../../__generated__/graphql';
+import { CashPlanOrPaymentPlanQuery } from '../../__generated__/graphql';
 
 interface VerificationPlanDetailsChartProps {
-  verificationPlan: CashPlanNode['verificationPlans']['edges'][number]['node'];
+  verificationPlan: CashPlanOrPaymentPlanQuery["cashPlanOrPaymentPlan"]['verificationPlans']['edges'][number]['node'];
 }
 
 const ChartContainer = styled.div`

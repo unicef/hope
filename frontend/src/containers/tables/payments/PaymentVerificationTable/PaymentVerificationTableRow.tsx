@@ -46,7 +46,8 @@ export function PaymentVerificationTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={paymentVerificationPlanPath}>{plan.unicefId}</BlackLink>
+          // eslint-disable-next-line no-underscore-dangle
+          <BlackLink to={`${paymentVerificationPlanPath}?planType=${plan.objType}`}>{plan.unicefId}</BlackLink>
         ) : (
           plan.unicefId
         )}

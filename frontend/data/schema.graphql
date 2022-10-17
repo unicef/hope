@@ -373,6 +373,38 @@ type CashPlanNodeEdge {
   cursor: String!
 }
 
+type CashPlanOrPaymentPlanNode {
+  id: ID
+  canCreatePaymentVerificationPlan: Boolean
+  availablePaymentRecordsCount: Int
+  startDate: Date
+  endDate: Date
+  updatedAt: DateTime
+  status: String
+  program: ProgramNode
+  paymentItems: [PaymentNode]
+  paymentRecordItems(offset: Int, before: String, after: String, first: Int, last: Int, parent: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
+  unicefId: String
+  bankReconciliationSuccess: Int
+  bankReconciliationError: Int
+  deliveryType: String
+  totalNumberOfHouseholds: Int
+  currency: String
+  totalDeliveredQuantity: Float
+  totalEntitledQuantity: Float
+  totalUndeliveredQuantity: Float
+  verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection
+  paymentVerificationSummary: PaymentVerificationSummaryNode
+  name: String
+  fundsCommitment: String
+  downPayment: String
+  dispersionDate: String
+  assistanceThrough: String
+  serviceProvider: ServiceProviderNode
+  caId: String
+  caHashId: String
+}
+
 enum CashPlanStatus {
   DISTRIBUTION_COMPLETED
   DISTRIBUTION_COMPLETED_WITH_ERRORS
@@ -3260,6 +3292,7 @@ type Query {
   allDeliveryMechanisms: [ChoiceObject]
   paymentPlanBackgroundActionStatusChoices: [ChoiceObject]
   availableFspsForDeliveryMechanisms(input: AvailableFspsForDeliveryMechanismsInput): [FspChoices]
+  cashPlanOrPaymentPlan(id: ID!, planType: String!): CashPlanOrPaymentPlanNode
   allCashPlansAndPaymentPlans(businessArea: String!, program: String, search: String, serviceProvider: String, deliveryType: String, verificationStatus: String, startDateGte: String, endDateLte: String, orderBy: String, first: Int, last: Int, before: String, after: String): PaginatedCashPlanAndPaymentPlanNode
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection

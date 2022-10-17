@@ -673,6 +673,62 @@ export type CashPlanNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type CashPlanOrPaymentPlanNode = {
+   __typename?: 'CashPlanOrPaymentPlanNode',
+  id?: Maybe<Scalars['ID']>,
+  canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']>,
+  availablePaymentRecordsCount?: Maybe<Scalars['Int']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  program?: Maybe<ProgramNode>,
+  paymentItems?: Maybe<Array<Maybe<PaymentNode>>>,
+  paymentRecordItems?: Maybe<PaymentRecordNodeConnection>,
+  unicefId?: Maybe<Scalars['String']>,
+  bankReconciliationSuccess?: Maybe<Scalars['Int']>,
+  bankReconciliationError?: Maybe<Scalars['Int']>,
+  deliveryType?: Maybe<Scalars['String']>,
+  totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
+  currency?: Maybe<Scalars['String']>,
+  totalDeliveredQuantity?: Maybe<Scalars['Float']>,
+  totalEntitledQuantity?: Maybe<Scalars['Float']>,
+  totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
+  verificationPlans?: Maybe<PaymentVerificationPlanNodeConnection>,
+  paymentVerificationSummary?: Maybe<PaymentVerificationSummaryNode>,
+  name?: Maybe<Scalars['String']>,
+  fundsCommitment?: Maybe<Scalars['String']>,
+  downPayment?: Maybe<Scalars['String']>,
+  dispersionDate?: Maybe<Scalars['String']>,
+  assistanceThrough?: Maybe<Scalars['String']>,
+  serviceProvider?: Maybe<ServiceProviderNode>,
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['String']>,
+};
+
+
+export type CashPlanOrPaymentPlanNodePaymentRecordItemsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  parent?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type CashPlanOrPaymentPlanNodeVerificationPlansArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
 export enum CashPlanStatus {
   DistributionCompleted = 'DISTRIBUTION_COMPLETED',
   DistributionCompletedWithErrors = 'DISTRIBUTION_COMPLETED_WITH_ERRORS',
@@ -4661,6 +4717,7 @@ export type Query = {
   allDeliveryMechanisms?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentPlanBackgroundActionStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   availableFspsForDeliveryMechanisms?: Maybe<Array<Maybe<FspChoices>>>,
+  cashPlanOrPaymentPlan?: Maybe<CashPlanOrPaymentPlanNode>,
   allCashPlansAndPaymentPlans?: Maybe<PaginatedCashPlanAndPaymentPlanNode>,
   businessArea?: Maybe<BusinessAreaNode>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
@@ -5113,6 +5170,12 @@ export type QueryAllPaymentsArgs = {
 
 export type QueryAvailableFspsForDeliveryMechanismsArgs = {
   input?: Maybe<AvailableFspsForDeliveryMechanismsInput>
+};
+
+
+export type QueryCashPlanOrPaymentPlanArgs = {
+  id: Scalars['ID'],
+  planType: Scalars['String']
 };
 
 
@@ -10276,6 +10339,57 @@ export type CashPlanQuery = (
         )> }
       )>> }
     ) }
+  )> }
+);
+
+export type CashPlanOrPaymentPlanQueryVariables = {
+  id: Scalars['ID'],
+  planType: Scalars['String']
+};
+
+
+export type CashPlanOrPaymentPlanQuery = (
+  { __typename?: 'Query' }
+  & { cashPlanOrPaymentPlan: Maybe<(
+    { __typename?: 'CashPlanOrPaymentPlanNode' }
+    & Pick<CashPlanOrPaymentPlanNode, 'id' | 'unicefId' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'assistanceThrough' | 'caId' | 'caHashId' | 'dispersionDate' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
+    & { serviceProvider: Maybe<(
+      { __typename?: 'ServiceProviderNode' }
+      & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
+    )>, verificationPlans: Maybe<(
+      { __typename?: 'PaymentVerificationPlanNodeConnection' }
+      & Pick<PaymentVerificationPlanNodeConnection, 'totalCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentVerificationPlanNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentVerificationPlanNode' }
+          & Pick<PaymentVerificationPlanNode, 'id' | 'unicefId' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationChannel' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'activationDate' | 'completionDate' | 'excludedAdminAreasFilter' | 'sexFilter' | 'xlsxFileExporting' | 'hasXlsxFile' | 'xlsxFileWasDownloaded' | 'xlsxFileImported'>
+          & { ageFilter: Maybe<(
+            { __typename?: 'AgeFilterObject' }
+            & Pick<AgeFilterObject, 'min' | 'max'>
+          )> }
+        )> }
+      )>> }
+    )>, paymentVerificationSummary: Maybe<(
+      { __typename?: 'PaymentVerificationSummaryNode' }
+      & Pick<PaymentVerificationSummaryNode, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'activationDate' | 'completionDate'>
+    )>, program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name' | 'caId'>
+    )>, paymentRecordItems: Maybe<(
+      { __typename?: 'PaymentRecordNodeConnection' }
+      & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentRecordNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentRecordNode' }
+          & { targetPopulation: (
+            { __typename?: 'TargetPopulationNode' }
+            & Pick<TargetPopulationNode, 'id' | 'name'>
+          ) }
+        )> }
+      )>> }
+    )> }
   )> }
 );
 
@@ -18738,6 +18852,138 @@ export function useCashPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
 export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
 export type CashPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanQuery, CashPlanQueryVariables>;
+export const CashPlanOrPaymentPlanDocument = gql`
+    query CashPlanOrPaymentPlan($id: ID!, $planType: String!) {
+  cashPlanOrPaymentPlan(id: $id, planType: $planType) {
+    id
+    unicefId
+    canCreatePaymentVerificationPlan
+    availablePaymentRecordsCount
+    name
+    startDate
+    endDate
+    updatedAt
+    status
+    deliveryType
+    fundsCommitment
+    downPayment
+    assistanceThrough
+    serviceProvider {
+      id
+      caId
+      fullName
+    }
+    caId
+    caHashId
+    dispersionDate
+    bankReconciliationSuccess
+    bankReconciliationError
+    totalNumberOfHouseholds
+    verificationPlans {
+      totalCount
+      edges {
+        node {
+          id
+          unicefId
+          status
+          sampleSize
+          receivedCount
+          notReceivedCount
+          respondedCount
+          verificationChannel
+          sampling
+          receivedCount
+          receivedWithProblemsCount
+          rapidProFlowId
+          confidenceInterval
+          marginOfError
+          activationDate
+          completionDate
+          ageFilter {
+            min
+            max
+          }
+          excludedAdminAreasFilter
+          sexFilter
+          xlsxFileExporting
+          hasXlsxFile
+          xlsxFileWasDownloaded
+          xlsxFileImported
+        }
+      }
+    }
+    paymentVerificationSummary {
+      id
+      createdAt
+      updatedAt
+      status
+      activationDate
+      completionDate
+    }
+    program {
+      id
+      name
+      caId
+    }
+    paymentRecordItems {
+      totalCount
+      edgeCount
+      edges {
+        node {
+          targetPopulation {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type CashPlanOrPaymentPlanComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashPlanOrPaymentPlanQuery, CashPlanOrPaymentPlanQueryVariables>, 'query'> & ({ variables: CashPlanOrPaymentPlanQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const CashPlanOrPaymentPlanComponent = (props: CashPlanOrPaymentPlanComponentProps) => (
+      <ApolloReactComponents.Query<CashPlanOrPaymentPlanQuery, CashPlanOrPaymentPlanQueryVariables> query={CashPlanOrPaymentPlanDocument} {...props} />
+    );
+    
+export type CashPlanOrPaymentPlanProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashPlanOrPaymentPlanQuery, CashPlanOrPaymentPlanQueryVariables> & TChildProps;
+export function withCashPlanOrPaymentPlan<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CashPlanOrPaymentPlanQuery,
+  CashPlanOrPaymentPlanQueryVariables,
+  CashPlanOrPaymentPlanProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashPlanOrPaymentPlanQuery, CashPlanOrPaymentPlanQueryVariables, CashPlanOrPaymentPlanProps<TChildProps>>(CashPlanOrPaymentPlanDocument, {
+      alias: 'cashPlanOrPaymentPlan',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCashPlanOrPaymentPlanQuery__
+ *
+ * To run a query within a React component, call `useCashPlanOrPaymentPlanQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashPlanOrPaymentPlanQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCashPlanOrPaymentPlanQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      planType: // value for 'planType'
+ *   },
+ * });
+ */
+export function useCashPlanOrPaymentPlanQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashPlanOrPaymentPlanQuery, CashPlanOrPaymentPlanQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashPlanOrPaymentPlanQuery, CashPlanOrPaymentPlanQueryVariables>(CashPlanOrPaymentPlanDocument, baseOptions);
+      }
+export function useCashPlanOrPaymentPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashPlanOrPaymentPlanQuery, CashPlanOrPaymentPlanQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashPlanOrPaymentPlanQuery, CashPlanOrPaymentPlanQueryVariables>(CashPlanOrPaymentPlanDocument, baseOptions);
+        }
+export type CashPlanOrPaymentPlanQueryHookResult = ReturnType<typeof useCashPlanOrPaymentPlanQuery>;
+export type CashPlanOrPaymentPlanLazyQueryHookResult = ReturnType<typeof useCashPlanOrPaymentPlanLazyQuery>;
+export type CashPlanOrPaymentPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanOrPaymentPlanQuery, CashPlanOrPaymentPlanQueryVariables>;
 export const IndividualPhotosDocument = gql`
     query IndividualPhotos($id: ID!) {
   individual(id: $id) {
@@ -22741,6 +22987,7 @@ export type ResolversTypes = {
   AvailableFspsForDeliveryMechanismsInput: AvailableFspsForDeliveryMechanismsInput,
   FspChoices: ResolverTypeWrapper<FspChoices>,
   FspChoice: ResolverTypeWrapper<FspChoice>,
+  CashPlanOrPaymentPlanNode: ResolverTypeWrapper<CashPlanOrPaymentPlanNode>,
   PaginatedCashPlanAndPaymentPlanNode: ResolverTypeWrapper<PaginatedCashPlanAndPaymentPlanNode>,
   PageInfoNode: ResolverTypeWrapper<PageInfoNode>,
   CashPlanAndPaymentPlanEdges: ResolverTypeWrapper<CashPlanAndPaymentPlanEdges>,
@@ -23186,6 +23433,7 @@ export type ResolversParentTypes = {
   AvailableFspsForDeliveryMechanismsInput: AvailableFspsForDeliveryMechanismsInput,
   FspChoices: FspChoices,
   FspChoice: FspChoice,
+  CashPlanOrPaymentPlanNode: CashPlanOrPaymentPlanNode,
   PaginatedCashPlanAndPaymentPlanNode: PaginatedCashPlanAndPaymentPlanNode,
   PageInfoNode: PageInfoNode,
   CashPlanAndPaymentPlanEdges: CashPlanAndPaymentPlanEdges,
@@ -23664,6 +23912,38 @@ export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extend
 export type CashPlanNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeEdge'] = ResolversParentTypes['CashPlanNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type CashPlanOrPaymentPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanOrPaymentPlanNode'] = ResolversParentTypes['CashPlanOrPaymentPlanNode']> = {
+  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
+  canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  startDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  paymentItems?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentNode']>>>, ParentType, ContextType>,
+  paymentRecordItems?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, CashPlanOrPaymentPlanNodePaymentRecordItemsArgs>,
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  deliveryType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  verificationPlans?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, CashPlanOrPaymentPlanNodeVerificationPlansArgs>,
+  paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['PaymentVerificationSummaryNode']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  fundsCommitment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  downPayment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  dispersionDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  assistanceThrough?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  serviceProvider?: Resolver<Maybe<ResolversTypes['ServiceProviderNode']>, ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ChartDatasetNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartDatasetNode'] = ResolversParentTypes['ChartDatasetNode']> = {
@@ -25250,6 +25530,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentPlanBackgroundActionStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   availableFspsForDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoices']>>>, ParentType, ContextType, QueryAvailableFspsForDeliveryMechanismsArgs>,
+  cashPlanOrPaymentPlan?: Resolver<Maybe<ResolversTypes['CashPlanOrPaymentPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanOrPaymentPlanArgs, 'id' | 'planType'>>,
   allCashPlansAndPaymentPlans?: Resolver<Maybe<ResolversTypes['PaginatedCashPlanAndPaymentPlanNode']>, ParentType, ContextType, RequireFields<QueryAllCashPlansAndPaymentPlansArgs, 'businessArea'>>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
@@ -26356,6 +26637,7 @@ export type Resolvers<ContextType = any> = {
   CashPlanNode?: CashPlanNodeResolvers<ContextType>,
   CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>,
   CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>,
+  CashPlanOrPaymentPlanNode?: CashPlanOrPaymentPlanNodeResolvers<ContextType>,
   ChartDatasetNode?: ChartDatasetNodeResolvers<ContextType>,
   ChartDetailedDatasetsNode?: ChartDetailedDatasetsNodeResolvers<ContextType>,
   ChartGrievanceTicketsNode?: ChartGrievanceTicketsNodeResolvers<ContextType>,
