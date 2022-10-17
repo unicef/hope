@@ -355,7 +355,7 @@ export function CreateCommunicationPage(): React.ReactElement {
                             setSelectedSampleSizeType(index);
                           }}
                           key={tab}
-                          control={<Radio />}
+                          control={<Radio color='primary' />}
                           label={tab}
                         />
                       ))}

@@ -60,6 +60,7 @@ export function LookUpSelectionTables({
             handleChange(CommunicationTabsValues.TARGET_POPULATION, value);
           }}
           noTableStyling
+          noTitle
         />
       )}
       {selectedTab === CommunicationTabsValues.RDI && (
@@ -75,6 +76,7 @@ export function LookUpSelectionTables({
             handleChange(CommunicationTabsValues.RDI, value);
           }}
           noTableStyling
+          noTitle
         />
       )}
     </>
