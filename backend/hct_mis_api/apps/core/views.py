@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -18,6 +19,7 @@ from hct_mis_api.apps.core.forms import StorageFileForm
 from hct_mis_api.apps.core.hope_redirect import get_hope_redirect
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.permissions_views_mixins import UploadFilePermissionMixin
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import DashboardReport
 
 logger = logging.getLogger(__name__)
@@ -95,3 +97,12 @@ class UploadFile(UploadFilePermissionMixin, View):
     @staticmethod
     def format_form_error(form):
         return form.errors.get_json_data()["__all__"][0]["message"]
+
+
+def load_programs(request):
+    business_area_id = request.GET.get('business_area_id')
+
+    logger.info(business_area_id)
+
+    programs = Program.objects.filter(Q(business_area_id=business_area_id) & Q(status=Program.ACTIVE))
+    return render(request, "core/program_dropdown_list_options.html", {"programs": programs})

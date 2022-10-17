@@ -5,13 +5,19 @@ from django.core.exceptions import ValidationError
 from hct_mis_api.apps.core.models import BusinessArea
 
 
+# default values for format purpose, program values are dynamic
+BLANK_CHOICES = (
+    ("", "---------"),
+)
+
+
 class StorageFileForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
 
         self.fields["business_area"] = forms.ModelChoiceField(queryset=self.get_business_area_queryset())
-
+        self.fields["program"] = forms.ChoiceField(choices=BLANK_CHOICES)
         self.fields["file"] = forms.FileField(label="Select a file")
 
     def get_business_area_queryset(self):

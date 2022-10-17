@@ -44,15 +44,47 @@
     {% endif %}
 
     <section class="main">
-      <form method="post" enctype="multipart/form-data">
+      <form
+        method="post"
+        enctype="multipart/form-data"
+        id="uploadForm"
+        data-programs-url="{% url 'ajax_load_programs' %}
+      ">
         <fieldset>
-          <legend><h2>Upload File</h2></legend>
+          <legend><h2>Upload eDopomoga File</h2></legend>
           {% csrf_token %}
           {{ form.as_p }}
           <p><button type="submit" value="Upload" class="btn">Upload</button></p>
         </fieldset>
       </form>
     </section>
-
     </body>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+      function prepareUrl(str) {
+          const lastIndex = str.lastIndexOf("/");
+          return str.slice(0, lastIndex + 1);
+      }
+
+      $("#id_business_area").change(function () {
+        let url = $("#uploadForm").attr("data-programs-url");
+
+        url = prepareUrl(url);
+        let businessAreaId = $(this).val();
+
+        if (businessAreaId) {
+            url = `${url}?business_area_id=${businessAreaId}`
+        }
+
+        $.ajax({
+          url: url,
+          method: "GET",
+          success: function (data) {
+            $("#id_program").html(data);
+          }
+        });
+      });
+    </script>
+
 </html>
