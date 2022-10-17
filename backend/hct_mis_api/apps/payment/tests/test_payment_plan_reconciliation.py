@@ -641,12 +641,13 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(payment.status, Payment.STATUS_NOT_DISTRIBUTED)
             self.assertEqual(payment_plan.is_reconciled, False)
 
-            # update xls delivered_quantity
+            filled_file_name = "filled.xlsx"
+            filled_file_path = os.path.join(temp_dir, filled_file_name)
+
+            # update xls, delivered_quantity != entitlement_quantity
             sheet.cell(
                 row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity") + 1
             ).value = 666
-            filled_file_name = "filled.xlsx"
-            filled_file_path = os.path.join(temp_dir, filled_file_name)
             workbook.save(filled_file_path)
 
             with open(filled_file_path, "rb") as file:
@@ -660,12 +661,41 @@ class TestPaymentPlanReconciliation(APITestCase):
                             "file": uploaded_file,
                         },
                     )
-                    assert "errors" not in import_mutation_response, import_mutation_response
+                    assert (
+                        "errors" in import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]
+                    ), import_mutation_response
+                    assert (
+                        import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]["errors"][0][
+                            "message"
+                        ]
+                        == f"Payment {payment.unicef_id}: Delivered quantity 666 is not equal Entitlement quantity 500.00"
+                    )
+
+            # update xls, delivered_quantity == entitlement_quantity
+            sheet.cell(
+                row=2, column=FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS.index("delivered_quantity") + 1
+            ).value = payment.entitlement_quantity
+            workbook.save(filled_file_path)
+
+            with open(filled_file_path, "rb") as file:
+                uploaded_file = SimpleUploadedFile(filled_file_name, file.read())
+                with patch("hct_mis_api.apps.payment.services.payment_plan_services.transaction") as mock_import:
+                    import_mutation_response = self.graphql_request(
+                        request_string=IMPORT_XLSX_PER_FSP_MUTATION,
+                        context={"user": self.user},
+                        variables={
+                            "paymentPlanId": encoded_payment_plan_id,
+                            "file": uploaded_file,
+                        },
+                    )
+                    assert (
+                        import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]["errors"] is None
+                    ), import_mutation_response
                     assert mock_import.on_commit.call_count == 1
                     mock_import.on_commit.call_args[0][0]()  # call real func
 
             payment.refresh_from_db()
             self.assertEqual(payment.entitlement_quantity, 500)
-            self.assertEqual(payment.delivered_quantity, 666)
+            self.assertEqual(payment.delivered_quantity, 500)
             self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
             self.assertEqual(payment_plan.is_reconciled, True)

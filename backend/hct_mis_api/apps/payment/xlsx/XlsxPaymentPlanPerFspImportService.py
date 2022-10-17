@@ -92,11 +92,27 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
-        delivered_quantity = row[self.expected_columns.index("delivered_quantity")].value
+
+        cell = row[self.expected_columns.index("delivered_quantity")]
+        delivered_quantity = cell.value
         if delivered_quantity is not None and delivered_quantity != "":
+
             delivered_quantity = float_to_decimal(delivered_quantity)
             if delivered_quantity != payment.delivered_quantity:
-                self.is_updated = True
+
+                if delivered_quantity == payment.entitlement_quantity:
+                    self.is_updated = True
+                else:
+                    # TODO should we allow delivered_quantity == 0
+                    # TODO should we allow and create grievance ticket for these cases
+                    self.errors.append(
+                        (
+                            self.fsp.name,
+                            cell.coordinate,
+                            f"Payment {payment_id}: Delivered quantity {delivered_quantity} is not equal "
+                            f"Entitlement quantity {payment.entitlement_quantity}",
+                        )
+                    )
 
     def _validate_rows(self):
         for row in self.ws_payments.iter_rows(min_row=2):
