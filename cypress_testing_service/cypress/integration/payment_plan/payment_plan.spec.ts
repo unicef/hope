@@ -236,7 +236,7 @@ And('I export xlsx to zip file', () => {
   cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.reload();
   cy.get('[data-cy="button-download-xlsx"]').click({ force: true });
-  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
 });
 
 When('I unarchive the zip file', () => {
