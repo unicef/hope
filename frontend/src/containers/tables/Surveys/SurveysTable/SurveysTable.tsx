@@ -1,12 +1,12 @@
 import React, { ReactElement } from 'react';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { decodeIdString } from '../../../utils/utils';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { decodeIdString } from '../../../../utils/utils';
 import {
   AllFeedbacksQueryVariables,
   FeedbackNode,
   useAllFeedbacksQuery,
-} from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
+} from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
 
