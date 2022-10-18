@@ -54,7 +54,7 @@ class TestDeleteVerificationMutation(APITestCase):
             program=cls.program,
             business_area=cls.business_area,
         )
-        cls.verification = cls.cash_plan.payment_verification_plans.first()
+        cls.verification = cls.cash_plan.payment_verification_plan.first()
 
     @parameterized.expand(
         [

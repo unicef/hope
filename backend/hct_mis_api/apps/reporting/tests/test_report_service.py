@@ -97,8 +97,8 @@ class TestGenerateReportService(TestCase):
             end_date=datetime.datetime.fromisoformat('2020-01-01 00:01:11+00:00')
 
         )
-        PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_1)
-        PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_2)
+        PaymentVerificationSummary.objects.create(payment_plan_obj=self.payment_plan_1)
+        PaymentVerificationSummary.objects.create(payment_plan_obj=self.payment_plan_2)
         self.cash_plan_verification_1 = PaymentVerificationPlanFactory(
             generic_fk_obj=self.cash_plan_1,
             completion_date="2020-01-01T14:30+00:00"

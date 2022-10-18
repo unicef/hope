@@ -157,7 +157,7 @@ class PullFromDatahubTask:
             ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
 
             if created:
-                PaymentVerificationSummary.objects.create(payment_plan=cash_plan)
+                PaymentVerificationSummary.objects.create(payment_plan_obj=cash_plan)
 
                 try:
                     if not cash_plan.exchange_rate:
