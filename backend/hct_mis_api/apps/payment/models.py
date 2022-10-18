@@ -1167,7 +1167,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     @property
     def business_area(self):
-        return self.payment_plan.business_area
+        return self.payment_plan_obj.business_area
 
     @property
     def has_xlsx_payment_verification_plan_file(self):
@@ -1255,7 +1255,7 @@ def build_summary(payment_plan):
     dispatch_uid="update_verification_status_in_cash_plan",
 )
 def update_verification_status_in_cash_plan(sender, instance, **kwargs):
-    build_summary(instance.payment_plan)
+    build_summary(instance.payment_plan_obj)
 
 
 @receiver(
@@ -1264,7 +1264,7 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs):
     dispatch_uid="update_verification_status_in_cash_plan_on_delete",
 )
 def update_verification_status_in_cash_plan_on_delete(sender, instance, **kwargs):
-    build_summary(instance.payment_plan)
+    build_summary(instance.payment_plan_obj)
 
 
 class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
@@ -1332,7 +1332,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
 
     @property
     def business_area(self):
-        return self.payment_verification_plan.payment_plan.business_area
+        return self.payment_verification_plan.payment_plan_obj.business_area
 
     def set_pending(self):
         self.status_date = timezone.now()

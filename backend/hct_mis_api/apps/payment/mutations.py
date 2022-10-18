@@ -140,7 +140,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
 
         payment_verification_plan = VerificationPlanCrudServices.update(payment_verification_plan, input)
 
-        payment_verification_plan.payment_plan.refresh_from_db()
+        payment_verification_plan.payment_plan_obj.refresh_from_db()
 
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
@@ -149,7 +149,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return cls(payment_plan=payment_verification_plan.payment_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
 class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutationMixin):
@@ -181,7 +181,7 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return ActivatePaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan)
+        return ActivatePaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
 class FinishPaymentVerificationPlan(PermissionMutation):
@@ -214,7 +214,7 @@ class FinishPaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return FinishPaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan)
+        return FinishPaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
 class DiscardPaymentVerificationPlan(PermissionMutation):
@@ -247,7 +247,7 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return cls(payment_plan=payment_verification_plan.payment_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
 class InvalidPaymentVerificationPlan(PermissionMutation):
@@ -280,7 +280,7 @@ class InvalidPaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return cls(payment_plan=payment_verification_plan.payment_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
 class DeletePaymentVerificationPlan(PermissionMutation):
@@ -297,7 +297,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
     def mutate(cls, root, info, payment_verification_plan_id, **kwargs):
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
-        payment_plan = payment_verification_plan.payment_plan
+        payment_plan = payment_verification_plan.payment_plan_obj
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
 
@@ -546,7 +546,7 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
         payment_verification_plan.xlsx_file_exporting = True
         payment_verification_plan.save()
         create_payment_verification_plan_xlsx.delay(pk, info.context.user.pk)
-        return cls(payment_plan=payment_verification_plan.payment_plan)
+        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
 class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
