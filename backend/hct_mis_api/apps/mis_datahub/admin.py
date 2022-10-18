@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button, link
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.filters import ValueFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
@@ -36,7 +36,7 @@ from hct_mis_api.apps.utils.security import is_root
 logger = logging.getLogger(__name__)
 
 
-class HUBAdminMixin(ExtraButtonsMixin, HOPEModelAdminBase):
+class HUBAdminMixin(HOPEModelAdminBase):
     @button(label="Truncate", css_class="btn-danger", permission=is_root)
     def truncate(self, request):
         if not request.headers.get("x-root-access") == "XMLHttpRequest":

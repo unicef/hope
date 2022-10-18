@@ -1,27 +1,31 @@
 import logging
-import pickle
 
+from django import forms
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.admin import ModelAdmin, register
+from django.contrib.admin import register
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.template.response import TemplateResponse
 from django.urls import reverse
 
 import tablib
 from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.mixin import AdminFiltersMixin
 from import_export import fields, resources
 from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
+from smart_admin.mixins import LinkedObjectsMixin
 
-from .celery_tasks import queue, refresh_reports
-from .forms import ExportForm, FormatterTestForm, QueryForm
-from .models import Dataset, Formatter, Query, Report
+from ..steficon.widget import PythonEditor
+from ..utils.admin import HOPEModelAdminBase
+from .celery_tasks import refresh_reports, run_background_query
+from .defaults import SYSTEM_PARAMETRIZER
+from .forms import FormatterTestForm
+from .models import Dataset, Formatter, Parametrizer, Query, Report, ReportDocument
 from .utils import to_dataset
 from .widget import FormatterEditor
 
@@ -48,64 +52,70 @@ class QueryResource(resources.ModelResource):
 
 
 @register(Query)
-class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
-    list_display = ("name", "target", "description", "owner", "status", "is_ready")
+class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+    list_display = ("name", "target", "description", "owner")
     search_fields = ("name",)
     list_filter = (
         ("target", AutoCompleteFilter),
         ("owner", AutoCompleteFilter),
     )
     autocomplete_fields = ("target", "owner")
-    readonly_fields = ("error",)
-    form = QueryForm
+    readonly_fields = ("sentry_error_id", "error_message", "info")
     change_form_template = None
     resource_class = QueryResource
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "code":
+            kwargs = {"widget": PythonEditor}
+        elif db_field.name == "description":
+            kwargs = {"widget": forms.Textarea(attrs={"rows": 2, "style": "width:80%"})}
+        elif db_field.name == "owner":
+            kwargs = {"widget": forms.HiddenInput}
+
+        return super(QueryAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
 
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser or (obj and obj.owner == request.user)
 
-    def status(self, obj):
-        return obj.ready and not obj.error
-
-    status.boolean = True
-
-    def is_ready(self, obj):
-        return obj.ready
-
-    is_ready.boolean = True
-
-    @button(visible=lambda btn: "/change" in btn.context["request"].path)
-    def create_report(self, request, pk):
-        obj = self.get_object(request, pk)
-        url = reverse("admin:power_query_report_add")
-        return HttpResponseRedirect(f"{url}?q={obj.pk}")
-
-    @button(visible=lambda btn: btn.context["original"].ready and "/change" in btn.context["request"].path)
-    def result(self, request, pk):
+    @button()
+    def datasets(self, request, pk):
         obj = self.get_object(request, pk)
         try:
-            url = reverse("admin:power_query_dataset_change", args=[obj.dataset.pk])
-            return HttpResponseRedirect(url)
+            url = reverse("admin:power_query_dataset_changelist")
+            return HttpResponseRedirect(f"{url}?query__exact={obj.pk}")
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+
+    @button(visible=settings.DEBUG)
+    def run(self, request, pk):
+        ctx = self.get_common_context(request, pk, title="Run results")
+        query: Query = self.get_object(request, pk)
+        results = query.execute_matrix(persist=True)
+        self.message_user(request, "Done", messages.SUCCESS)
+        ctx["results"] = results
+        return render(request, "admin/power_query/query/run_result.html", ctx)
 
     @button()
     def queue(self, request, pk):
         try:
-            queue.delay(pk)
+            run_background_query.delay(pk)
             self.message_user(request, "Query scheduled")
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button(visible=lambda btn: btn.context["original"].ready and "/change" in btn.context["request"].path)
+    @button()
     def preview(self, request, pk):
         obj: Query = self.get_object(request, pk)
         try:
             context = self.get_common_context(request, pk, title="Results")
-            ret, info = obj.execute(persist=False)
+            if obj.parametrizer:
+                args = obj.parametrizer.get_matrix()[0]
+            else:
+                args = {}
+            ret, extra = obj.run(False, args)
             context["type"] = type(ret).__name__
             context["raw"] = ret
-            context["info"] = info
+            context["info"] = extra
             context["title"] = f"Result of {obj.name} ({type(ret).__name__})"
             if isinstance(ret, QuerySet):
                 ret = ret[:100]
@@ -126,16 +136,22 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
 
 
 @register(Dataset)
-class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
+class DatasetAdmin(HOPEModelAdminBase):
     search_fields = ("query__name",)
-    list_display = ("query", "dataset_type", "target_type")
-    list_filter = (("query__target", AutoCompleteFilter),)
+    list_display = ("query", "id", "last_run", "dataset_type", "target_type", "size", "arguments")
+    list_filter = (
+        ("query__target", AutoCompleteFilter),
+        ("query", AutoCompleteFilter),
+    )
     change_form_template = None
     readonly_fields = ("last_run", "query", "info")
     date_hierarchy = "last_run"
 
     def has_add_permission(self, request):
         return False
+
+    def arguments(self, obj):
+        return obj.info.get("arguments")
 
     def dataset_type(self, obj):
         return obj.info.get("type")
@@ -144,40 +160,11 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
         return obj.query.target
 
     @button(visible=lambda btn: "change" in btn.context["request"].path)
-    def export(self, request, pk):
-        obj = self.get_object(request, pk)
-        try:
-            context = self.get_common_context(request, pk, title="Export")
-            if request.method == "POST":
-                form = ExportForm(request.POST)
-                if form.is_valid():
-                    formatter: Formatter = form.cleaned_data["formatter"]
-                    report_context = {
-                        "dataset": obj,
-                        "query": obj.query,
-                    }
-                    output = formatter.render(report_context)
-                    if formatter.content_type == "xls":
-                        response = HttpResponse(output, content_type=formatter.content_type)
-                        response["Content-Disposition"] = "attachment; filename=Dataset Report.xls"
-                        return response
-                    return HttpResponse(output)
-            else:
-                context["extra_buttons"] = ""
-                form = ExportForm()
-            context["form"] = form
-            return render(request, "admin/power_query/dataset/export.html", context)
-        except Exception as e:
-            logger.exception(e)
-            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-
-    @button(visible=lambda btn: "change" in btn.context["request"].path)
     def preview(self, request, pk):
         obj = self.get_object(request, pk)
         try:
             context = self.get_common_context(request, pk, title="Results")
-            data = pickle.loads(obj.result)
-            context["dataset"] = to_dataset(data)
+            context["dataset"] = to_dataset(obj.data)
             return render(request, "admin/power_query/query/preview.html", context)
         except Exception as e:
             logger.exception(e)
@@ -192,7 +179,7 @@ class FormatterResource(resources.ModelResource):
 
 
 @register(Formatter)
-class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
+class FormatterAdmin(ImportExportMixin, HOPEModelAdminBase):
     list_display = ("name", "content_type")
     search_fields = ("name",)
     list_filter = ("content_type",)
@@ -213,7 +200,7 @@ class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
                 if form.is_valid():
                     obj: Formatter = context["original"]
                     ctx = {
-                        "dataset": form.cleaned_data["query"].dataset,
+                        "dataset": form.cleaned_data["query"].datasets.first(),
                         "report": "None",
                     }
                     if obj.content_type == "xls":
@@ -226,6 +213,7 @@ class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
                 else:
                     form = FormatterTestForm()
         except Exception as e:
+            logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
         context["form"] = form
         return render(request, "admin/power_query/formatter/test.html", context)
@@ -242,14 +230,15 @@ class ReportResource(resources.ModelResource):
 
 
 @register(Report)
-class ReportAdmin(ImportExportMixin, ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
-    list_display = ("name", "query", "formatter", "is_ready", "last_run")
+class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+    list_display = ("name", "query", "formatter", "last_run")
     autocomplete_fields = ("query", "formatter")
-    filter_horizontal = ("available_to",)
+    filter_horizontal = ("limit_access_to",)
     readonly_fields = ("last_run",)
     list_filter = (("query", AutoCompleteFilter), ("formatter", AutoCompleteFilter))
     resource_class = ReportResource
     change_list_template = None
+    search_fields = ("name",)
 
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser or (obj and obj.owner == request.user)
@@ -263,24 +252,22 @@ class ReportAdmin(ImportExportMixin, ExtraButtonsMixin, AdminFiltersMixin, Model
             kwargs["notify_to"] = [request.user]
         return kwargs
 
-    def is_ready(self, obj):
-        return obj.result is not None
-
-    is_ready.boolean = True
-
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request, pk):
         obj: Report = self.get_object(request, pk)
         try:
-            obj.execute()
+            result = obj.execute(run_query=True)
+            errors = [r[1] for r in result if isinstance(r[1], Exception)]
+            if len(errors) == 0:
+                message_level = messages.SUCCESS
+            elif len(errors) == len(result):
+                message_level = messages.ERROR
+            else:
+                message_level = messages.WARNING
+            self.message_user(request, f"{result}", message_level)
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-
-    @button(visible=lambda btn: btn.context["original"].result and "/change" in btn.context["request"].path)
-    def view(self, request, pk):
-        url = reverse("power_query:report", args=[pk])
-        return HttpResponseRedirect(url)
 
     @button(visible=lambda btn: btn.path.endswith("/power_query/report/"))
     def refresh(self, request):
@@ -289,3 +276,35 @@ class ReportAdmin(ImportExportMixin, ExtraButtonsMixin, AdminFiltersMixin, Model
             self.message_user(request, "Reports refresh queued", messages.SUCCESS)
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+
+
+@register(Parametrizer)
+class QueryArgsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+    list_display = ("name", "code", "system")
+    list_filter = ("system",)
+    search_fields = ("name", "code")
+
+    @button()
+    def preview(self, request, pk):
+        context = self.get_common_context(request, pk, title="Execution Plan")
+        return TemplateResponse(request, "admin/power_query/queryargs/preview.html", context)
+
+    @button(visible=lambda b: b.context["original"].code in SYSTEM_PARAMETRIZER)
+    def refresh(self, request, pk):
+        obj: Parametrizer = self.get_object(request, pk)
+        obj.refresh()
+
+
+@register(ReportDocument)
+class ReportDocumentAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+    list_display = ("title", "content_type", "arguments", "size")
+    list_filter = (("report", AutoCompleteFilter),)
+    readonly_fields = ("arguments", "report", "dataset", "content_type")
+
+    def size(self, obj: ReportDocument):
+        return len(obj.output or "")
+
+    @button()
+    def view(self, request, pk):
+        url = reverse("power_query:report", args=[pk])
+        return HttpResponseRedirect(url)
