@@ -188,7 +188,7 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     search_fields = ("name",)
 
     def verification_status(self, obj):
-        return obj.payment_verification_summary.status if obj.payment_verification_summary else None
+        return obj.get_payment_verification_summary.status if obj.get_payment_verification_summary else None
 
     @button()
     def payments(self, request, pk):

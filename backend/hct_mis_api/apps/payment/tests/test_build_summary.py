@@ -41,7 +41,7 @@ class TestBuildSummary(TestCase):
     def test_status_pending_when_zero_verifications(self):
         build_summary(self.cash_plan)
 
-        summary = self.cash_plan.payment_verification_summary
+        summary = self.cash_plan.get_payment_verification_summary
 
         self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_PENDING)
 
@@ -50,7 +50,7 @@ class TestBuildSummary(TestCase):
 
         build_summary(self.cash_plan)
 
-        summary = self.cash_plan.payment_verification_summary
+        summary = self.cash_plan.get_payment_verification_summary
         self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_ACTIVE)
 
     def test_status_finished_when_all_verifications_finished(self):
@@ -58,7 +58,7 @@ class TestBuildSummary(TestCase):
 
         build_summary(self.cash_plan)
 
-        summary = self.cash_plan.payment_verification_summary
+        summary = self.cash_plan.get_payment_verification_summary
         self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_FINISHED)
 
     def test_status_pending_when_add_and_removed_verification(self):
@@ -67,7 +67,7 @@ class TestBuildSummary(TestCase):
 
         build_summary(self.cash_plan)
 
-        summary = self.cash_plan.payment_verification_summary
+        summary = self.cash_plan.get_payment_verification_summary
         self.assertEqual(summary.status, PaymentVerificationSummary.STATUS_PENDING)
 
     def test_query_number(self):
