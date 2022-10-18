@@ -73,6 +73,7 @@ export const CreateSurveyMenu = (): React.ReactElement => {
         color='primary'
         onClick={handleClick}
         endIcon={anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+        data-cy='button-new-survey'
       >
         {t('New Survey')}
       </Button>
@@ -85,18 +86,21 @@ export const CreateSurveyMenu = (): React.ReactElement => {
       >
         <StyledMenuItem>
           <ListItemText
+            data-cy='menu-item-rapid-pro'
             onClick={() => handleMenuItemClick('RAPID_PRO')}
             primary={t('New Survey with Rapid Pro')}
           />
         </StyledMenuItem>
         <StyledMenuItem>
           <ListItemText
+            data-cy='menu-item-sms'
             onClick={() => handleMenuItemClick('SMS')}
             primary={t('New Survey with SMS')}
           />
         </StyledMenuItem>
         <StyledMenuItem>
           <ListItemText
+            data-cy='menu-item-manual'
             onClick={() => handleMenuItemClick('MANUAL')}
             primary={t('New Survey with Manual Process')}
           />

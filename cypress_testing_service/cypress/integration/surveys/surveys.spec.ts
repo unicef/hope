@@ -34,7 +34,8 @@ Then('I should see the Surveys page', () => {
 });
 
 When('I click the New Survey button', () => {
-  cy.get('[data-cy="button-create-new-survey"').click({ force: true });
+  cy.get('[data-cy="button-new-survey"]').click({ force: true });
+  cy.get('[data-cy="menu-item-rapid-pro"]').click();
 });
 
 Then('I should see the New Survey page', () => {
