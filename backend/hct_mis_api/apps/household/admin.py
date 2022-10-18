@@ -93,6 +93,7 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_filter = (
         ("type", RelatedFieldComboFilter),
         ("individual", AutoCompleteFilter),
+        ("country", RelatedFieldComboFilter),
     )
     autocomplete_fields = ["type"]
 
