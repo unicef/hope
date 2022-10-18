@@ -1111,8 +1111,9 @@ export type DocumentNode = Node & {
   photo?: Maybe<Scalars['String']>,
   individual: IndividualNode,
   type: DocumentTypeNode,
-  status: DocumentStatus,
   country?: Maybe<Scalars['String']>,
+  status: DocumentStatus,
+  countryIso3?: Maybe<Scalars['String']>,
 };
 
 export type DocumentNodeConnection = {
@@ -1141,11 +1142,9 @@ export type DocumentTypeNode = {
   id: Scalars['UUID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  country?: Maybe<Scalars['String']>,
   label: Scalars['String'],
   type: DocumentTypeType,
   documents: DocumentNodeConnection,
-  countryIso3?: Maybe<Scalars['String']>,
 };
 
 
@@ -1924,8 +1923,8 @@ export type ImportedDocumentNode = Node & {
   photo?: Maybe<Scalars['String']>,
   individual: ImportedIndividualNode,
   type: ImportedDocumentTypeNode,
-  docDate?: Maybe<Scalars['Date']>,
   country?: Maybe<Scalars['String']>,
+  docDate?: Maybe<Scalars['Date']>,
 };
 
 export type ImportedDocumentNodeConnection = {
@@ -1942,265 +1941,11 @@ export type ImportedDocumentNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export enum ImportedDocumentTypeCountry {
-  Af = 'AF',
-  Ax = 'AX',
-  Al = 'AL',
-  Dz = 'DZ',
-  As = 'AS',
-  Ad = 'AD',
-  Ao = 'AO',
-  Ai = 'AI',
-  Aq = 'AQ',
-  Ag = 'AG',
-  Ar = 'AR',
-  Am = 'AM',
-  Aw = 'AW',
-  Au = 'AU',
-  At = 'AT',
-  Az = 'AZ',
-  Bs = 'BS',
-  Bh = 'BH',
-  Bd = 'BD',
-  Bb = 'BB',
-  By = 'BY',
-  Be = 'BE',
-  Bz = 'BZ',
-  Bj = 'BJ',
-  Bm = 'BM',
-  Bt = 'BT',
-  Bo = 'BO',
-  Bq = 'BQ',
-  Ba = 'BA',
-  Bw = 'BW',
-  Bv = 'BV',
-  Br = 'BR',
-  Io = 'IO',
-  Bn = 'BN',
-  Bg = 'BG',
-  Bf = 'BF',
-  Bi = 'BI',
-  Cv = 'CV',
-  Kh = 'KH',
-  Cm = 'CM',
-  Ca = 'CA',
-  Ky = 'KY',
-  Cf = 'CF',
-  Td = 'TD',
-  Cl = 'CL',
-  Cn = 'CN',
-  Cx = 'CX',
-  Cc = 'CC',
-  Co = 'CO',
-  Km = 'KM',
-  Cg = 'CG',
-  Cd = 'CD',
-  Ck = 'CK',
-  Cr = 'CR',
-  Ci = 'CI',
-  Hr = 'HR',
-  Cu = 'CU',
-  Cw = 'CW',
-  Cy = 'CY',
-  Cz = 'CZ',
-  Dk = 'DK',
-  Dj = 'DJ',
-  Dm = 'DM',
-  Do = 'DO',
-  Ec = 'EC',
-  Eg = 'EG',
-  Sv = 'SV',
-  Gq = 'GQ',
-  Er = 'ER',
-  Ee = 'EE',
-  Sz = 'SZ',
-  Et = 'ET',
-  Fk = 'FK',
-  Fo = 'FO',
-  Fj = 'FJ',
-  Fi = 'FI',
-  Fr = 'FR',
-  Gf = 'GF',
-  Pf = 'PF',
-  Tf = 'TF',
-  Ga = 'GA',
-  Gm = 'GM',
-  Ge = 'GE',
-  De = 'DE',
-  Gh = 'GH',
-  Gi = 'GI',
-  Gr = 'GR',
-  Gl = 'GL',
-  Gd = 'GD',
-  Gp = 'GP',
-  Gu = 'GU',
-  Gt = 'GT',
-  Gg = 'GG',
-  Gn = 'GN',
-  Gw = 'GW',
-  Gy = 'GY',
-  Ht = 'HT',
-  Hm = 'HM',
-  Va = 'VA',
-  Hn = 'HN',
-  Hk = 'HK',
-  Hu = 'HU',
-  Is = 'IS',
-  In = 'IN',
-  Id = 'ID',
-  Ir = 'IR',
-  Iq = 'IQ',
-  Ie = 'IE',
-  Im = 'IM',
-  Il = 'IL',
-  It = 'IT',
-  Jm = 'JM',
-  Jp = 'JP',
-  Je = 'JE',
-  Jo = 'JO',
-  Kz = 'KZ',
-  Ke = 'KE',
-  Ki = 'KI',
-  Kw = 'KW',
-  Kg = 'KG',
-  La = 'LA',
-  Lv = 'LV',
-  Lb = 'LB',
-  Ls = 'LS',
-  Lr = 'LR',
-  Ly = 'LY',
-  Li = 'LI',
-  Lt = 'LT',
-  Lu = 'LU',
-  Mo = 'MO',
-  Mg = 'MG',
-  Mw = 'MW',
-  My = 'MY',
-  Mv = 'MV',
-  Ml = 'ML',
-  Mt = 'MT',
-  Mh = 'MH',
-  Mq = 'MQ',
-  Mr = 'MR',
-  Mu = 'MU',
-  Yt = 'YT',
-  Mx = 'MX',
-  Fm = 'FM',
-  Md = 'MD',
-  Mc = 'MC',
-  Mn = 'MN',
-  Me = 'ME',
-  Ms = 'MS',
-  Ma = 'MA',
-  Mz = 'MZ',
-  Mm = 'MM',
-  Na = 'NA',
-  Nr = 'NR',
-  Np = 'NP',
-  Nl = 'NL',
-  Nc = 'NC',
-  Nz = 'NZ',
-  Ni = 'NI',
-  Ne = 'NE',
-  Ng = 'NG',
-  Nu = 'NU',
-  Nf = 'NF',
-  Kp = 'KP',
-  Mk = 'MK',
-  Mp = 'MP',
-  No = 'NO',
-  Om = 'OM',
-  Pk = 'PK',
-  Pw = 'PW',
-  Ps = 'PS',
-  Pa = 'PA',
-  Pg = 'PG',
-  Py = 'PY',
-  Pe = 'PE',
-  Ph = 'PH',
-  Pn = 'PN',
-  Pl = 'PL',
-  Pt = 'PT',
-  Pr = 'PR',
-  Qa = 'QA',
-  Re = 'RE',
-  Ro = 'RO',
-  Ru = 'RU',
-  Rw = 'RW',
-  Bl = 'BL',
-  Sh = 'SH',
-  Kn = 'KN',
-  Lc = 'LC',
-  Mf = 'MF',
-  Pm = 'PM',
-  Vc = 'VC',
-  Ws = 'WS',
-  Sm = 'SM',
-  St = 'ST',
-  Sa = 'SA',
-  Sn = 'SN',
-  Rs = 'RS',
-  Sc = 'SC',
-  Sl = 'SL',
-  Sg = 'SG',
-  Sx = 'SX',
-  Sk = 'SK',
-  Si = 'SI',
-  Sb = 'SB',
-  So = 'SO',
-  Za = 'ZA',
-  Gs = 'GS',
-  Kr = 'KR',
-  Ss = 'SS',
-  Es = 'ES',
-  Lk = 'LK',
-  Sd = 'SD',
-  Sr = 'SR',
-  Sj = 'SJ',
-  Se = 'SE',
-  Ch = 'CH',
-  Sy = 'SY',
-  Tw = 'TW',
-  Tj = 'TJ',
-  Tz = 'TZ',
-  Th = 'TH',
-  Tl = 'TL',
-  Tg = 'TG',
-  Tk = 'TK',
-  To = 'TO',
-  Tt = 'TT',
-  Tn = 'TN',
-  Tr = 'TR',
-  Tm = 'TM',
-  Tc = 'TC',
-  Tv = 'TV',
-  Ug = 'UG',
-  Ua = 'UA',
-  Ae = 'AE',
-  Gb = 'GB',
-  Um = 'UM',
-  Us = 'US',
-  U = 'U',
-  Uy = 'UY',
-  Uz = 'UZ',
-  Vu = 'VU',
-  Ve = 'VE',
-  Vn = 'VN',
-  Vg = 'VG',
-  Vi = 'VI',
-  Wf = 'WF',
-  Eh = 'EH',
-  Ye = 'YE',
-  Zm = 'ZM',
-  Zw = 'ZW'
-}
-
 export type ImportedDocumentTypeNode = {
    __typename?: 'ImportedDocumentTypeNode',
   id: Scalars['UUID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  country: ImportedDocumentTypeCountry,
   label: Scalars['String'],
   type: ImportedDocumentTypeType,
   documents: ImportedDocumentNodeConnection,
@@ -6877,10 +6622,10 @@ export type IndividualMinimalFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
+        & Pick<DocumentNode, 'id' | 'country' | 'countryIso3' | 'documentNumber' | 'photo'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
-          & Pick<DocumentTypeNode, 'country' | 'label' | 'type' | 'countryIso3'>
+          & Pick<DocumentTypeNode, 'label' | 'type'>
         ) }
       )> }
     )>> }
@@ -6931,7 +6676,7 @@ export type IndividualDetailedFragment = (
         & Pick<DocumentNode, 'id' | 'country' | 'photo' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
-          & Pick<DocumentTypeNode, 'country' | 'label'>
+          & Pick<DocumentTypeNode, 'label'>
         ) }
       )> }
     )>> }
@@ -7103,7 +6848,7 @@ export type ImportedIndividualDetailedFragment = (
         & Pick<ImportedDocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
         & { type: (
           { __typename?: 'ImportedDocumentTypeNode' }
-          & Pick<ImportedDocumentTypeNode, 'label' | 'country'>
+          & Pick<ImportedDocumentTypeNode, 'label'>
         ) }
       )> }
     )>> }
@@ -9214,7 +8959,7 @@ export type GrievanceTicketQuery = (
               & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
               & { type: (
                 { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label' | 'country'>
+                & Pick<DocumentTypeNode, 'label'>
               ) }
             )> }
           )>> }
@@ -9241,7 +8986,7 @@ export type GrievanceTicketQuery = (
               & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
               & { type: (
                 { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label' | 'country'>
+                & Pick<DocumentTypeNode, 'label'>
               ) }
             )> }
           )>> }
@@ -9268,7 +9013,7 @@ export type GrievanceTicketQuery = (
               & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
               & { type: (
                 { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'label' | 'country'>
+                & Pick<DocumentTypeNode, 'label'>
               ) }
             )> }
           )>> }
@@ -10057,10 +9802,10 @@ export type AllIndividualsQuery = (
             { __typename?: 'DocumentNodeEdge' }
             & { node: Maybe<(
               { __typename?: 'DocumentNode' }
-              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
+              & Pick<DocumentNode, 'id' | 'country' | 'countryIso3' | 'documentNumber' | 'photo'>
               & { type: (
                 { __typename?: 'DocumentTypeNode' }
-                & Pick<DocumentTypeNode, 'country' | 'label' | 'type' | 'countryIso3'>
+                & Pick<DocumentTypeNode, 'label' | 'type'>
               ) }
             )> }
           )>> }
@@ -11067,13 +10812,12 @@ export const IndividualMinimalFragmentDoc = gql`
       node {
         id
         country
+        countryIso3
         documentNumber
         photo
         type {
-          country
           label
           type
-          countryIso3
         }
       }
     }
@@ -11263,7 +11007,6 @@ export const IndividualDetailedFragmentDoc = gql`
         country
         photo
         type {
-          country
           label
         }
         documentNumber
@@ -11558,7 +11301,6 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
         country
         type {
           label
-          country
         }
         documentNumber
         photo
@@ -16904,7 +16646,6 @@ export const GrievanceTicketDocument = gql`
               country
               type {
                 label
-                country
               }
               documentNumber
               photo
@@ -16939,7 +16680,6 @@ export const GrievanceTicketDocument = gql`
               country
               type {
                 label
-                country
               }
               documentNumber
               photo
@@ -16976,7 +16716,6 @@ export const GrievanceTicketDocument = gql`
               country
               type {
                 label
-                country
               }
               documentNumber
               photo
@@ -18840,13 +18579,12 @@ export const AllIndividualsDocument = gql`
             node {
               id
               country
+              countryIso3
               documentNumber
               photo
               type {
-                country
                 label
                 type
-                countryIso3
               }
             }
           }
@@ -21717,7 +21455,6 @@ export type ResolversTypes = {
   ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>,
   ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
   ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>,
-  ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
   ImportedDocumentTypeType: ImportedDocumentTypeType,
   ImportedIndividualIdentityNodeConnection: ResolverTypeWrapper<ImportedIndividualIdentityNodeConnection>,
   ImportedIndividualIdentityNodeEdge: ResolverTypeWrapper<ImportedIndividualIdentityNodeEdge>,
@@ -22129,7 +21866,6 @@ export type ResolversParentTypes = {
   ImportedDocumentNodeEdge: ImportedDocumentNodeEdge,
   ImportedDocumentNode: ImportedDocumentNode,
   ImportedDocumentTypeNode: ImportedDocumentTypeNode,
-  ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
   ImportedDocumentTypeType: ImportedDocumentTypeType,
   ImportedIndividualIdentityNodeConnection: ImportedIndividualIdentityNodeConnection,
   ImportedIndividualIdentityNodeEdge: ImportedIndividualIdentityNodeEdge,
@@ -22777,8 +22513,9 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
+  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type DocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNodeConnection'] = ResolversParentTypes['DocumentNodeConnection']> = {
@@ -22797,11 +22534,9 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
-  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {
@@ -23160,8 +22895,8 @@ export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends 
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['ImportedDocumentTypeNode'], ParentType, ContextType>,
-  docDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  docDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
 };
 
 export type ImportedDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNodeConnection'] = ResolversParentTypes['ImportedDocumentNodeConnection']> = {
@@ -23180,7 +22915,6 @@ export type ImportedDocumentTypeNodeResolvers<ContextType = any, ParentType exte
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  country?: Resolver<ResolversTypes['ImportedDocumentTypeCountry'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['ImportedDocumentTypeType'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedDocumentTypeNodeDocumentsArgs>,
