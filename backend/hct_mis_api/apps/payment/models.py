@@ -127,46 +127,34 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         return payment_verification_plans
 
     def available_payment_records(
-        self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None
+        self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None, node_name=""
     ):
-        # old code
-        # params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
-        #
-        # if payment_verification_plan:
-        #     params &= Q(
-        #         Q(verification__isnull=True) | Q(verification__payment_verification_plan=payment_verification_plan)
-        #     )
-        # else:
-        #     params &= Q(verification__isnull=True)
-        #
-        # payment_records = self.payment_items.filter(params).distinct()
-
-        # just Fixed Temporary Not Tested
-        # TODO: check if works with CPlan and PPlan ??  #check self.__class__.__name__
-        payment_records = self.payment_items.filter(
-            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
-        ).distinct()
+        params = Q(status__in=GenericPayment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
-            def verification_null_or_payment_verification_plan(record):
-                return (
-                        record.verification is None or
-                        record.verification.payment_verification_plan.pk == payment_verification_plan.pk
-                )
-
-            payment_records = list(map(lambda pr: pr.pk, filter(verification_null_or_payment_verification_plan, payment_records)))
+            params &= Q(
+                Q(payment_verification__isnull=True) |
+                Q(payment_verification__payment_verification_plan=payment_verification_plan)
+            )
         else:
-            def verification_null(record):
-                return record.verification is None
+            params &= Q(payment_verification__isnull=True)
 
-            payment_records = list(
-                map(lambda pr: pr.pk, filter(verification_null, payment_records)))
+        payment_records = (
+            self.payment_items.select_related("head_of_household")
+            .only("parent", "head_of_household__phone_no", "head_of_household__phone_no_alternative")
+            .filter(params)
+            .distinct()
+        )
 
         if extra_validation:
             payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
 
-        # or Payment for PaymentPlan qs ?
-        return PaymentRecord.objects.filter(pk__in=payment_records)
+        if node_name == "CashPlanNode":
+            qs = PaymentRecord.objects.filter(pk__in=payment_records)
+        else:
+            qs = Payment.objects.filter(pk__in=payment_records)
+        return qs
+
 
 
 class GenericPayment(TimeStampedUUIDModel):
