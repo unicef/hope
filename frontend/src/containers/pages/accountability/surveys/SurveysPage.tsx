@@ -1,7 +1,9 @@
-import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { CreateSurveyMenu } from '../../../../components/accountability/Surveys/CreateSurveyMenu';
+import { SurveysFilters } from '../../../../components/accountability/Surveys/SurveysTable/SurveysFilters';
+import { PageHeader } from '../../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import {
   hasPermissionInModule,
   PERMISSIONS,
@@ -9,11 +11,7 @@ import {
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../../hooks/useDebounce';
 import { usePermissions } from '../../../../hooks/usePermissions';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { SurveysFilters } from '../../../../components/accountability/Surveys/SurveysTable/SurveysFilters';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
-import { CreateSurveyMenu } from '../../../../components/accountability/Surveys/CreateSurveyMenu';
 
 export const SurveysPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
