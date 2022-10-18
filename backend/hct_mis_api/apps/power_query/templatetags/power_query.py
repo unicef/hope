@@ -1,10 +1,11 @@
 import json
 
 from django import template
+from django.utils.safestring import mark_safe
 
 from adminactions.utils import get_attr
 
-from hct_mis_api.apps.power_query.utils import get_sentry_url
+from hct_mis_api.apps.power_query.utils import get_sentry_url, sizeof
 
 register = template.Library()
 
@@ -28,3 +29,8 @@ def get_class(value):
 def dataset_to_json(value):
     # TODO: json.dump needs a second argument (fp)
     return json.dump(value)  # type: ignore
+
+
+@register.filter()
+def fmt_size(value):
+    return mark_safe(sizeof(value))
