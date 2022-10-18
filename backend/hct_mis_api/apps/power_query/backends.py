@@ -1,7 +1,6 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission
 
-from ..account.models import User
 from .models import Report, ReportDocument
 
 
@@ -16,7 +15,7 @@ class PowerQueryBackend(ModelBackend):
             setattr(user_obj, key, {"%s.%s" % (ct, name) for ct, name in perms})
         return getattr(user_obj, key)
 
-    def has_perm(self, user_obj: User, perm, obj=None):
+    def has_perm(self, user_obj, perm, obj=None):
         if isinstance(obj, Report):
             if obj.owner == user_obj:
                 return True
