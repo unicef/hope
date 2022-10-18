@@ -697,6 +697,9 @@ class CashPlanOrPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
             return self.payment_items.all()
         return []
 
+    def resolve_payment_verification_summary(self, info, **kwargs):
+        return self.get_payment_verification_summary
+
 
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
