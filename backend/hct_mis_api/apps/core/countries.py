@@ -46,6 +46,8 @@ class Countries:
             if input_value in CaseInsensitiveTuple(country_tuple):
                 return country_tuple[index_map[output_type]]
 
+        raise ValueError(f"Country with {input_value} not found")
+
 
 class SanctionListCountries:
     COUNTRIES = {
@@ -1300,3 +1302,5 @@ class SanctionListCountries:
         for country_tuple in cls.COUNTRIES:
             if input_value in CaseInsensitiveTuple(country_tuple):
                 return country_tuple[index_map[output_type]]
+
+        raise ValueError(f"Country with {input_value} not found")

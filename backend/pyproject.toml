@@ -69,7 +69,6 @@ disable_error_code = [
   "assignment",
   "valid-type",
   "str-format",
-  "return",
   "union-attr",
   "dict-item",
   "return-value",
