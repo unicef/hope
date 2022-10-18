@@ -129,7 +129,7 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
 
     def object_id_filter(self, qs, name, value):
         cash_plan = CashPlan.objects.get(pk=value)
-        verifications_ids = cash_plan.payment_verification_plans.all().values_list("pk", flat=True)
+        verifications_ids = cash_plan.payment_verification_plan.all().values_list("pk", flat=True)
         return qs.filter(object_id__in=verifications_ids)
 
 

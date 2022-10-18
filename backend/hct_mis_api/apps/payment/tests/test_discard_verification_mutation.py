@@ -100,7 +100,7 @@ class TestDiscardVerificationMutation(APITestCase):
             )
             EntitlementCardFactory(household=household)
         cls.cash_plan = cash_plan
-        cls.verification = cash_plan.payment_verification_plans.first()
+        cls.verification = cash_plan.payment_verification_plan.first()
 
     @parameterized.expand(
         [
