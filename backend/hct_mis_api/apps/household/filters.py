@@ -105,6 +105,7 @@ class HouseholdFilter(FilterSet):
             "unicef_id",
             "household_ca_id",
             "size",
+            "status_label",
             Lower("head_of_household__full_name"),
             Lower("admin_area__name"),
             "residence_status",
