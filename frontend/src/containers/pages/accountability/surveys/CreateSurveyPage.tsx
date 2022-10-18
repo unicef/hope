@@ -546,6 +546,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         variant='outlined'
                         label={t('Survey Title')}
                         component={FormikTextField}
+                        data-cy='input-title'
                       />
                     </Grid>
                   </Box>
@@ -584,6 +585,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
+                  data-cy='button-submit'
                 >
                   {activeStep === steps.length - 1 ? t('Save') : t('Next')}
                 </LoadingButton>
