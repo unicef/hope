@@ -537,13 +537,13 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
         return self.__class__.__name__
 
     def resolve_verification_status(self, info, **kwargs):
-        return self.payment_verification_summary.status if self.payment_verification_summary else None
+        return self.get_payment_verification_summary.status if self.get_payment_verification_summary else None
 
     def resolve_programme_name(self, info, **kwargs):
         return self.program.name
 
     def resolve_verification_plans(self, info, **kwargs):
-        return self.payment_verification_plans.all()
+        return self.payment_verification_plan.all()
 
     def resolve_assistance_measurement(self, info, **kwargs):
         return "HH"
@@ -594,7 +594,7 @@ class GenericPaymentPlanNode(graphene.ObjectType):
         self,
         info,
     ):
-        return self.payment_verification_summary
+        return self.get_payment_verification_summary
 
 
 class CashPlanOrPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
@@ -1175,7 +1175,7 @@ class Query(graphene.ObjectType):
         )
 
         payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(
-            payment_plan_object_id=str(OuterRef("id"))
+            payment_plan_object_id=OuterRef("id")
         )
         service_provider_qs = ServiceProvider.objects.filter(cash_plans=OuterRef("id")).distinct()
         # cash_plan_qs = CashPlan.objects.filter(id=OuterRef("id")).distinct()

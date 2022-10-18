@@ -105,7 +105,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
 
     @property
-    def payment_verification_summary(self):
+    def get_payment_verification_summary(self):
         """PaymentPlan has only one payment_verification_summary"""
         c_type = ContentType.objects.get_for_model(self.__class__)
         try:
@@ -381,7 +381,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         related_query_name="payment_plan",
 
     )
-    payment_verification_plans = GenericRelation(
+    payment_verification_plan = GenericRelation(
         "payment.PaymentVerificationPlan",
         content_type_field="payment_plan_content_type",
         object_id_field="payment_plan_object_id",
@@ -1017,14 +1017,12 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         content_type_field="payment_content_type",
         object_id_field="payment_object_id",
         related_query_name="payment_record",
-        # related_name="payment_records",
     )
     payment_verification_summary = GenericRelation(
         "payment.PaymentVerificationSummary",
         content_type_field="payment_content_type",
         object_id_field="payment_object_id",
         related_query_name="payment_record",
-        # related_name="payment_records",
     )
 
     @property
@@ -1050,14 +1048,12 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
         content_type_field="payment_content_type",
         object_id_field="payment_object_id",
         related_query_name="payment",
-        # related_name="payments",
     )
     payment_verification_summary = GenericRelation(
         "payment.PaymentVerificationSummary",
         content_type_field="payment_content_type",
         object_id_field="payment_object_id",
         related_query_name="payment",
-        # related_name="payments",
     )
 
     objects = PaymentManager()
@@ -1240,7 +1236,7 @@ def build_summary(payment_plan):
         pending=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_PENDING)),
         finished=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_FINISHED)),
     )
-    summary = payment_plan.payment_verification_summary
+    summary = payment_plan.get_payment_verification_summary
     if statuses_count["active"] >= 1:
         summary.mark_as_active()
     elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
