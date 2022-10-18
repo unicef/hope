@@ -606,8 +606,9 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             context["form"] = form
             return TemplateResponse(request, "core/admin/create_tp.html", context)
         else:
-            program = Program.objects.get(pk=request.POST["program"])
-            create_target_population_task(storage_obj, program)
+            program = Program.objects.get(pk=request.POST.get("program"))
+            tp_name = request.POST.get("name")
+            create_target_population_task(storage_obj, program, tp_name)
 
             self.message_user(request, "Creation of tp started")
 

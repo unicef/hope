@@ -69,11 +69,11 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
 
 
 @sentry_tags
-def create_target_population_task(storage_obj, program):
+def create_target_population_task(storage_obj, program, tp_name):
     business_area = storage_obj.business_area
 
     first_registration_date = datetime.now()
-    last_registration_date = datetime.now()
+    last_registration_date = first_registration_date
 
     family_ids = set()
     individuals = []
@@ -106,18 +106,23 @@ def create_target_population_task(storage_obj, program):
                 }
 
                 if family_id in family_ids:
-                    individuals.append(Individual(**individual_data))
+                    individuals.append(
+                        Individual(**individual_data, household=Household.objects.get(family_id=family_id))
+                    )
                 else:
                     individual = Individual.objects.create(**individual_data)
 
-                    Household.objects.create(
+                    household = Household.objects.create(
                         head_of_household=individual,
                         business_area=business_area,
                         first_registration_date=first_registration_date,
                         last_registration_date=last_registration_date,
-                        size=row["FAM_NUM"],  # ??
                         family_id=family_id,
+                        storage_obj=storage_obj,
                     )
+
+                    individual.household = household
+                    individual.save()
 
                     family_ids.add(family_id)
 
@@ -143,14 +148,18 @@ def create_target_population_task(storage_obj, program):
         households = Household.objects.filter(family_id__in=list(family_ids))
         households_ids = households.values_list("id", flat=True)
 
+        for household in households:
+            household.size = Individual.objects.filter(household=household).count()
+        Household.objects.bulk_update(households, ["size"])
+
         target_population = TargetPopulation.objects.create(
-            name="eDopomoga",
+            name=tp_name,
             created_by=storage_obj.created_by,
             program=program,
             total_households_count=len(households),
             total_individuals_count=Individual.objects.filter(household_id__in=list(households_ids)).count(),
             status=TargetPopulation.STATUS_LOCKED,
-            business_area=storage_obj.business_area,
+            business_area=business_area,
         )
 
         target_population.households.set(households)
