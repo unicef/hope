@@ -44,6 +44,7 @@ import { getPercentage } from '../../../../utils/utils';
 import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { Missing } from '../../../../components/core/Missing';
+import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const sampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -119,6 +120,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+  const confirm = useConfirmation();
 
   const [activeStep, setActiveStep] = useState(SurveySteps.LookUp);
   const [selectedTab, setSelectedTab] = useState(SurveyTabsValues.PROGRAM);
@@ -580,15 +582,35 @@ export const CreateSurveyPage = (): React.ReactElement => {
                 >
                   {t('Back')}
                 </Button>
-                <LoadingButton
-                  loading={loading}
-                  color='primary'
-                  variant='contained'
-                  onClick={submitForm}
-                  data-cy='button-submit'
-                >
-                  {activeStep === steps.length - 1 ? t('Save') : t('Next')}
-                </LoadingButton>
+
+                {activeStep === steps.length - 1 ? (
+                  <Button
+                    onClick={() =>
+                      confirm({
+                        content: t(
+                          'Are you sure you want to send this survey?',
+                        ),
+                        continueText: 'Save',
+                      }).then(() => {
+                        submitForm;
+                      })
+                    }
+                    variant='outlined'
+                    color='primary'
+                  >
+                    {t('Save')}
+                  </Button>
+                ) : (
+                  <LoadingButton
+                    loading={loading}
+                    color='primary'
+                    variant='contained'
+                    onClick={submitForm}
+                    data-cy='button-submit'
+                  >
+                    {t('Next')}
+                  </LoadingButton>
+                )}
               </Box>
             </Box>
           </PaperContainer>
