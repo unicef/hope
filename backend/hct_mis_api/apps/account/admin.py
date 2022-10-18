@@ -326,7 +326,7 @@ class HopeUserCreationForm(UserCreationForm):
 
 @admin.register(account_models.User)
 class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmin):
-    Result = namedtuple("Result", "created,missing,updated,errors")
+    Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
     readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
@@ -851,7 +851,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
                 users_to_bulk_create = []
                 users_role_to_bulk_create = []
                 existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
-                results = self.Result([], [], [], [])
+                results = self.Results([], [], [], [])
                 try:
                     ms_graph = MicrosoftGraphAPI()
                     for email in emails:
