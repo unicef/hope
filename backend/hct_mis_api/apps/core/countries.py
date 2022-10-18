@@ -1,5 +1,6 @@
 import logging
 from functools import lru_cache
+from typing import Union
 
 from django_countries import countries as internal_countries
 from django_countries.fields import Country
@@ -31,7 +32,7 @@ class Countries:
         return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.get_countries())
 
     @classmethod
-    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args, **kwargs) -> str:
+    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args, **kwargs) -> Union[str, None]:
         index_map = {
             "name": 0,
             "alpha2": 1,
@@ -46,7 +47,7 @@ class Countries:
             if input_value in CaseInsensitiveTuple(country_tuple):
                 return country_tuple[index_map[output_type]]
 
-        raise ValueError(f"Country with {input_value} not found")
+        return None
 
 
 class SanctionListCountries:
@@ -1288,7 +1289,7 @@ class SanctionListCountries:
         return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.COUNTRIES)
 
     @classmethod
-    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args, **kwargs) -> str:
+    def get_country_value(cls, input_value: str, output_type: str = "alpha2", *args, **kwargs) -> Union[str, None]:
         index_map = {
             "name": 0,
             "alpha2": 1,
@@ -1303,4 +1304,4 @@ class SanctionListCountries:
             if input_value in CaseInsensitiveTuple(country_tuple):
                 return country_tuple[index_map[output_type]]
 
-        raise ValueError(f"Country with {input_value} not found")
+        return None
