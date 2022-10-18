@@ -1,4 +1,5 @@
 import json
+from base64 import b64decode
 from decimal import Decimal
 
 from django.db.models import (
@@ -903,29 +904,33 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info, input, **kwargs):
+        node_name, obj_id = b64decode(input.get("payment_plan_id")).decode().split(":")
         def get_payment_records(cash_plan, payment_verification_plan, verification_channel):
             kwargs = {}
             if payment_verification_plan:
                 kwargs["payment_verification_plan"] = payment_verification_plan
             if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
                 kwargs["extra_validation"] = does_payment_record_have_right_hoh_phone_number
+            kwargs["node_name"] = node_name
             return cash_plan.available_payment_records(**kwargs)
 
-        cash_plan_id = decode_id_string(input.get("cash_plan_id"))
-        cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
+        if node_name == "CashPlanNode":
+            payment_plan_object = get_object_or_404(CashPlan, id=obj_id)
+        else:
+            payment_plan_object = get_object_or_404(PaymentPlan, id=obj_id)
 
         payment_verification_plan = None
-        if payment_verification_plan_id := decode_id_string(input.get("cash_plan_payment_verification_id")):
+        if payment_verification_plan_id := decode_id_string(input.get("payment_verification_plan_id")):
             payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
-        payment_records = get_payment_records(cash_plan, payment_verification_plan, input.get("verification_channel"))
+        payment_records = get_payment_records(payment_plan_object, payment_verification_plan, input.get("verification_channel"))
         if not payment_records:
             return {
                 "sample_size": 0,
                 "payment_record_count": 0,
             }
 
-        sampling = Sampling(input, cash_plan, payment_records)
+        sampling = Sampling(input, payment_plan_object, payment_records)
         payment_record_count, payment_records_sample_count = sampling.generate_sampling()
 
         return {

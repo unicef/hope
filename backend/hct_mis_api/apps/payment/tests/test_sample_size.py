@@ -11,7 +11,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 def create_query_variables(cash_plan, verification_channel):
     return {
         "input": {
-            "cashPlanId": encode_id_base64(cash_plan.pk, "CashPlan"),
+            "paymentPlanId": encode_id_base64(cash_plan.pk, "CashPlan"),
             "sampling": "FULL_LIST",
             "fullListArguments": {"excludedAdminAreas": []},
             "verificationChannel": verification_channel,
