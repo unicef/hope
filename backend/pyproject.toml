@@ -71,7 +71,6 @@ disable_error_code = [
   "str-format",
   "return",
   "union-attr",
-  "no-redef",
   "dict-item",
   "return-value",
   "operator",
@@ -82,13 +81,8 @@ disable_error_code = [
   "no-any-return",
   "func-returns-value",
   "call-overload",
-  "str-bytes-safe",
-  "call-arg",
   "has-type",
 ]
-
-
-
 
 [tool.django-stubs]
 django_settings_module = "hct_mis_api.settings"
