@@ -11,11 +11,11 @@ import {
   Stepper,
   Typography,
 } from '@material-ui/core';
+import { Link, useHistory } from 'react-router-dom';
 import { Field, Form, Formik } from 'formik';
 import React, { useState, useEffect, useCallback, ReactElement } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { LoadingButton } from '../../../../components/core/LoadingButton';
@@ -52,26 +52,6 @@ const sampleSizeTabs = ['Full List', 'Random Sampling'];
 const Border = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
-
-const initialValues = {
-  program: '',
-  targetPopulation: '',
-  registrationDataImport: '',
-  confidenceInterval: 95,
-  marginOfError: 5,
-  filterAgeMin: null,
-  filterAgeMax: null,
-  filterSex: '',
-  excludedAdminAreasFull: [],
-  excludedAdminAreasRandom: [],
-  verificationChannel: 'MANUAL',
-  rapidProFlow: '',
-  adminCheckbox: false,
-  ageCheckbox: false,
-  sexCheckbox: false,
-  title: '',
-  samplingType: 'FULL_LIST',
-};
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(selectedSampleSizeType, values, businessArea) {
@@ -113,6 +93,7 @@ function prepareVariables(selectedSampleSizeType, values, businessArea) {
 
 export const CreateSurveyPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const history = useHistory();
   const [
     mutate,
     { loading },
@@ -121,6 +102,30 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const confirm = useConfirmation();
+
+  const category = history.location.state?.category;
+
+  const initialValues = {
+    category,
+    message: '',
+    program: '',
+    targetPopulation: '',
+    registrationDataImport: '',
+    confidenceInterval: 95,
+    marginOfError: 5,
+    filterAgeMin: null,
+    filterAgeMax: null,
+    filterSex: '',
+    excludedAdminAreasFull: [],
+    excludedAdminAreasRandom: [],
+    verificationChannel: 'MANUAL',
+    rapidProFlow: '',
+    adminCheckbox: false,
+    ageCheckbox: false,
+    sexCheckbox: false,
+    title: '',
+    samplingType: 'FULL_LIST',
+  };
 
   const [activeStep, setActiveStep] = useState(SurveySteps.LookUp);
   const [selectedTab, setSelectedTab] = useState(SurveyTabsValues.PROGRAM);
@@ -158,6 +163,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const validationSchema = useCallback(() => {
     const datum = {
       title: Yup.string(),
+      message: Yup.string(),
     };
 
     if (activeStep === SurveySteps.Details) {
@@ -165,6 +171,12 @@ export const CreateSurveyPage = (): React.ReactElement => {
         .min(2, t('Too short'))
         .max(255, t('Too long'))
         .required(t('Title is required'));
+      if (category === 'SMS') {
+        datum.message = Yup.string()
+          .min(2, t('Too short'))
+          .max(255, t('Too long'))
+          .required(t('Title is required'));
+      }
     }
     setValidateData(true);
 
@@ -546,12 +558,28 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         multiline
                         fullWidth
                         variant='outlined'
-                        label={t('Survey Title')}
+                        label={t('Title')}
                         component={FormikTextField}
                         data-cy='input-title'
                       />
                     </Grid>
                   </Box>
+                  {category === 'SMS' && (
+                    <Box my={3}>
+                      <Grid item xs={12}>
+                        <Field
+                          name='message'
+                          required
+                          multiline
+                          fullWidth
+                          variant='outlined'
+                          label={t('Message')}
+                          component={FormikTextField}
+                          data-cy='input-title'
+                        />
+                      </Grid>
+                    </Box>
+                  )}
                   <Grid item xs={12}>
                     <Box
                       pb={3}
@@ -591,9 +619,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                           'Are you sure you want to send this survey?',
                         ),
                         continueText: 'Save',
-                      }).then(() => {
-                        submitForm;
-                      })
+                      }).then(() => submitForm())
                     }
                     variant='outlined'
                     color='primary'
