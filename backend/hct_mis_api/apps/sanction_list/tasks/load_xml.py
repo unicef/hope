@@ -66,7 +66,7 @@ class LoadSanctionListXMLTask:
         tag = individual_tag.find(path)
         if isinstance(tag, ET.Element):
             return tag.text
-        raise ValueError(f"xml tag '{path}' not found")
+        return None
 
     @staticmethod
     def _get_designation(individual_tag: ET.Element, *args, **kwargs) -> Union[str, None]:
