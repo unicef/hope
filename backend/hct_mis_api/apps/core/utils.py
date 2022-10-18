@@ -211,7 +211,7 @@ def get_attr_value(name, obj, default=None):
 
 
 def to_choice_object(choices):
-    return [{"name": name, "value": value} for value, name in choices]
+    return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 
 def rename_dict_keys(obj, convert_func):
