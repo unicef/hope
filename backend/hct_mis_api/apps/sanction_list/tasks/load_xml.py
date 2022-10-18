@@ -62,7 +62,7 @@ class LoadSanctionListXMLTask:
         }
 
     @staticmethod
-    def _get_text_from_path(individual_tag: ET.Element, path: str) -> str:
+    def _get_text_from_path(individual_tag: ET.Element, path: str) -> Union[str, None]:
         tag = individual_tag.find(path)
         if isinstance(tag, ET.Element):
             return tag.text
