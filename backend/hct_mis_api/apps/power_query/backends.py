@@ -16,7 +16,7 @@ class PowerQueryBackend(ModelBackend):
             setattr(user_obj, key, {"%s.%s" % (ct, name) for ct, name in perms})
         return getattr(user_obj, key)
 
-    def has_perm(self, user_obj: User, perm, obj=None):
+    def has_perm(self, user_obj: User, perm, obj=None):  # type: ignore
         if isinstance(obj, Report):
             if obj.owner == user_obj:
                 return True
