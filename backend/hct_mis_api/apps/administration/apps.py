@@ -19,14 +19,16 @@ class Config(SmartConfig):
         django.contrib.admin.autodiscover()
         self.module.autodiscover()
         from django.contrib.admin.models import LogEntry
+        from django.contrib.auth.models import Permission
         from django.contrib.contenttypes.models import ContentType
 
-        from smart_admin.smart_auth.admin import ContentTypeAdmin
+        from smart_admin.smart_auth.admin import ContentTypeAdmin, PermissionAdmin
 
         from .admin import LogEntryAdmin
 
         smart_register(ContentType)(ContentTypeAdmin)
         smart_register(LogEntry)(LogEntryAdmin)
+        smart_register(Permission)(PermissionAdmin)
 
         from django.contrib.admin import site
 

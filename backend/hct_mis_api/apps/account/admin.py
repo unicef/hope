@@ -33,13 +33,11 @@ from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
 import requests
-from admin_extra_buttons.api import ExtraButtonsMixin, button
-from admin_sync.mixin import GetManyFromRemoteMixin
+from admin_extra_buttons.api import button
+from admin_sync.mixin import GetManyFromRemoteMixin, SyncMixin
 from adminactions.export import ForeignKeysCollector
-from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import AllValuesComboFilter
-from adminfilters.mixin import AdminFiltersMixin
 from constance import config
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
@@ -56,7 +54,7 @@ from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, Role, Us
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, HopeModelAdminMixin
 
 logger = logging.getLogger(__name__)
 
@@ -314,7 +312,7 @@ class BusinessAreaFilter(SimpleListFilter):
 
 
 @admin.register(account_models.Partner)
-class PartnerAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     list_filter = ("is_un",)
     search_fields = ("name",)
 
@@ -327,8 +325,8 @@ class HopeUserCreationForm(UserCreationForm):
 
 
 @admin.register(account_models.User)
-class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminActionPermMixin, BaseUserAdmin):
-    Result = namedtuple("Result", "created,missing,updated,errors")
+class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmin):
+    Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
     readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
@@ -411,6 +409,15 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
     @property
     def media(self):
         return super().media + forms.Media(js=["hijack/hijack.js"])
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "partner",
+            )
+        )
 
     def get_fields(self, request, obj=None):
         return [
@@ -785,7 +792,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
         else:
             raise Http404
 
-    @button(label="Sync", permission="account.can_sync_with_ad")
+    @button(label="AD Sync", permission="account.can_sync_with_ad")
     def sync_multi(self, request):
         not_found = []
         try:
@@ -844,7 +851,7 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
                 users_to_bulk_create = []
                 users_role_to_bulk_create = []
                 existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
-                results = self.Result([], [], [], [])
+                results = self.Results([], [], [], [])
                 try:
                     ms_graph = MicrosoftGraphAPI()
                     for email in emails:
@@ -922,12 +929,13 @@ class RoleResource(resources.ModelResource):
 
 
 @admin.register(account_models.Role)
-class RoleAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
     search_fields = ("name",)
     form = RoleAdminForm
     list_filter = (PermissionFilter, "subsystem")
     resource_class = RoleResource
+    change_list_template = "admin/account/role/change_list.html"
 
     @button()
     def members(self, request, pk):
@@ -997,6 +1005,17 @@ class UserRoleAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
         ("role__subsystem", AllValuesComboFilter),
     )
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "business_area",
+                "user",
+                "role",
+            )
+        )
+
     def check_sync_permission(self, request, obj=None):
         return request.user.is_staff
 
@@ -1054,7 +1073,7 @@ class GroupResource(resources.ModelResource):
 
 
 @smart_register(Group)
-class GroupAdmin(ImportExportModelAdmin, ExtraButtonsMixin, _GroupAdmin):
+class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupAdmin):
     resource_class = GroupResource
     change_list_template = "admin/account/group/change_list.html"
 
@@ -1092,3 +1111,45 @@ class GroupAdmin(ImportExportModelAdmin, ExtraButtonsMixin, _GroupAdmin):
                 "removed": sorted(self.existing_perms.difference(new_perms)),
             }
         return change_message
+
+
+@admin.register(account_models.UserGroup)
+class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
+    list_display = ("user", "group", "business_area")
+    autocomplete_fields = ("group",)
+    raw_id_fields = ("user", "business_area", "group")
+    search_fields = ("user__username__istartswith",)
+    list_filter = (
+        ("business_area", AutoCompleteFilter),
+        ("group", AutoCompleteFilter),
+    )
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "business_area",
+                "user",
+                "group",
+            )
+        )
+
+    def check_sync_permission(self, request, obj=None):
+        return request.user.is_staff
+
+    def check_publish_permission(self, request, obj=None):
+        return False
+
+    def _get_data(self, record) -> str:
+        groups = Group.objects.all()
+        collector = ForeignKeysCollector(None)
+        objs = []
+        for qs in [groups]:
+            objs.extend(qs)
+        objs.extend(account_models.UserGroup.objects.filter(pk=record.pk))
+        collector.collect(objs)
+        serializer = self.get_serializer("json")
+        return serializer.serialize(
+            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3
+        )
