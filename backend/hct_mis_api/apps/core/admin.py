@@ -37,6 +37,7 @@ from xlrd import XLRDError
 from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
+    create_target_population_task,
     upload_new_kobo_template_and_update_flex_fields_task,
 )
 from hct_mis_api.apps.core.forms import ProgramForm
@@ -51,6 +52,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
 from hct_mis_api.apps.utils.security import is_root
 from mptt.admin import MPTTModelAdmin
@@ -595,6 +597,18 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     @button(label="Create eDopomoga TP")
     def create_tp(self, request, pk):
         storage_obj = StorageFile.objects.get(pk=pk)
-        form = ProgramForm(business_area_id=storage_obj.business_area_id)
-        context = self.get_common_context(request, pk, form=form)
-        return TemplateResponse(request, "core/admin/create_tp.html", context)
+        context = self.get_common_context(
+            request,
+            pk,
+        )
+        if request.method == "GET":
+            form = ProgramForm(business_area_id=storage_obj.business_area_id)
+            context["form"] = form
+            return TemplateResponse(request, "core/admin/create_tp.html", context)
+        else:
+            program = Program.objects.get(pk=request.POST["program"])
+            create_target_population_task(storage_obj, program)
+
+            self.message_user(request, "Creation of tp started")
+
+            return redirect("..")

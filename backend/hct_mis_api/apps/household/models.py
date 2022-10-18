@@ -438,6 +438,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         max_digits=64,
         blank=True,
     )
+    family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga id
 
     class Meta:
         verbose_name = "Household"
