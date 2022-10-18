@@ -667,5 +667,8 @@
   "Number of selected recipients": "Number of selected recipients",
   "Survey Title": "Survey Title",
   "Check Answers": "Check Answers",
-  "Are you sure you want to send this survey?": "Are you sure you want to send this survey?"
+  "Are you sure you want to send this survey?": "Are you sure you want to send this survey?",
+  "New Survey with Rapid Pro": "New Survey with Rapid Pro",
+  "New Survey with SMS": "New Survey with SMS",
+  "New Survey with Manual Process": "New Survey with Manual Process"
 }
