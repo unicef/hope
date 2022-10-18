@@ -165,7 +165,6 @@ export const CreateSurveyPage = (): React.ReactElement => {
       title: Yup.string(),
       message: Yup.string(),
     };
-
     if (activeStep === SurveySteps.Details) {
       datum.title = Yup.string()
         .min(2, t('Too short'))
@@ -175,13 +174,13 @@ export const CreateSurveyPage = (): React.ReactElement => {
         datum.message = Yup.string()
           .min(2, t('Too short'))
           .max(255, t('Too long'))
-          .required(t('Title is required'));
+          .required(t('Message is required'));
       }
     }
     setValidateData(true);
 
     return Yup.object().shape(datum);
-  }, [activeStep, t]);
+  }, [activeStep, t, category]);
 
   const validate = (values): { error?: string } => {
     const { program, targetPopulation } = values;
@@ -621,7 +620,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         continueText: 'Save',
                       }).then(() => submitForm())
                     }
-                    variant='outlined'
+                    variant='contained'
                     color='primary'
                   >
                     {t('Save')}
