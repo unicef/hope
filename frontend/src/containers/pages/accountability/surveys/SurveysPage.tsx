@@ -13,6 +13,7 @@ import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { SurveysFilters } from '../../../../components/accountability/Surveys/SurveysTable/SurveysFilters';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
+import { CreateSurveyMenu } from '../../../../components/accountability/Surveys/CreateSurveyMenu';
 
 export const SurveysPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
@@ -57,15 +58,7 @@ export const SurveysPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader title={t('Surveys')}>
-        <Button
-          variant='contained'
-          color='primary'
-          component={Link}
-          to={`/${businessArea}/accountability/surveys/create`}
-          data-cy='button-create-new-survey'
-        >
-          {t('New Survey')}
-        </Button>
+        <CreateSurveyMenu />
       </PageHeader>
       <SurveysFilters filter={filter} onFilterChange={setFilter} />
       <SurveysTable
