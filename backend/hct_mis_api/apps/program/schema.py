@@ -119,7 +119,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         ).count()
 
     def resolve_payment_verification_summary(self, info, **kwargs):
-        return self.payment_verification_summary
+        return self.get_payment_verification_summary
 
 
 class Query(graphene.ObjectType):
@@ -191,7 +191,7 @@ class Query(graphene.ObjectType):
 
     def resolve_all_cash_plans(self, info, **kwargs):
         payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(
-            payment_plan_object_id=str(OuterRef("id"))
+            payment_plan_object_id=OuterRef("id")
         )
 
         return CashPlan.objects.annotate(
