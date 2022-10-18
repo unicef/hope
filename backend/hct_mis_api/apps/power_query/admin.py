@@ -74,9 +74,6 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
         return super(QueryAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
 
-    def get_readonly_fields(self, request, obj=None):
-        return super().get_readonly_fields(request, obj)
-
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser or (obj and obj.owner == request.user)
 
@@ -269,7 +266,6 @@ class ReportAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
                 message_level = messages.WARNING
             self.message_user(request, f"{result}", message_level)
         except Exception as e:
-            raise
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
