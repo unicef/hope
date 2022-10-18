@@ -326,7 +326,7 @@ class HopeUserCreationForm(UserCreationForm):
 
 @admin.register(account_models.User)
 class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmin):
-    Results = namedtuple("Result", "created,missing,updated,errors")
+    Result = namedtuple("Result", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
     readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
