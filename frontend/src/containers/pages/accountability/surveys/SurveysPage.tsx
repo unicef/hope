@@ -62,7 +62,7 @@ export const SurveysPage = (): React.ReactElement => {
           color='primary'
           component={Link}
           to={`/${businessArea}/accountability/surveys/create`}
-          data-cy='button-submit-new-feedback'
+          data-cy='button-create-new-survey'
         >
           {t('New Survey')}
         </Button>

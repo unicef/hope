@@ -56,6 +56,7 @@ export const LookUpProgrammesTableRow = ({
           value={program.id}
           name='radio-button-program'
           inputProps={{ 'aria-label': program.id }}
+          data-cy='input-radio-program'
         />
       </TableCell>
       <TableCell align='left'>
