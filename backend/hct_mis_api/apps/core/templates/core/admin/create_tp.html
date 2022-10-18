@@ -1,0 +1,10 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block content %}
+  <h2>Choose program:</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <br>
+    <button type="submit">Create TP</button>
+  </form>
+{% endblock %}

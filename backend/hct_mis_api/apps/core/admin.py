@@ -39,6 +39,7 @@ from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
+from hct_mis_api.apps.core.forms import ProgramForm
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
@@ -576,7 +577,7 @@ class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
 
 @admin.register(StorageFile)
-class StorageFileAdmin(admin.ModelAdmin):
+class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
 
     def has_change_permission(self, request, obj=None):
@@ -590,3 +591,10 @@ class StorageFileAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return request.user.can_download_storage_files()
+
+    @button(label="Create eDopomoga TP")
+    def create_tp(self, request, pk):
+        storage_obj = StorageFile.objects.get(pk=pk)
+        form = ProgramForm(business_area_id=storage_obj.business_area_id)
+        context = self.get_common_context(request, pk, form=form)
+        return TemplateResponse(request, "core/admin/create_tp.html", context)

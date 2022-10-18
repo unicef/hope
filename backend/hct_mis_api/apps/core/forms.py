@@ -1,8 +1,10 @@
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.program.models import Program
 
 
 class StorageFileForm(forms.Form):
@@ -23,3 +25,14 @@ class StorageFileForm(forms.Form):
         if self.cleaned_data["file"].size > limit:
             raise ValidationError(f"File too large. Size should not exceed {limit} MiB.")
         return cleaned_data
+
+
+class ProgramForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.business_area_id = kwargs.pop("business_area_id")
+        super().__init__(*args, **kwargs)
+
+        self.fields["program"] = forms.ModelChoiceField(queryset=self.get_program_queryset())
+
+    def get_program_queryset(self):
+        return Program.objects.filter(Q(business_area_id=self.business_area_id) & Q(status=Program.ACTIVE))
