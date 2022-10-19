@@ -2,6 +2,8 @@ import sys
 from types import FunctionType
 from typing import Any
 
+from django.http import HttpRequest
+
 from sentry_sdk import configure_scope
 
 
@@ -11,7 +13,7 @@ class SentryScopeMiddleware:
         super().__init__()
 
     # Note: must be listed AFTER AuthenticationMiddleware
-    def __call__(self, request: Any) -> Any:
+    def __call__(self, request: HttpRequest) -> Any:
         sys.stderr.isatty = lambda: False
         with configure_scope() as scope:
             scope.set_tag("username", request.user.username)
