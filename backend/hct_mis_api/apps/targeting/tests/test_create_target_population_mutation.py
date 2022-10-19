@@ -3,8 +3,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -17,12 +17,12 @@ class TestCreateTargetPopulationMutation(APITestCase):
         targetPopulation{
           name
           status
-          candidateListTotalHouseholds
-          candidateListTotalIndividuals
-            candidateListTargetingCriteria{
+          totalHouseholdsCount
+          totalIndividualsCount
+            targetingCriteria{
             rules{
               filters{
-                comparisionMethod
+                comparisonMethod
                 fieldName
                 arguments
                 isFlexField
@@ -70,7 +70,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                         {
                             "filters": [
                                 {
-                                    "comparisionMethod": "EQUALS",
+                                    "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
                                     "arguments": [3],
                                     "isFlexField": False,

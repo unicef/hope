@@ -1,19 +1,21 @@
 import logging
-import openpyxl
-
 from tempfile import NamedTemporaryFile
-from django.core.files import File
 
-from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from django.core.files import File
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
+
+import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.models import PaymentVerification, XlsxCashPlanPaymentVerificationFile
-
+from hct_mis_api.apps.payment.models import (
+    PaymentVerification,
+    XlsxCashPlanPaymentVerificationFile,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -150,7 +152,7 @@ class XlsxVerificationExportService:
                     except IndexError:
                         column_widths.append(len(value))
 
-        for i, width in enumerate(column_widths):
+        for i in range(len(column_widths)):
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             ws.column_dimensions[col_name].width = value

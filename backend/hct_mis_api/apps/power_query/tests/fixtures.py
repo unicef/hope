@@ -17,7 +17,7 @@ class QueryFactory(factory.DjangoModelFactory):
     owner = factory.SubFactory(UserFactory, is_superuser=True, is_staff=True)
     target = factory.Iterator(ContentType.objects.filter(app_label="auth", model="permission"))
     code = """result=conn.all()
-debug_info={"conn": str(conn.query)}    
+debug_info={"conn": str(conn.query)}
 """
 
     class Meta:

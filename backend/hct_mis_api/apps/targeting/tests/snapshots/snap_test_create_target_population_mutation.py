@@ -10,7 +10,9 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
     'data': {
         'createTargetPopulation': {
             'targetPopulation': {
-                'candidateListTargetingCriteria': {
+                'name': 'Example name 5',
+                'status': 'OPEN',
+                'targetingCriteria': {
                     'rules': [
                         {
                             'filters': [
@@ -18,7 +20,7 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
                                     'arguments': [
                                         3
                                     ],
-                                    'comparisionMethod': 'EQUALS',
+                                    'comparisonMethod': 'EQUALS',
                                     'fieldName': 'size',
                                     'isFlexField': False
                                 }
@@ -26,10 +28,8 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
                         }
                     ]
                 },
-                'candidateListTotalHouseholds': 2,
-                'candidateListTotalIndividuals': 6,
-                'name': 'Example name 5',
-                'status': 'DRAFT'
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
             }
         }
     }

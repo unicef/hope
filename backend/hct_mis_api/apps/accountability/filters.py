@@ -6,7 +6,7 @@ from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
 
-from .models import Feedback, Message, FeedbackMessage
+from .models import Feedback, FeedbackMessage, Message
 
 
 class MessagesFilter(FilterSet):

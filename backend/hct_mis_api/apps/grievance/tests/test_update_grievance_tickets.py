@@ -2,7 +2,6 @@ from datetime import date
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
 
 from parameterized import parameterized
 
@@ -47,6 +46,8 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestUpdateGrievanceTickets(APITestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     UPDATE_GRIEVANCE_TICKET_MUTATION = """
     mutation UpdateGrievanceTicket(
       $input: UpdateGrievanceTicketInput!
@@ -80,7 +81,6 @@ class TestUpdateGrievanceTickets(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         cls.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
@@ -132,15 +132,13 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         first_individual = cls.individuals[0]
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
-        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        birth_certificate_type = DocumentType.objects.get(
-            country=country_pl, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
-        )
+        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        birth_certificate_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
         cls.national_id = DocumentFactory(
-            type=national_id_type, document_number="789-789-645", individual=first_individual
+            country=country_pl, type=national_id_type, document_number="789-789-645", individual=first_individual
         )
         cls.birth_certificate = DocumentFactory(
-            type=birth_certificate_type, document_number="ITY8456", individual=first_individual
+            country=country_pl, type=birth_certificate_type, document_number="ITY8456", individual=first_individual
         )
         household_one.head_of_household = cls.individuals[0]
         household_one.save()
@@ -635,13 +633,13 @@ class TestUpdateGrievanceTickets(APITestCase):
         if name == "with_permission":
             self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
             self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.name, self.admin_area_2.name)
+            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.name, "City Test")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.language, "Polish, English")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
         else:
             self.assertEqual(self.positive_feedback_grievance_ticket.description, "")
             self.assertNotEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin2, self.admin_area_2)
+            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.name, "City Example")
             self.assertEqual(self.positive_feedback_grievance_ticket.language, "Spanish")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
 

@@ -33,7 +33,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Status
               </span>
-              <div>
+              <div
+                data-cy="label-Status"
+              >
                 <div
                   class="sc-iwsKbI dUmvrG"
                 >
@@ -57,7 +59,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Priority
               </span>
-              <div>
+              <div
+                data-cy="label-Priority"
+              >
                 <div
                   class="sc-iwsKbI dUmvrG"
                 >
@@ -81,7 +85,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Urgency
               </span>
-              <div>
+              <div
+                data-cy="label-Urgency"
+              >
                 <div
                   class="sc-iwsKbI dUmvrG"
                 >
@@ -105,7 +111,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Assigned to
               </span>
-              <div>
+              <div
+                data-cy="label-Assigned to"
+              >
                 Maciej Szewczyk
               </div>
             </div>
@@ -120,7 +128,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Category
               </span>
-              <div>
+              <div
+                data-cy="label-Category"
+              >
                 <span>
                   Data Change
                 </span>
@@ -137,7 +147,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Issue Type
               </span>
-              <div>
+              <div
+                data-cy="label-Issue Type"
+              >
                 <span>
                   Withdraw Individual
                 </span>
@@ -154,7 +166,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Household ID
               </span>
-              <div>
+              <div
+                data-cy="label-Household ID"
+              >
                 <span>
                   <a
                     class="sc-bwzfXH kvzhbg"
@@ -176,7 +190,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Individual ID
               </span>
-              <div>
+              <div
+                data-cy="label-Individual ID"
+              >
                 <span>
                   <a
                     class="sc-bwzfXH kvzhbg"
@@ -198,7 +214,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Payment ID
               </span>
-              <div>
+              <div
+                data-cy="label-Payment ID"
+              >
                 <span>
                   -
                 </span>
@@ -215,7 +233,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Programme
               </span>
-              <div>
+              <div
+                data-cy="label-Programme"
+              >
                 -
               </div>
             </div>
@@ -230,7 +250,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Created By
               </span>
-              <div>
+              <div
+                data-cy="label-Created By"
+              >
                 Maciej Szewczyk
               </div>
             </div>
@@ -245,7 +267,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Date Created
               </span>
-              <div>
+              <div
+                data-cy="label-Date Created"
+              >
                 <time
                   datetime="1644571534682"
                 >
@@ -264,7 +288,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Last Modified Date
               </span>
-              <div>
+              <div
+                data-cy="label-Last Modified Date"
+              >
                 <time
                   datetime="1644571964102"
                 >
@@ -283,7 +309,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Administrative Level 2
               </span>
-              <div>
+              <div
+                data-cy="label-Administrative Level 2"
+              >
                 -
               </div>
             </div>
@@ -298,7 +326,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Area / Village / Pay point
               </span>
-              <div>
+              <div
+                data-cy="label-Area / Village / Pay point"
+              >
                 -
               </div>
             </div>
@@ -313,7 +343,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Languages Spoken
               </span>
-              <div>
+              <div
+                data-cy="label-Languages Spoken"
+              >
                 -
               </div>
             </div>
@@ -328,7 +360,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Documentation
               </span>
-              <div>
+              <div
+                data-cy="label-Documentation"
+              >
                 <div
                   class="MuiBox-root MuiBox-root-1"
                 >
@@ -347,7 +381,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Description
               </span>
-              <div>
+              <div
+                data-cy="label-Description"
+              >
                 dwdw
               </div>
             </div>
@@ -362,7 +398,9 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 Comments
               </span>
-              <div>
+              <div
+                data-cy="label-Comments"
+              >
                 -
               </div>
             </div>

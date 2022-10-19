@@ -1,5 +1,4 @@
 import logging
-import os
 from enum import Enum
 from typing import Union
 
@@ -8,18 +7,13 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from graphene_file_upload.scalars import Upload
-
-from hct_mis_api.apps.accountability.models import Feedback
-from hct_mis_api.apps.grievance.documents import bulk_update_assigned_to
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import PaymentRecord
 
 import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
@@ -30,7 +24,13 @@ from hct_mis_api.apps.core.utils import (
     to_snake_case,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote, GrievanceDocument
+from hct_mis_api.apps.grievance.documents import bulk_update_assigned_to
+from hct_mis_api.apps.grievance.inputs import (
+    CreateGrievanceTicketInput,
+    CreateTicketNoteInput,
+    UpdateGrievanceTicketInput,
+)
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     close_add_individual_grievance_ticket,
     close_delete_household_ticket,
@@ -49,9 +49,7 @@ from hct_mis_api.apps.grievance.mutations_extras.feedback import (
 from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import (
     save_grievance_complaint_extras,
 )
-from hct_mis_api.apps.grievance.mutations_extras.main import (
-    _no_operation_close_method,
-)
+from hct_mis_api.apps.grievance.mutations_extras.main import _no_operation_close_method
 from hct_mis_api.apps.grievance.mutations_extras.payment_verification import (
     save_payment_verification_extras,
 )
@@ -74,15 +72,18 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     verify_required_arguments,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode, GrievanceDocumentNode
+from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
 from hct_mis_api.apps.grievance.utils import (
+    create_grievance_documents,
+    delete_grievance_documents,
     get_individual,
     traverse_sibling_tickets,
-    create_grievance_documents,
     update_grievance_documents,
-    delete_grievance_documents,
 )
-from hct_mis_api.apps.grievance.validators import DataChangeValidator, validate_grievance_documents_size
+from hct_mis_api.apps.grievance.validators import (
+    DataChangeValidator,
+    validate_grievance_documents_size,
+)
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -92,11 +93,9 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.grievance.inputs import (
-    CreateGrievanceTicketInput,
-    CreateTicketNoteInput,
-    UpdateGrievanceTicketInput,
-)
+from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -464,8 +463,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             create_grievance_documents(info, grievance_ticket, documents)
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
-            logger.error("Grievance Ticket on status Closed is not editable")
-            raise GraphQLError("Grievance Ticket on status Closed is not editable")
+            log_and_raise("Grievance Ticket in status Closed is not editable")
 
         if grievance_ticket.issue_type:
             verify_required_arguments(input, "issue_type", cls.EXTRAS_OPTIONS)
@@ -562,6 +560,9 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
 
+        admin = input.pop("admin", None)
+        if admin:
+            grievance_ticket.admin2 = get_object_or_404(Area, p_code=admin)
         grievance_ticket.partner = get_partner(input.pop("partner", None))
         grievance_ticket.user_modified = timezone.now()
         grievance_ticket.save()
@@ -752,8 +753,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if grievance_ticket.is_feedback:
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
-            logger.error("New status is incorrect")
-            raise GraphQLError("New status is incorrect")
+            log_and_raise("New status is incorrect")
         if status == GrievanceTicket.STATUS_CLOSED:
             ticket_details = grievance_ticket.ticket_details
             if getattr(grievance_ticket.ticket_details, "is_multiple_duplicates_version", False):
@@ -1094,15 +1094,13 @@ class ReassignRoleMutation(graphene.Mutation):
     @classmethod
     def verify_role_choices(cls, role):
         if role not in (ROLE_PRIMARY, ROLE_ALTERNATE, HEAD):
-            logger.error("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
-            raise GraphQLError("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
+            log_and_raise("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
     @classmethod
     def verify_if_role_exists(cls, household, current_individual, role):
         if role == HEAD:
             if household.head_of_household.id != current_individual.id:
-                logger.error("This individual is not a head of provided household")
-                raise GraphQLError("This individual is not a head of provided household")
+                log_and_raise("This individual is not a head of provided household")
         else:
             get_object_or_404(
                 IndividualRoleInHousehold,
@@ -1203,8 +1201,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         selected_individual_ids = kwargs.get("selected_individual_ids", None)
 
         if selected_individual_id and selected_individual_ids:
-            logger.error("Only one option for selected individuals is available")
-            raise GraphQLError("Only one option for selected individuals is available")
+            log_and_raise("Only one option for selected individuals is available")
 
         ticket_details = grievance_ticket.ticket_details
 
@@ -1215,8 +1212,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
                 ticket_details.golden_records_individual,
                 ticket_details.possible_duplicate,
             ):
-                logger.error("The selected individual is not valid, must be one of those attached to the ticket")
-                raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
+                log_and_raise("The selected individual is not valid, must be one of those attached to the ticket")
 
             ticket_details.selected_individual = selected_individual
             ticket_details.role_reassign_data = {}
@@ -1258,10 +1254,11 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         )
 
         if grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
-            logger.error("Payment Details changes can approve only for Grievance Ticket on status For Approval")
-            raise GraphQLError("Payment Details changes can approve only for Grievance Ticket on status For Approval")
+            log_and_raise("Payment Details changes can approve only for Grievance Ticket in status For Approval")
 
-        old_payment_verification_ticket_details = grievance_ticket.payment_verification_ticket_details
+        old_payment_verification_ticket_details = (  # noqa F841
+            grievance_ticket.payment_verification_ticket_details
+        )  # TODO: is this a bug?
         grievance_ticket.payment_verification_ticket_details.approve_status = kwargs.get("approve_status", False)
         grievance_ticket.payment_verification_ticket_details.save()
 

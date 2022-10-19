@@ -9,6 +9,7 @@ from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
 from hct_mis_api.apps.targeting.models import (
+    HouseholdSelection,
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
@@ -16,7 +17,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-def comparision_method_resolver(obj):
+def comparison_method_resolver(obj):
     core_fields = FieldFactory.from_scope(Scope.GLOBAL)
     core_field_attrs = [attr for attr in core_fields if attr.get("name") == obj.field_name]
     core_field_attr = core_field_attrs[0]
@@ -40,7 +41,7 @@ def arguments_resolver(obj):
         max = random.randint(min, random.randint(min + 1, 10))
     if obj.field_name == "residence_status":
         return [random.choice([x[0] for x in RESIDENCE_STATUS_CHOICE])]
-    if obj.comparision_method == "RANGE" or obj.comparision_method == "NOT_IN_RANGE":
+    if obj.comparison_method == "RANGE" or obj.comparison_method == "NOT_IN_RANGE":
         return [min, max]
     return [min]
 
@@ -49,7 +50,7 @@ class TargetingCriteriaRuleFilterFactory(factory.DjangoModelFactory):
     field_name = factory.fuzzy.FuzzyChoice(
         ["size", "residence_status"],
     )
-    comparision_method = factory.LazyAttribute(comparision_method_resolver)
+    comparison_method = factory.LazyAttribute(comparison_method_resolver)
     arguments = factory.LazyAttribute(arguments_resolver)
 
     class Meta:
@@ -79,7 +80,7 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     created_by = factory.SubFactory(UserFactory)
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
     updated_at = factory.LazyAttribute(lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000)))
-    status = factory.fuzzy.FuzzyChoice([TargetPopulation.STATUS_DRAFT])
+    status = TargetPopulation.STATUS_OPEN
     business_area = None
 
     @factory.post_generation
@@ -91,3 +92,12 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
         if extracted:
             for household in extracted:
                 self.households.add(household)
+
+
+class HouseholdSelectionFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = HouseholdSelection
+
+    household = factory.SubFactory(HouseholdFactory)
+    target_population = factory.SubFactory(TargetPopulationFactory)
+    vulnerability_score = factory.fuzzy.FuzzyInteger(0, 100)

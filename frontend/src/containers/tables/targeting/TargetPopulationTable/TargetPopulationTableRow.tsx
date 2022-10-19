@@ -77,7 +77,7 @@ export function TargetPopulationTableRow({
         {targetPopulation.program?.name || '-'}
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.finalListTotalHouseholds || '-'}
+        {targetPopulation.totalHouseholdsCount || '-'}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>

@@ -2,7 +2,7 @@ import { TargetPopulationStatus } from '../__generated__/graphql';
 
 export const TARGETING_STATES = {
   NONE: 'None',
-  [TargetPopulationStatus.Draft]: 'Open',
+  [TargetPopulationStatus.Open]: 'Open',
   [TargetPopulationStatus.Locked]: 'Locked',
   [TargetPopulationStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
   [TargetPopulationStatus.Processing]: 'Processing',
@@ -57,6 +57,19 @@ export const REPORT_TYPES = {
   INDIVIDUALS_AND_PAYMENT: '8',
 };
 
+export const REPORTING_STATES = {
+  PROCESSING: 1,
+  GENERATED: 2,
+  FAILED: 3
+};
+
+
+export const COLLECT_TYPES_MAPPING = {
+  "A_": "Unknown",
+  "A_0": "None",
+  "A_1": "Full",
+  "A_2": "Partial",
+}
 export const GRIEVANCE_TICKETS_TYPES = {
   userGenerated: 0,
   systemGenerated: 1,
@@ -77,12 +90,6 @@ export const GrievanceSearchTypes = {
   TicketID: 'ticket_id',
   HouseholdID: 'ticket_hh_id',
   LastName: 'last_name',
-};
-
-export const REPORTING_STATES = {
-  PROCESSING: 1,
-  GENERATED: 2,
-  FAILED: 3,
 };
 
 export const GrievanceSteps = {

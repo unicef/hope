@@ -33,6 +33,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
             "error_message",
         ]
     )
+    LOADING = "LOADING"
     IMPORTING = "IMPORTING"
     IN_REVIEW = "IN_REVIEW"
     MERGING = "MERGING"
@@ -43,6 +44,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     IMPORT_ERROR = "IMPORT_ERROR"
     MERGE_ERROR = "MERGE_ERROR"
     STATUS_CHOICE = (
+        (LOADING, _("Loading")),
         (DEDUPLICATION, _("Deduplication")),
         (DEDUPLICATION_FAILED, _("Deduplication Failed")),
         (IMPORTING, _("Importing")),
@@ -56,12 +58,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     XLS = "XLS"
     KOBO = "KOBO"
     DIIA = "DIIA"
+    API = "API"
     FLEX_REGISTRATION = "FLEX_REGISTRATION"
     DATA_SOURCE_CHOICE = (
         (XLS, "Excel"),
         (KOBO, "KoBo"),
         (DIIA, "DIIA"),
         (FLEX_REGISTRATION, "Flex Registration"),
+        (API, "Flex API"),
     )
     name = CICharField(
         max_length=255,
@@ -124,3 +128,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
             }
             for rdi in queryset
         ]
+
+    def can_be_merged(self):
+        return self.status in [self.IN_REVIEW, self.MERGE_ERROR]

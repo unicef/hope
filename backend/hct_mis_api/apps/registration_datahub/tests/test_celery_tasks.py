@@ -1,5 +1,4 @@
 import base64
-from django.utils import timezone
 import json
 from contextlib import contextmanager
 from pathlib import Path
@@ -7,8 +6,7 @@ from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.test import TestCase
-
-from django_countries.fields import Country
+from django.utils import timezone
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -88,9 +86,9 @@ def create_record(registration, status):
     )
 
 
-def create_imported_document_types(country_code):
+def create_imported_document_types():
     for document_type_string, _ in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
-        ImportedDocumentType.objects.create(country=Country(code=country_code), type=document_type_string)
+        ImportedDocumentType.objects.create(type=document_type_string)
 
 
 def create_ukraine_business_area():
@@ -133,7 +131,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
     def test_not_running_with_record_status_not_to_import(self):
         create_ukraine_business_area()
-        create_imported_document_types(country_code="UA")
+        create_imported_document_types()
         record = create_record(registration=234, status=Record.STATUS_ERROR)
 
         page_size = 1
@@ -146,7 +144,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
     def test_successful_run_with_records_to_import(self):
         create_ukraine_business_area()
-        create_imported_document_types(country_code="UA")
+        create_imported_document_types()
 
         registration = 345
         amount_of_records = 10
@@ -173,7 +171,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
     def test_successful_run_and_automatic_merge(self):
         create_ukraine_business_area()
-        create_imported_document_types(country_code="UA")
+        create_imported_document_types()
 
         registration = 345
         amount_of_records = 10
@@ -200,7 +198,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
     def test_successful_run_and_fix_task_id(self):
         create_ukraine_business_area()
-        create_imported_document_types(country_code="UA")
+        create_imported_document_types()
 
         registration = 345
         amount_of_records = 10

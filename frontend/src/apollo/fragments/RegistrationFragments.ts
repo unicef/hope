@@ -75,6 +75,7 @@ export const importedHouseholdMinimal = gql`
     hasDuplicates
     fchildHoh
     childHoh
+    collectIndividualData
   }
 `;
 export const importedHouseholdDetailed = gql`
@@ -160,7 +161,6 @@ export const importedIndividualDetailed = gql`
           country
           type {
             label
-            country
           }
           documentNumber
           photo

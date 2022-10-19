@@ -13,13 +13,22 @@ Frontend running on Local Machine (use node 16)
 cd frontend
 yarn
 yarn start
-# in anthorer terminal
+# in another terminal
 cd ..
 docker-compose build
 docker-compose up
 # once everything is up, in yet another terminal
 docker exec -it <prefix>_backend_1 ./manage.py initdemo
 ```
+
+There are some additional services that are not necessary for the app to run but may help a developer. If you want to e.g. turn on the kibana service, just run
+
+```bash
+docker-compose -f docker-compose.kibana.yml up
+```
+
+For the full list, try `ls -l docker-compose.*.yml`.
+
 ***
 Frontend app is run inside Docker (a lot slower)
 
@@ -37,6 +46,15 @@ Access the frontend in your browser at [`localhost:8082/login`](http://localhost
 Backend can be accessed at `/api/` i.e. [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/)
 
 When running locally, you don't neet to provide AD credentials - you can go straight to [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/) and log in with `root:root1234`. When you have the necessary cookies in your browser, you can also access the FE dashboard.
+
+# Cypress Testing Service
+Go to cypress_testing_service catalog
+Create cypress.env.json file based on cypress.env.json.example file
+Run yarn install
+Run yarn cy:open
+
+
+
 
 ### **Commands**
 
@@ -121,4 +139,3 @@ The following are the code branches and their CI / CD usage.
 | feature/\* or bug/\* | no | n/a |  |
 
 In the future hotfix branches might be made as well which merge directly to master potentially. A UAT environment that mirrors the stability of production \(master branch\) might be necessary as well. If strictly following an agile methodology, it may or may not be necessary, but a UAT env mirroring production might be helpful for production focused hot fix testing.
-

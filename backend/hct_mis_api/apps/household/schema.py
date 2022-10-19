@@ -84,15 +84,6 @@ INDIVIDUALS_CHART_LABELS = [
 
 
 class DocumentTypeNode(DjangoObjectType):
-    country = graphene.String(description="Country name")
-    country_iso3 = graphene.String(description="Country ISO3")
-
-    def resolve_country(parent: DocumentType, info):
-        return parent.country.name
-
-    def resolve_country_iso3(parent: DocumentType, info):
-        return parent.country.iso_code3
-
     class Meta:
         model = DocumentType
 
@@ -130,12 +121,19 @@ class IndividualIdentityNode(DjangoObjectType):
 
 class DocumentNode(DjangoObjectType):
     country = graphene.String(description="Document country")
+    country_iso3 = graphene.String(description="Country ISO3")
     photo = graphene.String(description="Photo url")
 
-    def resolve_country(parent, info):
-        return getattr(parent.type.country, "name", parent.type.country)
+    @staticmethod
+    def resolve_country(parent: Document, info):
+        return getattr(parent.country, "name", parent.country)
 
-    def resolve_photo(parent, info):
+    @staticmethod
+    def resolve_country_iso3(parent: Document, info):
+        return parent.country.iso_code3
+
+    @staticmethod
+    def resolve_photo(parent: Document, info):
         if parent.photo:
             return parent.photo.url
         return
@@ -214,11 +212,11 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_country_origin(parent: Household, info):
-        return parent.country_origin.name
+        return getattr(parent.country_origin, "name", "")
 
     @staticmethod
     def resolve_country(parent: Household, info):
-        return parent.country.name
+        return getattr(parent.country, "name", "")
 
     def resolve_admin1(parent, info):
         return parent.admin1
@@ -236,12 +234,6 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_programs_with_delivered_quantity(parent, info):
         return programs_with_delivered_quantity(parent)
-
-    def resolve_country(parent, info):
-        return parent.country.name
-
-    def resolve_country_origin(parent, info):
-        return parent.country_origin.name
 
     def resolve_selection(parent, info):
         selection = parent.selections.first()
@@ -443,7 +435,6 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
                 "selfcare_disability",
                 "comms_disability",
                 "work_status",
-                "collect_individual_data",
             ],
         )
 

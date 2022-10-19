@@ -7,7 +7,6 @@ from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
-from django.utils import timezone
 
 from dateutil.parser import parse
 from django_countries.fields import Country
@@ -44,7 +43,6 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     RdiBaseCreateTask,
-    is_flex_field_attr,
     logger,
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
@@ -135,7 +133,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if field_data_dict is None or field in excluded:
             return
 
-        is_flex_field = is_flex_field_attr(field)
+        is_flex_field = field.endswith(("_i_f", "_h_f"))
 
         if field_data_dict["type"] in complex_fields:
             cast_fn = complex_fields.get(field_data_dict["type"])
@@ -180,9 +178,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         type_name = IDENTIFICATION_TYPE_OTHER
                     label = IDENTIFICATION_TYPE_DICT.get(type_name, data.get("name"))
                     country = Country(data["issuing_country"])
-
                     document_type, _ = ImportedDocumentType.objects.get_or_create(
-                        country=country,
                         label=label,
                         type=type_name,
                     )
@@ -190,6 +186,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     documents.append(
                         ImportedDocument(
                             document_number=data["number"],
+                            country=country,
                             photo=file,
                             individual=data["individual"],
                             type=document_type,

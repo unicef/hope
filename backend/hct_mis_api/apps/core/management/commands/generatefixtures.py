@@ -126,7 +126,7 @@ class Command(BaseCommand):
 
         target_population = TargetPopulationFactory(
             created_by=user,
-            candidate_list_targeting_criteria=targeting_criteria,
+            targeting_criteria=targeting_criteria,
             business_area=business_area,
         )
         for _ in range(cash_plans_amount):
@@ -187,7 +187,7 @@ class Command(BaseCommand):
                         ),
                     }
 
-                    grievance_ticket = switch_dict.get(grievance_type)()
+                    grievance_ticket = switch_dict.get(grievance_type)()  # noqa: F841
 
                 EntitlementCardFactory(household=household)
         CashPlanPaymentVerificationFactory.create_batch(1)

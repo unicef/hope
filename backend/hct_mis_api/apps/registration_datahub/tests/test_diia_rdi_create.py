@@ -6,16 +6,16 @@ from django_countries.fields import Country
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.household.models import (
     DISABLED,
+    IDENTIFICATION_TYPE_TAX_ID,
+    MARITAL_STATUS_CHOICE,
     NOT_DISABLED,
     RELATIONSHIP_CHOICE,
-    MARITAL_STATUS_CHOICE,
-    IDENTIFICATION_TYPE_TAX_ID,
 )
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportedHousehold,
-    ImportedIndividual,
     DiiaHousehold,
     ImportedDocument,
+    ImportedHousehold,
+    ImportedIndividual,
     RegistrationDataImportDatahub,
 )
 
@@ -36,6 +36,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         )
 
         cls.RdiDiiaCreateTask = RdiDiiaCreateTask
+        super().setUpTestData()
 
     def test_execute_correct_data(self):
         rdi = self.RdiDiiaCreateTask().create_rdi(None, "Test import Diia")
