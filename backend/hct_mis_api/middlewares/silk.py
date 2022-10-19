@@ -1,4 +1,5 @@
 from typing import Any
+
 from flags.state import flag_enabled
 from silk.middleware import SilkyMiddleware
 

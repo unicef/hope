@@ -1,5 +1,6 @@
 from types import FunctionType
 from typing import Any
+
 from django.conf import settings
 
 

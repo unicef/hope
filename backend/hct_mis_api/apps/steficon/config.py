@@ -17,6 +17,7 @@ REST framework settings, checking for user settings first, then falling
 back to the defaults.
 """
 from typing import Any, Dict, List, Optional
+
 from django.conf import settings
 from django.core.signals import setting_changed
 from django.utils.module_loading import import_string

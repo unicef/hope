@@ -1,6 +1,6 @@
 import os
-from typing import Any, Dict
 import unittest
+from typing import Any, Dict
 
 from django.conf import settings
 from django.test.runner import ParallelTestSuite, partition_suite_by_case
