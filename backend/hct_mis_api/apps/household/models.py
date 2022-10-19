@@ -23,6 +23,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -51,6 +52,7 @@ FEMALE = "FEMALE"
 SEX_CHOICE = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
+    (None, None),
 )
 SINGLE = "SINGLE"
 MARRIED = "MARRIED"
@@ -423,6 +425,9 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         blank=True,
     )
 
+    family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
+    storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
+
     class Meta:
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
@@ -700,7 +705,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     given_name = CICharField(max_length=85, blank=True, db_index=True)
     middle_name = CICharField(max_length=85, blank=True, db_index=True)
     family_name = CICharField(max_length=85, blank=True, db_index=True)
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True)
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True, null=True)
     birth_date = models.DateField(db_index=True)
     estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
