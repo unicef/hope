@@ -163,8 +163,7 @@ class ExtendedHouseHoldConnection(graphene.Connection):
         return root.iterable.aggregate(sum=Sum("size")).get("sum")
 
 
-# FIXME: This need to be changed to HouseholdSelectionNode
-class HouseholdSelection(DjangoObjectType):
+class HouseholdSelectionNode(DjangoObjectType):
     class Meta:
         model = HouseholdSelection
 
@@ -198,7 +197,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     country = graphene.String(description="Country name")
     currency = graphene.String()
     flex_fields = FlexFieldsScalar()
-    selection = graphene.Field(HouseholdSelection)
+    selection = graphene.Field(HouseholdSelectionNode)
     sanction_list_possible_match = graphene.Boolean()
     sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
