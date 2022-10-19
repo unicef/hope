@@ -1,11 +1,13 @@
-from django.urls import reverse
-from django.test import Client
 from datetime import datetime
-from django.test import TestCase
-from faker import Faker
-from hct_mis_api.apps.changelog.models import Changelog
-from hct_mis_api.apps.account.fixtures import UserFactory
+
 from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
+from django.urls import reverse
+
+from faker import Faker
+
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.changelog.models import Changelog
 
 User = get_user_model()
 

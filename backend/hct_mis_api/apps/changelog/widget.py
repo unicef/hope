@@ -1,5 +1,5 @@
-from django.templatetags.static import static
 from django import forms
+from django.templatetags.static import static
 
 
 class HTMLEditor(forms.Textarea):
