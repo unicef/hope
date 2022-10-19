@@ -127,7 +127,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         return payment_verification_plans
 
     def available_payment_records(
-        self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None, node_name=""
+        self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None, class_name=""
     ):
         params = Q(status__in=GenericPayment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
@@ -149,10 +149,11 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         if extra_validation:
             payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
 
-        if node_name == "CashPlanNode":
-            qs = PaymentRecord.objects.filter(pk__in=payment_records)
-        else:
-            qs = Payment.objects.filter(pk__in=payment_records)
+        qs = (
+            PaymentRecord.objects.filter(pk__in=payment_records) if class_name == "CashPlan" else
+            Payment.objects.filter(pk__in=payment_records)
+        )
+
         return qs
 
 
