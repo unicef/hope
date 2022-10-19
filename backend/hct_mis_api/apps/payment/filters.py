@@ -1,3 +1,5 @@
+from base64 import b64decode
+
 from django.db.models import Case, CharField, Count, F, Q, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
@@ -69,14 +71,13 @@ class PaymentRecordFilter(FilterSet):
 
 
 class PaymentVerificationFilter(FilterSet):
-    # TODO refactor this one
-    # 'payment' instead of 'payment_record'
+    payment_plan_id = CharFilter(method="payment_plan_filter")
     search = CharFilter(method="search_filter")
-    business_area = CharFilter(field_name="payment__business_area___slug")
+    business_area = CharFilter(field_name="payment__business_area__slug", required=True)
     verification_channel = CharFilter(field_name="payment_verification_plan__verification_channel")
 
     class Meta:
-        fields = ("payment_verification_plan", "status")  # TODO: add "payment_verification_plan__payment_plan" ['GenericForeignKey' object has no attribute 'get_lookup']
+        fields = ("payment_verification_plan", "status")
         model = PaymentVerification
 
     order_by = OrderingFilter(
@@ -96,6 +97,8 @@ class PaymentVerificationFilter(FilterSet):
     )
 
     def search_filter(self, qs, name, value):
+        # TODO: fix filter; ''payment_record' and 'payment''
+        # payment_plan_id
         values = value.split(" ")
         q_obj = Q()
         for value in values:
@@ -110,6 +113,14 @@ class PaymentVerificationFilter(FilterSet):
             q_obj |= Q(payment__head_of_household__phone_no__istartswith=value)
             q_obj |= Q(payment__head_of_household__phone_no_alternative__istartswith=value)
         return qs.filter(q_obj)
+
+    def payment_plan_filter(self, qs, name, value):
+        node_name, obj_id = b64decode(value).decode().split(":")
+        key =(
+            "payment_verification_plan__cash_plan__id" if node_name == "CashPlanNode" else
+            "payment_verification_plan__payment_plan__id"
+        )
+        return qs.filter(**{key: obj_id})
 
 
 class PaymentVerificationPlanFilter(FilterSet):
