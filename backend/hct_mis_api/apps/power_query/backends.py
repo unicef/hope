@@ -1,4 +1,5 @@
 from typing import List, Tuple
+
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission
 

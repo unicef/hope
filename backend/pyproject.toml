@@ -79,7 +79,6 @@ disable_error_code = [
   "no-untyped-def",
   "no-untyped-call",
   "no-any-return",
-  "call-overload",
 ]
 
 [tool.django-stubs]
