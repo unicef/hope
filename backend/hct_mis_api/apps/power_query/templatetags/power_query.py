@@ -27,7 +27,8 @@ def get_class(value):
 
 @register.filter()
 def dataset_to_json(value):
-    return json.dump(value)
+    # TODO: json.dump needs a second argument (fp)
+    return json.dump(value)  # type: ignore
 
 
 @register.filter()

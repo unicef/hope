@@ -181,6 +181,6 @@ class Command(BaseCommand):
 
         # create general groups like can view all, can change all, can add all
         for action in actions:
-            self.create_group_and_set_permissions(general_groups_map.get(action), self.perms_list_map.get(action))
+            self.create_group_and_set_permissions(general_groups_map[action], self.perms_list_map[action])
 
         self.stdout.write(self.style.SUCCESS("Successfully created/updated all Groups"))

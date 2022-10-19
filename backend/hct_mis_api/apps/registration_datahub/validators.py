@@ -1144,6 +1144,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     if choice not in choices and choice.upper() not in choices:
                         return message
                 return None
+
+            return None
         except Exception as e:
             logger.exception(e)
             raise
@@ -1178,6 +1180,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         "header": field,
                         "message": message,
                     }
+
+            return None
         except Exception as e:
             logger.exception(e)
             raise
