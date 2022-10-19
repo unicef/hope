@@ -1,7 +1,8 @@
-from django.views import generic
 from django.urls import reverse_lazy
-from hct_mis_api.apps.changelog.models import Changelog
+from django.views import generic
+
 from hct_mis_api.apps.changelog.forms import ChangelogForm
+from hct_mis_api.apps.changelog.models import Changelog
 from hct_mis_api.apps.core.permissions_views_mixins import ViewPermissionsMixinBase
 
 
