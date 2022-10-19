@@ -323,6 +323,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
+                  data-cy='button-submit'
                 >
                   {t('Save')}
                 </LoadingButton>
@@ -343,7 +344,8 @@ export const EditGrievancePage = (): React.ReactElement => {
                           <Field
                             name='issueType'
                             disabled
-                            label={t('Issue Type*')}
+                            label={t('Issue Type')}
+                            required
                             variant='outlined'
                             choices={
                               issueTypeDict[values.category.toString()]
@@ -403,7 +405,8 @@ export const EditGrievancePage = (): React.ReactElement => {
                             fullWidth
                             disabled={Boolean(ticket.description)}
                             variant='outlined'
-                            label='Description*'
+                            label='Description'
+                            required
                             component={FormikTextField}
                           />
                         </Grid>

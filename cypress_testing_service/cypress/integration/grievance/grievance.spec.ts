@@ -18,37 +18,37 @@ When('I visit the main dashboard', () => {
   clearCache();
 });
 
-Then('I should see the side panel with Feedback option', () => {
-  cy.get('span').contains('Accountability').click({ force: true });
-  cy.get('span').contains('Feedback');
+Then('I should see the side panel with Grievance option', () => {
+  cy.get('span').contains('Grievance').click({ force: true });
+  cy.get('span').contains('Grievance Tickets');
 });
 
-When('I click on Feedback option', () => {
-  cy.get('span').contains('Feedback').click({ force: true });
+When('I click on Grievance Tickets option', () => {
+  cy.get('span').contains('Grievance Tickets').click({ force: true });
 });
 
-Then('I should see the Feedback page', () => {
-  cy.get('h5').contains('Feedback');
+Then('I should see the Grievance page', () => {
+  cy.get('h5').contains('Grievance Tickets');
 });
 
-When('I click the Submit New Feedback button', () => {
-  cy.get('[data-cy="button-submit-new-feedback"').click({ force: true });
+When('I click the New Ticket button', () => {
+  cy.get('[data-cy="button-new-ticket"').click({ force: true });
 });
 
-Then('I should see the New Feedback page', () => {
-  cy.get('h5').contains('New Feedback');
+Then('I should see the New Ticket page', () => {
+  cy.get('h5').contains('New Ticket');
 });
 
 When('I fill in the form and save', () => {
-  cy.get('[data-cy="select-issueType"]').click();
-  cy.contains('Positive feedback').click();
+  cy.get('[data-cy="select-category"]').click();
+  cy.contains('Referral').click();
   cy.get('[data-cy="button-submit"]').click();
   cy.get('[data-cy="household-table-row"]').eq(0).click();
   cy.contains('LOOK UP INDIVIDUAL').click({ force: true });
   cy.get('[data-cy="individual-table-row"]').eq(0).click();
   cy.get('[data-cy="button-submit"]').click();
-  cy.get('[data-cy="input-address"]').click();
-  cy.get('[data-cy="input-admin1"]').click();
+  cy.get('[data-cy="input-maleChildrenCount"]').click();
+  cy.get('[data-cy="input-childrenDisabledCount"]').click();
   cy.get('[data-cy="input-village"]').click();
   cy.get('[data-cy="input-countryOrigin"]').click();
   cy.get('[data-cy="input-headOfHousehold"]').click();
@@ -58,17 +58,19 @@ When('I fill in the form and save', () => {
   cy.get('[data-cy="button-submit"]').click();
 });
 
-Then('I should see the Feedback details page', () => {
-  cy.contains('Feedback ID:');
+Then('I should see the Grievance details page', () => {
+  cy.contains('Ticket ID:');
 });
 
-When('I edit the Feedback and save', () => {
+When('I edit the Grievance and save', () => {
   cy.get('[data-cy="button-edit"]').click({ force: true });
-  cy.get('[data-cy="input-description"]').click().type('description EDITED');
-  cy.get('[data-cy="button-submit"]').click();
+  cy.get('[data-cy="input-comments"]')
+    .click({ force: true })
+    .type('comments EDITED');
+  cy.get('[data-cy="button-submit"]').click({ force: true });
 });
 
-Then('I should see the updated Feedback', () => {
+Then('I should see the updated Grievance', () => {
   cy.wait(2000); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.contains('EDITED');
 });

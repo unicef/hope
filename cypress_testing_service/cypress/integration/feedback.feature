@@ -1,4 +1,4 @@
-Feature: Registration Data Import
+Feature: Feedback
     Checks, if creating and editing Feedback works.
 
     Background:
