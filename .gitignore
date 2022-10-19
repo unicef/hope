@@ -26,6 +26,7 @@ wheels/
 MANIFEST
 backend/test-results/
 backend/lint-results/
+backend/mypy-results/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action
+from admin_extra_buttons.api import button, confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, ValueFilter
@@ -18,9 +18,7 @@ from .steficon import SteficonExecutorMixin
 
 
 @admin.register(TargetPopulation)
-class TargetPopulationAdmin(
-    SoftDeletableAdminMixin, SteficonExecutorMixin, LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase
-):
+class TargetPopulationAdmin(SoftDeletableAdminMixin, SteficonExecutorMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "status",
@@ -74,24 +72,26 @@ class TargetPopulationAdmin(
     # def download_xlsx(self, request, pk):
     #     return redirect("admin-download-target-population", target_population_id=pk)
 
-    @button()
+    @button(enabled=lambda b: b.context["original"].steficon_rule)
     def rerun_steficon(self, request, pk):
         def _rerun(request):
             context = self.get_common_context(request, pk)
             target_population_apply_steficon.delay(pk)
             return TemplateResponse(request, "admin/targeting/targetpopulation/rule_change.html", context)
 
+        obj: TargetPopulation = self.get_object(request, pk)
         return confirm_action(
             self,
             request,
             _rerun,
-            "Do you want to rerun the steficon rule ?",
+            "Do you want to rerun the steficon rule '%s' ?" % obj.steficon_rule,
             "Updating target population in the background with correct scores.",
+            title="ddddd",
         )
 
 
 @admin.register(HouseholdSelection)
-class HouseholdSelectionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class HouseholdSelectionAdmin(HOPEModelAdminBase):
     list_display = (
         "household",
         "target_population",

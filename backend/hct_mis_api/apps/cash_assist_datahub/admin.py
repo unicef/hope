@@ -12,9 +12,8 @@ from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.decorators import link
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
-from adminfilters.mixin import AdminFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
@@ -44,7 +43,7 @@ class RollbackException(Exception):
 
 
 @admin.register(Session)
-class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class SessionAdmin(HOPEModelAdminBase):
     list_display = ("timestamp", "id", "status", "last_modified_date", "business_area", "run_time")
     date_hierarchy = "timestamp"
     list_filter = (
@@ -219,7 +218,7 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 
 @admin.register(CashPlan)
-class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class CashPlanAdmin(HOPEModelAdminBase):
     list_display = ("session", "name", "status", "business_area", "cash_plan_id")
     list_filter = (
         "status",
@@ -241,7 +240,7 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 
 @admin.register(PaymentRecord)
-class PaymentRecordAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, admin.ModelAdmin):
+class PaymentRecordAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("session", "business_area", "status", "full_name", "service_provider_ca_id")
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
