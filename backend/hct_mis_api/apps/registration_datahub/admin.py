@@ -1,5 +1,6 @@
 import base64
 import logging
+from typing import Dict
 
 from django import forms
 from django.contrib import admin, messages
@@ -253,7 +254,7 @@ class RemeberDataForm(forms.Form):
     def get_saved_config(cls, request):
         try:
             signer = Signer(request.user.password)
-            obj: dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
+            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
             return obj
         except BadSignature:
             return {}

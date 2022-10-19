@@ -1,8 +1,8 @@
-from typing import Any, List
+from typing import Any, Dict, List
 
 
 class QueryRunError(Exception):
-    def __init__(self, exception: Exception, sentry_error_id: Any, *args: List, **kwargs: dict) -> None:
+    def __init__(self, exception: Exception, sentry_error_id: Any, *args: List, **kwargs: Dict) -> None:
         self.exception = exception
         self.sentry_error_id = sentry_error_id
 

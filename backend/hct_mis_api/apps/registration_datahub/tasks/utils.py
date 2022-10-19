@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, Dict, List, Union
 
 
 def collectors_str_ids_to_list(values: Any) -> Union[None, str, List[str]]:
@@ -13,7 +13,7 @@ def collectors_str_ids_to_list(values: Any) -> Union[None, str, List[str]]:
         return str(values).strip(";").replace(" ", "").split(";")
 
 
-def get_submission_metadata(household_data_dict: dict) -> dict:
+def get_submission_metadata(household_data_dict: Dict) -> Dict:
     meta_fields_mapping = {
         "_uuid": "kobo_submission_uuid",
         "_xform_id_string": "kobo_asset_id",

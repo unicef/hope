@@ -1,4 +1,5 @@
 from functools import cached_property
+from typing import Dict
 
 from django.db.models import Q
 
@@ -89,7 +90,7 @@ class XlsxExportTargetingService:
         self._add_individual_documents_to_row(individual, individual_row)
         self.ws_individuals.append(individual_row)
 
-    def _add_individual_documents_to_row(self, individual: Individual, row: dict):
+    def _add_individual_documents_to_row(self, individual: Individual, row: Dict):
         document: Document
         for document in individual.documents.all():
             column_index = self._add_document_column_header(document)

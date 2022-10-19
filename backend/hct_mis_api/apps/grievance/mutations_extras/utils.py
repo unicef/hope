@@ -61,7 +61,7 @@ def handle_add_document(document, individual):
     return Document(document_number=number, individual=individual, type=document_type, photo=photo, country=country)
 
 
-def handle_edit_document(document_data: dict):
+def handle_edit_document(document_data: Dict):
     from django.shortcuts import get_object_or_404
 
     from graphql import GraphQLError
@@ -148,7 +148,7 @@ def handle_add_identity(identity, individual):
     return IndividualIdentity(number=number, individual=individual, agency=agency_type)
 
 
-def handle_edit_identity(identity_data: dict):
+def handle_edit_identity(identity_data: Dict):
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string

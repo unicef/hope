@@ -1,3 +1,4 @@
+from typing import Dict, List, Tuple
 import openpyxl
 
 from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
@@ -17,7 +18,7 @@ class TemplateFileGenerator:
         return wb
 
     @classmethod
-    def _handle_choices(cls, fields: dict) -> list[list[str]]:
+    def _handle_choices(cls, fields: Dict) -> List[List[str]]:
         rows: list[list[str]] = [["Field Name", "Label", "Value to be used in template"]]
 
         for field_name, field_value in fields.items():
@@ -37,9 +38,9 @@ class TemplateFileGenerator:
         return rows
 
     @classmethod
-    def _handle_name_and_label_row(cls, fields: dict) -> tuple[list[str], list[str]]:
-        names: list[str] = []
-        labels: list[str] = []
+    def _handle_name_and_label_row(cls, fields: Dict) -> Tuple[List[str], List[str]]:
+        names: List[str] = []
+        labels: List[str] = []
 
         for field_name, field_value in fields.items():
             names.append(field_name)
