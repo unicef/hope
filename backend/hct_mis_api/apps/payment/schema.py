@@ -1,4 +1,5 @@
 from typing import List
+
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
 from django.shortcuts import get_object_or_404
 

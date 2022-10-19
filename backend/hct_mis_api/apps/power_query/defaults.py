@@ -1,4 +1,5 @@
 from typing import Any, Dict
+
 from django.contrib.contenttypes.models import ContentType
 
 from hct_mis_api.apps.account.models import Partner, User

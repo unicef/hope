@@ -1,5 +1,8 @@
 import logging
 from functools import reduce
+from typing import List
+
+from backend.hct_mis_api.apps.registration_datahub.value_caster import BaseValueCaster
 
 from hct_mis_api.apps.core.utils import (
     get_combined_attributes,
@@ -44,8 +47,8 @@ class RdiBaseCreateTask:
 
         field = self.COMBINED_FIELDS[header]
 
-        casters = [
-            DefaultValueCaster(),
+        casters: List[BaseValueCaster] = [
+            DefaultValueCaster,
             BooleanValueCaster,
             SelectOneValueCaster,
             SelectManyValueCaster,

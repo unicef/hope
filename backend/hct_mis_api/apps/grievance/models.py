@@ -1,6 +1,7 @@
 import logging
 from decimal import Decimal
 from itertools import chain
+from typing import Dict, Optional
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -14,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     TimeStampedUUIDModel,
@@ -368,13 +370,14 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         verbose_name = "Grievance Ticket"
 
     def clean(self):
-        issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
-        should_contain_issue_types = bool(issue_types)
-        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types
-        has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
+        issue_types: Optional[Dict] = self.ISSUE_TYPES_CHOICES.get(self.category)
+        has_invalid_issue_type = issue_types and self.issue_type not in issue_types
+        has_issue_type_for_category_without_issue_types = not issue_types and self.issue_type
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
-            logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
-            raise ValidationError({"issue_type": "Invalid issue type for selected category"})
+            log_and_raise(
+                f"Invalid issue type {self.issue_type} for selected category {self.category}",
+                error_type=ValidationError,
+            )
 
     def save(self, *args, **kwargs):
         self.full_clean()
