@@ -107,80 +107,97 @@ def create_target_population_task(storage_id, program_id, tp_name):
     documents = []
     bank_infos = []
 
-    with open(storage_obj.file.path, encoding="KOI8-U") as file:
-        reader = csv.DictReader(file, delimiter=";")
+    storage_obj.status = StorageFile.STATUS_PROCESSING
+    storage_obj.save(update_fields=["status"])
 
-        for row in reader:
-            family_id = row["ID_FAM"]
+    try:
+        with open(storage_obj.file.path, encoding="KOI8-U") as file:
+            reader = csv.DictReader(file, delimiter=";")
 
-            iban = row["IBAN"]
-            tax_id = row["N_ID"]
-            passport_id = row["PASSPORT"]
+            for row in reader:
+                family_id = row["ID_FAM"]
 
-            individual_data = {
-                "given_name": row["NAME"],
-                "middle_name": row["PATRONYMIC"],
-                "family_name": row["SURNAME"],
-                "birth_date": datetime.strptime(row["BDATE"], "%d.%m.%Y").date(),
-                "phone_no": row["PHONе"],
-                "business_area": business_area,
-                "first_registration_date": first_registration_date,
-                "last_registration_date": last_registration_date,
-            }
+                iban = row["IBAN"]
+                tax_id = row["N_ID"]
+                passport_id = row["PASSPORT"]
 
-            if family_id in family_ids:
-                individuals.append(Individual(**individual_data, household=Household.objects.get(family_id=family_id)))
-            else:
-                individual = Individual.objects.create(**individual_data)
+                individual_data = {
+                    "given_name": row["NAME"],
+                    "middle_name": row["PATRONYMIC"],
+                    "family_name": row["SURNAME"],
+                    "birth_date": datetime.strptime(row["BDATE"], "%d.%m.%Y").date(),
+                    "phone_no": row["PHONе"],
+                    "business_area": business_area,
+                    "first_registration_date": first_registration_date,
+                    "last_registration_date": last_registration_date,
+                }
 
-                household = Household.objects.create(
-                    head_of_household=individual,
-                    business_area=business_area,
-                    first_registration_date=first_registration_date,
-                    last_registration_date=last_registration_date,
-                    family_id=family_id,
-                    storage_obj=storage_obj,
+                if family_id in family_ids:
+                    individuals.append(
+                        Individual(**individual_data, household=Household.objects.get(family_id=family_id))
+                    )
+                else:
+                    individual = Individual.objects.create(**individual_data)
+
+                    household = Household.objects.create(
+                        head_of_household=individual,
+                        business_area=business_area,
+                        first_registration_date=first_registration_date,
+                        last_registration_date=last_registration_date,
+                        family_id=family_id,
+                        storage_obj=storage_obj,
+                    )
+
+                    individual.household = household
+                    individual.save()
+
+                    family_ids.add(family_id)
+
+                passport = Document(
+                    document_number=passport_id, type=passport_type, individual=individual, status=Document.STATUS_VALID
                 )
 
-                individual.household = household
-                individual.save()
+                tax = Document(
+                    document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_VALID
+                )
 
-                family_ids.add(family_id)
+                bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
 
-            passport = Document(
-                document_number=passport_id, type=passport_type, individual=individual, status=Document.STATUS_VALID
-            )
+                documents.append(passport)
+                documents.append(tax)
 
-            tax = Document(document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_VALID)
+                bank_infos.append(bank_account_info)
 
-            bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
+        Individual.objects.bulk_create(individuals)
 
-            documents.append(passport)
-            documents.append(tax)
+        Document.objects.bulk_create(documents)
+        BankAccountInfo.objects.bulk_create(bank_infos)
 
-            bank_infos.append(bank_account_info)
+        households = Household.objects.filter(family_id__in=list(family_ids))
+        households_ids = households.values_list("id", flat=True)
 
-    Individual.objects.bulk_create(individuals)
+        for household in households:
+            household.size = Individual.objects.filter(household=household).count()
+        Household.objects.bulk_update(households, ["size"])
 
-    Document.objects.bulk_create(documents)
-    BankAccountInfo.objects.bulk_create(bank_infos)
+        target_population = TargetPopulation.objects.create(
+            name=tp_name,
+            created_by=storage_obj.created_by,
+            program=program,
+            total_households_count=len(households),
+            total_individuals_count=Individual.objects.filter(household_id__in=list(households_ids)).count(),
+            status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
+            business_area=business_area,
+            storage_file=storage_obj,
+        )
 
-    households = Household.objects.filter(family_id__in=list(family_ids))
-    households_ids = households.values_list("id", flat=True)
+        target_population.households.set(households)
 
-    for household in households:
-        household.size = Individual.objects.filter(household=household).count()
-    Household.objects.bulk_update(households, ["size"])
+        storage_obj.status = StorageFile.STATUS_FINISHED
+        storage_obj.save(update_fields=["status"])
 
-    target_population = TargetPopulation.objects.create(
-        name=tp_name,
-        created_by=storage_obj.created_by,
-        program=program,
-        total_households_count=len(households),
-        total_individuals_count=Individual.objects.filter(household_id__in=list(households_ids)).count(),
-        status=TargetPopulation.STATUS_LOCKED,
-        business_area=business_area,
-        storage_file=storage_obj,
-    )
+    except Exception as e:
+        logger.error(e)
 
-    target_population.households.set(households)
+        storage_obj.status = StorageFile.STATUS_FAILED
+        storage_obj.save(update_fields=["status"])

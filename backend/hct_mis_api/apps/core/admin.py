@@ -52,6 +52,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
 from hct_mis_api.apps.utils.security import is_root
 from mptt.admin import MPTTModelAdmin
@@ -601,6 +602,10 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             pk,
         )
         if request.method == "GET":
+            if TargetPopulation.objects.filter(storage_file=storage_obj).exists():
+                self.message_user(request, "TargetPopulation for this storageFile have been created", messages.ERROR)
+                return redirect("..")
+
             form = ProgramForm(business_area_id=storage_obj.business_area_id)
             context["form"] = form
             return TemplateResponse(request, "core/admin/create_tp.html", context)
@@ -610,5 +615,5 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
             create_target_population_task.delay(storage_obj.pk, program_id, tp_name)
 
-            self.message_user(request, "Creation of tp started")
+            self.message_user(request, "Creation of TargetPopulation started")
             return redirect("..")
