@@ -12,7 +12,7 @@ import {
 } from '../../utils/utils';
 import {
   PaymentVerificationPlanStatus,
-  CashPlanOrPaymentPlanQuery,
+  CashPlanNode,
   CashPlanVerificationSamplingChoicesQuery,
   useExportXlsxPaymentVerificationPlanFileMutation,
   useInvalidPaymentVerificationPlanMutation,
@@ -31,9 +31,9 @@ import { ImportXlsx } from './ImportXlsx';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
 
 interface VerificationPlanDetailsProps {
-  verificationPlan: CashPlanOrPaymentPlanQuery["cashPlanOrPaymentPlan"]['verificationPlans']['edges'][number]['node'];
+  verificationPlan: CashPlanNode['verificationPlans']['edges'][number]['node'];
   samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
-  cashPlan: CashPlanOrPaymentPlanQuery["cashPlanOrPaymentPlan"];
+  cashPlan: CashPlanNode;
 }
 
 const Container = styled.div`
