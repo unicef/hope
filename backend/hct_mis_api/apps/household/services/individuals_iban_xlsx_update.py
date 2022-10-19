@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -173,7 +174,7 @@ class IndividualsIBANXlsxUpdate:
             logger.exception(e)
 
     @staticmethod
-    def _prepare_email(context: dict):
+    def _prepare_email(context: Dict):
         text_body = render_to_string(
             "admin/household/individual/individuals_iban_xlsx_update_email.txt", context=context
         )
