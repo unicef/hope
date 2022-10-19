@@ -536,7 +536,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
     def status_reconciled(self):
         self.status_date = timezone.now()
         PaymentVerificationSummary.objects.create(
-            payment_plan=self,
+            payment_plan_obj=self,
         )
 
     @property

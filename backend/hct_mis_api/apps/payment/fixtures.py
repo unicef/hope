@@ -565,11 +565,17 @@ def create_payment_verification_plan_with_status(cash_plan, user, business_area,
 
         household.programs.add(program)
 
-        payment_record = PaymentRecordFactory(
-            parent=cash_plan,
-            household=household,
-            target_population=target_population,
-        )
+        if isinstance(cash_plan, CashPlan):
+            payment_record = PaymentRecordFactory(
+                parent=cash_plan,
+                household=household,
+                target_population=target_population,
+            )
+        else:
+            payment_record = PaymentFactory(
+                parent=cash_plan,
+                household=household,
+            )
 
         PaymentVerificationFactory(
             payment_verification_plan=cash_plan_payment_verification,
@@ -700,6 +706,36 @@ class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
         getter=lambda c: c[0],
     )
     delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
+
+
+def generate_reconciled_payment_plan():
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    root = User.objects.get(username="root")
+    now = timezone.now()
+    tp = TargetPopulation.objects.first()
+
+    pp = PaymentPlan.objects.update_or_create(
+        unicef_id="PP-0060-22-11223344",
+        business_area=afghanistan,
+        target_population=tp,
+        start_date=now,
+        end_date=now + timedelta(days=30),
+        currency="USD",
+        dispersion_start_date=now,
+        dispersion_end_date=now + timedelta(days=14),
+        status_date=now,
+        status=PaymentPlan.Status.ACCEPTED,
+        created_by=root,
+        program=tp.program,
+    )[0]
+    # update status
+    pp.status_reconciled()
+    pp.save()
+
+    create_payment_verification_plan_with_status(
+        pp, root, afghanistan, tp.program, tp, PaymentVerificationPlan.STATUS_ACTIVE
+    )
+    pp.update_population_count_fields()
 
 
 def generate_payment_plan():
