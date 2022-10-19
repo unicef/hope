@@ -1,6 +1,7 @@
 import logging
 
 from django import forms
+from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
@@ -8,7 +9,6 @@ from django.core.management import call_command
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.contrib import messages
 from django.views.generic import View
 
 from graphene_django.settings import graphene_settings
@@ -82,8 +82,8 @@ def hope_redirect(request):
 
 
 class UploadFile(UploadFilePermissionMixin, View):
-    login_url = '/login'
-    redirect_field_name = 'next'
+    login_url = "/login"
+    redirect_field_name = "next"
 
     def get(self, request):
         user = request.user
@@ -94,9 +94,7 @@ class UploadFile(UploadFilePermissionMixin, View):
         form = StorageFileForm(request.POST, request.FILES, user=user)
         if form.is_valid():
             new_file = StorageFile(
-                created_by=user,
-                file=request.FILES["file"],
-                business_area_id=request.POST["business_area"]
+                created_by=user, file=request.FILES["file"], business_area_id=request.POST["business_area"]
             )
             new_file.save()
             messages.success(request, f"File {new_file.file.name} has been successfully uploaded.")

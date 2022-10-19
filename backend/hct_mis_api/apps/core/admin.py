@@ -2,13 +2,6 @@ import csv
 import logging
 from io import StringIO
 
-import xlrd
-from admin_extra_buttons.api import ExtraButtonsMixin, button
-from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminFiltersMixin
-from constance import config
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
@@ -30,8 +23,15 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+
+import xlrd
+from admin_extra_buttons.api import ExtraButtonsMixin, button
+from admin_extra_buttons.mixins import confirm_action
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.mixin import AdminFiltersMixin
+from constance import config
 from jsoneditor.forms import JSONEditor
-from mptt.admin import MPTTModelAdmin
 from xlrd import XLRDError
 
 from hct_mis_api.apps.account.models import Role, User
@@ -39,19 +39,22 @@ from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
+from hct_mis_api.apps.core.forms import ProgramForm
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
-    XLSXKoboTemplate,
     StorageFile,
+    XLSXKoboTemplate,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
 from hct_mis_api.apps.utils.security import is_root
+from mptt.admin import MPTTModelAdmin
 
 logger = logging.getLogger(__name__)
 
@@ -590,3 +593,27 @@ class StorageFileAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return request.user.can_download_storage_files()
+
+    @button(label="Create eDopomoga TP")
+    def create_tp(self, request, pk):
+        storage_obj = StorageFile.objects.get(pk=pk)
+        context = self.get_common_context(
+            request,
+            pk,
+        )
+        if request.method == "GET":
+            if TargetPopulation.objects.filter(storage_file=storage_obj).exists():
+                self.message_user(request, "TargetPopulation for this storageFile have been created", messages.ERROR)
+                return redirect("..")
+
+            form = ProgramForm(business_area_id=storage_obj.business_area_id)
+            context["form"] = form
+            return TemplateResponse(request, "core/admin/create_tp.html", context)
+        else:
+            program_id = request.POST.get("program")
+            tp_name = request.POST.get("name")
+
+            create_target_population_task.delay(storage_obj.pk, program_id, tp_name)
+
+            self.message_user(request, "Creation of TargetPopulation started")
+            return redirect("..")

@@ -17,11 +17,11 @@ from hct_mis_api.apps.household.models import (
     UNICEF,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportedDocument,
+    ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
     RegistrationDataImportDatahub,
-    ImportedDocument,
-    ImportedDocumentType,
 )
 
 faker = Faker()

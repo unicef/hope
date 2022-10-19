@@ -21,21 +21,21 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
+    pull_kobo_submissions_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
     registration_xlsx_import_task,
-    pull_kobo_submissions_task,
     validate_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
-    RegistrationDataImportDatahub,
     KoboImportData,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
-    XlsxRowErrorNode,
     KoboImportDataNode,
+    XlsxRowErrorNode,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -252,7 +252,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
         if not obj_hct.can_be_merged():
-            raise ValidationError('can\'t merge RDI with this status')
+            raise ValidationError("can't merge RDI with this status")
         cls.validate(status=obj_hct.status)
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()

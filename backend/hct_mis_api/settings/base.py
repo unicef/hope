@@ -8,9 +8,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from smart_admin.utils import match, regex
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
+from smart_admin.utils import match, regex
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 

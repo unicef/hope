@@ -15,16 +15,15 @@ import hct_mis_api.apps.payment.views
 import hct_mis_api.apps.registration_datahub.views
 import hct_mis_api.apps.sanction_list.views
 import hct_mis_api.apps.targeting.views
+from hct_mis_api.apps.core.rest_api import all_fields_attributes
 from hct_mis_api.apps.core.views import (
+    UploadFile,
     homepage,
     hope_redirect,
     logout_view,
     schema,
     trigger_error,
-    UploadFile
 )
-
-from hct_mis_api.apps.core.rest_api import all_fields_attributes
 
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])

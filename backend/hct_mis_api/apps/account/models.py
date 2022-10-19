@@ -105,9 +105,8 @@ class User(AbstractUser, UUIDModel):
 
     def can_download_storage_files(self):
         return any(
-            self.has_permission(
-                Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area
-            ) for role in self.user_roles.all()
+            self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
+            for role in self.user_roles.all()
         )
 
     class Meta:

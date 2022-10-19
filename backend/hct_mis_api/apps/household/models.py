@@ -2,7 +2,6 @@ import logging
 import re
 from datetime import date
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -15,6 +14,8 @@ from django.db.models import DecimalField, JSONField
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
@@ -23,6 +24,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -422,6 +424,9 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         max_digits=64,
         blank=True,
     )
+
+    family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
+    storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         verbose_name = "Household"

@@ -2,9 +2,7 @@ from django.contrib import admin
 
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 

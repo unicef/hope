@@ -4,11 +4,11 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-
 from admin_extra_buttons.api import ExtraButtonsMixin, button, confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, ValueFilter
 from smart_admin.mixins import LinkedObjectsMixin
+
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
