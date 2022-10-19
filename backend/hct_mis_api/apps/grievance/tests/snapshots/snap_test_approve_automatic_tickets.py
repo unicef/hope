@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_0_with_permission 1'] = {
@@ -49,10 +50,10 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
                 'needsAdjudicationTicketDetails': {
                     'selectedIndividuals': [
                         {
-                            'id': 'SW5kaXZpZHVhbE5vZGU6ZjllMjdjYTgtMTFmNy00Mzg2LWJhZmItZTA3N2IwYmI0N2Yz'
+                            'id': 'SW5kaXZpZHVhbE5vZGU6OTRiMDlmZjItOWU2ZC00ZjM0LWE3MmMtYzMxOWUxZGI3MTE1'
                         },
                         {
-                            'id': 'SW5kaXZpZHVhbE5vZGU6OTRiMDlmZjItOWU2ZC00ZjM0LWE3MmMtYzMxOWUxZGI3MTE1'
+                            'id': 'SW5kaXZpZHVhbE5vZGU6ZjllMjdjYTgtMTFmNy00Mzg2LWJhZmItZTA3N2IwYmI0N2Yz'
                         }
                     ]
                 }
