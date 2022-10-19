@@ -1,5 +1,6 @@
 import os
 import unittest
+from typing import Any, Dict
 
 from django.conf import settings
 from django.test.runner import ParallelTestSuite, partition_suite_by_case
@@ -73,7 +74,7 @@ class PostgresTestRunner(TestRunner):
             "output": output,
         }
 
-    def run_suite(self, suite, **kwargs):
+    def run_suite(self, suite, **kwargs) -> Any:
         runner_kwargs = self.get_test_runner_kwargs()
         runner = self.test_runner(**runner_kwargs)
         results = runner.run(suite)
@@ -81,5 +82,5 @@ class PostgresTestRunner(TestRunner):
             runner_kwargs["output"].close()
         return results
 
-    def setup_databases(self, **kwargs):
+    def setup_databases(self, **kwargs: Dict) -> Any:
         return super().setup_databases(**kwargs)

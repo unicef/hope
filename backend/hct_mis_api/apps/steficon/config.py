@@ -16,6 +16,8 @@ This module provides the `api_setting` object, that is used to access
 REST framework settings, checking for user settings first, then falling
 back to the defaults.
 """
+from typing import Any, Dict, List, Optional
+
 from django.conf import settings
 from django.core.signals import setting_changed
 from django.utils.module_loading import import_string
@@ -29,8 +31,6 @@ DEFAULTS = {
     "BUILTIN_MODULES": [
         "random",
         "datetime",
-        # "datetime.date",
-        # "datetime.datetime",
         "dateutil",
         "dateutil.relativedelta",
     ],
@@ -41,19 +41,19 @@ DEFAULTS = {
 
 
 class Config:
-    def __init__(self, user_settings=None, defaults=None):
+    def __init__(self, user_settings: Optional[Dict] = None, defaults: Optional[Dict] = None) -> None:
         if user_settings:
             self._user_settings = user_settings
         self.defaults = defaults or DEFAULTS
         self._cached_attrs = set()
 
     @property
-    def user_settings(self):
+    def user_settings(self) -> Dict:
         if not hasattr(self, "_user_settings"):
             self._user_settings = getattr(settings, "STEFICON", {})
         return self._user_settings
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: Any) -> Any:
         if attr not in self.defaults:
             raise AttributeError("Invalid STEFICON setting: '%s'" % attr)
 
@@ -74,7 +74,7 @@ class Config:
         setattr(self, attr, val)
         return val
 
-    def reload(self):
+    def reload(self) -> None:
         for attr in self._cached_attrs:
             delattr(self, attr)
         self._cached_attrs.clear()
@@ -85,8 +85,8 @@ class Config:
 config = Config(None, DEFAULTS)
 
 
-def reload_config(*args, **kwargs):
-    setting = kwargs["setting"]
+def reload_config(*args: List, **kwargs: Dict[Any, str]) -> None:
+    setting: str = kwargs["setting"]
     if setting == "STEFICON":
         config.reload()
 

@@ -1,5 +1,6 @@
 import base64
 import logging
+from typing import Dict
 
 from django import forms
 from django.contrib import admin, messages
@@ -46,7 +47,9 @@ from hct_mis_api.apps.registration_datahub.services.extract_record import extrac
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
 )
-from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
+from hct_mis_api.apps.registration_datahub.utils import (
+    post_process_dedupe_results as _post_process_dedupe_results,
+)
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
 
@@ -153,12 +156,12 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
 
     def enrich_deduplication(self, request, queryset):
         for record in queryset.exclude(deduplication_batch_results__has_key="score"):
-            post_process_dedupe_results(record)
+            _post_process_dedupe_results(record)
 
     @button()
     def post_process_dedupe_results(self, request, pk):
         record = self.get_queryset(request).get(id=pk)
-        post_process_dedupe_results(record)
+        _post_process_dedupe_results(record)
         record.save()
 
     @button()
@@ -253,7 +256,7 @@ class RemeberDataForm(forms.Form):
     def get_saved_config(cls, request):
         try:
             signer = Signer(request.user.password)
-            obj: dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
+            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
             return obj
         except BadSignature:
             return {}

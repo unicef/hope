@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Union
+from typing import Dict, List, Union
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -608,7 +608,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: close_system_flagging_ticket,
     }
 
-    MOVE_TO_STATUS_PERMISSION_MAPPING: dict[str, dict[Union[str, int], list[Enum]]] = {
+    MOVE_TO_STATUS_PERMISSION_MAPPING: Dict[str, Dict[Union[str, int], List[Enum]]] = {
         GrievanceTicket.STATUS_ASSIGNED: {
             "any": [
                 Permissions.GRIEVANCES_UPDATE,

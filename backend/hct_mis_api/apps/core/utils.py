@@ -6,6 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
+from typing import Dict
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -513,8 +514,8 @@ def chart_map_choices(choices):
 def chart_get_filtered_qs(
     obj,
     year,
-    business_area_slug_filter: dict = None,
-    additional_filters: dict = None,
+    business_area_slug_filter: Dict = None,
+    additional_filters: Dict = None,
     year_filter_path: str = None,
 ) -> QuerySet:
     if additional_filters is None:
