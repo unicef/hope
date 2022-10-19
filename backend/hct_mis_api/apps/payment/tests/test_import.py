@@ -46,7 +46,7 @@ class TestXlsxVerificationImport(APITestCase):
         targeting_criteria = TargetingCriteriaFactory()
 
         target_population = TargetPopulationFactory(
-            created_by=cls.user, candidate_list_targeting_criteria=targeting_criteria, business_area=cls.business_area
+            created_by=cls.user, targeting_criteria=targeting_criteria, business_area=cls.business_area
         )
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()

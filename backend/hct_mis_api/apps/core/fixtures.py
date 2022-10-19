@@ -1,12 +1,12 @@
 from faker import Faker
 
+from hct_mis_api.apps.core.models import BusinessArea
+
 faker = Faker()
 
 
-def create_afghanistan():
-    from hct_mis_api.apps.core.models import BusinessArea
-
-    BusinessArea.objects.create(
+def create_afghanistan() -> BusinessArea:
+    return BusinessArea.objects.create(
         **{
             "code": "0060",
             "name": "Afghanistan",

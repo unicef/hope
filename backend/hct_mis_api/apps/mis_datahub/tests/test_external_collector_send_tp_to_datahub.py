@@ -42,13 +42,6 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             "changed_by": None,
             "finalized_at": None,
             "finalized_by": None,
-            "candidate_list_total_households": None,
-            "candidate_list_total_individuals": None,
-            "final_list_total_households": None,
-            "final_list_total_individuals": None,
-            "selection_computation_metadata": None,
-            "candidate_list_targeting_criteria": None,
-            "final_list_targeting_criteria": None,
         }
 
         return TargetPopulation.objects.create(
@@ -95,6 +88,8 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_with_individuals.households.set([cls.household, cls.household_second])
+        cls.target_population_with_individuals.refresh_stats()
+        cls.target_population_with_individuals.save()
 
         cls.target_population_without_individuals = cls._create_target_population(
             sent_to_datahub=False,
@@ -104,6 +99,8 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_without_individuals.households.set([cls.household, cls.household_second])
+        cls.target_population_without_individuals.refresh_stats()
+        cls.target_population_without_individuals.save()
 
     @classmethod
     def create_first_household(cls, admin_area, rdi):

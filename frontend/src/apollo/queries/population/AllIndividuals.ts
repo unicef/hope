@@ -85,13 +85,12 @@ export const AllIndividuals = gql`
               node {
                 id
                 country
+                countryIso3
                 documentNumber
                 photo
                 type {
-                  country
                   label
                   type
-                  countryIso3
                 }
               }
             }

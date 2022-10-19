@@ -1,6 +1,7 @@
+from django.conf import settings
+
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from django.conf import settings
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hct_mis_api.apps.household.elasticsearch_utils import DEFAULT_SCRIPT
@@ -66,7 +67,7 @@ class ImportedIndividualDocument(Document):
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
             "type": fields.KeywordField(attr="type.type", similarity="boolean"),
-            "country": fields.KeywordField(attr="type.country.alpha3", similarity="boolean"),
+            "country": fields.KeywordField(attr="country.alpha3", similarity="boolean"),
         }
     )
     identities = fields.ObjectField(

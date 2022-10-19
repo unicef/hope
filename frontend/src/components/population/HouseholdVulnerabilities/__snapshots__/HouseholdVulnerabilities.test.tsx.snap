@@ -28,7 +28,9 @@ exports[`components/population/HouseholdVulnerabilities should render 1`] = `
             >
               months displaced
             </span>
-            <div>
+            <div
+              data-cy="label-months displaced"
+            >
               <span
                 class="sc-bwzfXH emFVa"
                 color="textSecondary"
@@ -48,7 +50,9 @@ exports[`components/population/HouseholdVulnerabilities should render 1`] = `
             >
               difficulty breathing h f
             </span>
-            <div>
+            <div
+              data-cy="label-difficulty breathing h f"
+            >
               <span
                 class="sc-bwzfXH emFVa"
                 color="textSecondary"

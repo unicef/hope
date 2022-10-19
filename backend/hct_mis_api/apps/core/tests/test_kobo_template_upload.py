@@ -1,5 +1,4 @@
 from datetime import timedelta
-from django.utils import timezone
 from tempfile import NamedTemporaryFile
 from unittest.mock import patch
 
@@ -9,6 +8,7 @@ from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import Client, RequestFactory
 from django.urls import reverse
+from django.utils import timezone
 
 import requests
 
@@ -52,6 +52,7 @@ class TestKoboTemplateUpload(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.maxDiff = None
         cls.client = Client()
         cls.factory = RequestFactory()
         cls.site = AdminSite()
@@ -83,6 +84,7 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: relationship_i_c - Choice: OTHER is not present in the file",
                 "Field: marital_status_i_c - Choice: MARRIED is not present in the file",
                 "Field: marital_status_i_c - Choice: WRONG_CHOICE is not present in HOPE",
+                "Field: collect_individual_data_h_c - Choice: 2 is not present in the file",
                 "Field: currency_h_c - Choice: BOV is not present in the file",
                 "Field: currency_h_c - Choice: MRU is not present in the file",
                 "Field: currency_h_c - Choice: STN is not present in the file",
@@ -112,9 +114,9 @@ class TestKoboTemplateUpload(APITestCase):
     )
     def test_upload_valid_template(self):
         request = self.prepare_request("kobo-template-valid.xlsx")
-        setattr(request, "session", "session")
+        request.session = "session"
         messages = FallbackStorage(request)
-        setattr(request, "_messages", messages)
+        request._messages = messages
         response = self.admin.add_view(request, form_url="", extra_context=None)
         stored_messages = tuple(get_messages(request))
         self.assertEqual(response.status_code, 302)

@@ -30,7 +30,9 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             >
               Household Size
             </span>
-            <div>
+            <div
+              data-cy="label-Household Size"
+            >
               4
             </div>
           </div>
@@ -45,7 +47,9 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             >
               Country
             </span>
-            <div>
+            <div
+              data-cy="label-Country"
+            >
               Isle of Man
             </div>
           </div>
@@ -60,7 +64,9 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             >
               Residence Status
             </span>
-            <div>
+            <div
+              data-cy="label-Residence Status"
+            >
               Displaced  |  Refugee / Asylum Seeker
             </div>
           </div>
@@ -75,7 +81,9 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             >
               Country of Origin
             </span>
-            <div>
+            <div
+              data-cy="label-Country of Origin"
+            >
               San Marino
             </div>
           </div>
@@ -90,7 +98,9 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             >
               Head of Household
             </span>
-            <div>
+            <div
+              data-cy="label-Head of Household"
+            >
               <a
                 class="sc-bwzfXH kvzhbg"
                 href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
@@ -110,7 +120,9 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             >
               FEMALE CHILD HEADED HOUSEHOLD
             </span>
-            <div>
+            <div
+              data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
+            >
               No
             </div>
           </div>
@@ -125,7 +137,9 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             >
               CHILD HEADED HOUSEHOLD
             </span>
-            <div>
+            <div
+              data-cy="label-CHILD HEADED HOUSEHOLD"
+            >
               No
             </div>
           </div>
@@ -140,7 +154,9 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             >
               ADMINISTRATIVE LEVEL 1
             </span>
-            <div>
+            <div
+              data-cy="label-ADMINISTRATIVE LEVEL 1"
+            >
               Nangarhar
             </div>
           </div>
@@ -155,8 +171,27 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             >
               ADMINISTRATIVE LEVEL 2
             </span>
-            <div>
+            <div
+              data-cy="label-ADMINISTRATIVE LEVEL 2"
+            >
               Achin
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-htpNat hcDmtB"
+              color="textSecondary"
+            >
+              COLLECT TYPE
+            </span>
+            <div
+              data-cy="label-COLLECT TYPE"
+            >
+              -
             </div>
           </div>
         </div>

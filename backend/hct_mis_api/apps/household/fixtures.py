@@ -2,13 +2,14 @@ import random
 
 import factory
 from factory import enums, fuzzy
-from pytz import utc
 from faker import Faker
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
+    IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     NOT_DISABLED,
     ORG_ENUMERATOR_CHOICES,
@@ -148,7 +149,7 @@ class IndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.LazyAttribute(lambda _: f"{faker.country_calling_code()} {faker.msisdn()[3:]}")
+    phone_no = factory.LazyAttribute(lambda _: f"+380 {faker.msisdn()[:9]}")
     phone_no_alternative = ""
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
@@ -169,20 +170,23 @@ class BankAccountInfoFactory(factory.DjangoModelFactory):
     bank_account_number = random.randint(10**26, 10**27 - 1)
 
 
-class DocumentFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Document
-
-    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
-    type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by("?").first())
-    individual = factory.SubFactory(IndividualFactory)
-
-
 class DocumentTypeFactory(factory.DjangoModelFactory):
     class Meta:
         model = DocumentType
+        django_get_or_create = ("type",)
 
-    type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
+    type = factory.fuzzy.FuzzyChoice([value for value, _ in IDENTIFICATION_TYPE_CHOICE])
+
+
+class DocumentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Document
+        django_get_or_create = ("document_number", "type", "country")
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.SubFactory(DocumentTypeFactory)
+    individual = factory.SubFactory(IndividualFactory)
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
@@ -301,7 +305,9 @@ def create_household_and_individuals(household_data=None, individuals_data=None,
 
 
 def create_individual_document(individual, document_type=None):
+    additional_fields = {}
     if document_type:
-        DocumentTypeFactory(type=document_type)
-    document = DocumentFactory(individual=individual)
+        document_type = DocumentTypeFactory(type=document_type)
+        additional_fields["type"] = document_type
+    document = DocumentFactory(individual=individual, **additional_fields)
     return document

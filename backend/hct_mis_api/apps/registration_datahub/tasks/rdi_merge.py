@@ -29,6 +29,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedBankAccountInfo,
     ImportedHousehold,
@@ -41,7 +42,6 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
 
 logger = logging.getLogger(__name__)
 
@@ -171,6 +171,7 @@ class RdiMergeTask:
 
             if country_origin := countries.get(country_origin.code):
                 household_data["country_origin"] = country_origin
+
             household = Household(
                 **household_data,
                 registration_data_import=obj_hct,
@@ -185,11 +186,11 @@ class RdiMergeTask:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
             document_type, _ = DocumentType.objects.get_or_create(
-                country=geo_models.Country.objects.get(iso_code2=imported_document.type.country.code),
                 type=imported_document.type.type,
             )
             document = Document(
                 document_number=imported_document.document_number,
+                country=imported_document.country.code,
                 type=document_type,
                 individual=individual,
                 photo=imported_document.photo,
@@ -282,12 +283,14 @@ class RdiMergeTask:
         try:
             with transaction.atomic(using="default"):
                 with transaction.atomic(using="registration_datahub"):
-                    obj_hub = RegistrationDataImportDatahub.objects.get(
-                        hct_id=registration_data_import_id,
-                    )
                     obj_hct = RegistrationDataImport.objects.get(
                         id=registration_data_import_id,
                     )
+
+                    obj_hub = RegistrationDataImportDatahub.objects.get(
+                        hct_id=registration_data_import_id,
+                    )
+
                     old_obj_hct = copy_model_object(obj_hct)
                     imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
                     imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
@@ -378,11 +381,11 @@ class RdiMergeTask:
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
-                    deduplicate_documents.delay()
+                    transaction.on_commit(lambda: deduplicate_documents.delay())
                     log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
 
             self._update_individuals_and_households(individual_ids)
 
-        except:
+        except Exception:
             remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
             raise

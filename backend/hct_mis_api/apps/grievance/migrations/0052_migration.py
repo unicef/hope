@@ -10,10 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name="grievanceticket",
-            name="priority",
-        ),
         migrations.AddField(
             model_name="grievanceticket",
             name="priority",

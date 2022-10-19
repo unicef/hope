@@ -53,7 +53,7 @@ class GenerateReportContentHelpers:
         return (
             individual.household.id,
             individual.household.country_origin.name if individual.household.country_origin else "",
-            individual.household.admin_area.title if individual.household.admin_area else "",
+            individual.household.admin_area.name if individual.household.admin_area else "",
             individual.birth_date,
             individual.estimated_birth_date,
             individual.sex,
@@ -100,7 +100,7 @@ class GenerateReportContentHelpers:
         row = [
             household.id,
             household.country_origin.name if household.country_origin else "",
-            household.admin_area.title if household.admin_area else "",
+            household.admin_area.name if household.admin_area else "",
             household.size,
             household.geopoint[0] if household.geopoint else "",
             household.geopoint[1] if household.geopoint else "",
@@ -355,7 +355,7 @@ class GenerateReportContentHelpers:
         return (
             individual.household.id,
             individual.household.country_origin.name if individual.household.country_origin else "",
-            individual.household.admin_area.title if individual.household.admin_area else "",
+            individual.household.admin_area.name if individual.household.admin_area else "",
             self._format_date(individual.first_delivery_date),
             self._format_date(individual.last_delivery_date),
             individual.payments_made,
@@ -707,7 +707,7 @@ class GenerateReportService:
             filter_rows.append(
                 (
                     "Administrative area 2",
-                    GenerateReportContentHelpers._to_values_list(self.report.admin_area.all(), "title"),
+                    GenerateReportContentHelpers._to_values_list(self.report.admin_area.all(), "name"),
                 )
             )
         if self.report.program:
@@ -814,7 +814,7 @@ class GenerateReportService:
                     except IndexError:
                         column_widths.append(len(value))
 
-        for i, width in enumerate(column_widths):
+        for i in range(len(column_widths)):
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             value = GenerateReportService.MAX_COL_WIDTH if value > GenerateReportService.MAX_COL_WIDTH else value

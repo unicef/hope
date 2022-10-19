@@ -18,7 +18,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_0_wrong_args_cou
                     'line': 3
                 }
             ],
-            'message': "['Comparision method - EQUALS expect 1 arguments, 2 given']",
+            'message': "['Comparison method - EQUALS expect 1 arguments, 2 given']",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -38,7 +38,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_1_wrong_comparis
                     'line': 3
                 }
             ],
-            'message': "['size is INTEGER type filter and does not accept - CONTAINS comparision method']",
+            'message': "['size is INTEGER type filter and does not accept - CONTAINS comparison method']",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -58,7 +58,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_fail_update_2_unknown_compar
                     'line': 3
                 }
             ],
-            'message': "['Unknown comparision method - BLABLA']",
+            'message': "['Unknown comparison method - BLABLA']",
             'path': [
                 'updateTargetPopulation'
             ]
@@ -110,7 +110,9 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
     'data': {
         'updateTargetPopulation': {
             'targetPopulation': {
-                'candidateListTargetingCriteria': {
+                'name': 'with_permission_draft updated',
+                'status': 'OPEN',
+                'targetingCriteria': {
                     'rules': [
                         {
                             'filters': [
@@ -118,7 +120,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                                     'arguments': [
                                         3
                                     ],
-                                    'comparisionMethod': 'EQUALS',
+                                    'comparisonMethod': 'EQUALS',
                                     'fieldName': 'size',
                                     'isFlexField': False
                                 }
@@ -126,13 +128,8 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                         }
                     ]
                 },
-                'candidateListTotalHouseholds': 2,
-                'candidateListTotalIndividuals': 6,
-                'finalListTargetingCriteria': None,
-                'finalListTotalHouseholds': None,
-                'finalListTotalIndividuals': None,
-                'name': 'with_permission_draft updated',
-                'status': 'DRAFT'
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
             },
             'validationErrors': None
         }
@@ -171,7 +168,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                     'line': 3
                 }
             ],
-            'message': '["Name can\'t be changed when Target Population is in APPROVED status"]',
+            'message': '["Name can\'t be changed when Target Population is in Locked status"]',
             'path': [
                 'updateTargetPopulation'
             ]

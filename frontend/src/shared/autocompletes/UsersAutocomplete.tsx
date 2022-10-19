@@ -5,10 +5,14 @@ import { InputAdornment } from '@material-ui/core';
 import PersonIcon from '@material-ui/icons/Person';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { AllUsersQuery, useAllUsersQuery } from '../../__generated__/graphql';
+import {
+  AllUsersQuery,
+  useAllUsersForFiltersLazyQuery,
+} from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
 import TextField from '../TextField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { renderUserName } from '../../utils/utils';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => props.fullWidth || '232px'};
@@ -28,14 +32,24 @@ export const UsersAutocomplete = ({
   const businessArea = useBusinessArea();
   const debouncedInputText = useDebounce(inputValue, 500);
   const [newValue, setNewValue] = useState();
-  const { data, loading } = useAllUsersQuery({
+
+  const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
     variables: {
-      first: 1000,
-      search: debouncedInputText,
       businessArea,
+      first: 20,
+      orderBy: 'first_name,last_name,email',
+      search: debouncedInputText,
     },
   });
+
+  useEffect(() => {
+    if (open) {
+      loadData();
+    }
+  }, [open, debouncedInputText, loadData]);
+
   useEffect(() => setNewValue(value), [data, value]);
+
   return (
     <StyledAutocomplete<AllUsersQuery['allUsers']['edges'][number]>
       fullWidth={fullWidth}
@@ -56,10 +70,7 @@ export const UsersAutocomplete = ({
         if (!option.node) {
           return '';
         }
-        const name = option.node.firstName
-          ? `${option.node.firstName} ${option.node.lastName}`
-          : option.node.email;
-        return name;
+        return renderUserName(option.node);
       }}
       options={get(data, 'allUsers.edges', [])}
       loading={loading}

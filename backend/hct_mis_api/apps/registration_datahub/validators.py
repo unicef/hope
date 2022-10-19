@@ -437,7 +437,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 int(value)
                 return True
             # need to use Exception because of how Graphene catches errors
-            except Exception as e:
+            except Exception:
                 return False
         except Exception as e:
             logger.exception(e)
@@ -481,7 +481,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             try:
                 parser.parse(value)
             # need to use Exception because of how Graphene catches errors
-            except Exception as e:
+            except Exception:
                 return False
             return True
         except Exception as e:
@@ -1012,7 +1012,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 try:
                     int(value)
                     return
-                except Exception as e:
+                except Exception:
                     return f"Invalid value {value} of type {value_type_name} for " f"field {field} of type int"
             elif field_type == "STRING":
                 # everything from Kobo is string so cannot really validate it

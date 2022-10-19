@@ -27,10 +27,10 @@ class Command(BaseCommand):
         rdh_document_types = []
         agencies = []
         rdh_agencies = []
+        for doc_type, label in identification_type_choice:
+            document_types.append(DocumentType(label=label, type=doc_type))
+            rdh_document_types.append(RDHDocumentType(label=label, type=doc_type))
         for country in Country.objects.all():
-            for doc_type, label in identification_type_choice:
-                document_types.append(DocumentType(country=country, label=label, type=doc_type))
-                rdh_document_types.append(RDHDocumentType(country=country.iso_code2, label=label, type=doc_type))
             agencies_types = {
                 "UNHCR",
                 "WFP",
