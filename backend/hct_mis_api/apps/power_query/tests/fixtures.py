@@ -165,4 +165,5 @@ class user_grant_office_permission(object):
 
     def stop(self):
         """Stop an active patch."""
-        return self.__exit__()
+        # TODO: __exit__ needs arguments
+        return self.__exit__()  # type: ignore

@@ -5,6 +5,8 @@ from django.http import Http404
 
 import requests
 
+from hct_mis_api.apps.utils.exceptions import log_and_raise
+
 logger = logging.getLogger(__name__)
 
 DJANGO_USER_MAP = {
@@ -24,8 +26,10 @@ class MicrosoftGraphAPI:
 
     def get_token(self):
         if not self.azure_client_id or not self.azure_client_secret:
-            logger.error("Configure AZURE_CLIENT_ID and/or AZURE_CLIENT_SECRET")
-            raise ValueError("Configure AZURE_CLIENT_ID and/or AZURE_CLIENT_SECRET")
+            log_and_raise(
+                "Configure AZURE_CLIENT_ID and/or AZURE_CLIENT_SECRET",
+                error_type=ValueError,
+            )
 
         post_dict = {
             "grant_type": "client_credentials",
@@ -36,8 +40,10 @@ class MicrosoftGraphAPI:
         response = requests.post(settings.AZURE_TOKEN_URL, post_dict)
 
         if response.status_code != 200:
-            logger.error(f"Unable to fetch token from Azure. {response.status_code} {response.content}")
-            raise Exception(f"Error during token retrieval: {response.status_code} {response.content}")
+            log_and_raise(
+                f"Unable to fetch token from Azure. {response.status_code} {response.content.decode('utf-8')}",
+                error_type=Exception,
+            )
 
         json_response = response.json()
         token = json_response["access_token"]
