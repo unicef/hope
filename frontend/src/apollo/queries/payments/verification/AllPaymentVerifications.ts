@@ -10,7 +10,7 @@ export const AllPaymentVerifications = gql`
     $paymentVerificationPlan: ID
     $search: String
     $status: String
-    $businessArea: String
+    $businessArea: String!
     $verificationChannel: String
   ) {
     allPaymentVerifications(
