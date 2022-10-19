@@ -557,7 +557,7 @@ CONSTANCE_CONFIG = {
     "QUICK_LINKS": (
         """Kobo,https://kf-hope.unitst.org/;
 CashAssist,https://cashassist-trn.crm4.dynamics.com/;
-Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/;
+Sentry,https://excubo.unicef.io/sentry/;
 elasticsearch,hope-elasticsearch-coordinating-only:9200;
 Datamart,https://datamart.unicef.io;
 Flower,https://stg-hope.unitst.org/flower/;
@@ -614,6 +614,7 @@ ROOT_TOKEN = env.str("ROOT_ACCESS_TOKEN", uuid4().hex)
 
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_URL = env("SENTRY_URL")
+SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
@@ -625,13 +626,13 @@ if SENTRY_DSN:
         level=logging.INFO,
         event_level=logging.ERROR,  # Capture info and above as breadcrumbs  # Send errors as events
     )
-
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
         release=get_full_version(),
         traces_sample_rate=1.0,
         send_default_pii=True,
+        environment=SENTRY_ENVIRONMENT,
     )
     ignore_logger("graphql.execution.utils")
 

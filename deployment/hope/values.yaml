@@ -51,6 +51,7 @@ backend:
     AZURE_CLIENT_SECRET: ""
     AZURE_TENANT_KEY: ""
     SENTRY_DSN: ""
+    SENTRY_ENVIRONMENT: ""
     
 frontend:
   image: fronted:latest

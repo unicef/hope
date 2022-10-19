@@ -22,19 +22,15 @@ variables:
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
   Docker.registry_trn: "ICTD-HOPE-DEV-ACR"
+  Sentry.frontend.dsn: $(SENTRY_FRONTEND_DSN)
+  Sentry.environment: $(SENTRY_ENVIRONMENT)
+
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registry: "ICTD-HOPE-DEV-ACR"
     Docker.url: "uniappsakshopedev.azurecr.io"
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registry: "ICTD-HOPE-PRD-ACR"
     Docker.url: "uniappsakshope.azurecr.io"
-  ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
-    Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
-  ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
-    Sentry.frontend.dsn: $(STG_SENTRY_FRONTEND_DSN)
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
-    Sentry.frontend.dsn: $(PRD_SENTRY_FRONTEND_DSN)
-    Sentry.frontend.trn_dsn: $(TRN_SENTRY_FRONTEND_DSN)
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
 
 stages:
@@ -133,7 +129,7 @@ stages:
               command: build
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)-stage1
-              arguments: "--build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) 
+              arguments: "--build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) SENTRY_ENVIRONMENT=$(Sentry.environment)
                        --cache-from=$(Docker.url)/$(Docker.frontend.repository)-stage1:latest
                        --target=dev"
               containerRegistry: $(Docker.registry)
@@ -158,7 +154,7 @@ stages:
               command: build
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
-              arguments: "--build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) 
+              arguments: "--build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) SENTRY_ENVIRONMENT=$(Sentry.environment)
                           --cache-from=$(Docker.url)/$(Docker.frontend.repository)-stage1:latest"
               containerRegistry: $(Docker.registry)
               tags: |
@@ -185,7 +181,7 @@ stages:
               command: build
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
-              arguments: --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.trn_dsn)
+              arguments: --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) SENTRY_ENVIRONMENT=$(Sentry.environment)
               containerRegistry: $(Docker.registry_trn)
               tags: |
                 $(Build.BuildId)-trn

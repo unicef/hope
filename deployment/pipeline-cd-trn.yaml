@@ -65,11 +65,12 @@ stages:
                 backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
                 backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
                 backend.secret.SENTRY_DSN=$(SENTRY_DSN),\
+                frontend.secret.SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN),\
+                backend.secret.SENTRY_ENVIRONMENT=$(SENTRY_ENVIRONMENT),\
                 backend.secret.EMAIL_HOST=$(EMAIL_HOST),\
                 backend.secret.EMAIL_USE_TLS=$(EMAIL_USE_TLS),\
                 backend.secret.KOBO_API_URL=$(KOBO_API_URL),\
                 backend.secret.KOBO_MASTER_API_TOKEN=$(KOBO_MASTER_API_TOKEN),\
-                frontend.secret.SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN),\
                 backend.secret.DATAMART_USER=$(DATAMART_USER),\
                 backend.secret.DATAMART_PASSWORD=$(DATAMART_PASSWORD),\
                 backend.secret.DATAMART_URL=$(DATAMART_URL),\

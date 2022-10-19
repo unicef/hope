@@ -25,6 +25,7 @@ setupInternalization();
 if (process.env.NODE_ENV !== 'development')
   Sentry.init({
     dsn: process.env.SENTRY_FRONTEND_DSN,
+    environment: process.env.SENTRY_ENVIRONMENT,
     ignoreErrors: ['Permission Denied'],
   });
 

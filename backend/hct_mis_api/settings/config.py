@@ -31,6 +31,7 @@ DEFAULTS = {
     "ROOT_ACCESS_TOKEN": (str, ""),
     "SENTRY_DSN": (str, ""),
     "SENTRY_URL": (str, ""),
+    "SENTRY_ENVIRONMENT": (str, ""),
     "CELERY_BROKER_URL": (str, ""),
     "CELERY_RESULT_BACKEND": (str, ""),
     "CELERY_TASK_ALWAYS_EAGER": (bool, False),
