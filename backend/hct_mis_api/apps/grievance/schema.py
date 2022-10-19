@@ -7,7 +7,6 @@ from django.db.models import Q
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -54,6 +53,7 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
@@ -96,9 +96,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         if user.has_permission(perm, business_area) or check_creator or check_assignee:
             return True
 
-        msg = f"User is not active creator/assignee and does not have '{perm}' permission"
-        logger.error(msg)
-        raise GraphQLError(msg)
+        log_and_raise(f"User is not active creator/assignee and does not have '{perm}' permission")
 
     class Meta:
         model = GrievanceTicket

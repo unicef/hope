@@ -1,0 +1,19 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static "power_query.css" %}" type="text/css">
+</head>
+<body>
+<div class="title">{% block title %}Reports{% endblock %}</div>
+{% block breadcrumbs %}
+    <ul class="breadcrumbs">
+        {% block breadcrumbs-items %}
+            <li><a href="{% url "power_query:report_list" %}">List</a></li>
+        {% endblock %}
+    </ul>
+{% endblock %}
+{% block body %}{% endblock %}
+</body>
+</html>
