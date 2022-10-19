@@ -73,7 +73,6 @@ disable_error_code = [
   "union-attr",
   "dict-item",
   "return-value",
-  "operator",
   "list-item",
   "type-arg",
   "no-untyped-def",

@@ -1,5 +1,6 @@
 import logging
 from enum import Enum
+from types import FunctionType
 from typing import Dict, List, Union
 
 from django.contrib.auth import get_user_model
@@ -268,7 +269,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             verify_required_arguments(input, "issue_type", cls.ISSUE_TYPE_OPTIONS)
         category = arg("category")
         grievance_ticket, extras = cls.save_basic_data(root, info, input, **kwargs)
-        save_extra_methods = {
+        save_extra_methods: Dict[int, FunctionType] = {
             GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: save_payment_verification_extras,
             GrievanceTicket.CATEGORY_DATA_CHANGE: save_data_change_extras,
             GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: save_grievance_complaint_extras,
@@ -277,7 +278,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: save_negative_feedback_extras,
             GrievanceTicket.CATEGORY_REFERRAL: save_referral_extras,
         }
-        save_extra_method = save_extra_methods.get(category)
+        save_extra_method: FunctionType = save_extra_methods[category]
         grievances = [grievance_ticket]
         if save_extra_method:
             grievances = save_extra_method(root, info, input, grievance_ticket, extras, **kwargs)

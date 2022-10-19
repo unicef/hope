@@ -1,3 +1,4 @@
+from typing import List
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
 from django.shortcuts import get_object_or_404
 
@@ -337,7 +338,7 @@ class Query(graphene.ObjectType):
 
         verifications_by_status = payment_verifications.values("status").annotate(count=Count("status"))
         verifications_by_status_dict = {x.get("status"): x.get("count") for x in verifications_by_status}
-        dataset = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping.keys()]
+        dataset: List[int] = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping.keys()]
         try:
             all_verifications = sum(dataset)
             dataset_percentage = [data / all_verifications for data in dataset]
