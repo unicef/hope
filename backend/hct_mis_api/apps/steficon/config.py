@@ -16,7 +16,7 @@ This module provides the `api_setting` object, that is used to access
 REST framework settings, checking for user settings first, then falling
 back to the defaults.
 """
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from django.conf import settings
 from django.core.signals import setting_changed
 from django.utils.module_loading import import_string
@@ -84,8 +84,8 @@ class Config:
 config = Config(None, DEFAULTS)
 
 
-def reload_config(*args, **kwargs):
-    setting = kwargs["setting"]
+def reload_config(*args: List, **kwargs: Dict[Any, str]) -> None:
+    setting: str = kwargs["setting"]
     if setting == "STEFICON":
         config.reload()
 
