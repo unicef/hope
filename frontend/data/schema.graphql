@@ -373,38 +373,6 @@ type CashPlanNodeEdge {
   cursor: String!
 }
 
-type CashPlanOrPaymentPlanNode {
-  id: ID
-  canCreatePaymentVerificationPlan: Boolean
-  availablePaymentRecordsCount: Int
-  startDate: Date
-  endDate: Date
-  updatedAt: DateTime
-  status: String
-  program: ProgramNode
-  paymentItems: [PaymentNode]
-  paymentRecordItems(offset: Int, before: String, after: String, first: Int, last: Int, parent: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
-  unicefId: String
-  bankReconciliationSuccess: Int
-  bankReconciliationError: Int
-  deliveryType: String
-  totalNumberOfHouseholds: Int
-  currency: String
-  totalDeliveredQuantity: Float
-  totalEntitledQuantity: Float
-  totalUndeliveredQuantity: Float
-  verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection
-  paymentVerificationSummary: PaymentVerificationSummaryNode
-  name: String
-  fundsCommitment: String
-  downPayment: String
-  dispersionDate: String
-  assistanceThrough: String
-  serviceProvider: ServiceProviderNode
-  caId: String
-  caHashId: String
-}
-
 enum CashPlanStatus {
   DISTRIBUTION_COMPLETED
   DISTRIBUTION_COMPLETED_WITH_ERRORS
@@ -1027,9 +995,8 @@ type GenericPaymentPlanNode {
 scalar GeoJSON
 
 input GetCashplanVerificationSampleSizeInput {
-  cashPlanId: ID
   paymentPlanId: ID
-  cashPlanPaymentVerificationId: ID
+  paymentVerificationPlanId: ID
   sampling: String!
   verificationChannel: String
   businessAreaSlug: String!
@@ -3015,7 +2982,7 @@ type PaymentVerificationNode implements Node {
   version: BigInt!
   paymentVerificationPlan: PaymentVerificationPlanNode!
   paymentContentType: ContentTypeObjectType!
-  paymentObjectId: String!
+  paymentObjectId: UUID!
   status: PaymentVerificationStatus!
   statusDate: DateTime
   receivedAmount: Float
@@ -3046,7 +3013,7 @@ type PaymentVerificationPlanNode implements Node {
   unicefId: String
   status: PaymentVerificationPlanStatus!
   paymentPlanContentType: ContentTypeObjectType!
-  paymentPlanObjectId: String!
+  paymentPlanObjectId: UUID!
   sampling: PaymentVerificationPlanSampling!
   verificationChannel: PaymentVerificationPlanVerificationChannel!
   sampleSize: Int
@@ -3125,7 +3092,7 @@ type PaymentVerificationSummaryNode implements Node {
   activationDate: DateTime
   completionDate: DateTime
   paymentPlanContentType: ContentTypeObjectType!
-  paymentPlanObjectId: String!
+  paymentPlanObjectId: UUID!
 }
 
 type PaymentVerificationSummaryNodeConnection {
@@ -3265,7 +3232,7 @@ type Query {
   paymentRecordVerification(id: ID!): PaymentVerificationNode
   paymentVerificationPlan(id: ID!): PaymentVerificationPlanNode
   allPaymentRecords(offset: Int, before: String, after: String, first: Int, last: Int, parent: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
-  allPaymentVerifications(offset: Int, before: String, after: String, first: Int, last: Int, paymentVerificationPlan: ID, status: String, search: String, businessArea: String, verificationChannel: String, orderBy: String): PaymentVerificationNodeConnection
+  allPaymentVerifications(offset: Int, before: String, after: String, first: Int, last: Int, paymentVerificationPlan: ID, status: String, paymentPlanId: String, search: String, businessArea: String!, verificationChannel: String, orderBy: String): PaymentVerificationNodeConnection
   allPaymentVerificationPlan(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection
   chartPaymentVerification(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartPaymentVerification
   chartVolumeByDeliveryMechanism(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode
@@ -3292,7 +3259,6 @@ type Query {
   allDeliveryMechanisms: [ChoiceObject]
   paymentPlanBackgroundActionStatusChoices: [ChoiceObject]
   availableFspsForDeliveryMechanisms(input: AvailableFspsForDeliveryMechanismsInput): [FspChoices]
-  cashPlanOrPaymentPlan(id: ID!, planType: String!): CashPlanOrPaymentPlanNode
   allCashPlansAndPaymentPlans(businessArea: String!, program: String, search: String, serviceProvider: String, deliveryType: String, verificationStatus: String, startDateGte: String, endDateLte: String, orderBy: String, first: Int, last: Int, before: String, after: String): PaginatedCashPlanAndPaymentPlanNode
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
