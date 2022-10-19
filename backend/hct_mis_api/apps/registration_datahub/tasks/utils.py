@@ -1,6 +1,10 @@
-def collectors_str_ids_to_list(values):
+from typing import Any, List, Union
+
+
+def collectors_str_ids_to_list(values: Any) -> Union[None, str, List[str]]:
+    # TODO: refactor that?
     if values is None:
-        return
+        return None
 
     if isinstance(values, float) and values.is_integer():
         temp_value = int(values)
@@ -9,7 +13,7 @@ def collectors_str_ids_to_list(values):
         return str(values).strip(";").replace(" ", "").split(";")
 
 
-def get_submission_metadata(household_data_dict):
+def get_submission_metadata(household_data_dict: dict) -> dict:
     meta_fields_mapping = {
         "_uuid": "kobo_submission_uuid",
         "_xform_id_string": "kobo_asset_id",

@@ -1,3 +1,4 @@
+from typing import Dict
 from dateutil.parser import parse
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -6,7 +7,7 @@ from hct_mis_api.apps.household.models import NON_BENEFICIARY, RELATIONSHIP_UNKN
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 
 
-def reduce_asset(asset: dict, *args, **kwargs) -> dict:
+def reduce_asset(asset: Dict, *args, **kwargs) -> Dict:
     """
     Takes from asset only values that are needed by our frontend.
 

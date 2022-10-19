@@ -1,4 +1,5 @@
 import os
+from typing import Any, Dict
 import unittest
 
 from django.conf import settings
@@ -73,7 +74,7 @@ class PostgresTestRunner(TestRunner):
             "output": output,
         }
 
-    def run_suite(self, suite, **kwargs):
+    def run_suite(self, suite, **kwargs) -> Any:
         runner_kwargs = self.get_test_runner_kwargs()
         runner = self.test_runner(**runner_kwargs)
         results = runner.run(suite)
@@ -81,5 +82,5 @@ class PostgresTestRunner(TestRunner):
             runner_kwargs["output"].close()
         return results
 
-    def setup_databases(self, **kwargs):
+    def setup_databases(self, **kwargs: Dict) -> Any:
         return super().setup_databases(**kwargs)

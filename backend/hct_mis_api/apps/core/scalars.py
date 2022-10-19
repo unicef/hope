@@ -1,3 +1,4 @@
+from typing import Any
 import graphene
 
 
@@ -9,13 +10,13 @@ class BigInt(graphene.Scalar):
     """
 
     @classmethod
-    def parse_value(cls, value):
+    def parse_value(cls, value: Any) -> int:
         return int(value)
 
     @classmethod
-    def serialize(cls, value):
+    def serialize(cls, value: Any) -> int:
         return int(value)
 
     @staticmethod
-    def parse_literal(node):
+    def parse_literal(node: Any) -> int:
         return int(node.value)

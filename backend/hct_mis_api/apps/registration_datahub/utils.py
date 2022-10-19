@@ -1,16 +1,9 @@
 import sys
 
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 
-def post_process_dedupe_results(record):
-    # {"duplicates": [{"dob": "1965-11-05",
-    #                   "score": 11.0,
-    #                   "hit_id": "266704c0-d13c-4475-9445-52ad1f6d9cb8",
-    #                   "location": null,
-    #                   "full_name": "Lavone Burnham",
-    #                   "proximity_to_score": 5.0
-    #                 }],
-    #  "possible_duplicates": []
-    #  }
+
+def post_process_dedupe_results(record: ImportedIndividual) -> None:
     max_score = 0
     min_score = sys.maxsize
     for field in [record.deduplication_batch_results, record.deduplication_golden_record_results]:
