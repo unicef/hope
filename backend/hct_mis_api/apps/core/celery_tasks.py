@@ -1,13 +1,12 @@
 import csv
-from functools import wraps
 import logging
 from datetime import datetime
+from functools import wraps
 
 from django.db import transaction
 
 from hct_mis_api.apps.core.celery import app
-from celery import shared_task
-from hct_mis_api.apps.core.models import XLSXKoboTemplate, StorageFile
+from hct_mis_api.apps.core.models import StorageFile, XLSXKoboTemplate
 from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
 )
@@ -108,8 +107,8 @@ def create_target_population_task(storage_id, program_id, tp_name):
     documents = []
     bank_infos = []
 
-    with open(storage_obj.file.path, encoding="KOI8-U") as f:
-        reader = csv.DictReader(f, delimiter=";")
+    with open(storage_obj.file.path, encoding="KOI8-U") as file:
+        reader = csv.DictReader(file, delimiter=";")
 
         for row in reader:
             family_id = row["ID_FAM"]
@@ -130,9 +129,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
             }
 
             if family_id in family_ids:
-                individuals.append(
-                    Individual(**individual_data, household=Household.objects.get(family_id=family_id))
-                )
+                individuals.append(Individual(**individual_data, household=Household.objects.get(family_id=family_id)))
             else:
                 individual = Individual.objects.create(**individual_data)
 
@@ -154,9 +151,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                 document_number=passport_id, type=passport_type, individual=individual, status=Document.STATUS_VALID
             )
 
-            tax = Document(
-                document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_VALID
-            )
+            tax = Document(document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_VALID)
 
             bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
 
@@ -185,6 +180,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
         total_individuals_count=Individual.objects.filter(household_id__in=list(households_ids)).count(),
         status=TargetPopulation.STATUS_LOCKED,
         business_area=business_area,
+        storage_file=storage_obj,
     )
 
     target_population.households.set(households)
