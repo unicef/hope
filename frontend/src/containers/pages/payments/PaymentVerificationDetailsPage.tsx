@@ -1,4 +1,4 @@
-import { Button, Paper, Typography } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
@@ -19,8 +19,9 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
+  CashPlanNode,
   PaymentVerificationPlanStatus,
-  useCashPlanOrPaymentPlanQuery,
+  useCashPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
 } from '../../../__generated__/graphql';
 import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
@@ -60,35 +61,21 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   });
   const debouncedFilter = useDebounce(filter, 500);
   const { id } = useParams();
-  const searchParams = new URLSearchParams(window.location.search);
-  const planType = searchParams.get('planType');
-
-  const { data, loading, error } = useCashPlanOrPaymentPlanQuery({
-    variables: { id, planType },
+  const { data, loading, error } = useCashPlanQuery({
+    variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useCashPlanVerificationSamplingChoicesQuery();
-
-  if (!planType || !(planType === 'CashPlan' || planType === 'PaymentPlan')) {
-    return (
-      <Paper>
-        <Container>
-          <Typography>Plan Type is missing</Typography>
-        </Container>
-      </Paper>
-    );
-  }
 
   if (loading || choicesLoading) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || !choicesData || permissions === null) return null;
 
-  const { cashPlanOrPaymentPlan } = data;
+  const cashPlan= data.cashPlan as CashPlanNode;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -102,7 +89,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     permissions,
   );
 
-  const statesArray = cashPlanOrPaymentPlan.verificationPlans?.edges?.map((v) => v.node.status);
+  const statesArray = cashPlan.verificationPlans?.edges?.map((v) => v.node.status);
 
   const canSeeVerificationRecords = (): boolean => {
     const showTable =
@@ -120,13 +107,13 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   };
 
   const isFinished =
-    cashPlanOrPaymentPlan?.paymentVerificationSummary?.status === 'FINISHED';
+    cashPlan?.paymentVerificationSummary?.status === 'FINISHED';
 
   const toolbar = (
     <PageHeader
       title={
-        <BlackLink to={`/${businessArea}/cashplans/${cashPlanOrPaymentPlan.id}`}>
-          {t('Cash Plan')} {cashPlanOrPaymentPlan.caId}
+        <BlackLink to={`/${businessArea}/cashplans/${cashPlan.id}`}>
+          {t('Cash Plan')} {cashPlan.caId}
         </BlackLink>
       }
       breadCrumbs={
@@ -139,9 +126,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         {canCreate && (
           <CreateVerificationPlan
             disabled={false}
-            cashPlanId={cashPlanOrPaymentPlan.id}
+            cashPlanId={cashPlan.id}
             canCreatePaymentVerificationPlan={
-              cashPlanOrPaymentPlan.canCreatePaymentVerificationPlan
+              cashPlan.canCreatePaymentVerificationPlan
             }
           />
         )}
@@ -152,7 +139,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             color='primary'
             component={Link}
             to={`/${businessArea}/grievance-and-feedback/payment-verification/${decodeIdString(
-              cashPlanOrPaymentPlan.id,
+              cashPlan.id,
             )}`}
           >
             {t('View Tickets')}
@@ -166,18 +153,18 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     <>
       {toolbar}
       <Container>
-        <CashPlanDetailsSection cashPlan={cashPlanOrPaymentPlan} />
+        <CashPlanDetailsSection cashPlan={cashPlan} />
       </Container>
       <Container>
-        <VerificationPlansSummary cashPlan={cashPlanOrPaymentPlan} />
+        <VerificationPlansSummary cashPlan={cashPlan} />
       </Container>
-      {cashPlanOrPaymentPlan.verificationPlans?.edges?.length
-        ? cashPlanOrPaymentPlan.verificationPlans.edges.map((edge) => (
+      {cashPlan.verificationPlans?.edges?.length
+        ? cashPlan.verificationPlans.edges.map((edge) => (
             <VerificationPlanDetails
               key={edge.node.id}
               samplingChoicesData={choicesData}
               verificationPlan={edge.node}
-              cashPlan={cashPlanOrPaymentPlan}
+              cashPlan={cashPlan}
             />
           ))
         : null}
@@ -187,13 +174,13 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             <VerificationRecordsFilters
               filter={filter}
               onFilterChange={setFilter}
-              verifications={cashPlanOrPaymentPlan.verificationPlans}
+              verifications={cashPlan.verificationPlans}
             />
           </Container>
           <TableWrapper>
             <VerificationRecordsTable
               filter={debouncedFilter}
-              cashPlanId={cashPlanOrPaymentPlan.id}
+              cashPlanId={cashPlan.id}
               businessArea={businessArea}
               canViewRecordDetails={hasPermissions(
                 PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
@@ -214,10 +201,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}
-      {cashPlanOrPaymentPlan.verificationPlans?.edges[0]?.node?.id &&
+      {cashPlan.verificationPlans?.edges[0]?.node?.id &&
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
-            objectId={cashPlanOrPaymentPlan.id}
+            objectId={cashPlan.id}
           />
         )}
     </>
