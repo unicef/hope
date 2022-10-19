@@ -26,6 +26,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     FieldFactory,
     Scope,
 )
+from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import (
     map_unicef_ids_to_households_unicef_ids,
 )
@@ -261,6 +262,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         blank=True,
         null=True,
     )
+
+    storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
     def excluded_household_ids(self):
