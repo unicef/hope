@@ -137,6 +137,13 @@ class SendTPToDatahubTask:
 
             households_to_sync.update(last_sync_at=timezone.now())
             individuals_to_sync.update(last_sync_at=timezone.now())
+
+            if target_population.storage_file:
+                for household in target_population.household_list:
+                    for individual in household.individuals.all():
+                        individual.withdraw()
+                    household.withdraw()
+
             return {
                 "session": self.dh_session.id,
                 "program": str(program),
@@ -232,7 +239,9 @@ class SendTPToDatahubTask:
 
     def _prepare_datahub_object_household(self, household):
         dh_household_args = build_arg_dict(household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT)
-        dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.iso_code2)
+        if getattr(household, "country"):
+            dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.iso_code2)
+
         dh_household = dh_mis_models.Household(**dh_household_args)
         dh_household.unhcr_id = self._get_unhcr_household_id(household)
         dh_household.session = self.dh_session

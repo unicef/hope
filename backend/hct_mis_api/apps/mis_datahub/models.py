@@ -52,6 +52,7 @@ class Individual(SessionModel, UnicefIdentifiedModel):
     SEX_CHOICE = (
         (MALE, _("Male")),
         (FEMALE, _("Female")),
+        (None, None),
     )
 
     mis_id = models.UUIDField()
@@ -65,6 +66,7 @@ class Individual(SessionModel, UnicefIdentifiedModel):
     sex = models.CharField(
         max_length=255,
         choices=SEX_CHOICE,
+        null=True
     )
     date_of_birth = models.DateField()
     estimated_date_of_birth = models.BooleanField()
