@@ -94,7 +94,7 @@ description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
 [tool.poetry.dependencies]
-Django = "3.2.15"
+Django = "3.2.16"
 Jinja2 = "3.1.2"
 MarkupSafe = "2.1.1"
 PyJWT = "^2.4.0"
