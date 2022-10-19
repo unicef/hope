@@ -48,12 +48,13 @@ export const Check = ({
             color='primary'
             checked={checked}
             onChange={handleChange}
+            data-cy={`input-${field.name}`}
           />
         }
         label={displayValue ? '' : label}
       />
       {displayValue && (
-        < Grid item xs={9} >
+        <Grid item xs={9}>
           <LabelizedField label={label}>{displayValue}</LabelizedField>
         </Grid>
       )}

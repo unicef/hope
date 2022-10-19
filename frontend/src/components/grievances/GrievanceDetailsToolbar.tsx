@@ -326,6 +326,7 @@ export const GrievanceDetailsToolbar = ({
               component={Link}
               to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
+              data-cy='button-edit'
             >
               {t('Edit')}
             </Button>

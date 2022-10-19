@@ -394,6 +394,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             color='primary'
                             variant='contained'
                             onClick={submitForm}
+                            data-cy='button-submit'
                           >
                             {activeStep === GrievanceSteps.Description
                               ? t('Save')
