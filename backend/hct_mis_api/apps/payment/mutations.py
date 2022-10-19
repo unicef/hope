@@ -95,10 +95,10 @@ class CreateVerificationPlanMutation(PermissionMutation):
         payment_plan_id = input.get("payment_plan_id")
         node_name, obj_id = b64decode(payment_plan_id).decode().split(":")
 
-        if node_name == "CashPlanNode":
-            payment_plan_object = get_object_or_404(CashPlan, id=obj_id)
-        else:
-            payment_plan_object = get_object_or_404(PaymentPlan, id=obj_id)
+        payment_plan_object = (
+            get_object_or_404(CashPlan, id=obj_id) if node_name == "CashPlanNode" else
+            get_object_or_404(PaymentPlan, id=obj_id)
+        )
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
 
