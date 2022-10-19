@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from sentry_sdk import configure_scope
 
 
-def sentry_tags(func) -> FunctionType:
+def sentry_tags(func: FunctionType) -> FunctionType:
     """
     add sentry tags 'celery' and 'celery_task'
     """

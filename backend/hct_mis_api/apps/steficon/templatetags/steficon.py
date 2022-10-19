@@ -10,7 +10,7 @@ register = template.Library()
 
 
 @register.filter
-def pretty_json(json_object):
+def pretty_json(json_object) -> str:
     json_str = json.dumps(json_object, indent=4, sort_keys=True)
     lex = lexers.get_lexer_by_name("json")
     return mark_safe(highlight(json_str, lex, HtmlFormatter()))

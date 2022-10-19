@@ -1,9 +1,9 @@
 import sys
+from typing import Any, Dict, List, Optional
 
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 
-
-def post_process_dedupe_results(record: ImportedIndividual) -> None:
+def post_process_dedupe_results(record: Any) -> None:
+    # TODO: record: ImportedIndividual but circular import
     max_score = 0
     min_score = sys.maxsize
     for field in [record.deduplication_batch_results, record.deduplication_golden_record_results]:
@@ -15,7 +15,7 @@ def post_process_dedupe_results(record: ImportedIndividual) -> None:
             field["score"] = {"max": max_score, "min": min_score, "qty": len(duplicates)}
 
 
-def combine_collections(a, b, path=None, update=True):
+def combine_collections(a: Dict, b: Dict, path: Optional[List] = None, update: bool = True) -> Dict:
     """merges b into a
     version from flex registration"""
     if path is None:
