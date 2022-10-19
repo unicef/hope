@@ -6,7 +6,7 @@ from io import StringIO
 from django import forms
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.admin import ModelAdmin, register
+from django.contrib.admin import register
 from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import QuerySet
@@ -17,13 +17,12 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 
-from admin_extra_buttons.api import ExtraButtonsMixin, button
+from admin_extra_buttons.api import button
 from admin_extra_buttons.decorators import view
 from admin_extra_buttons.utils import labelize
 from admin_sync.mixin import SyncMixin
 from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.mixin import AdminFiltersMixin
 from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
@@ -33,6 +32,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from ..account.models import User
 from ..administration.widgets import JsonWidget
+from ..utils.admin import HOPEModelAdminBase
 from ..utils.security import is_root
 from .forms import (
     RuleDownloadCSVFileProcessForm,
@@ -209,7 +209,7 @@ class RuleResource(ModelResource):
 
 
 @register(Rule)
-class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
+class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
@@ -262,6 +262,17 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             },
         ),
     ]
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related("history")
+            .select_related(
+                "created_by",
+                "updated_by",
+            )
+        )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == "flags":
@@ -492,9 +503,7 @@ class RuleCommitResource(ModelResource):
 
 
 @register(RuleCommit)
-class RuleCommitAdmin(
-    ExtraButtonsMixin, AdminFiltersMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin
-):
+class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPEModelAdminBase):
     list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)

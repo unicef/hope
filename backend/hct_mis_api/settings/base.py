@@ -260,7 +260,6 @@ DJANGO_APPS = [
 
 OTHER_APPS = [
     "hijack",
-    # "hijack.contrib.admin",
     "jsoneditor",
     "django_countries",
     "phonenumber_field",
@@ -283,6 +282,8 @@ OTHER_APPS = [
     "import_export",
     "rest_framework",
     "drf_yasg",
+    "flags",
+    "admin_cursor_paginator",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -304,6 +305,7 @@ PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
 AUTHENTICATION_BACKENDS = [
+    "hct_mis_api.apps.power_query.backends.PowerQueryBackend",
     "django.contrib.auth.backends.ModelBackend",
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
 ]
@@ -664,6 +666,7 @@ SMART_ADMIN_SECTIONS = {
         "core",
         "constance",
         "household.agency",
+        "flags",
     ],
     "Power Query & Reports": [
         "power_query",
@@ -707,12 +710,6 @@ SMART_ADMIN_SECTIONS = {
     ],
 }
 
-# SMART_ADMIN_BOOKMARKS = [('GitHub', 'https://github.com/saxix/django-smart-admin'),
-#                          'https://github.com/saxix/django-adminactions',
-#                          'https://github.com/saxix/django-sysinfo',
-#                          'https://github.com/saxix/django-adminfilters',
-#                          'https://github.com/saxix/django-admin-extra-urls',
-#                          ]
 SMART_ADMIN_BOOKMARKS = "hct_mis_api.apps.administration.site.get_bookmarks"
 
 SMART_ADMIN_BOOKMARKS_PERMISSION = None
@@ -777,25 +774,6 @@ IMPERSONATE = {
     "DISABLE_LOGGING": False,
 }
 
-# EXPLORER_SCHEMA_INCLUDE_TABLE_PREFIXES = (
-#     'hct_mis_api',
-# )
-# EXPLORER_SCHEMA_EXCLUDE_TABLE_PREFIXES = (
-#     'django.contrib.auth',
-#     'django.contrib.contenttypes',
-#     'django_site',
-#     'django_session',
-#     'django.contrib.sessions',
-#     'django.contrib.admin',
-#     'django_celery',
-#     'django_celery.beat',
-#     'django_celery_beat',
-#     'django_celery_results',
-#     'django_migrations',
-#     'social_auth',
-#     'django_admin',
-# )
-
 POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
 
 CONCURRENCY_ENABLED = False
@@ -808,8 +786,9 @@ CONCURRENCY_ENABLED = False
 
 PROFILING = env("PROFILING", default="off") == "on"
 if PROFILING:
+    # SILK
     INSTALLED_APPS.append("silk")
-    MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
+    MIDDLEWARE.append("hct_mis_api.middlewares.silk.DynamicSilkyMiddleware")
     SILKY_PYTHON_PROFILER = True
 
 ADMIN_SYNC_USE_REVERSION = False
@@ -821,3 +800,45 @@ SWAGGER_SETTINGS = {
 }
 
 MAX_STORAGE_FILE_SIZE = 30
+
+FLAGS_STATE_LOGGING = DEBUG
+FLAGS = {
+    "DEVELOP_DEBUG_TOOLBAR": [],
+    "SILK_MIDDLEWARE": [],
+    "FRONT_DOOR_BYPASS": [],
+}
+
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
+    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+
+    # DEBUG TOOLBAR
+    def show_ddt(request):  # pragma: no-cover
+        from flags.state import flag_enabled
+
+        return flag_enabled("DEVELOP_DEBUG_TOOLBAR", request=request)
+
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": show_ddt,
+        "JQUERY_URL": "",
+    }
+    DEBUG_TOOLBAR_PANELS = [
+        "debug_toolbar.panels.history.HistoryPanel",
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "flags.panels.FlagsPanel",
+        "flags.panels.FlagChecksPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        "debug_toolbar.panels.logging.LoggingPanel",
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+    ]

@@ -411,15 +411,11 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class ImportedDocumentType(TimeStampedUUIDModel):
-    country = CountryField(default="U")
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
-    class Meta:
-        unique_together = ("country", "type")
-
     def __str__(self):
-        return f"{self.label} in {self.country}"
+        return f"{self.label}"
 
 
 class ImportedDocument(TimeStampedUUIDModel):
@@ -431,6 +427,7 @@ class ImportedDocument(TimeStampedUUIDModel):
         related_name="documents",
         on_delete=models.CASCADE,
     )
+    country = CountryField(default="U")
     doc_date = models.DateField(blank=True, null=True, default=None)
 
     def clean(self):

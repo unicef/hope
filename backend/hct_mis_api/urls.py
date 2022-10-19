@@ -7,6 +7,7 @@ from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
 
 import adminactions.actions as actions
+import debug_toolbar
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.apps.account.views
@@ -73,7 +74,7 @@ api_patterns = [
         include("advanced_filters.urls"),
     ),
     path(
-        f"{settings.ADMIN_PANEL_URL}/reports/",
+        "power_query/",
         include("hct_mis_api.apps.power_query.urls"),
     ),
     path(f"b/changelog/", include("hct_mis_api.apps.changelog.urls"),
@@ -85,6 +86,8 @@ api_patterns = [
 
 if settings.PROFILING:
     api_patterns.append(path("silk/", include("silk.urls", namespace="silk")))
+if settings.DEBUG:
+    api_patterns.append(path("root/__debug__/", include(debug_toolbar.urls)))
 
 urlpatterns = (
     [path("", homepage), path("_health", homepage), path("api/", include(api_patterns))]

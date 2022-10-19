@@ -552,16 +552,16 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class DocumentType(TimeStampedUUIDModel):
-    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     label = models.CharField(max_length=100)
-    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
+    type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE, unique=True)
 
     class Meta:
-        unique_together = ("country", "type")
-        ordering = ["country", "label"]
+        ordering = [
+            "label",
+        ]
 
     def __str__(self):
-        return f"{self.label} in {self.country}"
+        return f"{self.label}"
 
 
 class Document(SoftDeletableModel, TimeStampedUUIDModel):
@@ -569,6 +569,7 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
+    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"

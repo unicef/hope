@@ -1,0 +1,16 @@
+{% extends "admin_extra_buttons/action_page.html" %}{% load power_query %}
+{% block action-content %}
+    <table>{% for args, value in results.items %}
+        <tr>
+            <td>{{ args }}</td>
+            <td>{{ value }}</td>
+        </tr>
+    {% endfor %}</table>
+
+    <table>{% for dataset in original.datasets.all %}
+        <tr>
+            <td>{{ dataset }}</td>
+            <td>{{ dataset.size|fmt_size }}</td>
+        </tr>
+    {% endfor %}</table>
+{% endblock action-content %}

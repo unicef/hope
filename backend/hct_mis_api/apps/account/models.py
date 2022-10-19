@@ -1,7 +1,7 @@
 import logging
 
 from django import forms
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 from model_utils.models import UUIDModel
+from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
@@ -48,7 +49,7 @@ class Partner(models.Model):
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
-class User(AbstractUser, UUIDModel):
+class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
     partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True, blank=True)
@@ -132,7 +133,7 @@ class ChoiceArrayField(ArrayField):
         return super(ArrayField, self).formfield(**defaults)
 
 
-class UserRole(TimeStampedUUIDModel):
+class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
@@ -144,7 +145,19 @@ class UserRole(TimeStampedUUIDModel):
         return f"{self.user} {self.role} in {self.business_area}"
 
 
-class Role(TimeStampedUUIDModel):
+class UserGroup(NaturalKeyModel, models.Model):
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
+    user = models.ForeignKey("account.User", related_name="user_groups", on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, related_name="user_groups", on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("business_area", "user", "group")
+
+    def __str__(self):
+        return f"{self.user} {self.group} in {self.business_area}"
+
+
+class Role(NaturalKeyModel, TimeStampedUUIDModel):
     API = "API"
     HOPE = "HOPE"
     KOBO = "KOBO"
@@ -210,7 +223,7 @@ class IncompatibleRolesManager(models.Manager):
             )
 
 
-class IncompatibleRoles(TimeStampedUUIDModel):
+class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
     """
     Keeps track of what roles are incompatible:
     user cannot be assigned both of the roles in the same business area at the same time
