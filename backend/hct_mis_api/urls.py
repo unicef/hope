@@ -76,7 +76,7 @@ api_patterns = [
         f"{settings.ADMIN_PANEL_URL}/reports/",
         include("hct_mis_api.apps.power_query.urls"),
     ),
-    path(f"changelog/", include("hct_mis_api.apps.changelog.urls"),
+    path(f"b/changelog/", include("hct_mis_api.apps.changelog.urls"),
     ),
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
     path("hh-status", hct_mis_api.apps.household.views.HouseholdStatusView.as_view()),
