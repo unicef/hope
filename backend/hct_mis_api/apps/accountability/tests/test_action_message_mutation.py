@@ -7,7 +7,6 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
@@ -41,9 +40,8 @@ class TestActionMessageMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
 
         cls.tp = TargetPopulationFactory(business_area=cls.business_area)
         cls.households = [create_household()[0] for _ in range(4)]
@@ -87,14 +85,14 @@ class TestActionMessageMutation(APITestCase):
         )
     )
     def test_get_communication_message_sample_size_for_target_population(
-        self, _: str, permissions: Sequence[str], sampling_type: str
+        self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         data = {
             "businessArea": self.business_area.slug,
             "inputs": {
-                "targetPopulation": self.tp.id,
+                "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },
@@ -121,14 +119,14 @@ class TestActionMessageMutation(APITestCase):
         )
     )
     def test_get_communication_message_sample_size_for_households(
-        self, _: str, permissions: Sequence[str], sampling_type: str
+        self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         data = {
             "businessArea": self.business_area.slug,
             "inputs": {
-                "households": [household.id for household in self.households],
+                "households": [self.id_to_base64(household.id, "HouseholdNode") for household in self.households],
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },
@@ -155,14 +153,14 @@ class TestActionMessageMutation(APITestCase):
         )
     )
     def test_get_communication_message_sample_size_for_rdi(
-        self, _: str, permissions: Sequence[str], sampling_type: str
+        self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         data = {
             "businessArea": self.business_area.slug,
             "inputs": {
-                "registration_data_import": self.rdi_id,
+                "registrationDataImport": self.id_to_base64(self.rdi_id, "RegistrationDataImportNode"),
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },

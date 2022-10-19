@@ -1,16 +1,24 @@
 import logging
 
-import openpyxl
-
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
+from django.db import transaction
 from django.template.loader import render_to_string
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.household.models import Individual, XlsxUpdateFile, BankAccountInfo
+import openpyxl
 
+from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.household.models import (
+    BankAccountInfo,
+    Individual,
+    XlsxUpdateFile,
+)
 
 logger = logging.getLogger(__name__)
+
+
+class IndividualsIBANXlsxUpdateException(Exception):
+    pass
 
 
 class IndividualsIBANXlsxUpdate:
@@ -20,7 +28,7 @@ class IndividualsIBANXlsxUpdate:
     STATUS_MULTIPLE_MATCH = "MULTIPLE_MATCH"
 
     MATCHING_COLUMN = "UNICEF_ID"
-    UPDATE_COLUMN = "IBAN"
+    UPDATE_COLUMNS = ["IBAN", "BANK_NAME"]
     SPREADSHEET_NAME = "Individuals"
 
     def __init__(self, xlsx_update_file: XlsxUpdateFile):
@@ -36,15 +44,14 @@ class IndividualsIBANXlsxUpdate:
         first_row = self.individuals_ws[1]
         self.columns_names_index_dict = {cell.value: cell.col_idx for cell in first_row}
         self.matching_column_index = self.columns_names_index_dict[self.MATCHING_COLUMN]
-        self.update_column_index = self.columns_names_index_dict[self.UPDATE_COLUMN]
+        self.iban_update_column_index = self.columns_names_index_dict[self.UPDATE_COLUMNS[0]]
+        self.bank_name_update_column_index = self.columns_names_index_dict[self.UPDATE_COLUMNS[1]]
 
     def _row_report_data(self, row):
         return row[0].row
 
     def _get_queryset(self):
-        return Individual.objects.filter(
-            business_area=self.business_area, duplicate=False, withdrawn=False, bank_account_info__isnull=False
-        )
+        return Individual.objects.filter(business_area=self.business_area, duplicate=False, withdrawn=False)
 
     def validate(self):
         self._validate_columns_names()
@@ -62,8 +69,9 @@ class IndividualsIBANXlsxUpdate:
 
         if self.MATCHING_COLUMN not in columns:
             self.validation_errors.append(f"No {self.MATCHING_COLUMN} column in provided file")
-        if self.UPDATE_COLUMN not in columns:
-            self.validation_errors.append(f"No {self.UPDATE_COLUMN} column in provided file")
+        for column in self.UPDATE_COLUMNS:
+            if column not in columns:
+                self.validation_errors.append(f"No {column} column in provided file")
 
     def _get_matching_report_for_single_row(self, row):
         filter_value = row[self.matching_column_index - 1].value
@@ -93,19 +101,35 @@ class IndividualsIBANXlsxUpdate:
         if multiple_match := self.report_dict[self.STATUS_MULTIPLE_MATCH]:
             self.validation_errors.append(f"Multiple matching Individuals for rows: {multiple_match}")
 
+    @transaction.atomic
     def update(self):
-        updated_bank_accounts = []
-
         for individuals_unique_report in self.report_dict[self.STATUS_UNIQUE]:
             row_num, individual = individuals_unique_report
             row = self.individuals_ws[row_num]
-            new_value = row[self.update_column_index - 1].value
 
-            for bank_account_info in individual.bank_account_info.all():
-                bank_account_info.bank_account_number = new_value
-                updated_bank_accounts.append(bank_account_info)
+            new_iban = row[self.iban_update_column_index - 1].value
+            new_bank_name = row[self.bank_name_update_column_index - 1].value
 
-        BankAccountInfo.objects.bulk_update(updated_bank_accounts, ["bank_account_number"])
+            if not new_iban or not new_bank_name:
+                raise IndividualsIBANXlsxUpdateException(
+                    f"BankAccountInfo data is missing for Individual {individual.unicef_id} in Row {row_num},"
+                    f" One of IBAN/BANK_NAME value was not provided."
+                    f" Please validate also other rows for missing data."
+                )
+
+            if not individual.bank_account_info.exists():
+                BankAccountInfo.objects.create(
+                    individual=individual, bank_name=new_bank_name, bank_account_number=new_iban
+                )
+
+            else:
+                updated_bank_accounts = []
+                for bank_account_info in individual.bank_account_info.all():
+                    bank_account_info.bank_account_number = new_iban
+                    bank_account_info.bank_name = new_bank_name
+                    updated_bank_accounts.append(bank_account_info)
+
+                BankAccountInfo.objects.bulk_update(updated_bank_accounts, ["bank_account_number", "bank_name"])
 
     def _get_email_context(self, message: str):
         return {
@@ -125,7 +149,7 @@ class IndividualsIBANXlsxUpdate:
 
     def send_success_email(self):
         email = self._prepare_email(
-            context=self._get_email_context(message="All of the Individuals IBAN number we're updated successfuly")
+            context=self._get_email_context(message="All of the Individuals IBAN number we're updated successfully")
         )
         try:
             email.send()

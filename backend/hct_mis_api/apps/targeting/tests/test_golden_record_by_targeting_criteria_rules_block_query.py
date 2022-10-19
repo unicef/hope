@@ -3,8 +3,8 @@ from django.core.management import call_command
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     create_household_and_individuals,
@@ -84,13 +84,13 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
                             {
                                 "individualBlockFilters": [
                                     {
-                                        "comparisionMethod": "EQUALS",
+                                        "comparisonMethod": "EQUALS",
                                         "arguments": ["MARRIED"],
                                         "fieldName": "marital_status",
                                         "isFlexField": False,
                                     },
                                     {
-                                        "comparisionMethod": "EQUALS",
+                                        "comparisonMethod": "EQUALS",
                                         "arguments": [MALE],
                                         "fieldName": "sex",
                                         "isFlexField": False,
@@ -120,7 +120,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
                             {
                                 "individualBlockFilters": [
                                     {
-                                        "comparisionMethod": "CONTAINS",
+                                        "comparisonMethod": "CONTAINS",
                                         "arguments": [
                                             "COMMUNICATING",
                                             "HEARING",
@@ -158,7 +158,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
                             {
                                 "individualBlockFilters": [
                                     {
-                                        "comparisionMethod": "CONTAINS",
+                                        "comparisonMethod": "CONTAINS",
                                         "arguments": [
                                             "COMMUNICATING",
                                             "HEARING",
@@ -250,7 +250,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                             {
                                 "individualBlockFilters": [
                                     {
-                                        "comparisionMethod": "EQUALS",
+                                        "comparisonMethod": "EQUALS",
                                         "arguments": ["True"],
                                         "fieldName": "has_phone_number",
                                         "isFlexField": False,
@@ -292,7 +292,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                             {
                                 "individualBlockFilters": [
                                     {
-                                        "comparisionMethod": "EQUALS",
+                                        "comparisonMethod": "EQUALS",
                                         "arguments": ["True"],
                                         "fieldName": "has_the_bank_account_number",
                                         "isFlexField": False,
@@ -334,7 +334,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                             {
                                 "individualBlockFilters": [
                                     {
-                                        "comparisionMethod": "EQUALS",
+                                        "comparisonMethod": "EQUALS",
                                         "arguments": ["False"],
                                         "fieldName": "has_the_bank_account_number",
                                         "isFlexField": False,
@@ -375,7 +375,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                             {
                                 "individualBlockFilters": [
                                     {
-                                        "comparisionMethod": "EQUALS",
+                                        "comparisonMethod": "EQUALS",
                                         "arguments": ["True"],
                                         "fieldName": "has_tax_id_number",
                                         "isFlexField": False,

@@ -4,12 +4,11 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_population 1'] = {
     'data': {
-        'approveTargetPopulation': None
+        'lockTargetPopulation': None
     },
     'errors': [
         {
@@ -19,9 +18,9 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_populat
                     'line': 3
                 }
             ],
-            'message': "['Only Target Population with status DRAFT can be approved']",
+            'message': "['Only Target Population with status OPEN can be approved']",
             'path': [
-                'approveTargetPopulation'
+                'lockTargetPopulation'
             ]
         }
     ]
@@ -29,9 +28,9 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_populat
 
 snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_0_with_permission 1'] = {
     'data': {
-        'approveTargetPopulation': {
+        'lockTargetPopulation': {
             'targetPopulation': {
-                'households': {
+                'householdList': {
                     'edges': [
                         {
                             'node': {
@@ -56,7 +55,7 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_0
 
 snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_1_without_permission 1'] = {
     'data': {
-        'approveTargetPopulation': None
+        'lockTargetPopulation': None
     },
     'errors': [
         {
@@ -68,7 +67,7 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_1
             ],
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
-                'approveTargetPopulation'
+                'lockTargetPopulation'
             ]
         }
     ]
@@ -86,7 +85,7 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_fail_target_popul
                     'line': 3
                 }
             ],
-            'message': "['Only Target Population with status APPROVED can be finalized']",
+            'message': "['Only locked Target Population with status can be finalized']",
             'path': [
                 'finalizeTargetPopulation'
             ]
@@ -98,7 +97,7 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
     'data': {
         'finalizeTargetPopulation': {
             'targetPopulation': {
-                'finalList': {
+                'householdList': {
                     'edges': [
                         {
                             'node': {
@@ -161,7 +160,7 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
     'data': {
         'finalizeTargetPopulation': {
             'targetPopulation': {
-                'finalList': {
+                'householdList': {
                     'edges': [
                         {
                             'node': {
@@ -202,7 +201,7 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
 
 snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {
     'data': {
-        'unapproveTargetPopulation': None
+        'unlockTargetPopulation': None
     },
     'errors': [
         {
@@ -212,9 +211,9 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_pop
                     'line': 3
                 }
             ],
-            'message': "['Only Target Population with status APPROVED can be unapproved']",
+            'message': "['Only locked Target Population with status can be unlocked']",
             'path': [
-                'unapproveTargetPopulation'
+                'unlockTargetPopulation'
             ]
         }
     ]
@@ -222,7 +221,7 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_pop
 
 snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_population_0_with_permission 1'] = {
     'data': {
-        'unapproveTargetPopulation': {
+        'unlockTargetPopulation': {
             'targetPopulation': {
                 'households': {
                     'edges': [
@@ -241,7 +240,7 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
                     ],
                     'totalCount': 2
                 },
-                'status': 'DRAFT'
+                'status': 'OPEN'
             }
         }
     }
@@ -249,7 +248,7 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
 
 snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_population_1_without_permission 1'] = {
     'data': {
-        'unapproveTargetPopulation': None
+        'unlockTargetPopulation': None
     },
     'errors': [
         {
@@ -261,7 +260,7 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
             ],
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
-                'unapproveTargetPopulation'
+                'unlockTargetPopulation'
             ]
         }
     ]

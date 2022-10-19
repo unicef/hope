@@ -102,7 +102,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                     "category": {
                         "sensitiveGrievanceTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode")
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                         }
                     }
                 },
@@ -142,7 +142,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                     "category": {
                         "grievanceComplaintTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode")
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                         }
                     }
                 },
@@ -180,7 +180,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                     "category": {
                         "sensitiveGrievanceTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode")
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                         }
                     }
                 },
@@ -219,7 +219,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
                     "category": {
                         "sensitiveGrievanceTicketExtras": {
                             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode")
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                         }
                     }
                 },

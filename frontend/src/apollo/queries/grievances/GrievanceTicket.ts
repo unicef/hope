@@ -200,7 +200,6 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
-                  country
                 }
                 documentNumber
                 photo
@@ -235,7 +234,6 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
-                  country
                 }
                 documentNumber
                 photo
@@ -272,7 +270,6 @@ export const GrievanceTicket = gql`
                 country
                 type {
                   label
-                  country
                 }
                 documentNumber
                 photo

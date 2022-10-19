@@ -22,24 +22,12 @@ class TestCopyTargetPopulationMutation(APITestCase):
                 targetPopulation {
                     name
                     status
-                    candidateListTotalHouseholds
-                    candidateListTotalIndividuals
-                    finalListTotalHouseholds
-                    finalListTotalIndividuals
-                    candidateListTargetingCriteria{
+                    totalHouseholdsCount
+                    totalIndividualsCount
+                    targetingCriteria{
                       rules{
                         filters{
-                          comparisionMethod
-                          fieldName
-                          isFlexField
-                          arguments
-                        }
-                      }
-                    }
-                    finalListTargetingCriteria{
-                      rules{
-                        filters{
-                          comparisionMethod
+                          comparisonMethod
                           fieldName
                           isFlexField
                           arguments
@@ -71,11 +59,8 @@ class TestCopyTargetPopulationMutation(APITestCase):
         cls.household = household
         tp = TargetPopulation(name="Original Target Population", status="LOCKED", business_area=cls.business_area)
 
-        tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS"}
-        )
-        tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
+        tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
+            {"field_name": "size", "arguments": [1], "comparison_method": "EQUALS"}
         )
         tp.save()
         tp.households.add(cls.household)
@@ -144,11 +129,11 @@ class TestCopyTargetPopulationMutation(APITestCase):
             )
             self.assertNotEqual(target_population_copy.id, self.target_population.id)
             self.assertNotEqual(
-                target_population_copy.candidate_list_targeting_criteria.id,
-                self.target_population.candidate_list_targeting_criteria.id,
+                target_population_copy.targeting_criteria.id,
+                self.target_population.targeting_criteria.id,
             )
-            rule_copy = target_population_copy.candidate_list_targeting_criteria.rules.first()
-            rule = self.target_population.candidate_list_targeting_criteria.rules.first()
+            rule_copy = target_population_copy.targeting_criteria.rules.first()
+            rule = self.target_population.targeting_criteria.rules.first()
             self.assertNotEqual(
                 rule_copy.id,
                 rule.id,

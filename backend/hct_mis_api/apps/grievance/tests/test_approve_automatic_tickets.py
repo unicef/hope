@@ -1,8 +1,7 @@
 from datetime import datetime
 
-from django.utils import timezone
-
 from django.core.management import call_command
+from django.utils import timezone
 
 from parameterized import parameterized
 
@@ -42,8 +41,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
-      grievanceTicketId: $grievanceTicketId, 
-      selectedIndividualId: $selectedIndividualId, 
+      grievanceTicketId: $grievanceTicketId,
+      selectedIndividualId: $selectedIndividualId,
       selectedIndividualIds: $selectedIndividualIds
       ) {
         grievanceTicket {
@@ -62,8 +61,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
-      grievanceTicketId: $grievanceTicketId, 
-      selectedIndividualId: $selectedIndividualId, 
+      grievanceTicketId: $grievanceTicketId,
+      selectedIndividualId: $selectedIndividualId,
       selectedIndividualIds: $selectedIndividualIds
       ) {
         grievanceTicket {

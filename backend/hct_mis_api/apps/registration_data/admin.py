@@ -13,9 +13,7 @@ from django.utils.safestring import mark_safe
 from admin_extra_buttons.api import ExtraButtonsMixin, confirm_action
 from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -161,8 +159,8 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
                     request,
                     self.delete_rdi,
                     mark_safe(
-                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                    <h3>All households connected to this Registration data import will be deleted</h3> 
+                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    <h3>All households connected to this Registration data import will be deleted</h3>
                     """
                     ),
                     "Successfully executed",
@@ -250,8 +248,8 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
                     request,
                     self.delete_rdi,
                     mark_safe(
-                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                    <h3>All households connected to this Registration data import will be deleted</h3> 
+                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    <h3>All households connected to this Registration data import will be deleted</h3>
                     """
                     ),
                     "Successfully executed",

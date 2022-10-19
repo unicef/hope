@@ -74,13 +74,13 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
         household_one.programs.add(program_one)
 
         cls.individual = IndividualFactory(household=household_one)
-        national_id_type = DocumentType.objects.get(country=country, type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        birth_certificate_type = DocumentType.objects.get(country=country, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
+        national_id_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        birth_certificate_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
         cls.national_id = DocumentFactory(
-            type=national_id_type, document_number="789-789-645", individual=cls.individual
+            type=national_id_type, document_number="789-789-645", individual=cls.individual, country=country
         )
         cls.birth_certificate = DocumentFactory(
-            type=birth_certificate_type, document_number="ITY8456", individual=cls.individual
+            type=birth_certificate_type, document_number="ITY8456", individual=cls.individual, country=country
         )
         household_one.head_of_household = cls.individual
         household_one.save()

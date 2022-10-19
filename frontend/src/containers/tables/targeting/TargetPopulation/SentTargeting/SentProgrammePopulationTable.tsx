@@ -1,13 +1,13 @@
 import React, { ReactElement } from 'react';
-import { useFinalHouseholdsListByTargetingCriteriaQuery } from '../../../../../__generated__/graphql';
+import { useTranslation } from 'react-i18next';
+import { useTargetPopulationHouseholdsQuery } from '../../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../../hooks/useBusinessArea';
 import { UniversalTable } from '../../../UniversalTable';
+import { TableWrapper } from '../../../../../components/core/TableWrapper';
 import { ProgrammeTableRow } from './ProgrammeTableRow';
 import { headCells as programmeHeadCells } from './ProgrammeHeadCells';
 import { headCells as targetPopulationHeadCells } from './TargetPopulationHeadCells';
 import { TargetPopulationHouseholdTableRow } from './TargetPopulationTableRow';
-import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../../../components/core/TableWrapper';
 
 interface TargetPopulationHouseholdProps {
   id?: string;
@@ -39,8 +39,8 @@ export const SentTargetPopulationTable = ({
           selectedTab === 0 ? programmeHeadCells : targetPopulationHeadCells
         }
         rowsPerPageOptions={[10, 15, 20]}
-        query={useFinalHouseholdsListByTargetingCriteriaQuery}
-        queriedObjectName='finalHouseholdsListByTargetingCriteria'
+        query={useTargetPopulationHouseholdsQuery}
+        queriedObjectName='targetPopulationHouseholdsQuery'
         initialVariables={initialVariables}
         renderRow={(row) => {
           return selectedTab === 0 ? (

@@ -5,6 +5,8 @@ from pathlib import Path
 from uuid import uuid4
 
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.urls import reverse_lazy
+from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -72,7 +74,7 @@ GRIEVANCE_UPLOAD_CONTENT_TYPES = (
     "image/png",
     "image/tiff",
     "application/pdf",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 )
 
 # static resources related. See documentation at: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
@@ -221,6 +223,7 @@ TEMPLATES = [
     },
 ]
 PROJECT_APPS = [
+    "hct_mis_api.api",
     "hct_mis_api.apps.geo",
     "hct_mis_api.apps.account.apps.AccountConfig",
     "hct_mis_api.apps.core.apps.CoreConfig",
@@ -250,6 +253,7 @@ DJANGO_APPS = [
     "smart_admin.logs",
     "smart_admin.apps.SmartTemplateConfig",
     "hct_mis_api.apps.administration.apps.Config",
+    "admin_sync.apps.Config",
     "django_sysinfo",
     "django.contrib.auth",
     "django.contrib.humanize",
@@ -287,6 +291,7 @@ OTHER_APPS = [
     "explorer",
     "import_export",
     "rest_framework",
+    "drf_yasg",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -391,6 +396,7 @@ CACHES = {
 }
 
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "sessionid")
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 AUTH_USER_MODEL = "account.User"
 
@@ -531,6 +537,7 @@ CONSTANCE_CONFIG = {
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
+    "PRODUCTION_SERVER": ("https://hope.unicef.org/api/admin", "", str),
     "CASHASSIST_DOAP_RECIPIENT": (
         "",
         "UNHCR email address where to send DOAP updates",
@@ -787,7 +794,7 @@ AA_PERMISSION_HANDLER = 3
 
 
 def filter_environment(key, config, request):
-    return key in ["ROOT_ACCESS_TOKEN"]
+    return key in ["ROOT_ACCESS_TOKEN"] or key.startswith("DIRENV")
 
 
 def masker(key, value, config, request):
@@ -795,6 +802,8 @@ def masker(key, value, config, request):
 
     from ..apps.utils.security import is_root
 
+    if key in ["PATH", "PYTHONPATH"]:
+        return mark_safe(value.replace(":", r":<br>"))
     if not is_root(request):
         if key.startswith("DATABASE_URL"):
             from urllib.parse import urlparse
@@ -867,3 +876,13 @@ if PROFILING:
     INSTALLED_APPS.append("silk")
     MIDDLEWARE.append("silk.middleware.SilkyMiddleware")
     SILKY_PYTHON_PROFILER = True
+
+ADMIN_SYNC_USE_REVERSION = False
+
+SWAGGER_SETTINGS = {
+    "LOGOUT_URL": reverse_lazy("logout"),
+    "LOGIN_URL": "/",
+    "SECURITY_DEFINITIONS": {"DRF Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
+}
+
+MAX_STORAGE_FILE_SIZE = 30
