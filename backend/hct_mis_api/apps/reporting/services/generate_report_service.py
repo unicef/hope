@@ -176,8 +176,8 @@ class GenerateReportContentHelpers:
     def format_cash_plan_verification_row(self, verification: PaymentVerificationPlan) -> tuple:
         return (
             verification.id,
-            verification.payment_plan.unicef_id,
-            verification.payment_plan.program.name,
+            verification.payment_plan_obj.unicef_id,
+            verification.payment_plan_obj.program.name,
             self._format_date(verification.activation_date),
             verification.status,
             verification.verification_channel,
