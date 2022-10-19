@@ -1053,9 +1053,7 @@ class Query(graphene.ObjectType):
 
     def resolve_all_cash_plans_and_payment_plans(self, info, **kwargs):
         qs = ExtendedQuerySetSequence(
-            # TODO: added only for tests
-            # PaymentPlan.objects.filter(status=PaymentPlan.Status.RECONCILED),
-            PaymentPlan.objects.all(),
+            PaymentPlan.objects.filter(status=PaymentPlan.Status.RECONCILED),
             CashPlan.objects.all(),
         )
 
