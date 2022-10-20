@@ -62,7 +62,8 @@ class FlexibleAttributeNode(DjangoObjectType):
         return self.choices.all()
 
     def resolve_associated_with(self, info):
-        return str(FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1])
+        # TODO: No overload variant of "__getitem__" of "tuple" matches argument type "String"  [call-overload]
+        return str(FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1])  # type: ignore
 
     class Meta:
         model = FlexibleAttribute
