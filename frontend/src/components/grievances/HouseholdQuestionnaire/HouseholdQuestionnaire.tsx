@@ -95,6 +95,7 @@ export const HouseholdQuestionnaire = ({
         <Grid item xs={3}>
           <Field
             name={el.name}
+            data-cy={`input-${el.name}`}
             label={el.label}
             displayValue={el.value || '-'}
             color='primary'
