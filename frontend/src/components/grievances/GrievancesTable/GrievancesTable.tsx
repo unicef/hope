@@ -214,6 +214,7 @@ export const GrievancesTable = ({
                 color='primary'
                 component={Link}
                 to={`/${businessArea}/grievance-and-feedback/new-ticket`}
+                data-cy='button-new-ticket'
               >
                 {t('NEW TICKET')}
               </Button>
