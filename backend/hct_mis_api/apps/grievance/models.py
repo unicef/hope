@@ -1,7 +1,6 @@
 import logging
 from decimal import Decimal
 from itertools import chain
-from typing import Dict, Optional
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -370,9 +369,11 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         verbose_name = "Grievance Ticket"
 
     def clean(self):
-        issue_types: Optional[Dict] = self.ISSUE_TYPES_CHOICES.get(self.category)
-        has_invalid_issue_type = issue_types and self.issue_type not in issue_types
-        has_issue_type_for_category_without_issue_types = not issue_types and self.issue_type
+        # TODO: refactor that
+        issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
+        should_contain_issue_types = bool(issue_types)
+        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore
+        has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
             log_and_raise(
                 f"Invalid issue type {self.issue_type} for selected category {self.category}",
