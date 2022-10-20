@@ -14,7 +14,7 @@ from hct_mis_api.apps.household.models import (
     ORG_ENUMERATOR_CHOICES,
     RESIDENCE_STATUS_CHOICE,
     UNICEF,
-    SEX_CHOICE_WITHOUT_UNKNOWN,
+    SEX_CHOICE,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
@@ -108,7 +108,7 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     middle_name = factory.Faker("first_name")
     family_name = factory.Faker("last_name")
     sex = factory.fuzzy.FuzzyChoice(
-        SEX_CHOICE_WITHOUT_UNKNOWN,
+        SEX_CHOICE,
         getter=lambda c: c[0],
     )
     birth_date = factory.Faker("date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90)

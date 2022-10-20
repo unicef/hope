@@ -54,10 +54,8 @@ UNKNOWN = "UNKNOWN"
 SEX_CHOICE = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
-    (UNKNOWN, _("Unknown")),
 )
 
-SEX_CHOICE_WITHOUT_UNKNOWN = SEX_CHOICE[:-1]
 
 SINGLE = "SINGLE"
 MARRIED = "MARRIED"
