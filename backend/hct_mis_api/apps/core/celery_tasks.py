@@ -19,7 +19,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     IDENTIFICATION_TYPE_TAX_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
-    UNKNOWN,
+    MALE,
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -139,7 +139,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         "business_area": business_area,
                         "first_registration_date": first_registration_date,
                         "last_registration_date": last_registration_date,
-                        "sex": UNKNOWN,
+                        "sex": MALE,
                     }
 
                     if family_id in family_ids:
