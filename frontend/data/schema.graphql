@@ -186,6 +186,7 @@ type BusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
+  active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
@@ -930,9 +931,9 @@ type HouseholdNode implements Node {
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
-  selections: [HouseholdSelection!]!
+  selections: [HouseholdSelectionNode!]!
   adminAreaTitle: String
-  selection: HouseholdSelection
+  selection: HouseholdSelectionNode
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
@@ -977,7 +978,7 @@ enum HouseholdResidenceStatus {
   NON_HOST
 }
 
-type HouseholdSelection {
+type HouseholdSelectionNode {
   id: UUID!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -2857,7 +2858,7 @@ type TargetPopulationNode implements Node {
   adultMaleCount: Int
   adultFemaleCount: Int
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
-  selections: [HouseholdSelection!]!
+  selections: [HouseholdSelectionNode!]!
   totalFamilySize: Int
   householdList(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
 }
@@ -3427,6 +3428,7 @@ type UserBusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
+  active: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
