@@ -48,9 +48,9 @@ from hct_mis_api.apps.household.models import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
-    SEX_CHOICE,
     WORK_STATUS_CHOICE,
     YES_NO_CHOICE,
+    SEX_CHOICE_WITHOUT_UNKNOWN,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -377,7 +377,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": "Gender"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in SEX_CHOICE],
+        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in SEX_CHOICE_WITHOUT_UNKNOWN],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "gender_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
