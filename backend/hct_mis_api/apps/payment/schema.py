@@ -58,7 +58,7 @@ from hct_mis_api.apps.payment.filters import (
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    PaymentVerificationPlanFilter,
+    PaymentVerificationPlanFilter, cash_plan_and_payment_plan_ordering, cash_plan_and_payment_plan_filter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -740,8 +740,8 @@ class Query(graphene.ObjectType):
         program=graphene.String(),
         search=graphene.String(),
         service_provider=graphene.String(),
-        delivery_type=graphene.String(),
-        verification_status=graphene.String(),
+        delivery_type=graphene.List(graphene.String),
+        verification_status=graphene.List(graphene.String),
         start_date_gte=graphene.String(),
         end_date_lte=graphene.String(),
         order_by=graphene.String(),
@@ -1137,23 +1137,12 @@ class Query(graphene.ObjectType):
             ),
         ).order_by("-updated_at", "custom_order")
 
-        business_area = kwargs.get("business_area")
-        if business_area:
-            qs = qs.filter(business_area__slug=business_area)
-
-        order_by_value = kwargs.get("order_by")
+        # filtering
+        qs = cash_plan_and_payment_plan_filter(qs, **kwargs)
 
         # ordering
-        if order_by_value:
-            reverse = "-" if order_by_value.startswith("-") else ""
-            order_by = order_by_value[1:] if reverse else order_by_value
-            if order_by == "verification_status":
-                qs = qs.order_by(reverse + "custom_order")
-
-            elif order_by == "unicef_id":
-                qs = sorted(qs, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
-            else:
-                qs = qs.order_by(reverse + order_by)
+        if order_by_value := kwargs.get("order_by"):
+            qs = cash_plan_and_payment_plan_ordering(qs, order_by_value)
 
         # add qraphql pagination
         resp = connection_from_list_slice(
