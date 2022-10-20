@@ -278,7 +278,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: save_negative_feedback_extras,
             GrievanceTicket.CATEGORY_REFERRAL: save_referral_extras,
         }
-        save_extra_method: FunctionType = save_extra_methods[category]
+        save_extra_method: FunctionType = save_extra_methods.get(category)
         grievances = [grievance_ticket]
         if save_extra_method:
             grievances = save_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
