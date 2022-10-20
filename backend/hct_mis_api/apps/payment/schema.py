@@ -406,7 +406,14 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         source="get_payment_verification_plans",
         filterset_class=PaymentVerificationPlanFilter,
     )
-    payment_verification_summary = graphene.Field(PaymentVerificationSummaryNode)
+    payment_verification_summary = graphene.Field(
+        PaymentVerificationSummaryNode,
+        source="get_payment_verification_summary",
+    )
+    bank_reconciliation_success = graphene.Int()
+    bank_reconciliation_error = graphene.Int()
+    can_create_payment_verification_plan = graphene.Boolean()
+    available_payment_records_count = graphene.Int()
 
     class Meta:
         model = PaymentPlan
@@ -440,8 +447,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_volume_by_delivery_mechanism(self, info):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
-    def resolve_payment_verification_summary(self, info):
-        return self.get_payment_verification_summary
+    def resolve_available_payment_records_count(self, info, **kwargs):
+        return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0).count()
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -795,9 +802,11 @@ class Query(graphene.ObjectType):
     def resolve_sample_size(self, info, input, **kwargs):
         node_name, obj_id = b64decode(input.get("payment_plan_id")).decode().split(":")
         payment_plan_object = (
-            get_object_or_404(CashPlan, id=obj_id) if node_name == "CashPlanNode" else
-            get_object_or_404(PaymentPlan, id=obj_id)
+            get_object_or_404(CashPlan, id=obj_id)
+            if node_name == "CashPlanNode"
+            else get_object_or_404(PaymentPlan, id=obj_id)
         )
+
         def get_payment_records(cash_plan, payment_verification_plan, verification_channel):
             kwargs = {}
             if payment_verification_plan:
@@ -811,7 +820,9 @@ class Query(graphene.ObjectType):
         if payment_verification_plan_id := decode_id_string(input.get("payment_verification_plan_id")):
             payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
-        payment_records = get_payment_records(payment_plan_object, payment_verification_plan, input.get("verification_channel"))
+        payment_records = get_payment_records(
+            payment_plan_object, payment_verification_plan, input.get("verification_channel")
+        )
         if not payment_records:
             return {
                 "sample_size": 0,

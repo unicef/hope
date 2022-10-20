@@ -24,7 +24,8 @@ import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
 import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsPage';
-import { PaymentVerificationDetailsPage } from './pages/payments/PaymentVerificationDetailsPage';
+import { CashPlanVerificationDetailsPage } from './pages/payments/CashPlanVerificationDetailsPage';
+import { PaymentPlanVerificationDetailsPage } from './pages/payments/PaymentPlanVerificationDetailsPage';
 import { PaymentVerificationPage } from './pages/payments/PaymentVerificationPage';
 import { VerificationRecordDetailsPage } from './pages/payments/VerificationRecordDetailsPage';
 import { PopulationHouseholdDetailsPage } from './pages/population/PopulationHouseholdDetailsPage';
@@ -97,14 +98,17 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/target-population/:id'>
             <TargetPopulationDetailsPage />
           </SentryRoute>
-          <SentryRoute exact path='/:businessArea/payment-verification'>
-            <PaymentVerificationPage />
-          </SentryRoute>
           <SentryRoute path='/:businessArea/verification-records/:id'>
             <VerificationRecordDetailsPage />
           </SentryRoute>
-          <SentryRoute path='/:businessArea/payment-verification/:id'>
-            <PaymentVerificationDetailsPage />
+          <SentryRoute exact path='/:businessArea/payment-verification'>
+            <PaymentVerificationPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-verification/cash-plan/:id'>
+            <CashPlanVerificationDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-verification/payment-plan/:id'>
+            <PaymentPlanVerificationDetailsPage />
           </SentryRoute>
           <SentryRoute path='/:businessArea/csh-payment-verification/:id'>
             <CashPlanVerificationRedirectPage />

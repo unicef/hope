@@ -7,6 +7,10 @@ export const PAYMENT_PLAN_QUERY = gql`
       unicefId
       status
       backgroundActionStatus
+      canCreatePaymentVerificationPlan
+      availablePaymentRecordsCount
+      bankReconciliationSuccess
+      bankReconciliationError
       createdBy {
         id
         firstName
@@ -16,6 +20,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       program {
         id
         name
+        caId
       }
       targetPopulation {
         id
@@ -153,6 +158,60 @@ export const PAYMENT_PLAN_QUERY = gql`
       hasPaymentListExportFile
       importedFileName
       importedFileDate
+      verificationPlans {
+        totalCount
+        edges {
+          node {
+            id
+            unicefId
+            status
+            sampleSize
+            receivedCount
+            notReceivedCount
+            respondedCount
+            verificationChannel
+            sampling
+            receivedCount
+            receivedWithProblemsCount
+            rapidProFlowId
+            confidenceInterval
+            marginOfError
+            activationDate
+            completionDate
+            ageFilter {
+              min
+              max
+            }
+            excludedAdminAreasFilter
+            sexFilter
+            xlsxFileExporting
+            hasXlsxFile
+            xlsxFileWasDownloaded
+            xlsxFileImported
+          }
+        }
+      }
+      paymentVerificationSummary {
+        id
+        createdAt
+        updatedAt
+        status
+        activationDate
+        completionDate
+      }
+      paymentItems {
+        totalCount
+        edgeCount
+        edges {
+          node {
+            id
+            # targetPopulation {
+            #   id
+            #   name
+            # }
+          }
+        }
+      }
     }
   }
 `;
