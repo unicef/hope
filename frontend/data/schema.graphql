@@ -2839,6 +2839,12 @@ type PaymentPlanNode implements Node {
   importedFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
+  verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection
+  paymentVerificationSummary: PaymentVerificationSummaryNode
+  bankReconciliationSuccess: Int
+  bankReconciliationError: Int
+  canCreatePaymentVerificationPlan: Boolean
+  availablePaymentRecordsCount: Int
 }
 
 type PaymentPlanNodeConnection {
