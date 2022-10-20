@@ -49,11 +49,16 @@ RESIDENCE_STATUS_CHOICE = (
 # INDIVIDUALS
 MALE = "MALE"
 FEMALE = "FEMALE"
+UNKNOWN = "UNKNOWN"
+
 SEX_CHOICE = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
-    (None, None),
+    (UNKNOWN, _("Unknown")),
 )
+
+SEX_CHOICE_WITHOUT_UNKNOWN = SEX_CHOICE[:-1]
+
 SINGLE = "SINGLE"
 MARRIED = "MARRIED"
 WIDOWED = "WIDOWED"
@@ -705,7 +710,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     given_name = CICharField(max_length=85, blank=True, db_index=True)
     middle_name = CICharField(max_length=85, blank=True, db_index=True)
     family_name = CICharField(max_length=85, blank=True, db_index=True)
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True, null=True)
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True)
     birth_date = models.DateField(db_index=True)
     estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)

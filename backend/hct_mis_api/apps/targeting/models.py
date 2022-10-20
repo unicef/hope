@@ -263,6 +263,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         null=True,
     )
 
+    # todo move to StorageFile
     storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
