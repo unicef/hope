@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { countPercentage } from '../../utils/utils';
-import { CashPlanNode } from '../../__generated__/graphql';
+import { CashPlanNode, PaymentPlanNode } from '../../__generated__/graphql';
 import { BlackLink } from '../core/BlackLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { Title } from '../core/Title';
@@ -23,23 +23,23 @@ const BorderLeftBox = styled.div`
 `;
 
 interface CashPlanDetailsSectionProps {
-  cashPlan: CashPlanNode;
+  planNode: CashPlanNode | PaymentPlanNode;
 }
 
 export const CashPlanDetailsSection = ({
-  cashPlan,
+  planNode,
 }: CashPlanDetailsSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
   const bankReconciliationSuccessPercentage = countPercentage(
-    cashPlan.bankReconciliationSuccess,
-    cashPlan.paymentItems.totalCount,
+    planNode.bankReconciliationSuccess,
+    planNode.paymentItems.totalCount,
   );
 
   const bankReconciliationErrorPercentage = countPercentage(
-    cashPlan.bankReconciliationError,
-    cashPlan.paymentItems.totalCount,
+    planNode.bankReconciliationError,
+    planNode.paymentItems.totalCount,
   );
 
   return (
@@ -50,28 +50,28 @@ export const CashPlanDetailsSection = ({
         </Title>
         <Grid container>
           {[
-            { label: t('PROGRAMME NAME'), value: cashPlan.program.name },
+            { label: t('PROGRAMME NAME'), value: planNode.program.name },
             {
               label: t('PROGRAMME ID'),
               value: (
                 <BlackLink
-                  to={`/${businessArea}/programs/${cashPlan.program.id}`}
+                  to={`/${businessArea}/programs/${planNode.program.id}`}
                 >
-                  {cashPlan.program?.caId}
+                  {planNode.program?.caId}
                 </BlackLink>
               ),
             },
             {
               label: t('PAYMENT RECORDS'),
-              value: cashPlan.availablePaymentRecordsCount,
+              value: planNode.availablePaymentRecordsCount,
             },
             {
               label: t('START DATE'),
-              value: <UniversalMoment>{cashPlan.startDate}</UniversalMoment>,
+              value: <UniversalMoment>{planNode.startDate}</UniversalMoment>,
             },
             {
               label: t('END DATE'),
-              value: <UniversalMoment>{cashPlan.endDate}</UniversalMoment>,
+              value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
             },
           ].map((el) => (
             <Grid item xs={4} key={el.label}>

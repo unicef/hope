@@ -4086,6 +4086,12 @@ export type PaymentPlanNode = Node & {
   importedFileName?: Maybe<Scalars['String']>,
   paymentsConflictsCount?: Maybe<Scalars['Int']>,
   volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>,
+  verificationPlans?: Maybe<PaymentVerificationPlanNodeConnection>,
+  paymentVerificationSummary?: Maybe<PaymentVerificationSummaryNode>,
+  bankReconciliationSuccess?: Maybe<Scalars['Int']>,
+  bankReconciliationError?: Maybe<Scalars['Int']>,
+  canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']>,
+  availablePaymentRecordsCount?: Maybe<Scalars['Int']>,
 };
 
 
@@ -4099,6 +4105,15 @@ export type PaymentPlanNodePaymentItemsArgs = {
 
 
 export type PaymentPlanNodeApprovalProcessArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type PaymentPlanNodeVerificationPlansArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -9958,13 +9973,13 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListExportFile' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'approvalNumberRequired' | 'authorizationNumberRequired' | 'financeReviewNumberRequired' | 'hasPaymentListExportFile' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
     ), program: (
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name'>
+      & Pick<ProgramNode, 'id' | 'name' | 'caId'>
     ), targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
@@ -10044,7 +10059,34 @@ export type PaymentPlanQuery = (
           & Pick<FinancialServiceProviderNode, 'id' | 'name'>
         )> }
       )> }
-    )>>> }
+    )>>>, verificationPlans: Maybe<(
+      { __typename?: 'PaymentVerificationPlanNodeConnection' }
+      & Pick<PaymentVerificationPlanNodeConnection, 'totalCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentVerificationPlanNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentVerificationPlanNode' }
+          & Pick<PaymentVerificationPlanNode, 'id' | 'unicefId' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationChannel' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'activationDate' | 'completionDate' | 'excludedAdminAreasFilter' | 'sexFilter' | 'xlsxFileExporting' | 'hasXlsxFile' | 'xlsxFileWasDownloaded' | 'xlsxFileImported'>
+          & { ageFilter: Maybe<(
+            { __typename?: 'AgeFilterObject' }
+            & Pick<AgeFilterObject, 'min' | 'max'>
+          )> }
+        )> }
+      )>> }
+    )>, paymentVerificationSummary: Maybe<(
+      { __typename?: 'PaymentVerificationSummaryNode' }
+      & Pick<PaymentVerificationSummaryNode, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'activationDate' | 'completionDate'>
+    )>, paymentItems: (
+      { __typename?: 'PaymentNodeConnection' }
+      & Pick<PaymentNodeConnection, 'totalCount' | 'edgeCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentNode' }
+          & Pick<PaymentNode, 'id'>
+        )> }
+      )>> }
+    ) }
   )> }
 );
 
@@ -18009,6 +18051,10 @@ export const PaymentPlanDocument = gql`
     unicefId
     status
     backgroundActionStatus
+    canCreatePaymentVerificationPlan
+    availablePaymentRecordsCount
+    bankReconciliationSuccess
+    bankReconciliationError
     createdBy {
       id
       firstName
@@ -18018,6 +18064,7 @@ export const PaymentPlanDocument = gql`
     program {
       id
       name
+      caId
     }
     targetPopulation {
       id
@@ -18155,6 +18202,56 @@ export const PaymentPlanDocument = gql`
     hasPaymentListExportFile
     importedFileName
     importedFileDate
+    verificationPlans {
+      totalCount
+      edges {
+        node {
+          id
+          unicefId
+          status
+          sampleSize
+          receivedCount
+          notReceivedCount
+          respondedCount
+          verificationChannel
+          sampling
+          receivedCount
+          receivedWithProblemsCount
+          rapidProFlowId
+          confidenceInterval
+          marginOfError
+          activationDate
+          completionDate
+          ageFilter {
+            min
+            max
+          }
+          excludedAdminAreasFilter
+          sexFilter
+          xlsxFileExporting
+          hasXlsxFile
+          xlsxFileWasDownloaded
+          xlsxFileImported
+        }
+      }
+    }
+    paymentVerificationSummary {
+      id
+      createdAt
+      updatedAt
+      status
+      activationDate
+      completionDate
+    }
+    paymentItems {
+      totalCount
+      edgeCount
+      edges {
+        node {
+          id
+        }
+      }
+    }
   }
 }
     `;
@@ -24948,6 +25045,12 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   importedFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentsConflictsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   volumeByDeliveryMechanism?: Resolver<Maybe<Array<Maybe<ResolversTypes['VolumeByDeliveryMechanismNode']>>>, ParentType, ContextType>,
+  verificationPlans?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, PaymentPlanNodeVerificationPlansArgs>,
+  paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['PaymentVerificationSummaryNode']>, ParentType, ContextType>,
+  bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {

@@ -1,7 +1,7 @@
 import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CashPlanNode } from '../../__generated__/graphql';
+import { CashPlanNode, PaymentPlanNode } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
 import { paymentVerificationStatusToColor } from '../../utils/utils';
 import { StatusBox } from '../core/StatusBox';
@@ -9,14 +9,14 @@ import { UniversalMoment } from '../core/UniversalMoment';
 import { Title } from '../core/Title';
 
 interface VerificationPlansSummaryProps {
-  cashPlan: CashPlanNode;
+  planNode: CashPlanNode | PaymentPlanNode;
 }
 
 export function VerificationPlansSummary({
-  cashPlan,
+  planNode,
 }: VerificationPlansSummaryProps): React.ReactElement {
   const { t } = useTranslation();
-  const {status, activationDate, completionDate} = cashPlan.paymentVerificationSummary;
+  const {status, activationDate, completionDate} = planNode.paymentVerificationSummary;
 
   return (
     <Grid container>
@@ -54,7 +54,7 @@ export function VerificationPlansSummary({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Number of Verification Plans')}>
-                {cashPlan.verificationPlans.totalCount}
+                {planNode.verificationPlans.totalCount}
               </LabelizedField>
             </Box>
           </Grid>

@@ -1,15 +1,22 @@
 import {
   PaymentPlanQuery,
   PaymentPlanStatus,
+  PaymentVerificationPlanStatus,
   PaymentPlanCurrency,
+  PaymentVerificationPlanVerificationChannel,
+  PaymentVerificationPlanSampling,
 } from '../../src/__generated__/graphql';
 
-export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
+export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
   id:
     'UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ==',
   unicefId: 'PP-0060-22-00000001',
   status: PaymentPlanStatus.Locked,
   backgroundActionStatus: null,
+  canCreatePaymentVerificationPlan: false,
+  availablePaymentRecordsCount: 0,
+  bankReconciliationSuccess: 0,
+  bankReconciliationError: 0,
   createdBy: {
     id: 'VXNlck5vZGU6ZjRlMTYwZDEtOTgyNy00NmEwLTg4MzAtZmU1MjljZDVhNDBj',
     firstName: 'Matthew',
@@ -202,5 +209,61 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
       __typename: 'VolumeByDeliveryMechanismNode',
     },
   ],
+  verificationPlans: {
+    totalCount: 1,
+    edges: [
+      {
+        node: {
+          id: "UGF5bWVudFZlcmlmaWNhdGlvblBsYW5Ob2RlOjk1NTFlZDA4LWY1YzYtNDdmNC05ZmMwLTU1MWU2ZmEzN2UyNA==",
+          unicefId: "PVP-1",
+          status: PaymentVerificationPlanStatus.Active,
+          sampleSize: 44,
+          receivedCount: 47,
+          notReceivedCount: 0,
+          respondedCount: 71,
+          verificationChannel: PaymentVerificationPlanVerificationChannel.Rapidpro,
+          sampling: PaymentVerificationPlanSampling.FullList,
+          receivedWithProblemsCount: 2,
+          rapidProFlowId: "",
+          confidenceInterval: null,
+          marginOfError: null,
+          activationDate: null,
+          completionDate: null,
+          ageFilter: null,
+          excludedAdminAreasFilter: null,
+          sexFilter: null,
+          xlsxFileExporting: false,
+          hasXlsxFile: false,
+          xlsxFileWasDownloaded: false,
+          xlsxFileImported: false,
+          __typename: "PaymentVerificationPlanNode"
+        },
+        __typename: "PaymentVerificationPlanNodeEdge"
+      }
+    ],
+    __typename: "PaymentVerificationPlanNodeConnection"
+  },
+  paymentVerificationSummary: null,
+  paymentItems: {
+    totalCount: 2,
+    edgeCount: 2,
+    edges: [
+      {
+        node: {
+          id: "UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk",
+          __typename: "PaymentNode"
+        },
+        __typename: "PaymentNodeEdge"
+      },
+      {
+        node: {
+          id: "UGF5bWVudE5vZGU6MjAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk",
+          __typename: "PaymentNode"
+        },
+        __typename: "PaymentNodeEdge"
+      }
+    ],
+    __typename: "PaymentNodeConnection"
+  },
   __typename: 'PaymentPlanNode',
 };

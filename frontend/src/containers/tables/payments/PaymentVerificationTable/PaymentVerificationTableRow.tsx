@@ -26,9 +26,9 @@ export function PaymentVerificationTableRow({
 }: PaymentVerificationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const paymentVerificationPlanPath = `/${businessArea}/payment-verification/${plan.id}`;
+  const planVerificationPath = `/${businessArea}/payment-verification/${plan.objType === "CashPlan" ? "cash-plan" : "payment-plan"}/${plan.id}`;
   const handleClick = (): void => {
-    history.push(paymentVerificationPlanPath);
+    history.push(planVerificationPath);
   };
   const {
     data: statusChoicesData,
@@ -46,7 +46,7 @@ export function PaymentVerificationTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={paymentVerificationPlanPath}>{plan.unicefId}</BlackLink>
+          <BlackLink to={planVerificationPath}>{plan.unicefId}</BlackLink>
         ) : (
           plan.unicefId
         )}

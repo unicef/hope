@@ -1,21 +1,20 @@
-import graphene
-
-from graphene import relay
-from graphene_django import DjangoObjectType
-
 from django.db.models import (
     Case,
     Count,
     DecimalField,
+    Exists,
     F,
     IntegerField,
+    OuterRef,
     Q,
     Sum,
     Value,
     When,
-    OuterRef,
-    Exists,
 )
+
+import graphene
+from graphene import relay
+from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
@@ -27,7 +26,6 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
-
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
@@ -35,15 +33,21 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.filters import CashPlanFilter, PaymentVerificationPlanFilter
+from hct_mis_api.apps.payment.filters import (
+    CashPlanFilter,
+    PaymentVerificationPlanFilter,
+)
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
     GenericPayment,
     PaymentRecord,
+    PaymentVerificationPlan,
+    PaymentVerificationSummary,
 )
-from hct_mis_api.apps.payment.schema import PaymentVerificationPlanNode, PaymentVerificationSummaryNode
+from hct_mis_api.apps.payment.schema import (
+    PaymentVerificationPlanNode,
+    PaymentVerificationSummaryNode,
+)
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
 from hct_mis_api.apps.program.models import Program
@@ -109,12 +113,6 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         model = CashPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-
-    def resolve_total_number_of_households(self, info, **kwargs):
-        return self.total_number_of_households
-
-    def resolve_can_create_payment_verification_plan(self, info, **kwargs):
-        return self.can_create_payment_verification_plan
 
     def resolve_available_payment_records_count(self, info, **kwargs):
         return self.payment_items.filter(

@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Count, JSONField, Q, Sum, UniqueConstraint, UUIDField
@@ -115,8 +115,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         c_type = ContentType.objects.get_for_model(self.__class__)
         try:
             verification_summary = PaymentVerificationSummary.objects.get(
-                payment_plan_content_type_id=c_type.pk,
-                payment_plan_object_id=self.pk
+                payment_plan_content_type_id=c_type.pk, payment_plan_object_id=self.pk
             )
         except PaymentVerificationSummary.DoesNotExist:
             return None
@@ -126,20 +125,22 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     def get_payment_verification_plans(self):
         c_type = ContentType.objects.get_for_model(self.__class__)
         payment_verification_plans = PaymentVerificationPlan.objects.filter(
-            payment_plan_content_type_id=c_type.pk,
-            payment_plan_object_id=self.pk
+            payment_plan_content_type_id=c_type.pk, payment_plan_object_id=self.pk
         )
         return payment_verification_plans
 
     def available_payment_records(
-        self, payment_verification_plan: Optional["PaymentVerificationPlan"] = None, extra_validation=None, class_name=""
+        self,
+        payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
+        extra_validation=None,
+        class_name="",
     ):
         params = Q(status__in=GenericPayment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
         if payment_verification_plan:
             params &= Q(
-                Q(payment_verification__isnull=True) |
-                Q(payment_verification__payment_verification_plan=payment_verification_plan)
+                Q(payment_verification__isnull=True)
+                | Q(payment_verification__payment_verification_plan=payment_verification_plan)
             )
         else:
             params &= Q(payment_verification__isnull=True)
@@ -155,11 +156,16 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
             payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
 
         qs = (
-            PaymentRecord.objects.filter(pk__in=payment_records) if class_name == "CashPlan" else
-            Payment.objects.filter(pk__in=payment_records)
+            PaymentRecord.objects.filter(pk__in=payment_records)
+            if class_name == "CashPlan"
+            else Payment.objects.filter(pk__in=payment_records)
         )
 
         return qs
+
+    @property
+    def can_create_payment_verification_plan(self):
+        return self.available_payment_records().count() > 0
 
 
 class GenericPayment(TimeStampedUUIDModel):
@@ -268,10 +274,7 @@ class GenericPayment(TimeStampedUUIDModel):
     def verification(self):
         c_type = ContentType.objects.get_for_model(self.__class__)
         try:
-            verification = PaymentVerification.objects.get(
-                payment_content_type_id=c_type.pk,
-                payment_object_id=self.pk
-            )
+            verification = PaymentVerification.objects.get(payment_content_type_id=c_type.pk, payment_object_id=self.pk)
         except PaymentVerification.DoesNotExist:
             return None
         return verification
@@ -372,7 +375,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         content_type_field="payment_plan_content_type",
         object_id_field="payment_plan_object_id",
         related_query_name="payment_plan",
-
     )
     payment_verification_plan = GenericRelation(
         "payment.PaymentVerificationPlan",
@@ -387,6 +389,14 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     def __str__(self):
         return self.unicef_id
+
+    @property
+    def bank_reconciliation_success(self):
+        return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
+
+    @property
+    def bank_reconciliation_error(self):
+        return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
 
     @transition(
         field=background_action_status,
@@ -914,7 +924,6 @@ class CashPlan(GenericPaymentPlan):
         content_type_field="payment_plan_content_type",
         object_id_field="payment_plan_object_id",
         related_query_name="cash_plan",
-
     )
     payment_verification_plan = GenericRelation(
         "payment.PaymentVerificationPlan",
@@ -956,6 +965,9 @@ class CashPlan(GenericPaymentPlan):
     def can_create_payment_verification_plan(self):
         return self.available_payment_records().count() > 0
 
+    def unicef_id(self):
+        # TODO: maybe 'ca_id' rename to 'unicef_id'?
+        return getattr(self, "ca_id")
 
     class Meta:
         verbose_name = "Cash Plan"
