@@ -65,12 +65,12 @@ class Command(BaseCommand):
         else:
             qs = model.objects.filter(registration_data_import__business_area__slug=business_area)
 
-        i, count = 0, qs.count() // BATCH_SIZE + 1
+        i, count = 1, qs.count() // BATCH_SIZE + 1
 
         while i <= count:
             document_list = []
             self.stdout.write(f"{i}/{count}")
-            batch = qs[BATCH_SIZE * i: BATCH_SIZE * (i + 1)]
+            batch = qs[BATCH_SIZE * (i - 1) : BATCH_SIZE * i].iterator()
             for item in batch:
                 document = {**es_document().prepare(item), "_id": item.id}
                 document_list.append(document)
