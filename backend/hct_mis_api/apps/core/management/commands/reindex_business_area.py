@@ -66,16 +66,15 @@ class Command(BaseCommand):
             qs = model.objects.filter(registration_data_import__business_area__slug=business_area)
 
         i, count = 0, qs.count() // BATCH_SIZE + 1
-        document_list = []
 
         while i <= count:
+            document_list = []
             self.stdout.write(f"{i}/{count}")
-            batch = qs[BATCH_SIZE * i : BATCH_SIZE * (i + 1)]
+            batch = qs[BATCH_SIZE * i: BATCH_SIZE * (i + 1)]
             for item in batch:
                 document = {**es_document().prepare(item), "_id": item.id}
                 document_list.append(document)
             bulk(es, document_list, index=index)
-            document_list = []
             i += 1
 
         self.stdout.write(self.style.SUCCESS(f"Documents for index: {index}, business_area: {business_area} created"))

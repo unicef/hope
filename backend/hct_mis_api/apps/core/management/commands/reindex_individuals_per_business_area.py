@@ -21,21 +21,19 @@ class Command(BaseCommand):
         if business_area_slug in ("afghanistan", "ukraine"):
             qs = Individual.objects.filter(business_area__slug=business_area_slug)
         else:
-            qs = Individual.objects.exclude(Q(business_area__slug="afghanistan") | Q(business_area__slug="ukraine"))
+            qs = Individual.objects.exclude(business_area__slug__in=["afghanistan", "ukraine"])
 
         i, count = 0, qs.count() // BATCH_SIZE + 1
-        document_list = []
-
         self.stdout.write(index)
 
         while i <= count:
+            document_list = []
             self.stdout.write(f"{i}/{count}")
-            batch = qs[BATCH_SIZE * i : BATCH_SIZE * (i + 1)]
+            batch = qs[BATCH_SIZE * i: BATCH_SIZE * (i + 1)]
             for item in batch:
                 document = {**IndividualDocument().prepare(item), "_id": item.id}
                 document_list.append(document)
             bulk(self.es, document_list, index=index)
-            document_list = []
             i += 1
 
     def reindex_business_area(self, business_area_slug):
