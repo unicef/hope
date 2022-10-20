@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.validators import MinValueValidator
@@ -166,7 +168,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         (SELECT_MANY, _("Select Many")),
         (STRING, _("String")),
     )
-    ASSOCIATED_WITH_CHOICES = (
+    ASSOCIATED_WITH_CHOICES: Tuple[Tuple[int, str]] = (
         (0, _("Household")),
         (1, _("Individual")),
     )

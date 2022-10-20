@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Iterable
+from typing import List, Tuple, Type
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -50,19 +51,22 @@ class FlexibleAttributeChoiceNode(DjangoObjectType):
     class Meta:
         model = FlexibleAttributeChoice
         interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-        exclude_fields = []
+        connection_class: Type = ExtendedConnection
+        exclude_fields: List = []
 
 
 class FlexibleAttributeNode(DjangoObjectType):
     choices = graphene.List(FlexibleAttributeChoiceNode)
-    associated_with = graphene.String()
+    associated_with = graphene.Int()
 
     def resolve_choices(self, info):
         return self.choices.all()
 
     def resolve_associated_with(self, info):
-        return str(FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1])
+        # TODO: need some stubs for graphene-django?
+        associated_number: int = int(self.associated_with)  # type: ignore
+        choice: Tuple[int, str] = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[associated_number]
+        return str(choice[1])
 
     class Meta:
         model = FlexibleAttribute
