@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission
 
@@ -9,11 +11,11 @@ class PowerQueryBackend(ModelBackend):
     def get_office_permissions(self, user_obj, office_slug):
         key = f"_perm_{office_slug}"
         if not hasattr(user_obj, key):
-            perms = Permission.objects.filter(
+            permsissions = Permission.objects.filter(
                 group__user_groups__user=user_obj, group__user_groups__business_area__slug=office_slug
             )
-            perms = perms.values_list("content_type__app_label", "codename").order_by()
-            setattr(user_obj, key, {"%s.%s" % (ct, name) for ct, name in perms})
+            perms: List[Tuple[str, str]] = permsissions.values_list("content_type__app_label", "codename").order_by()
+            setattr(user_obj, key, {f"{ct}.{name}" for ct, name in perms})
         return getattr(user_obj, key)
 
     def has_perm(self, user_obj: User, perm, obj=None):  # type: ignore

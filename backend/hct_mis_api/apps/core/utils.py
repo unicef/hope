@@ -107,7 +107,8 @@ def _slug_strip(value, separator="-"):
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("{}+".format(re_sep, separator, value))  # noqa: F523 # TODO: bug?
+        # TODO: bug?
+        value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
