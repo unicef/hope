@@ -446,7 +446,7 @@ class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_payment(self, info):
-        return self.payment
+        return self.get_payment
 
 
 class PaymentVerificationPlanNode(DjangoObjectType):
@@ -625,7 +625,7 @@ class Query(graphene.ObjectType):
     all_payment_verifications = DjangoPermissionFilterConnectionField(
         PaymentVerificationNode,
         filterset_class=PaymentVerificationFilter,
-        # permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),  # TODO check perms
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
     )
     all_payment_verification_plan = DjangoPermissionFilterConnectionField(
         PaymentVerificationPlanNode,
