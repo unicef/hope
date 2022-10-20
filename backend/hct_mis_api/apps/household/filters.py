@@ -1,5 +1,6 @@
 import json
 import re
+from typing import Dict, List
 
 from django.db.models import Q
 from django.db.models.functions import Lower
@@ -37,6 +38,8 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.program.models import Program
+
+QueryType = List[Dict[str, Dict[str, Dict[str, str]]]]
 
 
 def _prepare_kobo_asset_id_value(code):
@@ -280,14 +283,14 @@ def get_elasticsearch_query_for_individuals(value, business_area):
         "admin2",
     ]
     prefix_fields = [
-        # "full_name",
         "middle_name",
         "unicef_id",
         "household.unicef_id",
         "phone_no_text",
     ]
     wildcard_fields = ["phone_no", "unicef_id", "household.unicef_id"]
-    match_queries = [
+
+    match_queries: QueryType = [
         {
             "match": {
                 x: {
@@ -297,7 +300,7 @@ def get_elasticsearch_query_for_individuals(value, business_area):
         }
         for x in match_fields
     ]
-    prefix_queries = [
+    prefix_queries: QueryType = [
         {
             "match_phrase_prefix": {
                 x: {
@@ -307,7 +310,7 @@ def get_elasticsearch_query_for_individuals(value, business_area):
         }
         for x in prefix_fields
     ]
-    wildcard_queries = [
+    wildcard_queries: QueryType = [
         {
             "wildcard": {
                 x: {
@@ -317,7 +320,7 @@ def get_elasticsearch_query_for_individuals(value, business_area):
         }
         for x in wildcard_fields
     ]
-    all_queries = []
+    all_queries: List[QueryType] = []
     all_queries.extend(wildcard_queries)
     all_queries.extend(prefix_queries)
     all_queries.extend(match_queries)
@@ -400,7 +403,7 @@ def get_elasticsearch_query_for_households(value, business_area):
     ]
     prefix_fields = ["head_of_household.middle_name", "unicef_id", "residence_status"]
     wildcard_fields = ["unicef_id"]
-    match_queries = [
+    match_queries: QueryType = [
         {
             "match": {
                 x: {
@@ -410,7 +413,7 @@ def get_elasticsearch_query_for_households(value, business_area):
         }
         for x in match_fields
     ]
-    prefix_queries = [
+    prefix_queries: QueryType = [
         {
             "match_phrase_prefix": {
                 x: {
@@ -420,7 +423,7 @@ def get_elasticsearch_query_for_households(value, business_area):
         }
         for x in prefix_fields
     ]
-    wildcard_queries = [
+    wildcard_queries: QueryType = [
         {
             "wildcard": {
                 x: {
@@ -430,7 +433,7 @@ def get_elasticsearch_query_for_households(value, business_area):
         }
         for x in wildcard_fields
     ]
-    all_queries = []
+    all_queries: List[QueryType] = []
     all_queries.extend(wildcard_queries)
     all_queries.extend(prefix_queries)
     all_queries.extend(match_queries)
