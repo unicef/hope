@@ -401,6 +401,11 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
+    verification_plans = DjangoPermissionFilterConnectionField(
+        "hct_mis_api.apps.program.schema.PaymentVerificationPlanNode",
+        source="get_payment_verification_plans",
+        filterset_class=PaymentVerificationPlanFilter,
+    )
     payment_verification_summary = graphene.Field(PaymentVerificationSummaryNode)
 
     class Meta:
