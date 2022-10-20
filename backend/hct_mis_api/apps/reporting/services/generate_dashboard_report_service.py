@@ -4,8 +4,7 @@ import functools
 import io
 import logging
 from itertools import chain
-from types import FunctionType
-from typing import Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -900,7 +899,7 @@ class GenerateDashboardReportService:
 
     def _add_rows(self, active_sheet, report_type):
         is_hq_report = self.hq_or_country == self.HQ
-        get_row_methods: List[FunctionType] = self.ROW_CONTENT_METHODS[report_type]
+        get_row_methods: List[Callable] = self.ROW_CONTENT_METHODS[report_type]
         all_instances, totals = get_row_methods[0](self.report)
         for instance in all_instances:
             row = get_row_methods[1](instance, False, is_hq_report)

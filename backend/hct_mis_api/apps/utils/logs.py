@@ -1,12 +1,11 @@
 import logging
 from functools import wraps
-from types import FunctionType
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 
 logger = logging.getLogger(__name__)
 
 
-def log_start_and_end(func: FunctionType) -> FunctionType:
+def log_start_and_end(func: Callable) -> Callable:
     @wraps(func)
     def wrapper(*args: List, **kwargs: Dict) -> Any:
         logger.info(f"--- Starting: {func.__name__}")

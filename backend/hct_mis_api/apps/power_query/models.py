@@ -1,8 +1,7 @@
 import itertools
 import logging
 import pickle
-from types import FunctionType
-from typing import Dict
+from typing import Callable, Dict
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -79,7 +78,7 @@ class Parametrizer(NaturalKeyModel, models.Model):
 
     def refresh(self):
         if self.code in SYSTEM_PARAMETRIZER:
-            getter: FunctionType = SYSTEM_PARAMETRIZER[self.code]["value"]
+            getter: Callable = SYSTEM_PARAMETRIZER[self.code]["value"]
             self.value = getter()
             self.save()
 

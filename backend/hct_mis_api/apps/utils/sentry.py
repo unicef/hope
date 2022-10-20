@@ -1,11 +1,10 @@
 from functools import wraps
-from types import FunctionType
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 
 from sentry_sdk import configure_scope
 
 
-def sentry_tags(func: FunctionType) -> FunctionType:
+def sentry_tags(func: Callable) -> Callable:
     """
     add sentry tags 'celery' and 'celery_task'
     """
