@@ -1,6 +1,7 @@
 import itertools
 import logging
 import pickle
+from types import FunctionType
 from typing import Dict
 
 from django.conf import settings
@@ -78,7 +79,8 @@ class Parametrizer(NaturalKeyModel, models.Model):
 
     def refresh(self):
         if self.code in SYSTEM_PARAMETRIZER:
-            self.value = SYSTEM_PARAMETRIZER[self.code]["value"]()
+            getter: FunctionType = SYSTEM_PARAMETRIZER[self.code]["value"]
+            self.value = getter()
             self.save()
 
     def __str__(self):
