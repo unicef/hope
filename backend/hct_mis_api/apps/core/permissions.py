@@ -1,13 +1,12 @@
 import logging
-from types import FunctionType
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 
 from django.core.exceptions import PermissionDenied
 
 logger = logging.getLogger(__name__)
 
 
-def is_authenticated(func: FunctionType) -> Any:
+def is_authenticated(func: Callable) -> Any:
     """
     Simple decorator for use with Graphene mutate method
     to check if user is authenticated.

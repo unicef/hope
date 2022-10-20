@@ -6,8 +6,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from types import FunctionType
-from typing import Optional, Union
+from typing import Callable, Optional, Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
@@ -705,7 +704,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         self.head_of_household_count[current_household_id] += 1
 
                     field_type = current_field["type"]
-                    fn: FunctionType = switch_dict[field_type]
+                    fn: Callable = switch_dict[field_type]
 
                     if fn(value, header.value, cell) is False and household_id_can_be_empty is False:
                         message = (
@@ -1165,7 +1164,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 "SELECT_MANY": self.choice_validator,
             }
             field_type = field_dict["type"]
-            complex_type_fn: Optional[FunctionType] = complex_types.get(field_type)
+            complex_type_fn: Optional[Callable] = complex_types.get(field_type)
 
             if complex_type_fn:
                 message = complex_type_fn(field=field, value=value, attachments=attachments)

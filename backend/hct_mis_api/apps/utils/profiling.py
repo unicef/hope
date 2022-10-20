@@ -1,11 +1,10 @@
 from functools import wraps
-from types import FunctionType
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 
 from django.conf import settings
 
 
-def do_nothing_decorator(func: FunctionType) -> FunctionType:
+def do_nothing_decorator(func: Callable) -> Callable:
     @wraps(func)
     def wrapped(*args: List, **kwargs: Dict) -> Any:
         return func(*args, **kwargs)
