@@ -17,6 +17,7 @@ from hct_mis_api.apps.geo import models as geo_models
 
 
 class TestEdopomogaCreation(APITestCase):
+    databases = ("default", "registration_datahub")
 
     @classmethod
     def setUpTestData(cls):

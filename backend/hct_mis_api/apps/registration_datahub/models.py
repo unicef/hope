@@ -36,7 +36,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_CHOICE,
     ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
-    SEX_CHOICE,
+    SEX_CHOICE_WITHOUT_UNKNOWN,
     UNIQUE,
     WORK_STATUS_CHOICE,
     YES_NO_CHOICE,
@@ -163,7 +163,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     )
     sex = models.CharField(
         max_length=255,
-        choices=SEX_CHOICE,
+        choices=SEX_CHOICE_WITHOUT_UNKNOWN,
     )
     birth_date = models.DateField()
     estimated_birth_date = models.BooleanField(default=False)
