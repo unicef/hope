@@ -98,6 +98,11 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     class Meta:
         abstract = True
 
+    @property
+    def get_unicef_id(self):
+        # TODO: MB 'ca_id' rename to 'unicef_id'?
+        return getattr(self, "ca_id") if isinstance(self, CashPlan) else getattr(self, "unicef_id")
+
     def get_exchange_rate(self, exchange_rates_client=None):
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
@@ -155,7 +160,6 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         )
 
         return qs
-
 
 
 class GenericPayment(TimeStampedUUIDModel):
@@ -952,10 +956,6 @@ class CashPlan(GenericPaymentPlan):
     def can_create_payment_verification_plan(self):
         return self.available_payment_records().count() > 0
 
-    @property
-    def unicef_id(self):
-        # TODO: maybe 'ca_id' rename to 'unicef_id'?
-        return getattr(self, "ca_id")
 
     class Meta:
         verbose_name = "Cash Plan"

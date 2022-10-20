@@ -727,6 +727,7 @@ def generate_reconciled_payment_plan():
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
         program=tp.program,
+        total_delivered_quantity=999,
     )[0]
     # update status
     pp.status_reconciled()

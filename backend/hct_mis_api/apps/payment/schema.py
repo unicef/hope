@@ -522,7 +522,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, graphene.ObjectType):
 
     obj_type = graphene.String()
     id = graphene.String()
-    unicef_id = graphene.String()
+    unicef_id = graphene.String(source="get_unicef_id")
     verification_status = graphene.String()
     currency = graphene.String()
     total_delivered_quantity = graphene.Float()
@@ -1136,12 +1136,11 @@ class Query(graphene.ObjectType):
         if order_by_value:
             reverse = "-" if order_by_value.startswith("-") else ""
             order_by = order_by_value[1:] if reverse else order_by_value
-            # unicef_id, verification_status, start_date, program__name, updated_at
             if order_by == "verification_status":
                 qs = qs.order_by(reverse + "custom_order")
 
             elif order_by == "unicef_id":
-                qs = sorted(qs, key=lambda o: o.unicef_id, reverse=bool(reverse))
+                qs = sorted(qs, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
             else:
                 qs = qs.order_by(reverse + order_by)
 
