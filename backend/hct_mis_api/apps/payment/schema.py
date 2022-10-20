@@ -401,6 +401,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
+    payment_verification_summary = graphene.Field(PaymentVerificationSummaryNode)
 
     class Meta:
         model = PaymentPlan
@@ -433,6 +434,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_volume_by_delivery_mechanism(self, info):
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
+
+    def resolve_payment_verification_summary(self, info):
+        return self.get_payment_verification_summary
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
