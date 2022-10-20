@@ -73,7 +73,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
         raise
 
 
-@transaction_celery_task
+@app.task
 @log_start_and_end
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
@@ -90,130 +90,129 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
         raise
 
 
-@app.task
+@transaction_celery_task()
 @sentry_tags
 def create_target_population_task(storage_id, program_id, tp_name):
     storage_obj = StorageFile.objects.get(id=storage_id)
     program = Program.objects.get(id=program_id)
 
     try:
-        with transaction.atomic():
-            with transaction.atomic("registration_datahub"):
-                registration_data_import = RegistrationDataImport.objects.create(
-                    name=f"{storage_obj.file.name}_{program.name}", number_of_individuals=0, number_of_households=0
-                )
+        with transaction.atomic("registration_datahub"):
+            registration_data_import = RegistrationDataImport.objects.create(
+                name=f"{storage_obj.file.name}_{program.name}", number_of_individuals=0, number_of_households=0
+            )
 
-                business_area = storage_obj.business_area
+            business_area = storage_obj.business_area
 
-                passport_type = DocumentType.objects.filter(
-                    Q(country=business_area.countries.first()) & Q(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
-                ).first()
-                tax_type = DocumentType.objects.filter(
-                    Q(country=business_area.countries.first()) & Q(type=IDENTIFICATION_TYPE_TAX_ID)
-                ).first()
+            passport_type = DocumentType.objects.filter(
+                Q(country=business_area.countries.first()) & Q(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
+            ).first()
+            tax_type = DocumentType.objects.filter(
+                Q(country=business_area.countries.first()) & Q(type=IDENTIFICATION_TYPE_TAX_ID)
+            ).first()
 
-                first_registration_date = datetime.now()
-                last_registration_date = first_registration_date
+            first_registration_date = datetime.now()
+            last_registration_date = first_registration_date
 
-                family_ids = set()
-                individuals, documents, bank_infos = [], [], []
+            family_ids = set()
+            individuals, documents, bank_infos = [], [], []
 
-                storage_obj.status = StorageFile.STATUS_PROCESSING
-                storage_obj.save(update_fields=["status"])
+            storage_obj.status = StorageFile.STATUS_PROCESSING
+            storage_obj.save(update_fields=["status"])
 
-                with open(storage_obj.file.path, encoding="cp1251") as file:
-                    reader = csv.DictReader(file, delimiter=";")
+            with open(storage_obj.file.path, encoding="cp1251") as file:
+                reader = csv.DictReader(file, delimiter=";")
 
-                    for row in reader:
-                        family_id = row["ID_FAM"]
-                        iban = row["IBAN"]
-                        tax_id = row["N_ID"]
-                        passport_id = row["PASSPORT"]
+                for row in reader:
+                    family_id = row["ID_FAM"]
+                    iban = row["IBAN"]
+                    tax_id = row["N_ID"]
+                    passport_id = row["PASSPORT"]
 
-                        individual_data = {
-                            "given_name": row.get("NAME", ""),
-                            "middle_name": row.get("PATRONYMIC", ""),
-                            "family_name": row.get("SURNAME", ""),
-                            "full_name": f'{row.get("NAME", "")} {row.get("PATRONYMIC", "")} {row.get("SURNAME", "")}',
-                            "birth_date": datetime.strptime(row["BDATE"], "%d.%m.%Y").date(),
-                            "phone_no": row.get("PHONЕ", ""),
-                            "business_area": business_area,
-                            "first_registration_date": first_registration_date,
-                            "last_registration_date": last_registration_date,
-                            "sex": UNKNOWN,
-                        }
+                    individual_data = {
+                        "given_name": row.get("NAME", ""),
+                        "middle_name": row.get("PATRONYMIC", ""),
+                        "family_name": row.get("SURNAME", ""),
+                        "full_name": f'{row.get("NAME", "")} {row.get("PATRONYMIC", "")} {row.get("SURNAME", "")}',
+                        "birth_date": datetime.strptime(row["BDATE"], "%d.%m.%Y").date(),
+                        "phone_no": row.get("PHONЕ", ""),
+                        "business_area": business_area,
+                        "first_registration_date": first_registration_date,
+                        "last_registration_date": last_registration_date,
+                        "sex": UNKNOWN,
+                    }
 
-                        if family_id in family_ids:
-                            individuals.append(
-                                Individual(**individual_data, household=Household.objects.get(family_id=family_id))
-                            )
-                        else:
-                            individual = Individual.objects.create(**individual_data)
-                            individual.refresh_from_db()
+                    if family_id in family_ids:
+                        individuals.append(
+                            Individual(**individual_data, household=Household.objects.get(family_id=family_id))
+                        )
+                    else:
+                        individual = Individual.objects.create(**individual_data)
+                        individual.refresh_from_db()
 
-                            household = Household.objects.create(
-                                head_of_household=individual,
-                                business_area=business_area,
-                                first_registration_date=first_registration_date,
-                                last_registration_date=last_registration_date,
-                                registration_data_import=registration_data_import,
-                                size=0,
-                                family_id=family_id,
-                                storage_obj=storage_obj,
-                            )
-
-                            individual.household = household
-                            individual.save()
-
-                            family_ids.add(family_id)
-
-                        passport = Document(
-                            document_number=passport_id,
-                            type=passport_type,
-                            individual=individual,
-                            status=Document.STATUS_VALID,
+                        household = Household.objects.create(
+                            head_of_household=individual,
+                            business_area=business_area,
+                            first_registration_date=first_registration_date,
+                            last_registration_date=last_registration_date,
+                            registration_data_import=registration_data_import,
+                            size=0,
+                            family_id=family_id,
+                            storage_obj=storage_obj,
                         )
 
-                        tax = Document(
-                            document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_VALID
-                        )
+                        individual.household = household
+                        individual.save()
 
-                        bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
+                        family_ids.add(family_id)
 
-                        documents.append(passport)
-                        documents.append(tax)
+                    passport = Document(
+                        document_number=passport_id,
+                        type=passport_type,
+                        individual=individual,
+                        status=Document.STATUS_VALID,
+                    )
 
-                        bank_infos.append(bank_account_info)
+                    tax = Document(
+                        document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_VALID
+                    )
 
-                Individual.objects.bulk_create(individuals)
+                    bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
 
-                Document.objects.bulk_create(documents)
-                BankAccountInfo.objects.bulk_create(bank_infos)
+                    documents.append(passport)
+                    documents.append(tax)
 
-                households = Household.objects.filter(family_id__in=list(family_ids))
+                    bank_infos.append(bank_account_info)
 
-                for household in households:
-                    household.size = Individual.objects.filter(household=household).count()
-                Household.objects.bulk_update(households, ["size"])
+            Individual.objects.bulk_create(individuals)
 
-                target_population = TargetPopulation.objects.create(
-                    name=tp_name,
-                    created_by=storage_obj.created_by,
-                    program=program,
-                    total_households_count=len(households),
-                    total_individuals_count=Individual.objects.filter(
-                        household_id__in=list(households.values_list("id", flat=True))
-                    ).count(),
-                    status=TargetPopulation.STATUS_LOCKED,
-                    build_status=TargetPopulation.BUILD_STATUS_OK,
-                    business_area=business_area,
-                    storage_file=storage_obj,
-                )
+            Document.objects.bulk_create(documents)
+            BankAccountInfo.objects.bulk_create(bank_infos)
 
-                target_population.households.set(households)
+            households = Household.objects.filter(family_id__in=list(family_ids))
 
-                storage_obj.status = StorageFile.STATUS_FINISHED
-                storage_obj.save(update_fields=["status"])
+            for household in households:
+                household.size = Individual.objects.filter(household=household).count()
+            Household.objects.bulk_update(households, ["size"])
+
+            target_population = TargetPopulation.objects.create(
+                name=tp_name,
+                created_by=storage_obj.created_by,
+                program=program,
+                total_households_count=len(households),
+                total_individuals_count=Individual.objects.filter(
+                    household_id__in=list(households.values_list("id", flat=True))
+                ).count(),
+                status=TargetPopulation.STATUS_LOCKED,
+                build_status=TargetPopulation.BUILD_STATUS_OK,
+                business_area=business_area,
+                storage_file=storage_obj,
+            )
+
+            target_population.households.set(households)
+
+            storage_obj.status = StorageFile.STATUS_FINISHED
+            storage_obj.save(update_fields=["status"])
 
     except Exception as e:
         logger.error(e)
