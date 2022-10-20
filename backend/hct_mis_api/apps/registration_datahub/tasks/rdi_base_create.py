@@ -8,7 +8,6 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.registration_datahub.value_caster import (
-    BaseValueCaster,
     BooleanValueCaster,
     DateValueCaster,
     DecimalValueCaster,
@@ -46,8 +45,8 @@ class RdiBaseCreateTask:
 
         field = self.COMBINED_FIELDS[header]
 
-        casters: List[BaseValueCaster] = [
-            DefaultValueCaster,
+        casters: List = [
+            DefaultValueCaster(),
             BooleanValueCaster,
             SelectOneValueCaster,
             SelectManyValueCaster,
