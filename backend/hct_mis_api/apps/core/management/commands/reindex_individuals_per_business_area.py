@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from django.db.models import Q
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
@@ -23,13 +22,13 @@ class Command(BaseCommand):
         else:
             qs = Individual.objects.exclude(business_area__slug__in=["afghanistan", "ukraine"])
 
-        i, count = 0, qs.count() // BATCH_SIZE + 1
+        i, count = 1, qs.count() // BATCH_SIZE + 1
         self.stdout.write(index)
 
         while i <= count:
             document_list = []
             self.stdout.write(f"{i}/{count}")
-            batch = qs[BATCH_SIZE * i: BATCH_SIZE * (i + 1)]
+            batch = qs[BATCH_SIZE * (i - 1) : BATCH_SIZE * i].iterator()
             for item in batch:
                 document = {**IndividualDocument().prepare(item), "_id": item.id}
                 document_list.append(document)
