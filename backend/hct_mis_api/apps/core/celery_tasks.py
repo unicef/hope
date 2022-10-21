@@ -212,7 +212,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
             )
             target_population.refresh_stats()
             target_population.households.set(households)
-
+            target_population.save()
             storage_obj.status = StorageFile.STATUS_FINISHED
             storage_obj.save(update_fields=["status"])
 
