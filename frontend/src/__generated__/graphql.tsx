@@ -5136,8 +5136,8 @@ export type QueryAllCashPlansAndPaymentPlansArgs = {
   program?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   serviceProvider?: Maybe<Scalars['String']>,
-  deliveryType?: Maybe<Scalars['String']>,
-  verificationStatus?: Maybe<Scalars['String']>,
+  deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
   startDateGte?: Maybe<Scalars['String']>,
   endDateLte?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
@@ -10141,8 +10141,8 @@ export type AllCashPlansAndPaymentPlansQueryVariables = {
   program?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   serviceProvider?: Maybe<Scalars['String']>,
-  deliveryType?: Maybe<Scalars['String']>,
-  verificationStatus?: Maybe<Scalars['String']>,
+  deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
   startDateGte?: Maybe<Scalars['String']>,
   endDateLte?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
@@ -18401,7 +18401,7 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllCashPlansAndPaymentPlansDocument = gql`
-    query AllCashPlansAndPaymentPlans($businessArea: String!, $program: String, $search: String, $serviceProvider: String, $deliveryType: String, $verificationStatus: String, $startDateGte: String, $endDateLte: String, $orderBy: String, $first: Int, $last: Int, $before: String, $after: String) {
+    query AllCashPlansAndPaymentPlans($businessArea: String!, $program: String, $search: String, $serviceProvider: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: String, $endDateLte: String, $orderBy: String, $first: Int, $last: Int, $before: String, $after: String) {
   allCashPlansAndPaymentPlans(businessArea: $businessArea, program: $program, search: $search, serviceProvider: $serviceProvider, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDateGte: $startDateGte, endDateLte: $endDateLte, orderBy: $orderBy, first: $first, last: $last, before: $before, after: $after) {
     pageInfo {
       startCursor
