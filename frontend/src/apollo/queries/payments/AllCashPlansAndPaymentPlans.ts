@@ -1,13 +1,13 @@
 import { gql } from 'apollo-boost';
 
 export const AllCashPlansAndPaymentPlans = gql`
-query AllCashPlansAndPaymentPlans(
+query allCashPlansAndPaymentPlans(
   $businessArea: String!
   $program: String
   $search: String
   $serviceProvider: String
-  $deliveryType: String
-  $verificationStatus: String
+  $deliveryType: [String]
+  $verificationStatus: [String]
   $startDateGte: String
   $endDateLte: String
   $orderBy: String
