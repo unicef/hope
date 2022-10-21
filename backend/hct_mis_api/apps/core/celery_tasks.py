@@ -1,11 +1,14 @@
 import csv
 import logging
+import os
+import tempfile
 from datetime import datetime
 from functools import wraps
 
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from storages.backends.azure_storage import AzureStorageFile
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import XLSXKoboTemplate, StorageFile
@@ -121,8 +124,12 @@ def create_target_population_task(storage_id, program_id, tp_name):
             storage_obj.status = StorageFile.STATUS_PROCESSING
             storage_obj.save(update_fields=["status"])
             rows_count = 0
-
-            with open(storage_obj.file.path, encoding="cp1251") as file:
+            file_path = None
+            with storage_obj.file.open("rb") as original_file, tempfile.NamedTemporaryFile(delete=False) as tmp:
+                tmp.write(original_file.read())
+                file_path = tmp.name
+                
+            with open(file_path, encoding="cp1251") as file:
                 reader = csv.DictReader(file, delimiter=";")
                 for row in reader:
                     rows_count += 1
@@ -143,7 +150,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         "last_registration_date": last_registration_date,
                         "sex": MALE,
                     }
-
+                    logger.warning(individual_data)
                     if family_id in family_ids:
                         individual = Individual(**individual_data, household=Household.objects.get(family_id=family_id))
                         individuals.append(individual)
@@ -224,3 +231,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
         storage_obj.status = StorageFile.STATUS_FAILED
         storage_obj.save(update_fields=["status"])
         raise
+    finally:
+        logger.warning("Finally called")
+        if file_path:
+            os.remove(file_path)
