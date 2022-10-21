@@ -137,13 +137,6 @@ class SendTPToDatahubTask:
 
             households_to_sync.update(last_sync_at=timezone.now())
             individuals_to_sync.update(last_sync_at=timezone.now())
-
-            if target_population.storage_file:
-                for household in target_population.household_list:
-                    for individual in household.individuals.all():
-                        individual.withdraw()
-                    household.withdraw()
-
             return {
                 "session": self.dh_session.id,
                 "program": str(program),

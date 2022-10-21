@@ -5,6 +5,7 @@ from functools import wraps
 
 from django.db import transaction
 from django.db.models import Q
+from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import XLSXKoboTemplate, StorageFile
@@ -170,11 +171,11 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         document_number=passport_id,
                         type=passport_type,
                         individual=individual,
-                        status=Document.STATUS_PENDING,
+                        status=Document.STATUS_INVALID,
                     )
 
                     tax = Document(
-                        document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_PENDING
+                        document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_INVALID
                     )
 
                     bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
@@ -187,19 +188,22 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         Individual.objects.bulk_create(individuals)
                         Document.objects.bulk_create(documents)
                         BankAccountInfo.objects.bulk_create(bank_infos)
-                        individuals=[]
-                        documents=[]
-                        bank_infos=[]
+                        individuals = []
+                        documents = []
+                        bank_infos = []
 
             Individual.objects.bulk_create(individuals)
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
 
-            households = Household.objects.filter(family_id__in=list(family_ids)).only('id')
+            households = Household.objects.filter(family_id__in=list(family_ids)).only("id")
             if len(family_ids) != rows_count:
                 for household in households:
                     household.size = Individual.objects.filter(household=household).count()
                 Household.objects.bulk_update(households, ["size"])
+
+            households.update(withdrawn=True, withdrawn_date=timezone.now())
+            Individual.objects.filter(household__in=households).update(withdrawn=True, withdrawn_date=timezone.now())
 
             target_population = TargetPopulation.objects.create(
                 name=tp_name,
