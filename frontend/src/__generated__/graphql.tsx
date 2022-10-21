@@ -892,7 +892,7 @@ export type CreatePaymentVerificationInput = {
   fullListArguments?: Maybe<FullListArguments>,
   randomSamplingArguments?: Maybe<RandomSamplingArguments>,
   rapidProArguments?: Maybe<RapidProArguments>,
-  paymentPlanId: Scalars['ID'],
+  cashOrPaymentPlanId: Scalars['ID'],
 };
 
 export type CreateProgram = {
