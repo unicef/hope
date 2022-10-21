@@ -6,17 +6,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('household', '0124_migration'),
+        ('grievance', '0050_migration'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='household',
-            name='unicef_id',
-            field=models.CharField(blank=True, db_index=True, max_length=255, null=True),
-        ),
-        migrations.AlterField(
-            model_name='individual',
+            model_name='grievanceticket',
             name='unicef_id',
             field=models.CharField(blank=True, db_index=True, max_length=255, null=True),
         ),
