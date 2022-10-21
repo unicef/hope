@@ -48,9 +48,9 @@ from hct_mis_api.apps.household.models import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
-    SEX_CHOICE,
     WORK_STATUS_CHOICE,
     YES_NO_CHOICE,
+    SEX_CHOICE,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 

@@ -23,6 +23,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -48,10 +49,14 @@ RESIDENCE_STATUS_CHOICE = (
 # INDIVIDUALS
 MALE = "MALE"
 FEMALE = "FEMALE"
+UNKNOWN = "UNKNOWN"
+
 SEX_CHOICE = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
 )
+
+
 SINGLE = "SINGLE"
 MARRIED = "MARRIED"
 WIDOWED = "WIDOWED"
@@ -422,6 +427,9 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         max_digits=64,
         blank=True,
     )
+
+    family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
+    storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         verbose_name = "Household"
