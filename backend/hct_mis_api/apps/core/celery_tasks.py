@@ -125,10 +125,12 @@ def create_target_population_task(storage_id, program_id, tp_name):
             storage_obj.save(update_fields=["status"])
             rows_count = 0
             file_path = None
+
+            #TODO fix to use Azure storage override AzureStorageFile open method
             with storage_obj.file.open("rb") as original_file, tempfile.NamedTemporaryFile(delete=False) as tmp:
                 tmp.write(original_file.read())
                 file_path = tmp.name
-                
+
             with open(file_path, encoding="cp1251") as file:
                 reader = csv.DictReader(file, delimiter=";")
                 for row in reader:
@@ -150,7 +152,6 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         "last_registration_date": last_registration_date,
                         "sex": MALE,
                     }
-                    logger.warning(individual_data)
                     if family_id in family_ids:
                         individual = Individual(**individual_data, household=Household.objects.get(family_id=family_id))
                         individuals.append(individual)
@@ -232,6 +233,5 @@ def create_target_population_task(storage_id, program_id, tp_name):
         storage_obj.save(update_fields=["status"])
         raise
     finally:
-        logger.warning("Finally called")
         if file_path:
             os.remove(file_path)
