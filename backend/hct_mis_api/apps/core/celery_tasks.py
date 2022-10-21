@@ -214,8 +214,8 @@ def create_target_population_task(storage_id, program_id, tp_name):
                 business_area=business_area,
                 storage_file=storage_obj,
             )
-            target_population.refresh_stats()
             target_population.households.set(households)
+            target_population.refresh_stats()
             target_population.save()
             storage_obj.status = StorageFile.STATUS_FINISHED
             storage_obj.save(update_fields=["status"])
