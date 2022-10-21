@@ -1,5 +1,6 @@
 from django.core.management import call_command
 
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -46,8 +47,8 @@ class TestChangeHeadOfHousehold(APITestCase):
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.save()
 
-        cls.individual1 = IndividualFactory(household=cls.household)
-        cls.individual2 = IndividualFactory(household=cls.household)
+        cls.individual1: Individual = IndividualFactory(household=cls.household)
+        cls.individual2: Individual = IndividualFactory(household=cls.household)
         cls.individual1.relationship = HEAD
         cls.individual2.relationship = BROTHER_SISTER
         cls.individual1.save()
