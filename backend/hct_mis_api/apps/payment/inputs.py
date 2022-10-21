@@ -38,7 +38,7 @@ class CreateUpdatePaymentVerificationPlan(graphene.InputObjectType):
 
 
 class CreatePaymentVerificationInput(CreateUpdatePaymentVerificationPlan):
-    payment_plan_id = graphene.ID(required=True)
+    cash_or_payment_plan_id = graphene.ID(required=True)
 
 
 class EditPaymentVerificationInput(CreateUpdatePaymentVerificationPlan):

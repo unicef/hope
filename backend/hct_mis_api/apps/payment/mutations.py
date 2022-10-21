@@ -1,7 +1,5 @@
 import logging
 import math
-import graphene
-
 from base64 import b64decode
 from decimal import Decimal
 
@@ -11,6 +9,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
+import graphene
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
@@ -57,8 +56,8 @@ from hct_mis_api.apps.payment.schema import (
     PaymentVerificationNode,
 )
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.services.mark_as_failed import mark_as_failed
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
 )
@@ -92,13 +91,10 @@ class CreateVerificationPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        payment_plan_id = input.get("payment_plan_id")
-        node_name, obj_id = b64decode(payment_plan_id).decode().split(":")
+        cash_or_payment_plan_id = input.get("cash_or_payment_plan_id")
+        node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")
 
-        payment_plan_object = (
-            get_object_or_404(CashPlan, id=obj_id) if node_name == "CashPlanNode" else
-            get_object_or_404(PaymentPlan, id=obj_id)
-        )
+        payment_plan_object = get_object_or_404(CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, payment_plan_object.business_area)
 

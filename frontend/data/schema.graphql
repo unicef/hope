@@ -541,7 +541,7 @@ input CreatePaymentVerificationInput {
   fullListArguments: FullListArguments
   randomSamplingArguments: RandomSamplingArguments
   rapidProArguments: RapidProArguments
-  paymentPlanId: ID!
+  cashOrPaymentPlanId: ID!
 }
 
 type CreateProgram {
