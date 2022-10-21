@@ -56527,7 +56527,7 @@
             "defaultValue": null
           },
           {
-            "name": "paymentPlanId",
+            "name": "cashOrPaymentPlanId",
             "description": null,
             "type": {
               "kind": "NON_NULL",
