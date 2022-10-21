@@ -90,26 +90,26 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
         raise
 
 
-@transaction_celery_task()
+@app.task
 @sentry_tags
 def create_target_population_task(storage_id, program_id, tp_name):
     storage_obj = StorageFile.objects.get(id=storage_id)
     program = Program.objects.get(id=program_id)
 
     try:
-        with transaction.atomic("registration_datahub"):
+        with transaction.atomic(), transaction.atomic("registration_datahub"):
             registration_data_import = RegistrationDataImport.objects.create(
                 name=f"{storage_obj.file.name}_{program.name}", number_of_individuals=0, number_of_households=0
             )
 
             business_area = storage_obj.business_area
 
-            passport_type = DocumentType.objects.filter(
+            passport_type = DocumentType.objects.get(
                 Q(country=business_area.countries.first()) & Q(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
-            ).first()
-            tax_type = DocumentType.objects.filter(
+            )
+            tax_type = DocumentType.objects.get(
                 Q(country=business_area.countries.first()) & Q(type=IDENTIFICATION_TYPE_TAX_ID)
-            ).first()
+            )
 
             first_registration_date = datetime.now()
             last_registration_date = first_registration_date
@@ -119,11 +119,12 @@ def create_target_population_task(storage_id, program_id, tp_name):
 
             storage_obj.status = StorageFile.STATUS_PROCESSING
             storage_obj.save(update_fields=["status"])
+            rows_count = 0
 
             with open(storage_obj.file.path, encoding="cp1251") as file:
                 reader = csv.DictReader(file, delimiter=";")
-
                 for row in reader:
+                    rows_count += 1
                     family_id = row["ID_FAM"]
                     iban = row["IBAN"]
                     tax_id = row["N_ID"]
@@ -143,9 +144,8 @@ def create_target_population_task(storage_id, program_id, tp_name):
                     }
 
                     if family_id in family_ids:
-                        individuals.append(
-                            Individual(**individual_data, household=Household.objects.get(family_id=family_id))
-                        )
+                        individual = Individual(**individual_data, household=Household.objects.get(family_id=family_id))
+                        individuals.append(individual)
                     else:
                         individual = Individual.objects.create(**individual_data)
                         individual.refresh_from_db()
@@ -156,7 +156,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                             first_registration_date=first_registration_date,
                             last_registration_date=last_registration_date,
                             registration_data_import=registration_data_import,
-                            size=0,
+                            size=1,
                             family_id=family_id,
                             storage_obj=storage_obj,
                         )
@@ -170,52 +170,53 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         document_number=passport_id,
                         type=passport_type,
                         individual=individual,
-                        status=Document.STATUS_VALID,
+                        status=Document.STATUS_PENDING,
                     )
 
                     tax = Document(
-                        document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_VALID
+                        document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_PENDING
                     )
 
                     bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
 
                     documents.append(passport)
                     documents.append(tax)
-
                     bank_infos.append(bank_account_info)
+                    # TODO refactor chunking
+                    if rows_count % 1000 == 0:
+                        Individual.objects.bulk_create(individuals)
+                        Document.objects.bulk_create(documents)
+                        BankAccountInfo.objects.bulk_create(bank_infos)
+                        individuals=[]
+                        documents=[]
+                        bank_infos=[]
 
             Individual.objects.bulk_create(individuals)
-
             Document.objects.bulk_create(documents)
             BankAccountInfo.objects.bulk_create(bank_infos)
 
-            households = Household.objects.filter(family_id__in=list(family_ids))
-
-            for household in households:
-                household.size = Individual.objects.filter(household=household).count()
-            Household.objects.bulk_update(households, ["size"])
+            households = Household.objects.filter(family_id__in=list(family_ids)).only('id')
+            if len(family_ids) != rows_count:
+                for household in households:
+                    household.size = Individual.objects.filter(household=household).count()
+                Household.objects.bulk_update(households, ["size"])
 
             target_population = TargetPopulation.objects.create(
                 name=tp_name,
                 created_by=storage_obj.created_by,
                 program=program,
-                total_households_count=len(households),
-                total_individuals_count=Individual.objects.filter(
-                    household_id__in=list(households.values_list("id", flat=True))
-                ).count(),
                 status=TargetPopulation.STATUS_LOCKED,
                 build_status=TargetPopulation.BUILD_STATUS_OK,
                 business_area=business_area,
                 storage_file=storage_obj,
             )
-
+            target_population.refresh_stats()
             target_population.households.set(households)
 
             storage_obj.status = StorageFile.STATUS_FINISHED
             storage_obj.save(update_fields=["status"])
 
-    except Exception as e:
-        logger.error(e)
-
+    except Exception:
         storage_obj.status = StorageFile.STATUS_FAILED
         storage_obj.save(update_fields=["status"])
+        raise
