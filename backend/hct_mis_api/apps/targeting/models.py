@@ -1,6 +1,5 @@
 import logging
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField, IntegerRangeField
 from django.contrib.postgres.validators import (
@@ -17,25 +16,16 @@ from django.db.models import Count, JSONField, Q
 from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.core_fields_attributes import (
-    FieldFactory,
-    Scope,
-)
+from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.core.utils import (
-    map_unicef_ids_to_households_unicef_ids,
-)
-from hct_mis_api.apps.household.models import (
-    FEMALE,
-    MALE,
-    Household,
-    Individual,
-)
-from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
+from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,

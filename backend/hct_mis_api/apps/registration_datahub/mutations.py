@@ -253,7 +253,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
         if not obj_hct.can_be_merged():
-            raise ValidationError('can\'t merge RDI with this status')
+            raise ValidationError("can't merge RDI with this status")
         cls.validate(status=obj_hct.status)
 
         if not obj_hct.can_be_merged():
