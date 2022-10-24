@@ -1,7 +1,7 @@
 import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
-import { FeedbackNode } from '../../../../__generated__/graphql';
+import { SurveyNode } from '../../../../__generated__/graphql';
 
-export const headCells: HeadCell<FeedbackNode>[] = [
+export const headCells: HeadCell<SurveyNode>[] = [
   {
     disablePadding: false,
     label: 'Survey ID',

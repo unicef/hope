@@ -199,11 +199,10 @@ export const CreateSurveyPage = (): React.ReactElement => {
     : [];
 
   if (permissions === null) return null;
-  //TODO: add permissions
-  // if (
-  //   !hasPermissions(PERMISSIONS.ACCOUNTABILITY_SURVEYS_VIEW_CREATE, permissions)
-  // )
-  //   return <PermissionDenied />;
+  if (
+    !hasPermissions(PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE, permissions)
+  )
+    return <PermissionDenied />;
 
   const getSampleSizePercentage = (): string => {
     return `(${getPercentage(

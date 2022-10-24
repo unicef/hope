@@ -2,9 +2,9 @@ import React, { ReactElement } from 'react';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { decodeIdString } from '../../../../utils/utils';
 import {
-  AllFeedbacksQueryVariables,
-  FeedbackNode,
-  useAllFeedbacksQuery,
+  AllSurveysQueryVariables,
+  SurveyNode,
+  useAllSurveysQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
@@ -12,30 +12,28 @@ import { SurveysTableRow } from './SurveysTableRow';
 
 interface SurveysTableProps {
   filter;
-  businessArea: string;
   canViewDetails: boolean;
 }
 
 export const SurveysTable = ({
   filter,
-  businessArea,
   canViewDetails,
 }: SurveysTableProps): ReactElement => {
-  const initialVariables: AllFeedbacksQueryVariables = {
-    feedbackId: filter.feedbackId,
-    issueType: filter.issueType || '',
+  const initialVariables: AllSurveysQueryVariables = {
+    search: filter.search,
+    targetPopulation: filter.targetPopulation || '',
     createdBy: decodeIdString(filter.createdBy) || '',
     createdAtRange: filter.createdAtRange
       ? JSON.stringify(filter.createdAtRange)
       : '',
-    businessAreaSlug: businessArea,
+    program: filter.program || '',
   };
   return (
     <TableWrapper>
-      <UniversalTable<FeedbackNode, AllFeedbacksQueryVariables>
+      <UniversalTable<SurveyNode, AllSurveysQueryVariables>
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllFeedbacksQuery}
+        query={useAllSurveysQuery}
         queriedObjectName='allFeedbacks'
         defaultOrderBy='createdAt'
         defaultOrderDirection='desc'
@@ -43,7 +41,7 @@ export const SurveysTable = ({
         renderRow={(row) => (
           <SurveysTableRow
             key={row.id}
-            feedback={row}
+            survey={row}
             canViewDetails={canViewDetails}
           />
         )}

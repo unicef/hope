@@ -51,11 +51,11 @@ export type AccountabilityCommunicationMessageAgeInput = {
   max?: Maybe<Scalars['Int']>,
 };
 
-export type AccountabilityCommunicationMessageFullListArguments = {
+export type AccountabilityFullListArguments = {
   excludedAdminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
 
-export type AccountabilityCommunicationMessageRandomSamplingArguments = {
+export type AccountabilityRandomSamplingArguments = {
   excludedAdminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
   confidenceInterval: Scalars['Float'],
   marginOfError: Scalars['Float'],
@@ -360,6 +360,7 @@ export type BusinessAreaNode = Node & {
   logentrySet: PaymentVerificationLogEntryNodeConnection,
   messageSet: CommunicationMessageNodeConnection,
   feedbackSet: FeedbackNodeConnection,
+  surveySet: SurveyNodeConnection,
 };
 
 
@@ -497,6 +498,15 @@ export type BusinessAreaNodeMessageSetArgs = {
 
 
 export type BusinessAreaNodeFeedbackSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeSurveySetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -868,8 +878,8 @@ export type CreateAccountabilityCommunicationMessageInput = {
   targetPopulation?: Maybe<Scalars['ID']>,
   registrationDataImport?: Maybe<Scalars['ID']>,
   samplingType: SamplingChoices,
-  fullListArguments?: Maybe<AccountabilityCommunicationMessageFullListArguments>,
-  randomSamplingArguments?: Maybe<AccountabilityCommunicationMessageRandomSamplingArguments>,
+  fullListArguments?: Maybe<AccountabilityFullListArguments>,
+  randomSamplingArguments?: Maybe<AccountabilityRandomSamplingArguments>,
   title: Scalars['String'],
   body: Scalars['String'],
 };
@@ -1001,6 +1011,21 @@ export type CreateReportInput = {
   dateTo: Scalars['Date'],
   adminArea?: Maybe<Array<Maybe<Scalars['ID']>>>,
   program?: Maybe<Scalars['ID']>,
+};
+
+export type CreateSurveyInput = {
+  title: Scalars['String'],
+  category: Scalars['String'],
+  targetPopulation?: Maybe<Scalars['ID']>,
+  program?: Maybe<Scalars['ID']>,
+  samplingType: Scalars['String'],
+  fullListArguments?: Maybe<AccountabilityFullListArguments>,
+  randomSamplingArguments?: Maybe<AccountabilityRandomSamplingArguments>,
+};
+
+export type CreateSurveyMutation = {
+   __typename?: 'CreateSurveyMutation',
+  survey?: Maybe<SurveyNode>,
 };
 
 export type CreateTargetPopulationInput = {
@@ -1318,8 +1343,8 @@ export type GetAccountabilityCommunicationMessageSampleSizeInput = {
   targetPopulation?: Maybe<Scalars['ID']>,
   registrationDataImport?: Maybe<Scalars['ID']>,
   samplingType: SamplingChoices,
-  fullListArguments?: Maybe<AccountabilityCommunicationMessageFullListArguments>,
-  randomSamplingArguments?: Maybe<AccountabilityCommunicationMessageRandomSamplingArguments>,
+  fullListArguments?: Maybe<AccountabilityFullListArguments>,
+  randomSamplingArguments?: Maybe<AccountabilityRandomSamplingArguments>,
 };
 
 export type GetCashplanVerificationSampleSizeInput = {
@@ -1625,6 +1650,7 @@ export type HouseholdNode = Node & {
   selections: Array<HouseholdSelection>,
   messages: CommunicationMessageNodeConnection,
   feedbacks: FeedbackNodeConnection,
+  surveys: SurveyNodeConnection,
   adminAreaTitle?: Maybe<Scalars['String']>,
   selection?: Maybe<HouseholdSelection>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
@@ -1780,6 +1806,15 @@ export type HouseholdNodeMessagesArgs = {
 
 
 export type HouseholdNodeFeedbacksArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type HouseholdNodeSurveysArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -2948,6 +2983,7 @@ export type Mutations = {
   createFeedback?: Maybe<CreateFeedbackMutation>,
   updateFeedback?: Maybe<UpdateFeedbackMutation>,
   createFeedbackMessage?: Maybe<CreateFeedbackMessageMutation>,
+  createSurvey?: Maybe<CreateSurveyMutation>,
   createReport?: Maybe<CreateReport>,
   restartCreateReport?: Maybe<RestartCreateReport>,
   createDashboardReport?: Maybe<CreateDashboardReport>,
@@ -3019,6 +3055,11 @@ export type MutationsUpdateFeedbackArgs = {
 
 export type MutationsCreateFeedbackMessageArgs = {
   input: CreateFeedbackMessageInput
+};
+
+
+export type MutationsCreateSurveyArgs = {
+  input: CreateSurveyInput
 };
 
 
@@ -3620,6 +3661,7 @@ export type ProgramNode = Node & {
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   feedbackSet: FeedbackNodeConnection,
+  surveys: SurveyNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']>,
   totalUndeliveredQuantity?: Maybe<Scalars['Decimal']>,
@@ -3704,6 +3746,15 @@ export type ProgramNodeFeedbackSetArgs = {
   last?: Maybe<Scalars['Int']>
 };
 
+
+export type ProgramNodeSurveysArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
 export type ProgramNodeConnection = {
    __typename?: 'ProgramNodeConnection',
   pageInfo: PageInfo,
@@ -3756,6 +3807,8 @@ export type Query = {
   feedback?: Maybe<FeedbackNode>,
   allFeedbacks?: Maybe<FeedbackNodeConnection>,
   feedbackIssueTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  survey?: Maybe<SurveyNode>,
+  allSurveys?: Maybe<SurveyNodeConnection>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
@@ -3946,6 +3999,26 @@ export type QueryAllFeedbacksArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
   feedbackId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QuerySurveyArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllSurveysArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  program?: Maybe<Scalars['ID']>,
+  targetPopulation?: Maybe<Scalars['ID']>,
+  createdBy?: Maybe<Scalars['ID']>,
+  createdAtRange?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5347,6 +5420,61 @@ export type SteficonRuleNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export enum SurveyCategory {
+  RapidPro = 'RAPID_PRO',
+  Sms = 'SMS',
+  Manual = 'MANUAL'
+}
+
+export type SurveyNode = Node & {
+   __typename?: 'SurveyNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  unicefId?: Maybe<Scalars['String']>,
+  title: Scalars['String'],
+  body?: Maybe<Scalars['String']>,
+  category: SurveyCategory,
+  numberOfRecipients: Scalars['Int'],
+  createdBy?: Maybe<UserNode>,
+  recipients: HouseholdNodeConnection,
+  targetPopulation?: Maybe<TargetPopulationNode>,
+  program?: Maybe<ProgramNode>,
+  businessArea: UserBusinessAreaNode,
+  samplingType: SurveySamplingType,
+  fullListArguments?: Maybe<Scalars['JSONString']>,
+  randomSamplingArguments?: Maybe<Scalars['JSONString']>,
+  sampleSize: Scalars['Int'],
+};
+
+
+export type SurveyNodeRecipientsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type SurveyNodeConnection = {
+   __typename?: 'SurveyNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SurveyNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SurveyNodeEdge = {
+   __typename?: 'SurveyNodeEdge',
+  node?: Maybe<SurveyNode>,
+  cursor: Scalars['String'],
+};
+
+export enum SurveySamplingType {
+  FullList = 'FULL_LIST',
+  Random = 'RANDOM'
+}
+
 export type TableTotalCashTransferred = {
    __typename?: 'TableTotalCashTransferred',
   data?: Maybe<Array<Maybe<_TableTotalCashTransferredDataNode>>>,
@@ -5494,6 +5622,7 @@ export type TargetPopulationNode = Node & {
   paymentRecords: PaymentRecordNodeConnection,
   selections: Array<HouseholdSelection>,
   messages: CommunicationMessageNodeConnection,
+  surveys: SurveyNodeConnection,
   totalFamilySize?: Maybe<Scalars['Int']>,
   householdList?: Maybe<HouseholdNodeConnection>,
 };
@@ -5518,6 +5647,15 @@ export type TargetPopulationNodePaymentRecordsArgs = {
 
 
 export type TargetPopulationNodeMessagesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type TargetPopulationNodeSurveysArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -6119,6 +6257,7 @@ export type UserBusinessAreaNode = Node & {
   logentrySet: PaymentVerificationLogEntryNodeConnection,
   messageSet: CommunicationMessageNodeConnection,
   feedbackSet: FeedbackNodeConnection,
+  surveySet: SurveyNodeConnection,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
 
@@ -6264,6 +6403,15 @@ export type UserBusinessAreaNodeFeedbackSetArgs = {
   last?: Maybe<Scalars['Int']>
 };
 
+
+export type UserBusinessAreaNodeSurveySetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
 export type UserBusinessAreaNodeConnection = {
    __typename?: 'UserBusinessAreaNodeConnection',
   pageInfo: PageInfo,
@@ -6312,6 +6460,7 @@ export type UserNode = Node & {
   messages: CommunicationMessageNodeConnection,
   feedbacks: FeedbackNodeConnection,
   feedbackMessages: FeedbackMessageNodeConnection,
+  surveys: SurveyNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
 };
 
@@ -6458,6 +6607,15 @@ export type UserNodeFeedbacksArgs = {
 
 
 export type UserNodeFeedbackMessagesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeSurveysArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -10547,6 +10705,44 @@ export type RdiAutocompleteQuery = (
       & { node: Maybe<(
         { __typename?: 'RegistrationDataImportNode' }
         & Pick<RegistrationDataImportNode, 'id' | 'name'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllSurveysQueryVariables = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  program: Scalars['ID'],
+  targetPopulation?: Maybe<Scalars['ID']>,
+  createdAtRange?: Maybe<Scalars['String']>,
+  createdBy?: Maybe<Scalars['ID']>,
+  search?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllSurveysQuery = (
+  { __typename?: 'Query' }
+  & { allSurveys: Maybe<(
+    { __typename?: 'SurveyNodeConnection' }
+    & Pick<SurveyNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'SurveyNodeEdge' }
+      & Pick<SurveyNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'SurveyNode' }
+        & Pick<SurveyNode, 'id' | 'unicefId' | 'title' | 'category' | 'numberOfRecipients' | 'createdAt'>
+        & { createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+        )> }
       )> }
     )>> }
   )> }
@@ -20642,6 +20838,87 @@ export function useRdiAutocompleteLazyQuery(baseOptions?: ApolloReactHooks.LazyQ
 export type RdiAutocompleteQueryHookResult = ReturnType<typeof useRdiAutocompleteQuery>;
 export type RdiAutocompleteLazyQueryHookResult = ReturnType<typeof useRdiAutocompleteLazyQuery>;
 export type RdiAutocompleteQueryResult = ApolloReactCommon.QueryResult<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>;
+export const AllSurveysDocument = gql`
+    query AllSurveys($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $program: ID!, $targetPopulation: ID, $createdAtRange: String, $createdBy: ID, $search: String, $orderBy: String) {
+  allSurveys(offset: $offset, before: $before, after: $after, first: $first, last: $last, program: $program, targetPopulation: $targetPopulation, createdAtRange: $createdAtRange, createdBy: $createdBy, search: $search, orderBy: $orderBy) {
+    totalCount
+    pageInfo {
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        unicefId
+        title
+        category
+        numberOfRecipients
+        createdBy {
+          id
+          firstName
+          lastName
+          email
+        }
+        createdAt
+      }
+    }
+  }
+}
+    `;
+export type AllSurveysComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllSurveysQuery, AllSurveysQueryVariables>, 'query'> & ({ variables: AllSurveysQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllSurveysComponent = (props: AllSurveysComponentProps) => (
+      <ApolloReactComponents.Query<AllSurveysQuery, AllSurveysQueryVariables> query={AllSurveysDocument} {...props} />
+    );
+    
+export type AllSurveysProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllSurveysQuery, AllSurveysQueryVariables> & TChildProps;
+export function withAllSurveys<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllSurveysQuery,
+  AllSurveysQueryVariables,
+  AllSurveysProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllSurveysQuery, AllSurveysQueryVariables, AllSurveysProps<TChildProps>>(AllSurveysDocument, {
+      alias: 'allSurveys',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllSurveysQuery__
+ *
+ * To run a query within a React component, call `useAllSurveysQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllSurveysQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllSurveysQuery({
+ *   variables: {
+ *      offset: // value for 'offset'
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      program: // value for 'program'
+ *      targetPopulation: // value for 'targetPopulation'
+ *      createdAtRange: // value for 'createdAtRange'
+ *      createdBy: // value for 'createdBy'
+ *      search: // value for 'search'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllSurveysQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllSurveysQuery, AllSurveysQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllSurveysQuery, AllSurveysQueryVariables>(AllSurveysDocument, baseOptions);
+      }
+export function useAllSurveysLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllSurveysQuery, AllSurveysQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllSurveysQuery, AllSurveysQueryVariables>(AllSurveysDocument, baseOptions);
+        }
+export type AllSurveysQueryHookResult = ReturnType<typeof useAllSurveysQuery>;
+export type AllSurveysLazyQueryHookResult = ReturnType<typeof useAllSurveysLazyQuery>;
+export type AllSurveysQueryResult = ApolloReactCommon.QueryResult<AllSurveysQuery, AllSurveysQueryVariables>;
 export const AllFieldsAttributesDocument = gql`
     query AllFieldsAttributes {
   allFieldsAttributes {
@@ -21250,6 +21527,11 @@ export type ResolversTypes = {
   HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
   CommunicationMessageNodeConnection: ResolverTypeWrapper<CommunicationMessageNodeConnection>,
   CommunicationMessageNodeEdge: ResolverTypeWrapper<CommunicationMessageNodeEdge>,
+  SurveyNodeConnection: ResolverTypeWrapper<SurveyNodeConnection>,
+  SurveyNodeEdge: ResolverTypeWrapper<SurveyNodeEdge>,
+  SurveyNode: ResolverTypeWrapper<SurveyNode>,
+  SurveyCategory: SurveyCategory,
+  SurveySamplingType: SurveySamplingType,
   ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
   ReportNode: ResolverTypeWrapper<ReportNode>,
@@ -21386,8 +21668,8 @@ export type ResolversTypes = {
   CommunicationMessageRecipientMapNodeEdge: ResolverTypeWrapper<CommunicationMessageRecipientMapNodeEdge>,
   GetAccountabilityCommunicationMessageSampleSizeInput: GetAccountabilityCommunicationMessageSampleSizeInput,
   SamplingChoices: SamplingChoices,
-  AccountabilityCommunicationMessageFullListArguments: AccountabilityCommunicationMessageFullListArguments,
-  AccountabilityCommunicationMessageRandomSamplingArguments: AccountabilityCommunicationMessageRandomSamplingArguments,
+  AccountabilityFullListArguments: AccountabilityFullListArguments,
+  AccountabilityRandomSamplingArguments: AccountabilityRandomSamplingArguments,
   AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput,
   GetCommunicationMessageSampleSizeObject: ResolverTypeWrapper<GetCommunicationMessageSampleSizeObject>,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
@@ -21476,6 +21758,8 @@ export type ResolversTypes = {
   UpdateFeedbackMutation: ResolverTypeWrapper<UpdateFeedbackMutation>,
   CreateFeedbackMessageInput: CreateFeedbackMessageInput,
   CreateFeedbackMessageMutation: ResolverTypeWrapper<CreateFeedbackMessageMutation>,
+  CreateSurveyInput: CreateSurveyInput,
+  CreateSurveyMutation: ResolverTypeWrapper<CreateSurveyMutation>,
   CreateReportInput: CreateReportInput,
   CreateReport: ResolverTypeWrapper<CreateReport>,
   RestartCreateReportInput: RestartCreateReportInput,
@@ -21661,6 +21945,11 @@ export type ResolversParentTypes = {
   HouseholdSelection: HouseholdSelection,
   CommunicationMessageNodeConnection: CommunicationMessageNodeConnection,
   CommunicationMessageNodeEdge: CommunicationMessageNodeEdge,
+  SurveyNodeConnection: SurveyNodeConnection,
+  SurveyNodeEdge: SurveyNodeEdge,
+  SurveyNode: SurveyNode,
+  SurveyCategory: SurveyCategory,
+  SurveySamplingType: SurveySamplingType,
   ReportNodeConnection: ReportNodeConnection,
   ReportNodeEdge: ReportNodeEdge,
   ReportNode: ReportNode,
@@ -21797,8 +22086,8 @@ export type ResolversParentTypes = {
   CommunicationMessageRecipientMapNodeEdge: CommunicationMessageRecipientMapNodeEdge,
   GetAccountabilityCommunicationMessageSampleSizeInput: GetAccountabilityCommunicationMessageSampleSizeInput,
   SamplingChoices: SamplingChoices,
-  AccountabilityCommunicationMessageFullListArguments: AccountabilityCommunicationMessageFullListArguments,
-  AccountabilityCommunicationMessageRandomSamplingArguments: AccountabilityCommunicationMessageRandomSamplingArguments,
+  AccountabilityFullListArguments: AccountabilityFullListArguments,
+  AccountabilityRandomSamplingArguments: AccountabilityRandomSamplingArguments,
   AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput,
   GetCommunicationMessageSampleSizeObject: GetCommunicationMessageSampleSizeObject,
   ChoiceObject: ChoiceObject,
@@ -21887,6 +22176,8 @@ export type ResolversParentTypes = {
   UpdateFeedbackMutation: UpdateFeedbackMutation,
   CreateFeedbackMessageInput: CreateFeedbackMessageInput,
   CreateFeedbackMessageMutation: CreateFeedbackMessageMutation,
+  CreateSurveyInput: CreateSurveyInput,
+  CreateSurveyMutation: CreateSurveyMutation,
   CreateReportInput: CreateReportInput,
   CreateReport: CreateReport,
   RestartCreateReportInput: RestartCreateReportInput,
@@ -22154,6 +22445,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
   messageSet?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, BusinessAreaNodeMessageSetArgs>,
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, BusinessAreaNodeFeedbackSetArgs>,
+  surveySet?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, BusinessAreaNodeSurveySetArgs>,
 };
 
 export type BusinessAreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeConnection'] = ResolversParentTypes['BusinessAreaNodeConnection']> = {
@@ -22425,6 +22717,10 @@ export type CreateProgramResolvers<ContextType = any, ParentType extends Resolve
 
 export type CreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateReport'] = ResolversParentTypes['CreateReport']> = {
   report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
+};
+
+export type CreateSurveyMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateSurveyMutation'] = ResolversParentTypes['CreateSurveyMutation']> = {
+  survey?: Resolver<Maybe<ResolversTypes['SurveyNode']>, ParentType, ContextType>,
 };
 
 export type CreateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']> = {
@@ -22835,6 +23131,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, HouseholdNodeMessagesArgs>,
   feedbacks?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, HouseholdNodeFeedbacksArgs>,
+  surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, HouseholdNodeSurveysArgs>,
   adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -23328,6 +23625,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createFeedback?: Resolver<Maybe<ResolversTypes['CreateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackArgs, 'input'>>,
   updateFeedback?: Resolver<Maybe<ResolversTypes['UpdateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateFeedbackArgs, 'input'>>,
   createFeedbackMessage?: Resolver<Maybe<ResolversTypes['CreateFeedbackMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackMessageArgs, 'input'>>,
+  createSurvey?: Resolver<Maybe<ResolversTypes['CreateSurveyMutation']>, ParentType, ContextType, RequireFields<MutationsCreateSurveyArgs, 'input'>>,
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
   restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>,
   createDashboardReport?: Resolver<Maybe<ResolversTypes['CreateDashboardReport']>, ParentType, ContextType, RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>>,
@@ -23385,7 +23683,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'GrievanceTicketNode' | 'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'GrievanceDocumentNode' | 'CommunicationMessageRecipientMapNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'GrievanceTicketNode' | 'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'SurveyNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'GrievanceDocumentNode' | 'CommunicationMessageRecipientMapNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -23539,6 +23837,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, ProgramNodeFeedbackSetArgs>,
+  surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, ProgramNodeSurveysArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
@@ -23572,6 +23871,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   feedback?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType, RequireFields<QueryFeedbackArgs, 'id'>>,
   allFeedbacks?: Resolver<Maybe<ResolversTypes['FeedbackNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllFeedbacksArgs, 'businessAreaSlug'>>,
   feedbackIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  survey?: Resolver<Maybe<ResolversTypes['SurveyNode']>, ParentType, ContextType, RequireFields<QuerySurveyArgs, 'id'>>,
+  allSurveys?: Resolver<Maybe<ResolversTypes['SurveyNodeConnection']>, ParentType, ContextType, QueryAllSurveysArgs>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
@@ -24099,6 +24400,38 @@ export type SteficonRuleNodeEdgeResolvers<ContextType = any, ParentType extends 
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SurveyNode'] = ResolversParentTypes['SurveyNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  body?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  category?: Resolver<ResolversTypes['SurveyCategory'], ParentType, ContextType>,
+  numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  recipients?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, SurveyNodeRecipientsArgs>,
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  samplingType?: Resolver<ResolversTypes['SurveySamplingType'], ParentType, ContextType>,
+  fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
+  randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
+  sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+};
+
+export type SurveyNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SurveyNodeConnection'] = ResolversParentTypes['SurveyNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SurveyNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SurveyNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SurveyNodeEdge'] = ResolversParentTypes['SurveyNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SurveyNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type TableTotalCashTransferredResolvers<ContextType = any, ParentType extends ResolversParentTypes['TableTotalCashTransferred'] = ResolversParentTypes['TableTotalCashTransferred']> = {
   data?: Resolver<Maybe<Array<Maybe<ResolversTypes['_TableTotalCashTransferredDataNode']>>>, ParentType, ContextType>,
 };
@@ -24190,6 +24523,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, TargetPopulationNodeMessagesArgs>,
+  surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, TargetPopulationNodeSurveysArgs>,
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   householdList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeHouseholdListArgs>,
 };
@@ -24604,6 +24938,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
   messageSet?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeMessageSetArgs>,
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeFeedbackSetArgs>,
+  surveySet?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeSurveySetArgs>,
   permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
 };
 
@@ -24652,6 +24987,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, UserNodeMessagesArgs>,
   feedbacks?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, UserNodeFeedbacksArgs>,
   feedbackMessages?: Resolver<ResolversTypes['FeedbackMessageNodeConnection'], ParentType, ContextType, UserNodeFeedbackMessagesArgs>,
+  surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, UserNodeSurveysArgs>,
   businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, UserNodeBusinessAreasArgs>,
 };
 
@@ -24742,6 +25078,7 @@ export type Resolvers<ContextType = any> = {
   CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
   CreateReport?: CreateReportResolvers<ContextType>,
+  CreateSurveyMutation?: CreateSurveyMutationResolvers<ContextType>,
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
   CreateTicketNoteMutation?: CreateTicketNoteMutationResolvers<ContextType>,
   Date?: GraphQLScalarType,
@@ -24897,6 +25234,9 @@ export type Resolvers<ContextType = any> = {
   SteficonRuleNode?: SteficonRuleNodeResolvers<ContextType>,
   SteficonRuleNodeConnection?: SteficonRuleNodeConnectionResolvers<ContextType>,
   SteficonRuleNodeEdge?: SteficonRuleNodeEdgeResolvers<ContextType>,
+  SurveyNode?: SurveyNodeResolvers<ContextType>,
+  SurveyNodeConnection?: SurveyNodeConnectionResolvers<ContextType>,
+  SurveyNodeEdge?: SurveyNodeEdgeResolvers<ContextType>,
   TableTotalCashTransferred?: TableTotalCashTransferredResolvers<ContextType>,
   TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>,
   TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<ContextType>,

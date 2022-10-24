@@ -41,9 +41,9 @@ export const SurveysFilters = ({
       <Grid container alignItems='center' spacing={3}>
         <Grid xs={3} item>
           <SearchTextField
-            value={filter.surveyId}
+            value={filter.search}
             label='Search'
-            onChange={(e) => handleFilterChange(e, 'surveyId')}
+            onChange={(e) => handleFilterChange(e, 'search')}
             data-cy='filters-search'
             fullWidth
           />
