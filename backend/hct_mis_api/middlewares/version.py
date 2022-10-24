@@ -1,11 +1,10 @@
-from types import FunctionType
-from typing import Any
+from typing import Any, Callable
 
 from django.conf import settings
 
 
 class VersionMiddleware:
-    def __init__(self, get_response: FunctionType):
+    def __init__(self, get_response: Callable):
         self.get_response = get_response
         super().__init__()
 

@@ -1,6 +1,5 @@
 import sys
-from types import FunctionType
-from typing import Any
+from typing import Any, Callable
 
 from django.http import HttpRequest
 
@@ -8,7 +7,7 @@ from sentry_sdk import configure_scope
 
 
 class SentryScopeMiddleware:
-    def __init__(self, get_response: FunctionType) -> None:
+    def __init__(self, get_response: Callable) -> None:
         self.get_response = get_response
         super().__init__()
 
