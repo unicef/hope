@@ -27,7 +27,7 @@ from django.utils.safestring import mark_safe
 import xlrd
 from admin_extra_buttons.api import button
 from admin_extra_buttons.decorators import choice, view
-from admin_extra_buttons.mixins import confirm_action
+from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
@@ -38,8 +38,10 @@ from xlrd import XLRDError
 from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
+    create_target_population_task,
     upload_new_kobo_template_and_update_flex_fields_task,
 )
+from hct_mis_api.apps.core.forms import ProgramForm
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
@@ -51,6 +53,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -581,7 +584,7 @@ class CountryCodeMapAdmin(HOPEModelAdminBase):
 
 
 @admin.register(StorageFile)
-class StorageFileAdmin(HOPEModelAdminBase):
+class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("file_name", "file", "business_area", "file_size", "created_by", "created_at")
 
     def has_change_permission(self, request, obj=None):
@@ -593,4 +596,31 @@ class StorageFileAdmin(HOPEModelAdminBase):
             return request.user.can_download_storage_files(obj.business_area)
 
     def has_view_permission(self, request, obj=None):
-        return True
+        return request.user.can_download_storage_files()
+
+    def has_add_permission(self, request):
+        return request.user.can_download_storage_files()
+
+    @button(label="Create eDopomoga TP")
+    def create_tp(self, request, pk):
+        storage_obj = StorageFile.objects.get(pk=pk)
+        context = self.get_common_context(
+            request,
+            pk,
+        )
+        if request.method == "GET":
+            if TargetPopulation.objects.filter(storage_file=storage_obj).exists():
+                self.message_user(request, "TargetPopulation for this storageFile have been created", messages.ERROR)
+                return redirect("..")
+
+            form = ProgramForm(business_area_id=storage_obj.business_area_id)
+            context["form"] = form
+            return TemplateResponse(request, "core/admin/create_tp.html", context)
+        else:
+            program_id = request.POST.get("program")
+            tp_name = request.POST.get("name")
+
+            create_target_population_task.delay(storage_obj.pk, program_id, tp_name)
+
+            self.message_user(request, "Creation of TargetPopulation started")
+            return redirect("..")
