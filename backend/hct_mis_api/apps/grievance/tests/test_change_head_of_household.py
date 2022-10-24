@@ -1,6 +1,5 @@
 from django.core.management import call_command
 
-from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -14,7 +13,12 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import AUNT_UNCLE, BROTHER_SISTER, HEAD
+from hct_mis_api.apps.household.models import (
+    AUNT_UNCLE,
+    BROTHER_SISTER,
+    HEAD,
+    Individual,
+)
 
 
 class TestChangeHeadOfHousehold(APITestCase):
