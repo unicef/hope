@@ -63,6 +63,9 @@
             "name": "SteficonRuleNode"
           },
           {
+            "name": "SurveyNode"
+          },
+          {
             "name": "ReportNode"
           },
           {
