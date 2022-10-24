@@ -12,9 +12,14 @@ from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.household.models import Household
 
-from .filters import FeedbackFilter, MessageRecipientsMapFilter, MessagesFilter
+from .filters import (
+    FeedbackFilter,
+    MessageRecipientsMapFilter,
+    MessagesFilter,
+    SurveyFilter,
+)
 from .inputs import GetAccountabilityCommunicationMessageSampleSizeInput
-from .models import Feedback, FeedbackMessage, Message
+from .models import Feedback, FeedbackMessage, Message, Survey
 from .services.message_crud_services import MessageCrudServices
 from .services.sampling import Sampling
 from .services.verifiers import MessageArgumentVerifier
@@ -91,6 +96,21 @@ class GetCommunicationMessageSampleSizeObject(BaseNodePermissionMixin, graphene.
     sample_size = graphene.Int()
 
 
+class SurveyNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopeOneOfPermissionClass(
+            Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
+            Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
+        ),
+    )
+
+    class Meta:
+        model = Survey
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
+        filter_fields = []
+
+
 class Query(graphene.ObjectType):
     accountability_communication_message = graphene.relay.Node.Field(CommunicationMessageNode)
     all_accountability_communication_messages = DjangoPermissionFilterConnectionField(
@@ -118,6 +138,13 @@ class Query(graphene.ObjectType):
 
     feedback_issue_type_choices = graphene.List(ChoiceObject)
 
+    survey = graphene.relay.Node.Field(SurveyNode)
+    all_surveys = DjangoPermissionFilterConnectionField(
+        SurveyNode,
+        filterset_class=SurveyFilter,
+        permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
+    )
+
     def resolve_feedback_issue_type_choices(self, info, **kwargs):
         return to_choice_object(Feedback.ISSUE_TYPE_CHOICES)
 
@@ -130,7 +157,7 @@ class Query(graphene.ObjectType):
         households = MessageCrudServices._get_households(inputs)
 
         sampling = Sampling(inputs, households)
-        number_of_recipients, sample_size = sampling.generate_sampling(inputs.get("sampling_type"))
+        number_of_recipients, sample_size = sampling.generate_sampling()
 
         return {
             "number_of_recipients": number_of_recipients,
