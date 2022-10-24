@@ -480,9 +480,13 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
 
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
+        documents = ImportedDocument.objects.all()
+        bank_accounts = ImportedBankAccountInfo.objects.all()
 
         self.assertEqual(1, households.count())
         self.assertEqual(2, individuals.count())
+        self.assertEqual(3, documents.count())
+        self.assertEqual(1, bank_accounts.count())
 
         individual = individuals.get(full_name="Test Testowski")
 
