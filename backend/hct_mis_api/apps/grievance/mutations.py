@@ -660,7 +660,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def get_close_function(cls, category, issue_type):
+    def get_close_function(cls, category, issue_type) -> Callable:
         function_or_nested_issue_types = cls.CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING.get(category)
         if isinstance(function_or_nested_issue_types, dict) and issue_type:
             return function_or_nested_issue_types.get(issue_type)
@@ -710,7 +710,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                 for individual in selected_individuals:
                     traverse_sibling_tickets(grievance_ticket, individual)
 
-            close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
+            close_function: Callable = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket, info)
             grievance_ticket.refresh_from_db()
         if status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
