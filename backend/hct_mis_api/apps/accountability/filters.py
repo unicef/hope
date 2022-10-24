@@ -1,12 +1,21 @@
+from django.contrib.auth import get_user_model
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, ChoiceFilter, FilterSet, UUIDFilter
+from django_filters import (
+    CharFilter,
+    ChoiceFilter,
+    FilterSet,
+    ModelChoiceFilter,
+    UUIDFilter,
+)
 
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
 
-from .models import Feedback, FeedbackMessage, Message
+from ..program.models import Program
+from ..targeting.models import TargetPopulation
+from .models import Feedback, FeedbackMessage, Message, Survey
 
 
 class MessagesFilter(FilterSet):
@@ -100,3 +109,30 @@ class FeedbackMessageFilter(FilterSet):
     class Meta:
         fields = ("id",)
         model = FeedbackMessage
+
+
+class SurveyFilter(FilterSet):
+    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    search = CharFilter(method="filter_search")
+
+    def filter_search(self, queryset, name, value):
+        return queryset.filter(title__icontains=value)
+
+    class Meta:
+        model = Survey
+        fields = {
+            "program": ["exact"],
+            "target_population": ["exact"],
+            "created_by": ["exact"],
+        }
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            "unicef_id",
+            "title",
+            "category",
+            "number_of_recipient",
+            "created_by",
+            "created_at",
+        )
+    )
