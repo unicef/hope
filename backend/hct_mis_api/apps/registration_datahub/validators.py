@@ -93,6 +93,7 @@ class ImportDataValidator(BaseValidator):
         "electoral_card_issuer_i_c": "electoral_card_no_i_c",
         "national_id_issuer_i_c": "national_id_no_i_c",
         "national_passport_issuer_i_c": "national_passport_i_c",
+        "tax_id_issuer_i_c": "tax_id_no_i_c",
         "other_id_issuer_i_c": "other_id_type_i_c",
         # identities
         "scope_id_issuer_i_c": "scope_id_no_i_c",
@@ -231,6 +232,7 @@ class ImportDataInstanceValidator:
         "electoral_card_issuer_i_c": "electoral_card_no_i_c",
         "national_id_issuer_i_c": "national_id_no_i_c",
         "national_passport_issuer_i_c": "national_passport_i_c",
+        "tax_id_issuer_i_c": "tax_id_no_i_c",
         "other_id_issuer_i_c": "other_id_type_i_c",
         # identities
         "scope_id_issuer_i_c": "scope_id_no_i_c",
@@ -662,6 +664,12 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 },
                 "national_passport_i_c": {
                     "type": "NATIONAL_PASSPORT",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "tax_id_no_i_c": {
+                    "type": "TAX_ID",
                     "validation_data": [],
                     "numbers": [],
                     "issuing_countries": [],
@@ -1224,6 +1232,12 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 },
                 "national_passport_i_c": {
                     "type": "NATIONAL_PASSPORT",
+                    "validation_data": [],
+                    "numbers": [],
+                    "issuing_countries": [],
+                },
+                "tax_id_no_i_c": {
+                    "type": "TAX_ID",
                     "validation_data": [],
                     "numbers": [],
                     "issuing_countries": [],
