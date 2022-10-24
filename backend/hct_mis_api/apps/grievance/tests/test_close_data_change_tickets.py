@@ -1,5 +1,5 @@
-from datetime import date
 import uuid
+from datetime import date
 
 from django.core.management import call_command
 
