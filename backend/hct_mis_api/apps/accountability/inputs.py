@@ -1,9 +1,11 @@
 import graphene
 
+from ..program.models import Program
+from ..targeting.models import TargetPopulation
 from .models import Message
 
 
-class AccountabilityCommunicationMessageFullListArguments(graphene.InputObjectType):
+class AccountabilityFullListArguments(graphene.InputObjectType):
     excluded_admin_areas = graphene.List(graphene.String)
 
 
@@ -12,7 +14,7 @@ class AccountabilityCommunicationMessageAgeInput(graphene.InputObjectType):
     max = graphene.Int()
 
 
-class AccountabilityCommunicationMessageRandomSamplingArguments(AccountabilityCommunicationMessageFullListArguments):
+class AccountabilityRandomSamplingArguments(AccountabilityFullListArguments):
     confidence_interval = graphene.Float(required=True)
     margin_of_error = graphene.Float(required=True)
     age = AccountabilityCommunicationMessageAgeInput()
@@ -24,8 +26,8 @@ class GetAccountabilityCommunicationMessageSampleSizeInput(graphene.InputObjectT
     target_population = graphene.ID()
     registration_data_import = graphene.ID()
     sampling_type = graphene.Enum.from_enum(Message.SamplingChoices)(required=True)
-    full_list_arguments = AccountabilityCommunicationMessageFullListArguments()
-    random_sampling_arguments = AccountabilityCommunicationMessageRandomSamplingArguments()
+    full_list_arguments = AccountabilityFullListArguments()
+    random_sampling_arguments = AccountabilityRandomSamplingArguments()
 
 
 class CreateAccountabilityCommunicationMessageInput(GetAccountabilityCommunicationMessageSampleSizeInput):
@@ -66,3 +68,13 @@ class CreateFeedbackMessageInput(graphene.InputObjectType):
 
     description = graphene.String(required=True)
     feedback = graphene.GlobalID(node=FeedbackMessageNode, required=True)
+
+
+class CreateSurveyInput(graphene.InputObjectType):
+    title = graphene.String(required=True)
+    category = graphene.String(required=True)
+    target_population = graphene.GlobalID(node=TargetPopulation, required=False)
+    program = graphene.GlobalID(node=Program, required=False)
+    sampling_type = graphene.String(required=True)
+    full_list_arguments = AccountabilityFullListArguments()
+    random_sampling_arguments = AccountabilityRandomSamplingArguments()

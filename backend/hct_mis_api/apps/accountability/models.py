@@ -143,3 +143,66 @@ class FeedbackMessage(TimeStampedUUIDModel):
         null=True,
         verbose_name=_("Created by"),
     )
+
+
+class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "title",
+            "category",
+            "number_of_recipient",
+            "created_by",
+            "target_population",
+            "program",
+            "sampling_type",
+            "full_list_arguments",
+            "random_sampling_arguments",
+            "sample_size",
+        ]
+    )
+
+    CATEGORY_RAPID_PRO = "RAPID_PRO"
+    CATEGORY_SMS = "SMS"
+    CATEGORY_MANUAL = "MANUAL"
+    CATEGORY_CHOICES = (
+        (CATEGORY_RAPID_PRO, _("Survey with RapidPro")),
+        (CATEGORY_SMS, _("Survey with SMS")),
+        (CATEGORY_MANUAL, _("Survey with manual process")),
+    )
+
+    SAMPLING_FULL_LIST = "FULL_LIST"
+    SAMPLING_RANDOM = "RANDOM"
+    SAMPLING_CHOICES = (
+        (SAMPLING_FULL_LIST, _("Full list")),
+        (SAMPLING_RANDOM, _("Random")),
+    )
+
+    title = models.CharField(max_length=60)
+    body = models.TextField(max_length=1000, blank=True, null=True)
+    category = models.CharField(max_length=16, choices=CATEGORY_CHOICES)
+    number_of_recipients = models.PositiveIntegerField(default=0)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="surveys",
+        null=True,
+        blank=True,
+        verbose_name=_("Created by"),
+    )
+    recipients = models.ManyToManyField("household.Household", related_name="surveys", blank=True)
+    target_population = models.ForeignKey(
+        "targeting.TargetPopulation", related_name="surveys", blank=True, null=True, on_delete=models.SET_NULL
+    )
+    program = models.ForeignKey(
+        "program.Program",
+        related_name="surveys",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+
+    sampling_type = models.CharField(max_length=50, choices=SAMPLING_CHOICES, default=SAMPLING_FULL_LIST)
+    full_list_arguments = models.JSONField(blank=True, null=True)
+    random_sampling_arguments = models.JSONField(blank=True, null=True)
+    sample_size = models.PositiveIntegerField(default=0)
