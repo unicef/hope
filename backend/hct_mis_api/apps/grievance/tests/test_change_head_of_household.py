@@ -95,6 +95,7 @@ class TestChangeHeadOfHousehold(APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
+
         self.individual1.refresh_from_db()
         self.individual2.refresh_from_db()
 
@@ -109,7 +110,7 @@ class TestChangeHeadOfHousehold(APITestCase):
         self.household.head_of_household = self.individual1
         self.household.save()
 
-        self.graphql_request(
+        response = self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user},
             variables={
@@ -117,6 +118,7 @@ class TestChangeHeadOfHousehold(APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
+        self.assertFalse("errors" in response)
         self.individual1.refresh_from_db()
         self.individual2.refresh_from_db()
 

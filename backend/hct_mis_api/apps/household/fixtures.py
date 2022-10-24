@@ -170,6 +170,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
+    unicef_id = factory.Faker("uuid4")
 
 
 class BankAccountInfoFactory(factory.DjangoModelFactory):
