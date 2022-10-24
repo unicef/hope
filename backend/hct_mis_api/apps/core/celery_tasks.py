@@ -6,7 +6,6 @@ from datetime import datetime
 from functools import wraps
 
 from django.db import transaction
-from django.db.models import Q
 from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
@@ -176,7 +175,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         type=passport_type,
                         individual=individual,
                         status=Document.STATUS_INVALID,
-                        country=business_area.countries.first()
+                        country=business_area.countries.first(),
                     )
 
                     tax = Document(
@@ -184,7 +183,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         type=tax_type,
                         individual=individual,
                         status=Document.STATUS_INVALID,
-                        country=business_area.countries.first()
+                        country=business_area.countries.first(),
                     )
 
                     bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
