@@ -17,7 +17,6 @@ from hct_mis_api.apps.household.models import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    SEX_CHOICE,
     UNICEF,
     BankAccountInfo,
     Document,
@@ -27,6 +26,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    SEX_CHOICE,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 

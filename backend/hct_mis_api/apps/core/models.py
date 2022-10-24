@@ -345,6 +345,18 @@ class CustomDatabaseScheduler(DatabaseScheduler):
 
 
 class StorageFile(models.Model):
+    STATUS_NOT_PROCESSED = "Not processed"
+    STATUS_PROCESSING = "Processing"
+    STATUS_FINISHED = "Finished"
+    STATUS_FAILED = "Failed"
+
+    STATUS_CHOICE = Choices(
+        (STATUS_NOT_PROCESSED, _("Not processed")),
+        (STATUS_PROCESSING, _("Processing")),
+        (STATUS_FINISHED, _("Finished")),
+        (STATUS_FAILED, _("Failed")),
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -355,6 +367,12 @@ class StorageFile(models.Model):
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
     file = models.FileField(upload_to="files")
+
+    status = models.CharField(
+        choices=STATUS_CHOICE,
+        default=STATUS_NOT_PROCESSED,
+        max_length=25,
+    )
 
     @property
     def file_name(self):

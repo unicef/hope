@@ -50,9 +50,12 @@ class Individual(SessionModel):
     STATUS_CHOICE = ((INACTIVE, "Inactive"), (ACTIVE, "Active"))
     MALE = "MALE"
     FEMALE = "FEMALE"
+    UNKNOWN = "UNKNOWN"
+
     SEX_CHOICE = (
         (MALE, _("Male")),
         (FEMALE, _("Female")),
+        (UNKNOWN, _("Unknown")),
     )
 
     mis_id = models.UUIDField()
@@ -64,10 +67,7 @@ class Individual(SessionModel):
     family_name = models.CharField(max_length=255, null=True)
     given_name = models.CharField(max_length=255, null=True)
     middle_name = models.CharField(max_length=255, null=True)
-    sex = models.CharField(
-        max_length=255,
-        choices=SEX_CHOICE,
-    )
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE)
     date_of_birth = models.DateField()
     estimated_date_of_birth = models.BooleanField()
     relationship = models.CharField(

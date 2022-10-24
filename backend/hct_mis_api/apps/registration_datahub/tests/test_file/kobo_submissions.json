@@ -34,7 +34,11 @@
                 "individual_questions/more_information/birth_certificate_no_i_c": "123123123",
                 "individual_questions/more_information/birth_certificate_issuer_i_c": "AFG",
                 "individual_questions/birth_date_i_c": "1960-08-11",
-                "individual_questions/is_only_collector": "NO"
+                "individual_questions/is_only_collector": "NO",
+                "individual_questions/identification/tax_id_no_i_c": "45638193",
+                "individual_questions/identification/tax_id_issuer_i_c": "UKR",
+                "individual_questions/identification/bank_account_number_i_c": "UA3481939838393949",
+                "individual_questions/identification/bank_name_i_c": "Privat"
             },
             {
                 "individual_questions/role_i_c": "alternate",
