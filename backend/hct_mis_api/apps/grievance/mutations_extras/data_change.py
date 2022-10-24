@@ -669,13 +669,14 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     payment_channels = individual_data.pop("payment_channels", [])
     role = individual_data.pop("role", ROLE_NO_ROLE)
     first_registration_date = timezone.now()
-    individual = Individual(
+    individual = Individual.objects.create(
         household=household,
         first_registration_date=first_registration_date,
         last_registration_date=first_registration_date,
         business_area=grievance_ticket.business_area,
         **individual_data,
     )
+    individual.refresh_from_db()
 
     documents_to_create = [handle_add_document(document, individual) for document in documents]
     identities_to_create = [handle_add_identity(identity, individual) for identity in identities]

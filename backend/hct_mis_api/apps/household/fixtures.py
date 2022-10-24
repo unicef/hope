@@ -78,6 +78,7 @@ class HouseholdFactory(factory.DjangoModelFactory):
     class Meta:
         model = Household
 
+    unicef_id = factory.Sequence(lambda n: f"HH-{n}")
     consent_sign = factory.django.ImageField(color="blue")
     consent = True
     consent_sharing = (UNICEF, HUMANITARIAN_PARTNER)
@@ -170,6 +171,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
+    unicef_id = factory.Sequence(lambda n: f"IND-{n}")
 
 
 class BankAccountInfoFactory(factory.DjangoModelFactory):

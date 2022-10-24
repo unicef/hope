@@ -21,7 +21,7 @@ def get_individual(individual_id: str) -> Individual:
 
 def select_individual(
     ticket_details: TicketNeedsAdjudicationDetails,
-    selected_individual: List[Individual],
+    selected_individual: Individual,
     ticket_duplicates: List[Individual],
     ticket_individuals: List[Individual],
 ):
