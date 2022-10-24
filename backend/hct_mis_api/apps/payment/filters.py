@@ -1,5 +1,6 @@
 from base64 import b64decode
 
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Case, CharField, Count, Q, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
@@ -118,11 +119,12 @@ class PaymentVerificationFilter(FilterSet):
 
     def payment_plan_filter(self, qs, name, value):
         node_name, obj_id = b64decode(value).decode().split(":")
-        key =(
-            "payment_verification_plan__cash_plan__id" if node_name == "CashPlanNode" else
-            "payment_verification_plan__payment_plan__id"
+        # content type for PaymentPlan or CashPlan
+        ct_id = ContentType.objects.filter(app_label="payment", model=node_name[:-4].lower()).first().pk
+        return qs.filter(
+            payment_verification_plan__payment_plan_object_id=obj_id,
+            payment_verification_plan__payment_plan_content_type_id=ct_id,
         )
-        return qs.filter(**{key: obj_id})
 
 
 class PaymentVerificationPlanFilter(FilterSet):
@@ -381,15 +383,20 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
     if verification_status:
         queryset = queryset.filter(payment_verification_summary__status__in=verification_status)
 
-    # TODO: add filters below
     if service_provider:
-        pass
+        # TODO: FIX ME
+        queryset = queryset.filter(fsp_names__istartswith=service_provider)
+
     if delivery_type:
-        # ["delivery_type",] PaymentRecord.DELIVERY_TYPE_CHOICE
-        pass
+        # TODO: FIX ME
+        queryset = queryset.filter(Q(delivery_types__istartswith=delivery_type)) # | Q(delivery_types__in=delivery_type)
 
     if search:
-        pass
+        q_obj = Q()
+        values = search.split(" ")
+        for value in values:
+            q_obj |= Q(unicef_id__istartswith=value)
+        queryset = queryset.filter(q_obj)
 
     return queryset
 
