@@ -106,6 +106,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
             )
 
             business_area = storage_obj.business_area
+            country = business_area.countries.first()
 
             passport_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
             tax_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_TAX_ID)
@@ -175,7 +176,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         type=passport_type,
                         individual=individual,
                         status=Document.STATUS_INVALID,
-                        country=business_area.countries.first(),
+                        country=country,
                     )
 
                     tax = Document(
@@ -183,7 +184,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         type=tax_type,
                         individual=individual,
                         status=Document.STATUS_INVALID,
-                        country=business_area.countries.first(),
+                        country=country,
                     )
 
                     bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
