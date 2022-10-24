@@ -176,7 +176,7 @@ class GenerateReportContentHelpers:
     def format_cash_plan_verification_row(self, verification: PaymentVerificationPlan) -> tuple:
         return (
             verification.id,
-            verification.payment_plan_obj.unicef_id,
+            verification.payment_plan_obj.get_unicef_id,
             verification.payment_plan_obj.program.name,
             self._format_date(verification.activation_date),
             verification.status,
@@ -261,7 +261,7 @@ class GenerateReportContentHelpers:
         return (
             payment_verification.payment_verification_plan.id,
             payment_verification.get_payment.unicef_id,
-            payment_verification.payment_verification_plan.get_payment_plan.unicef_id,
+            payment_verification.payment_verification_plan.get_payment_plan.get_unicef_id,
             self._format_date(payment_verification.payment_verification_plan.completion_date),
             payment_verification.received_amount,
             payment_verification.status,
@@ -280,7 +280,7 @@ class GenerateReportContentHelpers:
     @classmethod
     def format_payment_plan_row(self, payment_plan: PaymentPlan) -> tuple:
         return (
-            payment_plan.unicef_id,
+            payment_plan.get_unicef_id,
             payment_plan.get_status_display(),
             payment_plan.total_households_count,
             payment_plan.get_currency_display(),

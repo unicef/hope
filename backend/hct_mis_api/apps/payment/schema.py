@@ -11,7 +11,6 @@ from django.db.models import (
     IntegerField,
     OuterRef,
     Q,
-    Subquery,
     Sum,
     Value,
     When,
@@ -25,6 +24,7 @@ from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
+from hct_mis_api.apps.payment.managers import ArraySubquery
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -48,6 +48,7 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
@@ -740,7 +741,7 @@ class Query(graphene.ObjectType):
         program=graphene.String(),
         search=graphene.String(),
         service_provider=graphene.String(),
-        delivery_type=graphene.List(graphene.String),
+        delivery_type=graphene.String(),
         verification_status=graphene.List(graphene.String),
         start_date_gte=graphene.String(),
         end_date_lte=graphene.String(),
@@ -782,20 +783,22 @@ class Query(graphene.ObjectType):
         # TODO: FIX error
         # "'ExtendedQuerySetSequence' object has no attribute 'clone'"
         # payment_qs = get_payment_items_sequence_qs().filter(id=OuterRef("payment_object_id"))
-        # payment_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
+        payment_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
+        payment_record_qs = Payment.objects.filter(id=OuterRef("payment_object_id"), household__withdrawn=True)
 
         return (
             PaymentVerification.objects.filter(
                 Q(payment_verification_plan__status=PaymentVerificationPlan.STATUS_ACTIVE)
                 | Q(payment_verification_plan__status=PaymentVerificationPlan.STATUS_FINISHED)
             )
-            # .annotate(
-            #     payment__household__status=Case(
-            #         When(Exists(payment_qs), then=Value(STATUS_INACTIVE)),
-            #         default=Value(STATUS_ACTIVE),
-            #         output_field=CharField(),
-            #     ),
-            # )
+            .annotate(
+                payment_obj__household__status=Case(
+                    When(Exists(payment_qs), then=Value(STATUS_INACTIVE)),
+                    When(Exists(payment_record_qs), then=Value(STATUS_INACTIVE)),
+                    default=Value(STATUS_ACTIVE),
+                    output_field=CharField(),
+                ),
+            )
             .distinct()
         )
 
@@ -1072,22 +1075,29 @@ class Query(graphene.ObjectType):
         return to_choice_object(PaymentPlan.BackgroundActionStatus.choices)
 
     def resolve_all_cash_plans_and_payment_plans(self, info, **kwargs):
-        qs = ExtendedQuerySetSequence(
-            PaymentPlan.objects.filter(status=PaymentPlan.Status.RECONCILED),
-            CashPlan.objects.all(),
-        )
-
+        service_provider_qs = ServiceProvider.objects.filter(id=OuterRef("pk")).distinct()
+        fsp_qs = FinancialServiceProvider.objects.filter(
+            delivery_mechanisms_per_payment_plan__payment_plan=OuterRef("pk")
+        ).distinct()
+        delivery_mechanisms_per_pp_qs = DeliveryMechanismPerPaymentPlan.objects.filter(
+            payment_plan=OuterRef("pk")
+        ).distinct("delivery_mechanism")
         payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(
             payment_plan_object_id=OuterRef("id")
         )
-        service_provider_qs = ServiceProvider.objects.filter(cash_plans=OuterRef("id")).distinct()
-        # cash_plan_qs = CashPlan.objects.filter(id=OuterRef("id")).distinct()
 
-        delivery_mechanisms_per_payment_plan_qs = DeliveryMechanismPerPaymentPlan.objects.filter(
-            payment_plan=OuterRef("pk")
+        payment_plan_qs = PaymentPlan.objects.filter(status=PaymentPlan.Status.RECONCILED).annotate(
+            fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
+            delivery_types=ArraySubquery(delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism", flat=True)),
+            )
+
+        cash_plan_qs = CashPlan.objects.all().annotate(
+            unicef_id=F("ca_id"),
+            fsp_names=ArraySubquery(service_provider_qs.values_list("full_name", flat=True)),
+            delivery_types=F("delivery_type")
         )
-        # fsp_ids = delivery_mechanisms_per_payment_plan_qs.values_list("financial_service_provider", flat=True)
-        # fsp_qs = FinancialServiceProvider.objects.filter(id__in=fsp_ids).distinct()
+
+        qs = ExtendedQuerySetSequence(payment_plan_qs, cash_plan_qs)
 
         qs = qs.annotate(
             custom_order=Case(
@@ -1105,35 +1115,6 @@ class Query(graphene.ObjectType):
                 ),
                 output_field=IntegerField(),
                 default=Value(0),
-            ),
-            fsp_names=Case(
-                When(
-                    Exists(service_provider_qs),
-                    then=Subquery(service_provider_qs.values_list("full_name", flat=True)),
-                ),
-                When(
-                    Exists(delivery_mechanisms_per_payment_plan_qs),
-                    then=Value("FSP qs"),
-                    # TODO: upd query
-                    # then=Subquery(fsp_qs.values_list("name", flat=True)),
-                ),
-                default=Value(""),
-                output_field=CharField(),
-            ),
-            # TODO: upd 'delivery_types'
-            delivery_types=Case(
-                When(
-                    Exists(service_provider_qs),
-                    # then=F("delivery_type"),
-                    then=Value("from cash_plan"),
-                ),
-                When(
-                    Exists(delivery_mechanisms_per_payment_plan_qs),
-                    then=Value("list form delivery_mechanisms_per_payment_plan")
-                    # then=Subquery(delivery_mechanisms_per_payment_plan_qs.values_list("delivery_mechanism", flat=True)),
-                ),
-                default=Value(""),
-                output_field=CharField(),
             ),
         ).order_by("-updated_at", "custom_order")
 

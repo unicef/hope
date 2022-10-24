@@ -60,7 +60,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "input": {
-                    "paymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
+                    "cashOrPaymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
                     "sampling": "FULL_LIST",
                     "fullListArguments": {"excludedAdminAreas": []},
                     "verificationChannel": "MANUAL",
@@ -75,7 +75,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
         self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_CREATE], self.business_area)
 
         defaults = {
-            "paymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
+            "cashOrPaymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
             "businessAreaSlug": "afghanistan",
         }
 
@@ -138,7 +138,7 @@ class TestCreatePaymentVerificationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "input": {
-                    "paymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
+                    "cashOrPaymentPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
                     "sampling": "FULL_LIST",
                     "fullListArguments": {"excludedAdminAreas": []},
                     "verificationChannel": "MANUAL",
