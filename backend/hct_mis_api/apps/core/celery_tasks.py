@@ -108,12 +108,8 @@ def create_target_population_task(storage_id, program_id, tp_name):
 
             business_area = storage_obj.business_area
 
-            passport_type = DocumentType.objects.get(
-                Q(country=business_area.countries.first()) & Q(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
-            )
-            tax_type = DocumentType.objects.get(
-                Q(country=business_area.countries.first()) & Q(type=IDENTIFICATION_TYPE_TAX_ID)
-            )
+            passport_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT)
+            tax_type = DocumentType.objects.get(type=IDENTIFICATION_TYPE_TAX_ID)
 
             first_registration_date = datetime.now()
             last_registration_date = first_registration_date
@@ -180,10 +176,15 @@ def create_target_population_task(storage_id, program_id, tp_name):
                         type=passport_type,
                         individual=individual,
                         status=Document.STATUS_INVALID,
+                        country=business_area.countries.first()
                     )
 
                     tax = Document(
-                        document_number=tax_id, type=tax_type, individual=individual, status=Document.STATUS_INVALID
+                        document_number=tax_id,
+                        type=tax_type,
+                        individual=individual,
+                        status=Document.STATUS_INVALID,
+                        country=business_area.countries.first()
                     )
 
                     bank_account_info = BankAccountInfo(bank_account_number=iban, individual=individual)
