@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 
 from django.core.management import call_command
@@ -124,10 +125,11 @@ class TestCloseDataChangeTickets(APITestCase):
         ]
 
         cls.individuals = [
-            IndividualFactory(household=household_one, **individual) for individual in cls.individuals_to_create
+            IndividualFactory(household=household_one, **individual | {"unicef_id": str(uuid.uuid4())})
+            for individual in cls.individuals_to_create
         ]
         cls.individuals_household_two = [
-            IndividualFactory(household=household_two, **individual)
+            IndividualFactory(household=household_two, **individual | {"unicef_id": str(uuid.uuid4())})
             for individual in cls.individuals_to_create_for_second_household
         ]
 
@@ -281,7 +283,6 @@ class TestCloseDataChangeTickets(APITestCase):
     )
     def test_close_add_individual(cls, _, permissions, should_close):
         cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
-
         cls.graphql_request(
             request_string=cls.STATUS_CHANGE_MUTATION,
             context={"user": cls.user},
@@ -290,6 +291,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
+
         created_individual = Individual.objects.exclude(id="257f6f84-313c-43bd-8f0e-89b96c41a7d5").filter(
             given_name="Test",
             full_name="Test Example",

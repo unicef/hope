@@ -31,6 +31,7 @@ from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
 )
 
 BLANK = ""
@@ -287,7 +288,9 @@ INDIVIDUAL_FLAGS_CHOICES = (
 logger = logging.getLogger(__name__)
 
 
-class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class Household(
+    SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel
+):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "withdrawn",
@@ -416,7 +419,6 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
     fchild_hoh = models.BooleanField(null=True)
     child_hoh = models.BooleanField(null=True)
-    unicef_id = CICharField(max_length=250, blank=True, default=BLANK, db_index=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     start = models.DateTimeField(blank=True, null=True)
     deviceid = models.CharField(max_length=250, blank=True, default=BLANK)
@@ -675,7 +677,9 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
-class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class Individual(
+    SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, UnicefIdentifiedModel
+):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -779,7 +783,6 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     user_fields = JSONField(default=dict, blank=True)
     enrolled_in_nutrition_programme = models.BooleanField(null=True)
     administration_of_rutf = models.BooleanField(null=True)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
     deduplication_golden_record_status = models.CharField(
         max_length=50,
         default=UNIQUE,
