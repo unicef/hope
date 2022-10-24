@@ -248,7 +248,7 @@ class SendTPToDatahubTask:
 
     def _prepare_datahub_object_household(self, household):
         dh_household_args = build_arg_dict(household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT)
-        if getattr(household, "country"):
+        if household.country:
             dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.iso_code2)
 
         dh_household = dh_mis_models.Household(**dh_household_args)
