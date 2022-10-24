@@ -13,8 +13,8 @@ from hct_mis_api.apps.household.models import (
     MARITAL_STATUS_CHOICE,
     ORG_ENUMERATOR_CHOICES,
     RESIDENCE_STATUS_CHOICE,
-    SEX_CHOICE,
     UNICEF,
+    SEX_CHOICE,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
