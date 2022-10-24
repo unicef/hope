@@ -33,10 +33,7 @@ export function TargetPopulationCore({
   const { rules } = targetPopulation.targetingCriteria;
   return (
     <>
-      <TargetingCriteria
-        candidateListRules={rules}
-        targetPopulation={targetPopulation}
-      />
+      <TargetingCriteria rules={rules} targetPopulation={targetPopulation} />
       {targetPopulation?.excludedIds ? (
         <PaperContainer>
           <Typography variant='h6'>
