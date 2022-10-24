@@ -31,6 +31,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedAgency,
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -74,6 +75,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         "national_passport_i_c",
         "national_passport_photo_i_c",
         "national_passport_issuer_i_c",
+        "tax_id_no_i_c",
+        "tax_id_photo_i_c",
+        "tax_id_issuer_i_c",
         "scope_id_no_i_c",
         "scope_id_photo_i_c",
         "scope_id_issuer_i_c",
@@ -228,6 +232,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         head_of_households_mapping = {}
         households_to_create = []
         individuals_to_create = {}
+        bank_accounts_to_create = []
         collectors_to_create = defaultdict(list)
         for household in self.reduced_submissions:
             individuals_to_create_list = []
@@ -248,6 +253,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                     for individual in hh_value:
                         current_individual_docs_and_identities = defaultdict(dict)
+                        current_individual_bank_account = {}
                         individual_obj = ImportedIndividual()
                         only_collector_flag = False
                         role = None
@@ -274,6 +280,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 only_collector_flag = True
                             elif i_field == "role_i_c":
                                 role = i_value.upper()
+                            elif i_field in ("bank_name_i_c", "bank_account_number_i_c"):
+                                name = i_field.replace("_i_c", "")
+                                current_individual_bank_account["individual"] = individual_obj
+                                current_individual_bank_account[name] = i_value
                             elif i_field.endswith("_h_c") or i_field.endswith("_h_f"):
                                 try:
                                     self._cast_and_assign(i_value, i_field, household_obj)
@@ -295,6 +305,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         individuals_to_create_list.append(individual_obj)
                         current_individuals.append(individual_obj)
                         documents_and_identities_to_create.append(current_individual_docs_and_identities)
+                        if current_individual_bank_account:
+                            bank_accounts_to_create.append(ImportedBankAccountInfo(**current_individual_bank_account))
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
                             role_obj = ImportedIndividualRoleInHousehold(
                                 individual=individual_obj,
@@ -343,6 +355,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             ["head_of_household"],
             1000,
         )
+        ImportedBankAccountInfo.objects.bulk_create(bank_accounts_to_create)
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
 
