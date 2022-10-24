@@ -39,7 +39,6 @@ export const SurveyDetailsPage = (): React.ReactElement => {
       to: `/${businessArea}/accountability/surveys`,
     },
   ];
-  //TODO:   ACCOUNTABILITY_SURVEYS_VIEW_DETAILS: 'ACCOUNTABILITY_SURVEYS_VIEW_DETAILS',
 
   return (
     <>
@@ -47,7 +46,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
         title={`${survey.unicefId}`}
         breadCrumbs={
           hasPermissions(
-            PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+            PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
             permissions,
           )
             ? breadCrumbsItems
@@ -62,13 +61,13 @@ export const SurveyDetailsPage = (): React.ReactElement => {
         <SurveyDetails message={survey} />
         <RecipientsTable
           canViewDetails={hasPermissions(
-            PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+            PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
             permissions,
           )}
           id={id}
         />
         {hasPermissions(
-          PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+          PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
           permissions,
         ) && <UniversalActivityLogTable objectId={id} />}
       </Box>
