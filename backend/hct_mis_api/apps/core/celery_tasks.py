@@ -8,7 +8,6 @@ from functools import wraps
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-from storages.backends.azure_storage import AzureStorageFile
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import XLSXKoboTemplate, StorageFile
@@ -127,7 +126,7 @@ def create_target_population_task(storage_id, program_id, tp_name):
             rows_count = 0
             file_path = None
 
-            #TODO fix to use Azure storage override AzureStorageFile open method
+            # TODO fix to use Azure storage override AzureStorageFile open method
             with storage_obj.file.open("rb") as original_file, tempfile.NamedTemporaryFile(delete=False) as tmp:
                 tmp.write(original_file.read())
                 file_path = tmp.name
