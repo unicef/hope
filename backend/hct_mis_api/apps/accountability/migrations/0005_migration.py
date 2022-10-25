@@ -44,4 +44,30 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
+        migrations.RunSQL(
+            sql="ALTER TABLE accountability_survey ADD unicef_id_index SERIAL;",
+            reverse_sql="ALTER TABLE accountability_survey DROP unicef_id_index;",
+        ),
+        migrations.RunSQL(
+            sql="""
+            CREATE OR REPLACE FUNCTION create_accountability_survey_unicef_id() RETURNS trigger
+                LANGUAGE plpgsql
+                AS $$
+            BEGIN
+                NEW.unicef_id := format('SUR-%s-%s', to_char(NEW.created_at, 'yy'), TRIM(CASE WHEN NEW.unicef_id_index > 9999 THEN NEW.unicef_id_index::varchar(64) ELSE to_char(NEW.unicef_id_index, '0000') END));
+                return NEW;
+            END
+            $$;
+
+            CREATE TRIGGER create_accountability_survey_unicef_id BEFORE INSERT ON accountability_survey FOR EACH ROW EXECUTE PROCEDURE create_accountability_survey_unicef_id();
+            """,
+            reverse_sql="""
+                DROP TRIGGER create_accountability_survey_unicef_id ON accountability_survey;
+                DROP FUNCTION create_accountability_survey_unicef_id();
+                """,
+        ),
+        migrations.RunSQL(
+            sql="UPDATE accountability_survey SET unicef_id = format('SUR-%s-%s', to_char(created_at, 'yy'), TRIM(CASE WHEN unicef_id_index > 9999 THEN unicef_id_index::varchar(64) ELSE to_char(unicef_id_index, '0000') END));",
+            reverse_sql="UPDATE accountability_survey SET unicef_id = NULL;",
+        )
     ]
