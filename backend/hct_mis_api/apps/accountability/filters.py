@@ -1,12 +1,6 @@
 from django.db.models.functions import Lower
 
-from django_filters import (
-    CharFilter,
-    ChoiceFilter,
-    FilterSet,
-    ModelChoiceFilter,
-    UUIDFilter,
-)
+from django_filters import CharFilter, ChoiceFilter, FilterSet, UUIDFilter
 
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
