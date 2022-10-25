@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 from django.conf import settings
 from django.contrib import admin, messages

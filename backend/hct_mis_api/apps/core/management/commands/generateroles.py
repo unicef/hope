@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+
 from django.core.management import BaseCommand
 from django.db.models import Q
 
