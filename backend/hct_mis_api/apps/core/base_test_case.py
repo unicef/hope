@@ -1,6 +1,5 @@
 import base64
 import shutil
-from functools import reduce
 from io import BytesIO
 
 from django.contrib.auth.models import AnonymousUser
