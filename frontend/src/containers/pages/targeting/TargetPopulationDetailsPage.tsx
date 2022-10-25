@@ -28,7 +28,12 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
   ] = useLazyInterval(() => refetch(), 3000);
   const buildStatus = data?.targetPopulation?.buildStatus;
   useEffect(() => {
-    if (buildStatus !== TargetPopulationBuildStatus.Ok) {
+    if (
+      [
+        TargetPopulationBuildStatus.Building,
+        TargetPopulationBuildStatus.Pending,
+      ].includes(buildStatus)
+    ) {
       startPollingTargetPopulation();
     } else {
       stopPollingTargetPopulation();
