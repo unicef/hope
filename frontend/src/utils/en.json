@@ -611,5 +611,7 @@
   "Exporting XLSX started. Please check your email.": "Exporting XLSX started. Please check your email.",
   "Payment record has been marked as failed.": "Payment record has been marked as failed.",
   "Mark as failed": "Mark as failed",
-  "Are you sure you would like to mark payment record as failed?": "Are you sure you would like to mark payment record as failed?"
+  "Are you sure you would like to mark payment record as failed?": "Are you sure you would like to mark payment record as failed?",
+  "Save to see the list of households": "Save to see the list of households",
+  "List of households will be available after saving": "List of households will be available after saving"
 }
