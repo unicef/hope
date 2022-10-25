@@ -741,7 +741,7 @@ class Query(graphene.ObjectType):
         program=graphene.String(),
         search=graphene.String(),
         service_provider=graphene.String(),
-        delivery_type=graphene.String(),
+        delivery_type=graphene.List(graphene.String),
         verification_status=graphene.List(graphene.String),
         start_date_gte=graphene.String(),
         end_date_lte=graphene.String(),
