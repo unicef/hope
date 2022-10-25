@@ -3,9 +3,9 @@ from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from django.template.response import TemplateResponse
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
