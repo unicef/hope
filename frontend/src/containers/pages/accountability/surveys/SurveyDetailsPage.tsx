@@ -9,7 +9,10 @@ import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
-import { useFeedbackQuery } from '../../../../__generated__/graphql';
+import {
+  useFeedbackQuery,
+  useSurveyQuery,
+} from '../../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
@@ -19,7 +22,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const businessArea = useBusinessArea();
-  const { data, loading, error } = useFeedbackQuery({
+  const { data, loading, error } = useSurveyQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
@@ -31,7 +34,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
 
   if (!data || permissions === null) return null;
 
-  const survey = data.feedback;
+  const { survey } = data;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -58,7 +61,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
         </Button>
       </PageHeader>
       <Box display='flex' flexDirection='column'>
-        <SurveyDetails message={survey} />
+        <SurveyDetails survey={survey} />
         <RecipientsTable
           canViewDetails={hasPermissions(
             PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
