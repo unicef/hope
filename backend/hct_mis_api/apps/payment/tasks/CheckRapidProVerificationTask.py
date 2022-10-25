@@ -1,9 +1,6 @@
 import logging
 
-from hct_mis_api.apps.payment.models import (
-    PaymentVerificationPlan,
-    PaymentVerification,
-)
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
 from hct_mis_api.apps.utils.phone_number import is_right_phone_number_format

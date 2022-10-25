@@ -14,9 +14,9 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
-    PaymentVerificationPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import (

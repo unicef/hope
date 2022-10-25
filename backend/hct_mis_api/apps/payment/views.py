@@ -8,7 +8,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 
 logger = logging.getLogger(__name__)
 

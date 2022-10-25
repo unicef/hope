@@ -24,7 +24,6 @@ from graphene_django import DjangoObjectType
 from graphql_relay import to_global_id
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
-from hct_mis_api.apps.payment.managers import ArraySubquery
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -60,10 +59,11 @@ from hct_mis_api.apps.payment.filters import (
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
     PaymentVerificationPlanFilter,
-    cash_plan_and_payment_plan_ordering,
     cash_plan_and_payment_plan_filter,
+    cash_plan_and_payment_plan_ordering,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
+from hct_mis_api.apps.payment.managers import ArraySubquery
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
