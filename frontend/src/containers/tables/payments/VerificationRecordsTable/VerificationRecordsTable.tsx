@@ -10,7 +10,6 @@ import { headCells } from './VerificationRecordsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
 
 export function VerificationRecordsTable({
-  cashPlanId,
   filter,
   canViewRecordDetails,
   businessArea,
@@ -23,7 +22,6 @@ export function VerificationRecordsTable({
     status: filter.status,
     verificationChannel: filter.verificationChannel,
     businessArea,
-    // cashPlanId,
   };
 
   return (

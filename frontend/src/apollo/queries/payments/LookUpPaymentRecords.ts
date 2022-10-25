@@ -32,11 +32,6 @@ export const LookUpPaymentRecords = gql`
         node {
           id
           caId
-          # verification {
-          #   id
-          #   status
-          #   receivedAmount
-          # }
           parent {
             id
             name
