@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Q
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
@@ -8,8 +9,20 @@ from hct_mis_api.apps.household.elasticsearch_utils import DEFAULT_SCRIPT
 
 from .models import ImportedIndividual
 
+index_settings = {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "similarity": {
+        "default": {
+            "type": "scripted",
+            "script": {
+                "source": DEFAULT_SCRIPT,
+            },
+        },
+    },
+}
 
-@registry.register_document
+
 class ImportedIndividualDocument(Document):
     id = fields.KeywordField(boost=0)
     given_name = fields.TextField(
@@ -101,21 +114,6 @@ class ImportedIndividualDocument(Document):
     def prepare_business_area(self, instance):
         return instance.registration_data_import.business_area_slug
 
-    class Index:
-        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals"
-        settings = {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
-            "similarity": {
-                "default": {
-                    "type": "scripted",
-                    "script": {
-                        "source": DEFAULT_SCRIPT,
-                    },
-                },
-            },
-        }
-
     class Django:
         model = ImportedIndividual
 
@@ -123,3 +121,43 @@ class ImportedIndividualDocument(Document):
             "relationship",
             "sex",
         ]
+
+
+@registry.register_document
+class ImportedIndividualDocumentAfghanistan(ImportedIndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_afghanistan"
+        settings = index_settings
+
+    def get_queryset(self):
+        return ImportedIndividual.objects.filter(registration_data_import__business_area_slug="afghanistan")
+
+
+@registry.register_document
+class ImportedIndividualDocumentUkraine(ImportedIndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_ukraine"
+        settings = index_settings
+
+    def get_queryset(self):
+        return ImportedIndividual.objects.filter(registration_data_import__business_area_slug="ukraine")
+
+
+@registry.register_document
+class ImportedIndividualDocumentOthers(ImportedIndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}importedindividuals_others"
+        settings = index_settings
+
+    def get_queryset(self):
+        return ImportedIndividual.objects.exclude(
+            Q(registration_data_import__business_area_slug="ukraine")
+            | Q(registration_data_import__business_area_slug="afghanistan")
+        )
+
+
+def get_imported_individual_doc(business_area_slug):
+    return {
+        "afghanistan": ImportedIndividualDocumentAfghanistan,
+        "ukraine": ImportedIndividualDocumentUkraine,
+    }.get(business_area_slug, ImportedIndividualDocumentOthers)
