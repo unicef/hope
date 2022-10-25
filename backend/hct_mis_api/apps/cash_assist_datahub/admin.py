@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List, Tuple
 
 from django.conf import settings
 from django.contrib import admin, messages
@@ -134,11 +135,11 @@ class SessionAdmin(HOPEModelAdminBase):
 
     @button(permission="account.can_inspect")
     def inspect(self, request, pk):
-        context = self.get_common_context(request, pk)
+        context: Dict[str, Any] = self.get_common_context(request, pk)
         obj: Session = context["original"]
         context["title"] = f"Session {obj.pk} - {obj.timestamp} - {obj.status}"
         context["data"] = {}
-        warnings = []
+        warnings: List[List] = []
         errors = 0
         errors = 0
         has_content = False
