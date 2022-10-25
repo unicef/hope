@@ -142,8 +142,8 @@ class FieldAttributeNode(graphene.ObjectType):
     associated_with = graphene.String()
     is_flex_field = graphene.Boolean()
 
-    def resolve_choices(self, info):
-        choices = _custom_dict_or_attr_resolver("choices", None, self, info)
+    def resolve_choices(parent, info):
+        choices = _custom_dict_or_attr_resolver("choices", None, parent, info)
 
         if callable(choices) and not isinstance(choices, models.Manager):
             choices = choices()
@@ -159,11 +159,11 @@ class FieldAttributeNode(graphene.ObjectType):
             return True
         return False
 
-    def resolve_labels(self, info):
-        return resolve_label(_custom_dict_or_attr_resolver("label", None, self, info))
+    def resolve_labels(parent, info):
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
 
-    def resolve_label_en(self, info):
-        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]
+    def resolve_label_en(parent, info):
+        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
 
     def resolve_associated_with(self, info):
         resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
@@ -275,16 +275,16 @@ class Query(graphene.ObjectType):
     )
     cash_assist_url_prefix = graphene.String()
 
-    def resolve_business_area(self, info, business_area_slug):
+    def resolve_business_area(parent, info, business_area_slug):
         return BusinessArea.objects.get(slug=business_area_slug)
 
-    def resolve_all_business_areas(self, info):
+    def resolve_all_business_areas(parent, info):
         return BusinessArea.objects.filter(is_split=False)
 
-    def resolve_cash_assist_url_prefix(self, info):
+    def resolve_cash_assist_url_prefix(parent, info):
         return config.CASH_ASSIST_URL_PREFIX
 
-    def resolve_all_fields_attributes(self, info, flex_field=None, business_area_slug=None):
+    def resolve_all_fields_attributes(parent, info, flex_field=None, business_area_slug=None):
         def is_a_killer_filter(field):
             if isinstance(field, FlexibleAttribute):
                 name = field.name
