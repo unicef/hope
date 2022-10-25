@@ -454,13 +454,13 @@ class XlsxErrorNode(graphene.ObjectType):
     message = graphene.String()
 
     def resolve_sheet(parent, info):
-        return parent[0]
+        return parent[0]  # type: ignore
 
     def resolve_coordinates(parent, info):
-        return parent[1]
+        return parent[1]  # type: ignore
 
     def resolve_message(parent, info):
-        return parent[2]
+        return parent[2]  # type: ignore
 
 
 class ExportXlsxCashPlanVerification(PermissionMutation):

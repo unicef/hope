@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from django.db.models import Q
 from django.db.models.functions import Lower
@@ -494,7 +494,7 @@ def get_elasticsearch_query_for_households(value, business_area):
             },
         )
 
-    query = {
+    query: Dict[str, Any] = {
         "size": "100",
         "_source": False,
         "query": {

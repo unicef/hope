@@ -35,7 +35,7 @@ class SingleExchangeRate:
         VALID_TO: str,
         RATIO: str,
         NO_OF_DECIMAL: str,
-        PAST_XRATE: str,
+        PAST_XRATE: Optional[Dict],
     ):
         self.currency_code = CURRENCY_CODE
         self.currency_name = CURRENCY_NAME
