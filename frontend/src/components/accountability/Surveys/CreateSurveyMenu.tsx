@@ -1,5 +1,5 @@
 import Button from '@material-ui/core/Button';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu, { MenuProps } from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -9,6 +9,7 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { SurveyCategory } from '../../../__generated__/graphql';
 
 const StyledMenu = withStyles({
   paper: {
@@ -47,7 +48,7 @@ export const CreateSurveyMenu = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -87,21 +88,21 @@ export const CreateSurveyMenu = (): React.ReactElement => {
         <StyledMenuItem>
           <ListItemText
             data-cy='menu-item-rapid-pro'
-            onClick={() => handleMenuItemClick('RAPID_PRO')}
+            onClick={() => handleMenuItemClick(SurveyCategory.RapidPro)}
             primary={t('New Survey with Rapid Pro')}
           />
         </StyledMenuItem>
         <StyledMenuItem>
           <ListItemText
             data-cy='menu-item-sms'
-            onClick={() => handleMenuItemClick('SMS')}
+            onClick={() => handleMenuItemClick(SurveyCategory.Sms)}
             primary={t('New Survey with SMS')}
           />
         </StyledMenuItem>
         <StyledMenuItem>
           <ListItemText
             data-cy='menu-item-manual'
-            onClick={() => handleMenuItemClick('MANUAL')}
+            onClick={() => handleMenuItemClick(SurveyCategory.Manual)}
             primary={t('New Survey with Manual Process')}
           />
         </StyledMenuItem>
