@@ -138,16 +138,16 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
         DepotManager,
         QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
-        # ("payment_verification_plan__payment_plan", AutoCompleteFilter),
-        # ("payment_verification_plan__payment_plan__business_area", AutoCompleteFilter),
-        # ("payment__household__unicef_id", ValueFilter),
+        # ("payment_verification_plan__payment_plan_obj", AutoCompleteFilter),
+        # ("payment_verification_plan__payment_plan_obj__business_area", AutoCompleteFilter),
+        ("payment__household__unicef_id", ValueFilter),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("payment_verification_plan",)
 
     def payment_plan_name(self, obj):
         payment_plan = obj.payment_verification_plan.get_payment_plan
-        return payment_plan.name if payment_plan else ""
+        return getattr(payment_plan, "name", "~no name~")
 
     def household(self, obj):
         payment = obj.get_payment
@@ -159,9 +159,9 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
             .get_queryset(request)
             .select_related(
                 "payment_verification_plan",
-                # "payment_verification_plan__payment_plan",
-                # "payment",
-                # "payment__household",
+                # "payment_verification_plan__payment_plan_obj",
+                # "payment_obj",
+                # "payment_obj__household",
             )
         )
 
@@ -180,7 +180,7 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("delivery_type", ChoicesFieldComboFilter),
-        # ("payment_verification_summary__status", ChoicesFieldComboFilter), # TODO: FIX ME
+        ("payment_verification_summary__status", ChoicesFieldComboFilter),
         ("program__id", ValueFilter),
         ("vision_id", ValueFilter),
     )

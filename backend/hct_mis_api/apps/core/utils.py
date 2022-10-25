@@ -7,7 +7,6 @@ from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
 
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
@@ -734,14 +733,3 @@ def timezone_datetime(value):
     if datetime_value.tzinfo is None or datetime_value.tzinfo.utcoffset(datetime_value) is None:
         return datetime_value.replace(tzinfo=pytz.utc)
     return datetime_value
-
-
-def get_paginator(qs, page_size, page):
-    p = Paginator(qs, page_size)
-    try:
-        page_obj = p.page(page)
-    except PageNotAnInteger:
-        page_obj = p.page(1)
-    except EmptyPage:
-        page_obj = p.page(p.num_pages)
-    return p, page_obj
