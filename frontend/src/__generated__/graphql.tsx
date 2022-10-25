@@ -7243,7 +7243,7 @@ export type UpdateTpMutation = (
     & Pick<UpdateTargetPopulationMutation, 'validationErrors'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & TargetPopulationDetailedFragment
+      & Pick<TargetPopulationNode, 'id' | 'status' | 'totalHouseholdsCount' | 'totalIndividualsCount'>
     )> }
   )> }
 );
@@ -13096,12 +13096,15 @@ export const UpdateTpDocument = gql`
     mutation UpdateTP($input: UpdateTargetPopulationInput!) {
   updateTargetPopulation(input: $input) {
     targetPopulation {
-      ...targetPopulationDetailed
+      id
+      status
+      totalHouseholdsCount
+      totalIndividualsCount
     }
     validationErrors
   }
 }
-    ${TargetPopulationDetailedFragmentDoc}`;
+    `;
 export type UpdateTpMutationFn = ApolloReactCommon.MutationFunction<UpdateTpMutation, UpdateTpMutationVariables>;
 export type UpdateTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateTpMutation, UpdateTpMutationVariables>, 'mutation'>;
 
