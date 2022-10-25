@@ -16,6 +16,7 @@ from .filters import (
     FeedbackFilter,
     MessageRecipientsMapFilter,
     MessagesFilter,
+    RecipientFilter,
     SurveyFilter,
 )
 from .inputs import GetAccountabilityCommunicationMessageSampleSizeInput
@@ -111,6 +112,25 @@ class SurveyNode(BaseNodePermissionMixin, DjangoObjectType):
         filter_fields = []
 
 
+class RecipientNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopeOneOfPermissionClass(
+            Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
+        ),
+    )
+
+    class Meta:
+        model = Household
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
+        filter_fields = []
+        fields = (
+            "id",
+            "size",
+            "head_of_household",
+        )
+
+
 class Query(graphene.ObjectType):
     accountability_communication_message = graphene.relay.Node.Field(CommunicationMessageNode)
     all_accountability_communication_messages = DjangoPermissionFilterConnectionField(
@@ -143,6 +163,11 @@ class Query(graphene.ObjectType):
         SurveyNode,
         filterset_class=SurveyFilter,
         permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
+    )
+    recipients = DjangoPermissionFilterConnectionField(
+        RecipientNode,
+        filterset_class=RecipientFilter,
+        permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS),),
     )
 
     def resolve_feedback_issue_type_choices(self, info, **kwargs):
