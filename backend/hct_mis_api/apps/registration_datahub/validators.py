@@ -1,3 +1,8 @@
+# type: ignore
+# TODO: in this file, there are lines that evaluate to None[key]
+# mostly related to `"other_id_no_i_c": None,` where the remaining dict entries are Dict, not None.
+# This must be refactored somehow.
+
 import logging
 import re
 from collections import Counter, defaultdict
@@ -637,7 +642,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     "issuing_countries": [],
                 },
             }
-            documents_numbers: Dict[str, Dict[str, Any]] = {
+            documents_numbers: Dict[str, Optional[Dict[str, Any]]] = {
                 "birth_certificate_no_i_c": {
                     "type": "BIRTH_CERTIFICATE",
                     "validation_data": [],
@@ -681,7 +686,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     "numbers": [],
                     "issuing_countries": [],
                 },
-                "other_id_no_i_c": {},
+                "other_id_no_i_c": None,
             }
             for row in sheet.iter_rows(min_row=3):
                 # openpyxl keeps iterating on empty rows so need to omit empty rows
@@ -1115,10 +1120,10 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def choice_validator(self, value: str, field: str, *args, **kwargs) -> Union[str, None]:
         try:
             message = f"Invalid choice {value} for field {field}"
+            found_field: Dict = self.all_fields[field]
             if not value:
                 return message
 
-            found_field: Dict = self.all_fields[field]
             custom_validate_choices_method = found_field.get("custom_validate_choices")
             choices = found_field["choices"]
             choice_type = found_field["type"]
@@ -1205,7 +1210,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 "unhcr_id_no_i_c": {"agency": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
                 "scope_id_no_i_c": {"agency": "WFP", "validation_data": [], "numbers": [], "issuing_countries": []},
             }
-            documents_numbers: Dict[str, Dict[str, Any]] = {
+            documents_numbers: Dict[str, Optional[Dict[str, Any]]] = {
                 "birth_certificate_no_i_c": {
                     "type": "BIRTH_CERTIFICATE",
                     "validation_data": [],
@@ -1249,7 +1254,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     "numbers": [],
                     "issuing_countries": [],
                 },
-                "other_id_no_i_c": {},
+                "other_id_no_i_c": None,
             }
             kobo_asset_id = None
             if len(reduced_submissions) > 0:
