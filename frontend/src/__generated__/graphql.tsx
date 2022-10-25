@@ -7131,6 +7131,22 @@ export type CreateFeedbackMsgMutation = (
   )> }
 );
 
+export type CreateSurveyAccountabilityMutationVariables = {
+  input: CreateSurveyInput
+};
+
+
+export type CreateSurveyAccountabilityMutation = (
+  { __typename?: 'Mutations' }
+  & { createSurvey: Maybe<(
+    { __typename?: 'CreateSurveyMutation' }
+    & { survey: Maybe<(
+      { __typename?: 'SurveyNode' }
+      & Pick<SurveyNode, 'id'>
+    )> }
+  )> }
+);
+
 export type UpdateFeedbackTicketMutationVariables = {
   input: UpdateFeedbackInput
 };
@@ -10748,6 +10764,29 @@ export type AllSurveysQuery = (
   )> }
 );
 
+export type SurveyQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type SurveyQuery = (
+  { __typename?: 'Query' }
+  & { survey: Maybe<(
+    { __typename?: 'SurveyNode' }
+    & Pick<SurveyNode, 'id' | 'unicefId' | 'category' | 'title' | 'createdAt' | 'body'>
+    & { createdBy: Maybe<(
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email'>
+    )>, targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name'>
+    )>, program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name'>
+    )> }
+  )> }
+);
+
 export type AllFieldsAttributesQueryVariables = {};
 
 
@@ -11745,6 +11784,57 @@ export function useCreateFeedbackMsgMutation(baseOptions?: ApolloReactHooks.Muta
 export type CreateFeedbackMsgMutationHookResult = ReturnType<typeof useCreateFeedbackMsgMutation>;
 export type CreateFeedbackMsgMutationResult = ApolloReactCommon.MutationResult<CreateFeedbackMsgMutation>;
 export type CreateFeedbackMsgMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables>;
+export const CreateSurveyAccountabilityDocument = gql`
+    mutation CreateSurveyAccountability($input: CreateSurveyInput!) {
+  createSurvey(input: $input) {
+    survey {
+      id
+    }
+  }
+}
+    `;
+export type CreateSurveyAccountabilityMutationFn = ApolloReactCommon.MutationFunction<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables>;
+export type CreateSurveyAccountabilityComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables>, 'mutation'>;
+
+    export const CreateSurveyAccountabilityComponent = (props: CreateSurveyAccountabilityComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables> mutation={CreateSurveyAccountabilityDocument} {...props} />
+    );
+    
+export type CreateSurveyAccountabilityProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables> & TChildProps;
+export function withCreateSurveyAccountability<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateSurveyAccountabilityMutation,
+  CreateSurveyAccountabilityMutationVariables,
+  CreateSurveyAccountabilityProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables, CreateSurveyAccountabilityProps<TChildProps>>(CreateSurveyAccountabilityDocument, {
+      alias: 'createSurveyAccountability',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateSurveyAccountabilityMutation__
+ *
+ * To run a mutation, you first call `useCreateSurveyAccountabilityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateSurveyAccountabilityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createSurveyAccountabilityMutation, { data, loading, error }] = useCreateSurveyAccountabilityMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateSurveyAccountabilityMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables>(CreateSurveyAccountabilityDocument, baseOptions);
+      }
+export type CreateSurveyAccountabilityMutationHookResult = ReturnType<typeof useCreateSurveyAccountabilityMutation>;
+export type CreateSurveyAccountabilityMutationResult = ApolloReactCommon.MutationResult<CreateSurveyAccountabilityMutation>;
+export type CreateSurveyAccountabilityMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables>;
 export const UpdateFeedbackTicketDocument = gql`
     mutation UpdateFeedbackTicket($input: UpdateFeedbackInput!) {
   updateFeedback(input: $input) {
@@ -20919,6 +21009,77 @@ export function useAllSurveysLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type AllSurveysQueryHookResult = ReturnType<typeof useAllSurveysQuery>;
 export type AllSurveysLazyQueryHookResult = ReturnType<typeof useAllSurveysLazyQuery>;
 export type AllSurveysQueryResult = ApolloReactCommon.QueryResult<AllSurveysQuery, AllSurveysQueryVariables>;
+export const SurveyDocument = gql`
+    query Survey($id: ID!) {
+  survey(id: $id) {
+    id
+    unicefId
+    category
+    title
+    createdBy {
+      id
+      firstName
+      lastName
+      username
+      email
+    }
+    createdAt
+    targetPopulation {
+      id
+      name
+    }
+    program {
+      id
+      name
+    }
+    body
+    title
+  }
+}
+    `;
+export type SurveyComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<SurveyQuery, SurveyQueryVariables>, 'query'> & ({ variables: SurveyQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const SurveyComponent = (props: SurveyComponentProps) => (
+      <ApolloReactComponents.Query<SurveyQuery, SurveyQueryVariables> query={SurveyDocument} {...props} />
+    );
+    
+export type SurveyProps<TChildProps = {}> = ApolloReactHoc.DataProps<SurveyQuery, SurveyQueryVariables> & TChildProps;
+export function withSurvey<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SurveyQuery,
+  SurveyQueryVariables,
+  SurveyProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, SurveyQuery, SurveyQueryVariables, SurveyProps<TChildProps>>(SurveyDocument, {
+      alias: 'survey',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSurveyQuery__
+ *
+ * To run a query within a React component, call `useSurveyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSurveyQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSurveyQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSurveyQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<SurveyQuery, SurveyQueryVariables>) {
+        return ApolloReactHooks.useQuery<SurveyQuery, SurveyQueryVariables>(SurveyDocument, baseOptions);
+      }
+export function useSurveyLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SurveyQuery, SurveyQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<SurveyQuery, SurveyQueryVariables>(SurveyDocument, baseOptions);
+        }
+export type SurveyQueryHookResult = ReturnType<typeof useSurveyQuery>;
+export type SurveyLazyQueryHookResult = ReturnType<typeof useSurveyLazyQuery>;
+export type SurveyQueryResult = ApolloReactCommon.QueryResult<SurveyQuery, SurveyQueryVariables>;
 export const AllFieldsAttributesDocument = gql`
     query AllFieldsAttributes {
   allFieldsAttributes {

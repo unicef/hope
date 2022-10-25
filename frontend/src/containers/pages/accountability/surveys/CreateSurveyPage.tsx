@@ -29,10 +29,10 @@ import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { SurveySteps, SurveyTabsValues } from '../../../../utils/constants';
 import {
-  CreateAccountabilityCommunicationMessageMutationVariables,
+  CreateSurveyAccountabilityMutationVariables,
   useAllAdminAreasQuery,
   useAllRapidProFlowsQuery,
-  useCreateAccountabilityCommunicationMessageMutation,
+  useCreateSurveyAccountabilityMutation,
   useSampleSizeLazyQuery,
 } from '../../../../__generated__/graphql';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
@@ -94,10 +94,7 @@ function prepareVariables(selectedSampleSizeType, values, businessArea) {
 export const CreateSurveyPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
-  const [
-    mutate,
-    { loading },
-  ] = useCreateAccountabilityCommunicationMessageMutation();
+  const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -229,12 +226,14 @@ export const CreateSurveyPage = (): React.ReactElement => {
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const prepareMutationVariables = (values) => {
+    console.log('VALUES', values);
     const variables = {
-      businessAreaSlug: businessArea,
-      inputs: {
-        households: values.households,
+      input: {
+        title: values.title,
+        body: values.body,
+        category: values.category,
         targetPopulation: values.targetPopulation,
-        registrationDataImport: values.registrationDataImport,
+        program: values.program,
         samplingType: selectedSampleSizeType === 0 ? 'FULL_LIST' : 'RANDOM',
         fullListArguments:
           selectedSampleSizeType === 0
@@ -254,11 +253,9 @@ export const CreateSurveyPage = (): React.ReactElement => {
                 sex: values.sexCheckbox ? values.filterSex : null,
               }
             : null,
-        title: values.title,
-        body: values.body,
       },
     };
-    return variables as CreateAccountabilityCommunicationMessageMutationVariables;
+    return variables as CreateSurveyAccountabilityMutationVariables;
   };
 
   const dataChangeErrors = (errors): ReactElement[] =>
@@ -282,7 +279,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
               variables: prepareMutationVariables(values),
             });
             showMessage(t('Survey created.'), {
-              pathname: `/${businessArea}/accountability/surveys/${response.data.createAccountabilityCommunicationMessage.message.id}`,
+              pathname: `/${businessArea}/accountability/surveys/${response.data.createSurvey.survey.id}`,
               historyMethod: 'push',
             });
           } catch (e) {
@@ -299,7 +296,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
             title='New Survey'
             breadCrumbs={
               hasPermissions(
-                PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
+                PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE,
                 permissions,
               )
                 ? breadCrumbsItems
@@ -566,14 +563,14 @@ export const CreateSurveyPage = (): React.ReactElement => {
                     <Box my={3}>
                       <Grid item xs={12}>
                         <Field
-                          name='message'
+                          name='body'
                           required
                           multiline
                           fullWidth
                           variant='outlined'
                           label={t('Message')}
                           component={FormikTextField}
-                          data-cy='input-title'
+                          data-cy='input-body'
                         />
                       </Grid>
                     </Box>

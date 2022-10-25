@@ -1,9 +1,9 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { renderUserName } from '../../../utils/utils';
-import { FeedbackQuery } from '../../../__generated__/graphql';
+import { SurveyQuery } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';
@@ -13,56 +13,71 @@ import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
 
 interface SurveyDetailsProps {
-  message: FeedbackQuery['feedback'];
+  survey: SurveyQuery['survey'];
 }
 
 export const SurveyDetails = ({
-  message,
+  survey,
 }: SurveyDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
+  const {
+    category,
+    title,
+    createdBy,
+    createdAt,
+    targetPopulation,
+    program,
+    body,
+  } = survey;
+
   return (
-    <ContainerColumnWithBorder data-cy='communication-details-container'>
+    <ContainerColumnWithBorder>
       <Title>
         <Typography variant='h6'>{t('Details')}</Typography>
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
           <Grid item xs={3}>
-            <LabelizedField label={t('Category')} value={<Missing />} />
+            <LabelizedField label={t('Category')} value={category} />
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label={t('Survey Title')} value={<Missing />} />
+            <LabelizedField label={t('Survey Title')} value={title} />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('Created By')}
-              value={renderUserName(message.createdBy)}
+              value={renderUserName(createdBy)}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label={t('Date Created')}>
-              <UniversalMoment>{message.createdAt}</UniversalMoment>
+              <UniversalMoment>{createdAt}</UniversalMoment>
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <Missing />
-            {/* <LabelizedField label={t('Target Population')}>
-              {message.targetPopulation ? (
+            <LabelizedField label={t('Target Population')}>
+              {targetPopulation ? (
                 <BlackLink
-                  to={`/${businessArea}/target-population/${message.targetPopulation.id}`}
+                  to={`/${businessArea}/target-population/${targetPopulation.id}`}
                 >
-                  {message.targetPopulation.name}
+                  {targetPopulation.name}
                 </BlackLink>
               ) : (
                 '-'
               )}
-            </LabelizedField> */}
+            </LabelizedField>
             <Grid item xs={3}>
-              <LabelizedField label={t('Programme')} value={<Missing />} />
+              <LabelizedField label={t('Programme')} value={program.name} />
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label={t('Message')} value={<Missing />} />
+              <LabelizedField label={t('Message')}>
+                <Box display='flex' flexDirection='column'>
+                  {title}
+                  {body}
+                </Box>
+              </LabelizedField>
             </Grid>
           </Grid>
         </Grid>
