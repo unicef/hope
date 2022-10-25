@@ -285,7 +285,36 @@ class Query(graphene.ObjectType):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(parent, info, flex_field=None, business_area_slug=None):
-        return sort_by_attr(get_fields_attr_generators(flex_field, business_area_slug), "label.English(EN)")
+        def is_a_killer_filter(field):
+            if isinstance(field, FlexibleAttribute):
+                name = field.name
+                associated_with = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[field.associated_with][1]
+            else:
+                name = field["name"]
+                associated_with = field["associated_with"]
+
+            return name in {
+                "Household": ["address", "deviceid"],
+                "Individual": [
+                    "full_name",
+                    "family_name",
+                    "given_name",
+                    "middle_name",
+                    "phone_no",
+                    "phone_no_alternative",
+                    "electoral_card_no",
+                    "drivers_license_no",
+                ],
+            }.get(associated_with, [])
+
+        return sort_by_attr(
+            (
+                attr
+                for attr in get_fields_attr_generators(flex_field, business_area_slug)
+                if not is_a_killer_filter(attr)
+            ),
+            "label.English(EN)",
+        )
 
     def resolve_kobo_project(self, info, uid, business_area_slug, **kwargs):
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
