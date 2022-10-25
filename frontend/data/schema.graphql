@@ -2479,6 +2479,7 @@ type Query {
   feedbackIssueTypeChoices: [ChoiceObject]
   survey(id: ID!): SurveyNode
   allSurveys(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, targetPopulation: ID, createdBy: ID, createdAtRange: String, search: String, orderBy: String): SurveyNodeConnection
+  recipients(offset: Int, before: String, after: String, first: Int, last: Int, survey: String!, orderBy: String): RecipientNodeConnection
   adminArea(id: ID!): AreaNode
   allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
@@ -2646,6 +2647,24 @@ type ReassignRoleMutation {
 
 type RebuildTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
+}
+
+type RecipientNode implements Node {
+  id: ID!
+  size: Int
+  headOfHousehold: IndividualNode!
+}
+
+type RecipientNodeConnection {
+  pageInfo: PageInfo!
+  edges: [RecipientNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type RecipientNodeEdge {
+  node: RecipientNode
+  cursor: String!
 }
 
 input ReferralTicketExtras {

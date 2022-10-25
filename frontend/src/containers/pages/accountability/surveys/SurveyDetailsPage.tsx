@@ -1,22 +1,19 @@
+import { Box, Button } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { Box, Button } from '@material-ui/core';
+import { SurveyDetails } from '../../../../components/accountability/Surveys/SurveyDetails';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
-import {
-  useFeedbackQuery,
-  useSurveyQuery,
-} from '../../../../__generated__/graphql';
-import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useSurveyQuery } from '../../../../__generated__/graphql';
 import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
-import { SurveyDetails } from '../../../../components/accountability/Surveys/SurveyDetails';
+import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 
 export const SurveyDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();

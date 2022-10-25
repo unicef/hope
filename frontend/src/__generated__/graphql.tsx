@@ -3809,6 +3809,7 @@ export type Query = {
   feedbackIssueTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   survey?: Maybe<SurveyNode>,
   allSurveys?: Maybe<SurveyNodeConnection>,
+  recipients?: Maybe<RecipientNodeConnection>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
@@ -4019,6 +4020,17 @@ export type QueryAllSurveysArgs = {
   createdBy?: Maybe<Scalars['ID']>,
   createdAtRange?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryRecipientsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  survey: Scalars['String'],
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4752,6 +4764,27 @@ export type ReassignRoleMutation = {
 export type RebuildTargetPopulationMutation = {
    __typename?: 'RebuildTargetPopulationMutation',
   targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
+export type RecipientNode = Node & {
+   __typename?: 'RecipientNode',
+  id: Scalars['ID'],
+  size?: Maybe<Scalars['Int']>,
+  headOfHousehold: IndividualNode,
+};
+
+export type RecipientNodeConnection = {
+   __typename?: 'RecipientNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<RecipientNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type RecipientNodeEdge = {
+   __typename?: 'RecipientNodeEdge',
+  node?: Maybe<RecipientNode>,
+  cursor: Scalars['String'],
 };
 
 export type ReferralTicketExtras = {
@@ -10759,6 +10792,48 @@ export type AllSurveysQuery = (
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
         )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type RecipientsQueryVariables = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  survey: Scalars['String'],
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type RecipientsQuery = (
+  { __typename?: 'Query' }
+  & { recipients: Maybe<(
+    { __typename?: 'RecipientNodeConnection' }
+    & Pick<RecipientNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'RecipientNodeEdge' }
+      & Pick<RecipientNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'RecipientNode' }
+        & Pick<RecipientNode, 'id'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+          & { household: Maybe<(
+            { __typename?: 'HouseholdNode' }
+            & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'status' | 'residenceStatus' | 'lastRegistrationDate'>
+            & { admin2: Maybe<(
+              { __typename?: 'AreaNode' }
+              & Pick<AreaNode, 'id' | 'name'>
+            )> }
+          )> }
+        ) }
       )> }
     )>> }
   )> }
@@ -21009,6 +21084,91 @@ export function useAllSurveysLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type AllSurveysQueryHookResult = ReturnType<typeof useAllSurveysQuery>;
 export type AllSurveysLazyQueryHookResult = ReturnType<typeof useAllSurveysLazyQuery>;
 export type AllSurveysQueryResult = ApolloReactCommon.QueryResult<AllSurveysQuery, AllSurveysQueryVariables>;
+export const RecipientsDocument = gql`
+    query Recipients($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $survey: String!, $orderBy: String) {
+  recipients(offset: $offset, before: $before, after: $after, first: $first, last: $last, survey: $survey, orderBy: $orderBy) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edgeCount
+    edges {
+      cursor
+      node {
+        id
+        headOfHousehold {
+          id
+          fullName
+          household {
+            id
+            unicefId
+            size
+            status
+            admin2 {
+              id
+              name
+            }
+            residenceStatus
+            lastRegistrationDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type RecipientsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<RecipientsQuery, RecipientsQueryVariables>, 'query'> & ({ variables: RecipientsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const RecipientsComponent = (props: RecipientsComponentProps) => (
+      <ApolloReactComponents.Query<RecipientsQuery, RecipientsQueryVariables> query={RecipientsDocument} {...props} />
+    );
+    
+export type RecipientsProps<TChildProps = {}> = ApolloReactHoc.DataProps<RecipientsQuery, RecipientsQueryVariables> & TChildProps;
+export function withRecipients<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RecipientsQuery,
+  RecipientsQueryVariables,
+  RecipientsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, RecipientsQuery, RecipientsQueryVariables, RecipientsProps<TChildProps>>(RecipientsDocument, {
+      alias: 'recipients',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRecipientsQuery__
+ *
+ * To run a query within a React component, call `useRecipientsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRecipientsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRecipientsQuery({
+ *   variables: {
+ *      offset: // value for 'offset'
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      survey: // value for 'survey'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useRecipientsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<RecipientsQuery, RecipientsQueryVariables>) {
+        return ApolloReactHooks.useQuery<RecipientsQuery, RecipientsQueryVariables>(RecipientsDocument, baseOptions);
+      }
+export function useRecipientsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RecipientsQuery, RecipientsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<RecipientsQuery, RecipientsQueryVariables>(RecipientsDocument, baseOptions);
+        }
+export type RecipientsQueryHookResult = ReturnType<typeof useRecipientsQuery>;
+export type RecipientsLazyQueryHookResult = ReturnType<typeof useRecipientsLazyQuery>;
+export type RecipientsQueryResult = ApolloReactCommon.QueryResult<RecipientsQuery, RecipientsQueryVariables>;
 export const SurveyDocument = gql`
     query Survey($id: ID!) {
   survey(id: $id) {
@@ -21834,6 +21994,9 @@ export type ResolversTypes = {
   AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput,
   GetCommunicationMessageSampleSizeObject: ResolverTypeWrapper<GetCommunicationMessageSampleSizeObject>,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
+  RecipientNodeConnection: ResolverTypeWrapper<RecipientNodeConnection>,
+  RecipientNodeEdge: ResolverTypeWrapper<RecipientNodeEdge>,
+  RecipientNode: ResolverTypeWrapper<RecipientNode>,
   LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
   LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
   LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
@@ -22252,6 +22415,9 @@ export type ResolversParentTypes = {
   AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput,
   GetCommunicationMessageSampleSizeObject: GetCommunicationMessageSampleSizeObject,
   ChoiceObject: ChoiceObject,
+  RecipientNodeConnection: RecipientNodeConnection,
+  RecipientNodeEdge: RecipientNodeEdge,
+  RecipientNode: RecipientNode,
   LogEntryNodeConnection: LogEntryNodeConnection,
   LogEntryNodeEdge: LogEntryNodeEdge,
   LogEntryNode: LogEntryNode,
@@ -23844,7 +24010,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'GrievanceTicketNode' | 'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'SurveyNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'GrievanceDocumentNode' | 'CommunicationMessageRecipientMapNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'GrievanceTicketNode' | 'AreaNode' | 'AreaTypeNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'SurveyNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'GrievanceDocumentNode' | 'CommunicationMessageRecipientMapNode' | 'RecipientNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -24034,6 +24200,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   feedbackIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   survey?: Resolver<Maybe<ResolversTypes['SurveyNode']>, ParentType, ContextType, RequireFields<QuerySurveyArgs, 'id'>>,
   allSurveys?: Resolver<Maybe<ResolversTypes['SurveyNodeConnection']>, ParentType, ContextType, QueryAllSurveysArgs>,
+  recipients?: Resolver<Maybe<ResolversTypes['RecipientNodeConnection']>, ParentType, ContextType, RequireFields<QueryRecipientsArgs, 'survey'>>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
@@ -24189,6 +24356,24 @@ export type ReassignRoleMutationResolvers<ContextType = any, ParentType extends 
 
 export type RebuildTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RebuildTargetPopulationMutation'] = ResolversParentTypes['RebuildTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export type RecipientNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RecipientNode'] = ResolversParentTypes['RecipientNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+};
+
+export type RecipientNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['RecipientNodeConnection'] = ResolversParentTypes['RecipientNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['RecipientNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type RecipientNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RecipientNodeEdge'] = ResolversParentTypes['RecipientNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['RecipientNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
 export type RefuseRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RefuseRegistrationDataImportMutation'] = ResolversParentTypes['RefuseRegistrationDataImportMutation']> = {
@@ -25349,6 +25534,9 @@ export type Resolvers<ContextType = any> = {
   RapidProFlowRun?: RapidProFlowRunResolvers<ContextType>,
   ReassignRoleMutation?: ReassignRoleMutationResolvers<ContextType>,
   RebuildTargetPopulationMutation?: RebuildTargetPopulationMutationResolvers<ContextType>,
+  RecipientNode?: RecipientNodeResolvers<ContextType>,
+  RecipientNodeConnection?: RecipientNodeConnectionResolvers<ContextType>,
+  RecipientNodeEdge?: RecipientNodeEdgeResolvers<ContextType>,
   RefuseRegistrationDataImportMutation?: RefuseRegistrationDataImportMutationResolvers<ContextType>,
   RegistrationDataImportDatahubNode?: RegistrationDataImportDatahubNodeResolvers<ContextType>,
   RegistrationDataImportDatahubNodeConnection?: RegistrationDataImportDatahubNodeConnectionResolvers<ContextType>,
