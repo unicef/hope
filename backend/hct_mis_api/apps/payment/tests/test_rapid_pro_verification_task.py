@@ -177,9 +177,9 @@ class TestRapidProVerificationTask(TestCase):
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_not_received(self, mock_parent_init):
         mock_parent_init.return_value = None
-        payment_record_verification = (
-            TestRapidProVerificationTask.verification.payment_record_verifications.order_by("?").first()
-        )
+        payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
+            "?"
+        ).first()
         self.assertEqual(
             payment_record_verification.status,
             PaymentVerification.STATUS_PENDING,
@@ -205,11 +205,9 @@ class TestRapidProVerificationTask(TestCase):
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_received_with_issues(self, mock_parent_init):
         mock_parent_init.return_value = None
-        payment_record_verification = (
-            TestRapidProVerificationTask.verification.payment_record_verifications
-            .order_by("?")
-            .first()
-        )
+        payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
+            "?"
+        ).first()
         self.assertEqual(
             payment_record_verification.status,
             PaymentVerification.STATUS_PENDING,
@@ -239,11 +237,9 @@ class TestRapidProVerificationTask(TestCase):
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_received(self, mock_parent_init):
         mock_parent_init.return_value = None
-        payment_record_verification = (
-            TestRapidProVerificationTask.verification.payment_record_verifications
-            .order_by("?")
-            .first()
-        )
+        payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
+            "?"
+        ).first()
         self.assertEqual(
             payment_record_verification.status,
             PaymentVerification.STATUS_PENDING,
@@ -273,11 +269,9 @@ class TestRapidProVerificationTask(TestCase):
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_wrong_phone_number(self, mock_parent_init):
         mock_parent_init.return_value = None
-        payment_record_verification = (
-            TestRapidProVerificationTask.verification.payment_record_verifications
-            .order_by("?")
-            .first()
-        )
+        payment_record_verification = TestRapidProVerificationTask.verification.payment_record_verifications.order_by(
+            "?"
+        ).first()
         self.assertEqual(
             payment_record_verification.status,
             PaymentVerification.STATUS_PENDING,

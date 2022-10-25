@@ -78,7 +78,6 @@ class PaymentPlanGFKFactory(factory.django.DjangoModelFactory):
         abstract = True
 
 
-
 class PaymentVerificationSummaryFactory(PaymentPlanGFKFactory):
     generic_fk_obj = factory.SubFactory("payment.fixtures.CashPlanFactory")
 

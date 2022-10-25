@@ -142,9 +142,7 @@ class GenerateReportContentHelpers:
     @staticmethod
     def get_cash_plan_verifications(report: Report):
         pp_business_area_ids = list(
-            CashPlan.objects
-            .filter(business_area=report.business_area)
-            .values_list("id", flat=True)
+            CashPlan.objects.filter(business_area=report.business_area).values_list("id", flat=True)
         )
         filter_vars = {
             "payment_plan_object_id__in": pp_business_area_ids,
@@ -153,11 +151,7 @@ class GenerateReportContentHelpers:
             "completion_date__lte": report.date_to,
         }
         if report.program:
-            pp_program_ids = list(
-                CashPlan.objects
-                .filter(program=report.program)
-                .values_list("id", flat=True)
-            )
+            pp_program_ids = list(CashPlan.objects.filter(program=report.program).values_list("id", flat=True))
             filter_vars["payment_plan_object_id__in"] = pp_program_ids
         return PaymentVerificationPlan.objects.filter(**filter_vars)
 
@@ -238,9 +232,7 @@ class GenerateReportContentHelpers:
     @staticmethod
     def get_payment_verifications(report: Report):
         pp_business_area_ids = list(
-            PaymentPlan.objects
-            .filter(business_area=report.business_area)
-            .values_list("id", flat=True)
+            PaymentPlan.objects.filter(business_area=report.business_area).values_list("id", flat=True)
         )
         filter_vars = {
             "payment_verification_plan__payment_plan_object_id__in": pp_business_area_ids,
@@ -248,11 +240,7 @@ class GenerateReportContentHelpers:
             "payment_verification_plan__completion_date__date__range": (report.date_from, report.date_to),
         }
         if report.program:
-            pp_program_ids = list(
-                PaymentPlan.objects
-                .filter(program=report.program)
-                .values_list("id", flat=True)
-            )
+            pp_program_ids = list(PaymentPlan.objects.filter(program=report.program).values_list("id", flat=True))
             filter_vars["payment_verification_plan__payment_plan_object_id__in"] = pp_program_ids
         return PaymentVerification.objects.filter(**filter_vars)
 

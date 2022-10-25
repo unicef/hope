@@ -59,7 +59,9 @@ from hct_mis_api.apps.payment.filters import (
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    PaymentVerificationPlanFilter, cash_plan_and_payment_plan_ordering, cash_plan_and_payment_plan_filter,
+    PaymentVerificationPlanFilter,
+    cash_plan_and_payment_plan_ordering,
+    cash_plan_and_payment_plan_filter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -1089,12 +1091,12 @@ class Query(graphene.ObjectType):
         payment_plan_qs = PaymentPlan.objects.filter(status=PaymentPlan.Status.RECONCILED).annotate(
             fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
             delivery_types=ArraySubquery(delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism", flat=True)),
-            )
+        )
 
         cash_plan_qs = CashPlan.objects.all().annotate(
             unicef_id=F("ca_id"),
             fsp_names=ArraySubquery(service_provider_qs.values_list("full_name", flat=True)),
-            delivery_types=F("delivery_type")
+            delivery_types=F("delivery_type"),
         )
 
         qs = ExtendedQuerySetSequence(payment_plan_qs, cash_plan_qs)
