@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Any, Dict, List
 from uuid import uuid4
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -85,9 +86,6 @@ IS_STAGING = False
 IS_PROD = False
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
-
-# EMAIL_CONFIG = env.email_url('EMAIL_URL', default='smtp://user@:password@localhost:25')
-# vars().update(EMAIL_CONFIG)
 
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env("EMAIL_PORT")
@@ -186,7 +184,7 @@ MIDDLEWARE = [
     "hct_mis_api.middlewares.version.VersionMiddleware",
 ]
 
-TEMPLATES = [
+TEMPLATES: List[Dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
@@ -320,7 +318,7 @@ def extend_list_avoid_repeats(list_to_extend, extend_with):
 
 
 LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
-LOGGING = {
+LOGGING: Dict[str, Any] = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
@@ -361,20 +359,6 @@ LOGGING = {
 
 GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
 HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
-# REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
-#
-# if REDIS_INSTANCE:
-#     CACHES = {
-#         "default": {
-#             "BACKEND": "django_redis.cache.RedisCache",
-#             "LOCATION": f"redis://{REDIS_INSTANCE}/1",
-#             "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
-#             "TIMEOUT": 3600,
-#         }
-#     }
-#     DJANGO_REDIS_IGNORE_EXCEPTIONS = not DEBUG
-# else:
-#     CACHES = {"default": {"BACKEND": "common.cache_backends.DummyRedisCache", "LOCATION": "hct_mis"}}
 
 REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis:6379")
 if "CACHE_URL" not in os.environ:
@@ -684,12 +668,6 @@ SMART_ADMIN_SECTIONS = {
         "core.FlexibleAttribute",
         "core.FlexibleAttributeGroup",
     ],
-    # "HUBs": [
-    #     "cash_assist_datahub",
-    #     "erp_datahub",
-    #     "mis_datahub",
-    #     "registration_datahub",
-    # ],
     "HUB (Hope->CA)": [
         "mis_datahub",
     ],
@@ -776,12 +754,6 @@ IMPERSONATE = {
 POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
 
 CONCURRENCY_ENABLED = False
-
-# import warnings
-# warnings.filterwarnings(
-#     'error', r"DateTimeField .* received a naive datetime",
-#     RuntimeWarning, r'django\.db\.models\.fields',
-# )
 
 PROFILING = env("PROFILING", default="off") == "on"
 if PROFILING:
