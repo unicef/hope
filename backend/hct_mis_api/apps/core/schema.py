@@ -286,7 +286,14 @@ class Query(graphene.ObjectType):
 
     def resolve_all_fields_attributes(self, info, flex_field=None, business_area_slug=None):
         def is_a_killer_filter(field):
-            return field["name"] in {
+            if isinstance(field, FlexibleAttribute):
+                name = field.name
+                associated_with = FlexibleAttribute.ASSOCIATED_WITH_CHOICES[field.associated_with][1]
+            else:
+                name = field["name"]
+                associated_with = field["associated_with"]
+
+            return name in {
                 "Household": ["address", "deviceid"],
                 "Individual": [
                     "full_name",
@@ -298,7 +305,7 @@ class Query(graphene.ObjectType):
                     "electoral_card_no",
                     "drivers_license_no",
                 ],
-            }.get(field["associated_with"], [])
+            }.get(associated_with, [])
 
         return sort_by_attr(
             (
