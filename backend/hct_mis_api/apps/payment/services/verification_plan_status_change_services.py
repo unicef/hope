@@ -8,10 +8,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.payment.models import (
-    PaymentVerificationPlan,
-    PaymentVerification,
-)
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 
 

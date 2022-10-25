@@ -227,8 +227,8 @@ def import_payment_plan_payment_list_from_xlsx(payment_plan_id):
 @sentry_tags
 def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id, file_pk):
     try:
-        from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.core.models import FileTemp
+        from hct_mis_api.apps.payment.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         try:

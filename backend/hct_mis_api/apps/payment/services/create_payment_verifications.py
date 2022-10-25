@@ -4,9 +4,9 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
 
 from hct_mis_api.apps.payment.models import (
-    PaymentVerificationPlan,
     PaymentRecord,
     PaymentVerification,
+    PaymentVerificationPlan,
 )
 
 
