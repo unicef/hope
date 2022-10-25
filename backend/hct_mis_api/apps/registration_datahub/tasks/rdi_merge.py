@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
@@ -190,7 +190,7 @@ class RdiMergeTask:
             )
             document = Document(
                 document_number=imported_document.document_number,
-                country=imported_document.country.code,
+                country=Country.objects.get(iso_code2=str(imported_document.country)),
                 type=document_type,
                 individual=individual,
                 photo=imported_document.photo,
