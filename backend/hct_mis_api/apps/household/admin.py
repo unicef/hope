@@ -1,6 +1,6 @@
 import logging
 from itertools import chain
-from typing import Iterable
+from typing import Iterable, List
 
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
@@ -365,7 +365,7 @@ class HouseholdAdmin(
         # NOTE: this code is not should be optimized in the future and it is not
         # intended to be used in bulk
         hh = self.get_object(request, pk)
-        warnings = []
+        warnings: List[List] = []
         primary = None
         head = None
         try:

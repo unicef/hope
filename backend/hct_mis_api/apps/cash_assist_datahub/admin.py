@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List
 
 from django.conf import settings
 from django.contrib import admin, messages
@@ -134,11 +135,11 @@ class SessionAdmin(HOPEModelAdminBase):
 
     @button(permission="account.can_inspect")
     def inspect(self, request, pk):
-        context = self.get_common_context(request, pk)
+        context: Dict[str, Any] = self.get_common_context(request, pk)
         obj: Session = context["original"]
         context["title"] = f"Session {obj.pk} - {obj.timestamp} - {obj.status}"
         context["data"] = {}
-        warnings = []
+        warnings: List[List] = []
         errors = 0
         errors = 0
         has_content = False
@@ -174,9 +175,6 @@ class SessionAdmin(HOPEModelAdminBase):
         svs = []
         for sv in ServiceProvider.objects.filter(session=pk):
             svs.append(sv.ca_id)
-            # if not payment.ServiceProvider.objects.filter(ca_id=sv.ca_id).exists():
-            #     errors += 1
-            #     context["data"][ServiceProvider]["warnings"].append(f"ServiceProvider {sv.ca_id} not found in HOPE")
 
         session_cacheplans = CashPlan.objects.filter(session=pk).values_list("cash_plan_id", flat=True)
         hope_cacheplans = program.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(

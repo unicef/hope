@@ -43,7 +43,8 @@ class GeoCountryField(models.CharField):
         super().__init__(*args, **kwargs)
 
     def get_choices(self, include_blank=True, blank_choice=None, *args, **kwargs):
-        if self.choices[0] == (None, None):
+        # TODO: refactor
+        if self.choices[0] == (None, None):  # type: ignore
             self.choices = Country.objects.all().values_list("iso_code2", "name")
         if blank_choice is None:
             if self.blank_label is None:
