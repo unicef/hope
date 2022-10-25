@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.db.models.functions import Lower
 
 from django_filters import (
@@ -13,8 +12,6 @@ from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
 
-from ..program.models import Program
-from ..targeting.models import TargetPopulation
 from .models import Feedback, FeedbackMessage, Message, Survey
 
 
@@ -136,3 +133,25 @@ class SurveyFilter(FilterSet):
             "created_at",
         )
     )
+
+
+class RecipientFilter(FilterSet):
+    survey = CharFilter(method="filter_survey", required=True)
+
+    class Meta:
+        model = Household
+        fields = []
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            "unicef_id",
+            "head_of_household__full_name",
+            "size",
+            "admin_area__name",
+            "residence_status",
+            "registered_at",
+        )
+    )
+
+    def filter_survey(self, queryset, name, value):
+        return queryset.filter(surveys__id=decode_id_string(value))
