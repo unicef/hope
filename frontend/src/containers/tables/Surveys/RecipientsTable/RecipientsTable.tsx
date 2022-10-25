@@ -2,9 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
-  AllAccountabilityCommunicationMessageRecipientsQueryVariables,
-  CommunicationMessageRecipientMapNode,
-  useAllAccountabilityCommunicationMessageRecipientsQuery,
+  RecipientNode,
+  RecipientsQueryVariables,
+  useRecipientsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RecipientsTableHeadCells';
@@ -20,21 +20,18 @@ export const RecipientsTable = ({
   canViewDetails,
 }: RecipientsTableProps): React.ReactElement => {
   const { t } = useTranslation();
-  const initialVariables: AllAccountabilityCommunicationMessageRecipientsQueryVariables = {
-    messageId: id,
+  const initialVariables: RecipientsQueryVariables = {
+    survey: id,
   };
 
   return (
     <TableWrapper>
-      <UniversalTable<
-        CommunicationMessageRecipientMapNode,
-        AllAccountabilityCommunicationMessageRecipientsQueryVariables
-      >
+      <UniversalTable<RecipientNode, RecipientsQueryVariables>
         title={t('Recipients')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllAccountabilityCommunicationMessageRecipientsQuery}
-        queriedObjectName='allAccountabilityCommunicationMessageRecipients'
+        query={useRecipientsQuery}
+        queriedObjectName='recipients'
         initialVariables={initialVariables}
         renderRow={(row) => (
           <RecipientsTableRow

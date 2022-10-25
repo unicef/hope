@@ -1,7 +1,7 @@
 import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
-import { CommunicationMessageRecipientMapNode } from '../../../../__generated__/graphql';
+import { RecipientNode } from '../../../../__generated__/graphql';
 
-export const headCells: HeadCell<CommunicationMessageRecipientMapNode>[] = [
+export const headCells: HeadCell<RecipientNode>[] = [
   {
     disablePadding: false,
     label: 'Household Id',

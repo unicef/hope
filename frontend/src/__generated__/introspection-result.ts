@@ -165,6 +165,9 @@
             "name": "CommunicationMessageRecipientMapNode"
           },
           {
+            "name": "RecipientNode"
+          },
+          {
             "name": "LogEntryNode"
           },
           {
