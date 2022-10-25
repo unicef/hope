@@ -583,7 +583,9 @@ def chart_filters_decoder(filters):
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
-def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas", payment_verification_gfk=False):
+def chart_create_filter_query(
+    filters, program_id_path="id", administrative_area_path="admin_areas", payment_verification_gfk=False
+):
     filter_query = {} if not payment_verification_gfk else Q()
     if filters.get("program") is not None:
         if not payment_verification_gfk:
@@ -602,8 +604,8 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
         else:
             for path in administrative_area_path.split(","):
                 filter_query |= Q(
-                    Q(**{f"{path}__id": filters.get("administrative_area")}) &
-                    Q(**{f"{path}__area_type__area_level": 2})
+                    Q(**{f"{path}__id": filters.get("administrative_area")})
+                    & Q(**{f"{path}__area_type__area_level": 2})
                 )
 
     return filter_query

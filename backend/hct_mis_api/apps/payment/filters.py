@@ -389,7 +389,9 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
 
     if delivery_type:
         # TODO: FIX ME
-        queryset = queryset.filter(Q(delivery_types__istartswith=delivery_type)) # | Q(delivery_types__in=delivery_type)
+        queryset = queryset.filter(
+            Q(delivery_types__istartswith=delivery_type)
+        )  # | Q(delivery_types__in=delivery_type)
 
     if search:
         q_obj = Q()

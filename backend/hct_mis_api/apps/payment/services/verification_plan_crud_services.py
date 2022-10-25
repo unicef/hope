@@ -19,8 +19,7 @@ def get_payment_records(payment_plan, verification_channel):
     payment_plan_type = payment_plan.__class__.__name__
     if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
         return payment_plan.available_payment_records(
-        class_name=payment_plan_type,
-        extra_validation=does_payment_record_have_right_hoh_phone_number
+            class_name=payment_plan_type, extra_validation=does_payment_record_have_right_hoh_phone_number
         )
     return payment_plan.available_payment_records(class_name=payment_plan_type)
 
@@ -38,9 +37,7 @@ class VerificationPlanCrudServices:
 
         payment_verification_plan.verification_channel = input_data.get("verification_channel")
 
-        payment_records = get_payment_records(
-            payment_plan, payment_verification_plan.verification_channel
-        )
+        payment_records = get_payment_records(payment_plan, payment_verification_plan.verification_channel)
         sampling = Sampling(input_data, payment_plan, payment_records)
         payment_verification_plan, payment_records = sampling.process_sampling(payment_verification_plan)
         ProcessVerification(input_data, payment_verification_plan).process()

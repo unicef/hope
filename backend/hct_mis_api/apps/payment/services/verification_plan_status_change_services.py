@@ -85,8 +85,7 @@ class VerificationPlanStatusChangeServices:
 
     def _can_activate_via_rapidpro(self):
         return (
-            self.payment_verification_plan.verification_channel
-            == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO
+            self.payment_verification_plan.verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO
         )
 
     def _activate_rapidpro(self):
@@ -94,8 +93,8 @@ class VerificationPlanStatusChangeServices:
         api = RapidProAPI(business_area_slug)
 
         hoh_ids = [
-            pv.get_payment.household.head_of_household.pk for pv in
-            self.payment_verification_plan.payment_record_verifications.filter(sent_to_rapid_pro=False)
+            pv.get_payment.household.head_of_household.pk
+            for pv in self.payment_verification_plan.payment_record_verifications.filter(sent_to_rapid_pro=False)
         ]
         individuals = Individual.objects.filter(pk__in=hoh_ids)
         phone_numbers = list(individuals.values_list("phone_no", flat=True))

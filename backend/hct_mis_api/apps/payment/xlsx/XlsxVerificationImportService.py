@@ -30,9 +30,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
         self.payment_record_verifications_dict = {
             str(x.payment_object_id): x for x in self.payment_record_verifications
         }
-        self.payment_records_dict = {
-            str(x.payment_object_id): x.get_payment for x in self.payment_record_verifications
-        }
+        self.payment_records_dict = {str(x.payment_object_id): x.get_payment for x in self.payment_record_verifications}
         self.payment_verifications_to_save = []
         self.was_validation_run = False
 
