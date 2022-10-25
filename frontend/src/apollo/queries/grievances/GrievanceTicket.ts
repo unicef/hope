@@ -151,10 +151,6 @@ export const GrievanceTicket = gql`
         paymentVerification {
           id
           receivedAmount
-          # paymentRecord {
-          #   id
-          #   deliveredQuantity
-          # }
         }
         paymentVerifications {
           edges {

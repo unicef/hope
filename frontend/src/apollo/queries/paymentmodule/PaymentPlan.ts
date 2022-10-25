@@ -205,10 +205,6 @@ export const PAYMENT_PLAN_QUERY = gql`
         edges {
           node {
             id
-            # targetPopulation {
-            #   id
-            #   name
-            # }
           }
         }
       }

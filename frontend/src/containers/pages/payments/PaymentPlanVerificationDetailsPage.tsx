@@ -180,7 +180,6 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
           <TableWrapper>
             <VerificationRecordsTable
               filter={debouncedFilter}
-              cashPlanId={paymentPlan.id}
               businessArea={businessArea}
               canViewRecordDetails={hasPermissions(
                 PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
