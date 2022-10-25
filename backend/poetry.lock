@@ -1724,6 +1724,19 @@ python-versions = "*"
 Pillow = "*"
 
 [[package]]
+name = "openpyxl-stubs"
+version = "0.1.24"
+description = "Type stubs for openpyxl"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+mypy = ">=0.720"
+openpyxl = ">=3.0.0"
+typing-extensions = ">=3.7.4"
+
+[[package]]
 name = "packaging"
 version = "21.3"
 description = "Core utilities for Python packages"
@@ -2686,7 +2699,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.*"
-content-hash = "f07349ebfaa27fe6e0c936f9f5d9c5ef193c43acfc462a218cabdf6f99fd468d"
+content-hash = "b1c187453ce040758fa6b1be3d0500a5ea73d3d7e1ab6635f2d772ab9941b741"
 
 [metadata.files]
 amqp = [
@@ -3520,6 +3533,10 @@ openpyxl = [
 openpyxl-image-loader = [
     {file = "openpyxl-image-loader-1.0.5.tar.gz", hash = "sha256:6d9d7fa5c35ac0a3e620b9eaf7334420a7693ccdb2a16e940a3a92bc3ec87fe8"},
     {file = "openpyxl_image_loader-1.0.5-py3-none-any.whl", hash = "sha256:103e6ad4dc433cc3bb18d1f6c413139ad4a91a5f3de0e39783534e22ff0c9c0b"},
+]
+openpyxl-stubs = [
+    {file = "openpyxl-stubs-0.1.24.tar.gz", hash = "sha256:762099c41d5da359c86ddc08095ca1363e42233239b57f4113bd860c4718b4ca"},
+    {file = "openpyxl_stubs-0.1.24-py3-none-any.whl", hash = "sha256:356420facb59ef97cc193086fdefcd8ab627ae957b0feb630aa7d5c8d9ed6d37"},
 ]
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},

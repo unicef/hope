@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Dict
+from typing import Any, Callable, Dict, List, Union
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -216,18 +216,12 @@ def to_choice_object(choices):
     return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 
-def rename_dict_keys(obj, convert_func):
+def rename_dict_keys(obj: Union[Dict[Any, Any], List[Any], Any], convert_func: Callable) -> Union[Dict[Any, Any], List[Any], Any]:
     if isinstance(obj, dict):
-        new = {}
-        for k, v in obj.items():
-            new[convert_func(k)] = rename_dict_keys(v, convert_func)
+        return {convert_func(k): rename_dict_keys(v, convert_func) for k, v in obj.items()}
     elif isinstance(obj, list):
-        new = []
-        for v in obj:
-            new.append(rename_dict_keys(v, convert_func))
-    else:
-        return obj
-    return new
+        return [rename_dict_keys(v, convert_func) for v in obj]
+    return obj
 
 
 raise_attribute_error = object()

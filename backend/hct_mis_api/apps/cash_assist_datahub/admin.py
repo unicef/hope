@@ -174,9 +174,6 @@ class SessionAdmin(HOPEModelAdminBase):
         svs = []
         for sv in ServiceProvider.objects.filter(session=pk):
             svs.append(sv.ca_id)
-            # if not payment.ServiceProvider.objects.filter(ca_id=sv.ca_id).exists():
-            #     errors += 1
-            #     context["data"][ServiceProvider]["warnings"].append(f"ServiceProvider {sv.ca_id} not found in HOPE")
 
         session_cacheplans = CashPlan.objects.filter(session=pk).values_list("cash_plan_id", flat=True)
         hope_cacheplans = program.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(

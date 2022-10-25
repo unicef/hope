@@ -1,3 +1,4 @@
+from typing import Dict
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms.models import modelform_factory
@@ -36,7 +37,7 @@ class IndividualXlsxUpdate:
         self.xlsx_match_columns = xlsx_update_file.xlsx_match_columns or []
         self.wb = openpyxl.load_workbook(xlsx_update_file.file, data_only=True)
         self.individuals_ws = self.wb["Individuals"]
-        self.report_dict = None
+        self.report_dict: Dict = {}
         self._validate_columns_names()
         self._build_helpers()
 
