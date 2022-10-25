@@ -6,7 +6,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage, Survey
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
 class FeedbackFactory(factory.DjangoModelFactory):
