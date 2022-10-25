@@ -63,10 +63,10 @@ ignore_missing_imports = true # TODO
 # TODO: remove one, fix errors, repeat
 disable_error_code = [
   "var-annotated",
-  # "arg-type",
+  "arg-type",
   "attr-defined",
   "misc",
-  "index",
+  # "index",
   "assignment",
   "valid-type",
   "union-attr",
