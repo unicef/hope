@@ -25,30 +25,30 @@ class CheckRapidProVerificationTask:
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
             status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
-        for cashplan_payment_verification in active_rapidpro_verifications:
+        for payment_verification_plan in active_rapidpro_verifications:
             try:
-                self._verify_cashplan_payment_verification(cashplan_payment_verification)
+                self._verify_cashplan_payment_verification(payment_verification_plan)
             except Exception as e:
                 logger.exception(e)
 
-    def _verify_cashplan_payment_verification(self, cashplan_payment_verification):
-        payment_record_verifications = cashplan_payment_verification.payment_record_verifications.prefetch_related(
-            "payment_record__head_of_household"
+    def _verify_cashplan_payment_verification(self, payment_verification_plan: PaymentVerificationPlan):
+        payment_record_verifications = payment_verification_plan.payment_record_verifications.prefetch_related(
+            "payment_obj__head_of_household"
         )
-        payment_record_verification_to_update = []
-        business_area = cashplan_payment_verification.payment_plan.business_area
+        business_area = payment_verification_plan.payment_plan_obj.business_area
+
         payment_record_verifications_phone_number_dict = {
-            str(payment_record_verification.payment_record.head_of_household.phone_no): payment_record_verification
-            for payment_record_verification in payment_record_verifications
+            str(payment_verification.payment_obj.head_of_household.phone_no): payment_verification
+            for payment_verification in payment_record_verifications
         }
         api = RapidProAPI(business_area.slug)
-        rapid_pro_results = api.get_mapped_flow_runs(cashplan_payment_verification.rapid_pro_flow_start_uuids)
+        rapid_pro_results = api.get_mapped_flow_runs(payment_verification_plan.rapid_pro_flow_start_uuids)
         payment_record_verification_to_update = self._get_payment_record_verification_to_update(
             rapid_pro_results, payment_record_verifications_phone_number_dict
         )
         PaymentVerification.objects.bulk_update(payment_record_verification_to_update, ("status", "received_amount"))
-        calculate_counts(cashplan_payment_verification)
-        cashplan_payment_verification.save()
+        calculate_counts(payment_verification_plan)
+        payment_verification_plan.save()
 
     def _get_payment_record_verification_to_update(self, results, phone_numbers):
         output = []
@@ -71,7 +71,7 @@ class CheckRapidProVerificationTask:
         payment_record_verification = payment_record_verifications_phone_number_dict.get(phone_number)
         if not payment_record_verification:
             return None
-        delivered_amount = payment_record_verification.payment_record.delivered_quantity
+        delivered_amount = payment_record_verification.get_payment.delivered_quantity
         payment_record_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_record_verification.received_amount = received_amount
         return payment_record_verification
