@@ -661,6 +661,7 @@ input CreateReportInput {
 
 input CreateSurveyInput {
   title: String!
+  body: String
   category: String!
   targetPopulation: ID
   program: ID

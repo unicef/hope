@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -7,7 +7,6 @@ import { SurveyQuery } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';
-import { Missing } from '../../core/Missing';
 import { OverviewContainer } from '../../core/OverviewContainer';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
@@ -55,8 +54,7 @@ export const SurveyDetails = ({
               <UniversalMoment>{createdAt}</UniversalMoment>
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
-            <Missing />
+          <Grid item xs={3}>
             <LabelizedField label={t('Target Population')}>
               {targetPopulation ? (
                 <BlackLink
@@ -68,18 +66,23 @@ export const SurveyDetails = ({
                 '-'
               )}
             </LabelizedField>
-            <Grid item xs={3}>
-              <LabelizedField label={t('Programme')} value={program.name} />
-            </Grid>
-            <Grid item xs={3}>
-              <LabelizedField label={t('Message')}>
-                <Box display='flex' flexDirection='column'>
-                  {title}
-                  {body}
-                </Box>
-              </LabelizedField>
-            </Grid>
           </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label={t('Programme')}>
+              {program ? (
+                <BlackLink to={`/${businessArea}/programmes/${program.id}`}>
+                  {program.name}
+                </BlackLink>
+              ) : (
+                '-'
+              )}
+            </LabelizedField>
+          </Grid>
+          {body && (
+            <Grid item xs={3}>
+              <LabelizedField label={t('Message')} value={body} />
+            </Grid>
+          )}
         </Grid>
       </OverviewContainer>
     </ContainerColumnWithBorder>

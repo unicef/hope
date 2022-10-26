@@ -63,6 +63,7 @@ class UpdateFeedbackInput(graphene.InputObjectType):
 
 class CreateSurveyInput(graphene.InputObjectType):
     title = graphene.String(required=True)
+    body = graphene.String(required=False)
     category = graphene.String(required=True)
     target_population = graphene.ID()
     program = graphene.ID()
