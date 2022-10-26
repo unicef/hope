@@ -141,7 +141,7 @@ export function EditVerificationPlan({
     excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
     verificationChannel: verification.verificationChannel || null,
     rapidProFlow: verification.rapidProFlowId || null,
-    adminCheckbox: verification.excludedAdminAreasFilter.length !== 0,
+    adminCheckbox: verification.excludedAdminAreasFilter?.length !== 0,
     ageCheckbox:
       Boolean(verification.ageFilter?.min) ||
       Boolean(verification.ageFilter?.max) ||

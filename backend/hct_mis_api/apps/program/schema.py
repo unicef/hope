@@ -101,7 +101,6 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     available_payment_records_count = graphene.Int()
     verification_plans = DjangoPermissionFilterConnectionField(
         PaymentVerificationPlanNode,
-        source="get_payment_verification_plans",
         filterset_class=PaymentVerificationPlanFilter,
     )
     payment_verification_summary = graphene.Field(
@@ -118,6 +117,9 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.payment_items.filter(
             status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         ).count()
+
+    def resolve_verification_plans(self, info, **kwargs):
+        return self.get_payment_verification_plans
 
 
 class Query(graphene.ObjectType):
