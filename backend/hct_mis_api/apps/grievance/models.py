@@ -14,7 +14,11 @@ from django.utils.translation import gettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hct_mis_api.apps.utils.models import (
+    ConcurrencyModel,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -588,7 +592,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
     is_multiple_duplicates_version = models.BooleanField(default=False)
     possible_duplicate = models.ForeignKey(
-        "household.Individual", related_name="+", on_delete=models.CASCADE
+        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True
     )  # this field will be deprecated
     possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
     selected_individual = models.ForeignKey(

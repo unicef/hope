@@ -1,6 +1,6 @@
-from django.utils import timezone
 import logging
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField, IntegerRangeField
 from django.contrib.postgres.validators import (
@@ -14,10 +14,9 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import Count, JSONField, Q
+from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
-
-from dateutil.relativedelta import relativedelta
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
@@ -38,10 +37,10 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
+    TargetingCriteriaFilterBase,
     TargetingCriteriaQueryingBase,
     TargetingCriteriaRuleQueryingBase,
     TargetingIndividualRuleFilterBlockBase,
-    TargetingCriteriaFilterBase,
 )
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
