@@ -149,8 +149,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
 
 
 class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutationMixin):
-    # TODO upd to GenericPaymentPlanNode
-    payment_plan = graphene.Field(CashPlanNode)
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -181,8 +180,7 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
 
 
 class FinishPaymentVerificationPlan(PermissionMutation):
-    # TODO upd to GenericPaymentPlanNode
-    payment_plan = graphene.Field(CashPlanNode)
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -214,8 +212,7 @@ class FinishPaymentVerificationPlan(PermissionMutation):
 
 
 class DiscardPaymentVerificationPlan(PermissionMutation):
-    # TODO upd to GenericPaymentPlanNode
-    payment_plan = graphene.Field(CashPlanNode)
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -247,8 +244,7 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
 
 
 class InvalidPaymentVerificationPlan(PermissionMutation):
-    # TODO upd to GenericPaymentPlanNode
-    payment_plan = graphene.Field(CashPlanNode)
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -280,8 +276,7 @@ class InvalidPaymentVerificationPlan(PermissionMutation):
 
 
 class DeletePaymentVerificationPlan(PermissionMutation):
-    # TODO upd to GenericPaymentPlanNode
-    payment_plan = graphene.Field(CashPlanNode)
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -512,8 +507,7 @@ class XlsxErrorNode(graphene.ObjectType):
 
 
 class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
-    # TODO upd to GenericPaymentPlanNode
-    payment_plan = graphene.Field(CashPlanNode)
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
 
     class Arguments:
         payment_verification_plan_id = graphene.ID(required=True)
@@ -546,8 +540,7 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
 
 
 class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
-    # TODO upd to GenericPaymentPlanNode
-    payment_plan = graphene.Field(CashPlanNode)
+    payment_plan = graphene.Field(GenericPaymentPlanNode)
     errors = graphene.List(XlsxErrorNode)
 
     class Arguments:
@@ -558,26 +551,26 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
     @is_authenticated
     def mutate(cls, root, info, file, payment_verification_plan_id):
         id = decode_id_string(payment_verification_plan_id)
-        cashplan_payment_verification = get_object_or_404(PaymentVerificationPlan, id=id)
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=id)
 
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_IMPORT, cashplan_payment_verification.business_area)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_IMPORT, payment_verification_plan.business_area)
 
-        if cashplan_payment_verification.status != PaymentVerificationPlan.STATUS_ACTIVE:
+        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_ACTIVE:
             logger.error("You can only import verification for active CashPlan verification")
             raise GraphQLError("You can only import verification for active CashPlan verification")
-        if cashplan_payment_verification.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
+        if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
             logger.error("You can only import verification when XLSX channel is selected")
             raise GraphQLError("You can only import verification when XLSX channel is selected")
-        import_service = XlsxVerificationImportService(cashplan_payment_verification, file)
+        import_service = XlsxVerificationImportService(payment_verification_plan, file)
         import_service.open_workbook()
         import_service.validate()
         if len(import_service.errors):
             return ImportXlsxPaymentVerificationPlanFile(None, import_service.errors)
         import_service.import_verifications()
-        calculate_counts(cashplan_payment_verification)
-        cashplan_payment_verification.xlsx_file_imported = True
-        cashplan_payment_verification.save()
-        return ImportXlsxPaymentVerificationPlanFile(cashplan_payment_verification.payment_plan, import_service.errors)
+        calculate_counts(payment_verification_plan)
+        payment_verification_plan.xlsx_file_imported = True
+        payment_verification_plan.save()
+        return ImportXlsxPaymentVerificationPlanFile(payment_verification_plan.get_payment_plan, import_service.errors)
 
 
 class MarkPaymentRecordAsFailedMutation(PermissionMutation):
