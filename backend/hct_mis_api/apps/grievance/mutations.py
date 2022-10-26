@@ -485,7 +485,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
     def update_basic_data(cls, root, info, input, grievance_ticket, **kwargs):
         old_status = grievance_ticket.status
         old_assigned_to = grievance_ticket.assigned_to
-        arg = lambda name, default=None: input.get(name, default)
+        arg: Callable = lambda name, default=None: input.get(name, default)
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
@@ -1012,7 +1012,7 @@ class ReassignRoleMutation(graphene.Mutation):
         version = BigInt(required=False)
 
     @classmethod
-    def verify_role_choices(cls, role):
+    def verify_role_choices(cls, role) -> None:
         if role not in (ROLE_PRIMARY, ROLE_ALTERNATE, HEAD):
             log_and_raise("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
