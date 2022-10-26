@@ -63,7 +63,7 @@ class GrievanceNotification:
         email.attach_alternative(html_body, "text/html")
         return email
 
-    def send_email_notification(self):
+    def send_email_notification(self) -> None:
         if not config.SEND_GRIEVANCES_NOTIFICATION:
             return
         try:

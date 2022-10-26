@@ -649,7 +649,7 @@ def mark_as_duplicate_individual(
 
 def log_and_withdraw_household_if_needed(
     individual_to_remove, info, old_individual_to_remove, removed_individual_household
-):
+) -> None:
     from hct_mis_api.apps.household.models import Individual
 
     log_create(

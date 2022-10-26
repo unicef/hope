@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Any, Union
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -715,11 +716,11 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     )
 
 
-def is_approved(item):
+def is_approved(item) -> bool:
     return item.get("approve_status") is True
 
 
-def convert_to_empty_string_if_null(value):
+def convert_to_empty_string_if_null(value: Any) -> Union[Any, str]:
     return value or ""
 
 

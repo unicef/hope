@@ -34,7 +34,7 @@ def decode_id_string(id_string) -> Optional[str]:
     return b64decode(id_string).decode().split(":")[1]
 
 
-def encode_id_base64(id_string, model_name):
+def encode_id_base64(id_string, model_name) -> Optional[str]:
     if not id_string:
         return
 
@@ -411,7 +411,7 @@ def dict_to_camel_case(dictionary):
     return {}
 
 
-def to_snake_case(camel_case_string):
+def to_snake_case(camel_case_string) -> str:
     if "_" in camel_case_string:
         return camel_case_string
     import re
