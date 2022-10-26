@@ -1,6 +1,7 @@
 import difflib
 import json
 from difflib import _mdiff
+from typing import Any, Dict, Sequence
 
 from django import template
 from django.utils.safestring import mark_safe
@@ -8,11 +9,13 @@ from django.utils.safestring import mark_safe
 from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
 
+from hct_mis_api.apps.household.models import Household
+
 register = template.Library()
 
 
 class HtmlDiff(difflib.HtmlDiff):
-    def _format_line(self, side, flag, linenum, text):
+    def _format_line(self, side: Any, flag: Any, linenum: int, text: str) -> str:
         try:
             linenum = "{}".format(linenum)
             id = f' id="{self._prefix[side]}{linenum}"'
@@ -23,7 +26,15 @@ class HtmlDiff(difflib.HtmlDiff):
 
         return f'<td class="diff_header lineno"{id}>{linenum}</td><td class="code" nowrap="nowrap">{text}</td>'
 
-    def make_table(self, fromlines, tolines, fromdesc="", todesc="", context=False, numlines=5):
+    def make_table(
+        self,
+        fromlines: Sequence[str],
+        tolines: Sequence[str],
+        fromdesc: str = "",
+        todesc: str = "",
+        context: bool = False,
+        numlines: int = 5,
+    ) -> str:
         """Returns HTML table of side by side comparison with change highlights
 
         Arguments:
@@ -105,29 +116,29 @@ class HtmlDiff(difflib.HtmlDiff):
 
 
 @register.filter(name="getattr")
-def get_attr(d, v):
+def get_attr(d: Any, v: Any) -> Any:
     return getattr(d, v)
 
 
 @register.simple_tag
-def define(val=None):
+def define(val: Any = None) -> Any:
     return val
 
 
 @register.filter
-def adults(hh):
+def adults(hh: Household) -> int:
     return hh.members.filter(age__gte=18, age__lte=65, work__in=["fulltime", "seasonal", "parttime"]).count()
 
 
 @register.filter
-def pretty_json(json_object):
+def pretty_json(json_object: Dict) -> str:
     json_str = json.dumps(json_object, indent=4, sort_keys=True)
     lex = lexers.get_lexer_by_name("json")
     return mark_safe(highlight(json_str, lex, HtmlFormatter()))
 
 
 @register.filter
-def get_item(dictionary, key):
+def get_item(dictionary: Dict, key: Any) -> Any:
     return dictionary.get(key)
 
 

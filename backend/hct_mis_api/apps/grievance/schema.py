@@ -1,5 +1,6 @@
 import datetime
 import logging
+from typing import Dict
 
 from django.core.files.storage import default_storage
 from django.db.models import Q
@@ -171,7 +172,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info):
-        individual_data = self.individual_data
+        individual_data: Dict = self.individual_data  # type: ignore
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -230,7 +231,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_individual_data(self, info):
-        individual_data = self.individual_data
+        individual_data: Dict = self.individual_data  # type: ignore
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)

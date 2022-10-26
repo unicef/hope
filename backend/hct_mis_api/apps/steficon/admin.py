@@ -2,6 +2,7 @@ import csv
 import json
 import logging
 from io import StringIO
+from typing import List
 
 from django import forms
 from django.conf import settings
@@ -84,25 +85,27 @@ class AutocompleteWidget(forms.Widget):
     def media(self):
         extra = "" if settings.DEBUG else ".min"
         i18n_name = SELECT2_TRANSLATIONS.get(get_language())
-        i18n_file = (
-            (
+        i18n_file: List = (
+            [
                 "admin/js/vendor/select2/i18n/{}.js".format(
                     i18n_name,
                 )
-            )
+            ]
             if i18n_name
-            else ()
+            else []
         )
         return forms.Media(
-            js=(
-                "admin/js/vendor/jquery/jquery{}.js".format(extra),
-                "admin/js/vendor/select2/select2.full{}.js".format(extra),
-            )
-            + i18n_file
-            + (
-                "admin/js/jquery.init.js",
-                "admin/js/autocomplete.js",
-                "adminfilters/adminfilters{}.js".format(extra),
+            js=tuple(
+                [
+                    "admin/js/vendor/jquery/jquery{}.js".format(extra),
+                    "admin/js/vendor/select2/select2.full{}.js".format(extra),
+                ]
+                + i18n_file
+                + [
+                    "admin/js/jquery.init.js",
+                    "admin/js/autocomplete.js",
+                    "adminfilters/adminfilters{}.js".format(extra),
+                ]
             ),
             css={
                 "screen": (
@@ -114,7 +117,6 @@ class AutocompleteWidget(forms.Widget):
 
 
 class TestRuleMixin:
-    # @button(visible=lambda c: "/test/" not in c["request"].path)
     @button()
     def test(self, request, pk):
         rule: Rule = self.get_object(request, pk)
