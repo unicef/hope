@@ -140,7 +140,7 @@ class Query(graphene.ObjectType):
     program_sector_choices = graphene.List(ChoiceObject)
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
-    all_active_program_for_accountability = DjangoPermissionFilterConnectionField(
+    all_active_programs = DjangoPermissionFilterConnectionField(
         ProgramNode,
         permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
     )
@@ -271,7 +271,7 @@ class Query(graphene.ObjectType):
         ]
         return {"labels": months_labels, "datasets": datasets}
 
-    def resolve_all_active_program_for_accountability(self, info, **kwargs):
+    def resolve_all_active_programs(self, info, **kwargs):
         return Program.objects.exclude(status=Program.DRAFT).filter(
             business_area__slug=info.context.headers.get("Business-Area").lower()
         )
