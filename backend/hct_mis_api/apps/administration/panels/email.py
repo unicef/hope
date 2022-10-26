@@ -1,4 +1,7 @@
 from typing import Any, Union
+
+from django.http import HttpRequest
+
 from smart_admin.console.email import (
     concurrent,
     logger,
@@ -9,7 +12,6 @@ from smart_admin.console.email import (
 )
 
 from hct_mis_api.apps.utils.security import is_root
-from django.http import HttpRequest
 
 
 def masker(value: Any, request: HttpRequest) -> Union[Any, str]:

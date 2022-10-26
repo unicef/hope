@@ -4,8 +4,8 @@ import random
 import sys
 
 from django.contrib.auth.models import AnonymousUser
-from django.test import RequestFactory, TestCase
 from django.core.handlers.wsgi import WSGIRequest
+from django.test import RequestFactory, TestCase
 
 from elasticsearch_dsl import connections
 from graphene.test import Client
