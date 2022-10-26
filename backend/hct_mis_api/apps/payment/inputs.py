@@ -46,7 +46,7 @@ class EditPaymentVerificationInput(CreateUpdatePaymentVerificationPlan):
 
 
 class GetCashplanVerificationSampleSizeInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID()
+    cash_or_payment_plan_id = graphene.ID()
     payment_verification_plan_id = graphene.ID()
     sampling = graphene.String(required=True)
     verification_channel = graphene.String()
