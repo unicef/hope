@@ -406,7 +406,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
     verification_plans = DjangoPermissionFilterConnectionField(
         "hct_mis_api.apps.program.schema.PaymentVerificationPlanNode",
-        source="get_payment_verification_plans",
         filterset_class=PaymentVerificationPlanFilter,
     )
     payment_verification_summary = graphene.Field(
@@ -422,6 +421,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         model = PaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_verification_plans(self, info, **kwargs):
+        return self.get_payment_verification_plans
 
     def resolve_approval_number_required(self, info):
         return self.business_area.approval_number_required
