@@ -13,5 +13,5 @@ def evaluate_qs(qs: QuerySet) -> QuerySet:
     https://stackoverflow.com/questions/17159471/how-to-use-select-for-update-to-get-an-object-in-django
     """
 
-    list(qs)
+    qs._fetch_all()
     return qs
