@@ -396,7 +396,7 @@ class BaseMutationPermissionMixin:
         is_owner,
         owner_permission,
         raise_error=True,
-    ):
+    ) -> bool:
         cls.is_authenticated(info)
         if not (
             cls.has_permission(info, general_permission, business_area_arg, False)
@@ -407,7 +407,7 @@ class BaseMutationPermissionMixin:
         return True
 
     @staticmethod
-    def raise_permission_denied_error(not_authenticated=False, raise_error=True):
+    def raise_permission_denied_error(not_authenticated=False, raise_error=True) -> bool:
         if not raise_error:
             return False
         if not_authenticated:

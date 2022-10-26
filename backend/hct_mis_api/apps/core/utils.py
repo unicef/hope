@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -25,7 +25,7 @@ class CaseInsensitiveTuple(tuple):
         return key.casefold() in (element.casefold() for element in self)
 
 
-def decode_id_string(id_string):
+def decode_id_string(id_string) -> Optional[str]:
     if not id_string:
         return
 
@@ -420,7 +420,7 @@ def to_snake_case(camel_case_string):
     return snake_case[0] + snake_case[1:].lower()
 
 
-def check_concurrency_version_in_mutation(version, target):
+def check_concurrency_version_in_mutation(version, target) -> None:
     if version is None:
         return
 

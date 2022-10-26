@@ -10,10 +10,10 @@ class SanctionListIndividualQuerySet(models.QuerySet):
     def hard_delete(self):
         return super().delete()
 
-    def active(self):
+    def active(self) -> models.QuerySet:
         return self.filter(active=True)
 
-    def inactive(self):
+    def inactive(self) -> models.QuerySet:
         return self.exclude(active=False)
 
 

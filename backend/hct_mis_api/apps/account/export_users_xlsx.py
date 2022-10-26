@@ -50,7 +50,7 @@ class ExportUsersXlsx:
         self.ws.title = "Exported Users to Cash Assist"
         self._add_headers()
 
-    def _add_headers(self):
+    def _add_headers(self) -> None:
         self.ws.append([field.column_name for field in self.FIELDS_TO_COLUMNS_MAPPING.values()])
         for i in range(1, len(self.FIELDS_TO_COLUMNS_MAPPING) + 1):
             self.ws.column_dimensions[get_column_letter(i)].width = 20
