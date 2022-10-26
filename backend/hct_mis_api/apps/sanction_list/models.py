@@ -1,4 +1,5 @@
 from typing import Dict, Tuple
+
 from django.db import models
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel

@@ -2,6 +2,7 @@
 # - AreaType
 # - Area
 from typing import Any, Dict, List
+
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import CICharField
 from django.db.models import JSONField
