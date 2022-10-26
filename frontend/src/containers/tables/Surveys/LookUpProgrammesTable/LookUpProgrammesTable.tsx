@@ -1,13 +1,13 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
-import { TableWrapper } from '../../../components/core/TableWrapper';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
-  AllProgramsQueryVariables,
+  AllActiveProgramsQueryVariables,
   ProgrammeChoiceDataQuery,
   ProgramNode,
   useAllProgramsQuery,
-} from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
+} from '../../../../__generated__/graphql';
+import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpProgrammesHeadCells';
 import { LookUpProgrammesTableRow } from './LookUpProgrammesTableRow';
 
@@ -35,7 +35,7 @@ export const LookUpProgrammesTable = ({
   handleChange,
   setFieldValue,
 }: LookUpProgrammesTableProps): ReactElement => {
-  const initialVariables: AllProgramsQueryVariables = {
+  const initialVariables: AllActiveProgramsQueryVariables = {
     businessArea,
     search: filter.search,
     startDate: filter.startDate,
@@ -54,10 +54,10 @@ export const LookUpProgrammesTable = ({
   return (
     <NoTableStyling>
       <TableWrapper>
-        <UniversalTable<ProgramNode, AllProgramsQueryVariables>
+        <UniversalTable<ProgramNode, AllActiveProgramsQueryVariables>
           headCells={headCells}
           query={useAllProgramsQuery}
-          queriedObjectName='allPrograms'
+          queriedObjectName='allActivePrograms'
           initialVariables={initialVariables}
           renderRow={(row) => (
             <LookUpProgrammesTableRow

@@ -1,7 +1,7 @@
 import React from 'react';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { LookUpProgrammesTable } from '../../../../containers/tables/LookUpProgrammesTable/LookUpProgrammesTable';
-import { TargetPopulationTable } from '../../../../containers/tables/targeting/TargetPopulationTable';
+import { LookUpProgrammesTable } from '../../../../containers/tables/Surveys/LookUpProgrammesTable/LookUpProgrammesTable';
+import { LookUpTargetPopulationTable } from '../../../../containers/tables/Surveys/LookUpTargetPopulationTable';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { SurveyTabsValues } from '../../../../utils/constants';
 import { ProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
@@ -43,7 +43,7 @@ export function LookUpSelectionTables({
         />
       )}
       {selectedTab === SurveyTabsValues.TARGET_POPULATION && (
-        <TargetPopulationTable
+        <LookUpTargetPopulationTable
           filter={filtersTargetPopulationApplied}
           canViewDetails={hasPermissions(
             PERMISSIONS.TARGETING_VIEW_DETAILS,
