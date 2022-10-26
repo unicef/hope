@@ -21,7 +21,7 @@ class VerificationPlanStatusChangeServices:
             raise GraphQLError("You can discard only ACTIVE verification")
         if self.payment_verification_plan.verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
             if (
-                not self.payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded
+                self.payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded
                 or self.payment_verification_plan.xlsx_file_imported
             ):
                 raise GraphQLError("You can't discard if xlsx file was downloaded or imported")

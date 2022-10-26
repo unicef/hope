@@ -605,6 +605,21 @@ class GenericPaymentPlanNode(graphene.ObjectType):
     id = graphene.String()
     obj_type = graphene.String()
     payment_verification_summary = graphene.Field(PaymentVerificationSummaryNode)
+    available_payment_records_count = graphene.Int()
+    verification_plans = DjangoPermissionFilterConnectionField(
+        PaymentVerificationPlanNode,
+        filterset_class=PaymentVerificationPlanFilter,
+    )
+
+    bank_reconciliation_success = graphene.Int()
+    bank_reconciliation_error = graphene.Int()
+    delivery_type = graphene.String()
+    total_number_of_households = graphene.Int()
+    currency = graphene.String(source="currency")
+    total_delivered_quantity = graphene.Float()
+    total_entitled_quantity = graphene.Float()
+    total_undelivered_quantity = graphene.Float()
+    can_create_payment_verification_plan = graphene.Boolean()
 
     def resolve_id(self, info, **kwargs):
         return to_global_id(self.__class__.__name__ + "Node", self.id)
@@ -612,11 +627,26 @@ class GenericPaymentPlanNode(graphene.ObjectType):
     def resolve_obj_type(self, info, **kwargs):
         return self.__class__.__name__
 
-    def resolve_payment_verification_summary(
-        self,
-        info,
-    ):
+    def resolve_payment_verification_summary(self, info, **kwargs):
         return self.get_payment_verification_summary
+    def resolve_available_payment_records_count(self, info, **kwargs):
+        return self.payment_items.filter(
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
+        ).count()
+
+    def resolve_verification_plans(self, info, **kwargs):
+        return self.get_payment_verification_plans
+
+    def resolve_total_entitled_quantity(self, info, **kwargs):
+        return self.total_entitled_quantity
+
+    def resolve_total_delivered_quantity(self, info, **kwargs):
+        return self.total_delivered_quantity
+    def resolve_total_undelivered_quantity(self, info, **kwargs):
+        return self.total_undelivered_quantity
+
+    def resolve_can_create_payment_verification_plan(self, info, **kwargs):
+        return self.can_create_payment_verification_plan
 
 
 class Query(graphene.ObjectType):
