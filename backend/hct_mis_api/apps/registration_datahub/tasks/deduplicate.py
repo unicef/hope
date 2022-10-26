@@ -5,7 +5,7 @@ from dataclasses import dataclass, fields
 from time import sleep
 
 from django.db import transaction
-from django.db.models import CharField, F, Q, Value, QuerySet
+from django.db.models import CharField, F, Q, QuerySet, Value
 from django.db.models.functions import Concat
 
 from constance import config
