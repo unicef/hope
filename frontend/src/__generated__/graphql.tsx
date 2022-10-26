@@ -1029,6 +1029,7 @@ export type CreateReportInput = {
 
 export type CreateSurveyInput = {
   title: Scalars['String'],
+  body?: Maybe<Scalars['String']>,
   category: Scalars['String'],
   targetPopulation?: Maybe<Scalars['ID']>,
   program?: Maybe<Scalars['ID']>,
@@ -8299,6 +8300,19 @@ export type AccountabilityCommunicationMessageQuery = (
   )> }
 );
 
+export type AccountabilitySampleSizeQueryVariables = {
+  input: AccountabilitySampleSizeInput
+};
+
+
+export type AccountabilitySampleSizeQuery = (
+  { __typename?: 'Query' }
+  & { accountabilitySampleSize: Maybe<(
+    { __typename?: 'AccountabilitySampleSizeObject' }
+    & Pick<AccountabilitySampleSizeObject, 'numberOfRecipients' | 'sampleSize'>
+  )> }
+);
+
 export type AllAccountabilityCommunicationMessageRecipientsQueryVariables = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
@@ -15092,6 +15106,57 @@ export function useAccountabilityCommunicationMessageLazyQuery(baseOptions?: Apo
 export type AccountabilityCommunicationMessageQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageQuery>;
 export type AccountabilityCommunicationMessageLazyQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageLazyQuery>;
 export type AccountabilityCommunicationMessageQueryResult = ApolloReactCommon.QueryResult<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>;
+export const AccountabilitySampleSizeDocument = gql`
+    query AccountabilitySampleSize($input: AccountabilitySampleSizeInput!) {
+  accountabilitySampleSize(input: $input) {
+    numberOfRecipients
+    sampleSize
+  }
+}
+    `;
+export type AccountabilitySampleSizeComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>, 'query'> & ({ variables: AccountabilitySampleSizeQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AccountabilitySampleSizeComponent = (props: AccountabilitySampleSizeComponentProps) => (
+      <ApolloReactComponents.Query<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables> query={AccountabilitySampleSizeDocument} {...props} />
+    );
+    
+export type AccountabilitySampleSizeProps<TChildProps = {}> = ApolloReactHoc.DataProps<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables> & TChildProps;
+export function withAccountabilitySampleSize<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AccountabilitySampleSizeQuery,
+  AccountabilitySampleSizeQueryVariables,
+  AccountabilitySampleSizeProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables, AccountabilitySampleSizeProps<TChildProps>>(AccountabilitySampleSizeDocument, {
+      alias: 'accountabilitySampleSize',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAccountabilitySampleSizeQuery__
+ *
+ * To run a query within a React component, call `useAccountabilitySampleSizeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAccountabilitySampleSizeQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAccountabilitySampleSizeQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useAccountabilitySampleSizeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>) {
+        return ApolloReactHooks.useQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, baseOptions);
+      }
+export function useAccountabilitySampleSizeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, baseOptions);
+        }
+export type AccountabilitySampleSizeQueryHookResult = ReturnType<typeof useAccountabilitySampleSizeQuery>;
+export type AccountabilitySampleSizeLazyQueryHookResult = ReturnType<typeof useAccountabilitySampleSizeLazyQuery>;
+export type AccountabilitySampleSizeQueryResult = ApolloReactCommon.QueryResult<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>;
 export const AllAccountabilityCommunicationMessageRecipientsDocument = gql`
     query AllAccountabilityCommunicationMessageRecipients($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $messageId: String!, $recipientId: String, $fullName: String, $phoneNo: String, $sex: String, $orderBy: String) {
   allAccountabilityCommunicationMessageRecipients(offset: $offset, before: $before, after: $after, first: $first, last: $last, messageId: $messageId, recipientId: $recipientId, fullName: $fullName, phoneNo: $phoneNo, sex: $sex, orderBy: $orderBy) {

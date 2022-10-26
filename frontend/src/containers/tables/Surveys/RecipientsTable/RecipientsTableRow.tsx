@@ -35,14 +35,17 @@ export function RecipientsTableRow({
     variables: { businessArea },
     fetchPolicy: 'cache-first',
   });
-  const residenceStatusChoiceDict = choicesToDict(
-    choicesData.residenceStatusChoices,
-  );
   const householdDetailsPath = `/${businessArea}/population/household/${household.id}`;
   const handleClick = (): void => {
     history.push(householdDetailsPath);
   };
+
   if (choicesLoading) return <LoadingComponent />;
+
+  const residenceStatusChoiceDict = choicesToDict(
+    choicesData.residenceStatusChoices,
+  );
+
   return (
     <ClickableTableRow
       hover

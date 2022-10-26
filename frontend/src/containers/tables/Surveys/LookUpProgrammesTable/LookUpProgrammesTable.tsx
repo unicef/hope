@@ -5,7 +5,7 @@ import {
   AllActiveProgramsQueryVariables,
   ProgrammeChoiceDataQuery,
   ProgramNode,
-  useAllProgramsQuery,
+  useAllActiveProgramsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpProgrammesHeadCells';
@@ -56,7 +56,7 @@ export const LookUpProgrammesTable = ({
       <TableWrapper>
         <UniversalTable<ProgramNode, AllActiveProgramsQueryVariables>
           headCells={headCells}
-          query={useAllProgramsQuery}
+          query={useAllActiveProgramsQuery}
           queriedObjectName='allActivePrograms'
           initialVariables={initialVariables}
           renderRow={(row) => (

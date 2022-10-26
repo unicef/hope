@@ -6,9 +6,8 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { decodeIdString } from '../../../../utils/utils';
 import {
   AllActiveTargetPopulationsQueryVariables,
-  AllTargetPopulationsQueryVariables,
   TargetPopulationNode,
-  useAllTargetPopulationsQuery,
+  useAllActiveTargetPopulationsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCells';
@@ -75,7 +74,7 @@ export const LookUpTargetPopulationTable = ({
           title={noTitle ? null : t('Target Populations')}
           headCells={enableRadioButton ? headCells : headCells.slice(1)}
           rowsPerPageOptions={[10, 15, 20]}
-          query={useAllTargetPopulationsQuery}
+          query={useAllActiveTargetPopulationsQuery}
           queriedObjectName='allActiveTargetPopulations'
           defaultOrderBy='createdAt'
           defaultOrderDirection='desc'
