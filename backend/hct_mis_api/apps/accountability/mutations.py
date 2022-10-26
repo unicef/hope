@@ -127,7 +127,7 @@ class CreateSurveyMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input):
-        business_area_slug = info.context.META.get("Business-Area")
+        business_area_slug = info.context.headers.get("Business-Area")
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         cls.has_permission(info, Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE, business_area)
         survey = SurveyCrudServices.create(info.context.user, business_area, input)

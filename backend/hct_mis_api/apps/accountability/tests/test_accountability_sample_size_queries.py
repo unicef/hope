@@ -1,7 +1,6 @@
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.factories import SurveyFactory
 from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.base_test_case import APITestCase
