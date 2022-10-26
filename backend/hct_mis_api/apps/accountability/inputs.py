@@ -1,8 +1,6 @@
 import graphene
 
-from ..program.models import Program
-from ..targeting.models import TargetPopulation
-from .models import Message
+from hct_mis_api.apps.accountability.models import Message
 
 
 class AccountabilityFullListArguments(graphene.InputObjectType):
@@ -63,18 +61,26 @@ class UpdateFeedbackInput(graphene.InputObjectType):
     program = graphene.ID()
 
 
+class CreateSurveyInput(graphene.InputObjectType):
+    title = graphene.String(required=True)
+    category = graphene.String(required=True)
+    target_population = graphene.ID()
+    program = graphene.ID()
+    sampling_type = graphene.String(required=True)
+    full_list_arguments = AccountabilityFullListArguments()
+    random_sampling_arguments = AccountabilityRandomSamplingArguments()
+
+
+class AccountabilitySampleSizeInput(graphene.InputObjectType):
+    target_population = graphene.ID()
+    program = graphene.ID()
+    sampling_type = graphene.String(required=True)
+    full_list_arguments = AccountabilityFullListArguments()
+    random_sampling_arguments = AccountabilityRandomSamplingArguments()
+
+
 class CreateFeedbackMessageInput(graphene.InputObjectType):
     from .schema import FeedbackMessageNode
 
     description = graphene.String(required=True)
     feedback = graphene.GlobalID(node=FeedbackMessageNode, required=True)
-
-
-class CreateSurveyInput(graphene.InputObjectType):
-    title = graphene.String(required=True)
-    category = graphene.String(required=True)
-    target_population = graphene.GlobalID(node=TargetPopulation, required=False)
-    program = graphene.GlobalID(node=Program, required=False)
-    sampling_type = graphene.String(required=True)
-    full_list_arguments = AccountabilityFullListArguments()
-    random_sampling_arguments = AccountabilityRandomSamplingArguments()
