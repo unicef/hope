@@ -995,7 +995,7 @@ type GenericPaymentPlanNode {
 scalar GeoJSON
 
 input GetCashplanVerificationSampleSizeInput {
-  paymentPlanId: ID
+  cashOrPaymentPlanId: ID
   paymentVerificationPlanId: ID
   sampling: String!
   verificationChannel: String
@@ -3255,7 +3255,7 @@ type Query {
   paymentVerificationStatusChoices: [ChoiceObject]
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
-  allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): PaymentVerificationLogEntryNodeConnection
+  allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String, objectType: String): PaymentVerificationLogEntryNodeConnection
   paymentPlan(id: ID!): PaymentPlanNode
   allPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], totalEntitledQuantityFrom: Float, totalEntitledQuantityTo: Float, dispersionStartDate: Date, dispersionEndDate: Date, orderBy: String): PaymentPlanNodeConnection
   paymentPlanStatusChoices: [ChoiceObject]

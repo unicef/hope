@@ -2887,6 +2887,16 @@
                   "ofType": null
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "objectType",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -41049,7 +41059,7 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "paymentPlanId",
+            "name": "cashOrPaymentPlanId",
             "description": null,
             "type": {
               "kind": "SCALAR",

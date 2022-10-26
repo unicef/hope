@@ -204,6 +204,7 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={paymentPlan.id}
+            objectType="PaymentPlan"
           />
         )}
     </>
