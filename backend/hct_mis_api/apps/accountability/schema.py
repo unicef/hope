@@ -3,7 +3,6 @@ from django.shortcuts import get_object_or_404
 
 import graphene
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -11,26 +10,24 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopeOneOfPermissionClass,
 )
-from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
-from hct_mis_api.apps.household.models import Household
-
-from ..program.models import Program
-from ..program.schema import ProgramNode
-from ..targeting.graphql_types import TargetPopulationNode
-from ..targeting.models import TargetPopulation
-from .filters import (
+from hct_mis_api.apps.accountability.filters import (
     FeedbackFilter,
     MessageRecipientsMapFilter,
     MessagesFilter,
     RecipientFilter,
     SurveyFilter,
 )
-from .inputs import (
+from hct_mis_api.apps.accountability.inputs import (
     AccountabilitySampleSizeInput,
     GetAccountabilityCommunicationMessageSampleSizeInput,
 )
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.models import TargetPopulation
+
 from .models import Feedback, FeedbackMessage, Message, Survey
 from .services.message_crud_services import MessageCrudServices
 from .services.sampling import Sampling
@@ -189,14 +186,6 @@ class Query(graphene.ObjectType):
         AccountabilitySampleSizeObject,
         input=AccountabilitySampleSizeInput(),
     )
-    all_target_population_for_accountability = DjangoFilterConnectionField(
-        TargetPopulationNode,
-        permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
-    )
-    all_program_for_accountability = DjangoFilterConnectionField(
-        ProgramNode,
-        permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
-    )
 
     def resolve_feedback_issue_type_choices(self, info, **kwargs):
         return to_choice_object(Feedback.ISSUE_TYPE_CHOICES)
@@ -234,13 +223,3 @@ class Query(graphene.ObjectType):
             "number_of_recipients": number_of_recipients,
             "sample_size": sample_size,
         }
-
-    def resolve_target_population_for_accountability(self, info, **kwargs):
-        return TargetPopulation.objects.exclude(status=TargetPopulation.STATUS_OPEN).filter(
-            business_area__slug=info.context.headers.get("Business-Area").lower()
-        )
-
-    def resolve_program_for_accountability(self, info, **kwargs):
-        return Program.objects.exclude(status=Program.DRAFT).filter(
-            business_area__slug=info.context.headers.get("Business-Area").lower()
-        )
