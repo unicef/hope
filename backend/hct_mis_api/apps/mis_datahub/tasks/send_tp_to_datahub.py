@@ -107,25 +107,41 @@ class SendTPToDatahubTask:
             ) = self._prepare_data_to_send(program, target_population)
             self._send_program(program)
             self._send_target_population_object(target_population)
+            chunk_size = 1000
             for household in households_to_sync:
                 dh_household = self._prepare_datahub_object_household(household)
                 households_to_bulk_create.append(dh_household)
+                if len(households_to_bulk_create) % chunk_size:
+                    dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
+                    households_to_bulk_create = []
 
             for individual in individuals_to_sync:
                 dh_individual = self._prepare_datahub_object_individual(individual)
                 individuals_to_bulk_create.append(dh_individual)
+                if len(individuals_to_bulk_create) % chunk_size:
+                    dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
+                    individuals_to_bulk_create = []
 
             for role in roles_to_sync:
                 dh_role = self._prepare_datahub_object_role(role)
                 roles_to_bulk_create.append(dh_role)
+                if len(roles_to_bulk_create) % chunk_size:
+                    dh_mis_models.IndividualRoleInHousehold.objects.bulk_create(roles_to_bulk_create)
+                    roles_to_bulk_create = []
 
             for document in documents_to_sync:
                 dh_document = self._prepare_datahub_object_document(document)
                 documents_to_bulk_create.append(dh_document)
+                if len(documents_to_bulk_create) % chunk_size:
+                    dh_mis_models.Document.objects.bulk_create(documents_to_bulk_create)
+                    documents_to_bulk_create = []
 
             for selection in target_population_selections:
                 dh_target_population_selection = self._prepare_datahub_object_target_entry(selection)
                 tp_entries_to_bulk_create.append(dh_target_population_selection)
+                if len(tp_entries_to_bulk_create) % chunk_size:
+                    dh_mis_models.TargetPopulationEntry.objects.bulk_create(tp_entries_to_bulk_create)
+                    tp_entries_to_bulk_create = []
 
             dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
             dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
@@ -232,7 +248,9 @@ class SendTPToDatahubTask:
 
     def _prepare_datahub_object_household(self, household):
         dh_household_args = build_arg_dict(household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT)
-        dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.iso_code2)
+        if household.country:
+            dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.iso_code2)
+
         dh_household = dh_mis_models.Household(**dh_household_args)
         dh_household.unhcr_id = self._get_unhcr_household_id(household)
         dh_household.session = self.dh_session

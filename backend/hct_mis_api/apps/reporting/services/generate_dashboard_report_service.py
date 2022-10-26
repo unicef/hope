@@ -4,6 +4,7 @@ import functools
 import io
 import logging
 from itertools import chain
+from typing import Callable, Dict, List, Tuple
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -409,7 +410,7 @@ class GenerateDashboardReportContentHelpers:
         return admin_areas, totals
 
     @staticmethod
-    def format_beneficiaries_row(instance: dict, is_totals: bool, *args) -> tuple:
+    def format_beneficiaries_row(instance: Dict, is_totals: bool, *args) -> Tuple:
         return (
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total Distinct",
@@ -419,7 +420,7 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def format_individuals_row(cls, instance: dict, is_totals: bool, *args) -> tuple:
+    def format_individuals_row(cls, instance: Dict, is_totals: bool, *args) -> Tuple:
         all_count_fields = cls._get_all_with_disabled_individual_count_fields()
         result = [
             instance.get("business_area_code", "") if not is_totals else "",
@@ -430,7 +431,7 @@ class GenerateDashboardReportContentHelpers:
         return tuple(result)
 
     @staticmethod
-    def format_volumes_by_delivery_row(instance: dict, is_totals: bool, *args):
+    def format_volumes_by_delivery_row(instance: Dict, is_totals: bool, *args):
         result = [
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total",
@@ -555,12 +556,12 @@ class GenerateDashboardReportContentHelpers:
     def _format_filters(
         cls,
         report: DashboardReport,
-        custom_filters: dict,
+        custom_filters: Dict,
         date_path: str,
         admin_area_path: str,
         program_path: str,
         business_area_path: str,
-    ) -> dict:
+    ) -> Dict:
         filter_vars = custom_filters or {}
         if date_path:
             filter_vars.update({f"{date_path}__year": report.year})
@@ -607,12 +608,12 @@ class GenerateDashboardReportContentHelpers:
         return instances, valid_payment_records_in_instance_filter_key
 
     @staticmethod
-    def _aggregate_instances_sum(instances, field_list: list) -> dict:
+    def _aggregate_instances_sum(instances, field_list: List) -> Dict:
         aggregation_list = [Sum(field_name) for field_name in field_list]
         return instances.aggregate(*aggregation_list)
 
     @staticmethod
-    def _reduce_aggregate(aggregate: dict, fields_list: list) -> int:
+    def _reduce_aggregate(aggregate: Dict, fields_list: List) -> int:
         return functools.reduce(
             lambda a, b: a + aggregate[f"{b}__sum"] if aggregate[f"{b}__sum"] else a,
             fields_list,
@@ -898,13 +899,12 @@ class GenerateDashboardReportService:
 
     def _add_rows(self, active_sheet, report_type):
         is_hq_report = self.hq_or_country == self.HQ
-        get_row_methods = self.ROW_CONTENT_METHODS[report_type]
+        get_row_methods: List[Callable] = self.ROW_CONTENT_METHODS[report_type]
         all_instances, totals = get_row_methods[0](self.report)
         for instance in all_instances:
             row = get_row_methods[1](instance, False, is_hq_report)
             str_row = self._stringify_all_values(row)
             active_sheet.append(str_row)
-            # active_sheet.append(str_row)
         # append totals row
         if totals:
             row = get_row_methods[1](totals, True, is_hq_report)

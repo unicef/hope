@@ -313,6 +313,7 @@ export type BusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
   screenBeneficiary: Scalars['Boolean'],
   deduplicationIgnoreWithdraw: Scalars['Boolean'],
+  active: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -1304,9 +1305,9 @@ export type HouseholdNode = Node & {
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
   individuals: IndividualNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
-  selections: Array<HouseholdSelection>,
+  selections: Array<HouseholdSelectionNode>,
   adminAreaTitle?: Maybe<Scalars['String']>,
-  selection?: Maybe<HouseholdSelection>,
+  selection?: Maybe<HouseholdSelectionNode>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
   sanctionListConfirmedMatch?: Maybe<Scalars['Boolean']>,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
@@ -1484,8 +1485,8 @@ export enum HouseholdResidenceStatus {
   NonHost = 'NON_HOST'
 }
 
-export type HouseholdSelection = {
-   __typename?: 'HouseholdSelection',
+export type HouseholdSelectionNode = {
+   __typename?: 'HouseholdSelectionNode',
   id: Scalars['UUID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
@@ -4944,7 +4945,7 @@ export type TargetPopulationNode = Node & {
   adultMaleCount?: Maybe<Scalars['Int']>,
   adultFemaleCount?: Maybe<Scalars['Int']>,
   paymentRecords: PaymentRecordNodeConnection,
-  selections: Array<HouseholdSelection>,
+  selections: Array<HouseholdSelectionNode>,
   totalFamilySize?: Maybe<Scalars['Int']>,
   householdList?: Maybe<HouseholdNodeConnection>,
 };
@@ -5508,6 +5509,7 @@ export type UserBusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
   screenBeneficiary: Scalars['Boolean'],
   deduplicationIgnoreWithdraw: Scalars['Boolean'],
+  active: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -7241,7 +7243,7 @@ export type UpdateTpMutation = (
     & Pick<UpdateTargetPopulationMutation, 'validationErrors'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
-      & TargetPopulationDetailedFragment
+      & Pick<TargetPopulationNode, 'id' | 'status' | 'totalHouseholdsCount' | 'totalIndividualsCount'>
     )> }
   )> }
 );
@@ -9647,8 +9649,8 @@ export type TargetPopulationHouseholdsQuery = (
           { __typename?: 'AreaNode' }
           & Pick<AreaNode, 'id' | 'name'>
         )>, selection: Maybe<(
-          { __typename?: 'HouseholdSelection' }
-          & Pick<HouseholdSelection, 'vulnerabilityScore'>
+          { __typename?: 'HouseholdSelectionNode' }
+          & Pick<HouseholdSelectionNode, 'vulnerabilityScore'>
         )> }
       )> }
     )>> }
@@ -13094,12 +13096,15 @@ export const UpdateTpDocument = gql`
     mutation UpdateTP($input: UpdateTargetPopulationInput!) {
   updateTargetPopulation(input: $input) {
     targetPopulation {
-      ...targetPopulationDetailed
+      id
+      status
+      totalHouseholdsCount
+      totalIndividualsCount
     }
     validationErrors
   }
 }
-    ${TargetPopulationDetailedFragmentDoc}`;
+    `;
 export type UpdateTpMutationFn = ApolloReactCommon.MutationFunction<UpdateTpMutation, UpdateTpMutationVariables>;
 export type UpdateTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateTpMutation, UpdateTpMutationVariables>, 'mutation'>;
 
@@ -19247,7 +19252,7 @@ export type ResolversTypes = {
   RuleCommitNodeConnection: ResolverTypeWrapper<RuleCommitNodeConnection>,
   RuleCommitNodeEdge: ResolverTypeWrapper<RuleCommitNodeEdge>,
   RuleCommitLanguage: RuleCommitLanguage,
-  HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
+  HouseholdSelectionNode: ResolverTypeWrapper<HouseholdSelectionNode>,
   ProgramsWithDeliveredQuantityNode: ResolverTypeWrapper<ProgramsWithDeliveredQuantityNode>,
   DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>,
   CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
@@ -19622,7 +19627,7 @@ export type ResolversParentTypes = {
   RuleCommitNodeConnection: RuleCommitNodeConnection,
   RuleCommitNodeEdge: RuleCommitNodeEdge,
   RuleCommitLanguage: RuleCommitLanguage,
-  HouseholdSelection: HouseholdSelection,
+  HouseholdSelectionNode: HouseholdSelectionNode,
   ProgramsWithDeliveredQuantityNode: ProgramsWithDeliveredQuantityNode,
   DeliveredQuantityNode: DeliveredQuantityNode,
   CashPlanNodeConnection: CashPlanNodeConnection,
@@ -19985,6 +19990,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
@@ -20520,9 +20526,9 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
-  selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
+  selections?: Resolver<Array<ResolversTypes['HouseholdSelectionNode']>, ParentType, ContextType>,
   adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
+  selection?: Resolver<Maybe<ResolversTypes['HouseholdSelectionNode']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   sanctionListConfirmedMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -20546,7 +20552,7 @@ export type HouseholdNodeEdgeResolvers<ContextType = any, ParentType extends Res
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
-export type HouseholdSelectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdSelection'] = ResolversParentTypes['HouseholdSelection']> = {
+export type HouseholdSelectionNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdSelectionNode'] = ResolversParentTypes['HouseholdSelectionNode']> = {
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -21849,7 +21855,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   adultMaleCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   adultFemaleCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
-  selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
+  selections?: Resolver<Array<ResolversTypes['HouseholdSelectionNode']>, ParentType, ContextType>,
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   householdList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeHouseholdListArgs>,
 };
@@ -22236,6 +22242,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentrecordSetArgs>,
@@ -22408,7 +22415,7 @@ export type Resolvers<ContextType = any> = {
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
-  HouseholdSelection?: HouseholdSelectionResolvers<ContextType>,
+  HouseholdSelectionNode?: HouseholdSelectionNodeResolvers<ContextType>,
   ImportDataNode?: ImportDataNodeResolvers<ContextType>,
   ImportedDocumentNode?: ImportedDocumentNodeResolvers<ContextType>,
   ImportedDocumentNodeConnection?: ImportedDocumentNodeConnectionResolvers<ContextType>,

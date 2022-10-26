@@ -23,7 +23,7 @@ class SoftDeletableAdminMixin(admin.ModelAdmin):
         return qs
 
     def get_list_filter(self, request):
-        return super().get_list_filter(request) + ("is_removed",)
+        return tuple(list(super().get_list_filter(request)) + ["is_removed"])
 
 
 class JSONWidgetMixin:

@@ -1,10 +1,12 @@
+from typing import Any, Dict
+
 from django.contrib.contenttypes.models import ContentType
 
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household
 
-SYSTEM_PARAMETRIZER = {
+SYSTEM_PARAMETRIZER: Dict[str, Dict[str, Any]] = {
     "active-business-areas": {
         "name": "Active Business Areas",
         "value": lambda: {

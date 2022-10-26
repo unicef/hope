@@ -207,7 +207,7 @@ class ConcurrencyModel(models.Model):
 
 
 class UnicefIdentifiedModel(models.Model):
-    unicef_id = models.CharField(max_length=255, null=True, blank=True)
+    unicef_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
 
     class Meta:
         abstract = True
@@ -216,4 +216,4 @@ class UnicefIdentifiedModel(models.Model):
         super().save(*args, **kwargs)
         if self._state.adding:
             # due to existence of "CREATE TRIGGER" in migrations
-            self.refresh_from_db(fields=("unicef_id",))
+            self.refresh_from_db(fields=["unicef_id"])

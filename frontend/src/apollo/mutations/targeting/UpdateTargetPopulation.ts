@@ -4,9 +4,12 @@ export const UpdateTP = gql`
   mutation UpdateTP($input: UpdateTargetPopulationInput!) {
     updateTargetPopulation(input: $input) {
       targetPopulation {
-        ...targetPopulationDetailed
+        id
+        status
+        totalHouseholdsCount
+        totalIndividualsCount
       }
-     validationErrors 
+      validationErrors
     }
   }
 `;
