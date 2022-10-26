@@ -6,6 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
+from typing import Any, Callable, Dict, List, Union
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -106,7 +107,8 @@ def _slug_strip(value, separator="-"):
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("{}+".format(re_sep, separator, value))  # noqa: F523 # TODO: bug?
+        # TODO: bug?
+        value = re.sub("{}+".format(re_sep, separator, value))  # type: ignore # noqa: F523
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -214,18 +216,14 @@ def to_choice_object(choices):
     return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 
-def rename_dict_keys(obj, convert_func):
+def rename_dict_keys(
+    obj: Union[Dict[Any, Any], List[Any], Any], convert_func: Callable
+) -> Union[Dict[Any, Any], List[Any], Any]:
     if isinstance(obj, dict):
-        new = {}
-        for k, v in obj.items():
-            new[convert_func(k)] = rename_dict_keys(v, convert_func)
+        return {convert_func(k): rename_dict_keys(v, convert_func) for k, v in obj.items()}
     elif isinstance(obj, list):
-        new = []
-        for v in obj:
-            new.append(rename_dict_keys(v, convert_func))
-    else:
-        return obj
-    return new
+        return [rename_dict_keys(v, convert_func) for v in obj]
+    return obj
 
 
 raise_attribute_error = object()
@@ -513,8 +511,8 @@ def chart_map_choices(choices):
 def chart_get_filtered_qs(
     obj,
     year,
-    business_area_slug_filter: dict = None,
-    additional_filters: dict = None,
+    business_area_slug_filter: Dict = None,
+    additional_filters: Dict = None,
     year_filter_path: str = None,
 ) -> QuerySet:
     if additional_filters is None:

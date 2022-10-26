@@ -1,4 +1,4 @@
-from django.db.models import Prefetch, Sum, Value
+from django.db.models import Case, Prefetch, Sum, Value, When
 
 import graphene
 from graphene import relay
@@ -46,6 +46,8 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
     WORK_STATUS_CHOICE,
     Agency,
     BankAccountInfo,
@@ -163,8 +165,7 @@ class ExtendedHouseHoldConnection(graphene.Connection):
         return root.iterable.aggregate(sum=Sum("size")).get("sum")
 
 
-# FIXME: This need to be changed to HouseholdSelectionNode
-class HouseholdSelection(DjangoObjectType):
+class HouseholdSelectionNode(DjangoObjectType):
     class Meta:
         model = HouseholdSelection
 
@@ -198,7 +199,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     country = graphene.String(description="Country name")
     currency = graphene.String()
     flex_fields = FlexFieldsScalar()
-    selection = graphene.Field(HouseholdSelection)
+    selection = graphene.Field(HouseholdSelectionNode)
     sanction_list_possible_match = graphene.Boolean()
     sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
@@ -281,15 +282,15 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
             )
 
-    # I don't think this is needed because it would skip check_node_permission call
-    # @classmethod
-    # def get_node(cls, info, id):
-    #     # This will skip permission check from BaseNodePermissionMixin, check if okay
-    #     queryset = cls.get_queryset(cls._meta.model.all_objects, info)
-    #     try:
-    #         return queryset.get(pk=id)
-    #     except cls._meta.model.DoesNotExist:
-    #         return None
+    @classmethod
+    def get_queryset(cls, queryset, info):
+        queryset = queryset.annotate(
+            status_label=Case(
+                When(withdrawn=True, then=Value(STATUS_INACTIVE)),
+                default=Value(STATUS_ACTIVE),
+            )
+        )
+        return super().get_queryset(queryset, info)
 
     class Meta:
         model = Household
@@ -411,15 +412,6 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
                 any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
                 Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER.value,
             )
-
-    # I don't think this is needed because it would skip check_node_permission call
-    # @classmethod
-    # def get_node(cls, info, id):
-    #     queryset = cls.get_queryset(cls._meta.model.all_objects, info)
-    #     try:
-    #         return queryset.get(pk=id)
-    #     except cls._meta.model.DoesNotExist:
-    #         return None
 
     class Meta:
         model = Individual

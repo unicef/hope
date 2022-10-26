@@ -69,19 +69,19 @@ const AddCriteria = styled.div`
 `;
 
 interface TargetingCriteriaProps {
-  candidateListRules?;
-  isEdit?: boolean;
+  rules?;
   helpers?;
   targetPopulation?: TargetPopulationQuery['targetPopulation'];
   selectedProgram?;
+  isEdit?: boolean;
 }
 
 export function TargetingCriteria({
-  candidateListRules,
-  isEdit = false,
+  rules,
   helpers,
   targetPopulation,
   selectedProgram,
+  isEdit,
 }: TargetingCriteriaProps): React.ReactElement {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
@@ -120,7 +120,7 @@ export function TargetingCriteria({
           <Typography variant='h6'>{t('Targeting Criteria')}</Typography>
           {isEdit && (
             <>
-              {!!candidateListRules.length && (
+              {!!rules.length && (
                 <Button
                   variant='outlined'
                   color='primary'
@@ -131,7 +131,6 @@ export function TargetingCriteria({
               )}
               <TargetCriteriaForm
                 criteria={criteriaObject}
-                title={t('Add Filter')}
                 open={isOpen}
                 onClose={() => closeModal()}
                 addCriteria={addCriteria}
@@ -143,14 +142,14 @@ export function TargetingCriteria({
           )}
         </Title>
         <ContentWrapper>
-          {candidateListRules.length ? (
-            candidateListRules.map((criteria, index) => {
+          {rules.length ? (
+            rules.map((criteria, index) => {
               return (
                 //eslint-disable-next-line
                 <Fragment key={criteria.id || index}>
                   <Criteria
                     isEdit={isEdit}
-                    canRemove={candidateListRules.length > 1}
+                    canRemove={rules.length > 1}
                     rules={criteria.filters}
                     individualsFiltersBlocks={
                       criteria.individualsFiltersBlocks || []
@@ -159,8 +158,8 @@ export function TargetingCriteria({
                     removeFunction={() => helpers.remove(index)}
                   />
 
-                  {index === candidateListRules.length - 1 ||
-                  (candidateListRules.length === 1 && index === 0) ? null : (
+                  {index === rules.length - 1 ||
+                  (rules.length === 1 && index === 0) ? null : (
                     <Divider>
                       <DividerLabel>Or</DividerLabel>
                     </Divider>

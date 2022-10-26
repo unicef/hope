@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, List
 
 from django.db import transaction
 from django.db.models import Count
@@ -92,14 +93,14 @@ class PullFromDatahubTask:
 
     def execute(self):
         grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
-        ret = {
-            "grouped_session": 0,
+        ret: Dict[str, List] = {
             "skipped_due_failure": [],
             "successes": [],
             "failures": [],
         }
+        grouped_session_count = 0
         for group in grouped_session:
-            ret["grouped_session"] += 1
+            grouped_session_count += 1
             business_area = group.get("business_area")
             session_queryset = Session.objects.filter(business_area=business_area)
             # if any session in this business area fails omit other sessions in this business area
@@ -114,7 +115,7 @@ class PullFromDatahubTask:
                 except Exception as e:
                     logger.exception(e)
                     ret["failures"].append(session.id)
-        return ret
+        return ret | {"grouped_session": grouped_session_count}
 
     def copy_session(self, session):
         with configure_scope() as scope:

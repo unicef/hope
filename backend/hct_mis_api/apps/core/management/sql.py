@@ -1,4 +1,7 @@
-def sql_drop_tables(connection):
+from typing import Any
+
+
+def sql_drop_tables(connection: Any) -> str:
     tables = connection.introspection.django_table_names(only_existing=True, include_views=False)
     tables.append("django_migrations")
     if not tables:

@@ -138,42 +138,94 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
 
 snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_golden_record_by_targeting_criteria_observed_disability 1'] = {
     'data': {
-        'goldenRecordByTargetingCriteria': None
-    },
-    'errors': [
-        {
-            'locations': [
+        'goldenRecordByTargetingCriteria': {
+            'edges': [
                 {
-                    'column': 11,
-                    'line': 3
+                    'node': {
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'MALE'
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 1
+                    }
+                },
+                {
+                    'node': {
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'SINGLE',
+                                        'sex': 'MALE'
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'FEMALE'
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 2
+                    }
                 }
             ],
-            'message': "'TargetingIndividualBlockRuleFilter' object has no attribute 'parametrizer'",
-            'path': [
-                'goldenRecordByTargetingCriteria'
-            ]
+            'totalCount': 2
         }
-    ]
+    }
 }
 
 snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_golden_record_by_targeting_criteria_observed_disability_with_valid_argument 1'] = {
     'data': {
-        'goldenRecordByTargetingCriteria': None
-    },
-    'errors': [
-        {
-            'locations': [
+        'goldenRecordByTargetingCriteria': {
+            'edges': [
                 {
-                    'column': 11,
-                    'line': 3
+                    'node': {
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'MALE'
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 1
+                    }
+                },
+                {
+                    'node': {
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'SINGLE',
+                                        'sex': 'MALE'
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'FEMALE'
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 2
+                    }
                 }
             ],
-            'message': "'TargetingIndividualBlockRuleFilter' object has no attribute 'parametrizer'",
-            'path': [
-                'goldenRecordByTargetingCriteria'
-            ]
+            'totalCount': 2
         }
-    ]
+    }
 }
 
 snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_golden_record_by_targeting_criteria_size 1'] = {

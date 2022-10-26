@@ -1,6 +1,7 @@
 import itertools
 import logging
 import pickle
+from typing import Callable, Dict
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -77,7 +78,8 @@ class Parametrizer(NaturalKeyModel, models.Model):
 
     def refresh(self):
         if self.code in SYSTEM_PARAMETRIZER:
-            self.value = SYSTEM_PARAMETRIZER[self.code]["value"]()
+            getter: Callable = SYSTEM_PARAMETRIZER[self.code]["value"]
+            self.value = getter()
             self.save()
 
     def __str__(self):
@@ -139,7 +141,7 @@ class Query(NaturalKeyModel, models.Model):
             self.datasets.exclude(pk__in=[dpk for dpk in results.values() if isinstance(dpk, int)]).delete()
         return results
 
-    def run(self, persist=False, arguments: dict = None) -> "[Dataset, dict]":
+    def run(self, persist=False, arguments: Dict = None) -> "[Dataset, dict]":
         model = self.target.model_class()
         connections = {
             f"{model._meta.object_name}Manager": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
