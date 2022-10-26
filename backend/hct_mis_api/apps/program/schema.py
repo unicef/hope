@@ -142,6 +142,7 @@ class Query(graphene.ObjectType):
     cash_plan_status_choices = graphene.List(ChoiceObject)
     all_active_programs = DjangoPermissionFilterConnectionField(
         ProgramNode,
+        filterset_class=ProgramFilter,
         permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
     )
 
