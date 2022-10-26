@@ -63,6 +63,20 @@ export type AccountabilityRandomSamplingArguments = {
   sex?: Maybe<Scalars['String']>,
 };
 
+export type AccountabilitySampleSizeInput = {
+  targetPopulation?: Maybe<Scalars['ID']>,
+  program?: Maybe<Scalars['ID']>,
+  samplingType: Scalars['String'],
+  fullListArguments?: Maybe<AccountabilityFullListArguments>,
+  randomSamplingArguments?: Maybe<AccountabilityRandomSamplingArguments>,
+};
+
+export type AccountabilitySampleSizeObject = {
+   __typename?: 'AccountabilitySampleSizeObject',
+  numberOfRecipients?: Maybe<Scalars['Int']>,
+  sampleSize?: Maybe<Scalars['Int']>,
+};
+
 export type ActivateCashPlanVerificationMutation = {
    __typename?: 'ActivateCashPlanVerificationMutation',
   validationErrors?: Maybe<Scalars['Arg']>,
@@ -3810,6 +3824,7 @@ export type Query = {
   survey?: Maybe<SurveyNode>,
   allSurveys?: Maybe<SurveyNodeConnection>,
   recipients?: Maybe<RecipientNodeConnection>,
+  accountabilitySampleSize?: Maybe<AccountabilitySampleSizeObject>,
   adminArea?: Maybe<AreaNode>,
   allAdminAreas?: Maybe<AreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
@@ -3881,11 +3896,13 @@ export type Query = {
   programSectorChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   programScopeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   cashPlanStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  allActivePrograms?: Maybe<ProgramNodeConnection>,
   targetPopulation?: Maybe<TargetPopulationNode>,
   allTargetPopulation?: Maybe<TargetPopulationNodeConnection>,
   goldenRecordByTargetingCriteria?: Maybe<HouseholdNodeConnection>,
   targetPopulationHouseholds?: Maybe<HouseholdNodeConnection>,
   targetPopulationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  allActiveTargetPopulations?: Maybe<TargetPopulationNodeConnection>,
   household?: Maybe<HouseholdNode>,
   allHouseholds?: Maybe<HouseholdNodeConnection>,
   individual?: Maybe<IndividualNode>,
@@ -4032,6 +4049,11 @@ export type QueryRecipientsArgs = {
   last?: Maybe<Scalars['Int']>,
   survey: Scalars['String'],
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAccountabilitySampleSizeArgs = {
+  input?: Maybe<AccountabilitySampleSizeInput>
 };
 
 
@@ -4453,6 +4475,24 @@ export type QueryAllCashPlansArgs = {
 };
 
 
+export type QueryAllActiveProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
+  numberOfHouseholds?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
 export type QueryTargetPopulationArgs = {
   id: Scalars['ID']
 };
@@ -4504,6 +4544,29 @@ export type QueryTargetPopulationHouseholdsArgs = {
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllActiveTargetPopulationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  totalHouseholdsCountMin?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountMax?: Maybe<Scalars['Int']>,
+  totalIndividualsCountMin?: Maybe<Scalars['Int']>,
+  totalIndividualsCountMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -7092,7 +7155,7 @@ export type TargetPopulationDetailedFragment = (
     & Pick<ProgramNode, 'id' | 'name' | 'status'>
   )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
-    & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+    & Pick<UserNode, 'id' | 'email' | 'firstName' | 'lastName'>
   )>, targetingCriteria: Maybe<(
     { __typename?: 'TargetingCriteriaNode' }
     & { rules: Maybe<Array<Maybe<(
@@ -10186,6 +10249,42 @@ export type IndividualFlexFieldsQuery = (
   )> }
 );
 
+export type AllActiveProgramsQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  numberOfHouseholds?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllActiveProgramsQuery = (
+  { __typename?: 'Query' }
+  & { allActivePrograms: Maybe<(
+    { __typename?: 'ProgramNodeConnection' }
+    & Pick<ProgramNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'ProgramNodeEdge' }
+      & Pick<ProgramNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'sector' | 'totalNumberOfHouseholds' | 'budget'>
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllProgramsQueryVariables = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -10859,6 +10958,45 @@ export type SurveyQuery = (
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name'>
     )> }
+  )> }
+);
+
+export type AllActiveTargetPopulationsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>
+};
+
+
+export type AllActiveTargetPopulationsQuery = (
+  { __typename?: 'Query' }
+  & { allActiveTargetPopulations: Maybe<(
+    { __typename?: 'TargetPopulationNodeConnection' }
+    & Pick<TargetPopulationNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'TargetPopulationNodeEdge' }
+      & Pick<TargetPopulationNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'TargetPopulationNode' }
+        & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'totalHouseholdsCount' | 'createdAt' | 'updatedAt'>
+        & { program: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        )>, createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'email' | 'firstName' | 'lastName'>
+        )> }
+      )> }
+    )>> }
   )> }
 );
 
@@ -11705,6 +11843,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   }
   createdBy {
     id
+    email
     firstName
     lastName
   }
@@ -19463,6 +19602,88 @@ export function useIndividualFlexFieldsLazyQuery(baseOptions?: ApolloReactHooks.
 export type IndividualFlexFieldsQueryHookResult = ReturnType<typeof useIndividualFlexFieldsQuery>;
 export type IndividualFlexFieldsLazyQueryHookResult = ReturnType<typeof useIndividualFlexFieldsLazyQuery>;
 export type IndividualFlexFieldsQueryResult = ApolloReactCommon.QueryResult<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>;
+export const AllActiveProgramsDocument = gql`
+    query AllActivePrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String) {
+  allActivePrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, numberOfHouseholds: $numberOfHouseholds, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    totalCount
+    edgeCount
+    edges {
+      cursor
+      node {
+        id
+        name
+        status
+        startDate
+        endDate
+        sector
+        totalNumberOfHouseholds
+        budget
+      }
+    }
+  }
+}
+    `;
+export type AllActiveProgramsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>, 'query'> & ({ variables: AllActiveProgramsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllActiveProgramsComponent = (props: AllActiveProgramsComponentProps) => (
+      <ApolloReactComponents.Query<AllActiveProgramsQuery, AllActiveProgramsQueryVariables> query={AllActiveProgramsDocument} {...props} />
+    );
+    
+export type AllActiveProgramsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllActiveProgramsQuery, AllActiveProgramsQueryVariables> & TChildProps;
+export function withAllActivePrograms<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllActiveProgramsQuery,
+  AllActiveProgramsQueryVariables,
+  AllActiveProgramsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllActiveProgramsQuery, AllActiveProgramsQueryVariables, AllActiveProgramsProps<TChildProps>>(AllActiveProgramsDocument, {
+      alias: 'allActivePrograms',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllActiveProgramsQuery__
+ *
+ * To run a query within a React component, call `useAllActiveProgramsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllActiveProgramsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllActiveProgramsQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      status: // value for 'status'
+ *      sector: // value for 'sector'
+ *      businessArea: // value for 'businessArea'
+ *      search: // value for 'search'
+ *      numberOfHouseholds: // value for 'numberOfHouseholds'
+ *      budget: // value for 'budget'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllActiveProgramsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>(AllActiveProgramsDocument, baseOptions);
+      }
+export function useAllActiveProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>(AllActiveProgramsDocument, baseOptions);
+        }
+export type AllActiveProgramsQueryHookResult = ReturnType<typeof useAllActiveProgramsQuery>;
+export type AllActiveProgramsLazyQueryHookResult = ReturnType<typeof useAllActiveProgramsLazyQuery>;
+export type AllActiveProgramsQueryResult = ApolloReactCommon.QueryResult<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>;
 export const AllProgramsDocument = gql`
     query AllPrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String) {
   allPrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, numberOfHouseholds: $numberOfHouseholds, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate) {
@@ -21240,6 +21461,89 @@ export function useSurveyLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookO
 export type SurveyQueryHookResult = ReturnType<typeof useSurveyQuery>;
 export type SurveyLazyQueryHookResult = ReturnType<typeof useSurveyLazyQuery>;
 export type SurveyQueryResult = ApolloReactCommon.QueryResult<SurveyQuery, SurveyQueryVariables>;
+export const AllActiveTargetPopulationsDocument = gql`
+    query AllActiveTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID], $createdAtRange: String) {
+  allActiveTargetPopulations(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, totalHouseholdsCountMin: $numberOfHouseholdsMin, totalHouseholdsCountMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program, createdAtRange: $createdAtRange) {
+    edges {
+      node {
+        id
+        name
+        status
+        program {
+          id
+          name
+        }
+        totalHouseholdsCount
+        createdAt
+        updatedAt
+        createdBy {
+          id
+          email
+          firstName
+          lastName
+        }
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type AllActiveTargetPopulationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>, 'query'>;
+
+    export const AllActiveTargetPopulationsComponent = (props: AllActiveTargetPopulationsComponentProps) => (
+      <ApolloReactComponents.Query<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables> query={AllActiveTargetPopulationsDocument} {...props} />
+    );
+    
+export type AllActiveTargetPopulationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables> & TChildProps;
+export function withAllActiveTargetPopulations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllActiveTargetPopulationsQuery,
+  AllActiveTargetPopulationsQueryVariables,
+  AllActiveTargetPopulationsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables, AllActiveTargetPopulationsProps<TChildProps>>(AllActiveTargetPopulationsDocument, {
+      alias: 'allActiveTargetPopulations',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllActiveTargetPopulationsQuery__
+ *
+ * To run a query within a React component, call `useAllActiveTargetPopulationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllActiveTargetPopulationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllActiveTargetPopulationsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
+ *      status: // value for 'status'
+ *      numberOfHouseholdsMin: // value for 'numberOfHouseholdsMin'
+ *      numberOfHouseholdsMax: // value for 'numberOfHouseholdsMax'
+ *      businessArea: // value for 'businessArea'
+ *      program: // value for 'program'
+ *      createdAtRange: // value for 'createdAtRange'
+ *   },
+ * });
+ */
+export function useAllActiveTargetPopulationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, baseOptions);
+      }
+export function useAllActiveTargetPopulationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, baseOptions);
+        }
+export type AllActiveTargetPopulationsQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsQuery>;
+export type AllActiveTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsLazyQuery>;
+export type AllActiveTargetPopulationsQueryResult = ApolloReactCommon.QueryResult<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>;
 export const AllFieldsAttributesDocument = gql`
     query AllFieldsAttributes {
   allFieldsAttributes {
@@ -21997,6 +22301,8 @@ export type ResolversTypes = {
   RecipientNodeConnection: ResolverTypeWrapper<RecipientNodeConnection>,
   RecipientNodeEdge: ResolverTypeWrapper<RecipientNodeEdge>,
   RecipientNode: ResolverTypeWrapper<RecipientNode>,
+  AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
+  AccountabilitySampleSizeObject: ResolverTypeWrapper<AccountabilitySampleSizeObject>,
   LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
   LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
   LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
@@ -22418,6 +22724,8 @@ export type ResolversParentTypes = {
   RecipientNodeConnection: RecipientNodeConnection,
   RecipientNodeEdge: RecipientNodeEdge,
   RecipientNode: RecipientNode,
+  AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
+  AccountabilitySampleSizeObject: AccountabilitySampleSizeObject,
   LogEntryNodeConnection: LogEntryNodeConnection,
   LogEntryNodeEdge: LogEntryNodeEdge,
   LogEntryNode: LogEntryNode,
@@ -22618,6 +22926,11 @@ export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, Paren
   admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   totalCashTransferred?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type AccountabilitySampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['AccountabilitySampleSizeObject'] = ResolversParentTypes['AccountabilitySampleSizeObject']> = {
+  numberOfRecipients?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
@@ -24201,6 +24514,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   survey?: Resolver<Maybe<ResolversTypes['SurveyNode']>, ParentType, ContextType, RequireFields<QuerySurveyArgs, 'id'>>,
   allSurveys?: Resolver<Maybe<ResolversTypes['SurveyNodeConnection']>, ParentType, ContextType, QueryAllSurveysArgs>,
   recipients?: Resolver<Maybe<ResolversTypes['RecipientNodeConnection']>, ParentType, ContextType, RequireFields<QueryRecipientsArgs, 'survey'>>,
+  accountabilitySampleSize?: Resolver<Maybe<ResolversTypes['AccountabilitySampleSizeObject']>, ParentType, ContextType, QueryAccountabilitySampleSizeArgs>,
   adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
@@ -24272,11 +24586,13 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   programSectorChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   programScopeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  allActivePrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllActiveProgramsArgs, 'businessArea'>>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
   goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria' | 'program' | 'excludedIds'>>,
   targetPopulationHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryTargetPopulationHouseholdsArgs, 'targetPopulation'>>,
   targetPopulationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  allActiveTargetPopulations?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllActiveTargetPopulationsArgs>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>,
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
@@ -25376,6 +25692,7 @@ export type Resolvers<ContextType = any> = {
   _DatasetsNode?: _DatasetsNodeResolvers<ContextType>,
   _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>,
   _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>,
+  AccountabilitySampleSizeObject?: AccountabilitySampleSizeObjectResolvers<ContextType>,
   ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<ContextType>,
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
   AgencyNode?: AgencyNodeResolvers<ContextType>,

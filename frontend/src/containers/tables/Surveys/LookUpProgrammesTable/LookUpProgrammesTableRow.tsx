@@ -1,20 +1,20 @@
 import { Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { StatusBox } from '../../../components/core/StatusBox';
-import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { BlackLink } from '../../../../components/core/BlackLink';
+import { StatusBox } from '../../../../components/core/StatusBox';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   choicesToDict,
   formatCurrency,
   programStatusToColor,
-} from '../../../utils/utils';
+} from '../../../../utils/utils';
 import {
   ProgrammeChoiceDataQuery,
   ProgramNode,
-} from '../../../__generated__/graphql';
+} from '../../../../__generated__/graphql';
 
 interface LookUpProgrammesTableRowProps {
   program: ProgramNode;
