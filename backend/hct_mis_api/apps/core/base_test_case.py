@@ -1,7 +1,7 @@
 import base64
-import sys
 import os
 import random
+import sys
 
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
@@ -30,13 +30,13 @@ class APITestCase(SnapshotTestTestCase):
 
     def tearDown(self):
         # https://stackoverflow.com/a/39606065
-        if hasattr(self._outcome, "errors"):  # type: ignore
+        if hasattr(self._outcome, "errors"):
             # Python 3.4 - 3.10  (These two methods have no side effects)
             result = self.defaultTestResult()
-            self._feedErrorsToResult(result, self._outcome.errors)  # type: ignore
+            self._feedErrorsToResult(result, self._outcome.errors)
         else:
             # Python 3.11+
-            result = self._outcome.result  # type: ignore
+            result = self._outcome.result
 
         for typ, errors in (("ERROR", result.errors), ("FAIL", result.failures)):
             for test, text in errors:
