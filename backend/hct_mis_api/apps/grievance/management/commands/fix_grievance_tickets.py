@@ -1,10 +1,11 @@
 import logging
-from django.db import transaction
-from django.core.management import BaseCommand
 
-from hct_mis_api.apps.household.models import Individual, DISABLED, NOT_DISABLED
-from hct_mis_api.apps.grievance.models import GrievanceTicket
+from django.core.management import BaseCommand
+from django.db import transaction
+
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED, Individual
 
 
 # for copying & pasting into the terminal purposes

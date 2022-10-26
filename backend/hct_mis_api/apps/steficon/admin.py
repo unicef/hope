@@ -20,6 +20,8 @@ from django.utils.translation import get_language
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_buttons.decorators import view
 from admin_extra_buttons.utils import labelize
+from admin_sync.mixin import SyncMixin
+from adminactions.export import ForeignKeysCollector
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
 from import_export import fields
@@ -207,7 +209,7 @@ class RuleResource(ModelResource):
 
 
 @register(Rule)
-class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
+class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
@@ -270,13 +272,16 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
+    def check_sync_permission(self, request, obj=None):
+        return is_root(request)
+
     def has_delete_permission(self, request, obj=None):
         return is_root(request)
 
     def has_change_permission(self, request, obj=None):
         return is_root(request)
 
-    def get_ignored_linked_objects(self):
+    def get_ignored_linked_objects(self, request):
         return ["history"]
 
     def get_form(self, request, obj=None, change=False, **kwargs):
@@ -459,6 +464,18 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
             obj.created_by = request.user
         obj.updated_by = request.user
         obj.save()
+
+    def _get_data(self, record) -> str:
+        roles = RuleCommit.objects.filter(rule=record)
+        collector = ForeignKeysCollector(None)
+        objs = []
+        for qs in [roles]:
+            objs.extend(qs)
+        objs.extend(Rule.objects.filter(pk=record.pk))
+        collector.collect(objs)
+        serializer = self.get_serializer("json")
+        return serializer.serialize(
+            collector.data, use_natural_foreign_keys=True, use_natural_primary_keys=True, indent=3)
 
 
 class RuleCommitResource(ModelResource):

@@ -5,6 +5,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 
 import graphene
+from graphql import GraphQLError
 from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -21,21 +22,21 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
+    pull_kobo_submissions_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
     registration_xlsx_import_task,
-    pull_kobo_submissions_task,
     validate_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
-    RegistrationDataImportDatahub,
     KoboImportData,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
-    XlsxRowErrorNode,
     KoboImportDataNode,
+    XlsxRowErrorNode,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -254,6 +255,10 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         if not obj_hct.can_be_merged():
             raise ValidationError('can\'t merge RDI with this status')
         cls.validate(status=obj_hct.status)
+
+        if not obj_hct.can_be_merged():
+            raise GraphQLError(f"Can't begin to merge RDI: {obj_hct}")
+
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
         merge_registration_data_import_task.delay(registration_data_import_id=decode_id)

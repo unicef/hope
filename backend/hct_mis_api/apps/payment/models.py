@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField
+from django.db.models import Count, JSONField, Q
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -314,25 +314,18 @@ class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
 
 
 def build_summary(cash_plan):
-    active_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE).count()
-    pending_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_PENDING).count()
-    not_finished_count = cash_plan.verifications.exclude(
-        status=CashPlanPaymentVerificationSummary.STATUS_FINISHED
-    ).count()
+    statuses_count = cash_plan.verifications.aggregate(
+        active=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE)),
+        pending=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_PENDING)),
+        finished=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_FINISHED)),
+    )
     summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=cash_plan)
-    if active_count >= 1:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_ACTIVE
-        summary.completion_date = None
-        if summary.activation_date is None:
-            summary.activation_date = timezone.now()
-    elif not_finished_count == 0 and pending_count == 0:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_FINISHED
-        if summary.completion_date is None:
-            summary.completion_date = timezone.now()
+    if statuses_count["active"] >= 1:
+        summary.mark_as_active()
+    elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
+        summary.mark_as_finished()
     else:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_PENDING
-        summary.completion_date = None
-        summary.activation_date = None
+        summary.mark_as_pending()
     summary.save()
 
 
@@ -429,3 +422,19 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
     cash_plan = models.OneToOneField(
         "program.CashPlan", on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
     )
+
+    def mark_as_active(self):
+        self.status = self.STATUS_ACTIVE
+        self.completion_date = None
+        if self.activation_date is None:
+            self.activation_date = timezone.now()
+
+    def mark_as_finished(self):
+        self.status = self.STATUS_FINISHED
+        if self.completion_date is None:
+            self.completion_date = timezone.now()
+
+    def mark_as_pending(self):
+        self.status = self.STATUS_PENDING
+        self.completion_date = None
+        self.activation_date = None

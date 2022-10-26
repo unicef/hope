@@ -10,8 +10,8 @@ class HouseholdWithdraw:
         self.individuals: QuerySet[Individual] = self.household.individuals.filter(duplicate=False)
         self.documents = None
 
-    def withdraw(self):
-        self.household.withdraw()
+    def withdraw(self, tag=None):
+        self.household.withdraw(tag)
 
         for individual in self.individuals:
             individual.withdraw()

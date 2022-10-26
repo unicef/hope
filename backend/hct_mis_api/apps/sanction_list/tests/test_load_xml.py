@@ -1,7 +1,7 @@
 from datetime import datetime
-from django.utils import timezone
 
 from django.conf import settings
+from django.utils import timezone
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
