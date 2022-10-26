@@ -13,7 +13,7 @@ import {
 } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import { Field, Form, Formik } from 'formik';
-import React, { useState, useEffect, useCallback, ReactElement } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
@@ -29,22 +29,21 @@ import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { SurveySteps, SurveyTabsValues } from '../../../../utils/constants';
 import {
+  AccountabilitySampleSizeQueryVariables,
   CreateSurveyAccountabilityMutationVariables,
+  useAccountabilitySampleSizeLazyQuery,
   useAllAdminAreasQuery,
-  useAllRapidProFlowsQuery,
   useCreateSurveyAccountabilityMutation,
-  useSampleSizeLazyQuery,
 } from '../../../../__generated__/graphql';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { TabPanel } from '../../../../components/core/TabPanel';
 import { FormikMultiSelectField } from '../../../../shared/Formik/FormikMultiSelectField';
-import { FormikRadioGroup } from '../../../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { getPercentage } from '../../../../utils/utils';
 import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import { Missing } from '../../../../components/core/Missing';
 import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
+import { FormikEffect } from '../../../../components/core/FormikEffect';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const sampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -53,22 +52,19 @@ const Border = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function prepareVariables(selectedSampleSizeType, values, businessArea) {
-  const variables = {
+function prepareVariables(
+  selectedSampleSizeType,
+  values,
+): AccountabilitySampleSizeQueryVariables {
+  return {
     input: {
-      sampling: selectedSampleSizeType === 0 ? 'FULL_LIST' : 'RANDOM',
+      targetPopulation: values.targetPopulation,
+      program: values.program,
+      samplingType: selectedSampleSizeType === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
         selectedSampleSizeType === 0
           ? {
               excludedAdminAreas: values.excludedAdminAreasFull || [],
-            }
-          : null,
-      verificationChannel: values.verificationChannel,
-      rapidProArguments:
-        values.verificationChannel === 'RAPIDPRO'
-          ? {
-              flowId: values.rapidProFlow,
             }
           : null,
       randomSamplingArguments:
@@ -85,10 +81,8 @@ function prepareVariables(selectedSampleSizeType, values, businessArea) {
               sex: values.sexCheckbox ? values.filterSex : null,
             }
           : null,
-      businessAreaSlug: businessArea,
     },
   };
-  return variables;
 }
 
 export const CreateSurveyPage = (): React.ReactElement => {
@@ -107,7 +101,6 @@ export const CreateSurveyPage = (): React.ReactElement => {
     message: '',
     program: '',
     targetPopulation: '',
-    registrationDataImport: '',
     confidenceInterval: 95,
     marginOfError: 5,
     filterAgeMin: null,
@@ -115,8 +108,6 @@ export const CreateSurveyPage = (): React.ReactElement => {
     filterSex: '',
     excludedAdminAreasFull: [],
     excludedAdminAreasRandom: [],
-    verificationChannel: 'MANUAL',
-    rapidProFlow: '',
     adminCheckbox: false,
     ageCheckbox: false,
     sexCheckbox: false,
@@ -137,25 +128,19 @@ export const CreateSurveyPage = (): React.ReactElement => {
     },
   });
 
-  const { data: rapidProFlows } = useAllRapidProFlowsQuery({
-    variables: {
-      businessAreaSlug: businessArea,
-    },
-  });
-
-  const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
-    variables: prepareVariables(
-      selectedSampleSizeType,
-      formValues,
-      businessArea,
-    ),
+  const [
+    loadSampleSize,
+    { data: sampleSizesData },
+  ] = useAccountabilitySampleSizeLazyQuery({
+    variables: prepareVariables(selectedSampleSizeType, formValues),
     fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
-    loadSampleSize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formValues]);
+    if (activeStep === SurveySteps.SampleSize) {
+      loadSampleSize();
+    }
+  }, [activeStep, formValues, loadSampleSize]);
 
   const validationSchema = useCallback(() => {
     const datum = {
@@ -203,8 +188,8 @@ export const CreateSurveyPage = (): React.ReactElement => {
 
   const getSampleSizePercentage = (): string => {
     return `(${getPercentage(
-      sampleSizesData?.sampleSize?.sampleSize,
-      sampleSizesData?.sampleSize?.paymentRecordCount,
+      sampleSizesData?.accountabilitySampleSize?.sampleSize,
+      sampleSizesData?.accountabilitySampleSize?.numberOfRecipients,
     )})`;
   };
 
@@ -224,10 +209,10 @@ export const CreateSurveyPage = (): React.ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const prepareMutationVariables = (values) => {
-    console.log('VALUES', values);
-    const variables = {
+  const prepareMutationVariables = (
+    values,
+  ): CreateSurveyAccountabilityMutationVariables => {
+    return {
       input: {
         title: values.title,
         body: values.body,
@@ -255,7 +240,6 @@ export const CreateSurveyPage = (): React.ReactElement => {
             : null,
       },
     };
-    return variables as CreateSurveyAccountabilityMutationVariables;
   };
 
   const dataChangeErrors = (errors): ReactElement[] =>
@@ -286,6 +270,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
             e.graphQLErrors.map((x) => showMessage(x.message));
           }
         } else {
+          setFormValues(values);
           handleNext();
         }
       }}
@@ -320,6 +305,10 @@ export const CreateSurveyPage = (): React.ReactElement => {
               </Stepper>
             </Grid>
             <Form>
+              <FormikEffect
+                values={values}
+                onChange={() => setFormValues(values)}
+              />
               {activeStep === SurveySteps.LookUp && (
                 <Box display='flex' flexDirection='column'>
                   <LookUpSelection
@@ -348,7 +337,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         <FormControlLabel
                           value={index}
                           onChange={() => {
-                            setFormValues(initialValues);
+                            setFormValues(values);
                             setSelectedSampleSizeType(index);
                           }}
                           key={tab}
@@ -375,40 +364,18 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         fontSize={16}
                         fontWeight='fontWeightBold'
                       >
-                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
+                        Sample size:{' '}
+                        {sampleSizesData?.accountabilitySampleSize?.sampleSize}{' '}
+                        out of{' '}
+                        {
+                          sampleSizesData?.accountabilitySampleSize
+                            ?.numberOfRecipients
+                        }{' '}
                         {getSampleSizePercentage()}
                       </Box>
                       <Box fontSize={12} color='#797979'>
                         {t('This option is recommended for RapidPro')}
                       </Box>
-                      <Field
-                        name='verificationChannel'
-                        label={t('Verification Channel')}
-                        style={{ flexDirection: 'row' }}
-                        choices={[
-                          { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                          { value: 'XLSX', name: 'XLSX' },
-                          { value: 'MANUAL', name: 'MANUAL' },
-                        ]}
-                        component={FormikRadioGroup}
-                      />
-                      {values.verificationChannel === 'RAPIDPRO' && (
-                        <Field
-                          name='rapidProFlow'
-                          label={t('RapidPro Flow')}
-                          style={{ width: '90%' }}
-                          choices={
-                            rapidProFlows
-                              ? rapidProFlows.allRapidProFlows.map((flow) => ({
-                                  value: flow.id,
-                                  name: flow.name,
-                                }))
-                              : []
-                          }
-                          component={FormikSelectField}
-                        />
-                      )}
                     </Box>
                   </TabPanel>
                   <TabPanel value={selectedSampleSizeType} index={1}>
@@ -507,37 +474,15 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         fontSize={16}
                         fontWeight='fontWeightBold'
                       >
-                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}
+                        Sample size:{' '}
+                        {sampleSizesData?.accountabilitySampleSize?.sampleSize}{' '}
+                        out of{' '}
+                        {
+                          sampleSizesData?.accountabilitySampleSize
+                            ?.numberOfRecipients
+                        }{' '}
                         {getSampleSizePercentage()}
                       </Box>
-                      <Field
-                        name='verificationChannel'
-                        label={t('Verification Channel')}
-                        style={{ flexDirection: 'row' }}
-                        choices={[
-                          { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                          { value: 'XLSX', name: 'XLSX' },
-                          { value: 'MANUAL', name: 'MANUAL' },
-                        ]}
-                        component={FormikRadioGroup}
-                      />
-                      {values.verificationChannel === 'RAPIDPRO' && (
-                        <Field
-                          name='rapidProFlow'
-                          label='RapidPro Flow'
-                          style={{ width: '90%' }}
-                          choices={
-                            rapidProFlows
-                              ? rapidProFlows.allRapidProFlows.map((flow) => ({
-                                  value: flow.id,
-                                  name: flow.name,
-                                }))
-                              : []
-                          }
-                          component={FormikSelectField}
-                        />
-                      )}
                     </Box>
                   </TabPanel>
                 </Box>
@@ -582,7 +527,11 @@ export const CreateSurveyPage = (): React.ReactElement => {
                       fontSize={16}
                       fontWeight='fontWeightBold'
                     >
-                      {t('Number of selected recipients')}: <Missing />
+                      {t('Number of selected recipients')}:{' '}
+                      {
+                        sampleSizesData?.accountabilitySampleSize
+                          ?.numberOfRecipients
+                      }
                     </Box>
                   </Grid>
                 </>

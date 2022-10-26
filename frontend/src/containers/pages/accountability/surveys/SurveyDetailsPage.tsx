@@ -54,6 +54,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
         }
       >
         <Button variant='contained' color='primary' component={Link} to='/'>
+          {/* TODO change depends on the survey type */}
           {t('Check Answers')}
         </Button>
       </PageHeader>
