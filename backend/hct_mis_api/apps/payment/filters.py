@@ -4,9 +4,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Case, CharField, Count, Q, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 
 from django_filters import (
     CharFilter,
+    ChoiceFilter,
     DateFilter,
     FilterSet,
     MultipleChoiceFilter,
@@ -140,12 +142,22 @@ class PaymentVerificationSummaryFilter(FilterSet):
 
 
 class PaymentVerificationLogEntryFilter(LogEntryFilter):
+    PLAN_TYPE_CASH = "CashPlan"
+    PLAN_TYPE_PAYMENT = "PaymentPlan"
+    PLAN_TYPE_CHOICES = (
+        (PLAN_TYPE_CASH, _("CashPlan")),
+        (PLAN_TYPE_PAYMENT, _("PaymentPlan")),
+    )
     object_id = UUIDFilter(method="object_id_filter")
+    object_type = ChoiceFilter(method="object_type_filter", choices=PLAN_TYPE_CHOICES)
 
-    def object_id_filter(self, qs, name, value):
-        cash_plan = CashPlan.objects.get(pk=value)
-        verifications_ids = cash_plan.payment_verification_plan.all().values_list("pk", flat=True)
-        return qs.filter(object_id__in=verifications_ids)
+    def filter_queryset(self, queryset):
+        cleaned_data = self.form.cleaned_data
+        object_type = cleaned_data.get("object_type")
+        object_id = cleaned_data.get("object_id")
+        plan_object = (PaymentPlan if object_type == self.PLAN_TYPE_PAYMENT else CashPlan).objects.get(pk=object_id)
+        verifications_ids = plan_object.payment_verification_plan.all().values_list("pk", flat=True)
+        return queryset.filter(object_id__in=verifications_ids)
 
 
 class FinancialServiceProviderXlsxTemplateFilter(FilterSet):

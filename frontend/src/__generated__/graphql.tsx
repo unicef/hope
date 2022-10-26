@@ -1430,7 +1430,7 @@ export type GenericPaymentPlanNode = {
 
 
 export type GetCashplanVerificationSampleSizeInput = {
-  paymentPlanId?: Maybe<Scalars['ID']>,
+  cashOrPaymentPlanId?: Maybe<Scalars['ID']>,
   paymentVerificationPlanId?: Maybe<Scalars['ID']>,
   sampling: Scalars['String'],
   verificationChannel?: Maybe<Scalars['String']>,
@@ -5083,7 +5083,8 @@ export type QueryAllPaymentVerificationLogEntriesArgs = {
   objectId?: Maybe<Scalars['UUID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
-  module?: Maybe<Scalars['String']>
+  module?: Maybe<Scalars['String']>,
+  objectType?: Maybe<Scalars['String']>
 };
 
 
@@ -10472,6 +10473,7 @@ export type PaymentRecordQuery = (
 export type AllPaymentVerificationLogEntriesQueryVariables = {
   businessArea: Scalars['String'],
   objectId?: Maybe<Scalars['UUID']>,
+  objectType?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -19203,8 +19205,8 @@ export type PaymentRecordQueryHookResult = ReturnType<typeof usePaymentRecordQue
 export type PaymentRecordLazyQueryHookResult = ReturnType<typeof usePaymentRecordLazyQuery>;
 export type PaymentRecordQueryResult = ApolloReactCommon.QueryResult<PaymentRecordQuery, PaymentRecordQueryVariables>;
 export const AllPaymentVerificationLogEntriesDocument = gql`
-    query AllPaymentVerificationLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String) {
-  allPaymentVerificationLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module) {
+    query AllPaymentVerificationLogEntries($businessArea: String!, $objectId: UUID, $objectType: String, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String) {
+  allPaymentVerificationLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, objectType: $objectType, businessArea: $businessArea, search: $search, module: $module) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -19277,6 +19279,7 @@ export function withAllPaymentVerificationLogEntries<TProps, TChildProps = {}>(o
  *   variables: {
  *      businessArea: // value for 'businessArea'
  *      objectId: // value for 'objectId'
+ *      objectType: // value for 'objectType'
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      first: // value for 'first'
