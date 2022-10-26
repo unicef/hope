@@ -1,5 +1,6 @@
 import logging
 from enum import auto
+from typing import List, Type, TypeVar
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -13,6 +14,9 @@ from hct_mis_api.apps.core.utils import choices_to_dict, encode_id_base64
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 logger = logging.getLogger(__name__)
+
+
+GrievanceNotificationType = TypeVar("GrievanceNotificationType", bound="GrievanceNotification")
 
 
 class GrievanceNotification:
@@ -187,7 +191,9 @@ class GrievanceNotification:
     }
 
     @classmethod
-    def prepare_notification_for_ticket_creation(cls, grievance_ticket):
+    def prepare_notification_for_ticket_creation(
+        cls: Type[GrievanceNotificationType], grievance_ticket
+    ) -> List[GrievanceNotificationType]:
         notifications = []
         if grievance_ticket.assigned_to:
             notifications.append(
@@ -206,6 +212,6 @@ class GrievanceNotification:
         return notifications
 
     @classmethod
-    def send_all_notifications(cls, notifications):
+    def send_all_notifications(cls, notifications) -> None:
         for notification in notifications:
             notification.send_email_notification()

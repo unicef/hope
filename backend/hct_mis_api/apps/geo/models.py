@@ -1,6 +1,7 @@
 # - Country
 # - AreaType
 # - Area
+from typing import Any, Dict, List
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import CICharField
 from django.db.models import JSONField
@@ -58,7 +59,7 @@ class Country(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         return self.name
 
     @classmethod
-    def get_choices(cls):
+    def get_choices(cls) -> List[Dict[str, Any]]:
         queryset = cls.objects.all().order_by("name")
         return [
             {

@@ -375,7 +375,7 @@ def handle_bank_transfer_payment_method(pc):
     }
 
 
-def verify_required_arguments(input_data, field_name, options):
+def verify_required_arguments(input_data, field_name, options) -> None:
     from hct_mis_api.apps.core.utils import nested_dict_get
 
     for key, value in options.items():
@@ -389,12 +389,12 @@ def verify_required_arguments(input_data, field_name, options):
                 log_and_raise(f"You can't provide {not_allowed} in {key}")
 
 
-def remove_parsed_data_fields(data_dict, fields_list):
+def remove_parsed_data_fields(data_dict, fields_list) -> None:
     for field in fields_list:
         data_dict.pop(field, None)
 
 
-def verify_flex_fields(flex_fields_to_verify, associated_with):
+def verify_flex_fields(flex_fields_to_verify, associated_with) -> None:
     from hct_mis_api.apps.core.core_fields_attributes import (
         FIELD_TYPES_TO_INTERNAL_TYPE,
         TYPE_SELECT_MANY,

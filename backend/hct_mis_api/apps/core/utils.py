@@ -43,7 +43,7 @@ def encode_id_base64(id_string, model_name) -> Optional[str]:
     return b64encode(f"{model_name}Node:{str(id_string)}".encode()).decode()
 
 
-def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_separator="-"):
+def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_separator="-") -> None:
     """
     Calculates and stores a unique slug of ``value`` for an instance.
 
@@ -89,7 +89,7 @@ def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_
     setattr(instance, slug_field.attname, slug)
 
 
-def _slug_strip(value, separator="-"):
+def _slug_strip(value, separator="-") -> str:
     import re
 
     """
@@ -118,7 +118,7 @@ def _slug_strip(value, separator="-"):
     return value
 
 
-def serialize_flex_attributes():
+def serialize_flex_attributes() -> Dict[str, Dict[str, Any]]:
     from django.db.models import F
 
     """
@@ -193,7 +193,7 @@ def serialize_flex_attributes():
     return result_dict
 
 
-def get_combined_attributes():
+def get_combined_attributes() -> Dict:
     from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
     flex_attrs = serialize_flex_attributes()
@@ -206,13 +206,13 @@ def get_combined_attributes():
     }
 
 
-def get_attr_value(name, obj, default=None):
+def get_attr_value(name, obj, default=None) -> Any:
     if isinstance(obj, (MutableMapping, dict)):
         return obj.get(name, default)
     return getattr(obj, name, default)
 
 
-def to_choice_object(choices):
+def to_choice_object(choices) -> List[Dict[str, Any]]:
     return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 
@@ -229,7 +229,7 @@ def rename_dict_keys(
 raise_attribute_error = object()
 
 
-def nested_getattr(obj, attr, default=raise_attribute_error):
+def nested_getattr(obj, attr, default=raise_attribute_error) -> Any:
     import functools
 
     try:
@@ -241,7 +241,7 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
         raise
 
 
-def nested_dict_get(dictionary, path):
+def nested_dict_get(dictionary, path) -> Any:
     import functools
 
     return functools.reduce(
@@ -251,7 +251,7 @@ def nested_dict_get(dictionary, path):
     )
 
 
-def get_count_and_percentage(input_list, all_items_list):
+def get_count_and_percentage(input_list, all_items_list) -> Dict[str, Any]:
     count = len(input_list)
     all_items_count = len(all_items_list) or 1
     percentage = (count / all_items_count) * 100
