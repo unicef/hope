@@ -805,12 +805,8 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_sample_size(self, info, input, **kwargs):
-        node_name, obj_id = b64decode(input.get("payment_plan_id")).decode().split(":")
-        payment_plan_object = (
-            get_object_or_404(CashPlan, id=obj_id)
-            if node_name == "CashPlanNode"
-            else get_object_or_404(PaymentPlan, id=obj_id)
-        )
+        node_name, obj_id = b64decode(input.get("cash_or_payment_plan_id")).decode().split(":")
+        payment_plan_object = get_object_or_404(CashPlan if node_name == "CashPlanNode" else PaymentPlan, id=obj_id)
 
         def get_payment_records(cash_plan, payment_verification_plan, verification_channel):
             kwargs = {}
