@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 
@@ -20,10 +21,13 @@ def aggregate_optionally(household, **kwargs):
     return household.individuals.aggregate(**kwargs)
 
 
+@transaction.atomic
 def recalculate_data(household: Household) -> None:
+    household = Household.objects.select_for_update().get(id=household.id)
+
     if not (household.collect_individual_data in (COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL)):
         return
-    for individual in household.individuals.all():
+    for individual in household.individuals.all().select_for_update():
         individual.recalculate_data()
     date_6_years_ago = timezone.now() - relativedelta(years=+6)
     date_12_years_ago = timezone.now() - relativedelta(years=+12)

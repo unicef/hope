@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import List
 
 from django.db import transaction
 
@@ -11,7 +11,6 @@ from hct_mis_api.apps.household.models import (
     Document,
     Individual,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
@@ -20,19 +19,14 @@ from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge 
 
 class DeduplicateAndCheckAgainstSanctionsListTask:
     @transaction.atomic(using="default")
-    def execute(self, should_populate_index: bool, registration_data_import_id: str, individuals_ids: Sequence[str]):
-        registration_data_import = (
-            RegistrationDataImport.objects.get(id=registration_data_import_id) if registration_data_import_id else None
-        )
-        individuals = Individual.objects.filter(id__in=individuals_ids) if individuals_ids else None
-        business_area = (
-            registration_data_import.business_area if registration_data_import else individuals.first().business_area
-        )
+    def execute(self, should_populate_index: bool, individuals_ids: List[str]):
+        individuals = Individual.objects.filter(id__in=individuals_ids)
+        business_area = individuals.first().business_area
 
         if should_populate_index is True:
             populate_index(individuals, IndividualDocument)
 
-        DeduplicateTask.deduplicate_individuals_from_other_source(individuals=individuals)
+        DeduplicateTask.deduplicate_individuals_from_other_source(individuals, business_area)
 
         golden_record_duplicates = individuals.filter(deduplication_golden_record_status=DUPLICATE)
 

@@ -11,17 +11,21 @@ def _get_min_max_score(golden_records):
     return min(items, default=0.0), max(items, default=0.0)
 
 
-def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
+def create_grievance_ticket_with_details(
+    main_individual,
+    possible_duplicate,
+    business_area,
+    possible_duplicates=None,
+    registration_data_import=None,
+    is_multiple_duplicates_version=False,
+):
     from hct_mis_api.apps.grievance.models import (
         GrievanceTicket,
         TicketNeedsAdjudicationDetails,
     )
 
-    possible_duplicates = kwargs.get("possible_duplicates")
     if not possible_duplicates:
         return None, None
-
-    registration_data_import = kwargs.get("registration_data_import", None)
 
     ticket_all_individuals = {main_individual, *possible_duplicates}
 
@@ -55,7 +59,7 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         ticket=ticket,
         golden_records_individual=main_individual,
         possible_duplicate=possible_duplicate,
-        is_multiple_duplicates_version=kwargs.get("is_multiple_duplicates_version", False),
+        is_multiple_duplicates_version=is_multiple_duplicates_version,
         selected_individual=None,
         extra_data=extra_data,
         score_min=score_min,
@@ -69,7 +73,7 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
     return ticket, ticket_details
 
 
-def create_needs_adjudication_tickets(individuals_queryset, results_key, business_area, **kwargs):
+def create_needs_adjudication_tickets(individuals_queryset, results_key, business_area, registration_data_import=None):
     from hct_mis_api.apps.household.models import Individual
 
     if not individuals_queryset:
@@ -91,7 +95,7 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
             main_individual=possible_duplicate,
             possible_duplicate=possible_duplicate,  # for backward compatibility
             business_area=business_area,
-            registration_data_import=kwargs.get("registration_data_import", None),
+            registration_data_import=registration_data_import,
             possible_duplicates=possible_duplicates,
             is_multiple_duplicates_version=True,
         )

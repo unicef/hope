@@ -4,7 +4,8 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
 from time import sleep
 
-from django.db.models import CharField, F, Q, Value
+from django.db import transaction
+from django.db.models import CharField, F, Q, Value, QuerySet
 from django.db.models.functions import Concat
 
 from constance import config
@@ -388,21 +389,25 @@ class DeduplicateTask:
 
     @classmethod
     def _wait_until_health_green(cls):
-        ok = False
-        while not ok:
+        max_tries = 12
+        sleep_time = 5
+        for _ in range(max_tries):
             health = connections.get_connection().cluster.health()
             ok = (
                 health.get("status") == "green"
                 and not health.get("timed_out")
                 and health.get("number_of_pending_tasks") == 0
             )
-            log.info(
-                f"Check ES - status: {health.get('status')} timeout: {health.get('timed_out')} "
-                f"number of pending tasks:{health.get('number_of_pending_tasks')}"
-            )
             if ok:
                 break
-            sleep(5)
+
+            sleep(sleep_time)
+
+        else:
+            raise Exception(
+                f"Max Check ES attempts reached - status: {health.get('status')} timeout: {health.get('timed_out')} "
+                f"number of pending tasks:{health.get('number_of_pending_tasks')}"
+            )
 
     @classmethod
     def deduplicate_single_imported_individual(cls, individual):
@@ -478,7 +483,7 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_single_individual(cls, individual):
+    def deduplicate_single_individual(cls, individual: Individual):
         fields_names = (
             "given_name",
             "full_name",
@@ -556,9 +561,7 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def _get_duplicated_individuals(cls, registration_data_import, individuals):
-        if individuals is None:
-            individuals = Individual.objects.filter(registration_data_import=registration_data_import)
+    def _get_duplicated_individuals(cls, individuals: QuerySet[Individual]):
         all_duplicates = []
         all_possible_duplicates = []
         all_original_individuals_ids_duplicates = []
@@ -590,12 +593,11 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_individuals(cls, registration_data_import, individuals=None):
+    @transaction.atomic
+    def deduplicate_individuals(cls, registration_data_import):
         cls._wait_until_health_green()
-        if registration_data_import:
-            cls.set_thresholds(registration_data_import.business_area)
-        else:
-            cls.set_thresholds(individuals[0].business_area)
+        cls.set_thresholds(registration_data_import.business_area)
+        individuals = Individual.objects.filter(registration_data_import=registration_data_import).select_for_update()
 
         (
             all_duplicates,
@@ -603,7 +605,8 @@ class DeduplicateTask:
             all_original_individuals_ids_duplicates,
             all_original_individuals_ids_possible_duplicates,
             to_bulk_update_results,
-        ) = cls._get_duplicated_individuals(registration_data_import, individuals)
+        ) = cls._get_duplicated_individuals(individuals)
+
         cls._mark_individuals(
             all_duplicates,
             all_possible_duplicates,
@@ -613,9 +616,13 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_individuals_from_other_source(cls, individuals: list[Individual]):
+    @transaction.atomic
+    def deduplicate_individuals_from_other_source(cls, individuals: QuerySet[Individual], business_area: BusinessArea):
         cls._wait_until_health_green()
-        cls.set_thresholds(individuals[0].business_area)
+        cls.set_thresholds(business_area)
+
+        individuals.select_for_update()
+        list(individuals)  # apply db lock
 
         to_bulk_update_results = []
         for individual in individuals:
@@ -834,8 +841,13 @@ class DeduplicateTask:
             )
 
     @classmethod
+    @transaction.atomic
     def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
-        documents_to_dedup = [x for x in new_documents if x.status != Document.STATUS_VALID]
+        documents_to_dedup = list(
+            new_documents.exclude(status=Document.STATUS_VALID)
+            .select_related("individual")
+            .select_for_update(of=("self", "individual"))
+        )
         documents_numbers = [x.document_number for x in documents_to_dedup]
         new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in documents_to_dedup]
         new_document_signatures_duplicated_in_batch = [
@@ -851,8 +863,10 @@ class DeduplicateTask:
         already_processed_signatures = []
         ticket_data_dict = {}
         possible_duplicates_individuals_id_set = set()
+
         for new_document in documents_to_dedup:
             new_document_signature = f"{new_document.type_id}--{new_document.document_number}"
+
             if new_document_signature in all_matching_number_documents_signatures:
                 new_document.status = Document.STATUS_NEED_INVESTIGATION
                 ticket_data = ticket_data_dict.get(
@@ -863,6 +877,7 @@ class DeduplicateTask:
                 ticket_data_dict[new_document_signature] = ticket_data
                 possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
                 continue
+
             if (
                 new_document_signature in new_document_signatures_duplicated_in_batch
                 and new_document_signature in already_processed_signatures
@@ -871,6 +886,7 @@ class DeduplicateTask:
                 ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
                 possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
                 continue
+
             new_document.status = Document.STATUS_VALID
             already_processed_signatures.append(new_document_signature)
 
@@ -890,6 +906,7 @@ class DeduplicateTask:
                 f"new_document_signatures_duplicated_in_batch: {new_document_signatures_duplicated_in_batch}"
             )
             raise
+
         PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
         possible_duplicates_through_existing_list = (
             PossibleDuplicateThrough.objects.filter(individual__in=possible_duplicates_individuals_id_set)
@@ -900,10 +917,12 @@ class DeduplicateTask:
                 "ticketneedsadjudicationdetails__golden_records_individual",
             )
         )
+
         possible_duplicates_through_dict = defaultdict(set)
         for (ticked_details_id, individual_id, main_individual_id) in possible_duplicates_through_existing_list:
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
+
         ticket_data_collected = []
         for ticket_data in ticket_data_dict.values():
             prepared_ticket = cls.prepare_grievance_ticket_documents_deduplication(
@@ -916,6 +935,7 @@ class DeduplicateTask:
             if prepared_ticket is None:
                 continue
             ticket_data_collected.append(prepared_ticket)
+
         GrievanceTicket.objects.bulk_create([x.ticket for x in ticket_data_collected])
         TicketNeedsAdjudicationDetails.objects.bulk_create([x.ticket_details for x in ticket_data_collected])
         # makes flat list from list of lists models
@@ -924,7 +944,9 @@ class DeduplicateTask:
         )
         PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
 
+    @classmethod
     def prepare_grievance_ticket_documents_deduplication(
+        cls,
         main_individual,
         possible_duplicates_individuals,
         business_area,
