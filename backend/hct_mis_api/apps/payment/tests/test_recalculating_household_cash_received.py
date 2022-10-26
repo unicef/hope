@@ -1,23 +1,19 @@
+import uuid
 from unittest.mock import MagicMock
 
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import (
-    create_afghanistan,
-)
+import hct_mis_api.apps.cash_assist_datahub.fixtures as ca_fixtures
 import hct_mis_api.apps.cash_assist_datahub.models as ca_models
+import hct_mis_api.apps.payment.fixtures as payment_fixtures
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
     PullFromDatahubTask,
 )
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
-
-import hct_mis_api.apps.cash_assist_datahub.fixtures as ca_fixtures
-import hct_mis_api.apps.payment.fixtures as payment_fixtures
-
-import uuid
+from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
 class TestRecalculatingCash(APITestCase):

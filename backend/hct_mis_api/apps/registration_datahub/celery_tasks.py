@@ -21,6 +21,19 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 logger = logging.getLogger(__name__)
 
 
+def handle_rdi_exception(datahub_rdi_id, e):
+    try:
+        from sentry_sdk import capture_exception
+
+        err = capture_exception(e)
+    except Exception:
+        err = "N/A"
+
+    RegistrationDataImport.objects.filter(
+        datahub_id=datahub_rdi_id,
+    ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
+
+
 @contextmanager
 def locked_cache(key):
     try:
@@ -57,7 +70,6 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
             )
     except Exception as e:
         logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
@@ -66,9 +78,8 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
             id=registration_data_import_id,
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
-        RegistrationDataImport.objects.filter(
-            datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR)
+        handle_rdi_exception(registration_data_import_id, e)
+
         raise
 
 
@@ -92,25 +103,15 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
             )
     except Exception as e:
         logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
-
-        try:
-            from sentry_sdk import capture_exception
-
-            err = capture_exception(e)
-        except Exception:
-            err = "N/A"
 
         RegistrationDataImportDatahub.objects.filter(
             id=registration_data_import_id,
         ).update(import_done=RegistrationDataImportDatahub.DONE)
 
-        RegistrationDataImport.objects.filter(
-            datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
+        handle_rdi_exception(registration_data_import_id, e)
 
         raise
 
@@ -230,11 +231,9 @@ def rdi_deduplication_task(registration_data_import_id):
             DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
     except Exception as e:
         logger.exception(e)
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
-        RegistrationDataImport.objects.filter(
-            datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR)
+        handle_rdi_exception(registration_data_import_id, e)
+
         raise
 
 

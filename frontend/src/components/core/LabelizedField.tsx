@@ -49,7 +49,7 @@ export function LabelizedField({
   return (
     <div data-cy={dataCy && `labelized-field-container-${dataCy}`}>
       <Label color='textSecondary'>{label}</Label>
-      <div>{displayValue}</div>
+      <div data-cy={`label-${label}`}>{displayValue}</div>
     </div>
   );
 }

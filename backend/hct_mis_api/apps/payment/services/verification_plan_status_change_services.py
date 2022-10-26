@@ -99,7 +99,7 @@ class VerificationPlanStatusChangeServices:
         phone_numbers = list(individuals.values_list("phone_no", flat=True))
         flow_start_info_list, error = api.start_flows(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)
         for (flow_start_info, urns) in flow_start_info_list:
-            self.cash_plan_verification.rapid_pro_flow_start_uuids.append(flow_start_info["uuid"])
+            self.cash_plan_verification.rapid_pro_flow_start_uuids.append(flow_start_info.get("uuid"))
 
         all_urns = []
         for (_, urns) in flow_start_info_list:

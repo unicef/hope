@@ -1,21 +1,32 @@
 from django.test import TestCase
+
 from rest_framework.test import APIClient
 
-from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividualRoleInHousehold
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    create_household,
+)
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    IDENTIFICATION_TYPE_TAX_ID,
+    ROLE_NO_ROLE,
+)
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedDocumentFactory,
     ImportedDocumentTypeFactory,
-    ImportedIndividualFactory,
     ImportedHouseholdFactory,
+    ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
 )
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, HEAD, ROLE_NO_ROLE
-from hct_mis_api.apps.household.fixtures import DocumentFactory, DocumentTypeFactory, create_household
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedIndividualRoleInHousehold,
+)
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
 
 # used for ease of assertions, so it imitates serializer's behaviour
@@ -25,6 +36,7 @@ def _time(some_time):
 
 class TestDetails(TestCase):
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):

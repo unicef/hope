@@ -17,11 +17,11 @@ from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketNegativeFeedbackDetails,
     TicketNote,
+    TicketPaymentVerificationDetails,
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
-    TicketPaymentVerificationDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
