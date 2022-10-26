@@ -9,9 +9,11 @@ import {
 
 interface UniversalActivityLogTablePaymentVerificationProps {
   objectId: string;
+  objectType?: string;
 }
 export function UniversalActivityLogTablePaymentVerification({
   objectId,
+  objectType,
 }: UniversalActivityLogTablePaymentVerificationProps): ReactElement {
   const [page, setPage] = useState(0);
   const businessArea = useBusinessArea();
@@ -20,6 +22,7 @@ export function UniversalActivityLogTablePaymentVerification({
     variables: {
       businessArea,
       objectId: decodeIdString(objectId),
+      objectType,
       first: rowsPerPage,
     },
     fetchPolicy: 'network-only',
