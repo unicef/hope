@@ -63,6 +63,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 from hct_mis_api.apps.utils.schema import Arg
 
 
@@ -688,8 +689,8 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
         individual.save()
         if relationship_to_head_of_household == HEAD:
             household.head_of_household = individual
-            list(household.individuals.exclude(id=individual.id).select_for_update())
-            household.individuals.exclude(id=individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
+            household_individuals = evaluate_qs(household.individuals.exclude(id=individual.id).select_for_update())
+            household_individuals.update(relationship=RELATIONSHIP_UNKNOWN)
             household.save(update_fields=["head_of_household"])
         household.size += 1
         household.save()

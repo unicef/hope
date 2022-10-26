@@ -36,6 +36,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
+from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 log = logging.getLogger(__name__)
 
@@ -597,7 +598,9 @@ class DeduplicateTask:
     def deduplicate_individuals(cls, registration_data_import):
         cls._wait_until_health_green()
         cls.set_thresholds(registration_data_import.business_area)
-        individuals = Individual.objects.filter(registration_data_import=registration_data_import).select_for_update()
+        individuals = evaluate_qs(
+            Individual.objects.filter(registration_data_import=registration_data_import).select_for_update()
+        )
 
         (
             all_duplicates,
@@ -621,8 +624,7 @@ class DeduplicateTask:
         cls._wait_until_health_green()
         cls.set_thresholds(business_area)
 
-        individuals.select_for_update()
-        list(individuals)  # apply db lock
+        evaluate_qs(individuals.select_for_update())
 
         to_bulk_update_results = []
         for individual in individuals:
@@ -843,7 +845,7 @@ class DeduplicateTask:
     @classmethod
     @transaction.atomic
     def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
-        documents_to_dedup = list(
+        documents_to_dedup = evaluate_qs(
             new_documents.exclude(status=Document.STATUS_VALID)
             .select_related("individual")
             .select_for_update(of=("self", "individual"))
