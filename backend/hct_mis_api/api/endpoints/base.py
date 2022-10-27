@@ -19,7 +19,7 @@ class RejectPolicy(models.TextChoices):
 
 class SelectedBusinessAreaMixin:
     @cached_property
-    def selected_business_area(self):
+    def selected_business_area(self) -> models.Model:
         try:
             return self.request.auth.valid_for.all().get(slug=self.kwargs.get("business_area", None))
         except ObjectDoesNotExist:

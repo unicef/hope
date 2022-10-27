@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 from django.db.models import Model, QuerySet
 from django.utils import timezone
@@ -312,11 +312,11 @@ def to_dict(instance, fields=None, dict_fields=None):
     return data
 
 
-def build_arg_dict(model_object, mapping_dict):
+def build_arg_dict(model_object, mapping_dict) -> Dict:
     return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
 
 
-def build_arg_dict_from_dict(data_dict, mapping_dict):
+def build_arg_dict_from_dict(data_dict, mapping_dict) -> Dict:
     return {key: data_dict.get(value) for key, value in mapping_dict.items()}
 
 
@@ -391,7 +391,7 @@ def is_valid_uuid(uuid_str):
         return False
 
 
-def choices_to_dict(choices):
+def choices_to_dict(choices: List[Tuple]) -> Dict:
     return {value: name for value, name in choices}
 
 

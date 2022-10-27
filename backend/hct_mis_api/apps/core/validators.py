@@ -36,7 +36,7 @@ class BaseValidator:
     """
 
     @classmethod
-    def validate(cls, excluded_validators=None, *args, **kwargs):
+    def validate(cls, excluded_validators=None, *args, **kwargs) -> None:
         if not excluded_validators:
             excluded_validators = []
 

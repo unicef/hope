@@ -1,3 +1,5 @@
+from typing import List
+
 import graphene
 from graphene import relay
 from graphene_django import DjangoConnectionField, DjangoObjectType
@@ -24,7 +26,7 @@ def get_field_by_name(field_name: str):
     return field
 
 
-def filter_choices(field, args):
+def filter_choices(field, args) -> List:
     choices = field.get("choices")
     if args and choices:
         field["choices"] = list(filter(lambda choice: str(choice["value"]) in args, choices))

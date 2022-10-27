@@ -848,7 +848,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     )
 
 
-def cast_flex_fields(flex_fields):
+def cast_flex_fields(flex_fields) -> None:
     decimals_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="DECIMAL").values_list("name", flat=True)
     integer_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="INTEGER").values_list("name", flat=True)
     for key, value in flex_fields.items():

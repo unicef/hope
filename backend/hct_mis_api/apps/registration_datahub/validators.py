@@ -576,7 +576,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def required_validator(self, value, header, *args, **kwargs):
+    def required_validator(self, value, header, *args, **kwargs) -> bool:
         try:
             is_required = self.all_fields[header]["required"]
             is_not_empty = self.not_empty_validator(value)

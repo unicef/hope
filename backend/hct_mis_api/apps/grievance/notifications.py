@@ -1,6 +1,6 @@
 import logging
 from enum import auto
-from typing import List, Type, TypeVar
+from typing import Any, Dict, List, Type, TypeVar
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -38,7 +38,7 @@ class GrievanceNotification:
         self.user_recipients = self._prepare_user_recipients()
         self.emails = self._prepare_emails()
 
-    def _prepare_default_context(self, user_recipient):
+    def _prepare_default_context(self, user_recipient) -> Dict[str, Any]:
         protocol = "http" if settings.IS_DEV else "https"
         context = {
             "first_name": user_recipient.first_name,

@@ -20,6 +20,7 @@ from hct_mis_api.apps.household.models import (
     BankAccountInfo,
     Household,
     Individual,
+    IndividualIdentity,
 )
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
@@ -129,8 +130,8 @@ def handle_update_payment_channel(payment_channel) -> Optional[BankAccountInfo]:
         return bank_account_info
 
 
-def handle_add_identity(identity, individual):
-    from hct_mis_api.apps.household.models import Agency, IndividualIdentity
+def handle_add_identity(identity, individual) -> IndividualIdentity:
+    from hct_mis_api.apps.household.models import Agency
 
     agency_name = identity.get("agency")
     country_code = identity.get("country")
