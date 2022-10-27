@@ -4,6 +4,7 @@ import random
 import sys
 
 from django.contrib.auth.models import AnonymousUser
+from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory, TestCase
 
 from elasticsearch_dsl import connections
@@ -67,7 +68,7 @@ class APITestCase(SnapshotTestTestCase):
             context=self.generate_context(**context),
         )
 
-    def generate_context(self, user=None, files=None):
+    def generate_context(self, user=None, files=None) -> WSGIRequest:
         request = RequestFactory()
         context_value = request.get("/api/graphql/")
         context_value.user = user or AnonymousUser()
@@ -88,7 +89,7 @@ class APITestCase(SnapshotTestTestCase):
         return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
 
     @staticmethod
-    def __set_context_files(context, files):
+    def __set_context_files(context, files) -> None:
         if isinstance(files, dict):
             for name, file in files.items():
                 context.FILES[name] = file
@@ -114,5 +115,5 @@ class BaseElasticSearchTestCase(TestCase):
         super().tearDownClass()
 
     @classmethod
-    def rebuild_search_index(cls):
+    def rebuild_search_index(cls) -> None:
         rebuild_search_index()

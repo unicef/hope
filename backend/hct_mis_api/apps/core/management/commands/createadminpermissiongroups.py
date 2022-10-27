@@ -13,7 +13,7 @@ class Command(BaseCommand):
         group, _ = Group.objects.get_or_create(name=group_name)
         group.permissions.set(perms)
 
-    def _create_custom_group(self, codename, action, group_name):
+    def _create_custom_group(self, codename, action, group_name) -> None:
         perm = Permission.objects.filter(codename=codename).first()
         if perm:
             self.create_group_and_set_permissions(group_name, [perm])

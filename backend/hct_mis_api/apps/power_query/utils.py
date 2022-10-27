@@ -61,7 +61,7 @@ def to_dataset(result):
     return data
 
 
-def get_sentry_url(event_id, html=False):
+def get_sentry_url(event_id, html=False) -> str:
     url = f"{settings.SENTRY_URL}?query={event_id}"
     if html:
         return mark_safe('<a href="{url}" target="_sentry" >View on Sentry<a/>')
@@ -91,7 +91,7 @@ def basicauth(view):
     return wrap
 
 
-def sizeof(num, suffix=""):
+def sizeof(num, suffix="") -> str:
     for unit in ["&nbsp;&nbsp;", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb"]:
         if abs(num) < 1024.0:
             return f"{num:3.1f} {unit}{suffix} "
