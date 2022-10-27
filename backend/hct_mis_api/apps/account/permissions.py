@@ -2,6 +2,7 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
+from typing import Type
 
 from django.core.exceptions import PermissionDenied
 
@@ -197,7 +198,7 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
-def hopePermissionClass(permission):
+def hopePermissionClass(permission) -> Type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
         def has_permission(cls, info, **kwargs):
@@ -355,13 +356,13 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
 
 class BaseMutationPermissionMixin:
     @classmethod
-    def is_authenticated(cls, info):
+    def is_authenticated(cls, info) -> bool:
         if not info.context.user.is_authenticated:
             cls.raise_permission_denied_error(True)
         return True
 
     @classmethod
-    def has_permission(cls, info, permission, business_area_arg, raise_error=True):
+    def has_permission(cls, info, permission, business_area_arg, raise_error=True) -> bool:
         cls.is_authenticated(info)
         if not isinstance(permission, list):
             permissions = (permission,)
@@ -396,7 +397,7 @@ class BaseMutationPermissionMixin:
         is_owner,
         owner_permission,
         raise_error=True,
-    ):
+    ) -> bool:
         cls.is_authenticated(info)
         if not (
             cls.has_permission(info, general_permission, business_area_arg, False)
@@ -407,7 +408,7 @@ class BaseMutationPermissionMixin:
         return True
 
     @staticmethod
-    def raise_permission_denied_error(not_authenticated=False, raise_error=True):
+    def raise_permission_denied_error(not_authenticated=False, raise_error=True) -> bool:
         if not raise_error:
             return False
         if not_authenticated:

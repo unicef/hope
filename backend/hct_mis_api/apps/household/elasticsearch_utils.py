@@ -69,7 +69,7 @@ def _rebuild(models, options):
     _populate(models, options)
 
 
-def rebuild_search_index(models=None, options=None):
+def rebuild_search_index(models=None, options=None) -> None:
     if options is None:
         options = {"parallel": False, "quiet": True}
     _rebuild(models=models, options=options)
