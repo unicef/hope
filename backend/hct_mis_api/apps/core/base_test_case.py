@@ -1,6 +1,10 @@
 import base64
+import os
+import random
+import sys
 
 from django.contrib.auth.models import AnonymousUser
+from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory, TestCase
 
 from elasticsearch_dsl import connections
@@ -18,6 +22,29 @@ class APITestCase(SnapshotTestTestCase):
 
         super().setUp()
         self.client = Client(schema)
+
+        seed_in_env = os.getenv("RANDOM_SEED", None)
+        self.seed = seed_in_env if seed_in_env not in [None, ""] else random.randint(0, 100000)
+        random.seed(self.seed)
+        if seed_in_env is not None:
+            print(f"Random seed: {self.seed}")
+
+    def tearDown(self):
+        # https://stackoverflow.com/a/39606065
+        if hasattr(self._outcome, "errors"):
+            # Python 3.4 - 3.10  (These two methods have no side effects)
+            result = self.defaultTestResult()
+            self._feedErrorsToResult(result, self._outcome.errors)
+        else:
+            # Python 3.11+
+            result = self._outcome.result
+
+        for typ, errors in (("ERROR", result.errors), ("FAIL", result.failures)):
+            for test, text in errors:
+                if test is self:
+                    msg = [x for x in text.split("\n")[1:] if not x.startswith(" ")][0]
+                    print(f"Seed: {self.seed}", file=sys.stderr)
+                    print("%s: %s\n%s" % (typ, self.id(), msg), file=sys.stderr)
 
     def snapshot_graphql_request(self, request_string, context=None, variables=None):
         if context is None:
@@ -41,7 +68,7 @@ class APITestCase(SnapshotTestTestCase):
             context=self.generate_context(**context),
         )
 
-    def generate_context(self, user=None, files=None):
+    def generate_context(self, user=None, files=None) -> WSGIRequest:
         request = RequestFactory()
         context_value = request.get("/api/graphql/")
         context_value.user = user or AnonymousUser()
@@ -62,7 +89,7 @@ class APITestCase(SnapshotTestTestCase):
         return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
 
     @staticmethod
-    def __set_context_files(context, files):
+    def __set_context_files(context, files) -> None:
         if isinstance(files, dict):
             for name, file in files.items():
                 context.FILES[name] = file
@@ -88,5 +115,5 @@ class BaseElasticSearchTestCase(TestCase):
         super().tearDownClass()
 
     @classmethod
-    def rebuild_search_index(cls):
+    def rebuild_search_index(cls) -> None:
         rebuild_search_index()

@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List
 
 from django.core.cache import cache
 
@@ -27,7 +28,7 @@ def _custom_dict_or_attr_resolver(attname, default_value, obj):
     return resolver(attname, default_value, obj)
 
 
-def resolve_label(obj):
+def resolve_label(obj) -> List[Dict[str, Any]]:
     return [{"language": k, "label": v} for k, v in obj.items()]
 
 

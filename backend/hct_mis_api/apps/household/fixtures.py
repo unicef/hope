@@ -1,4 +1,5 @@
 import random
+from typing import Tuple
 
 import factory
 from factory import enums, fuzzy
@@ -260,7 +261,7 @@ def create_household(household_args=None, individual_args=None):
     return household, individuals
 
 
-def create_household_for_fixtures(household_args=None, individual_args=None):
+def create_household_for_fixtures(household_args=None, individual_args=None) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:

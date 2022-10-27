@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -260,7 +260,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        arg = lambda name, default=None: input.get(name, default)
+        arg: Callable = lambda name, default=None: input.get(name, default)
         cls.has_permission(info, Permissions.GRIEVANCES_CREATE, arg("business_area"))
 
         verify_required_arguments(input, "category", cls.CATEGORY_OPTIONS)
@@ -292,8 +292,8 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         return cls(grievance_tickets=grievances)
 
     @classmethod
-    def save_basic_data(cls, root, info, input, **kwargs):
-        arg = lambda name, default=None: input.get(name, default)
+    def save_basic_data(cls, root, info, input, **kwargs) -> Tuple[GrievanceTicket, Dict]:
+        arg: Callable = lambda name, default=None: input.get(name, default)
         user = info.context.user
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
@@ -397,7 +397,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        arg = lambda name, default=None: input.get(name, default)
+        arg: Callable = lambda name, default=None: input.get(name, default)
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
         grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
         household, individual = None, None
@@ -482,10 +482,10 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         return cls(grievance_ticket=grievance_ticket)
 
     @classmethod
-    def update_basic_data(cls, root, info, input, grievance_ticket, **kwargs):
+    def update_basic_data(cls, root, info, input, grievance_ticket, **kwargs) -> Tuple[GrievanceTicket, Dict]:
         old_status = grievance_ticket.status
         old_assigned_to = grievance_ticket.assigned_to
-        arg = lambda name, default=None: input.get(name, default)
+        arg: Callable = lambda name, default=None: input.get(name, default)
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
@@ -1012,12 +1012,12 @@ class ReassignRoleMutation(graphene.Mutation):
         version = BigInt(required=False)
 
     @classmethod
-    def verify_role_choices(cls, role):
+    def verify_role_choices(cls, role) -> None:
         if role not in (ROLE_PRIMARY, ROLE_ALTERNATE, HEAD):
             log_and_raise("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
     @classmethod
-    def verify_if_role_exists(cls, household, current_individual, role):
+    def verify_if_role_exists(cls, household, current_individual, role) -> None:
         if role == HEAD:
             if household.head_of_household.id != current_individual.id:
                 log_and_raise("This individual is not a head of provided household")
