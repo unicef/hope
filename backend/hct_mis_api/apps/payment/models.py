@@ -145,11 +145,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         else:
             params &= Q(payment_verification__isnull=True)
 
-        payment_records = (
-            self.payment_items.select_related("head_of_household")
-            .filter(params)
-            .distinct()
-        )
+        payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
 
         if extra_validation:
             payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
