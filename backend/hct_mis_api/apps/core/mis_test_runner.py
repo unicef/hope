@@ -1,6 +1,6 @@
 import os
 import unittest
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from django.conf import settings
 from django.test.runner import ParallelTestSuite, partition_suite_by_case
@@ -11,7 +11,7 @@ from snapshottest.django import TestRunner
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 
 
-def elastic_search_partition_suite_by_case(suite):
+def elastic_search_partition_suite_by_case(suite) -> List:
     """Ensure to run all elastic search without parallel"""
     groups = []
     other_tests = []
@@ -41,12 +41,12 @@ class PostgresTestRunner(TestRunner):
     test_runner = xmlrunner.XMLTestRunner
     parallel_test_suite = MisParallelTestSuite
 
-    def get_resultclass(self):
+    def get_resultclass(self) -> None:
         # Django provides `DebugSQLTextTestResult` if `debug_sql` argument is True
         # To use `xmlrunner.result._XMLTestResult` we supress default behavior
         return None
 
-    def get_test_runner_kwargs(self):
+    def get_test_runner_kwargs(self) -> Dict[str, Any]:
         # We use separate verbosity setting for our runner
         verbosity = getattr(settings, "TEST_OUTPUT_VERBOSE", 1)
         if isinstance(verbosity, bool):
@@ -70,7 +70,7 @@ class PostgresTestRunner(TestRunner):
             "verbosity": verbosity,
             "descriptions": getattr(settings, "TEST_OUTPUT_DESCRIPTIONS", False),
             "failfast": self.failfast,
-            "resultclass": self.get_resultclass(),
+            "resultclass": self.get_resultclass(),  # type: ignore
             "output": output,
         }
 

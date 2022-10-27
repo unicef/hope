@@ -110,7 +110,7 @@ class Command(BaseCommand):
         )
 
     @staticmethod
-    def _generate_program_with_dependencies(options, business_area_index):
+    def _generate_program_with_dependencies(options, business_area_index) -> None:
         cash_plans_amount = options["cash_plans_amount"]
         payment_record_amount = options["payment_record_amount"]
 
