@@ -751,7 +751,7 @@ class GenerateReportService:
         self._adjust_column_width_from_col(self.ws_report, 1, number_of_columns, 0)
         return self.wb
 
-    def generate_report(self):
+    def generate_report(self) -> None:
         try:
             self.generate_workbook()
             with NamedTemporaryFile() as tmp:

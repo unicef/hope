@@ -170,7 +170,7 @@ class IndividualDocumentOthers(IndividualDocument):
         return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
 
 
-def get_individual_doc(business_area_slug):
+def get_individual_doc(business_area_slug) -> IndividualDocument:
     return {
         "afghanistan": IndividualDocumentAfghanistan,
         "ukraine": IndividualDocumentUkraine,

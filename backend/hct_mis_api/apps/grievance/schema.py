@@ -78,7 +78,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
 
     @classmethod
-    def check_node_permission(cls, info, object_instance):
+    def check_node_permission(cls, info, object_instance) -> None:
         super().check_node_permission(info, object_instance)
         business_area = object_instance.business_area
         user = info.context.user

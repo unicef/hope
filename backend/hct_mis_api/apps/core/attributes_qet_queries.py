@@ -167,7 +167,7 @@ def get_has_tax_id_query(_, args):
     return Q(documents__type__type="TAX_ID") if has_tax_id else ~Q(documents__type__type="TAX_ID")
 
 
-def country_generic_query(comparison_method, args, lookup):
+def country_generic_query(comparison_method, args, lookup) -> Q:
     query = Q(**{lookup: Countries.get_country_value(args[0])})
     if comparison_method == "EQUALS":
         return query
