@@ -272,7 +272,7 @@ def to_date_string(dict, field_name):
         dict[field_name] = date.isoformat()
 
 
-def to_phone_number_str(dict, field_name):
+def to_phone_number_str(dict, field_name) -> None:
     phone_number = dict.get(field_name)
     if phone_number:
         dict[field_name] = str(phone_number)
@@ -916,7 +916,7 @@ def close_delete_individual_ticket(grievance_ticket, info):
         recalculate_data(household)
 
 
-def check_external_collector(household):
+def check_external_collector(household) -> None:
     individuals = household.individuals.all()
     external_collectors = IndividualRoleInHousehold.objects.filter(individual__in=individuals).exclude(
         household=household

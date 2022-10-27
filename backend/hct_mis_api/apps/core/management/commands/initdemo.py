@@ -46,7 +46,7 @@ class Command(BaseCommand):
         generate_real_cash_plans()
         update_mis_unicef_id_individual_and_household()
 
-    def _drop_databases(self):
+    def _drop_databases(self) -> None:
         for connection_name in connections:
             if connection_name == "read_only":
                 continue

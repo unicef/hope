@@ -10,6 +10,8 @@ from rest_framework.viewsets import ViewSetMixin
 from ..auth import HOPEAuthentication, HOPEPermission
 from ..models import APILogEntry, Grant
 
+from django.http.response import HttpResponseBase
+
 
 class RejectPolicy(models.TextChoices):
     STRICT = "STRICT", "Strict"
@@ -31,7 +33,7 @@ class HOPEAPIView(APIView):
     permission = Grant.API_READ_ONLY
     log_http_methods = ["POST", "PUT", "DELETE"]
 
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs) -> HttpResponseBase:
         ret = super().dispatch(request, *args, **kwargs)
         if request.method.upper() in self.log_http_methods and (ret.status_code < 300 or ret.status_code > 400):
             if request.auth:
