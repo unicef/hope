@@ -1,4 +1,5 @@
 from graphql import GraphQLError
+from django.db.models import QuerySet
 
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.payment.services.create_payment_verifications import (
@@ -14,7 +15,7 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
 )
 
 
-def get_payment_records(cash_plan, verification_channel):
+def get_payment_records(cash_plan, verification_channel) -> QuerySet:
     if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
         return cash_plan.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
     return cash_plan.available_payment_records()
@@ -65,7 +66,7 @@ class VerificationPlanCrudServices:
         return cash_plan_verification
 
     @classmethod
-    def delete(cls, cash_plan_verification):
+    def delete(cls, cash_plan_verification) -> None:
         if cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
             raise GraphQLError("You can delete only PENDING verification")
 

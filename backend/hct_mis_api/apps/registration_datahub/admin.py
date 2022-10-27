@@ -74,7 +74,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
         href=None,
         label="RDI",
     )
-    def hub(self, button):
+    def hub(self, button) -> None:
         obj = button.context.get("original")
         if obj:
             if obj.hct_id:
@@ -85,7 +85,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
         button.visible = False
 
     @button()
-    def inspect(self, request, pk):
+    def inspect(self, request, pk) -> TemplateResponse:
         context = self.get_common_context(request, pk)
         obj: RegistrationDataImportDatahub = context["original"]
         context["title"] = f"Import {obj.name} - {obj.import_done}"
@@ -131,19 +131,19 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
     actions = ["enrich_deduplication"]
     inlines = (ImportedBankAccountInfoStackedInline,)
 
-    def score(self, obj):
+    def score(self, obj):  # type: ignore # TODO: what type?
         try:
             return obj.deduplication_golden_record_results["score"]["max"]
         except KeyError:
             return ""
 
-    def batch_score(self, obj):
+    def batch_score(self, obj):  # type: ignore # TODO: what type?
         try:
             return obj.deduplication_batch_results["score"]["max"]
         except KeyError:
             return ""
 
-    def dedupe_status(self, obj):
+    def dedupe_status(self, obj) -> str:
         lbl = f"{obj.deduplication_batch_status}/{obj.deduplication_golden_record_status}"
         url = reverse("admin:registration_datahub_importedindividual_duplicates", args=[obj.pk])
         if "duplicates" in obj.deduplication_batch_results:
@@ -154,18 +154,18 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
             ret = lbl
         return mark_safe(ret)
 
-    def enrich_deduplication(self, request, queryset):
+    def enrich_deduplication(self, request, queryset) -> None:
         for record in queryset.exclude(deduplication_batch_results__has_key="score"):
             _post_process_dedupe_results(record)
 
     @button()
-    def post_process_dedupe_results(self, request, pk):
+    def post_process_dedupe_results(self, request, pk) -> None:
         record = self.get_queryset(request).get(id=pk)
         _post_process_dedupe_results(record)
         record.save()
 
     @button()
-    def duplicates(self, request, pk):
+    def duplicates(self, request, pk) -> TemplateResponse:
         ctx = self.get_common_context(request, pk, title="Duplicates")
         return TemplateResponse(request, "registration_datahub/admin/duplicates.html", ctx)
 
@@ -248,12 +248,12 @@ class RemeberDataForm(forms.Form):
     SYNC_COOKIE = "fetch"
     remember = forms.BooleanField(label="Remember me", required=False)
 
-    def get_signed_cookie(self, request):
+    def get_signed_cookie(self, request):  # type: ignore # TODO: what type?
         signer = Signer(request.user.password)
         return signer.sign_object(self.cleaned_data)
 
     @classmethod
-    def get_saved_config(cls, request):
+    def get_saved_config(cls, request) -> Dict:
         try:
             signer = Signer(request.user.password)
             obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))

@@ -73,7 +73,7 @@ disable_error_code = [
   "list-item",
   "type-arg",
   "no-untyped-def",
-  "no-untyped-call",
+  # "no-untyped-call",
   "no-any-return",
 ]
 

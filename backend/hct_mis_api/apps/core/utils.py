@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from django.db.models import Model, QuerySet
 from django.utils import timezone
@@ -395,7 +395,7 @@ def choices_to_dict(choices: List[Tuple]) -> Dict:
     return {value: name for value, name in choices}
 
 
-def decode_and_get_object(encoded_id, model, required) -> Optional[Model]:
+def decode_and_get_object(encoded_id, model, required):  # type: ignore # TODO: what type?
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
@@ -405,7 +405,7 @@ def decode_and_get_object(encoded_id, model, required) -> Optional[Model]:
     return None
 
 
-def dict_to_camel_case(dictionary):
+def dict_to_camel_case(dictionary) -> Dict:
     from graphene.utils.str_converters import to_camel_case
 
     if isinstance(dictionary, dict):

@@ -1,6 +1,7 @@
 import binascii
 import os
 from enum import Enum, auto, unique
+from typing import Tuple
 
 from django.db import models
 from django.utils import timezone
@@ -12,7 +13,7 @@ from ..apps.core.models import BusinessArea
 
 @unique
 class Grant(Enum):
-    def _generate_next_value_(name, *args):
+    def _generate_next_value_(name, *args) -> "Grant":
         return name
 
     API_READ_ONLY = auto()
@@ -22,7 +23,7 @@ class Grant(Enum):
     API_PROGRAM_CREATE = auto()
 
     @classmethod
-    def choices(cls):
+    def choices(cls) -> Tuple[Tuple[str, str]]:
         return tuple((i.value, i.value) for i in cls)
 
 
@@ -38,7 +39,7 @@ class APIToken(models.Model):
         models.CharField(choices=Grant.choices(), max_length=255),
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Token #{self.pk}"
 
     def save(self, *args, **kwargs):
