@@ -1,5 +1,4 @@
 import logging
-from optparse import Option
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from django.core.cache import cache
