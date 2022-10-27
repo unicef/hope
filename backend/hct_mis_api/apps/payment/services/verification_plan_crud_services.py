@@ -18,7 +18,7 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
 )
 
 
-def get_payment_records(payment_plan, verification_channel):
+def get_payment_records(payment_plan: Union[PaymentPlan, CashPlan], verification_channel):
     payment_plan_type = payment_plan.__class__.__name__
     if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
         return payment_plan.available_payment_records(
@@ -60,9 +60,9 @@ class VerificationPlanCrudServices:
             raise GraphQLError("You can only edit PENDING Cash/Payment Plan Verification")
 
         payment_records = get_payment_records(
-            payment_verification_plan.payment_plan, payment_verification_plan.verification_channel
+            payment_verification_plan.payment_plan_obj, payment_verification_plan.verification_channel
         )
-        sampling = Sampling(input_data, payment_verification_plan.payment_plan, payment_records)
+        sampling = Sampling(input_data, payment_verification_plan.payment_plan_obj, payment_records)
         payment_verification_plan, payment_records = sampling.process_sampling(payment_verification_plan)
         ProcessVerification(input_data, payment_verification_plan).process()
         payment_verification_plan.save()

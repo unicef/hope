@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def download_payment_verification_plan(request, verification_id):
-    payment_verification_plan__id = decode_id_string(verification_id)
-    payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan__id)
+    payment_verification_plan_id = decode_id_string(verification_id)
+    payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
     if not request.user.has_permission(
         Permissions.PAYMENT_VERIFICATION_EXPORT.value, payment_verification_plan.business_area
     ):

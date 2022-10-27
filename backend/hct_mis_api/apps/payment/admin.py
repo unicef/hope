@@ -77,7 +77,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
 @admin.register(PaymentVerificationPlan)
 class PaymentVerificationPlanAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     # TODO: fix filtering
-    list_display = ("payment_plan", "status", "verification_channel")
+    list_display = ("payment_plan_obj", "status", "verification_channel")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("verification_channel", ChoicesFieldComboFilter),
