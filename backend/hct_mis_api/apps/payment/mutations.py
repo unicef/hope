@@ -74,7 +74,6 @@ from hct_mis_api.apps.payment.xlsx.XlsxPaymentPlanPerFspImportService import (
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
 )
-from hct_mis_api.apps.program.schema import CashPlanNode
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
