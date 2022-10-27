@@ -2,7 +2,6 @@ import itertools
 import logging
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
-from time import sleep
 
 from django.db import transaction
 from django.db.models import CharField, F, Q, QuerySet, Value
@@ -10,7 +9,6 @@ from django.db.models.functions import Concat
 
 from constance import config
 from django_countries.fields import Country
-from elasticsearch_dsl import connections
 from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -21,7 +19,6 @@ from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
 )
 from hct_mis_api.apps.household.documents import get_individual_doc
-from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
@@ -36,6 +33,10 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    populate_index,
+    wait_until_healthy,
+)
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
 log = logging.getLogger(__name__)
@@ -389,28 +390,6 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def _wait_until_health_green(cls):
-        max_tries = 12
-        sleep_time = 5
-        for _ in range(max_tries):
-            health = connections.get_connection().cluster.health()
-            ok = (
-                health.get("status") == "green"
-                and not health.get("timed_out")
-                and health.get("number_of_pending_tasks") == 0
-            )
-            if ok:
-                break
-
-            sleep(sleep_time)
-
-        else:
-            raise Exception(
-                f"Max Check ES attempts reached - status: {health.get('status')} timeout: {health.get('timed_out')} "
-                f"number of pending tasks:{health.get('number_of_pending_tasks')}"
-            )
-
-    @classmethod
     def deduplicate_single_imported_individual(cls, individual):
         fields_names = (
             "given_name",
@@ -596,7 +575,7 @@ class DeduplicateTask:
     @classmethod
     @transaction.atomic
     def deduplicate_individuals(cls, registration_data_import):
-        cls._wait_until_health_green()
+        wait_until_healthy()
         cls.set_thresholds(registration_data_import.business_area)
         individuals = evaluate_qs(
             Individual.objects.filter(registration_data_import=registration_data_import).select_for_update()
@@ -621,7 +600,7 @@ class DeduplicateTask:
     @classmethod
     @transaction.atomic
     def deduplicate_individuals_from_other_source(cls, individuals: QuerySet[Individual], business_area: BusinessArea):
-        cls._wait_until_health_green()
+        wait_until_healthy()
         cls.set_thresholds(business_area)
 
         evaluate_qs(individuals.select_for_update())
@@ -696,7 +675,7 @@ class DeduplicateTask:
 
         populate_index(imported_individuals, get_imported_individual_doc(business_area.slug))
 
-        cls._wait_until_health_green()
+        wait_until_healthy()
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         allowed_duplicates_batch_amount = round(
             (imported_individuals.count() or 1) * (cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)

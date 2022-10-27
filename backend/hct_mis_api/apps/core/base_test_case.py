@@ -11,8 +11,8 @@ from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.models import Role, UserRole
-from hct_mis_api.apps.household.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 
 class APITestCase(SnapshotTestTestCase):

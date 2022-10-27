@@ -18,9 +18,6 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.documents import IndividualDocument
-from hct_mis_api.apps.household.elasticsearch_utils import (
-    remove_elasticsearch_documents_by_matching_ids,
-)
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -32,6 +29,9 @@ from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDo
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    remove_elasticsearch_documents_by_matching_ids,
+)
 from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)

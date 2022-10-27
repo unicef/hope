@@ -11,10 +11,6 @@ from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
-from hct_mis_api.apps.household.elasticsearch_utils import (
-    populate_index,
-    remove_elasticsearch_documents_by_matching_ids,
-)
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     HEAD,
@@ -41,6 +37,10 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
+)
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    populate_index,
+    remove_elasticsearch_documents_by_matching_ids,
 )
 
 logger = logging.getLogger(__name__)
