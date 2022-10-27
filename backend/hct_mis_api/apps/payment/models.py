@@ -147,7 +147,6 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
         payment_records = (
             self.payment_items.select_related("head_of_household")
-            .only("parent", "head_of_household__phone_no", "head_of_household__phone_no_alternative")
             .filter(params)
             .distinct()
         )
@@ -960,10 +959,6 @@ class CashPlan(GenericPaymentPlan):
     @property
     def currency_exchange_date(self):
         return self.dispersion_date
-
-    @property
-    def can_create_payment_verification_plan(self):
-        return self.available_payment_records().count() > 0
 
     def unicef_id(self):
         # TODO: maybe 'ca_id' rename to 'unicef_id'?

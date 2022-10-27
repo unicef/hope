@@ -1,8 +1,10 @@
+from typing import Union
+
 from django.contrib.admin.options import get_content_type_for_model
 
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentPlan, CashPlan
 from hct_mis_api.apps.payment.services.create_payment_verifications import (
     CreatePaymentVerifications,
 )
@@ -27,7 +29,7 @@ def get_payment_records(payment_plan, verification_channel):
 
 class VerificationPlanCrudServices:
     @classmethod
-    def create(cls, payment_plan, input_data) -> PaymentVerificationPlan:
+    def create(cls, payment_plan: Union[PaymentPlan, CashPlan], input_data: dict) -> PaymentVerificationPlan:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")
