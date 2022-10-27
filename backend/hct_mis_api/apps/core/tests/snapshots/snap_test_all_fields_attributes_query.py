@@ -43551,40 +43551,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'STRING'
             },
             {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'National ID number',
-                'labels': [
-                    {
-                        'label': 'National ID number',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'national_id_no',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'National passport number',
-                'labels': [
-                    {
-                        'label': 'National passport number',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'national_passport',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
                 'associatedWith': 'Household',
                 'choices': [
                 ],
