@@ -1,6 +1,6 @@
 import logging
 from enum import auto
-from typing import List, Type, TypeVar
+from typing import Any, Dict, List
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -14,9 +14,6 @@ from hct_mis_api.apps.core.utils import choices_to_dict, encode_id_base64
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 logger = logging.getLogger(__name__)
-
-
-GrievanceNotificationType = TypeVar("GrievanceNotificationType", bound="GrievanceNotification")
 
 
 class GrievanceNotification:
@@ -38,7 +35,7 @@ class GrievanceNotification:
         self.user_recipients = self._prepare_user_recipients()
         self.emails = self._prepare_emails()
 
-    def _prepare_default_context(self, user_recipient):
+    def _prepare_default_context(self, user_recipient) -> Dict[str, Any]:
         protocol = "http" if settings.IS_DEV else "https"
         context = {
             "first_name": user_recipient.first_name,
@@ -192,8 +189,8 @@ class GrievanceNotification:
 
     @classmethod
     def prepare_notification_for_ticket_creation(
-        cls: Type[GrievanceNotificationType], grievance_ticket
-    ) -> List[GrievanceNotificationType]:
+        cls: "GrievanceNotification", grievance_ticket
+    ) -> List["GrievanceNotification"]:
         notifications = []
         if grievance_ticket.assigned_to:
             notifications.append(

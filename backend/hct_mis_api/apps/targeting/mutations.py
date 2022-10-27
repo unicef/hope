@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -86,7 +87,7 @@ class ValidatedMutation(PermissionMutation):
         return cls.validated_mutate(root, info, model_object=model_object, old_model_object=old_model_object, **kwargs)
 
     @classmethod
-    def get_object(cls, root, info, **kwargs):
+    def get_object(cls, root, info, **kwargs) -> Any:
         id = kwargs.get("id")
         if id is None:
             return None
@@ -253,7 +254,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         return cls(target_population=target_population)
 
     @classmethod
-    def rebuild_tp(cls, should_rebuild_list, should_rebuild_stats, target_population):
+    def rebuild_tp(cls, should_rebuild_list, should_rebuild_stats, target_population) -> None:
         rebuild_list = target_population.is_open() and should_rebuild_list
         rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats
         if rebuild_list or rebuild_stats:
@@ -267,7 +268,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     @classmethod
     def validate_statuses(
         cls, name, target_population, targeting_criteria_input, vulnerability_score_max, vulnerability_score_min
-    ):
+    ) -> None:
         if not target_population.is_locked() and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
@@ -287,11 +288,10 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             raise ValidationError("Locked Target Population can't be changed")
 
     @classmethod
-    def get_object(cls, id):
+    def get_object(cls, id) -> Optional[TargetPopulation]:
         if id is None:
             return None
-        object = get_object_or_404(TargetPopulation, id=decode_id_string(id))
-        return object
+        return get_object_or_404(TargetPopulation, id=decode_id_string(id))
 
 
 class LockTargetPopulationMutation(ValidatedMutation):
@@ -447,7 +447,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             return cls(validation_errors=e.message_dict)
 
     @classmethod
-    def copy_target_criteria(cls, targeting_criteria):
+    def copy_target_criteria(cls, targeting_criteria) -> TargetingCriteria:
         targeting_criteria_copy = TargetingCriteria()
         targeting_criteria_copy.save()
         for rule in targeting_criteria.rules.all():

@@ -395,7 +395,7 @@ class LoadSanctionListXMLTask:
 
         return correct_value
 
-    def execute(self):
+    def execute(self) -> None:
         if self.file_path is not None:
             tree = ET.parse(self.file_path)
         else:

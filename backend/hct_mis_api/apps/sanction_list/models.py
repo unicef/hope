@@ -20,7 +20,7 @@ class SanctionListIndividualQuerySet(models.QuerySet):
 
 
 class ActiveIndividualsManager(models.Manager):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.alive_only = kwargs.pop("active_only", True)
         super().__init__(*args, **kwargs)
 
