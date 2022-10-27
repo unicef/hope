@@ -42,9 +42,9 @@ logger = logging.getLogger(__name__)
 
 class XLSXValidator(BaseValidator):
     @classmethod
-    def validate(cls, *args, **kwargs):
+    def validate(cls, *args, **kwargs) -> List:
         try:
-            validate_methods = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
+            validate_methods: List[Callable] = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
             errors_list = []
             for method in validate_methods:
@@ -59,7 +59,7 @@ class XLSXValidator(BaseValidator):
             raise
 
     @classmethod
-    def validate_file_extension(cls, *args, **kwargs):
+    def validate_file_extension(cls, *args, **kwargs) -> List:
         try:
             xlsx_file = kwargs.get("file")
             file_suffix = Path(xlsx_file.name).suffix

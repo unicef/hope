@@ -3,6 +3,7 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
+from typing import List, Optional
 from urllib.parse import unquote
 
 from django import forms
@@ -157,7 +158,7 @@ class DjAdminManager:
     class ResponseException(Exception):
         pass
 
-    def __init__(self, kf_host=settings.KOBO_KF_URL, kc_host=settings.KOBO_KC_URL):
+    def __init__(self, kf_host=settings.KOBO_KF_URL, kc_host=settings.KOBO_KC_URL) -> None:
         self.admin_path = "/admin/"
         self.admin_url = f"{kf_host}{self.admin_path}"
         self.login_url = f"{self.admin_url}login/"
@@ -171,11 +172,11 @@ class DjAdminManager:
         self._password = None
         self.form_errors = []
 
-    def extract_errors(self, res):
+    def extract_errors(self, res) -> List:
         self.form_errors = [msg for msg in self.regex.findall(res.content.decode())]
         return self.form_errors
 
-    def assert_response(self, status: [int], location: str = None, custom_error=""):
+    def assert_response(self, status: List[int], location: Optional[str] = None, custom_error=""):
         if not isinstance(status, (list, tuple)):
             status = [status]
         if self._last_response.status_code not in status:
@@ -189,7 +190,7 @@ class DjAdminManager:
             raise self.ResponseException(msg)
 
     @cached_property
-    def client(self):
+    def client(self) -> requests.Session:
         client = requests.Session()
         client.headers["Referer"] = self.admin_url
         client.headers["User-Agent"] = (

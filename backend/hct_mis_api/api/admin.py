@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
@@ -114,7 +116,7 @@ class APITokenAdmin(SmartModelAdmin):
             return "user", "valid_from"
         return []
 
-    def _get_email_context(self, request, obj):
+    def _get_email_context(self, request, obj) -> Dict[str, Any]:
         return {
             "obj": obj,
             "friendly_name": obj.user.first_name or obj.user.username,
@@ -122,7 +124,7 @@ class APITokenAdmin(SmartModelAdmin):
             "areas": ", ".join(obj.valid_for.values_list("name", flat=True)),
         }
 
-    def _send_token_email(self, request, obj, template):
+    def _send_token_email(self, request, obj, template) -> None:
         try:
             send_mail(
                 f"HOPE API Token {obj} infos",
