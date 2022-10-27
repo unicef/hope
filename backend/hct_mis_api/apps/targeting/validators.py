@@ -19,7 +19,7 @@ class TargetValidator(BaseValidator):
     """Validator for Target Population."""
 
     @staticmethod
-    def validate_is_finalized(target_status):
+    def validate_is_finalized(target_status) -> None:
         if target_status == "FINALIZED":
             logger.error("Target Population has been finalized. Cannot change.")
             raise ValidationError("Target Population has been finalized. Cannot change.")
@@ -27,7 +27,7 @@ class TargetValidator(BaseValidator):
 
 class RebuildTargetPopulationValidator:
     @staticmethod
-    def validate(target_population: TargetPopulation):
+    def validate(target_population: TargetPopulation) -> None:
         if target_population.status != TargetPopulation.STATUS_OPEN:
             message = f"Only Target Population with status {TargetPopulation.STATUS_OPEN} can be rebuild"
             logger.error(message)
@@ -36,7 +36,7 @@ class RebuildTargetPopulationValidator:
 
 class LockTargetPopulationValidator:
     @staticmethod
-    def validate(target_population: TargetPopulation):
+    def validate(target_population: TargetPopulation) -> None:
         if target_population.status != TargetPopulation.STATUS_OPEN:
             message = f"Only Target Population with status {TargetPopulation.STATUS_OPEN} can be approved"
             logger.error(message)
@@ -45,7 +45,7 @@ class LockTargetPopulationValidator:
 
 class UnlockTargetPopulationValidator:
     @staticmethod
-    def validate(target_population: TargetPopulation):
+    def validate(target_population: TargetPopulation) -> None:
         if not target_population.is_locked():
             message = "Only locked Target Population with status can be unlocked"
             logger.error(message)
@@ -54,7 +54,7 @@ class UnlockTargetPopulationValidator:
 
 class FinalizeTargetPopulationValidator:
     @staticmethod
-    def validate(target_population: TargetPopulation):
+    def validate(target_population: TargetPopulation) -> None:
         if not target_population.is_locked():
             message = "Only locked Target Population with status can be finalized"
             logger.error(message)
@@ -67,7 +67,7 @@ class FinalizeTargetPopulationValidator:
 
 class TargetingCriteriaRuleFilterInputValidator:
     @staticmethod
-    def validate(rule_filter):
+    def validate(rule_filter) -> None:
         is_flex_field = rule_filter.is_flex_field
         if not is_flex_field:
             attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")
@@ -124,7 +124,7 @@ class TargetingCriteriaRuleFilterInputValidator:
 
 class TargetingCriteriaRuleInputValidator:
     @staticmethod
-    def validate(rule):
+    def validate(rule) -> None:
         total_len = 0
         filters = rule.get("filters")
         individuals_filters_blocks = rule.get("individuals_filters_blocks")
@@ -142,7 +142,7 @@ class TargetingCriteriaRuleInputValidator:
 
 class TargetingCriteriaInputValidator:
     @staticmethod
-    def validate(targeting_criteria):
+    def validate(targeting_criteria) -> None:
         rules = targeting_criteria.get("rules")
         if len(rules) < 1:
             logger.error("There should be at least 1 rule in target criteria")
