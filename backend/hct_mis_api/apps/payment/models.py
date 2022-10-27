@@ -447,7 +447,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
         field=background_action_status,
         source=[None] + BACKGROUND_ACTION_ERROR_STATES,
         target=BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
-        conditions=[lambda obj: obj.status == PaymentPlan.Status.LOCKED],
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED]],
     )
     def background_action_status_xlsx_importing_reconciliation(self):
         pass
