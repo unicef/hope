@@ -356,7 +356,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
-        for key, value in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
+        for value in GrievanceTicket.ISSUE_TYPES_CHOICES.values():
             issue_type_choices_dict.update(value)
         return issue_type_choices_dict[self.issue_type]
 
@@ -368,15 +368,16 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         verbose_name = "Grievance Ticket"
 
     def clean(self):
+        # TODO: refactor that
         issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
-        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types
+        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
             logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
@@ -664,15 +665,15 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     @property
     def household(self):
-        return self.payment_verification.payment_record.household
+        return getattr(self.payment_record, "household", None)
 
     @property
     def individual(self):
-        return self.payment_verification.payment_record.head_of_household
+        return getattr(self.payment_record, "head_of_household", None)
 
     @property
     def payment_record(self):
-        return self.payment_verification.payment_record
+        return getattr(self.payment_verification, "payment_record", None)
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):

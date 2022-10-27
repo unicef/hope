@@ -2,7 +2,7 @@ import base64
 import hashlib
 import logging
 import uuid
-from typing import List
+from typing import Dict, List, Type
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -261,7 +261,7 @@ class FlexRegistrationService:
             else:
                 raise ValidationError("There should be only two collectors!")
 
-    def _create_object_and_validate(self, data, model_class):
+    def _create_object_and_validate(self, data, model_class) -> Type:
         ModelClassForm = modelform_factory(model_class, fields=data.keys())
         form = ModelClassForm(data)
         if not form.is_valid():
@@ -288,7 +288,7 @@ class FlexRegistrationService:
 
     def _prepare_individual_data(
         self,
-        individual_dict: dict,
+        individual_dict: Dict,
         household: ImportedHousehold,
         registration_data_import: RegistrationDataImportDatahub,
     ) -> dict:
@@ -334,7 +334,7 @@ class FlexRegistrationService:
 
         return individual_data
 
-    def _prepare_documents(self, individual_dict: dict, individual: ImportedIndividual) -> List[ImportedDocument]:
+    def _prepare_documents(self, individual_dict: Dict, individual: ImportedIndividual) -> List[ImportedDocument]:
         documents = []
 
         for document_type_string, (
@@ -351,8 +351,9 @@ class FlexRegistrationService:
 
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
-            document_type = ImportedDocumentType.objects.get(type=document_type_string, country="UA")
+            document_type = ImportedDocumentType.objects.get(type=document_type_string)
             document_kwargs = {
+                "country": "UA",
                 "type": document_type,
                 "document_number": document_number,
                 "individual": individual,
@@ -373,7 +374,7 @@ class FlexRegistrationService:
             certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture
 
-    def _prepare_bank_account_info(self, individual_dict: dict, individual: ImportedIndividual):
+    def _prepare_bank_account_info(self, individual_dict: Dict, individual: ImportedIndividual):
         if individual_dict.get("bank_account_h_f", "n") != "y":
             return
         if not individual_dict.get("bank_account_number"):

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test_golden_record_by_targeting_criteria_has_bank_account_info 1'] = {
@@ -153,9 +154,30 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_gold
                         },
                         'size': 1
                     }
+                },
+                {
+                    'node': {
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'SINGLE',
+                                        'sex': 'MALE'
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'FEMALE'
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 2
+                    }
                 }
             ],
-            'totalCount': 1
+            'totalCount': 2
         }
     }
 }
@@ -178,9 +200,30 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_gold
                         },
                         'size': 1
                     }
+                },
+                {
+                    'node': {
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'SINGLE',
+                                        'sex': 'MALE'
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'FEMALE'
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 2
+                    }
                 }
             ],
-            'totalCount': 1
+            'totalCount': 2
         }
     }
 }

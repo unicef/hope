@@ -1,5 +1,8 @@
 import base64
+import hashlib
 import inspect
+import json
+from typing import Any, Dict
 
 from django.conf import settings
 from django.contrib.auth import authenticate
@@ -12,7 +15,6 @@ from concurrency.utils import get_classname
 
 
 def fqn(o):
-
     parts = []
 
     if inspect.isclass(o):
@@ -36,7 +38,7 @@ def to_dataset(result):
         data = tablib.Dataset()
         fields = result.__dict__["_fields"]
         if not fields:
-            fields = [field.name for field in result.model._meta.get_fields()]
+            fields = [field.name for field in result.model._meta.concrete_fields]
         data.headers = fields
         try:
             for obj in result.all():
@@ -59,7 +61,7 @@ def to_dataset(result):
     return data
 
 
-def get_sentry_url(event_id, html=False):
+def get_sentry_url(event_id, html=False) -> str:
     url = f"{settings.SENTRY_URL}?query={event_id}"
     if html:
         return mark_safe('<a href="{url}" target="_sentry" >View on Sentry<a/>')
@@ -87,3 +89,21 @@ def basicauth(view):
         return response
 
     return wrap
+
+
+def sizeof(num, suffix="") -> str:
+    for unit in ["&nbsp;&nbsp;", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb"]:
+        if abs(num) < 1024.0:
+            return f"{num:3.1f} {unit}{suffix} "
+        num /= 1024.0
+    return f"{num:.1f}Yi{suffix}"
+
+
+def dict_hash(dictionary: Dict[str, Any]) -> str:
+    """MD5 hash of a dictionary."""
+    dhash = hashlib.md5()
+    # We need to sort arguments so {'a': 1, 'b': 2} is
+    # the same as {'b': 2, 'a': 1}
+    encoded = json.dumps(dictionary, sort_keys=True).encode()
+    dhash.update(encoded)
+    return dhash.hexdigest()

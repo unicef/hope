@@ -1,8 +1,11 @@
+from typing import Any, Dict, Tuple
+
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -68,12 +71,12 @@ class APITokenForm(forms.ModelForm):
         model = APIToken
         exclude = ("key",)
 
-    def __init__(self, *args, instance=None, **kwargs):
+    def __init__(self, *args, instance=None, **kwargs) -> None:
         super().__init__(*args, instance=instance, **kwargs)
         if instance:
             self.fields["valid_for"].queryset = BusinessArea.objects.filter(user_roles__user=instance.user).distinct()
 
-    def clean(self):
+    def clean(self) -> None:
         if self.instance:
             user = self.instance.user
         else:
@@ -101,20 +104,20 @@ class APITokenAdmin(SmartModelAdmin):
     form = APITokenForm
     search_fields = ("id",)
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         return super().get_queryset(request).select_related("user")
 
-    def get_fields(self, request, obj=None):
+    def get_fields(self, request, obj=None) -> Tuple[str]:
         if obj:
             return super().get_fields(request, obj)
         return "user", "grants", "valid_to"
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_readonly_fields(self, request, obj=None) -> Tuple[str]:
         if obj:
             return "user", "valid_from"
-        return []
+        return tuple()
 
-    def _get_email_context(self, request, obj):
+    def _get_email_context(self, request, obj) -> Dict[str, Any]:
         return {
             "obj": obj,
             "friendly_name": obj.user.first_name or obj.user.username,
@@ -122,7 +125,7 @@ class APITokenAdmin(SmartModelAdmin):
             "areas": ", ".join(obj.valid_for.values_list("name", flat=True)),
         }
 
-    def _send_token_email(self, request, obj, template):
+    def _send_token_email(self, request, obj, template) -> None:
         try:
             send_mail(
                 f"HOPE API Token {obj} infos",

@@ -19,7 +19,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
@@ -32,7 +32,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
+from hct_mis_api.apps.registration_datahub.documents import get_imported_individual_doc
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 
@@ -371,7 +371,7 @@ class DeduplicateTask:
                 original_individuals_ids_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - duplicate_score
                 results_data["duplicates"].append(results_core_data)
-            elif document == IndividualDocument:
+            elif document == get_individual_doc(individual.registration_data_import.business_area):
                 possible_duplicates.append(individual_hit.id)
                 original_individuals_ids_possible_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - cls.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE
@@ -418,7 +418,7 @@ class DeduplicateTask:
             "birth_date",
         )
         dict_fields = {
-            "documents": ("document_number", "type.type", "type.country"),
+            "documents": ("document_number", "type.type", "country"),
             "identities": ("document_number", "agency.type"),
             "household": (
                 "residence_status",
@@ -473,7 +473,7 @@ class DeduplicateTask:
         return cls._get_duplicates_tuple(
             query_dict,
             cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
-            ImportedIndividualDocument,
+            get_imported_individual_doc(individual.registration_data_import.business_area),
             individual,
         )
 
@@ -491,7 +491,7 @@ class DeduplicateTask:
             "birth_date",
         )
         dict_fields = {
-            "documents": ("document_number", "type.type", "type.country"),
+            "documents": ("document_number", "type.type", "country"),
             "identities": ("number", "agency.type"),
             "household": (
                 "residence_status",
@@ -542,10 +542,16 @@ class DeduplicateTask:
         query_dict["query"]["bool"]["filter"] = [
             {"term": {"business_area": cls.business_area.slug}},
         ]
+
+        if isinstance(individual, ImportedIndividual):
+            document = get_individual_doc(individual.registration_data_import.business_area)
+        else:
+            document = get_individual_doc(individual.registration_data_import.business_area.slug)
+
         return cls._get_duplicates_tuple(
             query_dict,
             cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
-            IndividualDocument,
+            document,
             individual,
         )
 
@@ -610,7 +616,6 @@ class DeduplicateTask:
     def deduplicate_individuals_from_other_source(cls, individuals: list[Individual]):
         cls._wait_until_health_green()
         cls.set_thresholds(individuals[0].business_area)
-        # cls.business_area = individuals[0].business_area
 
         to_bulk_update_results = []
         for individual in individuals:
@@ -657,7 +662,7 @@ class DeduplicateTask:
         )
 
     @staticmethod
-    def set_error_message_and_status(registration_data_import, message):
+    def set_error_message_and_status(registration_data_import, message) -> None:
         old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
         registration_data_import.error_message = message
         registration_data_import.status = RegistrationDataImport.DEDUPLICATION_FAILED
@@ -667,19 +672,21 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def set_thresholds(cls, business_area: BusinessArea):
+    def set_thresholds(cls, business_area: BusinessArea) -> None:
         cls.business_area = business_area
         cls.thresholds = Thresholds.from_business_area(cls.business_area)
 
     @classmethod
-    def deduplicate_imported_individuals(cls, registration_data_import_datahub):
+    def deduplicate_imported_individuals(cls, registration_data_import_datahub) -> None:
         business_area = BusinessArea.objects.get(slug=registration_data_import_datahub.business_area_slug)
         cls.set_thresholds(business_area)
 
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )
-        populate_index(imported_individuals, ImportedIndividualDocument)
+
+        populate_index(imported_individuals, get_imported_individual_doc(business_area.slug))
+
         cls._wait_until_health_green()
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         allowed_duplicates_batch_amount = round(
@@ -704,6 +711,7 @@ class DeduplicateTask:
                 _,
                 results_data_imported,
             ) = cls.deduplicate_single_imported_individual(imported_individual)
+
             imported_individual.deduplication_batch_results = results_data_imported
             post_process_dedupe_results(imported_individual)
 
@@ -826,7 +834,7 @@ class DeduplicateTask:
             )
 
     @classmethod
-    def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
+    def hard_deduplicate_documents(cls, new_documents, registration_data_import=None) -> None:
         documents_to_dedup = [x for x in new_documents if x.status != Document.STATUS_VALID]
         documents_numbers = [x.document_number for x in documents_to_dedup]
         new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in documents_to_dedup]

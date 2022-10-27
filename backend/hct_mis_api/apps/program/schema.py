@@ -252,7 +252,7 @@ class Query(graphene.ObjectType):
         voucher_transfers = [0] * 12
 
         for data_dict in months_and_amounts:
-            month_index = data_dict.get("delivery_date__month") - 1
+            month_index = data_dict[("delivery_date__month")] - 1
             cash_transfers[month_index] = data_dict.get("total_delivered_cash") or 0
             voucher_transfers[month_index] = data_dict.get("total_delivered_voucher") or 0
 

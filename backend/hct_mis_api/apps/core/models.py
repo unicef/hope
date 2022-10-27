@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.validators import MinValueValidator
@@ -8,10 +10,15 @@ from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
+from natural_keys import NaturalKeyModel
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
-from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import (
+    SoftDeletionTreeManager,
+    SoftDeletionTreeModel,
+    TimeStampedUUIDModel,
+)
 from mptt.fields import TreeForeignKey
 
 
@@ -89,6 +96,7 @@ class BusinessArea(TimeStampedUUIDModel):
     )
     screen_beneficiary = models.BooleanField(default=False)
     deduplication_ignore_withdraw = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
@@ -139,7 +147,7 @@ class BusinessArea(TimeStampedUUIDModel):
         return default
 
 
-class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
+class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
     ASSOCIATED_WITH_HOUSEHOLD = 0
     ASSOCIATED_WITH_INDIVIDUAL = 1
     STRING = "STRING"
@@ -160,7 +168,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         (SELECT_MANY, _("Select Many")),
         (STRING, _("String")),
     )
-    ASSOCIATED_WITH_CHOICES = (
+    ASSOCIATED_WITH_CHOICES: Tuple[Tuple[int, str]] = (
         (0, _("Household")),
         (1, _("Individual")),
     )
@@ -186,6 +194,11 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         return f"type: {self.type}, name: {self.name}"
 
 
+class FlexibleAttributeGroupManager(SoftDeletionTreeManager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
 class FlexibleAttributeGroup(SoftDeletionTreeModel):
     name = models.CharField(max_length=255, unique=True)
     label = JSONField(default=dict)
@@ -200,12 +213,16 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
+    objects = FlexibleAttributeGroupManager()
 
     def __str__(self):
         return f"name: {self.name}"
 
+    def natural_key(self):
+        return (self.name,)
 
-class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
+
+class FlexibleAttributeChoice(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
     class Meta:
         unique_together = ["list_name", "name"]
         ordering = ("name",)

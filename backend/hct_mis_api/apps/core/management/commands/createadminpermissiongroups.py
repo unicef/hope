@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Dict, List, Type
 
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -12,7 +13,7 @@ class Command(BaseCommand):
         group, _ = Group.objects.get_or_create(name=group_name)
         group.permissions.set(perms)
 
-    def _create_custom_group(self, codename, action, group_name):
+    def _create_custom_group(self, codename, action, group_name) -> None:
         perm = Permission.objects.filter(codename=codename).first()
         if perm:
             self.create_group_and_set_permissions(group_name, [perm])
@@ -130,14 +131,14 @@ class Command(BaseCommand):
         }
 
         self.view_perms, self.add_perms, self.change_perms, self.delete_perms = list(), list(), list(), list()
-        self.perms_list_map = defaultdict(list)
+        self.perms_list_map: Dict[str, List] = defaultdict(list)
         self.perms_list_map.update(
             {"view": self.view_perms, "add": self.add_perms, "change": self.change_perms, "delete": self.delete_perms}
         )
 
         for app, models in app_model_map.items():
             for model in models:
-                ct = ContentType.objects.filter(app_label=app, model=model).first()
+                ct: Type = ContentType.objects.filter(app_label=app, model=model).first()
 
                 if not ct:
                     print(f"Not found ContentType for {app} {model}")
@@ -152,7 +153,7 @@ class Command(BaseCommand):
 
                     self.create_group_and_set_permissions(f"{ct.app_labeled_name} | Can {action} {ct.name}", [perm])
                     # use in general groups
-                    self.perms_list_map.get(action).append(perm)
+                    self.perms_list_map[action].append(perm)
 
                 # create groups for custom perms
                 model_obj_perms = ct.model_class()._meta.permissions
@@ -181,6 +182,6 @@ class Command(BaseCommand):
 
         # create general groups like can view all, can change all, can add all
         for action in actions:
-            self.create_group_and_set_permissions(general_groups_map.get(action), self.perms_list_map.get(action))
+            self.create_group_and_set_permissions(general_groups_map[action], self.perms_list_map[action])
 
         self.stdout.write(self.style.SUCCESS("Successfully created/updated all Groups"))

@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -6,7 +7,6 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 import graphene
-from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
     PermissionMutation,
@@ -47,6 +47,7 @@ from hct_mis_api.apps.targeting.validators import (
     TargetValidator,
     UnlockTargetPopulationValidator,
 )
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -86,7 +87,7 @@ class ValidatedMutation(PermissionMutation):
         return cls.validated_mutate(root, info, model_object=model_object, old_model_object=old_model_object, **kwargs)
 
     @classmethod
-    def get_object(cls, root, info, **kwargs):
+    def get_object(cls, root, info, **kwargs) -> Any:
         id = kwargs.get("id")
         if id is None:
             return None
@@ -253,7 +254,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         return cls(target_population=target_population)
 
     @classmethod
-    def rebuild_tp(cls, should_rebuild_list, should_rebuild_stats, target_population):
+    def rebuild_tp(cls, should_rebuild_list, should_rebuild_stats, target_population) -> None:
         rebuild_list = target_population.is_open() and should_rebuild_list
         rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats
         if rebuild_list or rebuild_stats:
@@ -267,7 +268,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     @classmethod
     def validate_statuses(
         cls, name, target_population, targeting_criteria_input, vulnerability_score_max, vulnerability_score_min
-    ):
+    ) -> None:
         if not target_population.is_locked() and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
@@ -287,11 +288,10 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             raise ValidationError("Locked Target Population can't be changed")
 
     @classmethod
-    def get_object(cls, id):
+    def get_object(cls, id) -> Optional[TargetPopulation]:
         if id is None:
             return None
-        object = get_object_or_404(TargetPopulation, id=decode_id_string(id))
-        return object
+        return get_object_or_404(TargetPopulation, id=decode_id_string(id))
 
 
 class LockTargetPopulationMutation(ValidatedMutation):
@@ -381,7 +381,8 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
             target_population.finalized_by = user
             target_population.finalized_at = timezone.now()
             target_population.save()
-        send_target_population_task.delay(target_population.id)
+            transaction.on_commit(lambda: send_target_population_task.delay(target_population.id))
+            transaction.on_commit(lambda: target_population_rebuild_stats.delay(target_population.id))
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -446,7 +447,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             return cls(validation_errors=e.message_dict)
 
     @classmethod
-    def copy_target_criteria(cls, targeting_criteria):
+    def copy_target_criteria(cls, targeting_criteria) -> TargetingCriteria:
         targeting_criteria_copy = TargetingCriteria()
         targeting_criteria_copy.save()
         for rule in targeting_criteria.rules.all():
@@ -525,8 +526,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             steficon_rule_commit = steficon_rule.latest
             if not steficon_rule.enabled or steficon_rule.deprecated:
-                logger.error("This steficon rule is not enabled or is deprecated.")
-                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
+                log_and_raise("This steficon rule is not enabled or is deprecated")
             target_population.steficon_rule = steficon_rule_commit
             target_population.status = TargetPopulation.STATUS_STEFICON_WAIT
             target_population.save()

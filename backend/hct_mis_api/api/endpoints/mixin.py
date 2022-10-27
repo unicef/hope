@@ -1,6 +1,7 @@
 import base64
 import logging
 from dataclasses import dataclass
+from typing import Dict, List
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -44,11 +45,11 @@ class HouseholdUploadMixin:
             photo=get_photo_from_stream(doc.get("image", None)),
             doc_date=doc["doc_date"],
             individual=member,
-            type=ImportedDocumentType.objects.get(country=doc["country"], type=doc["type"]),
+            type=ImportedDocumentType.objects.get(type=doc["type"]),
         )
 
     def save_member(
-        self, rdi: RegistrationDataImportDatahub, hh: ImportedHousehold, member_data: dict
+        self, rdi: RegistrationDataImportDatahub, hh: ImportedHousehold, member_data: Dict
     ) -> ImportedIndividual:
         documents = member_data.pop("documents", [])
         member_of = None
@@ -67,9 +68,9 @@ class HouseholdUploadMixin:
             hh.individuals_and_roles.create(individual=ind, role=ROLE_ALTERNATE)
         return ind
 
-    def save_households(self, rdi: RegistrationDataImportDatahub, households_data: list[dict]):
+    def save_households(self, rdi: RegistrationDataImportDatahub, households_data: List[Dict]):
         totals = Totals(0, 0)
-        for i, household_data in enumerate(households_data):
+        for household_data in households_data:
             totals.households += 1
             members: list[dict] = household_data.pop("members")
             hh = ImportedHousehold.objects.create(registration_data_import=rdi, **household_data)

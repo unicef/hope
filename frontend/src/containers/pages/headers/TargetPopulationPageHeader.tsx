@@ -33,7 +33,6 @@ const StatusWrapper = styled.div`
 `;
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  setEditState: Function;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   canEdit: boolean;
   canRemove: boolean;
@@ -45,7 +44,6 @@ export interface ProgramDetailsPageHeaderPropTypes {
 
 export const TargetPopulationPageHeader = ({
   targetPopulation,
-  setEditState,
   canEdit,
   canRemove,
   canDuplicate,
@@ -69,7 +67,6 @@ export const TargetPopulationPageHeader = ({
       buttons = (
         <OpenTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
-          setEditState={setEditState}
           canDuplicate={canDuplicate}
           canRemove={canRemove}
           canEdit={canEdit}

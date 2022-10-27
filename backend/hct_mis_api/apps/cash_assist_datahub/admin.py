@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List
 
 from django.conf import settings
 from django.contrib import admin, messages
@@ -12,9 +13,8 @@ from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.api import button
 from admin_extra_buttons.decorators import link
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
-from adminfilters.mixin import AdminFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
@@ -44,7 +44,7 @@ class RollbackException(Exception):
 
 
 @admin.register(Session)
-class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class SessionAdmin(HOPEModelAdminBase):
     list_display = ("timestamp", "id", "status", "last_modified_date", "business_area", "run_time")
     date_hierarchy = "timestamp"
     list_filter = (
@@ -112,8 +112,8 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 request,
                 self.simulate_import,
                 mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                <h3>Import will only be simulated</h3> 
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                <h3>Import will only be simulated</h3>
                 """
                 ),
                 "Successfully executed",
@@ -135,11 +135,11 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     @button(permission="account.can_inspect")
     def inspect(self, request, pk):
-        context = self.get_common_context(request, pk)
+        context: Dict[str, Any] = self.get_common_context(request, pk)
         obj: Session = context["original"]
         context["title"] = f"Session {obj.pk} - {obj.timestamp} - {obj.status}"
         context["data"] = {}
-        warnings = []
+        warnings: List[List] = []
         errors = 0
         errors = 0
         has_content = False
@@ -175,9 +175,6 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         svs = []
         for sv in ServiceProvider.objects.filter(session=pk):
             svs.append(sv.ca_id)
-            # if not payment.ServiceProvider.objects.filter(ca_id=sv.ca_id).exists():
-            #     errors += 1
-            #     context["data"][ServiceProvider]["warnings"].append(f"ServiceProvider {sv.ca_id} not found in HOPE")
 
         session_cacheplans = CashPlan.objects.filter(session=pk).values_list("cash_plan_id", flat=True)
         hope_cacheplans = program.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(
@@ -219,7 +216,7 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 
 @admin.register(CashPlan)
-class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class CashPlanAdmin(HOPEModelAdminBase):
     list_display = ("session", "name", "status", "business_area", "cash_plan_id")
     list_filter = (
         "status",
@@ -241,7 +238,7 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 
 @admin.register(PaymentRecord)
-class PaymentRecordAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, admin.ModelAdmin):
+class PaymentRecordAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("session", "business_area", "status", "full_name", "service_provider_ca_id")
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"

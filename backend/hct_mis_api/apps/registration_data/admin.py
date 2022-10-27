@@ -1,20 +1,20 @@
 import logging
+from typing import Optional
 
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from admin_extra_buttons.api import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImport)
-class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class RegistrationDataImportAdmin(HOPEModelAdminBase):
     list_display = ("name", "status", "import_date", "data_source", "business_area")
     search_fields = ("name",)
     list_filter = (
@@ -56,6 +56,9 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
         ("imported_by__username", "imported by"),
         ("business_area__name", "business area"),
     )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("business_area")
 
     @link(
         label="HUB RDI",
@@ -159,8 +162,8 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
                     request,
                     self.delete_rdi,
                     mark_safe(
-                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                    <h3>All households connected to this Registration data import will be deleted</h3> 
+                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    <h3>All households connected to this Registration data import will be deleted</h3>
                     """
                     ),
                     "Successfully executed",
@@ -177,7 +180,7 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
         return is_correct_status and is_not_used_in_targeting and is_not_used_by_payment_record
 
     @staticmethod
-    def generate_query_for_all_grievances_tickets(rdi):
+    def generate_query_for_all_grievances_tickets(rdi) -> Q:
         details_related_names = [
             "referral_ticket_details__household",
             "negative_feedback_ticket_details__household",
@@ -204,7 +207,7 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
         permission=is_root,
         visible=lambda o, r: RegistrationDataImportAdmin.delete_merged_rdi_visible(o, r),
     )
-    def delete_merged_rdi(self, request, pk):
+    def delete_merged_rdi(self, request, pk) -> Optional[HttpResponse]:
         try:
             if request.method == "POST":
                 with transaction.atomic(using="default"):
@@ -248,8 +251,8 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
                     request,
                     self.delete_rdi,
                     mark_safe(
-                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                    <h3>All households connected to this Registration data import will be deleted</h3> 
+                        """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                    <h3>All households connected to this Registration data import will be deleted</h3>
                     """
                     ),
                     "Successfully executed",
@@ -257,6 +260,7 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
         except Exception as e:
             logger.exception(e)
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
+            return None
 
     @button()
     def households(self, request, pk):

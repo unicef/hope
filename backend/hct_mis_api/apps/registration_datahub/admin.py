@@ -1,5 +1,6 @@
 import base64
 import logging
+from typing import Dict
 
 from django import forms
 from django.contrib import admin, messages
@@ -12,8 +13,8 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 import requests
+from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button, link
-from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminactions.mass_update import mass_update
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
@@ -46,7 +47,9 @@ from hct_mis_api.apps.registration_datahub.services.extract_record import extrac
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
 )
-from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
+from hct_mis_api.apps.registration_datahub.utils import (
+    post_process_dedupe_results as _post_process_dedupe_results,
+)
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
 
@@ -54,7 +57,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImportDatahub)
-class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
     list_display = ("name", "import_date", "import_done", "business_area_slug", "hct_id")
     list_filter = ("created_at", "import_done", ("business_area_slug", ValueFilter.factory(lookup_name="istartswith")))
     advanced_filter_fields = (
@@ -104,7 +107,7 @@ class ImportedBankAccountInfoStackedInline(admin.StackedInline):
 
 
 @admin.register(ImportedIndividual)
-class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class ImportedIndividualAdmin(HOPEModelAdminBase):
     list_display = (
         "registration_data_import",
         "individual_id",
@@ -153,12 +156,12 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     def enrich_deduplication(self, request, queryset):
         for record in queryset.exclude(deduplication_batch_results__has_key="score"):
-            post_process_dedupe_results(record)
+            _post_process_dedupe_results(record)
 
     @button()
     def post_process_dedupe_results(self, request, pk):
         record = self.get_queryset(request).get(id=pk)
-        post_process_dedupe_results(record)
+        _post_process_dedupe_results(record)
         record.save()
 
     @button()
@@ -197,15 +200,15 @@ class ImportDataAdmin(HOPEModelAdminBase):
 
 @admin.register(ImportedDocumentType)
 class ImportedDocumentTypeAdmin(HOPEModelAdminBase):
-    list_display = ("label", "country")
-    list_filter = (("country", ChoicesFieldComboFilter), "label", QueryStringFilter)
+    list_display = ("label",)
+    list_filter = ("label", QueryStringFilter)
 
 
 @admin.register(ImportedDocument)
 class ImportedDocumentAdmin(HOPEModelAdminBase):
-    list_display = ("document_number", "type", "individual")
+    list_display = ("document_number", "type", "country", "individual")
     raw_id_fields = ("individual", "type")
-    list_filter = (("type", AutoCompleteFilter), QueryStringFilter)
+    list_filter = (("type", AutoCompleteFilter), ("country", ChoicesFieldComboFilter), QueryStringFilter)
     date_hierarchy = "created_at"
 
 
@@ -253,7 +256,7 @@ class RemeberDataForm(forms.Form):
     def get_saved_config(cls, request):
         try:
             signer = Signer(request.user.password)
-            obj: dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
+            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
             return obj
         except BadSignature:
             return {}
@@ -337,7 +340,7 @@ class AlexisFilter(SimpleListFilter):
 
 
 @admin.register(Record)
-class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "status", "ignored")
     readonly_fields = (
         "id",
@@ -348,12 +351,11 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         "status",
         "error_message",
     )
-    list_editable = ("ignored",)
+    # list_editable = ("ignored",)
     exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
-        AlexisFilter,
         ("registration_data_import", AutoCompleteFilter),
         "status",
         ("source_id", NumberFilter),
@@ -362,9 +364,9 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
-    change_list_template = "registration_datahub/admin/record/change_list.html"
+    # change_list_template = "registration_datahub/admin/record/change_list.html"
 
-    actions = [mass_update, "extract", "async_extract", "create_rdi"]
+    actions = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
 
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []

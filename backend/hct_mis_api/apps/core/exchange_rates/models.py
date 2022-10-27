@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional
 
 from django.utils import timezone
 
@@ -35,7 +35,7 @@ class SingleExchangeRate:
         VALID_TO: str,
         RATIO: str,
         NO_OF_DECIMAL: str,
-        PAST_XRATE: str,
+        PAST_XRATE: Optional[Dict],
     ):
         self.currency_code = CURRENCY_CODE
         self.currency_name = CURRENCY_NAME
@@ -90,8 +90,8 @@ class ExchangeRates:
 
     @staticmethod
     def _convert_response_json_to_exchange_rates(
-        response_json: dict,
-    ) -> dict[str, SingleExchangeRate]:
+        response_json: Dict,
+    ) -> Dict[str, SingleExchangeRate]:
         raw_exchange_rates = response_json.get("ROWSET", {}).get("ROW", [])
 
         return {
