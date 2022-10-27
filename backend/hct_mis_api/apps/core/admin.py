@@ -2,13 +2,6 @@ import csv
 import logging
 from io import StringIO
 
-import xlrd
-from admin_extra_buttons.api import ExtraButtonsMixin, button
-from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminFiltersMixin
-from constance import config
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
@@ -30,14 +23,23 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+
+import xlrd
+from admin_extra_buttons.api import button
+from admin_extra_buttons.decorators import choice, view
+from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_sync.mixin import GetManyFromRemoteMixin
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
+from constance import config
 from jsoneditor.forms import JSONEditor
-from mptt.admin import MPTTModelAdmin
 from xlrd import XLRDError
 
 from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
-    upload_new_kobo_template_and_update_flex_fields_task, create_target_population_task,
+    create_target_population_task,
+    upload_new_kobo_template_and_update_flex_fields_task,
 )
 from hct_mis_api.apps.core.forms import ProgramForm
 from hct_mis_api.apps.core.models import (
@@ -46,14 +48,19 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
-    XLSXKoboTemplate,
     StorageFile,
+    XLSXKoboTemplate,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    SoftDeletableAdminMixin,
+)
 from hct_mis_api.apps.utils.security import is_root
+from mptt.admin import MPTTModelAdmin
 
 logger = logging.getLogger(__name__)
 
@@ -117,16 +124,17 @@ class GroupConcat(Aggregate):
 
 
 @admin.register(BusinessArea)
-class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "slug",
         "code",
         "region_name",
         "region_code",
+        "active",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
+    list_filter = ("has_data_sharing_agreement", "active", "region_name", BusinessofficeFilter, "is_split")
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
     # formfield_overrides = {
@@ -142,10 +150,9 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    # def get_readonly_fields(self, request, obj=None):
-    #     if not is_root(request):
-    #         return self.readonly_fields + ('slug')
-    #     return super().get_readonly_fields(request, obj)
+    @choice(label="DOAP", change_list=False)
+    def doap(self, button):
+        button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
 
     @button(label="Create Business Office", permission="core.can_split")
     def split_business_area(self, request, pk):
@@ -230,7 +237,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                     matrix.append(user_data)
         return matrix
 
-    @button(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
+    @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
     def force_sync_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
@@ -239,7 +246,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
-    @button(label="Send DOAP", group="doap")
+    @view(label="Send DOAP", group="doap")
     def send_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
@@ -256,8 +263,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             environment = Site.objects.first().name
             mail = EmailMessage(
                 f"CashAssist - UNICEF - {obj.name} user updates",
-                f"""Dear GSD,
-                
+                f"""Dear GSD,\n
 In CashAssist, please update the users in {environment} UNICEF - {obj.name} business unit as per the attached DOAP.
 Many thanks,
 UNICEF HOPE""",
@@ -279,7 +285,7 @@ UNICEF HOPE""",
 
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
-    @button(label="Export DOAP", group="doap", permission="core.can_export_doap")
+    @view(label="Export DOAP", group="doap", permission="core.can_export_doap")
     def export_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="DOAP matrix")
         obj = context["original"]
@@ -293,7 +299,7 @@ UNICEF HOPE""",
             writer.writerow(row)
         return response
 
-    @button(permission="core.can_send_doap")
+    @view(permission="core.can_send_doap")
     def view_ca_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="DOAP matrix")
         context["aeu_groups"] = ["doap"]
@@ -376,8 +382,8 @@ UNICEF HOPE""",
                 request,
                 self.mark_submissions,
                 mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                <h3>All ImportedSubmission for not merged rdi will be marked.</h3> 
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
                 """
                 ),
                 "Successfully executed",
@@ -391,7 +397,7 @@ class FlexibleAttributeInline(admin.TabularInline):
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(SoftDeletableAdminMixin):
+class FlexibleAttributeAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
     list_display = ("type", "name", "required")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
@@ -405,7 +411,7 @@ class FlexibleAttributeAdmin(SoftDeletableAdminMixin):
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(SoftDeletableAdminMixin, MPTTModelAdmin):
+class FlexibleAttributeGroupAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin, MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
     # autocomplete_fields = ("parent",)
@@ -421,7 +427,7 @@ class FlexibleAttributeGroupAdmin(SoftDeletableAdminMixin, MPTTModelAdmin):
 
 
 @admin.register(FlexibleAttributeChoice)
-class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
+class FlexibleAttributeChoiceAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
     list_display = (
         "list_name",
         "name",
@@ -434,7 +440,7 @@ class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
 
 
 @admin.register(XLSXKoboTemplate)
-class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraButtonsMixin, admin.ModelAdmin):
+class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
     list_filter = (
         "status",
@@ -566,7 +572,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraBut
 
 
 @admin.register(CountryCodeMap)
-class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
     search_fields = ("country",)
 

@@ -1,4 +1,5 @@
 import random
+from typing import Tuple
 
 import factory
 from factory import enums, fuzzy
@@ -9,6 +10,7 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
+    IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     NOT_DISABLED,
     ORG_ENUMERATOR_CHOICES,
@@ -16,6 +18,7 @@ from hct_mis_api.apps.household.models import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    SEX_CHOICE,
     UNICEF,
     BankAccountInfo,
     Document,
@@ -25,7 +28,6 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
-    SEX_CHOICE,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
@@ -77,6 +79,7 @@ class HouseholdFactory(factory.DjangoModelFactory):
     class Meta:
         model = Household
 
+    unicef_id = factory.Sequence(lambda n: f"HH-{n}")
     consent_sign = factory.django.ImageField(color="blue")
     consent = True
     consent_sharing = (UNICEF, HUMANITARIAN_PARTNER)
@@ -123,6 +126,17 @@ class HouseholdFactory(factory.DjangoModelFactory):
             kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        hoh = kwargs.get("head_of_household", None)
+        if not hoh:
+            hoh = IndividualFactory(household=None)
+            kwargs["head_of_household"] = hoh
+        ret = super()._create(model_class, *args, **kwargs)
+        hoh.household = ret
+        hoh.save()
+        return ret
+
 
 class IndividualIdentityFactory(factory.DjangoModelFactory):
     class Meta:
@@ -158,6 +172,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
+    unicef_id = factory.Sequence(lambda n: f"IND-{n}")
 
 
 class BankAccountInfoFactory(factory.DjangoModelFactory):
@@ -172,18 +187,20 @@ class BankAccountInfoFactory(factory.DjangoModelFactory):
 class DocumentTypeFactory(factory.DjangoModelFactory):
     class Meta:
         model = DocumentType
+        django_get_or_create = ("type",)
 
-    type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
+    type = factory.fuzzy.FuzzyChoice([value for value, _ in IDENTIFICATION_TYPE_CHOICE])
 
 
 class DocumentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Document
-        django_get_or_create = ("type",)
+        django_get_or_create = ("document_number", "type", "country")
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
     type = factory.SubFactory(DocumentTypeFactory)
     individual = factory.SubFactory(IndividualFactory)
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
@@ -202,7 +219,7 @@ class EntitlementCardFactory(factory.DjangoModelFactory):
     household = factory.SubFactory(HouseholdFactory)
 
 
-def create_household(household_args=None, individual_args=None):
+def create_household(household_args=None, individual_args=None) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -244,7 +261,7 @@ def create_household(household_args=None, individual_args=None):
     return household, individuals
 
 
-def create_household_for_fixtures(household_args=None, individual_args=None):
+def create_household_for_fixtures(household_args=None, individual_args=None) -> Tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:

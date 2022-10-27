@@ -5,7 +5,10 @@ from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.fixtures import (
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
@@ -15,7 +18,6 @@ from hct_mis_api.apps.household.models import (
     SON_DAUGHTER,
     WIFE_HUSBAND,
     Document,
-    DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
@@ -27,7 +29,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        super().setUpTestData()
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",
@@ -106,29 +107,41 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             ],
         )
         country = geo_models.Country.objects.get(iso_code2="PL")
-        dt = DocumentType(country=country, label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        dt_tax_id = DocumentType.objects.create(
-            country=country, label=IDENTIFICATION_TYPE_TAX_ID, type=IDENTIFICATION_TYPE_TAX_ID
-        )
+        dt = DocumentTypeFactory(label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        dt_tax_id = DocumentTypeFactory(label=IDENTIFICATION_TYPE_TAX_ID, type=IDENTIFICATION_TYPE_TAX_ID)
         dt.save()
         cls.document1 = Document(
-            type=dt, document_number="ASD123", individual=cls.individuals[0], status=Document.STATUS_VALID
+            country=country,
+            type=dt,
+            document_number="ASD123",
+            individual=cls.individuals[0],
+            status=Document.STATUS_VALID,
         )
-        cls.document2 = Document(type=dt, document_number="ASD123", individual=cls.individuals[1])
-        cls.document3 = Document(type=dt, document_number="BBC999", individual=cls.individuals[2])
-        cls.document4 = Document(type=dt, document_number="ASD123", individual=cls.individuals[3])
+        cls.document2 = Document(type=dt, document_number="ASD123", individual=cls.individuals[1], country=country)
+        cls.document3 = Document(type=dt, document_number="BBC999", individual=cls.individuals[2], country=country)
+        cls.document4 = Document(type=dt, document_number="ASD123", individual=cls.individuals[3], country=country)
         cls.document5 = Document(
-            type=dt, document_number="TOTALY UNIQ", individual=cls.individuals[4], status=Document.STATUS_VALID
+            country=country,
+            type=dt,
+            document_number="TOTALY UNIQ",
+            individual=cls.individuals[4],
+            status=Document.STATUS_VALID,
         )
         cls.document6 = Document.objects.create(
-            type=dt_tax_id, document_number="ASD123", individual=cls.individuals[2], status=Document.STATUS_VALID
+            country=country,
+            type=dt_tax_id,
+            document_number="ASD123",
+            individual=cls.individuals[2],
+            status=Document.STATUS_VALID,
         )
         cls.document7 = Document.objects.create(
+            country=country,
             type=dt,
             document_number="ASD123",
             individual=cls.individuals[1],
         )
         cls.document8 = Document.objects.create(
+            country=country,
             type=dt,
             document_number="ASD123",
             individual=cls.individuals[4],
@@ -148,6 +161,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             cls.document6,
             cls.document7,
         ]
+        super().setUpTestData()
 
     def refresh_all_documents(self):
         for document in self.all_documents:

@@ -2,6 +2,7 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
+from typing import Type
 
 from django.core.exceptions import PermissionDenied
 
@@ -13,9 +14,9 @@ from graphene_django.filter.utils import (
     get_filtering_args_from_filterset,
     get_filterset_class,
 )
-from graphql import GraphQLError
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +198,7 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
-def hopePermissionClass(permission):
+def hopePermissionClass(permission) -> Type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
         def has_permission(cls, info, **kwargs):
@@ -246,8 +247,7 @@ class BaseNodePermissionMixin:
     def check_node_permission(cls, info, object_instance):
         business_area = object_instance.business_area
         if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
-            logger.error("Permission Denied")
-            raise GraphQLError("Permission Denied")
+            log_and_raise("Permission Denied")
 
     @classmethod
     def get_node(cls, info, object_id):
@@ -276,8 +276,7 @@ class BaseNodePermissionMixin:
             or (is_creator and user.has_permission(creator_permission, business_area))
             or (is_owner and user.has_permission(owner_permission, business_area))
         ):
-            logger.error("Permission Denied")
-            raise GraphQLError("Permission Denied")
+            log_and_raise("Permission Denied")
 
 
 class DjangoPermissionFilterConnectionField(DjangoConnectionField):
@@ -291,7 +290,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         permission_classes=(AllowAny,),
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self._fields = fields
         self._provided_filterset_class = filterset_class
         self._filterset_class = None
@@ -338,8 +337,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
     ):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
         if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
-            logger.error("Permission Denied")
-            raise GraphQLError("Permission Denied")
+            log_and_raise("Permission Denied")
         if "permissions" in filtering_args:
             filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
                 filter_kwargs.get("business_area")
@@ -358,13 +356,13 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
 
 class BaseMutationPermissionMixin:
     @classmethod
-    def is_authenticated(cls, info):
+    def is_authenticated(cls, info) -> bool:
         if not info.context.user.is_authenticated:
             cls.raise_permission_denied_error(True)
         return True
 
     @classmethod
-    def has_permission(cls, info, permission, business_area_arg, raise_error=True):
+    def has_permission(cls, info, permission, business_area_arg, raise_error=True) -> bool:
         cls.is_authenticated(info)
         if not isinstance(permission, list):
             permissions = (permission,)
@@ -399,7 +397,7 @@ class BaseMutationPermissionMixin:
         is_owner,
         owner_permission,
         raise_error=True,
-    ):
+    ) -> bool:
         cls.is_authenticated(info)
         if not (
             cls.has_permission(info, general_permission, business_area_arg, False)
@@ -410,7 +408,7 @@ class BaseMutationPermissionMixin:
         return True
 
     @staticmethod
-    def raise_permission_denied_error(not_authenticated=False, raise_error=True):
+    def raise_permission_denied_error(not_authenticated=False, raise_error=True) -> bool:
         if not raise_error:
             return False
         if not_authenticated:

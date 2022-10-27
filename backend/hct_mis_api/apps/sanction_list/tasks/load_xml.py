@@ -62,10 +62,11 @@ class LoadSanctionListXMLTask:
         }
 
     @staticmethod
-    def _get_text_from_path(individual_tag: ET.Element, path: str) -> str:
+    def _get_text_from_path(individual_tag: ET.Element, path: str) -> Union[str, None]:
         tag = individual_tag.find(path)
         if isinstance(tag, ET.Element):
             return tag.text
+        return None
 
     @staticmethod
     def _get_designation(individual_tag: ET.Element, *args, **kwargs) -> Union[str, None]:
@@ -394,7 +395,7 @@ class LoadSanctionListXMLTask:
 
         return correct_value
 
-    def execute(self):
+    def execute(self) -> None:
         if self.file_path is not None:
             tree = ET.parse(self.file_path)
         else:

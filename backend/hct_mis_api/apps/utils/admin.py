@@ -23,7 +23,7 @@ class SoftDeletableAdminMixin(admin.ModelAdmin):
         return qs
 
     def get_list_filter(self, request):
-        return super().get_list_filter(request) + ("is_removed",)
+        return tuple(list(super().get_list_filter(request)) + ["is_removed"])
 
 
 class JSONWidgetMixin:
@@ -37,7 +37,7 @@ class JSONWidgetMixin:
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
-class LastSyncDateResetMixin(ExtraButtonsMixin):
+class LastSyncDateResetMixin:
     @button()
     def reset_sync_date(self, request):
         if request.method == "POST":
@@ -66,9 +66,11 @@ class LastSyncDateResetMixin(ExtraButtonsMixin):
             )
 
 
-class HOPEModelAdminBase(
-    SmartDisplayAllMixin, AdminFiltersMixin, AdminActionPermMixin, JSONWidgetMixin, admin.ModelAdmin
-):
+class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPermMixin, AdminFiltersMixin):
+    pass
+
+
+class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
     list_per_page = 50
 
     def get_fields(self, request, obj=None):
@@ -76,9 +78,13 @@ class HOPEModelAdminBase(
 
     def get_actions(self, request):
         actions = super().get_actions(request)
-        if "delete_selected" in actions:
+        if "delete_selected" in actions and not is_root(request):
             del actions["delete_selected"]
         return actions
+
+    def count_queryset(self, request, queryset):
+        count = queryset.count()
+        self.message_user(request, f"Selection contains {count} records")
 
 
 class HUBBusinessAreaFilter(SimpleListFilter):

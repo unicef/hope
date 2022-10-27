@@ -3,6 +3,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from io import BytesIO
+from typing import Callable, Dict
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -11,22 +12,21 @@ from django.db import transaction
 from django.utils import timezone
 
 import openpyxl
-
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
 from hct_mis_api.apps.household.models import (
+    COLLECT_TYPE_FULL,
+    COLLECT_TYPE_NONE,
+    COLLECT_TYPE_PARTIAL,
+    COLLECT_TYPE_UNKNOWN,
     HEAD,
     IDENTIFICATION_TYPE_DICT,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    COLLECT_TYPE_FULL,
-    COLLECT_TYPE_NONE,
-    COLLECT_TYPE_PARTIAL,
-    COLLECT_TYPE_UNKNOWN,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -294,13 +294,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         docs_to_create = []
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
-            doc_type = ImportedDocumentType.objects.get(
-                country=issuing_country,
-                type=document_data["type"],
-            )
+            doc_type = ImportedDocumentType.objects.get(type=document_data["type"])
             photo = document_data.get("photo")
             individual = document_data.get("individual")
             obj = ImportedDocument(
+                country=issuing_country,
                 document_number=document_data.get("value"),
                 photo=photo,
                 individual=individual,
@@ -398,7 +396,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             },
         }
 
-        complex_types = {
+        complex_types: Dict[str, Callable] = {
             "GEOPOINT": self._handle_geopoint_field,
             "IMAGE": self._handle_image_field,
             "DECIMAL": self._handle_decimal_field,
@@ -452,8 +450,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 obj_to_create.household = self.households.get(household_id)
 
                         if header in complex_fields[sheet_title]:
-                            fn = complex_fields[sheet_title].get(header)
-                            value = fn(
+                            fn_complex: Callable = complex_fields[sheet_title][header]
+                            value = fn_complex(
                                 value=cell.value,
                                 cell=cell,
                                 header=header,
@@ -494,8 +492,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             value = self._cast_value(cell.value, header)
                             type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
                             if type_name in complex_types:
-                                fn = complex_types[type_name]
-                                value = fn(
+                                fn_flex: Callable = complex_types[type_name]
+                                value = fn_flex(
                                     value=cell.value,
                                     cell=cell,
                                     header=header,

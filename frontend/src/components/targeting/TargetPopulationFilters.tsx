@@ -3,21 +3,22 @@ import { Group, Person } from '@material-ui/icons';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TARGETING_STATES } from '../../utils/constants';
-import { ProgramNode } from '../../__generated__/graphql';
+import {
+  ProgramNode,
+  TargetPopulationStatus,
+} from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { targetPopulationStatusMapping } from '../../utils/utils';
 
 interface TargetPopulationFiltersProps {
-  //targetPopulations: TargetPopulationNode[],
   onFilterChange;
   filter;
   programs: ProgramNode[];
 }
 export function TargetPopulationFilters({
-  // targetPopulations,
   onFilterChange,
   filter,
   programs,
@@ -42,15 +43,14 @@ export function TargetPopulationFilters({
             label={t('Status')}
             icon={<Person />}
           >
-            <MenuItem value=''>{TARGETING_STATES.NONE}</MenuItem>
-            <MenuItem value='DRAFT'>{TARGETING_STATES.OPEN}</MenuItem>
-            <MenuItem value='LOCKED'>{TARGETING_STATES.LOCKED}</MenuItem>
-            <MenuItem value='PROCESSING'>
-              {TARGETING_STATES.PROCESSING}
-            </MenuItem>
-            <MenuItem value='READY_FOR_CASH_ASSIST'>
-              {TARGETING_STATES.READY_FOR_CASH_ASSIST}
-            </MenuItem>
+            <MenuItem value=''>None</MenuItem>
+            {Object.values(TargetPopulationStatus)
+              .sort()
+              .map((key) => (
+                <MenuItem value={key}>
+                  {targetPopulationStatusMapping(key)}
+                </MenuItem>
+              ))}
           </SelectFilter>
         </Grid>
         <Grid item>

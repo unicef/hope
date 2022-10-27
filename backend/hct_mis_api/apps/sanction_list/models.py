@@ -1,3 +1,5 @@
+from typing import Dict, Tuple
+
 from django.db import models
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
@@ -7,27 +9,27 @@ class SanctionListIndividualQuerySet(models.QuerySet):
     def delete(self):
         return super().update(active=False)
 
-    def hard_delete(self):
+    def hard_delete(self) -> Tuple[int, Dict[str, int]]:
         return super().delete()
 
-    def active(self):
+    def active(self) -> models.QuerySet:
         return self.filter(active=True)
 
-    def inactive(self):
+    def inactive(self) -> models.QuerySet:
         return self.exclude(active=False)
 
 
 class ActiveIndividualsManager(models.Manager):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.alive_only = kwargs.pop("active_only", True)
         super().__init__(*args, **kwargs)
 
-    def get_queryset(self):
+    def get_queryset(self) -> models.QuerySet:
         if self.alive_only:
             return SanctionListIndividualQuerySet(self.model).active()
         return SanctionListIndividualQuerySet(self.model)
 
-    def hard_delete(self):
+    def hard_delete(self) -> Tuple[int, Dict[str, int]]:
         return self.get_queryset().hard_delete()
 
 

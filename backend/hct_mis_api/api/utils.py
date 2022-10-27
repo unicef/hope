@@ -1,6 +1,9 @@
-def humanize_errors(errors):
+from typing import List
+
+
+def humanize_errors(errors: List) -> List:
     try:
-        households = errors.pop("households", [])
+        households = errors.pop("households")
         errs = {}
         if len(households) == 1 and isinstance(households[0], str):
             hh_info = households
@@ -23,7 +26,3 @@ def humanize_errors(errors):
         return errs
     except (ValueError, AttributeError):
         return errors
-
-
-def humanize_errors2(errors):
-    return errors

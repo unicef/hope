@@ -1,3 +1,7 @@
+from typing import Any, Union
+
+from django.http import HttpRequest
+
 from smart_admin.console.email import (
     concurrent,
     logger,
@@ -10,7 +14,7 @@ from smart_admin.console.email import (
 from hct_mis_api.apps.utils.security import is_root
 
 
-def masker(value, request):
+def masker(value: Any, request: HttpRequest) -> Union[Any, str]:
     if is_root(request):
         return value
     return "****"
