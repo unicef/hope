@@ -304,6 +304,8 @@ class Query(graphene.ObjectType):
                     "phone_no_alternative",
                     "electoral_card_no",
                     "drivers_license_no",
+                    "national_passport",
+                    "national_id_no",
                 ],
             }.get(associated_with, [])
 

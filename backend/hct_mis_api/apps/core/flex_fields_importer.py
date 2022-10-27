@@ -208,11 +208,11 @@ class FlexibleAttributeImporter:
             return row[0].value.split(" ")[1]
         return
 
-    def _reset_model_fields_variables(self):
+    def _reset_model_fields_variables(self) -> None:
         self.json_fields_to_create = defaultdict(dict)
         self.object_fields_to_create = {}
 
-    def _handle_choices(self, sheets):
+    def _handle_choices(self, sheets) -> None:
         choices_assigned_to_fields = self._get_list_of_field_choices(sheets["survey"])
         choices_from_db = FlexibleAttributeChoice.objects.all()
         choices_first_row = sheets["choices"].row(0)

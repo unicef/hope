@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal, InvalidOperation
+from typing import List
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -113,10 +114,10 @@ class RapidProAPI:
                 return successful_flows, e
         return successful_flows, None
 
-    def get_flow_runs(self):
+    def get_flow_runs(self) -> List:
         return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
 
-    def get_mapped_flow_runs(self, start_uuids):
+    def get_mapped_flow_runs(self, start_uuids) -> List:
         results = self.get_flow_runs()
         mapped_results = [
             self._map_to_internal_structure(x)
@@ -125,7 +126,7 @@ class RapidProAPI:
         ]
         return mapped_results
 
-    def _get_paginated_results(self, url) -> list:
+    def _get_paginated_results(self, url) -> List:
         next_url = f"{self._get_url()}{url}"
         results: list = []
         while next_url:

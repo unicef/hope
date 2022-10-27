@@ -163,7 +163,7 @@ DATABASES = {
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
 # If app is not specified here it will use default db
-DATABASE_APPS_MAPPING = {
+DATABASE_APPS_MAPPING: Dict[str, str] = {
     "cash_assist_datahub": "cash_assist_datahub_ca",
     "mis_datahub": "cash_assist_datahub_mis",
     "erp_datahub": "cash_assist_datahub_erp",

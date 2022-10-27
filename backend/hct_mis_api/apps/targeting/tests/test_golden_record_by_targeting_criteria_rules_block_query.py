@@ -11,18 +11,31 @@ from hct_mis_api.apps.household.fixtures import (
     create_individual_document,
 )
 from hct_mis_api.apps.household.models import MALE
+from hct_mis_api.apps.household.services.household_recalculate_data import (
+    recalculate_data,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
     QUERY = """
-        query GoldenRecordFilter($targetingCriteria: TargetingCriteriaObjectType!, $program: ID!, $businessArea: String) {
-          goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, program: $program, businessArea: $businessArea, excludedIds: "") {
+        query GoldenRecordFilter(
+            $targetingCriteria: TargetingCriteriaObjectType!,
+            $program: ID!,
+            $businessArea: String
+          ) {
+          goldenRecordByTargetingCriteria(
+              targetingCriteria: $targetingCriteria,
+              program: $program,
+              businessArea: $businessArea,
+              excludedIds: "",
+              orderBy: "size"
+            ) {
             totalCount
             edges {
               node {
                 size
-                individuals{
+                individuals {
                     edges{
                         node{
                             sex
@@ -68,6 +81,9 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
         )
         cls.not_targeted_household = household
+
+        recalculate_data(cls.household_targeted)
+        recalculate_data(cls.not_targeted_household)
 
         cls.user = UserFactory()
         cls.create_user_role_with_permissions(cls.user, [Permissions.TARGETING_CREATE], cls.business_area)

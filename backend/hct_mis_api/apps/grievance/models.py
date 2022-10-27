@@ -377,7 +377,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
             logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         self.full_clean()
         if self.ticket_details and self.ticket_details.household:
             self.household_unicef_id = self.ticket_details.household.unicef_id
