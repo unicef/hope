@@ -143,11 +143,10 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
         return context
 
-    @staticmethod
-    def send_email(user, cash_plan_payment_verification_id):
+    def send_email(self, user):
         protocol = "http" if settings.IS_DEV else "https"
-        payment_verification_id = encode_id_base64(cash_plan_payment_verification_id, "CashPlanPaymentVerification")
-        api = reverse("download-cash-plan-payment-verification", args=[payment_verification_id])
+        payment_verification_id = encode_id_base64(self.payment_verification_plan.id, "PaymentVerificationPlan")
+        api = reverse("download-payment-verification-plan", args=[payment_verification_id])
         link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
