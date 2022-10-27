@@ -2,7 +2,7 @@ import base64
 import hashlib
 import logging
 import uuid
-from typing import Dict, List
+from typing import Dict, List, Type
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -261,7 +261,7 @@ class FlexRegistrationService:
             else:
                 raise ValidationError("There should be only two collectors!")
 
-    def _create_object_and_validate(self, data, model_class):
+    def _create_object_and_validate(self, data, model_class) -> Type:
         ModelClassForm = modelform_factory(model_class, fields=data.keys())
         form = ModelClassForm(data)
         if not form.is_valid():
