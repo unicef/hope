@@ -2,7 +2,7 @@ import logging
 from decimal import Decimal
 from math import ceil
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 import phonenumbers
 
@@ -10,7 +10,7 @@ from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_fil
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 
 
-def is_right_phone_number_format(phone_number):
+def is_right_phone_number_format(phone_number) -> bool:
     # from phonenumbers.parse method description:
     # This method will throw a NumberParseException if the number is not
     # considered to be a possible number.
@@ -88,7 +88,9 @@ def calculate_counts(cash_plan_verification):
     ).count()
 
 
-def get_payment_records_for_dashboard(year, business_area_slug, filters, only_with_delivered_quantity=False):
+def get_payment_records_for_dashboard(
+    year, business_area_slug, filters, only_with_delivered_quantity=False
+) -> QuerySet:
     additional_filters = {}
     if only_with_delivered_quantity:
         additional_filters["delivered_quantity_usd__gt"] = 0

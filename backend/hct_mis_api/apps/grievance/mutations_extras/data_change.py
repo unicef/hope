@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, Union
+from typing import Any, List, Union
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -266,7 +266,7 @@ class HouseholdDeleteIssueTypeExtras(graphene.InputObjectType):
     household = graphene.GlobalID(node=HouseholdNode, required=True)
 
 
-def to_date_string(dict, field_name):
+def to_date_string(dict, field_name) -> None:
     date = dict.get(field_name)
     if date:
         dict[field_name] = date.isoformat()
@@ -278,7 +278,7 @@ def to_phone_number_str(dict, field_name) -> None:
         dict[field_name] = str(phone_number)
 
 
-def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     issue_type = input.get("issue_type")
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
         return save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
@@ -290,6 +290,7 @@ def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwarg
         return save_household_delete_extras(root, info, input, grievance_ticket, extras, **kwargs)
     if issue_type == GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE:
         return save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
+    raise Exception("Invalid issue type")
 
 
 def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
@@ -377,7 +378,7 @@ def update_household_data_update_extras(root, info, input, grievance_ticket, ext
     return grievance_ticket
 
 
-def save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_data_update_issue_type_extras")
 

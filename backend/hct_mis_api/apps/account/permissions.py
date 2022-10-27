@@ -290,7 +290,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         permission_classes=(AllowAny,),
         *args,
         **kwargs,
-    ):
+    ) -> None:
         self._fields = fields
         self._provided_filterset_class = filterset_class
         self._filterset_class = None

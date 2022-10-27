@@ -6,10 +6,11 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 from django.db.models import QuerySet
 from django.utils import timezone
+from django.db.models import Model
 
 import pytz
 from django_filters import OrderingFilter
@@ -395,7 +396,7 @@ def choices_to_dict(choices):
     return {value: name for value, name in choices}
 
 
-def decode_and_get_object(encoded_id, model, required):
+def decode_and_get_object(encoded_id, model, required) -> Optional[Model]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
@@ -540,7 +541,7 @@ def sum_lists_with_values(qs_values, list_len):
     return data
 
 
-def chart_permission_decorator(chart_resolve=None, permissions=None):
+def chart_permission_decorator(chart_resolve=None, permissions=None) -> Callable:
     if chart_resolve is None:
         return functools.partial(chart_permission_decorator, permissions=permissions)
 
@@ -559,7 +560,7 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
     return resolve_f
 
 
-def chart_filters_decoder(filters):
+def chart_filters_decoder(filters) -> Dict:
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
@@ -577,15 +578,18 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
     return filter_query
 
 
+CaIdIteratorType = TypeVar("CaIdIteratorType", bound="CaIdIterator")
+
+
 class CaIdIterator:
-    def __init__(self, name):
+    def __init__(self, name) -> None:
         self.name = name
         self.last_id = 0
 
-    def __iter__(self):
+    def __iter__(self: CaIdIteratorType) -> CaIdIteratorType:
         return self
 
-    def __next__(self):
+    def __next__(self: CaIdIteratorType) -> str:
         self.last_id += 1
         return f"123-21-{self.name.upper()}-{self.last_id:05d}"
 

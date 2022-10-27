@@ -3,7 +3,7 @@ import random
 import string
 import urllib.parse
 from collections import Counter
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -207,7 +207,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
     return previous_documents
 
 
-def prepare_edit_documents(documents_to_edit):
+def prepare_edit_documents(documents_to_edit) -> List[Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string

@@ -20,7 +20,7 @@ class GeoCountryDescriptor:
             return [self.country(code) for code in value]
         return self.country(value)
 
-    def country(self, code):
+    def country(self, code) -> Country:
         return Country.objects.get(iso_code2=code)
 
     def __set__(self, instance, value):

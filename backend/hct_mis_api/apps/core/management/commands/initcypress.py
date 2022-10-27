@@ -1,7 +1,5 @@
 from django.core.management import BaseCommand, call_command
-from django.db import connections
-
-from hct_mis_api.apps.core.management.sql import sql_drop_tables
+from hct_mis_api.apps.core.management.sql import drop_databases
 
 
 class Command(BaseCommand):
@@ -15,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options["skip_drop"] is False:
-            self._drop_databases()
+            drop_databases()
             call_command("migratealldb")
 
         call_command("flush", "--noinput")
@@ -32,15 +30,3 @@ class Command(BaseCommand):
         )
 
         call_command("search_index", "--rebuild", "-f")
-
-    def _drop_databases(self):
-        for connection_name in connections:
-            if connection_name == "read_only":
-                continue
-            connection = connections[connection_name]
-            with connection.cursor() as cursor:
-                sql = sql_drop_tables(connection)
-                if not sql:
-                    continue
-                print(sql)
-                cursor.execute(sql)
