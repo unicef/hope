@@ -311,7 +311,7 @@ class Command(BaseCommand):
                 elapsed = " (%.3fs)" % (time.time() - self.start) if compute_time else ""
                 self.stdout.write(self.style.SUCCESS(" DONE" + elapsed))
 
-    def sync_apps(self, connection, app_labels):
+    def sync_apps(self, connection, app_labels) -> None:
         """Run the old syncdb-style operation on a list of app_labels."""
         with connection.cursor() as cursor:
             tables = connection.introspection.table_names(cursor)
