@@ -189,8 +189,8 @@ class FinishPaymentVerificationPlan(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, payment_verification_plan_id, **kwargs):
-        id = decode_id_string(payment_verification_plan_id)
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=id)
+        payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
         old_payment_verification_plan = copy_model_object(payment_verification_plan)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, payment_verification_plan.business_area)
@@ -514,8 +514,8 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, payment_verification_plan_id):
-        pk = decode_id_string(payment_verification_plan_id)
-        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=pk)
+        payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
+        payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_EXPORT, payment_verification_plan.business_area)
 
@@ -534,7 +534,7 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
 
         payment_verification_plan.xlsx_file_exporting = True
         payment_verification_plan.save()
-        create_payment_verification_plan_xlsx.delay(pk, info.context.user.pk)
+        create_payment_verification_plan_xlsx.delay(payment_verification_plan_id, info.context.user.pk)
         return cls(payment_plan=payment_verification_plan.payment_plan_obj)
 
 
@@ -569,7 +569,7 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
         calculate_counts(payment_verification_plan)
         payment_verification_plan.xlsx_file_imported = True
         payment_verification_plan.save()
-        return ImportXlsxPaymentVerificationPlanFile(payment_verification_plan.get_payment_plan, import_service.errors)
+        return ImportXlsxPaymentVerificationPlanFile(payment_verification_plan.payment_plan_obj, import_service.errors)
 
 
 class MarkPaymentRecordAsFailedMutation(PermissionMutation):

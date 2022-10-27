@@ -610,6 +610,8 @@ class GenericPaymentPlanNode(graphene.ObjectType):
         PaymentVerificationPlanNode,
         filterset_class=PaymentVerificationPlanFilter,
     )
+    status_date = graphene.DateTime()
+    status = graphene.String()
 
     bank_reconciliation_success = graphene.Int()
     bank_reconciliation_error = graphene.Int()
@@ -647,6 +649,12 @@ class GenericPaymentPlanNode(graphene.ObjectType):
 
     def resolve_can_create_payment_verification_plan(self, info, **kwargs):
         return self.can_create_payment_verification_plan
+
+    def resolve_status_date(self, info):
+        return self.status_date
+
+    def resolve_status(self, info):
+        return self.status
 
 
 class Query(graphene.ObjectType):

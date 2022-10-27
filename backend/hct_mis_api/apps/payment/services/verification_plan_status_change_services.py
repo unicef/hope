@@ -129,15 +129,15 @@ class VerificationPlanStatusChangeServices:
         ).delete()
         return self.payment_verification_plan
 
-    def _create_grievance_ticket_for_status(self, cashplan_payment_verification, status):
-        verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
+    def _create_grievance_ticket_for_status(self, payment_verification_plan: PaymentVerificationPlan, status: str):
+        verifications = payment_verification_plan.payment_record_verifications.filter(status=status)
         if verifications.count() == 0:
             return
 
         grievance_ticket_list = [
             GrievanceTicket(
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-                business_area=cashplan_payment_verification.cash_plan.business_area,
+                business_area=payment_verification_plan.payment_plan_obj.business_area,
             )
             for _ in list(range(verifications.count()))
         ]
@@ -157,8 +157,8 @@ class VerificationPlanStatusChangeServices:
 
         TicketPaymentVerificationDetails.objects.bulk_create(ticket_payment_verification_details_list)
 
-    def _create_grievance_tickets(self, cashplan_payment_verification):
-        self._create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED)
+    def _create_grievance_tickets(self, payment_verification_plan):
+        self._create_grievance_ticket_for_status(payment_verification_plan, PaymentVerification.STATUS_NOT_RECEIVED)
         self._create_grievance_ticket_for_status(
-            cashplan_payment_verification, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+            payment_verification_plan, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
         )

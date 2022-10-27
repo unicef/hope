@@ -63,10 +63,10 @@ def fsp_generate_xlsx_report_task(fsp_id):
 @app.task
 @log_start_and_end
 @sentry_tags
-def create_payment_verification_plan_xlsx(cash_plan_payment_verification_id, user_id):
+def create_payment_verification_plan_xlsx(payment_verification_plan_id, user_id):
     try:
         user = get_user_model().objects.get(pk=user_id)
-        payment_verification_plan = PaymentVerificationPlan.objects.get(id=cash_plan_payment_verification_id)
+        payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
 
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_verification_plan.business_area)
