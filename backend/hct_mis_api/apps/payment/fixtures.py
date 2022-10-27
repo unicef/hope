@@ -322,7 +322,7 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     registration_ca_id = factory.Faker("uuid4")
 
 
-def generate_real_cash_plans():
+def generate_real_cash_plans() -> None:
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3)
     program = RealProgramFactory()
