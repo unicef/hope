@@ -1,5 +1,6 @@
 import logging
 from enum import auto
+from typing import Any, Dict, List
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -34,7 +35,7 @@ class GrievanceNotification:
         self.user_recipients = self._prepare_user_recipients()
         self.emails = self._prepare_emails()
 
-    def _prepare_default_context(self, user_recipient):
+    def _prepare_default_context(self, user_recipient) -> Dict[str, Any]:
         protocol = "http" if settings.IS_DEV else "https"
         context = {
             "first_name": user_recipient.first_name,
@@ -63,7 +64,7 @@ class GrievanceNotification:
         email.attach_alternative(html_body, "text/html")
         return email
 
-    def send_email_notification(self):
+    def send_email_notification(self) -> None:
         if not config.SEND_GRIEVANCES_NOTIFICATION:
             return
         try:
@@ -187,7 +188,9 @@ class GrievanceNotification:
     }
 
     @classmethod
-    def prepare_notification_for_ticket_creation(cls, grievance_ticket):
+    def prepare_notification_for_ticket_creation(
+        cls: "GrievanceNotification", grievance_ticket
+    ) -> List["GrievanceNotification"]:
         notifications = []
         if grievance_ticket.assigned_to:
             notifications.append(
@@ -206,6 +209,6 @@ class GrievanceNotification:
         return notifications
 
     @classmethod
-    def send_all_notifications(cls, notifications):
+    def send_all_notifications(cls, notifications) -> None:
         for notification in notifications:
             notification.send_email_notification()

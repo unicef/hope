@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Any, List, Union
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -265,19 +266,19 @@ class HouseholdDeleteIssueTypeExtras(graphene.InputObjectType):
     household = graphene.GlobalID(node=HouseholdNode, required=True)
 
 
-def to_date_string(dict, field_name):
+def to_date_string(dict, field_name) -> None:
     date = dict.get(field_name)
     if date:
         dict[field_name] = date.isoformat()
 
 
-def to_phone_number_str(dict, field_name):
+def to_phone_number_str(dict, field_name) -> None:
     phone_number = dict.get(field_name)
     if phone_number:
         dict[field_name] = str(phone_number)
 
 
-def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     issue_type = input.get("issue_type")
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
         return save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
@@ -289,9 +290,10 @@ def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwarg
         return save_household_delete_extras(root, info, input, grievance_ticket, extras, **kwargs)
     if issue_type == GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE:
         return save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
+    raise Exception("Invalid issue type")
 
 
-def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
     issue_type = grievance_ticket.issue_type
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
         return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
@@ -318,7 +320,7 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
     }
 
-    for field, field_data in household_data_with_approve_status.items():
+    for field in household_data_with_approve_status.keys():
         current_value = getattr(household, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()
@@ -356,7 +358,7 @@ def update_household_data_update_extras(root, info, input, grievance_ticket, ext
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in new_household_data.items()
     }
 
-    for field, field_data in household_data_with_approve_status.items():
+    for field in household_data_with_approve_status.keys():
         current_value = getattr(household, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()
@@ -376,7 +378,7 @@ def update_household_data_update_extras(root, info, input, grievance_ticket, ext
     return grievance_ticket
 
 
-def save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_data_update_issue_type_extras")
 
@@ -407,7 +409,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
     }
 
-    for field, field_data in individual_data_with_approve_status.items():
+    for field in individual_data_with_approve_status.keys():
         current_value = getattr(individual, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()
@@ -505,7 +507,7 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in new_individual_data.items()
     }
 
-    for field, field_data in individual_data_with_approve_status.items():
+    for field in individual_data_with_approve_status.keys():
         current_value = getattr(individual, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()
@@ -669,13 +671,14 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     payment_channels = individual_data.pop("payment_channels", [])
     role = individual_data.pop("role", ROLE_NO_ROLE)
     first_registration_date = timezone.now()
-    individual = Individual(
+    individual = Individual.objects.create(
         household=household,
         first_registration_date=first_registration_date,
         last_registration_date=first_registration_date,
         business_area=grievance_ticket.business_area,
         **individual_data,
     )
+    individual.refresh_from_db()
 
     documents_to_create = [handle_add_document(document, individual) for document in documents]
     identities_to_create = [handle_add_identity(identity, individual) for identity in identities]
@@ -714,11 +717,11 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     )
 
 
-def is_approved(item):
+def is_approved(item) -> bool:
     return item.get("approve_status") is True
 
 
-def convert_to_empty_string_if_null(value):
+def convert_to_empty_string_if_null(value: Any) -> Union[Any, str]:
     return value or ""
 
 
@@ -845,7 +848,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     )
 
 
-def cast_flex_fields(flex_fields):
+def cast_flex_fields(flex_fields) -> None:
     decimals_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="DECIMAL").values_list("name", flat=True)
     integer_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="INTEGER").values_list("name", flat=True)
     for key, value in flex_fields.items():
@@ -914,7 +917,7 @@ def close_delete_individual_ticket(grievance_ticket, info):
         recalculate_data(household)
 
 
-def check_external_collector(household):
+def check_external_collector(household) -> None:
     individuals = household.individuals.all()
     external_collectors = IndividualRoleInHousehold.objects.filter(individual__in=individuals).exclude(
         household=household

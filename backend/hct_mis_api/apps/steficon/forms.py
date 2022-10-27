@@ -77,7 +77,8 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
-            self.fields[fname].widget = HiddenInput()
+            # TODO: fields is CharField but used as dict?
+            self.fields[fname].widget = HiddenInput()  # type: ignore
 
     def clean_fields(self):
         try:

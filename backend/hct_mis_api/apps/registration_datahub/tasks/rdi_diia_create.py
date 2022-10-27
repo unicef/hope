@@ -8,7 +8,6 @@ from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.models import (
     DISABLED,
     FEMALE,
@@ -295,6 +294,7 @@ class RdiDiiaCreateTask:
 
         self.documents.append(
             ImportedDocument(
+                country=Country("UA"),
                 document_number=household.vpo_doc_id,
                 individual=head_of_household,
                 type=self.other_document_type,
@@ -306,6 +306,7 @@ class RdiDiiaCreateTask:
     def _add_birth_document(self, individual, individual_obj):
         self.documents.append(
             ImportedDocument(
+                country=Country("UA"),
                 document_number=individual.birth_doc,
                 individual=individual_obj,
                 type=self.birth_document_type,
@@ -317,6 +318,7 @@ class RdiDiiaCreateTask:
 
         self.documents.append(
             ImportedDocument(
+                country=Country("UA"),
                 document_number=data.get("document_number"),
                 individual=data.get("individual"),
                 doc_date=data.get("doc_date"),
@@ -327,6 +329,7 @@ class RdiDiiaCreateTask:
     def _add_tax_id_document(self, tax_id, individual_obj):
         self.documents.append(
             ImportedDocument(
+                country=Country("UA"),
                 document_number=tax_id,
                 individual=individual_obj,
                 type=self.imported_doc_type_for_tax_id,
@@ -335,23 +338,18 @@ class RdiDiiaCreateTask:
 
     def _get_document_types(self):
         self.national_passport_document_type, _ = ImportedDocumentType.objects.get_or_create(
-            country=Country("UA"),  # DiiaIndividual don't has issuing country
             type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
         )
         self.birth_document_type, _ = ImportedDocumentType.objects.get_or_create(
-            country=Country("UA"),  # DiiaIndividual don't has issuing country
             type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         )
         self.other_document_type, _ = ImportedDocumentType.objects.get_or_create(
-            country=Country("UA"),  # DiiaIndividual don't has issuing country
             type=IDENTIFICATION_TYPE_OTHER,
         )
         self.imported_doc_type_for_tax_id, _ = ImportedDocumentType.objects.get_or_create(
-            country=Country("UA"),  # DiiaIndividual don't has issuing country
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
         self.doc_type_for_tax_id, _ = DocumentType.objects.get_or_create(
-            country=GeoCountry.objects.get(iso_code2="UA"),
             type=IDENTIFICATION_TYPE_TAX_ID,
         )
 

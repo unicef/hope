@@ -3,7 +3,7 @@ import random
 import string
 import urllib.parse
 from collections import Counter
-from typing import Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -15,12 +15,19 @@ from graphql import GraphQLError
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN, BankAccountInfo
+from hct_mis_api.apps.household.models import (
+    RELATIONSHIP_UNKNOWN,
+    BankAccountInfo,
+    Household,
+    Individual,
+    IndividualIdentity,
+)
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
 
-def handle_role(role, household, individual):
+def handle_role(role, household, individual) -> None:
     from hct_mis_api.apps.household.models import (
         ROLE_ALTERNATE,
         ROLE_PRIMARY,
@@ -49,16 +56,18 @@ def handle_add_document(document, individual):
     photoraw = document.get("photoraw")
     if photo:
         photo = photoraw
-    document_type = DocumentType.objects.get(country=country, type=type_name)
+    document_type = DocumentType.objects.get(type=type_name)
 
-    document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
+    document_already_exists = Document.objects.filter(
+        document_number=number, type=document_type, country=country
+    ).exists()
     if document_already_exists:
-        raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
+        raise GraphQLError(f"Document with number {number} of type {type_name} already exist")
 
-    return Document(document_number=number, individual=individual, type=document_type, photo=photo)
+    return Document(document_number=number, individual=individual, type=document_type, photo=photo, country=country)
 
 
-def handle_edit_document(document_data: dict):
+def handle_edit_document(document_data: Dict):
     from django.shortcuts import get_object_or_404
 
     from graphql import GraphQLError
@@ -81,21 +90,24 @@ def handle_edit_document(document_data: dict):
     document_id = decode_id_string(document_id)
     document = get_object_or_404(Document, id=document_id)
 
-    document_type = DocumentType.objects.get(country=country, type=type_name)
+    document_type = DocumentType.objects.get(type=type_name)
 
     document_already_exists = (
-        Document.objects.exclude(pk=document_id).filter(document_number=number, type=document_type).exists()
+        Document.objects.exclude(pk=document_id)
+        .filter(document_number=number, type=document_type, country=country)
+        .exists()
     )
     if document_already_exists:
-        raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
+        raise GraphQLError(f"Document with number {number} of type {type_name} already exist")
 
     document.document_number = number
     document.type = document_type
+    document.country = country
     document.photo = photo
     return document
 
 
-def handle_add_payment_channel(payment_channel, individual):
+def handle_add_payment_channel(payment_channel, individual) -> Optional[BankAccountInfo]:
     payment_channel_type = payment_channel.get("type")
     if payment_channel_type == "BANK_TRANSFER":
         bank_name = payment_channel.get("bank_name")
@@ -105,9 +117,10 @@ def handle_add_payment_channel(payment_channel, individual):
             bank_name=bank_name,
             bank_account_number=bank_account_number,
         )
+    return None
 
 
-def handle_update_payment_channel(payment_channel):
+def handle_update_payment_channel(payment_channel) -> Optional[BankAccountInfo]:
     payment_channel_type = payment_channel.get("type")
     payment_channel_id = decode_id_string(payment_channel.get("id"))
 
@@ -117,11 +130,11 @@ def handle_update_payment_channel(payment_channel):
         bank_account_info.bank_account_number = payment_channel.get("bank_account_number")
         return bank_account_info
 
+    return None
 
-def handle_add_identity(identity, individual):
-    from graphql import GraphQLError
 
-    from hct_mis_api.apps.household.models import Agency, IndividualIdentity
+def handle_add_identity(identity, individual) -> IndividualIdentity:
+    from hct_mis_api.apps.household.models import Agency
 
     agency_name = identity.get("agency")
     country_code = identity.get("country")
@@ -139,16 +152,13 @@ def handle_add_identity(identity, individual):
 
     identity_already_exists = IndividualIdentity.objects.filter(number=number, agency=agency_type).exists()
     if identity_already_exists:
-        logger.error(f"Identity with number {number}, agency: {agency_name} already exist")
-        raise GraphQLError(f"Identity with number {number}, agency: {agency_name} already exist")
+        log_and_raise(f"Identity with number {number}, agency: {agency_name} already exists")
 
     return IndividualIdentity(number=number, individual=individual, agency=agency_type)
 
 
-def handle_edit_identity(identity_data: dict):
+def handle_edit_identity(identity_data: Dict):
     from django.shortcuts import get_object_or_404
-
-    from graphql import GraphQLError
 
     from hct_mis_api.apps.core.utils import decode_id_string
     from hct_mis_api.apps.household.models import Agency, IndividualIdentity
@@ -177,8 +187,7 @@ def handle_edit_identity(identity_data: dict):
         IndividualIdentity.objects.exclude(pk=identity_id).filter(number=number, agency=agency_type).exists()
     )
     if identity_already_exists:
-        logger.error(f"Identity with number {number}, agency: {agency_name} already exist")
-        raise GraphQLError(f"Identity with number {number}, agency: {agency_name} already exist")
+        log_and_raise(f"Identity with number {number}, agency: {agency_name} already exists")
 
     identity.number = number
     identity.agency = agency_type
@@ -200,13 +209,13 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
             "document_number": document.document_number,
             "individual": encode_id_base64(document.individual.id, "Individual"),
             "type": document.type.type,
-            "country": document.type.country.iso_code3,
+            "country": document.country.iso_code3,
         }
 
     return previous_documents
 
 
-def prepare_edit_documents(documents_to_edit):
+def prepare_edit_documents(documents_to_edit) -> List[Dict]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -216,8 +225,8 @@ def prepare_edit_documents(documents_to_edit):
 
     for document_to_edit in documents_to_edit:
         encoded_id = document_to_edit.get("id")
-        country = document_to_edit.get("country")
         document_type = document_to_edit.get("type")
+        country = document_to_edit.get("country")
         document_number = document_to_edit.get("number")
         document_photo = document_to_edit.get("photo")
         document_photoraw = document_to_edit.get("photoraw")
@@ -232,16 +241,16 @@ def prepare_edit_documents(documents_to_edit):
                 "approve_status": False,
                 "value": {
                     "id": encoded_id,
-                    "country": country,
                     "type": document_type,
+                    "country": country,
                     "number": document_number,
                     "photo": document_photo,
                     "photoraw": document_photo,
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "country": document.type.country.iso_code3,
                     "type": document.type.type,
+                    "country": document.country.iso_code3,
                     "number": document.document_number,
                     "photo": document.photo.name,
                     "photoraw": document.photo.name,
@@ -252,7 +261,7 @@ def prepare_edit_documents(documents_to_edit):
     return edited_documents
 
 
-def prepare_previous_identities(identities_to_remove_with_approve_status):
+def prepare_previous_identities(identities_to_remove_with_approve_status) -> Dict[str, Any]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -375,9 +384,7 @@ def handle_bank_transfer_payment_method(pc):
     }
 
 
-def verify_required_arguments(input_data, field_name, options):
-    from graphql import GraphQLError
-
+def verify_required_arguments(input_data, field_name, options) -> None:
     from hct_mis_api.apps.core.utils import nested_dict_get
 
     for key, value in options.items():
@@ -385,20 +392,18 @@ def verify_required_arguments(input_data, field_name, options):
             continue
         for required in value.get("required"):
             if nested_dict_get(input_data, required) is None:
-                logger.error(f"You have to provide {required} in {key}")
-                raise GraphQLError(f"You have to provide {required} in {key}")
+                log_and_raise(f"You have to provide {required} in {key}")
         for not_allowed in value.get("not_allowed"):
             if nested_dict_get(input_data, not_allowed) is not None:
-                logger.error(f"You can't provide {not_allowed} in {key}")
-                raise GraphQLError(f"You can't provide {not_allowed} in {key}")
+                log_and_raise(f"You can't provide {not_allowed} in {key}")
 
 
-def remove_parsed_data_fields(data_dict, fields_list):
+def remove_parsed_data_fields(data_dict, fields_list) -> None:
     for field in fields_list:
         data_dict.pop(field, None)
 
 
-def verify_flex_fields(flex_fields_to_verify, associated_with):
+def verify_flex_fields(flex_fields_to_verify, associated_with) -> None:
     from hct_mis_api.apps.core.core_fields_attributes import (
         FIELD_TYPES_TO_INTERNAL_TYPE,
         TYPE_SELECT_MANY,
@@ -434,7 +439,7 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 
-def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove, info):
+def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove, info) -> None:
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
@@ -473,7 +478,7 @@ def get_data_from_role_data(role_data):
     return role_name, old_individual, new_individual, household
 
 
-def get_data_from_role_data_new_ticket(role_data):
+def get_data_from_role_data_new_ticket(role_data) -> Tuple[str, Individual, Individual, Household]:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -486,7 +491,9 @@ def get_data_from_role_data_new_ticket(role_data):
     return role_name, old_individual, new_individual, household
 
 
-def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_data, info=None, is_new_ticket=False):
+def reassign_roles_on_disable_individual(
+    individual_to_remove, role_reassign_data, info=None, is_new_ticket=False
+) -> Household:
     from django.shortcuts import get_object_or_404
 
     from graphql import GraphQLError
@@ -553,16 +560,14 @@ def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_dat
     is_one_individual = household_to_remove.individuals.count() == 1 if household_to_remove else False
 
     if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
-        logger.error("Ticket cannot be closed, not all roles have been reassigned")
-        raise GraphQLError("Ticket cannot be closed, not all roles have been reassigned")
+        log_and_raise("Ticket cannot be closed, not all roles have been reassigned")
 
     if (
         all(HEAD not in key for key in role_reassign_data.keys())
         and individual_to_remove.is_head()
         and not is_one_individual
     ):
-        logger.error("Ticket cannot be closed head of household has not been reassigned")
-        raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
+        log_and_raise("Ticket cannot be closed head of household has not been reassigned")
 
     if roles_to_bulk_update:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
@@ -570,7 +575,7 @@ def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_dat
     return household_to_remove
 
 
-def reassign_roles_on_update(individual, role_reassign_data, info=None):
+def reassign_roles_on_update(individual, role_reassign_data, info=None) -> None:
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.household.models import (
@@ -621,7 +626,7 @@ def reassign_roles_on_update(individual, role_reassign_data, info=None):
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
 
 
-def withdraw_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household):
+def withdraw_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household) -> None:
     from hct_mis_api.apps.household.models import Document
 
     individual_to_remove.withdraw()
@@ -655,7 +660,7 @@ def mark_as_duplicate_individual(
 
 def log_and_withdraw_household_if_needed(
     individual_to_remove, info, old_individual_to_remove, removed_individual_household
-):
+) -> None:
     from hct_mis_api.apps.household.models import Individual
 
     log_create(

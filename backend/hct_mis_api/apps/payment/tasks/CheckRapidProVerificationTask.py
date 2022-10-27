@@ -23,7 +23,7 @@ def does_payment_record_have_right_hoh_phone_number(record):
 
 
 class CheckRapidProVerificationTask:
-    def execute(self):
+    def execute(self) -> None:
         active_rapidpro_verifications = CashPlanPaymentVerification.objects.filter(
             verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
             status=CashPlanPaymentVerification.STATUS_ACTIVE,

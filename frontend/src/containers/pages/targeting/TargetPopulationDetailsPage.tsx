@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
   useTargetPopulationQuery,
 } from '../../../__generated__/graphql';
-import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
 import { TargetPopulationCore } from '../../../components/targeting/TargetPopulationCore';
 import { TargetPopulationDetails } from '../../../components/targeting/TargetPopulationDetails';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -29,7 +28,12 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
   ] = useLazyInterval(() => refetch(), 3000);
   const buildStatus = data?.targetPopulation?.buildStatus;
   useEffect(() => {
-    if (buildStatus !== TargetPopulationBuildStatus.Ok) {
+    if (
+      [
+        TargetPopulationBuildStatus.Building,
+        TargetPopulationBuildStatus.Pending,
+      ].includes(buildStatus)
+    ) {
       startPollingTargetPopulation();
     } else {
       stopPollingTargetPopulation();
@@ -37,7 +41,6 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
     return stopPollingTargetPopulation;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buildStatus]);
-  const [isEdit, setEditState] = useState(false);
 
   if (loading && !data) return <LoadingComponent />;
 
@@ -50,42 +53,26 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
 
   return (
     <>
-      {isEdit ? (
-        <EditTargetPopulation
-          targetPopulation={targetPopulation}
-          cancelEdit={() => setEditState(false)}
-        />
-      ) : (
-        <>
-          <TargetPopulationPageHeader
-            targetPopulation={targetPopulation}
-            setEditState={setEditState}
-            canEdit={hasPermissions(PERMISSIONS.TARGETING_UPDATE, permissions)}
-            canRemove={hasPermissions(
-              PERMISSIONS.TARGETING_REMOVE,
-              permissions,
-            )}
-            canDuplicate={hasPermissions(
-              PERMISSIONS.TARGETING_DUPLICATE,
-              permissions,
-            )}
-            canLock={hasPermissions(PERMISSIONS.TARGETING_LOCK, permissions)}
-            canUnlock={hasPermissions(
-              PERMISSIONS.TARGETING_UNLOCK,
-              permissions,
-            )}
-            canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
-          />
-          {status !== TargetPopulationStatus.Open && (
-            <TargetPopulationDetails targetPopulation={targetPopulation} />
-          )}
-          <TargetPopulationCore
-            id={targetPopulation.id}
-            targetPopulation={targetPopulation}
-            permissions={permissions}
-          />
-        </>
+      <TargetPopulationPageHeader
+        targetPopulation={targetPopulation}
+        canEdit={hasPermissions(PERMISSIONS.TARGETING_UPDATE, permissions)}
+        canRemove={hasPermissions(PERMISSIONS.TARGETING_REMOVE, permissions)}
+        canDuplicate={hasPermissions(
+          PERMISSIONS.TARGETING_DUPLICATE,
+          permissions,
+        )}
+        canLock={hasPermissions(PERMISSIONS.TARGETING_LOCK, permissions)}
+        canUnlock={hasPermissions(PERMISSIONS.TARGETING_UNLOCK, permissions)}
+        canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
+      />
+      {status !== TargetPopulationStatus.Open && (
+        <TargetPopulationDetails targetPopulation={targetPopulation} />
       )}
+      <TargetPopulationCore
+        id={targetPopulation.id}
+        targetPopulation={targetPopulation}
+        permissions={permissions}
+      />
     </>
   );
 }

@@ -224,20 +224,6 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
         'unlockTargetPopulation': {
             'targetPopulation': {
                 'households': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ],
                     'totalCount': 2
                 },
                 'status': 'OPEN'

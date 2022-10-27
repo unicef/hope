@@ -23,7 +23,7 @@ from hct_mis_api.apps.household.models import (
 logger = logging.getLogger(__name__)
 
 
-def age_to_birth_date_range_query(field_name, age_min, age_max):
+def age_to_birth_date_range_query(field_name, age_min, age_max) -> Q:
     query_dict = {}
     current_date = dt.date.today()
     if age_min is not None:
@@ -94,7 +94,7 @@ def get_other_document_number_query(_, args):
     return get_documents_number_query(IDENTIFICATION_TYPE_OTHER, args[0])
 
 
-def get_documents_number_query(document_type, number):
+def get_documents_number_query(document_type, number) -> Q:
     return Q(documents__type__type=document_type, documents__document_number=number)
 
 
@@ -126,11 +126,11 @@ def get_other_issuer_query(_, args):
     return get_documents_issuer_query(IDENTIFICATION_TYPE_OTHER, args[0])
 
 
-def get_documents_issuer_query(document_type, country_alpha3):
+def get_documents_issuer_query(document_type, country_alpha3) -> Q:
     return Q(documents__type__type=document_type, documents__type__country__iso_code3=country_alpha3)
 
 
-def get_role_query(_, args):
+def get_role_query(_, args) -> Q:
     return Q(households_and_roles__role=args[0])
 
 
@@ -167,7 +167,7 @@ def get_has_tax_id_query(_, args):
     return Q(documents__type__type="TAX_ID") if has_tax_id else ~Q(documents__type__type="TAX_ID")
 
 
-def country_generic_query(comparison_method, args, lookup):
+def country_generic_query(comparison_method, args, lookup) -> Q:
     query = Q(**{lookup: Countries.get_country_value(args[0])})
     if comparison_method == "EQUALS":
         return query

@@ -152,23 +152,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Address',
-                'labels': [
-                    {
-                        'label': 'Address',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'address',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
                     {
                         'labelEn': 'No',
                         'labels': [
@@ -299,23 +282,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'age',
                 'required': False,
                 'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Alternative phone number',
-                'labels': [
-                    {
-                        'label': 'Alternative phone number',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'phone_no_alternative',
-                'required': False,
-                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -1281,10 +1247,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Child is/ head of household',
+                'labelEn': 'Child is head of household',
                 'labels': [
                     {
-                        'label': 'Child is/ head of household',
+                        'label': 'Child is head of household',
                         'language': 'English(EN)'
                     }
                 ],
@@ -6679,23 +6645,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Device ID',
-                'labels': [
-                    {
-                        'label': 'Device ID',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'deviceid',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
                     {
                         'labelEn': "Don't know",
                         'labels': [
@@ -7881,23 +7830,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'DECIMAL'
             },
             {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': "Driver's license number",
-                'labels': [
-                    {
-                        'label': "Driver's license number",
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'drivers_license_no',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
                 'associatedWith': 'Household',
                 'choices': [
                 ],
@@ -8000,23 +7932,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Electoral card number',
-                'labels': [
-                    {
-                        'label': 'Electoral card number',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'electoral_card_no',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
                 'associatedWith': 'Household',
                 'choices': [
                 ],
@@ -8090,23 +8005,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'estimated_birth_date',
                 'required': True,
                 'type': 'BOOL'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Family name',
-                'labels': [
-                    {
-                        'label': 'Family name',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'family_name',
-                'required': False,
-                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -8590,23 +8488,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'fruits_hdds_h_f',
                 'required': False,
                 'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Full name',
-                'labels': [
-                    {
-                        'label': 'Full name',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'full_name',
-                'required': True,
-                'type': 'STRING'
             },
             {
                 'associatedWith': 'Individual',
@@ -11314,23 +11195,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'inc_gift_h_f',
                 'required': False,
                 'type': 'DECIMAL'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Given name',
-                'labels': [
-                    {
-                        'label': 'Given name',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'given_name',
-                'required': False,
-                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -43361,23 +43225,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'DECIMAL'
             },
             {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Middle name(s)',
-                'labels': [
-                    {
-                        'label': 'Middle name(s)',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'middle_name',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
                 'associatedWith': 'Household',
                 'choices': [
                 ],
@@ -43700,40 +43547,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'name_enumerator',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'National ID number',
-                'labels': [
-                    {
-                        'label': 'National ID number',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'national_id_no',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'National passport number',
-                'labels': [
-                    {
-                        'label': 'National passport number',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'national_passport',
                 'required': False,
                 'type': 'STRING'
             },
@@ -44352,23 +44165,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'inc_self_h_f',
                 'required': False,
                 'type': 'DECIMAL'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Phone number',
-                'labels': [
-                    {
-                        'label': 'Phone number',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'phone_no',
-                'required': False,
-                'type': 'STRING'
             },
             {
                 'associatedWith': 'Individual',
@@ -51390,14 +51186,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Who answers this phone?',
+                'labelEn': 'Who answers this (alt) phone?',
                 'labels': [
                     {
-                        'label': 'Who answers this phone?',
+                        'label': 'Who answers this (alt) phone?',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'who_answers_phone',
+                'name': 'who_answers_alt_phone',
                 'required': False,
                 'type': 'STRING'
             },
@@ -51414,7 +51210,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'who_answers_alt_phone',
+                'name': 'who_answers_phone',
                 'required': False,
                 'type': 'STRING'
             },

@@ -8,7 +8,6 @@ class ViewPermissionsMixinBase(AccessMixin):
     def has_permissions(self):
         return NotImplemented
 
-
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
@@ -22,7 +21,5 @@ class UploadFilePermissionMixin(ViewPermissionsMixinBase):
         roles = self.request.user.user_roles.all()
 
         return any(
-            self.request.user.has_permission(
-                Permissions.UPLOAD_STORAGE_FILE.name, role.business_area
-            ) for role in roles
+            self.request.user.has_permission(Permissions.UPLOAD_STORAGE_FILE.name, role.business_area) for role in roles
         )

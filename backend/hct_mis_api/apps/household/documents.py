@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Q
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
@@ -8,8 +9,20 @@ from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_a
 from .elasticsearch_utils import DEFAULT_SCRIPT
 from .models import Household, Individual, IndividualIdentity, IndividualRoleInHousehold
 
+index_settings = {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "similarity": {
+        "default": {
+            "type": "scripted",
+            "script": {
+                "source": DEFAULT_SCRIPT,
+            },
+        },
+    },
+}
 
-@registry.register_document
+
 class IndividualDocument(Document):
     id = fields.KeywordField(boost=0)
     given_name = fields.TextField(
@@ -68,7 +81,7 @@ class IndividualDocument(Document):
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
             "type": fields.KeywordField(attr="type.type", similarity="boolean"),
-            "country": fields.KeywordField(attr="type.country.iso_code3", similarity="boolean"),
+            "country": fields.KeywordField(attr="country.iso_code3", similarity="boolean"),
         }
     )
     identities = fields.ObjectField(
@@ -108,21 +121,6 @@ class IndividualDocument(Document):
     def prepare_business_area(self, instance):
         return instance.business_area.slug
 
-    class Index:
-        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals"
-        settings = {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
-            "similarity": {
-                "default": {
-                    "type": "scripted",
-                    "script": {
-                        "source": DEFAULT_SCRIPT,
-                    },
-                },
-            },
-        }
-
     class Django:
         model = Individual
 
@@ -140,6 +138,43 @@ class IndividualDocument(Document):
             return related_instance.individual
         if isinstance(related_instance, Household):
             return related_instance.individuals.all()
+
+
+@registry.register_document
+class IndividualDocumentAfghanistan(IndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_afghanistan"
+        settings = index_settings
+
+    def get_queryset(self):
+        return Individual.objects.filter(business_area__slug="afghanistan")
+
+
+@registry.register_document
+class IndividualDocumentUkraine(IndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_ukraine"
+        settings = index_settings
+
+    def get_queryset(self):
+        return Individual.objects.filter(business_area__slug="ukraine")
+
+
+@registry.register_document
+class IndividualDocumentOthers(IndividualDocument):
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals_others"
+        settings = index_settings
+
+    def get_queryset(self):
+        return Individual.objects.exclude(Q(business_area__slug="ukraine") | Q(business_area__slug="afghanistan"))
+
+
+def get_individual_doc(business_area_slug) -> IndividualDocument:
+    return {
+        "afghanistan": IndividualDocumentAfghanistan,
+        "ukraine": IndividualDocumentUkraine,
+    }.get(business_area_slug, IndividualDocumentOthers)
 
 
 @registry.register_document
