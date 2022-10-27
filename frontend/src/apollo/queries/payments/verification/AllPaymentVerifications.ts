@@ -12,6 +12,7 @@ export const AllPaymentVerifications = gql`
     $status: String
     $businessArea: String!
     $verificationChannel: String
+    $paymentPlanId: String
   ) {
     allPaymentVerifications(
       after: $after
@@ -24,6 +25,7 @@ export const AllPaymentVerifications = gql`
       status: $status
       businessArea: $businessArea
       verificationChannel: $verificationChannel
+      paymentPlanId: $paymentPlanId
     ) {
       pageInfo {
         hasNextPage

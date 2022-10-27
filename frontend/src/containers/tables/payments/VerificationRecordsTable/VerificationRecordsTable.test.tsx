@@ -2,9 +2,9 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
-import { VerificationRecordsTable } from '.';
 import { fakeApolloAllPaymentVerifications } from '../../../../../fixtures/payments/fakeApolloAllPaymentVerifications';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
+import { VerificationRecordsTable } from '.';
 
 describe('containers/tables/payments/VerificationRecordsTable', () => {
   it('should render with data', async () => {
@@ -14,9 +14,9 @@ describe('containers/tables/payments/VerificationRecordsTable', () => {
         mocks={fakeApolloAllPaymentVerifications}
       >
         <VerificationRecordsTable
-          cashPlanId='Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=='
-          filter={{}}
-          canViewRecordDetails={true}
+          paymentPlanId='Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=='
+          // filter={{}}
+          canViewRecordDetails
           businessArea='afghanistan'
         />
       </MockedProvider>,
@@ -34,9 +34,9 @@ describe('containers/tables/payments/VerificationRecordsTable', () => {
         mocks={fakeApolloAllPaymentVerifications}
       >
         <VerificationRecordsTable
-          cashPlanId='Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=='
-          filter={{}}
-          canViewRecordDetails={true}
+          paymentPlanId='Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=='
+          // filter={{}}
+          canViewRecordDetails
           businessArea='afghanistan'
         />
       </MockedProvider>,

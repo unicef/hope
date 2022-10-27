@@ -27,7 +27,7 @@ type ActionPaymentPlanMutation {
 
 type ActivatePaymentVerificationPlan {
   validationErrors: Arg
-  paymentPlan: CashPlanNode
+  paymentPlan: GenericPaymentPlanNode
 }
 
 input AddIndividualDataObjectType {
@@ -625,7 +625,7 @@ type DeletePaymentPlanMutation {
 }
 
 type DeletePaymentVerificationPlan {
-  paymentPlan: CashPlanNode
+  paymentPlan: GenericPaymentPlanNode
 }
 
 type DeleteProgram {
@@ -697,7 +697,7 @@ enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
 }
 
 type DiscardPaymentVerificationPlan {
-  paymentPlan: CashPlanNode
+  paymentPlan: GenericPaymentPlanNode
 }
 
 type DjangoDebug {
@@ -825,7 +825,7 @@ type ExportXLSXPaymentPlanPaymentListPerFSPMutation {
 }
 
 type ExportXlsxPaymentVerificationPlanFile {
-  paymentPlan: CashPlanNode
+  paymentPlan: GenericPaymentPlanNode
 }
 
 input FSPToDeliveryMechanismMappingInput {
@@ -957,7 +957,7 @@ type FinancialServiceProviderXlsxTemplateNodeEdge {
 }
 
 type FinishPaymentVerificationPlan {
-  paymentPlan: CashPlanNode
+  paymentPlan: GenericPaymentPlanNode
 }
 
 scalar FlexFieldsScalar
@@ -990,6 +990,17 @@ type GenericPaymentPlanNode {
   id: String
   objType: String
   paymentVerificationSummary: PaymentVerificationSummaryNode
+  availablePaymentRecordsCount: Int
+  verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection
+  bankReconciliationSuccess: Int
+  bankReconciliationError: Int
+  deliveryType: String
+  totalNumberOfHouseholds: Int
+  currency: String
+  totalDeliveredQuantity: Float
+  totalEntitledQuantity: Float
+  totalUndeliveredQuantity: Float
+  canCreatePaymentVerificationPlan: Boolean
 }
 
 scalar GeoJSON
@@ -1341,7 +1352,7 @@ type ImportXLSXPaymentPlanPaymentListPerFSPMutation {
 }
 
 type ImportXlsxPaymentVerificationPlanFile {
-  paymentPlan: CashPlanNode
+  paymentPlan: GenericPaymentPlanNode
   errors: [XlsxErrorNode]
 }
 
@@ -2298,7 +2309,7 @@ input IndividualUpdateDataObjectType {
 }
 
 type InvalidPaymentVerificationPlan {
-  paymentPlan: CashPlanNode
+  paymentPlan: GenericPaymentPlanNode
 }
 
 input IssueTypeExtrasInput {

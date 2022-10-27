@@ -56626,6 +56626,189 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "availablePaymentRecordsCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "verificationPlans",
+            "description": null,
+            "args": [
+              {
+                "name": "offset",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "before",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "after",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentVerificationPlanNodeConnection",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "bankReconciliationSuccess",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "bankReconciliationError",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deliveryType",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalNumberOfHouseholds",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "currency",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalDeliveredQuantity",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalEntitledQuantity",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalUndeliveredQuantity",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "canCreatePaymentVerificationPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -56905,7 +57088,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "CashPlanNode",
+              "name": "GenericPaymentPlanNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -56938,7 +57121,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "CashPlanNode",
+              "name": "GenericPaymentPlanNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -57036,7 +57219,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "CashPlanNode",
+              "name": "GenericPaymentPlanNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -57059,7 +57242,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "CashPlanNode",
+              "name": "GenericPaymentPlanNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -57082,7 +57265,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "CashPlanNode",
+              "name": "GenericPaymentPlanNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -57105,7 +57288,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "CashPlanNode",
+              "name": "GenericPaymentPlanNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -57128,7 +57311,7 @@
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "CashPlanNode",
+              "name": "GenericPaymentPlanNode",
               "ofType": null
             },
             "isDeprecated": false,

@@ -9,19 +9,30 @@ import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './VerificationRecordsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
 
+interface Props {
+  paymentPlanId?: string;
+  filter?: AllPaymentVerificationsQueryVariables;
+  canViewRecordDetails: boolean;
+  businessArea: string;
+}
+
 export function VerificationRecordsTable({
+  paymentPlanId,
   filter,
   canViewRecordDetails,
   businessArea,
-}): ReactElement {
+}: Props): ReactElement {
   const { t } = useTranslation();
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {
-    paymentVerificationPlan: filter.cashPlanPaymentVerification,
-    search: filter.search,
-    status: filter.status,
-    verificationChannel: filter.verificationChannel,
+    ...filter,
+    // TODO: cleanup
+    // paymentVerificationPlan: filter.cashPlanPaymentVerification,
+    // search: filter.search,
+    // status: filter.status,
+    // verificationChannel: filter.verificationChannel,
     businessArea,
+    paymentPlanId,
   };
 
   return (

@@ -7,8 +7,8 @@ export const DELETE_CASH_PLAN_PAYMENT_VERIFICATION = gql`
     ) {
       paymentPlan {
         id
-        status
-        statusDate
+        # status
+        # statusDate
         verificationPlans {
           edges {
             node {
