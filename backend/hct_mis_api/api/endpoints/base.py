@@ -1,6 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.http import Http404
+from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 
 from rest_framework.exceptions import PermissionDenied
@@ -9,8 +10,6 @@ from rest_framework.viewsets import ViewSetMixin
 
 from ..auth import HOPEAuthentication, HOPEPermission
 from ..models import APILogEntry, Grant
-
-from django.http.response import HttpResponseBase
 
 
 class RejectPolicy(models.TextChoices):

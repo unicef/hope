@@ -1,4 +1,5 @@
 from django.core.management import BaseCommand, call_command
+
 from hct_mis_api.apps.core.management.sql import drop_databases
 
 

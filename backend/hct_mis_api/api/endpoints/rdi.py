@@ -1,7 +1,8 @@
 from dataclasses import asdict
-from typing import Optional, Type
+from typing import Optional
 
 from django.db.transaction import atomic
+from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 
 from rest_framework import serializers, status
@@ -19,8 +20,6 @@ from ..utils import humanize_errors
 from .base import HOPEAPIBusinessAreaView, HOPEAPIView
 from .mixin import HouseholdUploadMixin
 from .upload import HouseholdSerializer
-
-from django.http.response import HttpResponseBase
 
 
 class RDISerializer(serializers.ModelSerializer):

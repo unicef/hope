@@ -1,7 +1,5 @@
 import logging
 
-from django.core.management import CommandError
-
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search
 
