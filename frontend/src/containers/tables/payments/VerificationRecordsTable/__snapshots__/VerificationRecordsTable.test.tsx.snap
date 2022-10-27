@@ -335,20 +335,20 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <a
                   class="sc-bxivhb iRvpKE"
-                  href="/afghanistan/verification-records/UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6NjgyNmVmZjctZTU4Zi00N2MxLTliMDEtNjIxOWMyZmMyZTcz"
+                  href="/afghanistan/verification-records/UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6NDYyODNkMTktMWJjMS00NjljLWI0Y2MtODQ5NjJlOGU0YTU5"
                 >
-                  123-21-PR-00014
+                  RCPT-0060-22-0.000.005
                 </a>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                MANUAL
+                RAPIDPRO
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                PVP-14
+                PVP-1
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -367,7 +367,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                HH-20-0000.0001
+                HH-22-0000.0007
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -386,17 +386,329 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                CUC 3,377.00
+                NOK 2,274.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                CUC 0.00
+                NOK 0.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                +48875012932
+                +1 684 1511478743
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bxivhb iRvpKE"
+                  href="/afghanistan/verification-records/UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6OGJkM2RlMjYtODZjMi00OTcyLTgyM2QtYWMyMjc5MDA4ZWNm"
+                >
+                  RCPT-0060-22-0.000.007
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                RAPIDPRO
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                PVP-1
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje eEdtvm"
+                    data-cy="status-container"
+                  >
+                    PENDING
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                HH-22-0000.0009
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje eoikBB"
+                    data-cy="status-container"
+                  >
+                    ACTIVE
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                BYR 5,526
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                BYR 0
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                +993 0684121090
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bxivhb iRvpKE"
+                  href="/afghanistan/verification-records/UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6OTEyNWIxYWMtY2Y2Zi00ZDg2LTk4OWEtNDFmMDlkZTg3ZTQ0"
+                >
+                  RCPT-0060-22-0.000.003
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                RAPIDPRO
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                PVP-1
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje eEdtvm"
+                    data-cy="status-container"
+                  >
+                    PENDING
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                HH-22-0000.0005
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje eoikBB"
+                    data-cy="status-container"
+                  >
+                    ACTIVE
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                SLL 1,877
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                SLL 0
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                +232 5632769040
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bxivhb iRvpKE"
+                  href="/afghanistan/verification-records/UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6ZDFhNTUxZGMtNjcyMi00ZmNiLTk5NjQtN2Q4MTg5MWJjYzY1"
+                >
+                  RCPT-0060-22-0.000.004
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                RAPIDPRO
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                PVP-1
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje eEdtvm"
+                    data-cy="status-container"
+                  >
+                    PENDING
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                HH-22-0000.0006
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje eoikBB"
+                    data-cy="status-container"
+                  >
+                    ACTIVE
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                BWP 1,156.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                BWP 0.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                +965 0452689882
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bxivhb iRvpKE"
+                  href="/afghanistan/verification-records/UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6ZWMxMDgzODktM2UzZS00NmZlLThmMDItNmRmMjBjM2M0YjBl"
+                >
+                  RCPT-0060-22-0.000.006
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                RAPIDPRO
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                PVP-1
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje eEdtvm"
+                    data-cy="status-container"
+                  >
+                    PENDING
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                HH-22-0000.0008
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-ifAKCX iPKgts"
+                >
+                  <div
+                    class="sc-EHOje eoikBB"
+                    data-cy="status-container"
+                  >
+                    ACTIVE
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                YER 974
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                YER 0
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                +1 441 4461030202
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"

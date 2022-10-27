@@ -10,7 +10,7 @@ import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
 
 interface PaymentVerificationTableProps {
-  filter;
+  filter?: AllCashPlansAndPaymentPlansQueryVariables;
   businessArea: string;
   canViewDetails: boolean;
 }
@@ -22,13 +22,14 @@ export function PaymentVerificationTable({
   const { t } = useTranslation();
   const initialVariables: AllCashPlansAndPaymentPlansQueryVariables = {
     businessArea,
-    program: filter.program,
-    search: filter.search,
-    serviceProvider: filter.serviceProvider,
-    deliveryType: filter.deliveryType,
-    verificationStatus: filter.verificationStatus,
-    startDateGte: filter.startDate,
-    endDateLte: filter.endDate,
+    ...(filter || {}),
+    // program: filter.program,
+    // search: filter.search,
+    // serviceProvider: filter.serviceProvider,
+    // deliveryType: filter.deliveryType,
+    // verificationStatus: filter.verificationStatus,
+    // startDateGte: filter.startDate,
+    // endDateLte: filter.endDate,
   };
   return (
     <UniversalTable<
