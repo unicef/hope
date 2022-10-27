@@ -6,9 +6,9 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from django.db.models import QuerySet
+from django.db.models import Model, QuerySet
 from django.utils import timezone
 
 import pytz
@@ -312,11 +312,11 @@ def to_dict(instance, fields=None, dict_fields=None):
     return data
 
 
-def build_arg_dict(model_object, mapping_dict):
+def build_arg_dict(model_object, mapping_dict) -> Dict:
     return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
 
 
-def build_arg_dict_from_dict(data_dict, mapping_dict):
+def build_arg_dict_from_dict(data_dict, mapping_dict) -> Dict:
     return {key: data_dict.get(value) for key, value in mapping_dict.items()}
 
 
@@ -391,16 +391,18 @@ def is_valid_uuid(uuid_str):
         return False
 
 
-def choices_to_dict(choices):
+def choices_to_dict(choices: List[Tuple]) -> Dict:
     return {value: name for value, name in choices}
 
 
-def decode_and_get_object(encoded_id, model, required):
+def decode_and_get_object(encoded_id, model, required) -> Optional[Model]:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
         decoded_id = decode_id_string(encoded_id)
         return get_object_or_404(model, id=decoded_id)
+
+    return None
 
 
 def dict_to_camel_case(dictionary):
@@ -540,7 +542,7 @@ def sum_lists_with_values(qs_values, list_len):
     return data
 
 
-def chart_permission_decorator(chart_resolve=None, permissions=None):
+def chart_permission_decorator(chart_resolve=None, permissions=None) -> Callable:
     if chart_resolve is None:
         return functools.partial(chart_permission_decorator, permissions=permissions)
 
@@ -559,7 +561,7 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
     return resolve_f
 
 
-def chart_filters_decoder(filters):
+def chart_filters_decoder(filters) -> Dict:
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
@@ -578,14 +580,14 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
 
 
 class CaIdIterator:
-    def __init__(self, name):
+    def __init__(self, name) -> None:
         self.name = name
         self.last_id = 0
 
-    def __iter__(self):
+    def __iter__(self: "CaIdIterator") -> "CaIdIterator":
         return self
 
-    def __next__(self):
+    def __next__(self: "CaIdIterator") -> str:
         self.last_id += 1
         return f"123-21-{self.name.upper()}-{self.last_id:05d}"
 
