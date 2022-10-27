@@ -52,6 +52,7 @@ class CoreFieldChoiceSerializer(serializers.Serializer):
     def get_label_en(self, obj) -> Optional[str]:
         if data := _custom_dict_or_attr_resolver("label", None, obj):
             return data["English(EN)"]
+        return None
 
 
 class FieldAttributeSerializer(serializers.Serializer):
@@ -68,8 +69,10 @@ class FieldAttributeSerializer(serializers.Serializer):
     def get_labels(self, obj):
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
-    def get_label_en(self, obj):
-        return _custom_dict_or_attr_resolver("label", None, obj)["English(EN)"]
+    def get_label_en(self, obj) -> Optional[str]:
+        if data := _custom_dict_or_attr_resolver("label", None, obj):
+            return data["English(EN)"]
+        return None
 
     def get_is_flex_field(self, obj):
         if isinstance(obj, FlexibleAttribute):

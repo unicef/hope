@@ -117,6 +117,7 @@ def handle_add_payment_channel(payment_channel, individual) -> Optional[BankAcco
             bank_name=bank_name,
             bank_account_number=bank_account_number,
         )
+    return None
 
 
 def handle_update_payment_channel(payment_channel) -> Optional[BankAccountInfo]:
@@ -128,6 +129,8 @@ def handle_update_payment_channel(payment_channel) -> Optional[BankAccountInfo]:
         bank_account_info.bank_name = payment_channel.get("bank_name")
         bank_account_info.bank_account_number = payment_channel.get("bank_account_number")
         return bank_account_info
+
+    return None
 
 
 def handle_add_identity(identity, individual) -> IndividualIdentity:

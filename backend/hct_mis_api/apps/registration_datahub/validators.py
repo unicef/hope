@@ -42,7 +42,8 @@ logger = logging.getLogger(__name__)
 
 class XLSXValidator(BaseValidator):
     @classmethod
-    def validate(cls, *args, **kwargs) -> List:
+    def validate(cls, *args, **kwargs) -> List:  # type: ignore
+        # TODO: Signature of "validate" incompatible with supertype "BaseValidator"
         try:
             validate_methods: List[Callable] = [getattr(cls, m) for m in dir(cls) if m.startswith("validate_")]
 
