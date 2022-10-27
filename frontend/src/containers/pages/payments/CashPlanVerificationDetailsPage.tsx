@@ -57,7 +57,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
     search: null,
     status: null,
     verificationChannel: null,
-    cashPlanPaymentVerification: null,
+    paymentVerificationPlan: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
   const { id } = useParams();
@@ -179,6 +179,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
           </Container>
           <TableWrapper>
             <VerificationRecordsTable
+              paymentPlanId={cashPlan.id}
               filter={debouncedFilter}
               businessArea={businessArea}
               canViewRecordDetails={hasPermissions(
