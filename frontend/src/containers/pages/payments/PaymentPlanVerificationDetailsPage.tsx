@@ -24,7 +24,7 @@ import {
   usePaymentPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
 } from '../../../__generated__/graphql';
-import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
+import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 
@@ -178,7 +178,7 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
             />
           </Container>
           <TableWrapper>
-            <VerificationRecordsTable
+            <VerificationsTable
               paymentPlanId={paymentPlan.id}
               filter={debouncedFilter}
               businessArea={businessArea}
