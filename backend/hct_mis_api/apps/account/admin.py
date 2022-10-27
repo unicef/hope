@@ -176,7 +176,7 @@ class DjAdminManager:
         self.form_errors = [msg for msg in self.regex.findall(res.content.decode())]
         return self.form_errors
 
-    def assert_response(self, status: List[int], location: Optional[str] = None, custom_error=""):
+    def assert_response(self, status: List[int], location: Optional[str] = None, custom_error="") -> None:
         if not isinstance(status, (list, tuple)):
             status = [status]
         if self._last_response.status_code not in status:

@@ -22,5 +22,4 @@ def drop_databases() -> None:
             sql = sql_drop_tables(connection)
             if not sql:
                 continue
-            print(sql)
             cursor.execute(sql)

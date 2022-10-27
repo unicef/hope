@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django.db.models import Model, QuerySet
 from django.utils import timezone
@@ -579,18 +579,15 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
     return filter_query
 
 
-CaIdIteratorType = TypeVar("CaIdIteratorType", bound="CaIdIterator")
-
-
 class CaIdIterator:
     def __init__(self, name) -> None:
         self.name = name
         self.last_id = 0
 
-    def __iter__(self: CaIdIteratorType) -> CaIdIteratorType:
+    def __iter__(self: "CaIdIterator") -> "CaIdIterator":
         return self
 
-    def __next__(self: CaIdIteratorType) -> str:
+    def __next__(self: "CaIdIterator") -> str:
         self.last_id += 1
         return f"123-21-{self.name.upper()}-{self.last_id:05d}"
 
