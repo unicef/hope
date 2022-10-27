@@ -1,9 +1,11 @@
 import enum
 import logging
 from time import sleep
+from typing import Optional, Set
 
 from django.conf import settings
 from django.core.management import CommandError
+from django.db import models
 
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search, connections
@@ -17,12 +19,12 @@ logger = logging.getLogger(__name__)
 DEFAULT_SCRIPT = "return (1.0/doc.length)*query.boost"
 
 
-def populate_index(queryset, doc, parallel=False):
+def populate_index(queryset, doc, parallel=False) -> None:
     qs = queryset.iterator()
     doc().update(qs, parallel=parallel)
 
 
-def _get_models(args):
+def _get_models(args) -> Optional[Set[models.Model]]:
     if args:
         models = []
         for arg in args:
@@ -46,25 +48,25 @@ def _get_models(args):
     return set(models)
 
 
-def _create(models, options):
+def _create(models, options) -> None:
     for index in registry.get_indices(models):
         index.create()
 
 
-def _populate(models, options):
+def _populate(models, options) -> None:
     parallel = options["parallel"]
     for doc in registry.get_documents(models):
         qs = doc().get_indexing_queryset()
         doc().update(qs, parallel=parallel)
 
 
-def _delete(models, options):
+def _delete(models, options) -> bool:
     for index in registry.get_indices(models):
         index.delete(ignore=404)
     return True
 
 
-def _rebuild(models, options):
+def _rebuild(models, options) -> None:
     if not _delete(models, options):
         return
 
@@ -78,18 +80,18 @@ def rebuild_search_index(models=None, options=None) -> None:
     _rebuild(models=models, options=options)
 
 
-def populate_all_indexes():
+def populate_all_indexes() -> None:
     _populate(models=None, options={"parallel": False, "quiet": True})
 
 
-def remove_document_by_matching_ids(id_list, document):
+def remove_document_by_matching_ids(id_list, document) -> None:
     query_dict = {"query": {"terms": {"id": id_list}}}
     search = Search(index="individuals")
     search.update_from_dict(query_dict)
     search.delete()
 
 
-def remove_elasticsearch_documents_by_matching_ids(id_list, document):
+def remove_elasticsearch_documents_by_matching_ids(id_list, document) -> None:
     query_dict = {"query": {"terms": {"id": id_list}}}
     search = Search(index=document.Index.name)
     search.update_from_dict(query_dict)
@@ -102,7 +104,7 @@ class HealthStatus(enum.Enum):
     GREEN = "green"
 
 
-def wait_until_healthy():
+def wait_until_es_healthy() -> None:
     max_tries = 12
     sleep_time = 5
     # https://www.yireo.com/blog/2022-08-31-elasticsearch-cluster-is-yellow-which-is-ok

@@ -35,7 +35,7 @@ from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
-    wait_until_healthy,
+    wait_until_es_healthy,
 )
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
@@ -575,7 +575,7 @@ class DeduplicateTask:
     @classmethod
     @transaction.atomic
     def deduplicate_individuals(cls, registration_data_import):
-        wait_until_healthy()
+        wait_until_es_healthy()
         cls.set_thresholds(registration_data_import.business_area)
         individuals = evaluate_qs(
             Individual.objects.filter(registration_data_import=registration_data_import).select_for_update()
@@ -600,7 +600,7 @@ class DeduplicateTask:
     @classmethod
     @transaction.atomic
     def deduplicate_individuals_from_other_source(cls, individuals: QuerySet[Individual], business_area: BusinessArea):
-        wait_until_healthy()
+        wait_until_es_healthy()
         cls.set_thresholds(business_area)
 
         evaluate_qs(individuals.select_for_update())
@@ -675,7 +675,7 @@ class DeduplicateTask:
 
         populate_index(imported_individuals, get_imported_individual_doc(business_area.slug))
 
-        wait_until_healthy()
+        wait_until_es_healthy()
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         allowed_duplicates_batch_amount = round(
             (imported_individuals.count() or 1) * (cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
