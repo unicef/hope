@@ -598,7 +598,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def rows_validator(self, sheet):
+    def rows_validator(self, sheet) -> List:
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -774,7 +774,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_file_with_template(self, wb):
+    def validate_file_with_template(self, wb) -> List:
         try:
             errors = []
             combined_fields = self.combined_fields
@@ -804,7 +804,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_file_extension(self, xlsx_file):
+    def validate_file_extension(self, xlsx_file) -> List:
         try:
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":

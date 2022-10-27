@@ -650,7 +650,7 @@ class DeduplicateTask:
         )
 
     @staticmethod
-    def set_error_message_and_status(registration_data_import, message):
+    def set_error_message_and_status(registration_data_import, message) -> None:
         old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
         registration_data_import.error_message = message
         registration_data_import.status = RegistrationDataImport.DEDUPLICATION_FAILED
@@ -660,12 +660,12 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def set_thresholds(cls, business_area: BusinessArea):
+    def set_thresholds(cls, business_area: BusinessArea) -> None:
         cls.business_area = business_area
         cls.thresholds = Thresholds.from_business_area(cls.business_area)
 
     @classmethod
-    def deduplicate_imported_individuals(cls, registration_data_import_datahub):
+    def deduplicate_imported_individuals(cls, registration_data_import_datahub) -> None:
         business_area = BusinessArea.objects.get(slug=registration_data_import_datahub.business_area_slug)
         cls.set_thresholds(business_area)
 
@@ -823,7 +823,7 @@ class DeduplicateTask:
 
     @classmethod
     @transaction.atomic
-    def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
+    def hard_deduplicate_documents(cls, new_documents, registration_data_import=None) -> None:
         documents_to_dedup = evaluate_qs(
             new_documents.exclude(status=Document.STATUS_VALID)
             .select_related("individual")

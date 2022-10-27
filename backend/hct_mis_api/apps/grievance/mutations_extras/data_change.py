@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Any, Union
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -292,7 +293,7 @@ def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwarg
         return save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
 
 
-def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
     issue_type = grievance_ticket.issue_type
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
         return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
@@ -717,11 +718,11 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     )
 
 
-def is_approved(item):
+def is_approved(item) -> bool:
     return item.get("approve_status") is True
 
 
-def convert_to_empty_string_if_null(value):
+def convert_to_empty_string_if_null(value: Any) -> Union[Any, str]:
     return value or ""
 
 

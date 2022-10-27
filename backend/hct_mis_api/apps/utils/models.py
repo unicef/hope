@@ -212,7 +212,7 @@ class UnicefIdentifiedModel(models.Model):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
         if self._state.adding:
             # due to existence of "CREATE TRIGGER" in migrations

@@ -1,5 +1,6 @@
 import random
 import time
+from typing import Tuple
 
 from django.contrib.gis.geos import Point
 
@@ -123,7 +124,9 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
 
 
-def create_imported_household(household_args=None, individual_args=None):
+def create_imported_household(
+    household_args=None, individual_args=None
+) -> Tuple[ImportedHousehold, ImportedIndividual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
