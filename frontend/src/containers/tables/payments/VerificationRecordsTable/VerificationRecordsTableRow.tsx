@@ -17,11 +17,13 @@ interface VerificationRecordsTableRowProps {
   canViewRecordDetails: boolean;
   // selected: Array<string>;
   // checkboxClickHandler: () => void;
+  showStatusColumn?: boolean;
 }
 
 export function VerificationRecordsTableRow({
   paymentVerification,
   canViewRecordDetails,
+  showStatusColumn = true,
 }: VerificationRecordsTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
 
@@ -54,12 +56,14 @@ export function VerificationRecordsTableRow({
       <TableCell align='left'>
         {paymentVerification.payment.household.unicefId}
       </TableCell>
-      <TableCell align='left'>
-        <StatusBox
-          status={paymentVerification.payment.household.status}
-          statusToColor={householdStatusToColor}
-        />
-      </TableCell>
+      {showStatusColumn && (
+        <TableCell align='left'>
+          <StatusBox
+            status={paymentVerification.payment.household.status}
+            statusToColor={householdStatusToColor}
+          />
+        </TableCell>
+      )}
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
           paymentVerification.payment.deliveredQuantity,

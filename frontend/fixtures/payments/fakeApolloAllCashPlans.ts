@@ -22,7 +22,7 @@ export const fakeApolloAllCashPlans = [
             endCursor: 'YXJyYXljb25uZWN0aW9uOjQ=',
             __typename: 'PageInfo',
           },
-          totalCount: 6,
+          totalCount: 1,
           edges: [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',

@@ -1,3 +1,2 @@
-import { VerificationRecordsTable } from './VerificationRecordsTable';
-
-export { VerificationRecordsTable };
+export { VerificationRecordsTable } from './VerificationRecordsTable';
+export { VerificationsTable } from './VerificationsTable';

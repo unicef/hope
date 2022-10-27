@@ -2,10 +2,10 @@ import { MockedProvider } from '@apollo/react-testing';
 import React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
-import { CashPlanTable } from '.';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
 import { fakeApolloAllCashPlans } from '../../../../../fixtures/payments/fakeApolloAllCashPlans';
 import { fakeProgram } from '../../../../../fixtures/programs/fakeProgram';
+import { CashPlanTable } from '.';
 
 describe('containers/tables/payments/CashPlanTable', () => {
   it('should render with data', async () => {
