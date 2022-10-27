@@ -631,6 +631,7 @@ class GenericPaymentPlanNode(graphene.ObjectType):
 
     def resolve_payment_verification_summary(self, info, **kwargs):
         return self.get_payment_verification_summary
+
     def resolve_available_payment_records_count(self, info, **kwargs):
         return self.payment_items.filter(
             status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
@@ -644,6 +645,7 @@ class GenericPaymentPlanNode(graphene.ObjectType):
 
     def resolve_total_delivered_quantity(self, info, **kwargs):
         return self.total_delivered_quantity
+
     def resolve_total_undelivered_quantity(self, info, **kwargs):
         return self.total_undelivered_quantity
 
