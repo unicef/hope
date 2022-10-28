@@ -24,13 +24,21 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
   };
 
   return (
-    <UniversalTable<CashPlanAndPaymentPlanNode, AllCashPlansAndPaymentPlansQueryVariables>
+    <UniversalTable<
+      CashPlanAndPaymentPlanNode,
+      AllCashPlansAndPaymentPlansQueryVariables
+    >
       title={t('Cash Plans')}
       headCells={headCells}
       query={useAllCashPlansAndPaymentPlansQuery}
       queriedObjectName='allCashPlansAndPaymentPlans'
       initialVariables={initialVariables}
-      renderRow={(cashAndPaymentPlan) => <CashPlanTableRow key={cashAndPaymentPlan.id} cashAndPaymentPlan={cashAndPaymentPlan} />}
+      renderRow={(cashPlanAndPaymentPlanNode) => (
+        <CashPlanTableRow
+          key={cashPlanAndPaymentPlanNode.id}
+          cashAndPaymentPlan={cashPlanAndPaymentPlanNode}
+        />
+      )}
     />
   );
 }

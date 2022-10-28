@@ -28,9 +28,9 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
+  PaymentVerificationPlanNode,
   useAllAdminAreasQuery,
   useAllRapidProFlowsQuery,
-  useCashPlanQuery,
   useEditPaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
@@ -49,22 +49,20 @@ const TabsContainer = styled.div`
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(
-  paymentPlanId,
+  cashOrPaymentPlanId = null,
+  paymentVerificationPlanId,
   selectedTab,
   values,
   businessArea,
-  cashPlanId = null,
-  paymentVerificationPlanId = null,
 ) {
   return {
     input: {
-      ...(paymentPlanId && {
-        paymentPlanId,
+      ...(cashOrPaymentPlanId && {
+        cashOrPaymentPlanId,
       }),
       ...(paymentVerificationPlanId && {
         paymentVerificationPlanId,
       }),
-      ...(cashPlanId && { cashPlanId }),
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
         selectedTab === 0
@@ -102,51 +100,46 @@ function prepareVariables(
 }
 
 export interface Props {
-  paymentPlanId: string;
-  cashPlanId: string;
+  paymentVerificationPlanNode: PaymentVerificationPlanNode;
+  cashOrPaymentPlanId: string;
 }
 
 export function EditVerificationPlan({
-  paymentPlanId,
-  cashPlanId,
+  paymentVerificationPlanNode,
+  cashOrPaymentPlanId,
 }: Props): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
   const businessArea = useBusinessArea();
-  const {
-    data: { cashPlan },
-  } = useCashPlanQuery({
-    variables: { id: cashPlanId },
-  });
-  const verification = cashPlan?.verificationPlans?.edges[0].node;
+
   useEffect(() => {
-    if (verification.sampling === 'FULL_LIST') {
+    if (paymentVerificationPlanNode.sampling === 'FULL_LIST') {
       setSelectedTab(0);
     } else {
       setSelectedTab(1);
     }
-  }, [verification.sampling]);
+  }, [paymentVerificationPlanNode.sampling]);
 
   const initialValues = {
-    confidenceInterval: verification.confidenceInterval * 100 || 95,
-    marginOfError: verification.marginOfError * 100 || 5,
-    filterAgeMin: verification.ageFilter?.min || '',
-    filterAgeMax: verification.ageFilter?.max || '',
-    filterSex: verification.sexFilter || '',
-    excludedAdminAreasFull: verification.excludedAdminAreasFilter,
-    excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
-    verificationChannel: verification.verificationChannel || null,
-    rapidProFlow: verification.rapidProFlowId || null,
-    adminCheckbox: verification.excludedAdminAreasFilter?.length !== 0,
+    confidenceInterval: paymentVerificationPlanNode.confidenceInterval * 100 || 95,
+    marginOfError: paymentVerificationPlanNode.marginOfError * 100 || 5,
+    filterAgeMin: paymentVerificationPlanNode.ageFilter?.min || '',
+    filterAgeMax: paymentVerificationPlanNode.ageFilter?.max || '',
+    filterSex: paymentVerificationPlanNode.sexFilter || '',
+    excludedAdminAreasFull: paymentVerificationPlanNode.excludedAdminAreasFilter,
+    excludedAdminAreasRandom: paymentVerificationPlanNode.excludedAdminAreasFilter,
+    verificationChannel: paymentVerificationPlanNode.verificationChannel || null,
+    rapidProFlow: paymentVerificationPlanNode.rapidProFlowId || '',
+    adminCheckbox: paymentVerificationPlanNode.excludedAdminAreasFilter?.length !== 0,
     ageCheckbox:
-      Boolean(verification.ageFilter?.min) ||
-      Boolean(verification.ageFilter?.max) ||
+      Boolean(paymentVerificationPlanNode.ageFilter?.min) ||
+      Boolean(paymentVerificationPlanNode.ageFilter?.max) ||
       false,
-    sexCheckbox: Boolean(verification.sexFilter) || false,
+    sexCheckbox: Boolean(paymentVerificationPlanNode.sexFilter) || false,
   };
 
   const [formValues, setFormValues] = useState(initialValues);
@@ -165,11 +158,11 @@ export function EditVerificationPlan({
 
   const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
     variables: prepareVariables(
-      paymentPlanId,
+      cashOrPaymentPlanId,
+      paymentVerificationPlanNode.id,
       selectedTab,
       formValues,
       businessArea,
-      cashPlanId,
     ),
     fetchPolicy: 'network-only',
   });
@@ -183,10 +176,10 @@ export function EditVerificationPlan({
     const { errors } = await mutate({
       variables: prepareVariables(
         null,
+        paymentVerificationPlanNode.id,
         selectedTab,
         values,
         businessArea,
-        paymentPlanId,
       ),
       refetchQueries,
     });

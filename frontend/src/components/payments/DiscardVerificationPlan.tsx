@@ -15,14 +15,14 @@ import { ErrorButtonContained } from '../core/ErrorButtonContained';
 
 export interface DiscardVerificationPlanProps {
   paymentVerificationPlanId: string;
-  cashPlanId: string;
+  cashOrPaymentPlanId: string;
 }
 
 export function DiscardVerificationPlan({
   paymentVerificationPlanId,
-  cashPlanId,
+  cashOrPaymentPlanId,
 }: DiscardVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
