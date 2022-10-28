@@ -20,6 +20,7 @@ import {
   useUpdatePpMutation,
 } from '../../../__generated__/graphql';
 import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -148,6 +149,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
     >
       {({ submitForm, values }) => (
         <Form>
+          <AutoSubmitFormOnEnter />
           <EditPaymentPlanHeader
             paymentPlan={paymentPlanData.paymentPlan}
             handleSubmit={submitForm}

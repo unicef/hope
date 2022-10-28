@@ -8,6 +8,7 @@ import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
@@ -86,6 +87,7 @@ export const DuplicateTargetPopulation = ({
       >
         {({ submitForm }) => (
           <>
+            {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
                 <Typography variant='h6'>
