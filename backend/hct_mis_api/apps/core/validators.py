@@ -2,7 +2,7 @@ import logging
 
 from django.core.exceptions import ValidationError
 
-from hct_mis_api.apps.core.core_fields_attributes import (
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     TYPE_BOOL,
     TYPE_DATE,
     TYPE_DECIMAL,

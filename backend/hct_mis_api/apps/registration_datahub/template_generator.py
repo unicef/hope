@@ -1,6 +1,6 @@
 import openpyxl
 
-from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.utils import serialize_flex_attributes
 from hct_mis_api.apps.geo.models import Area
 
