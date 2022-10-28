@@ -3,7 +3,7 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
-import { fakeApolloAllCashPlansAndPaymentPlans } from '../../../../../fixtures/payments/fakeApolloAllCashPlansAndPaymentPlans';
+import { fakeApolloAllCashPlansAndPaymentPlans } from '../../../../../fixtures/payments/fakeApolloAllCashPlansAndPaymentPlansForProgram';
 import { fakeProgram } from '../../../../../fixtures/programs/fakeProgram';
 import { CashPlanTable } from '.';
 
