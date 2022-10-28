@@ -22,6 +22,7 @@ import { PaperContainer } from '../PaperContainer';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { TargetPopulationProgramme } from '../TargetPopulationProgramme';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
+import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -148,6 +149,7 @@ export function EditTargetPopulation({
       {({ values, submitForm }) => {
         return (
           <Form>
+            <AutoSubmitFormOnEnter />
             <EditTargetPopulationHeader
               handleSubmit={submitForm}
               cancelEdit={cancelEdit}
