@@ -15,7 +15,6 @@ describe('containers/tables/payments/VerificationRecordsTable', () => {
       >
         <VerificationRecordsTable
           paymentPlanId='Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=='
-          // filter={{}}
           canViewRecordDetails
           businessArea='afghanistan'
         />
@@ -35,7 +34,6 @@ describe('containers/tables/payments/VerificationRecordsTable', () => {
       >
         <VerificationRecordsTable
           paymentPlanId='Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=='
-          // filter={{}}
           canViewRecordDetails
           businessArea='afghanistan'
         />

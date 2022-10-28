@@ -40,18 +40,6 @@ export const fakeGrievanceTicketPaymentVerification = {
       receivedAmount: 0,
       paymentObjectId: null,
       paymentContentType: null,
-      // paymentRecord: {
-  //       id:
-  //         'UGF5bWVudFJlY29yZE5vZGU6MDZlODg0ZjQtYzAxNS00Mzk2LWI3YmItMDc4NDZkODBkNGQx',
-  //       deliveredQuantity: 3355,
-  //       __typename: 'PaymentRecordNode',
-  //     },
-  //     __typename: 'PaymentVerificationNode',
-  //   },
-    // paymentVerifications: {
-    //   edges: [],
-    //   __typename: 'PaymentVerificationNodeConnection',
-    // }
     },
     __typename: 'TicketPaymentVerificationDetailsNode',
   },
