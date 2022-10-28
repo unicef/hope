@@ -77,22 +77,22 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             return XlsxVerificationExportService.TRUE_FALSE_MAPPING[False]
         return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
 
-    def _add_payment_record_verification_row(self, payment_record_verification):
+    def _add_payment_record_verification_row(self, payment_record_verification: PaymentVerification):
         household = payment_record_verification.get_payment.household
         head_of_household = payment_record_verification.get_payment.head_of_household
 
         payment_record_verification_row = (
             str(payment_record_verification.payment_object_id),
-            str(payment_record_verification.get_payment.ca_id) if payment_record_verification.get_payment else "",
+            str(payment_record_verification.payment_obj.unicef_id) if payment_record_verification.get_payment else "",
             self._to_received_column(payment_record_verification),
             str(head_of_household.full_name) if head_of_household else "",
             str(household.admin1.name) if household.admin1 else "",
             str(household.admin2.name) if household.admin2 else "",
             str(household.village),
             str(household.address),
-            str(payment_record_verification.get_payment.household_id),
+            str(payment_record_verification.payment_obj.household_id),
             str(household.unicef_id),
-            payment_record_verification.get_payment.delivered_quantity,
+            payment_record_verification.payment_obj.delivered_quantity,
             payment_record_verification.received_amount,
         )
         self.ws_export_list.append(payment_record_verification_row)
@@ -133,9 +133,9 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
         context = {
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
+            "first_name": getattr(user, "first_name", ""),
+            "last_name": getattr(user, "last_name", ""),
+            "email": getattr(user, "email", ""),
             "message": msg,
             "link": link,
             "title": "Verification Plan XLSX file generated",
@@ -151,9 +151,9 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
         msg = "Verification Plan xlsx file was generated and below You have the link to download this file."
         context = {
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
+            "first_name": getattr(user, "first_name", ""),
+            "last_name": getattr(user, "last_name", ""),
+            "email": getattr(user, "email", ""),
             "message": msg,
             "link": link,
         }

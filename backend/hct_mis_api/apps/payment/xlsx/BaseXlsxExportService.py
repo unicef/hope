@@ -99,9 +99,9 @@ class XlsxExportBaseService:
         msg = "Payment Plan Payment List xlsx file(s) were generated and below You have the link to download this file."
 
         context = {
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
+            "first_name": getattr(user, "first_name", ""),
+            "last_name": getattr(user, "last_name", ""),
+            "email": getattr(user, "email", ""),
             "message": msg,
             "link": link,
             "title": "Payment Plan Payment List files generated",

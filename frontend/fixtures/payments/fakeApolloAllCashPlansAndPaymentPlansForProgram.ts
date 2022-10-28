@@ -6,6 +6,7 @@ export const fakeApolloAllCashPlansAndPaymentPlans = [
       query: AllCashPlansAndPaymentPlansDocument,
       variables: {
         businessArea: 'afghanistan',
+        program: "UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm",
         first: 5,
         orderBy: null,
       },

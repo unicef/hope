@@ -150,11 +150,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         if extra_validation:
             payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
 
-        qs = (
-            PaymentRecord.objects.filter(pk__in=payment_records)
-            if class_name == "CashPlan"
-            else Payment.objects.filter(pk__in=payment_records)
-        )
+        qs = (PaymentRecord if class_name == "CashPlan" else Payment).objects.filter(pk__in=payment_records)
 
         return qs
 

@@ -24,14 +24,14 @@ import { LoadingComponent } from '../core/LoadingComponent';
 
 export interface FinishVerificationPlanProps {
   paymentVerificationPlanId: string;
-  cashPlanId: string;
+  cashOrPaymentPlanId: string;
 }
 
 export function FinishVerificationPlan({
   paymentVerificationPlanId,
-  cashPlanId,
+  cashOrPaymentPlanId,
 }: FinishVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
