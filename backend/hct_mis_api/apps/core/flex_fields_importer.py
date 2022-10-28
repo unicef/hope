@@ -1,6 +1,7 @@
 import logging
 from collections import defaultdict
 from os.path import isfile
+from typing import List, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -72,14 +73,14 @@ class FlexibleAttributeImporter:
         "deviceid",
     )
 
-    def _get_model_fields(self, object_type_to_add):
+    def _get_model_fields(self, object_type_to_add) -> Optional[List[str]]:
         return {
             "attribute": self.ATTRIBUTE_MODEL_FIELDS,
             "group": self.GROUP_MODEL_FIELDS,
             "choice": self.CHOICE_MODEL_FIELDS,
         }.get(object_type_to_add)
 
-    def _assign_field_values(self, value, header_name, object_type_to_add, row, row_number):
+    def _assign_field_values(self, value, header_name, object_type_to_add, row, row_number) -> None:
         model_fields = self._get_model_fields(object_type_to_add)
 
         if any(header_name.startswith(i) for i in self.JSON_MODEL_FIELDS):
