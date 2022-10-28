@@ -373,7 +373,9 @@ class FlexRegistrationService:
             certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture
 
-    def _prepare_bank_account_info(self, individual_dict: Dict, individual: ImportedIndividual) -> Optional[Dict[str, Any]]:
+    def _prepare_bank_account_info(
+        self, individual_dict: Dict, individual: ImportedIndividual
+    ) -> Optional[Dict[str, Any]]:
         if individual_dict.get("bank_account_h_f", "n") != "y":
             return
         if not individual_dict.get("bank_account_number"):

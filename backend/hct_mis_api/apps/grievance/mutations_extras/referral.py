@@ -1,9 +1,9 @@
 from typing import List, Optional, Tuple
+
 import graphene
 
-from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.core.utils import decode_and_get_object
-from hct_mis_api.apps.grievance.models import TicketReferralDetails
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketReferralDetails
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 

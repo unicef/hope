@@ -1,9 +1,10 @@
 from typing import List, Optional, Tuple
+
 import graphene
-from backend.hct_mis_api.apps.grievance.models import GrievanceTicket
 
 from hct_mis_api.apps.core.utils import decode_and_get_object
 from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
     TicketNegativeFeedbackDetails,
     TicketPositiveFeedbackDetails,
 )

@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
 from django.core.validators import (

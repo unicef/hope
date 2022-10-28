@@ -2,6 +2,7 @@ import json
 import logging
 import re
 from datetime import date
+from typing import Dict, Optional
 
 from django.contrib.gis.db.models import PointField
 from django.core.validators import (
@@ -19,7 +20,9 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
+from hct_mis_api.apps.account.export_users_xlsx import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -44,6 +47,7 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
 )
 from hct_mis_api.apps.payment.utils import is_right_phone_number_format
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
@@ -152,21 +156,21 @@ class ImportedHousehold(TimeStampedUUIDModel):
     mis_unicef_id = models.CharField(max_length=255, null=True)
 
     @property
-    def business_area(self):
+    def business_area(self) -> str:
         return self.registration_data_import.business_area
 
     @cached_property
-    def primary_collector(self):
+    def primary_collector(self) -> Optional[User]:
         return self.individuals_and_roles.get(role=ROLE_PRIMARY).individual
 
     @cached_property
-    def alternate_collector(self):
+    def alternate_collector(self) -> Optional[User]:
         try:
             return self.individuals_and_roles.filter(role=ROLE_ALTERNATE).first().individual
         except AttributeError:
             return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Household ID: {self.id}"
 
 
@@ -249,7 +253,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     mis_unicef_id = models.CharField(max_length=255, null=True)
 
     @property
-    def age(self):
+    def age(self) -> int:
         today = date.today()
         return (
             today.year
@@ -258,7 +262,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         )
 
     @property
-    def get_hash_key(self):
+    def get_hash_key(self) -> str:
         from hashlib import sha256
 
         fields = (
@@ -276,23 +280,23 @@ class ImportedIndividual(TimeStampedUUIDModel):
 
         return sha256(";".join(values).encode()).hexdigest()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.full_name
 
     @property
-    def business_area(self):
+    def business_area(self) -> BusinessArea:
         return self.registration_data_import.business_area
 
     @property
-    def phone_no_valid(self):
+    def phone_no_valid(self) -> bool:
         return is_right_phone_number_format(str(self.phone_no))
 
     @property
-    def phone_no_alternative_valid(self):
+    def phone_no_alternative_valid(self) -> bool:
         return is_right_phone_number_format(str(self.phone_no_alternative))
 
     @property
-    def role(self):
+    def role(self) -> Optional[str]:
         role = self.households_and_roles.first()
         return role.role if role is not None else ROLE_NO_ROLE
 
@@ -355,8 +359,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         return self.business_area_slug
 
     @property
-    def linked_rdi(self):
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+    def linked_rdi(self) -> "RegistrationDataImport":
 
         return RegistrationDataImport.objects.get(datahub_id=self.id)
 
@@ -414,7 +417,7 @@ class ImportedDocumentType(TimeStampedUUIDModel):
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.label}"
 
 
@@ -430,7 +433,7 @@ class ImportedDocument(TimeStampedUUIDModel):
     country = CountryField(default="U")
     doc_date = models.DateField(blank=True, null=True, default=None)
 
-    def clean(self):
+    def clean(self) -> None:
         from django.core.exceptions import ValidationError
 
         for validator in self.type.validators.all():
@@ -451,7 +454,7 @@ class ImportedAgency(models.Model):
     class Meta:
         unique_together = ("country", "type")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.label}"
 
 
@@ -469,7 +472,7 @@ class ImportedIndividualIdentity(models.Model):
     class Meta:
         verbose_name_plural = "Imported Individual Identities"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.agency} {self.individual} {self.document_number}"
 
 
@@ -527,16 +530,16 @@ class Record(models.Model):
     index2 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
     index3 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
 
-    def mark_as_invalid(self, msg: str):
+    def mark_as_invalid(self, msg: str) -> None:
         self.error_message = msg
         self.status = self.STATUS_ERROR
         self.save()
 
-    def mark_as_imported(self):
+    def mark_as_imported(self) -> None:
         self.status = self.STATUS_IMPORTED
         self.save()
 
-    def get_data(self):
+    def get_data(self) -> Dict:
         if self.storage:
             return json.loads(self.storage.tobytes().decode())
         files = json.loads(self.files.tobytes().decode())
@@ -551,7 +554,7 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if self.bank_account_number:
             self.bank_account_number = str(self.bank_account_number).replace(" ", "")
         if self.debit_card_number:
@@ -592,7 +595,7 @@ class DiiaHousehold(models.Model):
     )
     status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Diia Household ID: {self.id}"
 
 
@@ -660,10 +663,10 @@ class DiiaIndividual(models.Model):
     )
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         return f"{self.last_name} {self.first_name} {self.second_name}"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if self.iban:
             self.iban = str(self.iban).replace(" ", "")
         super().save(*args, **kwargs)

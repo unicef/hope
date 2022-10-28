@@ -246,7 +246,7 @@ class HouseholdAdmin(
     def has_withdrawn_permission(self, request) -> bool:
         return request.user.has_perm("household.can_withdrawn")
 
-    def mass_withdraw(self, request, qs) -> TemplateResponse:
+    def mass_withdraw(self, request, qs) -> Optional[TemplateResponse]:
         context = self.get_common_context(request, title="Withdrawn")
         context["op"] = "withdraw"
         context["action"] = "mass_withdraw"

@@ -1,6 +1,6 @@
 import base64
 import logging
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, Iterable, Optional, Tuple
 
 from django import forms
 from django.contrib import admin, messages
@@ -313,17 +313,17 @@ class AlexisFilter(SimpleListFilter):
             queryset = queryset.filter(data__w_counters__collector_bank_account=True)
         return queryset
 
-    def lookups(self, request, model_admin) -> Tuple[List[str]]:
-        return tuple(
-            ["1", "Household size match"],
-            ["2", "Only one collector"],
-            ["3", "One and only one head"],
-            ["4", "More than 1 phone number"],
-            ["5", "At least 1 HoH has TaxId ans BankAccount"],
-            ["6", "at least one birth certificate picture"],
-            ["7", "disability certificate for each disabled"],
-            ["8", "At least 1 member has TaxId ans BankAccount"],
-            ["9", "Collector has BankAccount"],
+    def lookups(self, request, model_admin) -> Optional[Iterable[Tuple[Any, str]]]:
+        return (
+            ("1", "Household size match"),
+            ("2", "Only one collector"),
+            ("3", "One and only one head"),
+            ("4", "More than 1 phone number"),
+            ("5", "At least 1 HoH has TaxId ans BankAccount"),
+            ("6", "at least one birth certificate picture"),
+            ("7", "disability certificate for each disabled"),
+            ("8", "At least 1 member has TaxId ans BankAccount"),
+            ("9", "Collector has BankAccount"),
         )
 
     def choices(self, changelist) -> Generator:

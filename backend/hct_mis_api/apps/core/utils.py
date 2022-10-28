@@ -6,9 +6,9 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from django.db.models import Model, QuerySet
+from django.db.models import QuerySet
 from django.utils import timezone
 
 import pytz

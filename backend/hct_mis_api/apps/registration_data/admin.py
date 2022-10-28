@@ -5,12 +5,11 @@ from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from django.db.models import QuerySet
 
 from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button, link
