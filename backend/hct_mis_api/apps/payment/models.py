@@ -1021,6 +1021,12 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
     def unicef_id(self):
         return getattr(self, "ca_id")
 
+    def mark_as_failed(self):
+        if self.status is self.STATUS_FORCE_FAILED:
+            raise ValidationError("Status shouldn't be failed")
+        self.status = self.STATUS_FORCE_FAILED
+        self.status_date = timezone.now()
+
 
 class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
     parent = models.ForeignKey(
@@ -1058,12 +1064,6 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel):
                 name="payment_plan_and_household",
             )
         ]
-
-    def mark_as_failed(self):
-        if self.status is self.STATUS_FORCE_FAILED:
-            raise ValidationError("Status shouldn't be failed")
-        self.status = self.STATUS_FORCE_FAILED
-        self.status_date = timezone.now()
 
 
 class ServiceProvider(TimeStampedUUIDModel):
