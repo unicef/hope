@@ -3,7 +3,6 @@ import logging
 from time import sleep
 from typing import Optional, Set
 
-from django.conf import settings
 from django.core.management import CommandError
 from django.db import models
 
@@ -108,9 +107,7 @@ def wait_until_es_healthy() -> None:
     max_tries = 12
     sleep_time = 5
     # https://www.yireo.com/blog/2022-08-31-elasticsearch-cluster-is-yellow-which-is-ok
-    expected_statuses = [HealthStatus.GREEN.value]
-    if settings.IS_DEV:
-        expected_statuses.append(HealthStatus.YELLOW.value)
+    expected_statuses = [HealthStatus.GREEN.value, HealthStatus.YELLOW.value]
 
     for _ in range(max_tries):
         health = connections.get_connection().cluster.health()
