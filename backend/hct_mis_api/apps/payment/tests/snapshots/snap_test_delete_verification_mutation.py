@@ -51,7 +51,7 @@ snapshots['TestDeleteVerificationMutation::test_delete_pending_verification_plan
     'data': {
         'deletePaymentVerificationPlan': {
             'paymentPlan': {
-                'name': 'TEST',
+                'objType': 'CashPlan',
                 'verificationPlans': {
                     'edges': [
                         {

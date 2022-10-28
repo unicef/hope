@@ -28,7 +28,7 @@ class TestDiscardVerificationMutation(APITestCase):
         mutation DiscardVerification($paymentVerificationPlanId: ID!){
           discardPaymentVerificationPlan(paymentVerificationPlanId:$paymentVerificationPlanId) {
             paymentPlan{
-                name
+                objType
                 verificationPlans {
                     edges {
                         node {
