@@ -23,7 +23,7 @@ class TestDeleteVerificationMutation(APITestCase):
         mutation DeleteVerification($paymentVerificationPlanId: ID!){
           deletePaymentVerificationPlan(paymentVerificationPlanId:$paymentVerificationPlanId) {
             paymentPlan{
-                name
+            objType
                 verificationPlans {
                     edges {
                         node {
