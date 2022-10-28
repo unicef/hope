@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from hct_mis_api.apps.core.core_fields_attributes import TYPE_DECIMAL
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import TYPE_DECIMAL
 from hct_mis_api.apps.core.utils import fix_flex_type_fields, serialize_flex_attributes
 
 

@@ -22,7 +22,7 @@ from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
 from hct_mis_api.apps.steficon.models import RuleCommit

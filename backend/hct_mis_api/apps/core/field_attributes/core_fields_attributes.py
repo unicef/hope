@@ -1664,46 +1664,10 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "household_id",
         "scope": [Scope.HOUSEHOLD_ID],
     },
-    {
-        "id": "e5766962-1455-4ebc-8fad-fc89cdde792b",
-        "type": TYPE_STRING,
-        "name": "bank_name",
-        "lookup": "bank_name",
-        "required": False,
-        "label": {"English(EN)": "Bank name"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "bank_name_i_c",
-        "scope": [Scope.XLSX],
-    },
-    {
-        "id": "3d6a45f3-d3f7-48a0-801b-7a98c0da517a",
-        "type": TYPE_STRING,
-        "name": "bank_account_number",
-        "lookup": "bank_account_number",
-        "required": False,
-        "label": {"English(EN)": "Bank account number"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "bank_account_number_i_c",
-        "scope": [Scope.XLSX],
-    },
-    {
-        "id": "4a2ae111-3450-41a4-8d26-5eb20f4e233c",
-        "type": TYPE_STRING,
-        "name": "debit_card_number",
-        "lookup": "debit_card_number",
-        "required": False,
-        "label": {"English(EN)": "Debit card number"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "debit_card_number_i_c",
-        "scope": [Scope.XLSX],
-    },
 ]
+
+
+
 
 
 class FieldFactory(list):
