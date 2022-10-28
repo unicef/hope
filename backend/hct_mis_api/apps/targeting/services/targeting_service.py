@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+from hct_mis_api.apps.core.field_attributes.fields_types import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     TYPE_DECIMAL,

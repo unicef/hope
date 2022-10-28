@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from faker import Faker
 from openpyxl.drawing.image import Image
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_BOOL,
     TYPE_DATE,
     TYPE_GEOPOINT,
