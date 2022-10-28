@@ -19,6 +19,7 @@ import { LoadingButton } from '../../../core/LoadingButton';
 import { GreyText } from '../../../core/GreyText';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 
 export interface AuthorizePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -69,6 +70,7 @@ export const AuthorizePaymentPlan = ({
       >
         {({ submitForm }) => (
           <>
+            {authorizeDialogOpen && <AutoSubmitFormOnEnter />}
             <Box p={2}>
               <Button
                 color='primary'
