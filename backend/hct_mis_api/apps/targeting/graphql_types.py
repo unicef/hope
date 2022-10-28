@@ -8,7 +8,8 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory, Scope
+from hct_mis_api.apps.core.field_attributes.fields_types import Scope
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode
 from hct_mis_api.apps.household.schema import HouseholdNode

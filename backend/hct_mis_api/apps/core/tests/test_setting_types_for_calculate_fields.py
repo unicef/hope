@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_DATE,
     TYPE_DECIMAL,
     TYPE_INTEGER,

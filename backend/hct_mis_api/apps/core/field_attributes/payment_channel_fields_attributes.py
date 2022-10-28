@@ -1,3 +1,5 @@
+from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING, _INDIVIDUAL, Scope
+
 PAYMENT_CHANNEL_FIELDS_ATTRIBUTES = [
     {
         "id": "e5766962-1455-4ebc-8fad-fc89cdde792b",
