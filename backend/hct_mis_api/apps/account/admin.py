@@ -3,7 +3,7 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple
 from urllib.parse import unquote
 
 from django import forms
@@ -429,7 +429,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
             "job_title",
         ]
 
-    def get_fieldsets(self, request, obj=None) -> List[Tuple]:
+    def get_fieldsets(self, request, obj=None) -> Any:
         if request.user.is_superuser:
             return super().get_fieldsets(request, obj)
         return [(None, {"fields": self.get_fields(request, obj)})]
@@ -437,7 +437,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
     def kobo_user(self, obj) -> str:
         return obj.custom_fields.get("kobo_username")
 
-    def get_deleted_objects(self, objs, request) -> Tuple:
+    def get_deleted_objects(self, objs, request) -> Any:
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
         user = objs[0]
         kobo_pk = user.custom_fields.get("kobo_pk", None)
@@ -913,7 +913,7 @@ class PermissionFilter(SimpleListFilter):
     parameter_name = "perm"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request, model_admin) -> Tuple[Tuple]:
+    def lookups(self, request, model_admin) -> Optional[Iterable[Tuple[Any, str]]]:
         return Permissions.choices()
 
     def queryset(self, request, queryset) -> QuerySet:

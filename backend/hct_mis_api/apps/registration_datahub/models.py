@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from datetime import date
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from django.contrib.gis.db.models import PointField
 from django.core.validators import (
@@ -47,7 +47,6 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
 )
 from hct_mis_api.apps.payment.utils import is_right_phone_number_format
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
@@ -359,7 +358,8 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         return self.business_area_slug
 
     @property
-    def linked_rdi(self) -> "RegistrationDataImport":
+    def linked_rdi(self) -> Any:  # TODO: (circular import) "RegistrationDataImport":
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
         return RegistrationDataImport.objects.get(datahub_id=self.id)
 

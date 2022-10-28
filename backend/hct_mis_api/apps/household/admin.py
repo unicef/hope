@@ -263,6 +263,7 @@ class HouseholdAdmin(
                         if service.household.withdraw:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
+                return None
             else:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
@@ -296,6 +297,7 @@ class HouseholdAdmin(
                         if not service.household.withdraw:
                             results += 1
                 self.message_user(request, f"Changed {results} Households.")
+                return None
             else:
                 context["form"] = form
                 return TemplateResponse(request, "admin/household/household/mass_withdrawn.html", context)
