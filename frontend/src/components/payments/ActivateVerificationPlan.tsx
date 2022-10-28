@@ -12,14 +12,14 @@ import { useActivatePaymentVerificationPlanMutation } from '../../__generated__/
 
 export interface ActivateVerificationPlanProps {
   paymentVerificationPlanId: string;
-  cashPlanId: string;
+  cashOrPaymentPlanId: string;
 }
 
 export function ActivateVerificationPlan({
   paymentVerificationPlanId,
-  cashPlanId,
+  cashOrPaymentPlanId,
 }: ActivateVerificationPlanProps): React.ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
 

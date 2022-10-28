@@ -1,4 +1,4 @@
-import { AllCashPlansAndPaymentPlansDocument, AllCashPlansAndPaymentPlansQueryVariables, AllCashPlansAndPaymentPlansQuery } from '../../src/__generated__/graphql';
+import { AllCashPlansAndPaymentPlansDocument } from '../../src/__generated__/graphql';
 
 export const fakeApolloAllCashPlansAndPaymentPlans = [
   {
@@ -7,18 +7,18 @@ export const fakeApolloAllCashPlansAndPaymentPlans = [
       variables: {
         businessArea: 'afghanistan',
         program: null,
-        search: '',
+        // search: '',
         first: 5,
-        serviceProvider: null,
-        deliveryType: null,
-        verificationStatus: null,
-        startDateGte: null,
-        endDateLte: null,
+        // serviceProvider: null,
+        // deliveryType: null,
+        // verificationStatus: null,
+        // startDateGte: null,
+        // endDateLte: null,
         orderBy: null,
-        last: null,
-        before: null,
-        after: null,
-      } as AllCashPlansAndPaymentPlansQueryVariables,
+        // last: null,
+        // before: null,
+        // after: null,
+      },
     },
     result: {
       data: {
@@ -127,7 +127,7 @@ export const fakeApolloAllCashPlansAndPaymentPlans = [
             }
           ],
         },
-      } as AllCashPlansAndPaymentPlansQuery,
+      },
     },
   },
 ];
