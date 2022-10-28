@@ -78,7 +78,7 @@ def create_payment_verification_plan_xlsx(payment_verification_plan_id, user_id)
 
             payment_verification_plan.xlsx_file_exporting = False
             payment_verification_plan.save()
-            service.send_email(service.get_email_context(user))
+            service.send_email(user)
     except Exception as e:
         logger.exception(e)
         raise

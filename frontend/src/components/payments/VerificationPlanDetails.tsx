@@ -203,7 +203,7 @@ export const VerificationPlanDetails = ({
                             <Box p={2}>
                               <StyledLink
                                 download
-                                href={`/api/download-cash-plan-payment-verification/${verificationPlan.id}`}
+                                href={`/api/download-payment-verification-plan/${verificationPlan.id}`}
                               >
                                 <Button
                                   color='primary'
