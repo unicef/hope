@@ -3,14 +3,17 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
-import { fakeApolloAllCashPlans } from '../../../../../fixtures/payments/fakeApolloAllCashPlans';
+import { fakeApolloAllCashPlansAndPaymentPlans } from '../../../../../fixtures/payments/fakeApolloAllCashPlansAndPaymentPlans';
 import { fakeProgram } from '../../../../../fixtures/programs/fakeProgram';
 import { CashPlanTable } from '.';
 
 describe('containers/tables/payments/CashPlanTable', () => {
   it('should render with data', async () => {
     const { container } = render(
-      <MockedProvider addTypename={false} mocks={fakeApolloAllCashPlans}>
+      <MockedProvider
+        addTypename={false}
+        mocks={fakeApolloAllCashPlansAndPaymentPlans}
+      >
         <CashPlanTable program={fakeProgram} />
       </MockedProvider>,
     );
@@ -24,7 +27,7 @@ describe('containers/tables/payments/CashPlanTable', () => {
       <MockedProvider
         link={new ApolloLoadingLink()}
         addTypename={false}
-        mocks={fakeApolloAllCashPlans}
+        mocks={fakeApolloAllCashPlansAndPaymentPlans}
       >
         <CashPlanTable program={fakeProgram} />
       </MockedProvider>,

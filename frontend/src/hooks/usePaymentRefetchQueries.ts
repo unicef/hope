@@ -2,24 +2,27 @@ import { DocumentNode } from 'graphql';
 import {
   AllPaymentVerificationsDocument,
   CashPlanDocument,
+  PaymentPlanDocument,
 } from '../__generated__/graphql';
 import { useBusinessArea } from './useBusinessArea';
 
 export const usePaymentRefetchQueries = (
-  cashPlanId: string,
+  paymentPlanId: string,
 ): (() => [
   {
     query: DocumentNode;
-    variables: { cashPlanId: string; businessArea: string };
+    variables: { paymentPlanId: string; businessArea: string };
   },
   { query: DocumentNode; variables: { id: string } },
 ]) => {
   const businessArea = useBusinessArea();
+  const planType = atob(paymentPlanId).split(":")[0];
+
   return () => [
     {
       query: AllPaymentVerificationsDocument,
       variables: {
-        cashPlanId,
+        paymentPlanId,
         businessArea,
         paymentVerificationPlan: null,
         first: 5,
@@ -30,8 +33,8 @@ export const usePaymentRefetchQueries = (
       },
     },
     {
-      query: CashPlanDocument,
-      variables: { id: cashPlanId },
+      query: planType === 'PaymentPlanNode' ? PaymentPlanDocument : CashPlanDocument,
+      variables: { id: paymentPlanId },
     },
   ];
 };

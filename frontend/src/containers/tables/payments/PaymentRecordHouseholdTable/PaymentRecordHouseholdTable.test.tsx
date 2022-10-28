@@ -2,10 +2,10 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
-import { PaymentRecordHouseholdTable } from '.';
 import { fakeApolloAllPaymentRecordsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentRecordsHousehold';
 import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
+import { PaymentRecordHouseholdTable } from '.';
 
 describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
   it('should render with data', async () => {
@@ -18,7 +18,7 @@ describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
           household={fakeHousehold}
           openInNewTab={false}
           businessArea='afghanistan'
-          canViewPaymentRecordDetails={true}
+          canViewPaymentRecordDetails
         />
       </MockedProvider>,
     );
@@ -38,7 +38,7 @@ describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
           household={fakeHousehold}
           openInNewTab={false}
           businessArea='afghanistan'
-          canViewPaymentRecordDetails={true}
+          canViewPaymentRecordDetails
         />
       </MockedProvider>,
     );

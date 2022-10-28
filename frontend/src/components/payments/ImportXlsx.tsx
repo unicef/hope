@@ -30,8 +30,13 @@ const StyledButton = styled(Button)`
   width: 150px;
 `;
 
-export function ImportXlsx({ paymentVerificationPlanId, cashPlanId }): ReactElement {
-  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
+export interface ImportXlsxProps {
+  paymentVerificationPlanId: string;
+  cashOrPaymentPlanId: string;
+}
+
+export function ImportXlsx({ paymentVerificationPlanId, cashOrPaymentPlanId }: ImportXlsxProps): ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
