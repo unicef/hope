@@ -1,50 +1,18 @@
 import enum
 import logging
 from time import sleep
-from typing import Optional, Set
-
-from django.core.management import CommandError
-from django.db import models
 
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch_dsl import Search, connections
 
 logger = logging.getLogger(__name__)
 
-# DEFAULT_SCRIPT = (
-#     "double tf = Math.sqrt(doc.freq); double idf = 1.0; double norm = 1/"
-#     "Math.sqrt(doc.length); return query.boost * tf * idf * norm;"
-# )
 DEFAULT_SCRIPT = "return (1.0/doc.length)*query.boost"
 
 
 def populate_index(queryset, doc, parallel=False) -> None:
     qs = queryset.iterator()
     doc().update(qs, parallel=parallel)
-
-
-def _get_models(args) -> Optional[Set[models.Model]]:
-    if args:
-        models = []
-        for arg in args:
-            arg = arg.lower()
-            match_found = False
-
-            for model in registry.get_models():
-                if model._meta.app_label == arg:
-                    models.append(model)
-                    match_found = True
-                elif f"{model._meta.app_label.lower()}.{model._meta.model_name.lower()}" == arg:
-                    models.append(model)
-                    match_found = True
-
-            if not match_found:
-                logger.error(f"No model or app named {arg}")
-                raise CommandError(f"No model or app named {arg}")
-    else:
-        models = registry.get_models()
-
-    return set(models)
 
 
 def _create(models, options) -> None:

@@ -1,5 +1,10 @@
 import logging
+from typing import List, Optional, Tuple
 
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
 logger = logging.getLogger(__name__)
@@ -18,7 +23,7 @@ def create_grievance_ticket_with_details(
     possible_duplicates=None,
     registration_data_import=None,
     is_multiple_duplicates_version=False,
-):
+) -> Tuple[Optional[GrievanceTicket], Optional[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.grievance.models import (
         GrievanceTicket,
         TicketNeedsAdjudicationDetails,
@@ -73,7 +78,9 @@ def create_grievance_ticket_with_details(
     return ticket, ticket_details
 
 
-def create_needs_adjudication_tickets(individuals_queryset, results_key, business_area, registration_data_import=None):
+def create_needs_adjudication_tickets(
+    individuals_queryset, results_key, business_area, registration_data_import=None
+) -> Optional[List[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.household.models import Individual
 
     if not individuals_queryset:

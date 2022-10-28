@@ -73,7 +73,7 @@ class CheckAgainstSanctionListPreMergeTask:
 
     @classmethod
     @transaction.atomic
-    def execute(cls, individuals=None, registration_data_import=None):
+    def execute(cls, individuals=None, registration_data_import=None) -> None:
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE

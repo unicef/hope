@@ -1,11 +1,12 @@
 import logging
+from typing import Optional
 
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -179,7 +180,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         return is_correct_status and is_not_used_in_targeting and is_not_used_by_payment_record
 
     @staticmethod
-    def generate_query_for_all_grievances_tickets(rdi):
+    def generate_query_for_all_grievances_tickets(rdi) -> Q:
         details_related_names = [
             "referral_ticket_details__household",
             "negative_feedback_ticket_details__household",
@@ -206,7 +207,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         permission=is_root,
         visible=lambda o, r: RegistrationDataImportAdmin.delete_merged_rdi_visible(o, r),
     )
-    def delete_merged_rdi(self, request, pk):
+    def delete_merged_rdi(self, request, pk) -> Optional[HttpResponse]:
         try:
             if request.method == "POST":
                 with transaction.atomic(using="default"):
@@ -259,6 +260,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         except Exception as e:
             logger.exception(e)
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
+            return None
 
     @button()
     def households(self, request, pk):
