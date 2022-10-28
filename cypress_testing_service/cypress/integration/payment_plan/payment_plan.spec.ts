@@ -202,7 +202,7 @@ When('I download the xlsx template', () => {
 
 Then('I fill the xlsx template', () => {
   // Wait for the file to be generated
-  cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
+  cy.wait(3000); // eslint-disable-line cypress/no-unnecessary-waiting
   const name = xlsxFileName(paymentPlanUnicefId);
   const downloadedFilePath = `${downloadsFolder}/${name}`;
   cy.exec(`node cypress/scripts/fillXlsxEntitlements.js ${downloadedFilePath}`);
