@@ -375,7 +375,7 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
     business_area = kwargs.get("business_area")
     program = kwargs.get("program")
     service_provider = kwargs.get("service_provider")
-    delivery_type = kwargs.get("delivery_type")
+    delivery_types = kwargs.get("delivery_type")
     verification_status = kwargs.get("verification_status")
     start_date_gte, end_date_lte = kwargs.get("start_date_gte"), kwargs.get("end_date_lte")
     search = kwargs.get("search")
@@ -396,21 +396,20 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
         queryset = queryset.filter(payment_verification_summary__status__in=verification_status)
 
     if service_provider:
-        # TODO: FIX ME
-        queryset = queryset.filter(fsp_names__istartswith=service_provider)
+        queryset = queryset.filter(fsp_names__icontains=service_provider)
 
-    if delivery_type:
-        # TODO: FIX ME
-        queryset = queryset.filter(
-            Q(delivery_types__istartswith=delivery_type)
-        )  # | Q(delivery_types__in=delivery_type)
+    if delivery_types:
+        q = Q()
+        for delivery_type in delivery_types:
+            q |= Q(delivery_types__icontains=delivery_type)
+        queryset = queryset.filter(q)
 
     if search:
-        q_obj = Q()
+        q = Q()
         values = search.split(" ")
         for value in values:
-            q_obj |= Q(unicef_id__istartswith=value)
-        queryset = queryset.filter(q_obj)
+            q |= Q(unicef_id__istartswith=value)
+        queryset = queryset.filter(q)
 
     return queryset
 

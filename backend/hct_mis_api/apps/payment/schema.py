@@ -2,12 +2,14 @@ import json
 from base64 import b64decode
 from decimal import Decimal
 
+from django.contrib.postgres.fields import ArrayField
 from django.db.models import (
     Case,
     CharField,
     Count,
     Exists,
     F,
+    Func,
     IntegerField,
     OuterRef,
     Q,
@@ -1115,7 +1117,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(PaymentPlan.BackgroundActionStatus.choices)
 
     def resolve_all_cash_plans_and_payment_plans(self, info, **kwargs):
-        service_provider_qs = ServiceProvider.objects.filter(id=OuterRef("pk")).distinct()
+        service_provider_qs = ServiceProvider.objects.filter(cash_plans=OuterRef("pk")).distinct()
         fsp_qs = FinancialServiceProvider.objects.filter(
             delivery_mechanisms_per_payment_plan__payment_plan=OuterRef("pk")
         ).distinct()
@@ -1130,13 +1132,16 @@ class Query(graphene.ObjectType):
             fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)),
             delivery_types=ArraySubquery(delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism", flat=True)),
         )
-
         cash_plan_qs = CashPlan.objects.all().annotate(
             unicef_id=F("ca_id"),
             fsp_names=ArraySubquery(service_provider_qs.values_list("full_name", flat=True)),
-            delivery_types=F("delivery_type"),
+            delivery_types=Func(
+                [],
+                F("delivery_type"),
+                function="array_append",
+                output_field=ArrayField(CharField(null=True)),
+            ),
         )
-
         qs = ExtendedQuerySetSequence(payment_plan_qs, cash_plan_qs)
 
         qs = qs.annotate(

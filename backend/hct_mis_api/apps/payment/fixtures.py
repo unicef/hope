@@ -432,6 +432,8 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
     total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
+    service_provider = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first())
+
     @factory.post_generation
     def payment_verification_summary(self, create, extracted, **kwargs):
         if not create:
@@ -732,6 +734,13 @@ def generate_reconciled_payment_plan():
     pp.status_reconciled()
     pp.save()
 
+    fsp_1 = FinancialServiceProviderFactory(
+        delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
+    )
+    DeliveryMechanismPerPaymentPlanFactory(
+        payment_plan=pp, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+    )
+
     create_payment_verification_plan_with_status(
         pp, root, afghanistan, tp.program, tp, PaymentVerificationPlan.STATUS_ACTIVE
     )
@@ -883,6 +892,10 @@ def generate_payment_plan():
         name="Test FSP 1",
         delivery_mechanisms=[Payment.DELIVERY_TYPE_CASH],
     )[0]
+
+    DeliveryMechanismPerPaymentPlanFactory(
+        payment_plan=payment_plan, financial_service_provider=fsp_1, delivery_mechanism=Payment.DELIVERY_TYPE_CASH
+    )
 
     payment_1_pk = UUID("10000000-feed-beef-0000-00000badf00d")
     Payment.objects.update_or_create(
