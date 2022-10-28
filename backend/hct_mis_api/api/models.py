@@ -1,7 +1,7 @@
 import binascii
 import os
 from enum import Enum, auto, unique
-from typing import Tuple
+from typing import Any, List, Tuple
 
 from django.db import models
 from django.utils import timezone
@@ -13,7 +13,7 @@ from ..apps.core.models import BusinessArea
 
 @unique
 class Grant(Enum):
-    def _generate_next_value_(name, *args) -> "Grant":
+    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:
         return name
 
     API_READ_ONLY = auto()

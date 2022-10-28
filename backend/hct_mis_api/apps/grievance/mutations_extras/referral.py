@@ -1,5 +1,7 @@
+from typing import List, Optional, Tuple
 import graphene
 
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.core.utils import decode_and_get_object
 from hct_mis_api.apps.grievance.models import TicketReferralDetails
 from hct_mis_api.apps.household.models import Household, Individual
@@ -11,14 +13,14 @@ class ReferralTicketExtras(graphene.InputObjectType):
     individual = graphene.GlobalID(node=IndividualNode, required=False)
 
 
-def save_referral_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_referral_extras(root, info, input, grievance_ticket, extras, **kwargs) -> List[GrievanceTicket]:
     household, individual = fetch_household_and_individual(extras)
     create_new_ticket(grievance_ticket, household, individual)
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
 
 
-def update_referral_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def update_referral_extras(root, info, input, grievance_ticket, extras, **kwargs) -> GrievanceTicket:
     household, individual = fetch_household_and_individual(extras)
 
     update_ticket(grievance_ticket, household, individual)
@@ -26,7 +28,7 @@ def update_referral_extras(root, info, input, grievance_ticket, extras, **kwargs
     return grievance_ticket
 
 
-def create_new_ticket(grievance_ticket, household, individual):
+def create_new_ticket(grievance_ticket, household, individual) -> None:
     TicketReferralDetails.objects.create(
         individual=individual,
         household=household,
@@ -34,7 +36,7 @@ def create_new_ticket(grievance_ticket, household, individual):
     )
 
 
-def fetch_household_and_individual(extras):
+def fetch_household_and_individual(extras) -> Tuple[Optional[Household], Optional[Individual]]:
     category_extras = extras.get("category", {})
     feedback_ticket_extras = category_extras.get("referral_ticket_extras", {})
     individual_encoded_id = feedback_ticket_extras.get("individual")
@@ -44,7 +46,7 @@ def fetch_household_and_individual(extras):
     return household, individual
 
 
-def update_ticket(grievance_ticket, household, individual):
+def update_ticket(grievance_ticket, household, individual) -> None:
     ticket_details = grievance_ticket.referral_ticket_details
     if individual:
         ticket_details.individual = individual

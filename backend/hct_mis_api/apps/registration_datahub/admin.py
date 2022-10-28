@@ -1,12 +1,12 @@
 import base64
 import logging
-from typing import Dict
+from typing import Any, Dict, Generator, List, Tuple
 
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.core.signing import BadSignature, Signer
-from django.db.models import F
+from django.db.models import F, QuerySet
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -131,13 +131,13 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
     actions = ["enrich_deduplication"]
     inlines = (ImportedBankAccountInfoStackedInline,)
 
-    def score(self, obj):  # type: ignore # TODO: what type?
+    def score(self, obj) -> Any:
         try:
             return obj.deduplication_golden_record_results["score"]["max"]
         except KeyError:
             return ""
 
-    def batch_score(self, obj):  # type: ignore # TODO: what type?
+    def batch_score(self, obj) -> Any:
         try:
             return obj.deduplication_batch_results["score"]["max"]
         except KeyError:
@@ -248,7 +248,7 @@ class RemeberDataForm(forms.Form):
     SYNC_COOKIE = "fetch"
     remember = forms.BooleanField(label="Remember me", required=False)
 
-    def get_signed_cookie(self, request):  # type: ignore # TODO: what type?
+    def get_signed_cookie(self, request) -> Any:
         signer = Signer(request.user.password)
         return signer.sign_object(self.cleaned_data)
 
@@ -272,7 +272,7 @@ class FetchForm(RemeberDataForm):
     start = forms.IntegerField()
     end = forms.IntegerField()
 
-    def clean(self):
+    def clean(self) -> Dict[str, Any]:
         return super().clean()
 
 
@@ -287,12 +287,12 @@ class AlexisFilter(SimpleListFilter):
     title = "Alexis"
     parameter_name = "alexis"
 
-    def __init__(self, request, params, model, model_admin):
+    def __init__(self, request, params, model, model_admin) -> None:
         super().__init__(request, params, model, model_admin)
         self.lookup_kwarg = self.parameter_name
         self.lookup_val = request.GET.getlist(self.lookup_kwarg, [])
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset) -> QuerySet:
         if "1" in self.lookup_val:
             queryset = queryset.filter(data__w_counters__individuals_num=F("data__household__0__size_h_c"))
         if "2" in self.lookup_val:
@@ -313,8 +313,8 @@ class AlexisFilter(SimpleListFilter):
             queryset = queryset.filter(data__w_counters__collector_bank_account=True)
         return queryset
 
-    def lookups(self, request, model_admin):
-        return (
+    def lookups(self, request, model_admin) -> Tuple[List[str]]:
+        return tuple(
             ["1", "Household size match"],
             ["2", "Only one collector"],
             ["3", "One and only one head"],
@@ -326,7 +326,7 @@ class AlexisFilter(SimpleListFilter):
             ["9", "Collector has BankAccount"],
         )
 
-    def choices(self, changelist):
+    def choices(self, changelist) -> Generator:
         for lookup, title in self.lookup_choices:
             qs = changelist.get_query_string(remove=[self.parameter_name]) + "&"
             qs += "&".join([f"{self.parameter_name}={v}" for v in self.lookup_val if v != lookup])
@@ -371,13 +371,13 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         qs = super().get_queryset(request)
         qs = qs.defer("storage", "data")
         return qs
 
     @admin.action(description="Create RDI")
-    def create_rdi(self, request, queryset):
+    def create_rdi(self, request, queryset) -> None:
         service = FlexRegistrationService()
         try:
             records_ids = queryset.values_list("id", flat=True)
@@ -392,7 +392,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
             self.message_user(request, str(e), messages.ERROR)
 
     @admin.action(description="Async extract")
-    def async_extract(self, request, queryset):
+    def async_extract(self, request, queryset) -> None:
         try:
             records_ids = queryset.values_list("id", flat=True)
             fresh_extract_records_task.delay(list(records_ids))
@@ -401,7 +401,7 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
             self.message_user(request, str(e), messages.ERROR)
 
     @button(permission=is_root)
-    def fetch(self, request):
+    def fetch(self, request) -> TemplateResponse:
         ctx = self.get_common_context(request)
         cookies = {}
         if request.method == "POST":
@@ -433,17 +433,17 @@ class RecordDatahubAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
         return response
 
     @button(label="Extract")
-    def extract_single(self, request, pk):
+    def extract_single(self, request, pk) -> None:
         records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
         try:
             extract(records_ids, raise_exception=True)
         except Exception as e:
             self.message_error_to_user(request, e)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request) -> bool:
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         return is_root(request)
 
 

@@ -1,3 +1,4 @@
+from typing import Any, Dict, List
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
 from django.core.validators import (
@@ -105,18 +106,18 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         return self.name
 
     @cached_property
-    def all_imported_individuals(self):
+    def all_imported_individuals(self) -> models.QuerySet[ImportedIndividual]:
         return ImportedIndividual.objects.filter(registration_data_import=self.datahub_id)
 
     class Meta:
         unique_together = ("name", "business_area")
         verbose_name = "Registration data import"
 
-    def should_check_against_sanction_list(self):
+    def should_check_against_sanction_list(self) -> bool:
         return self.screen_beneficiary
 
     @classmethod
-    def get_choices(cls, business_area_slug=None):
+    def get_choices(cls, business_area_slug=None) -> List[Dict[str, Any]]:
         filters = {}
         if business_area_slug:
             filters["business_area__slug"] = business_area_slug
@@ -129,5 +130,5 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
             for rdi in queryset
         ]
 
-    def can_be_merged(self):
+    def can_be_merged(self) -> bool:
         return self.status in [self.IN_REVIEW, self.MERGE_ERROR]

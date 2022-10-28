@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
@@ -127,7 +127,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         permission=is_root,
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
-    def delete_rdi(self, request, pk) -> HttpResponseRedirect:
+    def delete_rdi(self, request, pk) -> Any:  # TODO: typing
         try:
             if request.method == "POST":
                 with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
@@ -170,7 +170,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
 
     @staticmethod
-    def delete_merged_rdi_visible(o, r):
+    def delete_merged_rdi_visible(o, r) -> bool:
         is_correct_status = o.status == RegistrationDataImport.MERGED
         is_not_used_in_targeting = HouseholdSelection.objects.filter(household__registration_data_import=o).count() == 0
         is_not_used_by_payment_record = PaymentRecord.objects.filter(household__registration_data_import=o).count() == 0
@@ -255,6 +255,6 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
             return None
 
     @button()
-    def households(self, request, pk):
+    def households(self, request, pk) -> HttpResponseRedirect:
         url = reverse("admin:household_household_changelist")
         return HttpResponseRedirect(f"{url}?&registration_data_import__exact={pk}")
