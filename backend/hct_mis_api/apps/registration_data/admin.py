@@ -10,6 +10,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.db.models import QuerySet
 
 from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button, link
@@ -57,7 +58,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         ("business_area__name", "business area"),
     )
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> QuerySet:
         return super().get_queryset(request).select_related("business_area")
 
     @link(
@@ -65,19 +66,20 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         # permission=lambda r, o: r.user.is_superuser,
         # visible=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
-    def hub(self, button):
+    def hub(self, button) -> Optional[str]:
         obj = button.context.get("original")
         if obj:
             return reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
 
         button.visible = False
+        return None
 
     @button(
         label="Re-run RDI",
         permission=lambda r, o: r.user.is_superuser,
         enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
-    def rerun_rdi(self, request, pk):
+    def rerun_rdi(self, request, pk) -> None:
         obj = self.get_object(request, pk)
         try:
             if obj.data_source == RegistrationDataImport.XLS:
@@ -112,7 +114,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         permission=lambda r, o: r.user.is_superuser,
         enabled=lambda btn: btn.original.status == RegistrationDataImport.MERGE_ERROR,
     )
-    def rerun_merge_rdi(self, request, pk):
+    def rerun_merge_rdi(self, request, pk) -> None:
         try:
             merge_registration_data_import_task.delay(registration_data_import_id=pk)
 
@@ -125,37 +127,32 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         permission=is_root,
         enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
-    def delete_rdi(self, request, pk):
+    def delete_rdi(self, request, pk) -> HttpResponseRedirect:
         try:
             if request.method == "POST":
-                with transaction.atomic(using="default"):
-                    with transaction.atomic(using="registration_datahub"):
-                        rdi = RegistrationDataImport.objects.get(pk=pk)
-                        rdi_name = rdi.name
-                        rdi_datahub = datahub_models.RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
-                        datahub_individuals_ids = list(
-                            datahub_models.ImportedIndividual.objects.filter(
-                                registration_data_import=rdi_datahub
-                            ).values_list("id", flat=True)
-                        )
-                        rdi_datahub.delete()
-                        rdi.delete()
-                        # remove elastic search records linked to individuals
-                        remove_elasticsearch_documents_by_matching_ids(
-                            datahub_individuals_ids, ImportedIndividualDocument
-                        )
-                        self.message_user(request, "RDI Deleted")
-                        LogEntry.objects.log_action(
-                            user_id=request.user.pk,
-                            content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                            object_id=None,
-                            object_repr=f"Removed RDI {rdi_name} id: {pk}",
-                            action_flag=DELETION,
-                            change_message="RDI removed",
-                        )
-                        return HttpResponseRedirect(
-                            reverse("admin:registration_data_registrationdataimport_changelist")
-                        )
+                with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
+                    rdi = RegistrationDataImport.objects.get(pk=pk)
+                    rdi_name = rdi.name
+                    rdi_datahub = datahub_models.RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
+                    datahub_individuals_ids = list(
+                        datahub_models.ImportedIndividual.objects.filter(
+                            registration_data_import=rdi_datahub
+                        ).values_list("id", flat=True)
+                    )
+                    rdi_datahub.delete()
+                    rdi.delete()
+                    # remove elastic search records linked to individuals
+                    remove_elasticsearch_documents_by_matching_ids(datahub_individuals_ids, ImportedIndividualDocument)
+                    self.message_user(request, "RDI Deleted")
+                    LogEntry.objects.log_action(
+                        user_id=request.user.pk,
+                        content_type_id=ContentType.objects.get_for_model(self.model).pk,
+                        object_id=None,
+                        object_repr=f"Removed RDI {rdi_name} id: {pk}",
+                        action_flag=DELETION,
+                        change_message="RDI removed",
+                    )
+                    return HttpResponseRedirect(reverse("admin:registration_data_registrationdataimport_changelist"))
             else:
                 return confirm_action(
                     self,
@@ -210,41 +207,36 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
     def delete_merged_rdi(self, request, pk) -> Optional[HttpResponse]:
         try:
             if request.method == "POST":
-                with transaction.atomic(using="default"):
-                    with transaction.atomic(using="registration_datahub"):
-                        rdi = RegistrationDataImport.objects.get(pk=pk)
-                        rdi_name = rdi.name
-                        rdi_datahub = datahub_models.RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
-                        datahub_individuals_ids = list(
-                            datahub_models.ImportedIndividual.objects.filter(
-                                registration_data_import=rdi_datahub
-                            ).values_list("id", flat=True)
-                        )
-                        individuals_ids = list(
-                            Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
-                        )
-                        rdi_datahub.delete()
-                        GrievanceTicket.objects.filter(
-                            RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
-                        ).filter(business_area=rdi.business_area).delete()
-                        rdi.delete()
-                        # remove elastic search records linked to individuals
-                        remove_elasticsearch_documents_by_matching_ids(
-                            datahub_individuals_ids, ImportedIndividualDocument
-                        )
-                        remove_elasticsearch_documents_by_matching_ids(individuals_ids, IndividualDocument)
-                        self.message_user(request, "RDI Deleted")
-                        LogEntry.objects.log_action(
-                            user_id=request.user.pk,
-                            content_type_id=ContentType.objects.get_for_model(self.model).pk,
-                            object_id=None,
-                            object_repr=f"Removed RDI {rdi_name} id: {pk}",
-                            action_flag=DELETION,
-                            change_message="RDI removed",
-                        )
-                        return HttpResponseRedirect(
-                            reverse("admin:registration_data_registrationdataimport_changelist")
-                        )
+                with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
+                    rdi = RegistrationDataImport.objects.get(pk=pk)
+                    rdi_name = rdi.name
+                    rdi_datahub = datahub_models.RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
+                    datahub_individuals_ids = list(
+                        datahub_models.ImportedIndividual.objects.filter(
+                            registration_data_import=rdi_datahub
+                        ).values_list("id", flat=True)
+                    )
+                    individuals_ids = list(
+                        Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+                    )
+                    rdi_datahub.delete()
+                    GrievanceTicket.objects.filter(
+                        RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
+                    ).filter(business_area=rdi.business_area).delete()
+                    rdi.delete()
+                    # remove elastic search records linked to individuals
+                    remove_elasticsearch_documents_by_matching_ids(datahub_individuals_ids, ImportedIndividualDocument)
+                    remove_elasticsearch_documents_by_matching_ids(individuals_ids, IndividualDocument)
+                    self.message_user(request, "RDI Deleted")
+                    LogEntry.objects.log_action(
+                        user_id=request.user.pk,
+                        content_type_id=ContentType.objects.get_for_model(self.model).pk,
+                        object_id=None,
+                        object_repr=f"Removed RDI {rdi_name} id: {pk}",
+                        action_flag=DELETION,
+                        change_message="RDI removed",
+                    )
+                    return HttpResponseRedirect(reverse("admin:registration_data_registrationdataimport_changelist"))
             else:
                 return confirm_action(
                     self,

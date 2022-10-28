@@ -134,11 +134,10 @@ class FlexRegistrationService:
         try:
             for record_id in records_ids_to_import:
                 try:
-                    with atomic("default"):
-                        with atomic("registration_datahub"):
-                            record = Record.objects.defer("data").get(id=record_id)
-                            self.create_household_for_rdi_household(record, rdi_datahub)
-                            imported_records_ids.append(record_id)
+                    with atomic("default"), atomic("registration_datahub"):
+                        record = Record.objects.defer("data").get(id=record_id)
+                        self.create_household_for_rdi_household(record, rdi_datahub)
+                        imported_records_ids.append(record_id)
                 except ValidationError as e:
                     logger.exception(e)
                     record.mark_as_invalid(str(e))

@@ -1,6 +1,7 @@
 import logging
 from decimal import Decimal
 from math import ceil
+from typing import Union
 
 from django.db.models import Q, QuerySet
 
@@ -31,7 +32,7 @@ def is_right_phone_number_format(phone_number) -> bool:
         return False
 
 
-def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error):
+def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error) -> int:
     from statistics import NormalDist
 
     variable = 0.5
@@ -43,7 +44,7 @@ def get_number_of_samples(payment_records_sample_count, confidence_interval, mar
     return min(actual_sample, payment_records_sample_count)
 
 
-def from_received_to_status(received, received_amount, delivered_amount):
+def from_received_to_status(received, received_amount, delivered_amount) -> str:
     received_amount_dec = float_to_decimal(received_amount)
     if received is None:
         return PaymentVerification.STATUS_PENDING
@@ -58,7 +59,7 @@ def from_received_to_status(received, received_amount, delivered_amount):
         return PaymentVerification.STATUS_NOT_RECEIVED
 
 
-def float_to_decimal(received_amount):
+def float_to_decimal(received_amount: Union[Decimal, float]) -> Decimal:
     if isinstance(received_amount, float):
         return Decimal(f"{round(received_amount, 2):.2f}")
     return received_amount
