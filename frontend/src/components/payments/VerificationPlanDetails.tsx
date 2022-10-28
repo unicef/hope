@@ -132,15 +132,15 @@ export const VerificationPlanDetails = ({
                   {canDelete && (
                     <DeleteVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
-                      cashPlanId={planNode.id}
+                      cashOrPaymentPlanId={planNode.id}
                     />
                   )}
                 </Box>
 
                 {canEdit && (
                   <EditVerificationPlan
-                    cashPlanId={planNode.id}
-                    paymentPlanId={verificationPlan.id}
+                    paymentVerificationPlanNode={verificationPlan}
+                    cashOrPaymentPlanId={planNode.id}
                   />
                 )}
                 {canActivate && (
@@ -148,7 +148,7 @@ export const VerificationPlanDetails = ({
                     {canActivate && (
                       <ActivateVerificationPlan
                         paymentVerificationPlanId={verificationPlan.id}
-                        cashPlanId={planNode.id}
+                        cashOrPaymentPlanId={planNode.id}
                       />
                     )}
                   </Box>
@@ -203,7 +203,7 @@ export const VerificationPlanDetails = ({
                             <Box p={2}>
                               <StyledLink
                                 download
-                                href={`/api/download-cash-plan-payment-verification/${verificationPlan.id}`}
+                                href={`/api/download-payment-verification-plan/${verificationPlan.id}`}
                               >
                                 <Button
                                   color='primary'
@@ -220,8 +220,8 @@ export const VerificationPlanDetails = ({
                     {canImport && (
                       <Box p={2}>
                         <ImportXlsx
-                          cashPlanId={planNode.id}
                           paymentVerificationPlanId={verificationPlan.id}
+                          cashOrPaymentPlanId={planNode.id}
                         />
                       </Box>
                     )}
@@ -232,7 +232,7 @@ export const VerificationPlanDetails = ({
                   verificationPlan.xlsxFileImported && (
                     <FinishVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
-                      cashPlanId={planNode.id}
+                      cashOrPaymentPlanId={planNode.id}
                     />
                   )}
                 {canDiscard &&
@@ -258,7 +258,7 @@ export const VerificationPlanDetails = ({
                   ) : (
                     <DiscardVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
-                      cashPlanId={planNode.id}
+                      cashOrPaymentPlanId={planNode.id}
                     />
                   ))}
               </Box>
