@@ -8,7 +8,7 @@ from django.utils.html import strip_tags
 
 import xlrd
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_DATE,
     TYPE_DECIMAL,
     TYPE_IMAGE,

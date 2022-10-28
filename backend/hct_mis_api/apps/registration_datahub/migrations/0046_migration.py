@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import TYPE_DECIMAL
+from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_DECIMAL
 from hct_mis_api.apps.core.utils import fix_flex_type_fields, serialize_flex_attributes
 
 
@@ -33,7 +33,7 @@ def fix_fields_households(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('registration_datahub', '0045_migration'),
+        ("registration_datahub", "0045_migration"),
     ]
 
     operations = [
