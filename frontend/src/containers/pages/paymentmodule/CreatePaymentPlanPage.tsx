@@ -17,6 +17,7 @@ import {
   useCreatePpMutation,
   useCurrencyChoicesQuery,
 } from '../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -124,6 +125,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     >
       {({ submitForm, values }) => (
         <Form>
+          <AutoSubmitFormOnEnter />
           <CreatePaymentPlanHeader
             handleSubmit={submitForm}
             businessArea={businessArea}

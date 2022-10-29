@@ -17,6 +17,7 @@ import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField/FormikTextField';
 import { Action } from '../../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { ErrorButton } from '../../../core/ErrorButton';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
@@ -63,6 +64,7 @@ export const RejectPaymentPlan = ({
     >
       {({ submitForm }) => (
         <>
+          {rejectDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
             <ErrorButton onClick={() => setRejectDialogOpen(true)}>
               {t('Reject')}

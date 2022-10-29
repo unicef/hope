@@ -17,6 +17,7 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { useUpdatePaymentVerificationReceivedAndReceivedAmountMutation } from '../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 
 export interface Props {
   paymentVerificationId: string;
@@ -27,7 +28,7 @@ export function VerifyManual({
   enabled,
 }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const [VerifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
+  const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [
     mutate,
@@ -66,6 +67,7 @@ export function VerifyManual({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ values }) => (
         <Form>
+          {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
             <Button
               color='primary'
@@ -78,7 +80,7 @@ export function VerifyManual({
             </Button>
           </Box>
           <Dialog
-            open={VerifyManualDialogOpen}
+            open={verifyManualDialogOpen}
             onClose={() => setVerifyManualDialogOpen(false)}
             scroll='paper'
             aria-labelledby='form-dialog-title'

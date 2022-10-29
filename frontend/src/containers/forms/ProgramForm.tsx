@@ -11,6 +11,7 @@ import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
@@ -168,6 +169,7 @@ export const ProgramForm = ({
         >
           {({ submitForm, values }) => (
             <>
+              {open && <AutoSubmitFormOnEnter />}
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title' disableTypography>
                   <Typography variant='h6'>{title}</Typography>
