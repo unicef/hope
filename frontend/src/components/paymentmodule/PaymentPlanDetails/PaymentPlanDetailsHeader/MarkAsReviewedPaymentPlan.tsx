@@ -17,6 +17,7 @@ import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField/FormikTextField';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
 
@@ -72,6 +73,7 @@ export const MarkAsReviewedPaymentPlan = ({
       >
         {({ submitForm }) => (
           <>
+            {markAsReviewedDialogOpen && <AutoSubmitFormOnEnter />}
             <Box p={2}>
               <Button
                 color='primary'
