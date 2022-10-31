@@ -117,7 +117,7 @@ class PullFromDatahubTask:
                     ret["failures"].append(session.id)
         return ret | {"grouped_session": grouped_session_count}
 
-    def copy_session(self, session):
+    def copy_session(self, session) -> None:
         with configure_scope() as scope:
             scope.set_tag("session.ca", str(session.id))
             session.status = session.STATUS_PROCESSING
@@ -147,7 +147,7 @@ class PullFromDatahubTask:
             code=BusinessArea.cash_assist_to_code_mapping.get(cash_assist_code, cash_assist_code)
         )
 
-    def copy_cash_plans(self, session):
+    def copy_cash_plans(self, session) -> None:
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
         for dh_cash_plan in dh_cash_plans:
             cash_plan_args = build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
@@ -168,7 +168,7 @@ class PullFromDatahubTask:
                 except Exception as e:
                     logger.exception(e)
 
-    def set_cash_plan_service_provider(self, cash_plan_args):
+    def set_cash_plan_service_provider(self, cash_plan_args) -> None:
         assistance_through = cash_plan_args.get("assistance_through")
         if not assistance_through:
             return
@@ -177,7 +177,7 @@ class PullFromDatahubTask:
             return
         cash_plan_args["service_provider"] = service_provider
 
-    def copy_payment_records(self, session):
+    def copy_payment_records(self, session) -> None:
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
         household_ids = []
         for dh_payment_record in dh_payment_records:
@@ -208,7 +208,7 @@ class PullFromDatahubTask:
                 payment_record.household.programs.add(payment_record.cash_plan.program)
         handle_total_cash_in_specific_households(household_ids)
 
-    def copy_service_providers(self, session):
+    def copy_service_providers(self, session) -> None:
         dh_service_providers = ca_models.ServiceProvider.objects.filter(session=session)
         for dh_service_provider in dh_service_providers:
             service_provider_args = build_arg_dict(
@@ -221,7 +221,7 @@ class PullFromDatahubTask:
             service_provider_args["country"] = CountryCodeMap.objects.get_iso3_code(dh_service_provider.country)
             ServiceProvider.objects.update_or_create(ca_id=dh_service_provider.ca_id, defaults=service_provider_args)
 
-    def copy_programs(self, session):
+    def copy_programs(self, session) -> None:
         dh_programs = ca_models.Programme.objects.filter(session=session)
         programs = []
         for dh_program in dh_programs:
@@ -231,7 +231,7 @@ class PullFromDatahubTask:
             programs.append(program)
         Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
 
-    def copy_target_population(self, session):
+    def copy_target_population(self, session) -> None:
         dh_target_populations = ca_models.TargetPopulation.objects.filter(session=session)
         target_populations = []
         for dh_target_population in dh_target_populations:
