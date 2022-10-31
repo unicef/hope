@@ -172,7 +172,7 @@ class FlexibleAttributeImporter:
             else:
                 self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
 
-    def _can_add_row(self, row):
+    def _can_add_row(self, row) -> bool:
         is_core_field = any(row[1].value.endswith(i) for i in self.CORE_FIELD_SUFFIXES) and not row[0].value.endswith(
             "_group"
         )
@@ -204,7 +204,7 @@ class FlexibleAttributeImporter:
 
         return {row[0].value.split(" ")[1] for row in fields_with_choices}
 
-    def _get_field_choice_name(self, row):
+    def _get_field_choice_name(self, row) -> Optional[str]:
         has_choice = row[0].value.startswith("select_")
         if has_choice:
             return row[0].value.split(" ")[1]
@@ -269,7 +269,7 @@ class FlexibleAttributeImporter:
         for choice in choices_to_delete:
             choice.delete()
 
-    def _handle_groups_and_fields(self, sheet):
+    def _handle_groups_and_fields(self, sheet) -> None:
         groups_from_db, attrs_from_db = (
             FlexibleAttributeGroup.objects.all(),
             FlexibleAttribute.objects.all(),

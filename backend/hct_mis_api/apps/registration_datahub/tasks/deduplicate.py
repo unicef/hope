@@ -3,7 +3,7 @@ import logging
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
 from time import sleep
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, NamedTuple, Tuple
 
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat
@@ -56,7 +56,7 @@ class Thresholds:
             setattr(self, f.name, getattr(config, f.name))
 
     @classmethod
-    def from_business_area(cls, ba):
+    def from_business_area(cls, ba) -> Any:
         t = cls()
         for f in fields(cls):
             setattr(t, f.name, getattr(ba, f.name.lower()))
@@ -132,7 +132,7 @@ class DeduplicateTask:
         return query_dict
 
     @classmethod
-    def _prepare_queries_for_names_from_fields(cls, fields):
+    def _prepare_queries_for_names_from_fields(cls, fields) -> List[Dict]:
         given_name = fields.pop("given_name")
         family_name = fields.pop("family_name")
         full_name = fields.pop("full_name")
@@ -141,35 +141,34 @@ class DeduplicateTask:
         return cls._prepare_queries_for_names(given_name, family_name, full_name)
 
     @classmethod
-    def _prepare_households_and_roles_queries_from_fields(cls, fields):
+    def _prepare_households_and_roles_queries_from_fields(cls, fields) -> List[Dict]:
         households_and_roles = fields.pop("households_and_roles", [])
         households_and_roles_queries = cls._prepare_households_and_roles_queries(households_and_roles)
         return households_and_roles_queries
 
     @classmethod
-    def _prepare_identities_queries_from_fields(cls, fields):
+    def _prepare_identities_queries_from_fields(cls, fields) -> List[Dict]:
         identities = fields.pop("identities", [])
         identities_queries = cls._prepare_identities_or_documents_query(identities, "identity")
         return identities_queries
 
     @classmethod
-    def _prepare_documents_queries_from_fields(cls, fields):
+    def _prepare_documents_queries_from_fields(cls, fields) -> List[Dict]:
         documents = fields.pop("documents", [])
         documents_queries = cls._prepare_identities_or_documents_query(documents, "document")
         return documents_queries
 
     @staticmethod
-    def _prepare_fields(individual, fields_names, dict_fields):
+    def _prepare_fields(individual, fields_names, dict_fields) -> Dict[str, Any]:
         fields = to_dict(individual, fields=fields_names, dict_fields=dict_fields)
         if not isinstance(fields["phone_no"], str):
             fields["phone_no"] = fields["phone_no"].raw_input
         if not isinstance(fields["phone_no_alternative"], str):
             fields["phone_no_alternative"] = fields["phone_no_alternative"].raw_input
-
         return fields
 
     @classmethod
-    def _prepare_households_and_roles_queries(cls, households_and_roles):
+    def _prepare_households_and_roles_queries(cls, households_and_roles) -> List[Dict]:
         """
         Not needed
         Not working
@@ -279,7 +278,7 @@ class DeduplicateTask:
         return queries
 
     @classmethod
-    def _prepare_queries_for_names(cls, given_name, family_name, full_name):
+    def _prepare_queries_for_names(cls, given_name, family_name, full_name) -> List[Dict]:
         """
         prepares ES queries for
         * givenName
@@ -387,7 +386,7 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def _wait_until_health_green(cls):
+    def _wait_until_health_green(cls) -> None:
         ok = False
         while not ok:
             health = connections.get_connection().cluster.health()
@@ -556,7 +555,7 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def _get_duplicated_individuals(cls, registration_data_import, individuals):
+    def _get_duplicated_individuals(cls, registration_data_import, individuals) -> Tuple:
         if individuals is None:
             individuals = Individual.objects.filter(registration_data_import=registration_data_import)
         all_duplicates = []
@@ -647,7 +646,7 @@ class DeduplicateTask:
         to_bulk_update_results,
         all_original_individuals_ids_duplicates,
         all_original_individuals_ids_possible_duplicates,
-    ):
+    ) -> None:
         Individual.objects.filter(
             id__in=all_possible_duplicates + all_original_individuals_ids_possible_duplicates
         ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
@@ -930,7 +929,7 @@ class DeduplicateTask:
         business_area,
         registration_data_import,
         possible_duplicates_through_dict,
-    ):
+    ) -> NamedTuple:
         from hct_mis_api.apps.grievance.models import (
             GrievanceTicket,
             TicketNeedsAdjudicationDetails,

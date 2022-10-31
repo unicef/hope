@@ -1,8 +1,8 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Tuple
 
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import F, Q, QuerySet
 from django.utils import timezone
 
 from hct_mis_api.apps.core.models import CountryCodeMap
@@ -167,7 +167,7 @@ class SendTPToDatahubTask:
             logger.exception(e)
             raise
 
-    def _prepare_data_to_send(self, program, target_population):
+    def _prepare_data_to_send(self, program, target_population) -> Tuple:
         (
             all_targeted_households_ids,
             households_to_sync,
@@ -190,7 +190,7 @@ class SendTPToDatahubTask:
         ).distinct()
         return documents, households_to_sync, individuals_to_sync, roles_to_sync, target_population_selections
 
-    def _prepare_unhcr_dict(self, individuals_to_sync):
+    def _prepare_unhcr_dict(self, individuals_to_sync) -> None:
         individual_identities = IndividualIdentity.objects.filter(
             agency__type="UNHCR", individual__in=individuals_to_sync
         ).distinct()
@@ -221,7 +221,7 @@ class SendTPToDatahubTask:
         ).distinct()
         return all_targeted_households_ids, households_to_sync, individuals_to_sync
 
-    def _get_documents(self, individuals):
+    def _get_documents(self, individuals) -> QuerySet[Document]:
         return Document.objects.filter(individual__in=individuals).distinct()
 
     def _send_program(self, program) -> dh_mis_models.Program:
@@ -290,10 +290,10 @@ class SendTPToDatahubTask:
             session=self.dh_session,
         )
 
-    def _get_unhcr_individual_id(self, individual):
+    def _get_unhcr_individual_id(self, individual) -> Optional[str]:
         return self.unhcr_id_dict.get(individual.id)
 
-    def _get_unhcr_household_id(self, household):
+    def _get_unhcr_household_id(self, household) -> Optional[str]:
         if household.unhcr_id == "":
             return None
         return household.unhcr_id
