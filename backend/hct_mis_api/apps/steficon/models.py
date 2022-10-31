@@ -1,3 +1,4 @@
+from typing import Any
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.validators import ProhibitNullCharactersValidator
@@ -231,7 +232,7 @@ class RuleCommit(models.Model):
     def interpreter(self):
         return mapping[self.language](self.definition)
 
-    def execute(self, context):
+    def execute(self, context) -> Any:
         return self.interpreter.execute(context)
 
     def release(self):

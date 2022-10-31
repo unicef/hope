@@ -269,7 +269,7 @@ class BaseNodePermissionMixin:
         creator_permission,
         is_owner,
         owner_permission,
-    ):
+    ) -> None:
         user = info.context.user
         business_area = object_instance.business_area
         if not info.context.user.is_authenticated or not (

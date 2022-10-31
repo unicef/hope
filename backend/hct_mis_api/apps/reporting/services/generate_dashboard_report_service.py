@@ -937,7 +937,7 @@ class GenerateDashboardReportService:
 
         return self.wb
 
-    def generate_report(self):
+    def generate_report(self) -> None:
         try:
             self.generate_workbook()
             file_name = (
