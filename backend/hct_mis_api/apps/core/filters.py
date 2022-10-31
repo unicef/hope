@@ -10,6 +10,7 @@ from django.forms import (
     IntegerField,
 )
 from django.utils import timezone
+from django.db.models import QuerySet
 
 from dateutil.parser import parse
 from django_filters import Filter
@@ -89,7 +90,7 @@ class DecimalRangeFilter(BaseRangeFilter):
     field_class = DecimalRangeField
 
 
-def filter_age(field_name, qs, min, max):
+def filter_age(field_name, qs, min, max) -> QuerySet:
     current = timezone.now().date()
     lookup_expr = "range"
     values = None

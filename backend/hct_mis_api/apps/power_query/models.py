@@ -286,8 +286,8 @@ class Report(NaturalKeyModel, models.Model):
             result = ["No Dataset available"]
         return result
 
-    def __str__(self) -> Optional[str]:
-        return self.name
+    def __str__(self) -> str:
+        return self.name or ""
 
     def get_absolute_url(self) -> str:
         return reverse("power_query:report", args=[self.pk])

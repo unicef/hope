@@ -5,7 +5,7 @@ from django.db.models.functions import Coalesce
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
-def update_household_unicef_id():
+def update_household_unicef_id() -> int:
     subquery = Subquery(
         GrievanceTicket.objects.annotate(
             hh_unicef_id=Coalesce(

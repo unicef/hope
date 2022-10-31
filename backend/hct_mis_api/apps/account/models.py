@@ -86,7 +86,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             self.partner.save()
         super().save(*args, **kwargs)
 
-    def permissions_in_business_area(self, business_area_slug):
+    def permissions_in_business_area(self, business_area_slug) -> List:
         all_roles_permissions_list = list(
             Role.objects.filter(
                 user_roles__user=self,
@@ -203,7 +203,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class IncompatibleRolesManager(models.Manager):
-    def validate_user_role(self, user, business_area, role):
+    def validate_user_role(self, user, business_area, role) -> None:
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
         ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
