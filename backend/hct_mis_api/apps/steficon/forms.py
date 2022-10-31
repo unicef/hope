@@ -1,6 +1,7 @@
 import csv
 import json
 import logging
+from typing import Type
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
@@ -16,7 +17,7 @@ from .widget import ContentTypeChoiceField, PythonEditor
 logger = logging.getLogger(__name__)
 
 
-def format_code(code):
+def format_code(code) -> str:
     try:
         import black
 
@@ -195,7 +196,8 @@ class RuleForm(forms.ModelForm):
         self._validate_unique = True
         code = self.cleaned_data.get("definition", "")
         language = self.cleaned_data["language"]
-        i: Interpreter = mapping[language](code)
+        interpreter: Type[Interpreter] = mapping[language]
+        i: Interpreter = interpreter(code)
         try:
             i.validate()
         except Exception as e:

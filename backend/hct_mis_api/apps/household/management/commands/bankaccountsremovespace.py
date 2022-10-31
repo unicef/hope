@@ -7,7 +7,7 @@ from hct_mis_api.apps.registration_datahub.models import ImportedBankAccountInfo
 class Command(BaseCommand):
     help = "Fix Bank Account info (remove space from account number and debit card number)"
 
-    def bank_acc_remove_space(self):
+    def bank_acc_remove_space(self) -> None:
         # update BankAccountInfo
         qs = BankAccountInfo.objects.all()
 

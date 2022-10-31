@@ -620,7 +620,7 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @staticmethod
-    def _get_all_with_disabled_individual_count_fields():
+    def _get_all_with_disabled_individual_count_fields() -> List[str]:
         return [
             "female_age_group_0_5_count",
             "female_age_group_0_5_disabled_count",
@@ -645,7 +645,7 @@ class GenerateDashboardReportContentHelpers:
         ]
 
     @staticmethod
-    def _get_all_individual_count_fields():
+    def _get_all_individual_count_fields() -> List[str]:
         return [
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
@@ -660,7 +660,7 @@ class GenerateDashboardReportContentHelpers:
         ]
 
     @staticmethod
-    def get_all_months():
+    def get_all_months() -> List[str]:
         return [
             "january",
             "february",

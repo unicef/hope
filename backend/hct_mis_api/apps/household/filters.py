@@ -42,7 +42,7 @@ from hct_mis_api.apps.program.models import Program
 QueryType = List[Dict[str, Dict[str, Dict[str, str]]]]
 
 
-def _prepare_kobo_asset_id_value(code):
+def _prepare_kobo_asset_id_value(code) -> str:
     """
     preparing value for filter by kobo_asset_id
     value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222

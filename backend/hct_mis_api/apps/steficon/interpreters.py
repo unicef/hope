@@ -25,7 +25,7 @@ class Interpreter:
     def __init__(self, init_string):
         self.init_string = init_string
 
-    def validate(self):
+    def validate(self) -> bool:
         try:
             self.execute()
             return True

@@ -70,7 +70,7 @@ class KoboAPI:
             query_params += f"&{additional_query_params}"
         return f"{self.KPI_URL}/{endpoint}?{query_params}"
 
-    def _get_token(self):
+    def _get_token(self) -> None:
         self._client = KoboRequestsSession()
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=False)
         self._client.mount(self.KPI_URL, HTTPAdapter(max_retries=retries))

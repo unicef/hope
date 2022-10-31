@@ -980,7 +980,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
 
 class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.combined_fields = self.get_combined_fields()
         self.expected_household_fields = self.get_expected_household_fields()

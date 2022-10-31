@@ -3,7 +3,7 @@ from typing import Any
 
 from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
@@ -37,16 +37,16 @@ class TargetingCriteriaQueryingBase:
         else:
             self._excluded_household_ids = excluded_household_ids
 
-    def get_household_queryset(self):
+    def get_household_queryset(self) -> QuerySet:
         return Household.objects
 
-    def get_individual_queryset(self):
+    def get_individual_queryset(self) -> QuerySet:
         return Individual.objects
 
     def get_rules(self) -> Any:
         return self.rules
 
-    def get_excluded_household_ids(self):
+    def get_excluded_household_ids(self) -> Any:
         return self._excluded_household_ids
 
     def get_criteria_string(self) -> str:
@@ -71,19 +71,19 @@ class TargetingCriteriaRuleQueryingBase:
     combines individual filters block with household filters
     """
 
-    def __init__(self, filters=None, individuals_filters_blocks=None):
+    def __init__(self, filters=None, individuals_filters_blocks=None) -> None:
         if filters is not None:
             self.filters = filters
         if individuals_filters_blocks is not None:
             self.individuals_filters_blocks = individuals_filters_blocks
 
-    def get_filters(self):
+    def get_filters(self) -> Any:
         return self.filters
 
-    def get_individuals_filters_blocks(self):
+    def get_individuals_filters_blocks(self) -> Any:
         return self.individuals_filters_blocks
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         filters = self.get_filters()
         filters_strings = [x.get_criteria_string() for x in filters]
         individuals_filters_blocks = self.get_individuals_filters_blocks()
@@ -95,7 +95,7 @@ class TargetingCriteriaRuleQueryingBase:
             all_strings.append(f"I({' AND '.join(individuals_filters_blocks_strings).strip()})")
         return " AND ".join(all_strings).strip()
 
-    def get_query(self):
+    def get_query(self) -> Q:
         query = Q()
         filters = self.get_filters()
         individuals_filters_blocks = self.get_individuals_filters_blocks()
@@ -109,24 +109,24 @@ class TargetingCriteriaRuleQueryingBase:
 
 
 class TargetingIndividualRuleFilterBlockBase:
-    def __init__(self, individual_block_filters=None, target_only_hoh=None):
+    def __init__(self, individual_block_filters=None, target_only_hoh=None) -> None:
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
         if target_only_hoh is not None:
             self.target_only_hoh = target_only_hoh
 
-    def get_individual_block_filters(self):
+    def get_individual_block_filters(self) -> Any:
         return self.individual_block_filters
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         filters = self.get_individual_block_filters()
         filters_string = [x.get_criteria_string() for x in filters]
         return f"({' AND '.join(filters_string).strip()})"
 
-    def get_basic_individual_query(self):
+    def get_basic_individual_query(self) -> Q:
         return Q(duplicate=False) & Q(withdrawn=False)
 
-    def get_query(self):
+    def get_query(self) -> Q:
         individuals_query = self.get_basic_individual_query()
         filters = self.get_individual_block_filters()
         filtered = False

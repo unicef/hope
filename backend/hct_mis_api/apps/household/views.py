@@ -1,3 +1,4 @@
+from typing import Dict
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,7 +21,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.utils.profiling import profiling
 
 
-def get_individual(tax_id, business_area_code):
+def get_individual(tax_id, business_area_code) -> Document:
     documents = (
         Document.objects.all()
         if not business_area_code
@@ -45,7 +46,7 @@ def get_individual(tax_id, business_area_code):
     raise Exception("Document with given tax_id not found")
 
 
-def get_household(registration_id, business_area_code):
+def get_household(registration_id, business_area_code) -> ImportedHousehold:
     kobo_asset_value = _prepare_kobo_asset_id_value(registration_id)
     households = (
         Household.objects.all()
@@ -78,12 +79,9 @@ def get_household(registration_id, business_area_code):
     raise Exception("Household with given registration_id not found")
 
 
-def get_household_or_individual(tax_id, registration_id, business_area_code):
+def get_household_or_individual(tax_id, registration_id, business_area_code) -> Dict:
     if tax_id and registration_id:
         raise Exception("tax_id and registration_id are mutually exclusive")
-
-    if not (tax_id or registration_id):
-        raise Exception("tax_id or registration_id is required")
 
     if tax_id:
         individual = get_individual(tax_id, business_area_code)
@@ -92,6 +90,8 @@ def get_household_or_individual(tax_id, registration_id, business_area_code):
     if registration_id:
         household = get_household(registration_id, business_area_code)
         return serialize_by_household(household)
+
+    raise Exception("tax_id or registration_id is required")
 
 
 class HouseholdStatusView(APIView):
