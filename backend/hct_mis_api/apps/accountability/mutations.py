@@ -17,6 +17,7 @@ from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
 
 from ..core.models import BusinessArea
+from .celery_tasks import export_survey_sample_task
 from .models import Message
 from .schema import (
     CommunicationMessageNode,
@@ -141,9 +142,26 @@ class CreateSurveyMutation(PermissionMutation):
         return cls(survey=survey)
 
 
+class ExportSurveySampleMutationMutation(PermissionMutation):
+    survey = graphene.Field(SurveyNode)
+
+    class Arguments:
+        survey_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, survey_id):
+        survey = get_object_or_404(Survey, id=decode_id_string(survey_id))
+        cls.has_permission(info, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS, survey.business_area)
+
+        export_survey_sample_task(survey.id, info.context.user.id)
+        return cls(survey=survey)
+
+
 class Mutations(graphene.ObjectType):
     create_accountability_communication_message = CreateCommunicationMessageMutation.Field()
     create_feedback = CreateFeedbackMutation.Field()
     update_feedback = UpdateFeedbackMutation.Field()
     create_feedback_message = CreateFeedbackMessageMutation.Field()
     create_survey = CreateSurveyMutation.Field()
+    export_survey_sample = ExportSurveySampleMutationMutation.Field()

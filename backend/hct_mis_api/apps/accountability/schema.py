@@ -28,7 +28,13 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
-from .models import Feedback, FeedbackMessage, Message, Survey
+from .models import (
+    Feedback,
+    FeedbackMessage,
+    Message,
+    SampleFileExpiredException,
+    Survey,
+)
 from .services.message_crud_services import MessageCrudServices
 from .services.sampling import Sampling
 from .services.verifiers import MessageArgumentVerifier
@@ -113,11 +119,25 @@ class SurveyNode(BaseNodePermissionMixin, DjangoObjectType):
         ),
     )
 
+    sample_file_path = graphene.String()
+    has_valid_sample_file = graphene.Boolean()
+
     class Meta:
         model = Survey
         interfaces = (graphene.relay.Node,)
         connection_class = ExtendedConnection
         filter_fields = []
+
+    @staticmethod
+    def resolve_sample_file_path(survey: Survey, info):
+        try:
+            return survey.sample_file_path()
+        except SampleFileExpiredException:
+            return None
+
+    @staticmethod
+    def resolve_has_valid_sample_file(survey: Survey, info):
+        return survey.has_valid_sample_file()
 
 
 class RecipientNode(BaseNodePermissionMixin, DjangoObjectType):
