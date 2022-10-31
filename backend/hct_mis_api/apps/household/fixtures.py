@@ -120,16 +120,15 @@ class HouseholdFactory(factory.DjangoModelFactory):
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
 
     @classmethod
-    def build(cls, **kwargs):
+    def build(cls, **kwargs) -> Household:
         """Build an instance of the associated class, with overriden attrs."""
         if "registration_data_import__imported_by__partner" not in kwargs:
             kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
     @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        hoh = kwargs.get("head_of_household", None)
-        if not hoh:
+    def _create(cls, model_class, *args, **kwargs) -> Household:
+        if not (hoh := kwargs.get("head_of_household", None)):
             hoh = IndividualFactory(household=None)
             kwargs["head_of_household"] = hoh
         ret = super()._create(model_class, *args, **kwargs)

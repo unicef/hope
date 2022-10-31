@@ -28,7 +28,7 @@ class TokenInvalid(Exception):
 class KoboRequestsSession(requests.Session):
     AUTH_DOMAINS = [urlparse(settings.KOBO_KF_URL).hostname, urlparse(settings.KOBO_KC_URL).hostname]
 
-    def should_strip_auth(self, old_url, new_url):
+    def should_strip_auth(self, old_url, new_url) -> bool:
         new_parsed = urlparse(new_url)
         if new_parsed.hostname in KoboRequestsSession.AUTH_DOMAINS:
             return False

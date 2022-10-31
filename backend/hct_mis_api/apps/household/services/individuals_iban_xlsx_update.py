@@ -103,7 +103,7 @@ class IndividualsIBANXlsxUpdate:
             self.validation_errors.append(f"Multiple matching Individuals for rows: {multiple_match}")
 
     @transaction.atomic
-    def update(self):
+    def update(self) -> None:
         for individuals_unique_report in self.report_dict[self.STATUS_UNIQUE]:
             row_num, individual = individuals_unique_report
             row = self.individuals_ws[row_num]

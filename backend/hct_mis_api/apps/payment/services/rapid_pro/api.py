@@ -135,7 +135,7 @@ class RapidProAPI:
             results.extend(data["results"])
         return results
 
-    def _map_to_internal_structure(self, run):
+    def _map_to_internal_structure(self, run) -> Dict:
         variable_received_name = "cash_received_text"
         variable_received_positive_string = "YES"
         variable_amount_name = "cash_received_amount"

@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.admin import register
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django import forms
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -65,7 +66,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     change_form_template = None
     resource_class = QueryResource
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs) -> models.Field:
+    def formfield_for_dbfield(self, db_field, request, **kwargs) -> Optional[forms.fields.Field]:
         if db_field.name == "code":
             kwargs = {"widget": PythonEditor}
         elif db_field.name == "description":
@@ -131,6 +132,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             return render(request, "admin/power_query/query/preview.html", context)
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+        return None
 
     def get_changeform_initial_data(self, request) -> Dict[str, Any]:
         ct = ContentType.objects.filter(id=request.GET.get("ct", 0)).first()
@@ -171,6 +173,7 @@ class DatasetAdmin(HOPEModelAdminBase):
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+        return None
 
 
 class FormatterResource(resources.ModelResource):

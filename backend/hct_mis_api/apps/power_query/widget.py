@@ -6,7 +6,7 @@ from django.templatetags.static import static
 class FormatterEditor(forms.Textarea):
     template_name = "steficon/widgets/codewidget.html"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         theme = kwargs.pop("theme", "midnight")
         super().__init__(*args, **kwargs)
         self.attrs["class"] = "formatter-editor"

@@ -8,7 +8,7 @@ from hct_mis_api.apps.program.models import Program
 
 
 class StorageFileForm(forms.Form):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
 
