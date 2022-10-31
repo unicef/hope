@@ -119,7 +119,7 @@ class FlexRegistrationService:
         self,
         rdi_id,
         records_ids,
-    ):
+    ) -> None:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
         import_data = rdi_datahub.import_data

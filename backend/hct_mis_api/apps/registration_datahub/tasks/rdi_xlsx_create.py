@@ -56,7 +56,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     that registration data import instance.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.image_loader = None
         self.business_area = None
         self.households = {}
