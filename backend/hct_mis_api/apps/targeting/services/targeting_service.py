@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, List
 
 from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
@@ -219,13 +219,13 @@ class TargetingCriteriaFilterBase:
         ("LESS_THAN", _("Less than")),
     )
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         return f"{{{self.field_name} {self.comparison_method} ({','.join([str(x) for x in self.arguments])})}}"
 
-    def get_lookup_prefix(self, associated_with):
+    def get_lookup_prefix(self, associated_with) -> str:
         return "individuals__" if associated_with == _INDIVIDUAL else ""
 
-    def prepare_arguments(self, arguments, field_attr):
+    def prepare_arguments(self, arguments: List, field_attr) -> List:
         is_flex_field = get_attr_value("is_flex_field", field_attr, False)
         if not is_flex_field:
             return arguments
@@ -240,7 +240,7 @@ class TargetingCriteriaFilterBase:
         self,
         lookup,
         field_attr,
-    ):
+    ) -> Q:
         select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)
         args_count = comparison_attribute.get("arguments")
@@ -281,7 +281,7 @@ class TargetingCriteriaFilterBase:
             return ~query
         return query
 
-    def get_query_for_core_field(self):
+    def get_query_for_core_field(self) -> Q:
         core_fields = self.get_core_fields()
         core_field_attrs = [attr for attr in core_fields if attr.get("name") == self.field_name]
         if len(core_field_attrs) != 1:
@@ -306,7 +306,7 @@ class TargetingCriteriaFilterBase:
         lookup_prefix = self.get_lookup_prefix(core_field_attr["associated_with"])
         return self.get_query_for_lookup(f"{lookup_prefix}{lookup}", core_field_attr)
 
-    def get_query_for_flex_field(self):
+    def get_query_for_flex_field(self) -> Q:
         flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
         if not flex_field_attr:
             logger.error(f"There are no Flex Field Attributes associated with this fieldName {self.field_name}")
@@ -317,10 +317,10 @@ class TargetingCriteriaFilterBase:
         lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
         return self.get_query_for_lookup(lookup, flex_field_attr)
 
-    def get_query(self):
+    def get_query(self) -> Q:
         if not self.is_flex_field:
             return self.get_query_for_core_field()
         return self.get_query_for_flex_field()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.field_name} {self.comparison_method} {self.arguments}"

@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 
@@ -151,7 +151,7 @@ class KoboTemplateValidator:
     )
 
     @classmethod
-    def _map_columns_numbers(cls, first_row):
+    def _map_columns_numbers(cls, first_row) -> Dict[str, int]:
         columns_names_and_numbers_mapping = {
             "type": None,
             "name": None,
@@ -216,7 +216,7 @@ class KoboTemplateValidator:
         }
 
     @classmethod
-    def _check_if_field_exists(cls, core_field, core_field_from_file):
+    def _check_if_field_exists(cls, core_field, core_field_from_file) -> Optional[Dict]:
         if core_field_from_file is None:
             return {
                 "field": core_field,
@@ -225,7 +225,7 @@ class KoboTemplateValidator:
         return
 
     @classmethod
-    def _check_field_type(cls, core_field, core_field_from_file, field_type):
+    def _check_field_type(cls, core_field, core_field_from_file, field_type) -> Optional[Dict]:
         if field_type != core_field_from_file["type"] and core_field_from_file["type"] != "CALCULATE":
             return {
                 "field": core_field,
@@ -234,7 +234,7 @@ class KoboTemplateValidator:
         return
 
     @classmethod
-    def _check_is_field_required(cls, core_field, core_field_from_file):
+    def _check_is_field_required(cls, core_field, core_field_from_file) -> Optional[Dict]:
         field_from_file_required = str(core_field_from_file["required"])
 
         if core_field in cls.EXPECTED_REQUIRED_FIELDS and field_from_file_required.lower() != "true":
@@ -245,7 +245,7 @@ class KoboTemplateValidator:
         return
 
     @classmethod
-    def _check_field_choices(cls, core_field, core_field_from_file, field_choices):
+    def _check_field_choices(cls, core_field, core_field_from_file, field_choices) -> Optional[List]:
         if core_field in cls.FIELDS_EXCLUDED_FROM_CHOICE_CHECK:
             return
 

@@ -879,7 +879,7 @@ class GenerateDashboardReportService:
         self.ws_meta = ws_meta
         return wb
 
-    def _format_meta_tab(self):
+    def _format_meta_tab(self) -> None:
         self.ws_meta.append(self.META_HEADERS)
         info_row = (
             self._report_types_to_joined_str(),
@@ -896,7 +896,7 @@ class GenerateDashboardReportService:
         active_sheet.append(headers_row)
         return len(headers_row)
 
-    def _add_rows(self, active_sheet, report_type):
+    def _add_rows(self, active_sheet, report_type) -> int:
         is_hq_report = self.hq_or_country == self.HQ
         get_row_methods: List[Callable] = self.ROW_CONTENT_METHODS[report_type]
         all_instances, totals = get_row_methods[0](self.report)

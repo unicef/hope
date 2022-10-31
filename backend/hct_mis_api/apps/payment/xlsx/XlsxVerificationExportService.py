@@ -62,17 +62,17 @@ class XlsxVerificationExportService:
         self.ws_meta = wb.create_sheet(XlsxVerificationExportService.META_SHEET)
         return wb
 
-    def _add_version(self):
+    def _add_version(self) -> None:
         self.ws_meta[
             XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES
         ] = XlsxVerificationExportService.VERSION_CELL_NAME
         self.ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES] = XlsxVerificationExportService.VERSION
 
-    def _add_headers(self):
+    def _add_headers(self) -> None:
         headers_row = XlsxVerificationExportService.HEADERS
         self.ws_verifications.append(headers_row)
 
-    def _to_received_column(self, payment_record_verification):
+    def _to_received_column(self, payment_record_verification) -> "XlsxVerificationExportService":
         status = payment_record_verification.status
         if payment_record_verification.status == PaymentVerification.STATUS_PENDING:
             return None
