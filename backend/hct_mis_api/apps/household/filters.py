@@ -224,7 +224,7 @@ class IndividualFilter(FilterSet):
 
         return qs.filter(q_obj)
 
-    def _search_es(self, qs, value):
+    def _search_es(self, qs, value) -> QuerySet:
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_individuals(value, business_area)
         es_response = (
@@ -233,12 +233,12 @@ class IndividualFilter(FilterSet):
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids)).distinct()
 
-    def search_filter(self, qs, name, value):
+    def search_filter(self, qs, name, value) -> QuerySet:
         if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)
 
-    def _search_db(self, qs, value):
+    def _search_db(self, qs, value) -> QuerySet:
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
         else:
@@ -274,7 +274,7 @@ class IndividualFilter(FilterSet):
         return qs.exclude(id=decode_id_string(value))
 
 
-def get_elasticsearch_query_for_individuals(value, business_area):
+def get_elasticsearch_query_for_individuals(value, business_area) -> Dict:
     match_fields = [
         "phone_no_text",
         "phone_no_alternative",
@@ -396,7 +396,7 @@ def get_elasticsearch_query_for_individuals(value, business_area):
     return query
 
 
-def get_elasticsearch_query_for_households(value, business_area):
+def get_elasticsearch_query_for_households(value, business_area) -> Dict:
     match_fields = [
         "admin1",
         "admin2",

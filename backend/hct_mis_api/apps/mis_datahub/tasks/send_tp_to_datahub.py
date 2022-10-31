@@ -240,14 +240,14 @@ class SendTPToDatahubTask:
         program.save(update_fields=["last_sync_at"])
         return dh_program
 
-    def _send_target_population_object(self, target_population):
+    def _send_target_population_object(self, target_population) -> dh_mis_models.TargetPopulation:
         dh_tp_args = build_arg_dict(target_population, SendTPToDatahubTask.MAPPING_TP_DICT)
         dh_target = dh_mis_models.TargetPopulation(**dh_tp_args)
         dh_target.session = self.dh_session
         dh_target.save()
         return dh_target
 
-    def _prepare_datahub_object_household(self, household):
+    def _prepare_datahub_object_household(self, household) -> Dict:
         dh_household_args = build_arg_dict(household, SendTPToDatahubTask.MAPPING_HOUSEHOLD_DICT)
         if household.country:
             dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.iso_code2)
@@ -257,14 +257,14 @@ class SendTPToDatahubTask:
         dh_household.session = self.dh_session
         return dh_household
 
-    def _prepare_datahub_object_individual(self, individual):
+    def _prepare_datahub_object_individual(self, individual) -> Dict:
         dh_individual_args = build_arg_dict(individual, SendTPToDatahubTask.MAPPING_INDIVIDUAL_DICT)
         dh_individual = dh_mis_models.Individual(**dh_individual_args)
         dh_individual.unhcr_id = self._get_unhcr_individual_id(individual)
         dh_individual.session = self.dh_session
         return dh_individual
 
-    def _prepare_datahub_object_role(self, role):
+    def _prepare_datahub_object_role(self, role) -> dh_mis_models.IndividualRoleInHousehold:
         return dh_mis_models.IndividualRoleInHousehold(
             role=role.role,
             household_mis_id=role.household.id,
@@ -272,7 +272,7 @@ class SendTPToDatahubTask:
             session=self.dh_session,
         )
 
-    def _prepare_datahub_object_document(self, document):
+    def _prepare_datahub_object_document(self, document) -> dh_mis_models.Document:
         dh_document_args = build_arg_dict(document, SendTPToDatahubTask.MAPPING_DOCUMENT_DICT)
         dh_document = dh_mis_models.Document(
             **dh_document_args,
@@ -280,7 +280,7 @@ class SendTPToDatahubTask:
         )
         return dh_document
 
-    def _prepare_datahub_object_target_entry(self, target_population_selection):
+    def _prepare_datahub_object_target_entry(self, target_population_selection) -> dh_mis_models.TargetPopulationEntry:
         household_unhcr_id = self._get_unhcr_household_id(target_population_selection.household)
         return dh_mis_models.TargetPopulationEntry(
             target_population_mis_id=target_population_selection.target_population.id,

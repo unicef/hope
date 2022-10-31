@@ -1,6 +1,6 @@
 import logging
 from functools import reduce
-from typing import List
+from typing import Any, List
 
 from hct_mis_api.apps.core.utils import (
     get_combined_attributes,
@@ -26,7 +26,7 @@ class RdiBaseCreateTask:
     FLEX_FIELDS = serialize_flex_attributes()
 
     @staticmethod
-    def _assign_admin_areas_titles(household_obj):
+    def _assign_admin_areas_titles(household_obj) -> None:
         if household_obj.admin1:
             admin_area_level_1 = Area.objects.filter(p_code=household_obj.admin1).first()
             household_obj.admin1_title = getattr(admin_area_level_1, "name", "")
@@ -36,7 +36,7 @@ class RdiBaseCreateTask:
 
         return household_obj
 
-    def _cast_value(self, value, header):
+    def _cast_value(self, value, header) -> Any:
         if isinstance(value, str):
             value = value.strip()
 

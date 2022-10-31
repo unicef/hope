@@ -170,7 +170,7 @@ class KoboTemplateValidator:
         return columns_names_and_numbers_mapping
 
     @classmethod
-    def _get_core_fields_from_file(cls, survey_sheet, choices_mapping, columns_names_and_numbers_mapping):
+    def _get_core_fields_from_file(cls, survey_sheet, choices_mapping, columns_names_and_numbers_mapping) -> Dict:
         core_fields_in_file = {}
         for row in xlrd_rows_iterator(survey_sheet):
             field_name = row[columns_names_and_numbers_mapping["name"]].value

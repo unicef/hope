@@ -956,7 +956,7 @@ class GenerateDashboardReportService:
         if self.report.file:
             self._send_email()
 
-    def _send_email(self):
+    def _send_email(self) -> None:
         path = reverse("dashboard_report", kwargs={"report_id": self.report.id})
         protocol = "http" if settings.IS_DEV else "https"
         context = {
@@ -976,7 +976,7 @@ class GenerateDashboardReportService:
         msg.send()
 
     @staticmethod
-    def _adjust_column_width_from_col(ws, min_col, max_col, min_row):
+    def _adjust_column_width_from_col(ws, min_col, max_col, min_row) -> None:
         column_widths = []
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
             for cell in col:
@@ -1041,7 +1041,7 @@ class GenerateDashboardReportService:
         )
 
     @staticmethod
-    def _remove_empty_columns(ws, totals_row, min_col=1, max_col=2):
+    def _remove_empty_columns(ws, totals_row, min_col=1, max_col=2) -> int:
         to_remove_columns = []
         for col_idx in range(min_col, max_col):
             col_letter = get_column_letter(col_idx)
