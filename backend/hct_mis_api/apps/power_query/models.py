@@ -216,8 +216,8 @@ class Formatter(NaturalKeyModel, models.Model):
     content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))
     code = models.TextField(blank=True, null=True)
 
-    def __str__(self) -> Optional[str]:  # TODO: name is a nullable charfield?
-        return self.name
+    def __str__(self) -> str:  # TODO: name is a nullable charfield?
+        return self.name or ""
 
     def render(self, context) -> str:
         if self.content_type == "xls":

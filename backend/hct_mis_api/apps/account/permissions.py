@@ -2,7 +2,7 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import Optional, Type
+from typing import Optional, Tuple, Type
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(name, *args):
+    # TODO: signature differs from superclass
+    def _generate_next_value_(name, *args):  # type: ignore
         return name
 
     # RDI
@@ -166,7 +167,7 @@ class Permissions(Enum):
     # ...
 
     @classmethod
-    def choices(cls):
+    def choices(cls) -> Tuple:
         return tuple((i.value, i.value.replace("_", " ")) for i in cls)
 
 
