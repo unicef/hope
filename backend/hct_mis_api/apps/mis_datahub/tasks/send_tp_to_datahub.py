@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from django.db import transaction
 from django.db.models import F, Q
@@ -77,12 +78,12 @@ class SendTPToDatahubTask:
         "type": "type.type",
     }
 
-    def execute(self, target_population):
+    def execute(self, target_population) -> Dict:
         return self.send_target_population(target_population)
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="cash_assist_datahub_mis")
-    def send_target_population(self, target_population):
+    def send_target_population(self, target_population) -> Dict:
         households_to_bulk_create = []
         individuals_to_bulk_create = []
         documents_to_bulk_create = []

@@ -90,10 +90,9 @@ class SessionAdmin(HOPEModelAdminBase):
 
             runner = PullFromDatahubTask()
             try:
-                with transaction.atomic(using="default"):
-                    with transaction.atomic(using="cash_assist_datahub_ca"):
-                        runner.copy_session(session)
-                        raise RollbackException()
+                with transaction.atomic(using="default"), transaction.atomic(using="cash_assist_datahub_ca"):
+                    runner.copy_session(session)
+                    raise RollbackException()
             except RollbackException:
                 self.message_user(request, "Test Completed", messages.SUCCESS)
             except Exception as e:
