@@ -33,7 +33,7 @@ class LoadSanctionListXMLTask:
 
     INDIVIDUAL_TAG_PATH = "INDIVIDUALS/INDIVIDUAL"
 
-    def __init__(self, file_path=None):
+    def __init__(self, file_path=None) -> None:
         self.file_path = file_path
 
         self.VALUES_PATHS = {

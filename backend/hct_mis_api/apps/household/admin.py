@@ -359,7 +359,7 @@ class HouseholdAdmin(
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
     @button()
-    def members(self, request, pk):
+    def members(self, request, pk) -> HttpResponseRedirect:
         obj = Household.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?qs=unicef_id={obj.unicef_id}")

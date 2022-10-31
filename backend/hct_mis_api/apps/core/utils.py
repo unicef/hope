@@ -6,7 +6,7 @@ import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
 from datetime import date, datetime
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
-    def __contains__(self, key, *args, **kwargs):
+    def __contains__(self, key, *args, **kwargs) -> bool:
         return key.casefold() in (element.casefold() for element in self)
 
 
@@ -266,7 +266,7 @@ def encode_ids(results: list[dict], model_name: str, key: str) -> list[dict]:
     return results
 
 
-def to_dict(instance, fields=None, dict_fields=None):
+def to_dict(instance, fields=None, dict_fields=None) -> Dict[str, Any]:
     from django.db.models import Model
     from django.forms import model_to_dict
 
@@ -321,7 +321,7 @@ def build_arg_dict_from_dict(data_dict, mapping_dict) -> Dict:
 
 
 class CustomOrderingFilter(OrderingFilter):
-    def filter(self, qs, value):
+    def filter(self, qs, value) -> QuerySet:
         from django.db.models.functions import Lower
 
         from django_filters.constants import EMPTY_VALUES
@@ -346,7 +346,7 @@ class CustomOrderingFilter(OrderingFilter):
                 new_ordering.append(field)
         return qs.order_by(*new_ordering)
 
-    def normalize_fields(self, fields):
+    def normalize_fields(self, fields) -> Dict:
         """
         Normalize the fields into an ordered map of {field name: param name}
         """
@@ -381,7 +381,7 @@ class CustomOrderingFilter(OrderingFilter):
         return OrderedDict([(f, f) if isinstance(f, (str, Lower)) else f for f in new_fields])
 
 
-def is_valid_uuid(uuid_str):
+def is_valid_uuid(uuid_str) -> bool:
     from uuid import UUID
 
     try:
@@ -431,7 +431,7 @@ def check_concurrency_version_in_mutation(version, target) -> None:
         log_and_raise(f"Someone has modified this {target} record, versions {version} != {target.version}")
 
 
-def update_labels_mapping(csv_file):
+def update_labels_mapping(csv_file) -> None:
     """
     WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
 
@@ -495,7 +495,7 @@ def update_labels_mapping(csv_file):
         print(new_content, file=f, end="")
 
 
-def xlrd_rows_iterator(sheet):
+def xlrd_rows_iterator(sheet) -> Generator:
     import xlrd
 
     for row_number in range(1, sheet.nrows):
@@ -507,7 +507,7 @@ def xlrd_rows_iterator(sheet):
         yield row
 
 
-def chart_map_choices(choices):
+def chart_map_choices(choices) -> Dict:
     return dict(choices)
 
 
@@ -529,11 +529,11 @@ def chart_get_filtered_qs(
     return obj.objects.filter(**year_filter, **business_area_slug_filter, **additional_filters)
 
 
-def parse_list_values_to_int(list_to_parse):
+def parse_list_values_to_int(list_to_parse) -> List[int]:
     return list(map(lambda x: int(x or 0), list_to_parse))
 
 
-def sum_lists_with_values(qs_values, list_len):
+def sum_lists_with_values(qs_values, list_len) -> List[int]:
     data = [0] * list_len
     for values in qs_values:
         parsed_values = parse_list_values_to_int(values)
@@ -548,7 +548,7 @@ def chart_permission_decorator(chart_resolve=None, permissions=None) -> Callable
         return functools.partial(chart_permission_decorator, permissions=permissions)
 
     @functools.wraps(chart_resolve)
-    def resolve_f(*args, **kwargs):
+    def resolve_f(*args, **kwargs) -> Any:
         from hct_mis_api.apps.core.models import BusinessArea
 
         _, resolve_info = args
@@ -566,7 +566,7 @@ def chart_filters_decoder(filters) -> Dict:
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
-def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
+def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas") -> Dict:
     filter_query = {}
     if filters.get("program") is not None:
         filter_query.update({program_id_path: filters.get("program")})
@@ -593,7 +593,7 @@ class CaIdIterator:
         return f"123-21-{self.name.upper()}-{self.last_id:05d}"
 
 
-def resolve_flex_fields_choices_to_string(parent):
+def resolve_flex_fields_choices_to_string(parent) -> str:
     from hct_mis_api.apps.core.models import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
@@ -613,7 +613,7 @@ def resolve_flex_fields_choices_to_string(parent):
     return flex_fields_with_str_choices
 
 
-def get_model_choices_fields(model, excluded=None):
+def get_model_choices_fields(model, excluded=None) -> List[str]:
     if excluded is None:
         excluded = []
 
@@ -629,7 +629,7 @@ class SheetImageLoader:
 
     _images = {}
 
-    def __init__(self, sheet):
+    def __init__(self, sheet) -> None:
         # Holds an array of A-ZZ
         col_holder = list(
             itertools.chain(
@@ -644,11 +644,11 @@ class SheetImageLoader:
             col = col_holder[image.anchor._from.col]
             self._images[f"{col}{row}"] = image._data
 
-    def image_in(self, cell):
+    def image_in(self, cell) -> bool:
         """Checks if there's an image in specified cell"""
         return cell in self._images
 
-    def get(self, cell):
+    def get(self, cell) -> Any:
         """Retrieves image data from a cell"""
         if cell not in self._images:
             raise ValueError(f"Cell {cell} doesn't contain an image")
@@ -657,7 +657,7 @@ class SheetImageLoader:
             return Image.open(image)
 
 
-def fix_flex_type_fields(items, flex_fields):
+def fix_flex_type_fields(items, flex_fields) -> List[Dict]:
     for item in items:
         for key, value in item.flex_fields.items():
             if key in flex_fields:
@@ -669,7 +669,7 @@ def fix_flex_type_fields(items, flex_fields):
     return items
 
 
-def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
+def map_unicef_ids_to_households_unicef_ids(excluded_ids_string) -> List:
     excluded_ids_array = excluded_ids_string.split(",")
     excluded_ids_array = [excluded_id.strip() for excluded_id in excluded_ids_array]
     excluded_household_ids_array = [excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")]
@@ -686,13 +686,13 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
 
 
 @functools.lru_cache(maxsize=None)
-def cached_business_areas_slug_id_dict():
+def cached_business_areas_slug_id_dict() -> Dict:
     from hct_mis_api.apps.core.models import BusinessArea
 
     return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}
 
 
-def timezone_datetime(value):
+def timezone_datetime(value) -> datetime:
     if not value:
         return value
     datetime_value = value

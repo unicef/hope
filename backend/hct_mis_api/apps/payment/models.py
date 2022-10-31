@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Optional
 
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
@@ -13,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
@@ -159,7 +161,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     vision_id = models.CharField(max_length=255, null=True)
     registration_ca_id = models.CharField(max_length=255, null=True)
 
-    def mark_as_failed(self):
+    def mark_as_failed(self) -> None:
         if self.status is self.STATUS_FORCE_FAILED:
             raise ValidationError("Status shouldn't be failed")
         self.status = self.STATUS_FORCE_FAILED
@@ -174,7 +176,7 @@ class ServiceProvider(TimeStampedUUIDModel):
     country = models.CharField(max_length=3)
     vision_id = models.CharField(max_length=255, null=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.full_name
 
 
@@ -257,11 +259,11 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         ordering = ("created_at",)
 
     @property
-    def business_area(self):
+    def business_area(self) -> BusinessArea:
         return self.cash_plan.business_area
 
     @property
-    def has_xlsx_cash_plan_payment_verification_file(self):
+    def has_xlsx_cash_plan_payment_verification_file(self) -> bool:
         if all(
             [
                 self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
@@ -272,23 +274,23 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         return False
 
     @property
-    def xlsx_cash_plan_payment_verification_file_link(self):
+    def xlsx_cash_plan_payment_verification_file_link(self) -> Optional[str]:
         if self.has_xlsx_cash_plan_payment_verification_file:
             return self.xlsx_cashplan_payment_verification_file.file.url
         return None
 
     @property
-    def xlsx_cash_plan_payment_verification_file_was_downloaded(self):
+    def xlsx_cash_plan_payment_verification_file_was_downloaded(self) -> bool:
         if self.has_xlsx_cash_plan_payment_verification_file:
             return self.xlsx_cashplan_payment_verification_file.was_downloaded
         return False
 
-    def set_active(self):
+    def set_active(self) -> None:
         self.status = CashPlanPaymentVerification.STATUS_ACTIVE
         self.activation_date = timezone.now()
         self.error = None
 
-    def set_pending(self):
+    def set_pending(self) -> None:
         self.status = CashPlanPaymentVerification.STATUS_PENDING
         self.responded_count = None
         self.received_count = None
@@ -297,7 +299,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         self.activation_date = None
         self.rapid_pro_flow_start_uuids = []
 
-    def can_activate(self):
+    def can_activate(self) -> bool:
         return self.status not in (
             CashPlanPaymentVerification.STATUS_PENDING,
             CashPlanPaymentVerification.STATUS_RAPID_PRO_ERROR,
@@ -313,7 +315,7 @@ class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
     created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
 
 
-def build_summary(cash_plan):
+def build_summary(cash_plan) -> None:
     statuses_count = cash_plan.verifications.aggregate(
         active=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE)),
         pending=Count("pk", filter=Q(status=CashPlanPaymentVerificationSummary.STATUS_PENDING)),
@@ -334,7 +336,7 @@ def build_summary(cash_plan):
     sender=CashPlanPaymentVerification,
     dispatch_uid="update_verification_status_in_cash_plan",
 )
-def update_verification_status_in_cash_plan(sender, instance, **kwargs):
+def update_verification_status_in_cash_plan(sender, instance, **kwargs) -> None:
     build_summary(instance.cash_plan)
 
 
@@ -343,7 +345,7 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs):
     sender=CashPlanPaymentVerification,
     dispatch_uid="update_verification_status_in_cash_plan_on_delete",
 )
-def update_verification_status_in_cash_plan_on_delete(sender, instance, **kwargs):
+def update_verification_status_in_cash_plan_on_delete(sender, instance, **kwargs) -> None:
     build_summary(instance.cash_plan)
 
 
@@ -386,7 +388,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     sent_to_rapid_pro = models.BooleanField(default=False)
 
     @property
-    def is_manually_editable(self):
+    def is_manually_editable(self) -> bool:
         if (
             self.cash_plan_payment_verification.verification_channel
             != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
@@ -396,10 +398,10 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
 
     @property
-    def business_area(self):
+    def business_area(self) -> BusinessArea:
         return self.cash_plan_payment_verification.cash_plan.business_area
 
-    def set_pending(self):
+    def set_pending(self) -> None:
         self.status_date = timezone.now()
         self.status = PaymentVerification.STATUS_PENDING
         self.received_amount = None
@@ -423,18 +425,18 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
         "program.CashPlan", on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
     )
 
-    def mark_as_active(self):
+    def mark_as_active(self) -> None:
         self.status = self.STATUS_ACTIVE
         self.completion_date = None
         if self.activation_date is None:
             self.activation_date = timezone.now()
 
-    def mark_as_finished(self):
+    def mark_as_finished(self) -> None:
         self.status = self.STATUS_FINISHED
         if self.completion_date is None:
             self.completion_date = timezone.now()
 
-    def mark_as_pending(self):
+    def mark_as_pending(self) -> None:
         self.status = self.STATUS_PENDING
         self.completion_date = None
         self.activation_date = None
