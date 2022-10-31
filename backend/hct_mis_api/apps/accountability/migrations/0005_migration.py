@@ -39,6 +39,8 @@ class Migration(migrations.Migration):
                 ('program', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='surveys', to='program.program')),
                 ('recipients', models.ManyToManyField(blank=True, related_name='surveys', to='household.Household')),
                 ('target_population', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='surveys', to='targeting.targetpopulation')),
+                ('sample_file', models.FileField(blank=True, null=True, upload_to='')),
+                ('sample_file_generated_at', models.DateTimeField(blank=True, null=True)),
             ],
             options={
                 'abstract': False,

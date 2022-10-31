@@ -1245,6 +1245,11 @@ export type EditPaymentVerificationMutation = {
   cashPlan?: Maybe<CashPlanNode>,
 };
 
+export type ExportSurveySampleMutationMutation = {
+   __typename?: 'ExportSurveySampleMutationMutation',
+  survey?: Maybe<SurveyNode>,
+};
+
 export type ExportXlsxCashPlanVerification = {
    __typename?: 'ExportXlsxCashPlanVerification',
   cashPlan?: Maybe<CashPlanNode>,
@@ -2999,6 +3004,7 @@ export type Mutations = {
   updateFeedback?: Maybe<UpdateFeedbackMutation>,
   createFeedbackMessage?: Maybe<CreateFeedbackMessageMutation>,
   createSurvey?: Maybe<CreateSurveyMutation>,
+  exportSurveySample?: Maybe<ExportSurveySampleMutationMutation>,
   createReport?: Maybe<CreateReport>,
   restartCreateReport?: Maybe<RestartCreateReport>,
   createDashboardReport?: Maybe<CreateDashboardReport>,
@@ -3075,6 +3081,11 @@ export type MutationsCreateFeedbackMessageArgs = {
 
 export type MutationsCreateSurveyArgs = {
   input: CreateSurveyInput
+};
+
+
+export type MutationsExportSurveySampleArgs = {
+  surveyId: Scalars['ID']
 };
 
 
@@ -5538,10 +5549,14 @@ export type SurveyNode = Node & {
   targetPopulation?: Maybe<TargetPopulationNode>,
   program?: Maybe<ProgramNode>,
   businessArea: UserBusinessAreaNode,
+  sampleFile?: Maybe<Scalars['String']>,
+  sampleFileGeneratedAt?: Maybe<Scalars['DateTime']>,
   samplingType: SurveySamplingType,
   fullListArguments?: Maybe<Scalars['JSONString']>,
   randomSamplingArguments?: Maybe<Scalars['JSONString']>,
   sampleSize: Scalars['Int'],
+  sampleFilePath?: Maybe<Scalars['String']>,
+  hasValidSampleFile?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -7237,6 +7252,22 @@ export type CreateSurveyAccountabilityMutation = (
   { __typename?: 'Mutations' }
   & { createSurvey: Maybe<(
     { __typename?: 'CreateSurveyMutation' }
+    & { survey: Maybe<(
+      { __typename?: 'SurveyNode' }
+      & Pick<SurveyNode, 'id'>
+    )> }
+  )> }
+);
+
+export type ExportSurveySampleMutationVariables = {
+  surveyId: Scalars['ID']
+};
+
+
+export type ExportSurveySampleMutation = (
+  { __typename?: 'Mutations' }
+  & { exportSurveySample: Maybe<(
+    { __typename?: 'ExportSurveySampleMutationMutation' }
     & { survey: Maybe<(
       { __typename?: 'SurveyNode' }
       & Pick<SurveyNode, 'id'>
@@ -10961,7 +10992,7 @@ export type SurveyQuery = (
   { __typename?: 'Query' }
   & { survey: Maybe<(
     { __typename?: 'SurveyNode' }
-    & Pick<SurveyNode, 'id' | 'unicefId' | 'category' | 'title' | 'createdAt' | 'body'>
+    & Pick<SurveyNode, 'id' | 'unicefId' | 'category' | 'title' | 'createdAt' | 'body' | 'sampleFilePath' | 'hasValidSampleFile'>
     & { createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email'>
@@ -12063,6 +12094,57 @@ export function useCreateSurveyAccountabilityMutation(baseOptions?: ApolloReactH
 export type CreateSurveyAccountabilityMutationHookResult = ReturnType<typeof useCreateSurveyAccountabilityMutation>;
 export type CreateSurveyAccountabilityMutationResult = ApolloReactCommon.MutationResult<CreateSurveyAccountabilityMutation>;
 export type CreateSurveyAccountabilityMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables>;
+export const ExportSurveySampleDocument = gql`
+    mutation ExportSurveySample($surveyId: ID!) {
+  exportSurveySample(surveyId: $surveyId) {
+    survey {
+      id
+    }
+  }
+}
+    `;
+export type ExportSurveySampleMutationFn = ApolloReactCommon.MutationFunction<ExportSurveySampleMutation, ExportSurveySampleMutationVariables>;
+export type ExportSurveySampleComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExportSurveySampleMutation, ExportSurveySampleMutationVariables>, 'mutation'>;
+
+    export const ExportSurveySampleComponent = (props: ExportSurveySampleComponentProps) => (
+      <ApolloReactComponents.Mutation<ExportSurveySampleMutation, ExportSurveySampleMutationVariables> mutation={ExportSurveySampleDocument} {...props} />
+    );
+    
+export type ExportSurveySampleProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportSurveySampleMutation, ExportSurveySampleMutationVariables> & TChildProps;
+export function withExportSurveySample<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ExportSurveySampleMutation,
+  ExportSurveySampleMutationVariables,
+  ExportSurveySampleProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ExportSurveySampleMutation, ExportSurveySampleMutationVariables, ExportSurveySampleProps<TChildProps>>(ExportSurveySampleDocument, {
+      alias: 'exportSurveySample',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useExportSurveySampleMutation__
+ *
+ * To run a mutation, you first call `useExportSurveySampleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExportSurveySampleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [exportSurveySampleMutation, { data, loading, error }] = useExportSurveySampleMutation({
+ *   variables: {
+ *      surveyId: // value for 'surveyId'
+ *   },
+ * });
+ */
+export function useExportSurveySampleMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExportSurveySampleMutation, ExportSurveySampleMutationVariables>) {
+        return ApolloReactHooks.useMutation<ExportSurveySampleMutation, ExportSurveySampleMutationVariables>(ExportSurveySampleDocument, baseOptions);
+      }
+export type ExportSurveySampleMutationHookResult = ReturnType<typeof useExportSurveySampleMutation>;
+export type ExportSurveySampleMutationResult = ApolloReactCommon.MutationResult<ExportSurveySampleMutation>;
+export type ExportSurveySampleMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportSurveySampleMutation, ExportSurveySampleMutationVariables>;
 export const UpdateFeedbackTicketDocument = gql`
     mutation UpdateFeedbackTicket($input: UpdateFeedbackInput!) {
   updateFeedback(input: $input) {
@@ -21480,6 +21562,8 @@ export const SurveyDocument = gql`
     }
     body
     title
+    sampleFilePath
+    hasValidSampleFile
   }
 }
     `;
@@ -22455,6 +22539,7 @@ export type ResolversTypes = {
   CreateFeedbackMessageMutation: ResolverTypeWrapper<CreateFeedbackMessageMutation>,
   CreateSurveyInput: CreateSurveyInput,
   CreateSurveyMutation: ResolverTypeWrapper<CreateSurveyMutation>,
+  ExportSurveySampleMutationMutation: ResolverTypeWrapper<ExportSurveySampleMutationMutation>,
   CreateReportInput: CreateReportInput,
   CreateReport: ResolverTypeWrapper<CreateReport>,
   RestartCreateReportInput: RestartCreateReportInput,
@@ -22878,6 +22963,7 @@ export type ResolversParentTypes = {
   CreateFeedbackMessageMutation: CreateFeedbackMessageMutation,
   CreateSurveyInput: CreateSurveyInput,
   CreateSurveyMutation: CreateSurveyMutation,
+  ExportSurveySampleMutationMutation: ExportSurveySampleMutationMutation,
   CreateReportInput: CreateReportInput,
   CreateReport: CreateReport,
   RestartCreateReportInput: RestartCreateReportInput,
@@ -23542,6 +23628,10 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
 
 export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
+export type ExportSurveySampleMutationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportSurveySampleMutationMutation'] = ResolversParentTypes['ExportSurveySampleMutationMutation']> = {
+  survey?: Resolver<Maybe<ResolversTypes['SurveyNode']>, ParentType, ContextType>,
 };
 
 export type ExportXlsxCashPlanVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportXlsxCashPlanVerification'] = ResolversParentTypes['ExportXlsxCashPlanVerification']> = {
@@ -24331,6 +24421,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updateFeedback?: Resolver<Maybe<ResolversTypes['UpdateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateFeedbackArgs, 'input'>>,
   createFeedbackMessage?: Resolver<Maybe<ResolversTypes['CreateFeedbackMessageMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFeedbackMessageArgs, 'input'>>,
   createSurvey?: Resolver<Maybe<ResolversTypes['CreateSurveyMutation']>, ParentType, ContextType, RequireFields<MutationsCreateSurveyArgs, 'input'>>,
+  exportSurveySample?: Resolver<Maybe<ResolversTypes['ExportSurveySampleMutationMutation']>, ParentType, ContextType, RequireFields<MutationsExportSurveySampleArgs, 'surveyId'>>,
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
   restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>,
   createDashboardReport?: Resolver<Maybe<ResolversTypes['CreateDashboardReport']>, ParentType, ContextType, RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>>,
@@ -25141,10 +25232,14 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  sampleFile?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  sampleFileGeneratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   samplingType?: Resolver<ResolversTypes['SurveySamplingType'], ParentType, ContextType>,
   fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
   randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
   sampleSize?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  sampleFilePath?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  hasValidSampleFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type SurveyNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SurveyNodeConnection'] = ResolversParentTypes['SurveyNodeConnection']> = {
@@ -25826,6 +25921,7 @@ export type Resolvers<ContextType = any> = {
   DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>,
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
+  ExportSurveySampleMutationMutation?: ExportSurveySampleMutationMutationResolvers<ContextType>,
   ExportXlsxCashPlanVerification?: ExportXlsxCashPlanVerificationResolvers<ContextType>,
   FeedbackMessageNode?: FeedbackMessageNodeResolvers<ContextType>,
   FeedbackMessageNodeConnection?: FeedbackMessageNodeConnectionResolvers<ContextType>,

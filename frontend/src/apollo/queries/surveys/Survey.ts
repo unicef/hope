@@ -25,6 +25,8 @@ export const Survey = gql`
       }
       body
       title
+      sampleFilePath
+      hasValidSampleFile
     }
   }
 `;

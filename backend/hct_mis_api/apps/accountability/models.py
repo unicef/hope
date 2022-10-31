@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -145,6 +148,10 @@ class FeedbackMessage(TimeStampedUUIDModel):
     )
 
 
+class SampleFileExpiredException(Exception):
+    pass
+
+
 class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -201,8 +208,26 @@ class Survey(UnicefIdentifiedModel, TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    sample_file = models.FileField(upload_to="", blank=True, null=True)
+    sample_file_generated_at = models.DateTimeField(blank=True, null=True)
 
     sampling_type = models.CharField(max_length=50, choices=SAMPLING_CHOICES, default=SAMPLING_FULL_LIST)
     full_list_arguments = models.JSONField(blank=True, null=True)
     random_sampling_arguments = models.JSONField(blank=True, null=True)
     sample_size = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.title
+
+    def sample_file_path(self):
+        if self.has_valid_sample_file():
+            return self.sample_file.url
+        raise SampleFileExpiredException("Sample file expired")
+
+    def has_valid_sample_file(self) -> bool:
+        return self.sample_file and self.sample_file_generated_at >= timezone.now() - timedelta(days=30)
+
+    def store_sample_file(self, filename, file):
+        self.sample_file.save(filename, file)
+        self.sample_file_generated_at = timezone.now()
+        self.save()
