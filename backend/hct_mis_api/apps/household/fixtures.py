@@ -1,5 +1,5 @@
 import random
-from typing import Tuple
+from typing import List, Tuple
 
 import factory
 from factory import enums, fuzzy
@@ -120,16 +120,15 @@ class HouseholdFactory(factory.DjangoModelFactory):
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
 
     @classmethod
-    def build(cls, **kwargs):
+    def build(cls, **kwargs) -> Household:
         """Build an instance of the associated class, with overriden attrs."""
         if "registration_data_import__imported_by__partner" not in kwargs:
             kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
     @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        hoh = kwargs.get("head_of_household", None)
-        if not hoh:
+    def _create(cls, model_class, *args, **kwargs) -> Household:
+        if not (hoh := kwargs.get("head_of_household", None)):
             hoh = IndividualFactory(household=None)
             kwargs["head_of_household"] = hoh
         ret = super()._create(model_class, *args, **kwargs)
@@ -302,17 +301,21 @@ def create_household_for_fixtures(household_args=None, individual_args=None) -> 
     return household, individuals
 
 
-def create_household_and_individuals(household_data=None, individuals_data=None, imported=False):
+def create_household_and_individuals(
+    household_data=None, individuals_data=None, imported=False
+) -> Tuple[Household, List[Individual]]:
     if household_data is None:
         household_data = {}
     if individuals_data is None:
         individuals_data = {}
     if household_data.get("size") is None:
         household_data["size"] = len(individuals_data)
-    household = HouseholdFactory.build(**household_data)
+    household: Household = HouseholdFactory.build(**household_data)
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
-    individuals = [IndividualFactory(household=household, **individual_data) for individual_data in individuals_data]
+    individuals: List[Individual] = [
+        IndividualFactory(household=household, **individual_data) for individual_data in individuals_data
+    ]
     household.head_of_household = individuals[0]
     household.save()
     return household, individuals

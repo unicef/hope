@@ -651,7 +651,7 @@ def mark_as_duplicate_individual(
     old_individual_to_remove,
     removed_individual_household,
     unique_individual,
-):
+) -> None:
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_and_withdraw_household_if_needed(
         individual_to_remove,
@@ -717,7 +717,7 @@ def handle_photo(photo: Union[InMemoryUploadedFile, str], photoraw: str) -> Opti
     return None
 
 
-def handle_document(document) -> dict:
+def handle_document(document) -> Dict:
     photo = document.get("photo")
     photoraw = document.get("photoraw")
     document["photo"] = handle_photo(photo, photoraw)
@@ -725,5 +725,5 @@ def handle_document(document) -> dict:
     return document
 
 
-def handle_documents(documents) -> list[dict]:
+def handle_documents(documents) -> List[Dict]:
     return [handle_document(document) for document in documents]

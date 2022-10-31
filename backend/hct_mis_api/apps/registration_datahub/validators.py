@@ -398,7 +398,7 @@ class ImportDataInstanceValidator:
 
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.head_of_household_count = defaultdict(int)
         self.combined_fields = self.get_combined_fields()
@@ -821,7 +821,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(self, xlsx_file, business_area_slug):
+    def validate_everything(self, xlsx_file, business_area_slug) -> List:
         try:
             errors = self.validate_file_extension(xlsx_file)
             if errors:
