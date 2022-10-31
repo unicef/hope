@@ -216,15 +216,6 @@ class KoboTemplateValidator:
         }
 
     @classmethod
-    def _check_if_field_exists(cls, core_field, core_field_from_file) -> Optional[Dict]:
-        if core_field_from_file is None:
-            return {
-                "field": core_field,
-                "message": "Field is missing",
-            }
-        return
-
-    @classmethod
     def _check_field_type(cls, core_field, core_field_from_file, field_type) -> Optional[Dict]:
         if field_type != core_field_from_file["type"] and core_field_from_file["type"] != "CALCULATE":
             return {
@@ -291,11 +282,9 @@ class KoboTemplateValidator:
         for core_field, field_data in core_fields_in_db.items():
             field_type = field_data["type"]
             field_choices = [choice["value"] for choice in field_data["choices"]]
-            core_field_from_file = core_fields_in_file[core_field]
 
-            field_exists_error = cls._check_if_field_exists(core_field, core_field_from_file)
-            if field_exists_error:
-                validation_errors.append(field_exists_error)
+            if not (core_field_from_file := core_fields_in_file.get(core_field)):
+                validation_errors.append({"field": core_field, "message": "Field is missing"})
                 continue
 
             field_required_error = cls._check_is_field_required(core_field, core_field_from_file)
