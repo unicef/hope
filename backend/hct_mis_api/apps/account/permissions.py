@@ -2,7 +2,7 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import Optional, Type
+from typing import Optional, Tuple, Type
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(name, *args):
+    # TODO: signature differs from superclass
+    def _generate_next_value_(name, *args):  # type: ignore
         return name
 
     # RDI
@@ -166,7 +167,7 @@ class Permissions(Enum):
     # ...
 
     @classmethod
-    def choices(cls):
+    def choices(cls) -> Tuple:
         return tuple((i.value, i.value.replace("_", " ")) for i in cls)
 
 
@@ -183,19 +184,19 @@ ALL_GRIEVANCES_CREATE_MODIFY = (
 
 class BasePermission:
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return False
 
 
 class AllowAny(BasePermission):
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return True
 
 
 class AllowAuthenticated(BasePermission):
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return info.context.user.is_authenticated
 
 
@@ -269,7 +270,7 @@ class BaseNodePermissionMixin:
         creator_permission,
         is_owner,
         owner_permission,
-    ):
+    ) -> None:
         user = info.context.user
         business_area = object_instance.business_area
         if not info.context.user.is_authenticated or not (

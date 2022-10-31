@@ -46,7 +46,7 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
         to_field_name=None,
         limit_choices_to=None,
         **kwargs,
-    ):
+    ) -> None:
         queryset = ContentType.objects.order_by("model", "app_label")
         super().__init__(
             queryset,

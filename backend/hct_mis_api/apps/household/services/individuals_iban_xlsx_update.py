@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Any, Dict, Tuple
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -54,7 +54,7 @@ class IndividualsIBANXlsxUpdate:
     def _get_queryset(self):
         return Individual.objects.filter(business_area=self.business_area, duplicate=False, withdrawn=False)
 
-    def validate(self):
+    def validate(self) -> None:
         self._validate_columns_names()
         if self.validation_errors:
             return
@@ -63,7 +63,7 @@ class IndividualsIBANXlsxUpdate:
         self._create_matching_report()
         self._validate_matching_report()
 
-    def _validate_columns_names(self):
+    def _validate_columns_names(self) -> None:
         first_row = self.individuals_ws[1]
 
         columns = [cell.value for cell in first_row]
@@ -74,7 +74,8 @@ class IndividualsIBANXlsxUpdate:
             if column not in columns:
                 self.validation_errors.append(f"No {column} column in provided file")
 
-    def _get_matching_report_for_single_row(self, row):
+    def _get_matching_report_for_single_row(self, row) -> Tuple[str, Any]:
+        # TODO: refactor output types
         filter_value = row[self.matching_column_index - 1].value
         individuals = self._get_queryset().filter(**{self.MATCHING_COLUMN.lower(): filter_value})
         if not individuals.count():
@@ -103,7 +104,7 @@ class IndividualsIBANXlsxUpdate:
             self.validation_errors.append(f"Multiple matching Individuals for rows: {multiple_match}")
 
     @transaction.atomic
-    def update(self):
+    def update(self) -> None:
         for individuals_unique_report in self.report_dict[self.STATUS_UNIQUE]:
             row_num, individual = individuals_unique_report
             row = self.individuals_ws[row_num]
@@ -141,14 +142,14 @@ class IndividualsIBANXlsxUpdate:
             "upload_file_id": str(self.xlsx_update_file.id),
         }
 
-    def send_failure_email(self):
+    def send_failure_email(self) -> None:
         email = self._prepare_email(context=self._get_email_context(message=str(self.validation_errors)))
         try:
             email.send()
         except Exception as e:
             logger.exception(e)
 
-    def send_success_email(self):
+    def send_success_email(self) -> None:
         email = self._prepare_email(
             context=self._get_email_context(message="All of the Individuals IBAN number we're updated successfully")
         )
@@ -158,7 +159,7 @@ class IndividualsIBANXlsxUpdate:
             logger.exception(e)
 
     @classmethod
-    def send_error_email(cls, error_message: str, xlsx_update_file_id: str, uploaded_by: User):
+    def send_error_email(cls, error_message: str, xlsx_update_file_id: str, uploaded_by: User) -> None:
         message = f"There was an unexpected error during Individuals IBAN update: {error_message}"
         context = {
             "first_name": uploaded_by.first_name,

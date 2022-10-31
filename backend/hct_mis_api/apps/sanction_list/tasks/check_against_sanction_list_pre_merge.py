@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -27,7 +28,7 @@ log = logging.getLogger(__name__)
 
 class CheckAgainstSanctionListPreMergeTask:
     @staticmethod
-    def _get_query_dict(individual):
+    def _get_query_dict(individual) -> Dict:
         documents = [
             doc
             for doc in individual.documents.all()

@@ -10,7 +10,7 @@ from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 logger = logging.getLogger(__name__)
 
 
-def _get_min_max_score(golden_records):
+def _get_min_max_score(golden_records) -> Tuple[float, float]:
     items = [item.get("score", 0.0) for item in golden_records]
 
     return min(items, default=0.0), max(items, default=0.0)

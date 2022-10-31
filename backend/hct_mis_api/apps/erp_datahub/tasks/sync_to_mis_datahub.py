@@ -22,7 +22,7 @@ class SyncToMisDatahubTask:
 
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
-    def execute(self):
+    def execute(self) -> None:
         # have to be list because it used in another database
 
         parent_business_area_codes = list(BusinessArea.objects.filter(is_split=True).values_list("code", flat=True))

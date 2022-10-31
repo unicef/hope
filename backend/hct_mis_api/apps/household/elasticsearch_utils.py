@@ -45,7 +45,7 @@ def rebuild_search_index(models=None, options=None) -> None:
     _rebuild(models=models, options=options)
 
 
-def populate_all_indexes():
+def populate_all_indexes() -> None:
     _populate(models=None, options={"parallel": False, "quiet": True})
 
 

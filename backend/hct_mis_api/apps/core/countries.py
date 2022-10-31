@@ -1,6 +1,6 @@
 import logging
 from functools import lru_cache
-from typing import Union
+from typing import List, Union
 
 from django_countries import countries as internal_countries
 from django_countries.fields import Country
@@ -17,7 +17,7 @@ class Countries:
         return [(label, alpha2, Country(alpha2).alpha3) for alpha2, label in internal_countries]
 
     @classmethod
-    def get_choices(cls, output_code="alpha2") -> list:
+    def get_choices(cls, output_code="alpha2") -> List:
         if output_code not in ("alpha2", "alpha3"):
             logger.error(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
             raise ValueError("output_code have to be one of: alpha2, alpha3")
@@ -1275,7 +1275,7 @@ class SanctionListCountries:
     }
 
     @classmethod
-    def get_choices(cls, output_code="alpha2") -> list:
+    def get_choices(cls, output_code="alpha2") -> List:
         if output_code not in ("alpha2", "alpha3"):
             logger.error(f"output_code have to be one of: alpha2, alpha3, provided output_code={output_code}")
             raise ValueError("output_code have to be one of: alpha2, alpha3")
