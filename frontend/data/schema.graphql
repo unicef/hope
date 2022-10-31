@@ -854,6 +854,10 @@ type EditPaymentVerificationMutation {
   cashPlan: CashPlanNode
 }
 
+type ExportSurveySampleMutationMutation {
+  survey: SurveyNode
+}
+
 type ExportXlsxCashPlanVerification {
   cashPlan: CashPlanNode
 }
@@ -2168,6 +2172,7 @@ type Mutations {
   updateFeedback(input: UpdateFeedbackInput!): UpdateFeedbackMutation
   createFeedbackMessage(input: CreateFeedbackMessageInput!): CreateFeedbackMessageMutation
   createSurvey(input: CreateSurveyInput!): CreateSurveyMutation
+  exportSurveySample(surveyId: ID!): ExportSurveySampleMutationMutation
   createReport(reportData: CreateReportInput!): CreateReport
   restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
@@ -3165,10 +3170,14 @@ type SurveyNode implements Node {
   targetPopulation: TargetPopulationNode
   program: ProgramNode
   businessArea: UserBusinessAreaNode!
+  sampleFile: String
+  sampleFileGeneratedAt: DateTime
   samplingType: SurveySamplingType!
   fullListArguments: JSONString
   randomSamplingArguments: JSONString
   sampleSize: Int!
+  sampleFilePath: String
+  hasValidSampleFile: Boolean
 }
 
 type SurveyNodeConnection {

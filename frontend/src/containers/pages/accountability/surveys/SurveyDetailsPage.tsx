@@ -11,11 +11,17 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
-import { useSurveyQuery } from '../../../../__generated__/graphql';
+import {
+  SurveyCategory,
+  useExportSurveySampleMutation,
+  useSurveyQuery,
+} from '../../../../__generated__/graphql';
 import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
 
 export const SurveyDetailsPage = (): React.ReactElement => {
+  const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const { id } = useParams();
   const businessArea = useBusinessArea();
@@ -23,6 +29,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
+  const [mutate] = useExportSurveySampleMutation();
   const permissions = usePermissions();
 
   if (loading) return <LoadingComponent />;
@@ -40,6 +47,53 @@ export const SurveyDetailsPage = (): React.ReactElement => {
     },
   ];
 
+  const exportSurveySample = async (): Promise<void> => {
+    try {
+      await mutate({
+        variables: {
+          surveyId: id,
+        },
+      });
+      showMessage(t('Survey sample exported.'));
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
+  };
+
+  const renderActions = (): React.ReactElement => {
+    if (survey.category === SurveyCategory.RapidPro) {
+      return (
+        <Button variant='contained' color='primary' component={Link} to='/'>
+          {t('Check Answers')}
+        </Button>
+      );
+    }
+    if (survey.category === SurveyCategory.Manual) {
+      if (survey.hasValidSampleFile) {
+        return (
+          <Button
+            download
+            variant='contained'
+            color='primary'
+            href={survey.sampleFilePath}
+          >
+            {t('Download Survey Sample')}
+          </Button>
+        );
+      }
+      return (
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={exportSurveySample}
+        >
+          {t('Export Survey Sample')}
+        </Button>
+      );
+    }
+    return null;
+  };
+
   return (
     <>
       <PageHeader
@@ -53,10 +107,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
             : null
         }
       >
-        <Button variant='contained' color='primary' component={Link} to='/'>
-          {/* TODO change depends on the survey type */}
-          {t('Check Answers')}
-        </Button>
+        {renderActions()}
       </PageHeader>
       <Box display='flex' flexDirection='column'>
         <SurveyDetails survey={survey} />
