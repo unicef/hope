@@ -5,10 +5,10 @@ from typing import List
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
+from django.db.models import QuerySet
 from django.forms import FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
-from django.db.models import QuerySet
 
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter

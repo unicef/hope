@@ -33,7 +33,7 @@ class KoboRequestsSession(requests.Session):
         new_parsed = urlparse(new_url)
         if new_parsed.hostname in KoboRequestsSession.AUTH_DOMAINS:
             return False
-        return super().should_strip_auth(old_url, new_url)
+        return super().should_strip_auth(old_url, new_url)  # type: ignore # Call to untyped function "should_strip_auth" in typed context
 
 
 class KoboAPI:

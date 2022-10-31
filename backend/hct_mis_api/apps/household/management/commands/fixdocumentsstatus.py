@@ -1,7 +1,6 @@
 from django.core.management import BaseCommand
 from django.db.models import QuerySet
 
-
 from hct_mis_api.apps.household.models import Document
 
 
