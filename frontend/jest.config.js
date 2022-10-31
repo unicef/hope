@@ -1,5 +1,5 @@
 module.exports = {
-  collectCoverage: !true,
+  collectCoverage: true,
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
   moduleDirectories: ['node_modules', 'src'],
   testPathIgnorePatterns: ['/node_modules/', '/.history/', '/scripts/'],
