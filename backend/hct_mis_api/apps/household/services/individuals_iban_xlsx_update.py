@@ -4,6 +4,7 @@ from typing import Any, Dict, Tuple
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
+from django.db.models import QuerySet
 from django.template.loader import render_to_string
 
 import openpyxl
@@ -41,7 +42,7 @@ class IndividualsIBANXlsxUpdate:
         self.wb = openpyxl.load_workbook(xlsx_update_file.file, data_only=True)
         self.individuals_ws = self.wb[self.SPREADSHEET_NAME]
 
-    def _build_helpers(self):
+    def _build_helpers(self) -> None:
         first_row = self.individuals_ws[1]
         self.columns_names_index_dict = {cell.value: cell.col_idx for cell in first_row}
         self.matching_column_index = self.columns_names_index_dict[self.MATCHING_COLUMN]
@@ -51,7 +52,7 @@ class IndividualsIBANXlsxUpdate:
     def _row_report_data(self, row) -> Any:
         return row[0].row
 
-    def _get_queryset(self):
+    def _get_queryset(self) -> QuerySet[Individual]:
         return Individual.objects.filter(business_area=self.business_area, duplicate=False, withdrawn=False)
 
     def validate(self) -> None:
@@ -84,7 +85,7 @@ class IndividualsIBANXlsxUpdate:
             return self.STATUS_MULTIPLE_MATCH, self._row_report_data(row)
         return self.STATUS_UNIQUE, (self._row_report_data(row), individuals.first())
 
-    def _create_matching_report(self):
+    def _create_matching_report(self) -> None:
         report_dict = {
             self.STATUS_UNIQUE: [],
             self.STATUS_NO_MATCH: [],
@@ -96,7 +97,7 @@ class IndividualsIBANXlsxUpdate:
 
         self.report_dict = report_dict
 
-    def _validate_matching_report(self):
+    def _validate_matching_report(self) -> None:
         if no_match := self.report_dict[self.STATUS_NO_MATCH]:
             self.validation_errors.append(f"No matching Individuals for rows: {no_match}")
 

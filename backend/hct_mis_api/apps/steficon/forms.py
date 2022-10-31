@@ -9,7 +9,7 @@ from django.forms import HiddenInput, Media, Textarea
 from django.utils.translation import gettext_lazy as _
 
 from .config import config
-from .interpreters import mapping
+from .interpreters import Interpreter, mapping
 from .models import Rule
 from .widget import ContentTypeChoiceField, PythonEditor
 
@@ -106,7 +106,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
         to_field_name=None,
         limit_choices_to=None,
         **kwargs,
-    ):
+    ) -> None:
         from hct_mis_api.apps.targeting.models import TargetPopulation
 
         queryset = TargetPopulation.objects.all()
@@ -123,7 +123,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
             **kwargs,
         )
 
-    def label_from_instance(self, obj):
+    def label_from_instance(self, obj) -> str:
         if obj and obj.business_area:
             return f"{obj.name} ({obj.business_area.name})"
         elif obj.name:
@@ -195,7 +195,7 @@ class RuleForm(forms.ModelForm):
         self._validate_unique = True
         code = self.cleaned_data.get("definition", "")
         language = self.cleaned_data["language"]
-        i = mapping[language](code)
+        i: Interpreter = mapping[language](code)
         try:
             i.validate()
         except Exception as e:

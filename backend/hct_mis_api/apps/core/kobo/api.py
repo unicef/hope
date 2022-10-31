@@ -1,7 +1,7 @@
 import logging
 import time
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -13,6 +13,7 @@ from requests.packages.urllib3.util.retry import Retry
 
 from hct_mis_api.apps.core.kobo.common import filter_by_owner
 from hct_mis_api.apps.core.models import BusinessArea, XLSXKoboTemplate
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +47,9 @@ class KoboAPI:
             self.business_area = None
         self._get_token()
 
-    def _handle_paginated_results(self, url):
+    def _handle_paginated_results(self, url) -> List[Dict]:
         next_url = url
-        results: list = []
+        results: List = []
 
         # if there will be more than 30000 results,
         # we need to make additional queries
@@ -99,7 +100,9 @@ class KoboAPI:
         response = self._client.patch(url=url, data=data, files=files)
         return response
 
-    def create_template_from_file(self, bytes_io_file, xlsx_kobo_template_object, template_id=""):
+    def create_template_from_file(
+        self, bytes_io_file, xlsx_kobo_template_object, template_id=""
+    ) -> Optional[Tuple[Dict, str]]:
         data = {
             "name": "Untitled",
             "asset_type": "template",
@@ -143,8 +146,8 @@ class KoboAPI:
             else:
                 return response_dict, asset_uid
 
-        logger.error("Fetching import data took too long")
-        raise RetryError("Fetching import data took too long")
+        log_and_raise("Fetching import data took too long", error_type=RetryError)
+        return None
 
     def get_all_projects_data(self) -> List:
         if not self.business_area:

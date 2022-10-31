@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
@@ -42,18 +43,18 @@ class TargetingCriteriaQueryingBase:
     def get_individual_queryset(self):
         return Individual.objects
 
-    def get_rules(self):
+    def get_rules(self) -> Any:
         return self.rules
 
     def get_excluded_household_ids(self):
         return self._excluded_household_ids
 
-    def get_criteria_string(self):
+    def get_criteria_string(self) -> str:
         rules = self.get_rules()
         rules_string = [x.get_criteria_string() for x in rules]
         return " OR ".join(rules_string).strip()
 
-    def get_basic_query(self):
+    def get_basic_query(self) -> Q:
         return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.get_excluded_household_ids())
 
     def get_query(self):

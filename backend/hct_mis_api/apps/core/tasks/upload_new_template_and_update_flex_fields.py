@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class KoboRetriableError(Exception):
-    def __init__(self, xlsx_kobo_template_object):
+    def __init__(self, xlsx_kobo_template_object) -> None:
         self.xlsx_kobo_template_object = xlsx_kobo_template_object
 
 
