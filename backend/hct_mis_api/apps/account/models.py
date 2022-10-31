@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from django import forms
 from django.contrib.auth.models import AbstractUser, Group
@@ -45,7 +46,7 @@ class Partner(models.Model):
         return self.name
 
     @classmethod
-    def get_partners_as_choices(cls):
+    def get_partners_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
@@ -197,7 +198,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         return f"{self.name} ({self.subsystem})"
 
     @classmethod
-    def get_roles_as_choices(cls):
+    def get_roles_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
 
 

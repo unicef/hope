@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
@@ -70,11 +70,12 @@ class IndividualXlsxUpdate:
         Individual.objects.bulk_update(individuals, columns)
 
     @staticmethod
-    def _column_name_by_attr(attr) -> str:
+    def _column_name_by_attr(attr) -> Optional[str]:
         if attr.get("associated_with") == _INDIVIDUAL:
             return f"individual__{attr.get('name')}"
         if attr.get("associated_with") == _HOUSEHOLD:
             return f"household__{attr.get('name')}"
+        return None
 
     def _validate_columns_names(self) -> None:
         first_row = self.individuals_ws[1]

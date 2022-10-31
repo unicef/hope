@@ -651,7 +651,7 @@ def mark_as_duplicate_individual(
     old_individual_to_remove,
     removed_individual_household,
     unique_individual,
-):
+) -> None:
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_and_withdraw_household_if_needed(
         individual_to_remove,
