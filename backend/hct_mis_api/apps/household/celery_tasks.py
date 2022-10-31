@@ -33,9 +33,8 @@ def recalculate_population_fields_task(household_ids: list[UUID] = None):
         ):
             with configure_scope() as scope:
                 scope.set_tag("business_area", hh.business_area)
-                with disable_concurrency(Household):
-                    with disable_concurrency(Individual):
-                        recalculate_data(hh)
+                with disable_concurrency(Household), disable_concurrency(Individual):
+                    recalculate_data(hh)
 
     except Exception as e:
         logger.exception(e)

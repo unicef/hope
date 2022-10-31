@@ -371,10 +371,9 @@ class LoadSanctionListXMLTask:
     def _cast_field_value_to_correct_type(model, field_name: str, value: Any):
         field = model._meta.get_field(field_name)
         # silencing lxml warning
-        with open(os.devnull, "w") as devnull:
-            with contextlib.redirect_stderr(devnull):
-                if not value:
-                    return field.default
+        with open(os.devnull, "w") as devnull, contextlib.redirect_stderr(devnull):
+            if not value:
+                return field.default
 
         if field.get_internal_type() == "DateTimeField":
             year, month, day, *time = value.split("-")

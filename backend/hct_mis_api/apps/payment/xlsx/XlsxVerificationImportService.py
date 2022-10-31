@@ -25,7 +25,7 @@ class XlsxVerificationImportService:
     }
     COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n")
 
-    def __init__(self, cashplan_payment_verification, file):
+    def __init__(self, cashplan_payment_verification, file) -> None:
         self.file = file
         self.cashplan_payment_verification = cashplan_payment_verification
         self.payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
@@ -50,13 +50,13 @@ class XlsxVerificationImportService:
         self.ws_verifications = wb[XlsxVerificationExportService.VERIFICATION_SHEET]
         return wb
 
-    def validate(self):
+    def validate(self) -> None:
         self._check_version()
         self._validate_headers()
         self._validate_rows()
         self.was_validation_run = True
 
-    def import_verifications(self):
+    def import_verifications(self) -> None:
         if len(self.errors):
             raise GraphQLError("You can't import verifications with errors.")
         if not self.was_validation_run:
@@ -67,7 +67,7 @@ class XlsxVerificationImportService:
             self._import_row(row)
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "received_amount"))
 
-    def _check_version(self):
+    def _check_version(self) -> None:
         ws_meta = self.wb[XlsxVerificationExportService.META_SHEET]
         version_cell_name = ws_meta[XlsxVerificationExportService.VERSION_CELL_NAME_COORDINATES].value
         version = ws_meta[XlsxVerificationExportService.VERSION_CELL_COORDINATES].value
@@ -81,7 +81,7 @@ class XlsxVerificationImportService:
                 f"Only version: {XlsxVerificationExportService.VERSION} is supported"
             )
 
-    def _validate_headers(self):
+    def _validate_headers(self) -> None:
         headers_row = self.ws_verifications[1]
         accepted_headers = XlsxVerificationExportService.HEADERS
         if len(headers_row) != len(accepted_headers):
@@ -113,7 +113,7 @@ class XlsxVerificationImportService:
                 )
             column += 1
 
-    def _validate_row_types(self, row):
+    def _validate_row_types(self, row) -> None:
         column = 0
         for cell in row:
             if cell.value is None:
@@ -133,7 +133,7 @@ class XlsxVerificationImportService:
                 )
             column += 1
 
-    def _validate_payment_record_id(self, row):
+    def _validate_payment_record_id(self, row) -> None:
         cell = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX]
         if cell.value not in self.payment_record_ids:
             self.errors.append(
@@ -144,7 +144,7 @@ class XlsxVerificationImportService:
                 )
             )
 
-    def _validate_row_received(self, row):
+    def _validate_row_received(self, row) -> None:
         valid_received = [None, "YES", "NO"]
         cell = row[XlsxVerificationExportService.RECEIVED_COLUMN_INDEX]
         if cell.value not in valid_received:
@@ -157,7 +157,7 @@ class XlsxVerificationImportService:
                 )
             )
 
-    def _validate_received_to_received_amount(self, row):
+    def _validate_received_to_received_amount(self, row) -> None:
         payment_record_id = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX].value
         payment_record = self.payment_records_dict.get(payment_record_id)
         if payment_record is None:
@@ -202,7 +202,7 @@ class XlsxVerificationImportService:
                 )
             )
 
-    def _validate_rows(self):
+    def _validate_rows(self) -> None:
         for row in self.ws_verifications.iter_rows(min_row=2):
             if not any([cell.value for cell in row]):
                 continue
@@ -211,7 +211,7 @@ class XlsxVerificationImportService:
             self._validate_row_received(row)
             self._validate_received_to_received_amount(row)
 
-    def _import_row(self, row):
+    def _import_row(self, row) -> None:
 
         payment_record_id = row[XlsxVerificationExportService.PAYMENT_RECORD_ID_COLUMN_INDEX].value
         received = row[XlsxVerificationExportService.RECEIVED_COLUMN_INDEX].value

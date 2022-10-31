@@ -48,7 +48,7 @@ class Sampling:
 
         return payment_record_count, sampling.sample_size
 
-    def _get_sampling(self):
+    def _get_sampling(self) -> "BaseSampling":
         sampling_type = self.input_data.get("sampling")
         if sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             arguments = self.input_data.get("full_list_arguments")

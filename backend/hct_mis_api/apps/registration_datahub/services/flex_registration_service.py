@@ -2,7 +2,7 @@ import base64
 import hashlib
 import logging
 import uuid
-from typing import Dict, List, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -76,12 +76,12 @@ class FlexRegistrationService:
         IDENTIFICATION_TYPE_TAX_ID: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @atomic("default")
     @atomic("registration_datahub")
-    def create_rdi(self, imported_by, rdi_name="rdi_name"):
+    def create_rdi(self, imported_by, rdi_name="rdi_name") -> RegistrationDataImport:
         business_area = BusinessArea.objects.get(slug="ukraine")
         number_of_individuals = 0
         number_of_households = 0
@@ -134,11 +134,10 @@ class FlexRegistrationService:
         try:
             for record_id in records_ids_to_import:
                 try:
-                    with atomic("default"):
-                        with atomic("registration_datahub"):
-                            record = Record.objects.defer("data").get(id=record_id)
-                            self.create_household_for_rdi_household(record, rdi_datahub)
-                            imported_records_ids.append(record_id)
+                    with atomic("default"), atomic("registration_datahub"):
+                        record = Record.objects.defer("data").get(id=record_id)
+                        self.create_household_for_rdi_household(record, rdi_datahub)
+                        imported_records_ids.append(record_id)
                 except ValidationError as e:
                     logger.exception(e)
                     record.mark_as_invalid(str(e))
@@ -243,13 +242,13 @@ class FlexRegistrationService:
 
         ImportedDocument.objects.bulk_create(documents)
 
-    def _set_default_head_of_household(self, individuals_array):
+    def _set_default_head_of_household(self, individuals_array) -> None:
         for individual_data in individuals_array:
             if individual_data.get("role_i_c") == "y":
                 individual_data["relationship_i_c"] = "head"
                 break
 
-    def _create_role(self, role, individual, household):
+    def _create_role(self, role, individual, household) -> None:
         if role == "y":
             defaults = dict(individual=individual, household=household)
             if ImportedIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:
@@ -367,14 +366,16 @@ class FlexRegistrationService:
 
         return documents
 
-    def _prepare_picture_from_base64(self, certificate_picture, document_number):
+    def _prepare_picture_from_base64(self, certificate_picture: Any, document_number) -> Union[ContentFile, Any]:
         if certificate_picture:
             format_image = "jpg"
             name = hashlib.md5(document_number.encode()).hexdigest()
             certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture
 
-    def _prepare_bank_account_info(self, individual_dict: Dict, individual: ImportedIndividual):
+    def _prepare_bank_account_info(
+        self, individual_dict: Dict, individual: ImportedIndividual
+    ) -> Optional[Dict[str, Any]]:
         if individual_dict.get("bank_account_h_f", "n") != "y":
             return
         if not individual_dict.get("bank_account_number"):
@@ -391,7 +392,7 @@ class FlexRegistrationService:
         }
         return bank_account_info_data
 
-    def validate_household(self, individuals_array):
+    def validate_household(self, individuals_array) -> None:
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
 
@@ -399,5 +400,5 @@ class FlexRegistrationService:
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
 
-    def _has_head(self, individuals_array):
+    def _has_head(self, individuals_array) -> bool:
         return any(individual_data.get("relationship_i_c") == "head" for individual_data in individuals_array)

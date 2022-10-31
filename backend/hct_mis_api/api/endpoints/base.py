@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.http import Http404
@@ -46,7 +48,7 @@ class HOPEAPIView(APIView):
 
         return ret
 
-    def handle_exception(self, exc):
+    def handle_exception(self, exc) -> Any:
         if isinstance(exc, PermissionDenied):
             perm_name = self.permission.name if self.permission else ""
             exc = PermissionDenied("%s %s" % (exc.detail, perm_name))
