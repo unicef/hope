@@ -20,7 +20,7 @@ class Command(BaseCommand):
     help = "Anonymize data"
 
     @atomic()
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         pl_faker = Faker("pl_PL")
         ba_to_locale_dict = defaultdict(lambda: pl_faker)
         ba_to_locale_dict["afghanistan"] = Faker("fa_IR")

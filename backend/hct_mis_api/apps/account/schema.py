@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Set
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
@@ -33,7 +34,7 @@ from hct_mis_api.apps.core.utils import to_choice_object
 logger = logging.getLogger(__name__)
 
 
-def permissions_resolver(user_roles):
+def permissions_resolver(user_roles) -> Set:
     all_user_roles = user_roles
     permissions_set = set()
     for user_role in all_user_roles:

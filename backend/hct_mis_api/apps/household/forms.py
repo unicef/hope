@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -41,7 +41,7 @@ class UpdateByXlsxStage1Form(forms.Form):
 class UpdateByXlsxStage2Form(forms.Form):
     xlsx_update_file = forms.ModelChoiceField(queryset=XlsxUpdateFile.objects.all(), widget=forms.HiddenInput())
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.xlsx_columns = kwargs.pop("xlsx_columns", [])
         super().__init__(*args, **kwargs)
         self.fields["xlsx_match_columns"] = forms.MultipleChoiceField(
@@ -49,7 +49,7 @@ class UpdateByXlsxStage2Form(forms.Form):
             choices=[(xlsx_column, xlsx_column) for xlsx_column in self.xlsx_columns],
         )
 
-    def clean_xlsx_match_columns(self):
+    def clean_xlsx_match_columns(self) -> Dict:
         data = self.cleaned_data["xlsx_match_columns"]
         required_columns = {"individual__unicef_id", "household__unicef_id"}
         all_columns = set(self.xlsx_columns)

@@ -11,11 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **options):
-        initialise_countries()
+    def handle(self, *args, **options) -> None:
+        initialize_countries()
 
 
-def initialise_countries():
+def initialize_countries() -> None:
     results = {"errors": []}
     try:
         default_data = {

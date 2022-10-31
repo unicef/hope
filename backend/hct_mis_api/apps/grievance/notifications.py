@@ -46,13 +46,13 @@ class GrievanceNotification:
         }
         return context
 
-    def _prepare_user_recipients(self):
+    def _prepare_user_recipients(self) -> Any:
         return GrievanceNotification.ACTION_PREPARE_USER_RECIPIENTS_DICT[self.action](self)
 
-    def _prepare_emails(self):
+    def _prepare_emails(self) -> List[EmailMultiAlternatives]:
         return [self._prepare_email(user) for user in self.user_recipients]
 
-    def _prepare_email(self, user_recipient):
+    def _prepare_email(self, user_recipient) -> EmailMultiAlternatives:
         prepare_bodies_method = GrievanceNotification.ACTION_PREPARE_BODIES_DICT[self.action]
         text_body, html_body, subject = prepare_bodies_method(self, user_recipient)
         email = EmailMultiAlternatives(

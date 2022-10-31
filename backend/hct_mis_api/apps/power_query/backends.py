@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Permission
@@ -8,7 +8,7 @@ from .models import Report, ReportDocument
 
 
 class PowerQueryBackend(ModelBackend):
-    def get_office_permissions(self, user_obj, office_slug):
+    def get_office_permissions(self, user_obj, office_slug) -> Any:
         key = f"_perm_{office_slug}"
         if not hasattr(user_obj, key):
             permsissions = Permission.objects.filter(

@@ -510,7 +510,7 @@ class UserAdmin(HopeModelAdminMixin, SyncMixin, LinkedObjectsMixin, BaseUserAdmi
                 del actions["add_business_area_role"]
         return actions
 
-    def add_business_area_role(self, request, queryset):
+    def add_business_area_role(self, request, queryset) -> HttpResponse:
         if "apply" in request.POST:
             form = AddRoleForm(request.POST)
             if form.is_valid():

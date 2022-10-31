@@ -1,7 +1,7 @@
 import itertools
 import logging
 import pickle
-from typing import Callable, Dict
+from typing import Any, Callable, Dict, List
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -37,7 +37,7 @@ mimetype_map = {
 }
 
 
-def validate_queryargs(value):
+def validate_queryargs(value) -> None:
     try:
         if not isinstance(value, dict):
             raise ValidationError("QueryArgs must be a dict")
@@ -64,25 +64,25 @@ class Parametrizer(NaturalKeyModel, models.Model):
         verbose_name_plural = "Arguments"
         verbose_name = "Arguments"
 
-    def clean(self):
+    def clean(self) -> None:
         validate_queryargs(self.value)
 
-    def get_matrix(self) -> list[dict]:
+    def get_matrix(self) -> List[Dict]:
         product = list(itertools.product(*self.value.values()))
         return [dict(zip(self.value.keys(), e)) for e in product]
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
         if not self.code:
             self.code = slugify(self.name)
         super().save(force_insert, force_update, using, update_fields)
 
-    def refresh(self):
+    def refresh(self) -> None:
         if self.code in SYSTEM_PARAMETRIZER:
             getter: Callable = SYSTEM_PARAMETRIZER[self.code]["value"]
             self.value = getter()
             self.save()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -100,29 +100,29 @@ class Query(NaturalKeyModel, models.Model):
     active = models.BooleanField(default=True)
     refresh_daily = models.BooleanField(default=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name or ""
 
     class Meta:
         verbose_name_plural = "Power Queries"
         ordering = ("name",)
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
         if not self.code:
             self.code = "qs=conn.all().order_by('id')"
         self.error = None
         super().save(force_insert, force_update, using, update_fields)
 
-    def _invoke(self, query_id, arguments):
+    def _invoke(self, query_id, arguments) -> Dict:
         query = Query.objects.get(id=query_id)
         result = query.run(persist=False, arguments=arguments)
         return result
 
-    def update_results(self, results):
+    def update_results(self, results) -> None:
         self.info["last_run_results"] = results
         self.save()
 
-    def execute_matrix(self, persist=True, **kwargs) -> "[Dataset]":
+    def execute_matrix(self, persist=True, **kwargs) -> List["Dataset"]:
         if self.parametrizer:
             args = self.parametrizer.get_matrix()
         else:
@@ -195,19 +195,19 @@ class Dataset(NaturalKeyModel, models.Model):
     info = JSONField(default=dict, blank=True)
     extra = models.BinaryField(null=True, blank=True, help_text="Any other attribute to pass to the formatter")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Result of {self.query.name} {self.arguments}"
 
     @property
-    def data(self):
+    def data(self) -> Any:
         return pickle.loads(self.value)
 
     @property
-    def size(self):
+    def size(self) -> int:
         return len(self.value)
 
     @property
-    def arguments(self):
+    def arguments(self) -> Dict:
         return self.info.get("arguments", {})
 
 
@@ -216,10 +216,10 @@ class Formatter(NaturalKeyModel, models.Model):
     content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))
     code = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return self.name
+    def __str__(self) -> str:  # TODO: name is a nullable charfield?
+        return self.name or ""
 
-    def render(self, context):
+    def render(self, context) -> str:
         if self.content_type == "xls":
             dt = to_dataset(context["dataset"].data)
             return dt.export("xls")
@@ -250,12 +250,13 @@ class Report(NaturalKeyModel, models.Model):
 
     last_run = models.DateTimeField(null=True, blank=True)
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
         if not self.document_title:
             self.document_title = self.name
         super().save(force_insert, force_update, using, update_fields)
 
-    def execute(self, run_query=False):
+    def execute(self, run_query=False) -> List:
+        # TODO: refactor that
         query: Query = self.query
         result = []
         if run_query:
@@ -285,15 +286,15 @@ class Report(NaturalKeyModel, models.Model):
             result = ["No Dataset available"]
         return result
 
-    def __str__(self):
-        return self.name
+    def __str__(self) -> str:
+        return self.name or ""
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("power_query:report", args=[self.pk])
 
 
 class ReportDocumentManager(models.Manager):
-    def get_queryset(self):
+    def get_queryset(self) -> models.QuerySet:
         return super().get_queryset().select_related("report")
 
 
@@ -312,16 +313,16 @@ class ReportDocument(models.Model):
     class Meta:
         unique_together = ("report", "dataset")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
     @cached_property
-    def data(self):
+    def data(self) -> Any:
         return pickle.loads(self.output)
 
     @cached_property
-    def size(self):
+    def size(self) -> int:
         return len(self.output)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("power_query:document", args=[self.report.pk, self.pk])

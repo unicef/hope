@@ -43,13 +43,13 @@ class APIToken(models.Model):
     def __str__(self) -> str:
         return f"Token #{self.pk}"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if not self.key:
             self.key = self.generate_key()
         return super().save(*args, **kwargs)
 
     @classmethod
-    def generate_key(cls):
+    def generate_key(cls) -> str:
         return binascii.hexlify(os.urandom(20)).decode()
 
 

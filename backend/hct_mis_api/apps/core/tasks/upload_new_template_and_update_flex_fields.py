@@ -24,7 +24,7 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
         xlsx_kobo_template_object.template_id = template_id
         xlsx_kobo_template_object.save()
 
-    def execute(self, xlsx_kobo_template_id):
+    def execute(self, xlsx_kobo_template_id) -> None:
         xlsx_kobo_template_object = XLSXKoboTemplate.objects.filter(id=xlsx_kobo_template_id).first()
         if not xlsx_kobo_template_object:
             self._save_message_status_template_id(

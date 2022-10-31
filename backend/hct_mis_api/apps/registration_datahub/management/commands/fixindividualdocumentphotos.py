@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+from typing import Union
 
 from django.core.files import File
 from django.core.management import BaseCommand
@@ -19,7 +20,8 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
 )
 
 
-def _get_file(attachments, value, business_area_slug):
+def _get_file(attachments, value, business_area_slug) -> Union[File, str]:
+    # TODO: refactor
     download_url = ""
     for attachment in attachments:
         filename = attachment.get("filename", "")
@@ -37,7 +39,7 @@ def _get_file(attachments, value, business_area_slug):
     return file
 
 
-def fix_document_photos():
+def fix_document_photos() -> None:
     imported_documents = (
         ImportedDocument.objects.filter(
             photo="", individual__registration_data_import__import_data__data_type=ImportData.JSON

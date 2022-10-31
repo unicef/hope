@@ -1,6 +1,6 @@
 import logging
 from collections.abc import Iterable
-from typing import List, Tuple, Type
+from typing import Generator, List, Tuple, Type
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -118,7 +118,7 @@ def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args):
     return resolver(attname, default_value, root, info, **args)
 
 
-def sort_by_attr(options, attrs: str) -> list:
+def sort_by_attr(options, attrs: str) -> List:
     def key_extractor(el):
         for attr in attrs.split("."):
             el = _custom_dict_or_attr_resolver(attr, None, el, None)
@@ -216,7 +216,7 @@ class KoboAssetObjectConnection(Connection):
         node = KoboAssetObject
 
 
-def get_fields_attr_generators(flex_field, business_area_slug=None):
+def get_fields_attr_generators(flex_field, business_area_slug=None) -> Generator:
     if flex_field is not False:
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
