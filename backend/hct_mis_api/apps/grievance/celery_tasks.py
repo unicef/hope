@@ -37,7 +37,7 @@ def deduplicate_and_check_against_sanctions_list_task(
 
 @app.task
 @sentry_tags
-def periodic_grievances_notifications():
+def periodic_grievances_notifications() -> None:
     sensitive_tickets_one_day_date = timezone.now() - timedelta(days=1)
     sensitive_tickets_to_notify = (
         GrievanceTicket.objects.exclude(status=GrievanceTicket.STATUS_CLOSED)

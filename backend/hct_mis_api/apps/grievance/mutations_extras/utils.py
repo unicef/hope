@@ -717,7 +717,7 @@ def handle_photo(photo: Union[InMemoryUploadedFile, str], photoraw: str) -> Opti
     return None
 
 
-def handle_document(document) -> dict:
+def handle_document(document) -> Dict:
     photo = document.get("photo")
     photoraw = document.get("photoraw")
     document["photo"] = handle_photo(photo, photoraw)
@@ -725,5 +725,5 @@ def handle_document(document) -> dict:
     return document
 
 
-def handle_documents(documents) -> list[dict]:
+def handle_documents(documents) -> List[Dict]:
     return [handle_document(document) for document in documents]

@@ -267,7 +267,7 @@ class FlexRegistrationService:
             raise ValidationError(form.errors)
         return form.save()
 
-    def _prepare_household_data(self, household_dict, record, registration_data_import) -> dict:
+    def _prepare_household_data(self, household_dict, record, registration_data_import) -> Dict:
         household_data = dict(
             **build_arg_dict_from_dict(household_dict, FlexRegistrationService.HOUSEHOLD_MAPPING_DICT),
             flex_registrations_record=record,
@@ -290,7 +290,7 @@ class FlexRegistrationService:
         individual_dict: Dict,
         household: ImportedHousehold,
         registration_data_import: RegistrationDataImportDatahub,
-    ) -> dict:
+    ) -> Dict:
         individual_data = dict(
             **build_arg_dict_from_dict(individual_dict, FlexRegistrationService.INDIVIDUAL_MAPPING_DICT),
             household=household,

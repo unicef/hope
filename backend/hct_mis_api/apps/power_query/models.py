@@ -67,7 +67,7 @@ class Parametrizer(NaturalKeyModel, models.Model):
     def clean(self) -> None:
         validate_queryargs(self.value)
 
-    def get_matrix(self) -> list[dict]:
+    def get_matrix(self) -> List[Dict]:
         product = list(itertools.product(*self.value.values()))
         return [dict(zip(self.value.keys(), e)) for e in product]
 
@@ -219,7 +219,7 @@ class Formatter(NaturalKeyModel, models.Model):
     def __str__(self) -> Optional[str]:  # TODO: name is a nullable charfield?
         return self.name
 
-    def render(self, context):
+    def render(self, context) -> str:
         if self.content_type == "xls":
             dt = to_dataset(context["dataset"].data)
             return dt.export("xls")

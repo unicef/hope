@@ -1,6 +1,8 @@
 import logging
 import re
 from datetime import date
+from decimal import Decimal
+from typing import Any, List, Optional
 
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
@@ -10,7 +12,7 @@ from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import DecimalField, JSONField
+from django.db.models import DecimalField, JSONField, QuerySet
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -453,7 +455,7 @@ class Household(
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         from hct_mis_api.apps.targeting.models import (
             HouseholdSelection,
             TargetPopulation,
@@ -466,10 +468,10 @@ class Household(
         super().save(*args, **kwargs)
 
     @property
-    def status(self):
+    def status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
-    def withdraw(self, tag=None):
+    def withdraw(self, tag=None) -> None:
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         user_fields = self.user_fields or {}
@@ -477,27 +479,29 @@ class Household(
         self.user_fields = user_fields
         self.save()
 
-    def unwithdraw(self):
+    def unwithdraw(self) -> None:
         self.withdrawn = False
         self.withdrawn_date = None
         self.save()
 
-    def set_sys_field(self, key, value):
+    def set_sys_field(self, key, value) -> None:
         if "sys" not in self.user_fields:
             self.user_fields["sys"] = {}
         self.user_fields["sys"][key] = value
 
-    def get_sys_field(self, key):
+    def get_sys_field(self, key) -> Any:
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
 
     @property
-    def admin_area_title(self):
+    def admin_area_title(self) -> Optional[str]:
+        if not self.admin_area:
+            return None
         return self.admin_area.name
 
     @property
-    def admin1(self):
+    def admin1(self) -> Any:
         if self.admin_area is None:
             return None
         if self.admin_area.area_type.area_level == 0:
@@ -508,7 +512,7 @@ class Household(
         return current_admin
 
     @property
-    def admin2(self):
+    def admin2(self) -> Any:
         if not self.admin_area or self.admin_area.area_type.area_level in (0, 1):
             return None
         current_admin = self.admin_area
@@ -517,15 +521,15 @@ class Household(
         return current_admin
 
     @property
-    def sanction_list_possible_match(self):
+    def sanction_list_possible_match(self) -> bool:
         return self.individuals.filter(sanction_list_possible_match=True).count() > 0
 
     @property
-    def sanction_list_confirmed_match(self):
+    def sanction_list_confirmed_match(self) -> bool:
         return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
 
     @property
-    def total_cash_received_realtime(self):
+    def total_cash_received_realtime(self) -> Decimal:
         return (
             self.payment_records.filter()
             .aggregate(models.Sum("delivered_quantity", output_field=DecimalField()))
@@ -533,7 +537,7 @@ class Household(
         )
 
     @property
-    def total_cash_received_usd_realtime(self):
+    def total_cash_received_usd_realtime(self) -> Decimal:
         return (
             self.payment_records.filter()
             .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
@@ -541,18 +545,18 @@ class Household(
         )
 
     @property
-    def active_individuals(self):
+    def active_individuals(self) -> QuerySet:
         return self.individuals.filter(withdrawn=False, duplicate=False)
 
     @cached_property
-    def primary_collector(self):
+    def primary_collector(self) -> Optional["Individual"]:
         return self.representatives.get(households_and_roles__role=ROLE_PRIMARY)
 
     @cached_property
-    def alternate_collector(self):
+    def alternate_collector(self) -> Optional["Individual"]:
         return self.representatives.filter(households_and_roles__role=ROLE_ALTERNATE).first()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.unicef_id}"
 
 
@@ -570,7 +574,7 @@ class DocumentType(TimeStampedUUIDModel):
             "label",
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.label}"
 
 
@@ -592,7 +596,7 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
 
-    def clean(self):
+    def clean(self) -> None:
         from django.core.exceptions import ValidationError
 
         for validator in self.type.validators.all():
@@ -609,13 +613,13 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
             )
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.type} - {self.document_number}"
 
-    def mark_as_need_investigation(self):
+    def mark_as_need_investigation(self) -> None:
         self.status = self.STATUS_NEED_INVESTIGATION
 
-    def mark_as_valid(self):
+    def mark_as_valid(self) -> None:
         self.status = self.STATUS_VALID
 
 
@@ -635,7 +639,7 @@ class Agency(models.Model):
             )
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.label} in {self.country}"
 
 
@@ -649,7 +653,7 @@ class IndividualIdentity(models.Model):
     class Meta:
         verbose_name_plural = "Individual Identities"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.agency} {self.individual} {self.number}"
 
 
@@ -673,7 +677,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
     class Meta:
         unique_together = ("role", "household")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.individual.full_name} - {self.role}"
 
 
@@ -818,24 +822,24 @@ class Individual(
     vector_column = SearchVectorField(null=True)
 
     @property
-    def phone_no_valid(self):
+    def phone_no_valid(self) -> bool:
         return is_right_phone_number_format(self.phone_no)
 
     @property
-    def phone_no_alternative_valid(self):
+    def phone_no_alternative_valid(self) -> bool:
         return is_right_phone_number_format(self.phone_no_alternative)
 
     @property
-    def age(self):
+    def age(self) -> int:
         return relativedelta(date.today(), self.birth_date).years
 
     @property
-    def role(self):
+    def role(self) -> str:
         role = self.households_and_roles.first()
         return role.role if role is not None else ROLE_NO_ROLE
 
     @property
-    def get_hash_key(self):
+    def get_hash_key(self) -> str:
         from hashlib import sha256
 
         fields = (
@@ -852,7 +856,7 @@ class Individual(
         return sha256(";".join(values).encode()).hexdigest()
 
     @property
-    def status(self):
+    def status(self) -> str:
         statuses = []
         if self.duplicate:
             statuses.append(STATUS_DUPLICATE)
@@ -863,26 +867,26 @@ class Individual(
         return STATUS_ACTIVE
 
     @property
-    def cash_assist_status(self):
+    def cash_assist_status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn or self.duplicate else STATUS_ACTIVE
 
     @property
-    def sanction_list_last_check(self):
+    def sanction_list_last_check(self) -> Any:
         return cache.get("sanction_list_last_check")
 
-    def withdraw(self):
+    def withdraw(self) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.save()
 
-    def unwithdraw(self):
+    def unwithdraw(self) -> None:
         self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)
         self.withdrawn = False
         self.withdrawn_date = None
         self.save()
 
-    def mark_as_duplicate(self, original_individual=None):
+    def mark_as_duplicate(self, original_individual=None) -> None:
         if original_individual is not None:
             self.unicef_id = original_individual.unicef_id
         self.documents.update(status=Document.STATUS_INVALID)
@@ -890,24 +894,24 @@ class Individual(
         self.duplicate_date = timezone.now()
         self.save()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.unicef_id
 
     class Meta:
         verbose_name = "Individual"
         indexes = (GinIndex(fields=["vector_column"]),)
 
-    def set_sys_field(self, key, value):
+    def set_sys_field(self, key, value) -> None:
         if "sys" not in self.user_fields:
             self.user_fields["sys"] = {}
         self.user_fields["sys"][key] = value
 
-    def get_sys_field(self, key):
+    def get_sys_field(self, key) -> Any:
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
 
-    def recalculate_data(self):
+    def recalculate_data(self) -> None:
         disability_fields = (
             "seeing_disability",
             "hearing_disability",
@@ -923,29 +927,29 @@ class Individual(
         self.disability = DISABLED if should_be_disabled else NOT_DISABLED
         self.save(update_fields=["disability"])
 
-    def count_all_roles(self):
+    def count_all_roles(self) -> int:
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
 
-    def count_primary_roles(self):
+    def count_primary_roles(self) -> int:
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()
 
     @cached_property
-    def parents(self):
+    def parents(self) -> List["Individual"]:
         return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True)) if self.household else []
 
-    def is_golden_record_duplicated(self):
+    def is_golden_record_duplicated(self) -> bool:
         return self.deduplication_golden_record_status == DUPLICATE
 
-    def get_deduplication_golden_record(self):
+    def get_deduplication_golden_record(self) -> List:
         status_key = "duplicates" if self.is_golden_record_duplicated() else "possible_duplicates"
         return self.deduplication_golden_record_results.get(status_key, [])
 
     @cached_property
-    def active_record(self):
+    def active_record(self) -> Optional["Individual"]:
         if self.duplicate:
             return Individual.objects.filter(unicef_id=self.unicef_id, duplicate=False, is_removed=False).first()
 
-    def is_head(self):
+    def is_head(self) -> bool:
         if not self.household:
             return False
         return self.household.head_of_household.id == self.id
@@ -992,10 +996,10 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.bank_account_number} ({self.bank_name})"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if self.bank_account_number:
             self.bank_account_number = str(self.bank_account_number).replace(" ", "")
         if self.debit_card_number:

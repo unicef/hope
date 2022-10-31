@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from django.db.models import Case, CharField, Count, Q, Sum, Value, When, QuerySet
+from django.db.models import Case, CharField, Count, Q, QuerySet, Sum, Value, When
 from django.shortcuts import get_object_or_404
 
 import graphene

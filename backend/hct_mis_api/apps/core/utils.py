@@ -258,7 +258,7 @@ def get_count_and_percentage(input_list, all_items_list) -> Dict[str, Any]:
     return {"count": count, "percentage": percentage}
 
 
-def encode_ids(results: list[dict], model_name: str, key: str) -> list[dict]:
+def encode_ids(results: list[dict], model_name: str, key: str) -> List[Dict]:
     if results:
         for result in results:
             result_id = result[key]

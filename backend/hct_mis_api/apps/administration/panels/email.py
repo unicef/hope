@@ -1,6 +1,6 @@
 from typing import Any, Union
 
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 
 from smart_admin.console.email import (
     concurrent,
@@ -20,7 +20,7 @@ def masker(value: Any, request: HttpRequest) -> Union[Any, str]:
     return "****"
 
 
-def email(self, request, extra_context=None):
+def email(self, request, extra_context=None) -> HttpResponse:
     context = self.each_context(request)
     context["title"] = "Test Email"
     context["smtp"] = {

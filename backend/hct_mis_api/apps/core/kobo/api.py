@@ -1,6 +1,7 @@
 import logging
 import time
 from io import BytesIO
+from typing import Dict, List
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -81,7 +82,7 @@ class KoboAPI:
 
         self._client.headers.update({"Authorization": f"token {token}"})
 
-    def _handle_request(self, url) -> dict:
+    def _handle_request(self, url) -> Dict:
         response = self._client.get(url=url)
         try:
             response.raise_for_status()
@@ -145,7 +146,7 @@ class KoboAPI:
         logger.error("Fetching import data took too long")
         raise RetryError("Fetching import data took too long")
 
-    def get_all_projects_data(self) -> list:
+    def get_all_projects_data(self) -> List:
         if not self.business_area:
             logger.error("Business area is not provided")
             raise ValueError("Business area is not provided")
@@ -154,12 +155,12 @@ class KoboAPI:
         response_dict = self._handle_paginated_results(projects_url)
         return filter_by_owner(response_dict, self.business_area)
 
-    def get_single_project_data(self, uid: str) -> dict:
+    def get_single_project_data(self, uid: str) -> Dict:
         projects_url = self._get_url(f"assets/{uid}")
 
         return self._handle_request(projects_url)
 
-    def get_project_submissions(self, uid: str, only_active_submissions) -> list:
+    def get_project_submissions(self, uid: str, only_active_submissions) -> List:
         additional_query_params = None
         if only_active_submissions:
             additional_query_params = 'query={"_validation_status.uid":"validation_status_approved"}'

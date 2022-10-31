@@ -2,7 +2,7 @@ import contextlib
 import os
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
-from typing import Any, Iterable, Union
+from typing import Any, Dict, Iterable, List, Union
 from urllib.request import urlopen
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -261,7 +261,7 @@ class LoadSanctionListXMLTask:
 
         return documents
 
-    def _get_individual_data(self, individual_tag: ET.Element) -> dict:
+    def _get_individual_data(self, individual_tag: ET.Element) -> Dict:
         individual_data_dict = {
             "individual": SanctionListIndividual(),
             "documents": None,
@@ -287,7 +287,7 @@ class LoadSanctionListXMLTask:
         return individual_data_dict
 
     @cached_property
-    def _get_individual_fields(self) -> list[str]:
+    def _get_individual_fields(self) -> List[str]:
         excluded_fields = {
             "id",
             "history",
@@ -298,7 +298,6 @@ class LoadSanctionListXMLTask:
             "dates_of_birth",
             "created_at",
             "updated_at",
-            # "country_of_birth",
         }
         all_fields = SanctionListIndividual._meta.get_fields(include_parents=False)
         return [field.name for field in all_fields if field.name not in excluded_fields and field.concrete is True]
@@ -353,7 +352,7 @@ class LoadSanctionListXMLTask:
 
         return individuals_to_update
 
-    def _get_individuals_to_deactivate(self, individuals_from_file: Iterable[SanctionListIndividual]) -> list[str]:
+    def _get_individuals_to_deactivate(self, individuals_from_file: Iterable[SanctionListIndividual]) -> List[str]:
         individuals_reference_numbers = self._get_reference_numbers_list(individuals_from_file)
         ids = self._get_all_individuals_from_db.difference(
             self._get_existing_individuals(individuals_reference_numbers)
