@@ -590,7 +590,7 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_individuals(cls, registration_data_import, individuals=None):
+    def deduplicate_individuals(cls, registration_data_import, individuals=None) -> None:
         cls._wait_until_health_green()
         if registration_data_import:
             cls.set_thresholds(registration_data_import.business_area)
@@ -613,7 +613,7 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_individuals_from_other_source(cls, individuals: list[Individual]):
+    def deduplicate_individuals_from_other_source(cls, individuals: list[Individual]) -> None:
         cls._wait_until_health_green()
         cls.set_thresholds(individuals[0].business_area)
 

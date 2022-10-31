@@ -123,15 +123,14 @@ class PullFromDatahubTask:
             session.status = session.STATUS_PROCESSING
             session.save(update_fields=("status",))
             try:
-                with transaction.atomic(using="default"):
-                    with transaction.atomic(using="cash_assist_datahub_ca"):
-                        self.copy_service_providers(session)
-                        self.copy_programs(session)
-                        self.copy_target_population(session)
-                        self.copy_cash_plans(session)
-                        self.copy_payment_records(session)
-                        session.status = session.STATUS_COMPLETED
-                        session.save(update_fields=("status",))
+                with transaction.atomic(using="default"), transaction.atomic(using="cash_assist_datahub_ca"):
+                    self.copy_service_providers(session)
+                    self.copy_programs(session)
+                    self.copy_target_population(session)
+                    self.copy_cash_plans(session)
+                    self.copy_payment_records(session)
+                    session.status = session.STATUS_COMPLETED
+                    session.save(update_fields=("status",))
             except Exception as e:
                 session.process_exception(e)
                 session.save(

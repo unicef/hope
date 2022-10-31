@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Optional
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -10,7 +11,7 @@ User = get_user_model()
 
 
 class GenericField:
-    def __init__(self, name: str, column_name: str):
+    def __init__(self, name: str, column_name: str) -> None:
         self.name = name
         self.column_name = column_name
 
@@ -56,7 +57,7 @@ class ExportUsersXlsx:
             self.ws.column_dimensions[get_column_letter(i)].width = 20
 
     @transaction.atomic(using="default")
-    def get_exported_users_file(self):
+    def get_exported_users_file(self) -> Optional[Workbook]:
         fields = self.FIELDS_TO_COLUMNS_MAPPING.values()
         users = (
             User.objects.prefetch_related("user_roles")
