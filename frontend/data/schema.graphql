@@ -992,6 +992,8 @@ type GenericPaymentPlanNode {
   paymentVerificationSummary: PaymentVerificationSummaryNode
   availablePaymentRecordsCount: Int
   verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection
+  statusDate: DateTime
+  status: String
   bankReconciliationSuccess: Int
   bankReconciliationError: Int
   deliveryType: String
