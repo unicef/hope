@@ -948,6 +948,7 @@ class Individual(
     def active_record(self) -> Optional["Individual"]:
         if self.duplicate:
             return Individual.objects.filter(unicef_id=self.unicef_id, duplicate=False, is_removed=False).first()
+        return None
 
     def is_head(self) -> bool:
         if not self.household:

@@ -86,6 +86,7 @@ class QueryAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
             return HttpResponseRedirect(f"{url}?query__exact={obj.pk}")
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+        return None
 
     @button(visible=settings.DEBUG)
     def run(self, request, pk) -> HttpResponse:
