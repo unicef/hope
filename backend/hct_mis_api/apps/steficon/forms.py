@@ -74,7 +74,7 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     data = forms.CharField(widget=Textarea({"hidden": ""}))
     fields = forms.CharField(widget=HiddenInput)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
             # TODO: fields is CharField but used as dict?

@@ -845,7 +845,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     @staticmethod
-    def collector_column_validator(header, data_dict, household_ids):
+    def collector_column_validator(header, data_dict, household_ids) -> List[Dict[str, Any]]:
         try:
             is_primary_collector = header == "primary_collector_id"
             errors = []

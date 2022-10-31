@@ -18,7 +18,7 @@ class KoboRetriableError(Exception):
 
 
 class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
-    def _save_message_status_template_id(self, xlsx_kobo_template_object, message, status, template_id=""):
+    def _save_message_status_template_id(self, xlsx_kobo_template_object, message, status, template_id="") -> None:
         xlsx_kobo_template_object.error_description = message
         xlsx_kobo_template_object.status = status
         xlsx_kobo_template_object.template_id = template_id

@@ -35,7 +35,7 @@ def close_system_flagging_ticket(grievance_ticket, info, should_log=True):
         )
 
 
-def _clear_deduplication_individuals_fields(individuals):
+def _clear_deduplication_individuals_fields(individuals) -> None:
     for individual in individuals:
         individual.deduplication_golden_record_status = UNIQUE
         individual.deduplication_batch_status = UNIQUE_IN_BATCH

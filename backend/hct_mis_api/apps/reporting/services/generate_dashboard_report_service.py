@@ -590,7 +590,7 @@ class GenerateDashboardReportContentHelpers:
         return PaymentRecord.objects.filter(**filter_vars)
 
     @classmethod
-    def _get_business_areas_or_programs(cls, report, valid_payment_records):
+    def _get_business_areas_or_programs(cls, report, valid_payment_records) -> Tuple[Any, str]:
         if cls._is_report_global(report):
             business_area_code_path = "code"
             instances = BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)

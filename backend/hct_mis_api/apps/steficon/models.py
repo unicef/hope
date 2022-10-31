@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -67,7 +67,7 @@ class Rule(models.Model):
     def get_flag(self, name, default=None):
         return self.flags.get(name, default)
 
-    def as_dict(self):
+    def as_dict(self) -> Dict:
         return model_to_dict(self, MONITORED_FIELDS)
 
     def clean(self):
@@ -93,7 +93,7 @@ class Rule(models.Model):
         diff = set(data1.items()).symmetric_difference(data2.items())
         return data1, list(dict(diff).keys())
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None) -> None:
         if "individual_data_needed" not in self.flags:
             self.flags["individual_data_needed"] = False
         with atomic():

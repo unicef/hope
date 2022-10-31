@@ -48,7 +48,7 @@ class IndividualsIBANXlsxUpdate:
         self.iban_update_column_index = self.columns_names_index_dict[self.UPDATE_COLUMNS[0]]
         self.bank_name_update_column_index = self.columns_names_index_dict[self.UPDATE_COLUMNS[1]]
 
-    def _row_report_data(self, row):
+    def _row_report_data(self, row) -> Any:
         return row[0].row
 
     def _get_queryset(self):

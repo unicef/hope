@@ -3,6 +3,7 @@ import logging
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
 from time import sleep
+from typing import Dict, List
 
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat
@@ -237,7 +238,7 @@ class DeduplicateTask:
         return queries
 
     @classmethod
-    def _prepare_identities_or_documents_query(cls, data, data_type):
+    def _prepare_identities_or_documents_query(cls, data, data_type) -> List[Dict]:
         queries = []
         document_type_key = "type"
         prefix = "identities" if data_type.lower() == "identity" else "documents"
@@ -315,7 +316,7 @@ class DeduplicateTask:
         return [max_from_should_and_must]
 
     @classmethod
-    def _get_complex_query_for_name(cls, name, field_name):
+    def _get_complex_query_for_name(cls, name, field_name) -> Dict:
         name_phonetic_query_dict = {"match": {f"{field_name}.phonetic": {"query": name}}}
         # phonetic analyzer not working with fuzziness
         name_fuzzy_query_dict = {
@@ -332,10 +333,7 @@ class DeduplicateTask:
         # choose max from fuzzy and phonetic
         # phonetic score === 0 or 1
         # fuzzy score <=1 changes if there is need make change
-        name_complex_query = {
-            "dis_max": {"queries": [name_fuzzy_query_dict, name_phonetic_query_dict], "tie_breaker": 0}
-        }
-        return name_complex_query
+        return {"dis_max": {"queries": [name_fuzzy_query_dict, name_phonetic_query_dict], "tie_breaker": 0}}
 
     @classmethod
     def _get_duplicates_tuple(cls, query_dict, duplicate_score, document, individual):

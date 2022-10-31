@@ -793,7 +793,7 @@ class GenerateReportService:
             col_letter = get_column_letter(x)
             ws[f"{col_letter}1"] = label
 
-    def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row):
+    def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row) -> None:
         column_widths = []
 
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):

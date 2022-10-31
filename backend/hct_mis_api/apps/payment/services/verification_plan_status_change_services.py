@@ -126,7 +126,7 @@ class VerificationPlanStatusChangeServices:
         ).delete()
         return self.cash_plan_verification
 
-    def _create_grievance_ticket_for_status(self, cashplan_payment_verification, status):
+    def _create_grievance_ticket_for_status(self, cashplan_payment_verification, status) -> None:
         verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
         if verifications.count() == 0:
             return

@@ -1,6 +1,6 @@
 import logging
 from collections.abc import Iterable
-from typing import Generator, List, Tuple, Type
+from typing import Any, Generator, List, Tuple, Type
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -111,7 +111,7 @@ class CoreFieldChoiceObject(graphene.ObjectType):
         return resolve_label(dict_or_attr_resolver("label", None, parent, info))
 
 
-def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args):
+def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args) -> Any:
     resolver = attr_resolver
     if isinstance(root, dict):
         resolver = dict_resolver

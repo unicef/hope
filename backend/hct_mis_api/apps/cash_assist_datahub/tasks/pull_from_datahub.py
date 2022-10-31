@@ -142,7 +142,7 @@ class PullFromDatahubTask:
                 )
                 raise
 
-    def get_business_area_for_cash_assist_code(self, cash_assist_code):
+    def get_business_area_for_cash_assist_code(self, cash_assist_code) -> BusinessArea:
         return BusinessArea.objects.get(
             code=BusinessArea.cash_assist_to_code_mapping.get(cash_assist_code, cash_assist_code)
         )
