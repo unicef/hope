@@ -126,15 +126,12 @@ class DocumentNode(DjangoObjectType):
     country_iso3 = graphene.String(description="Country ISO3")
     photo = graphene.String(description="Photo url")
 
-    @staticmethod
     def resolve_country(parent: Document, info):
         return getattr(parent.country, "name", parent.country)
 
-    @staticmethod
     def resolve_country_iso3(parent: Document, info):
         return parent.country.iso_code3
 
-    @staticmethod
     def resolve_photo(parent: Document, info):
         if parent.photo:
             return parent.photo.url
