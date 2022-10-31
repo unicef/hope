@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Union
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -166,7 +166,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "issuing_country": Country(value),
             }
 
-    def _handle_image_field(self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs):
+    def _handle_image_field(
+        self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs
+    ) -> Union[File, str, None]:
         if self.image_loader.image_in(cell.coordinate):
             image = self.image_loader.get(cell.coordinate)
             file_name = f"{cell.coordinate}-{timezone.now()}.jpg"

@@ -150,7 +150,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         else:
             setattr(obj, field_data_dict["name"], correct_value)
 
-    def _handle_documents_and_identities(self, documents_and_identities):
+    def _handle_documents_and_identities(self, documents_and_identities) -> None:
         identity_fields = {
             "scope_id",
             "unhcr_id",

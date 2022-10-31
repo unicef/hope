@@ -134,8 +134,7 @@ class XlsxVerificationExportService:
             tmp.seek(0)
             xlsx_obj.file.save(filename, File(tmp))
 
-    def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col):
-
+    def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col) -> None:
         column_widths = []
 
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):

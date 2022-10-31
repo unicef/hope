@@ -72,7 +72,7 @@ class CommonValidator(BaseValidator):
                 raise ValidationError("Start date cannot be greater than the end date.")
 
 
-def prepare_choices_for_validation(choices_sheet):
+def prepare_choices_for_validation(choices_sheet) -> Dict[str, List[str]]:
     from collections import defaultdict
 
     import xlrd
@@ -203,7 +203,7 @@ class KoboTemplateValidator:
         return core_fields_in_file
 
     @classmethod
-    def _get_core_fields_from_db(cls):
+    def _get_core_fields_from_db(cls) -> Dict:
         all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)
         return {
             core_field_data["xlsx_field"]: {

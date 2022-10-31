@@ -1000,7 +1000,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             },
         }
 
-    def get_expected_household_fields(self):
+    def get_expected_household_fields(self) -> Dict:
         try:
             return {field["xlsx_field"] for field in self.combined_fields["households"].values() if field["required"]}
         except Exception as e:

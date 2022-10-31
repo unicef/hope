@@ -3,7 +3,7 @@ import logging
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, fields
 from time import sleep
-from typing import Dict, List
+from typing import Any, Dict, List, Tuple
 
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat
@@ -75,7 +75,7 @@ class DeduplicateTask:
     thresholds: Thresholds = None
 
     @classmethod
-    def _prepare_query_dict(cls, individual, fields, min_score):
+    def _prepare_query_dict(cls, individual, fields, min_score) -> Dict[str, Any]:
         fields_meta = {
             "birth_date": {"boost": 2},
             "phone_no": {"boost": 2},
@@ -336,7 +336,9 @@ class DeduplicateTask:
         return {"dis_max": {"queries": [name_fuzzy_query_dict, name_phonetic_query_dict], "tie_breaker": 0}}
 
     @classmethod
-    def _get_duplicates_tuple(cls, query_dict, duplicate_score, document, individual):
+    def _get_duplicates_tuple(
+        cls, query_dict, duplicate_score, document, individual
+    ) -> Tuple[List, List, List, List, Dict[str, Any]]:
         duplicates = []
         possible_duplicates = []
         original_individuals_ids_duplicates = []
@@ -403,7 +405,7 @@ class DeduplicateTask:
             sleep(5)
 
     @classmethod
-    def deduplicate_single_imported_individual(cls, individual):
+    def deduplicate_single_imported_individual(cls, individual) -> Tuple[List, List, List, List, Dict[str, Any]]:
         fields_names = (
             "given_name",
             "full_name",
@@ -476,7 +478,7 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_single_individual(cls, individual):
+    def deduplicate_single_individual(cls, individual) -> Tuple[List, List, List, List, Dict[str, Any]]:
         fields_names = (
             "given_name",
             "full_name",
