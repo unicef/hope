@@ -183,19 +183,19 @@ ALL_GRIEVANCES_CREATE_MODIFY = (
 
 class BasePermission:
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return False
 
 
 class AllowAny(BasePermission):
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return True
 
 
 class AllowAuthenticated(BasePermission):
     @classmethod
-    def has_permission(cls, info, **kwargs):
+    def has_permission(cls, info, **kwargs) -> bool:
         return info.context.user.is_authenticated
 
 
