@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Any, Dict
 
 from django.db import transaction
 from django.db.models import F, Q
@@ -196,7 +196,7 @@ class SendTPToDatahubTask:
         ).distinct()
         self.unhcr_id_dict = {identity.individual_id: identity.number for identity in individual_identities}
 
-    def _get_individuals_and_hauseholds(self, program, target_population):
+    def _get_individuals_and_hauseholds(self, program, target_population) -> Any:
         all_targeted_households_ids = target_population.household_list.values_list("id", flat=True)
         if program.individual_data_needed:
             # all targeted individuals + collectors (primary_collector,alternate_collector)
@@ -224,7 +224,7 @@ class SendTPToDatahubTask:
     def _get_documents(self, individuals):
         return Document.objects.filter(individual__in=individuals).distinct()
 
-    def _send_program(self, program):
+    def _send_program(self, program) -> dh_mis_models.Program:
         if not (program.last_sync_at is None or program.last_sync_at < program.updated_at):
             return
         dh_program_args = build_arg_dict(program, SendTPToDatahubTask.MAPPING_PROGRAM_DICT)

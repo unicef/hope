@@ -291,7 +291,7 @@ class KoboTemplateValidator:
         for core_field, field_data in core_fields_in_db.items():
             field_type = field_data["type"]
             field_choices = [choice["value"] for choice in field_data["choices"]]
-            core_field_from_file = core_fields_in_file.get(core_field)
+            core_field_from_file = core_fields_in_file[core_field]
 
             field_exists_error = cls._check_if_field_exists(core_field, core_field_from_file)
             if field_exists_error:

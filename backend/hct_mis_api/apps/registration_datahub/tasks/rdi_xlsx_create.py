@@ -285,7 +285,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             role = ROLE_PRIMARY if header == "primary_collector_id" else ROLE_ALTERNATE
             self.collectors[hh_id].append(ImportedIndividualRoleInHousehold(individual=individual, role=role))
 
-    def _create_bank_accounts_infos(self):
+    def _create_bank_accounts_infos(self) -> None:
         bank_accounts_infos_to_create = [
             ImportedBankAccountInfo(**bank_account_info) for bank_account_info in self.bank_accounts.values()
         ]

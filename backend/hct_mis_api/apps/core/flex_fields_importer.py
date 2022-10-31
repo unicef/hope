@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from os.path import isfile
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -195,7 +195,7 @@ class FlexibleAttributeImporter:
 
         return True
 
-    def _get_list_of_field_choices(self, sheet):
+    def _get_list_of_field_choices(self, sheet) -> Dict:
         fields_with_choices = []
         for row_number in range(1, sheet.nrows):
             row = sheet.row(row_number)

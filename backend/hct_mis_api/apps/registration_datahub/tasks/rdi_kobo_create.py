@@ -91,7 +91,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     business_area = None
     attachments = None
 
-    def _handle_image_field(self, value, is_flex_field):
+    def _handle_image_field(self, value, is_flex_field) -> Union[str, File]:
         if not self.registration_data_import_mis.pull_pictures:
             return None
         download_url = ""
@@ -200,7 +200,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         ImportedIndividualIdentity.objects.bulk_create(identities)
 
     @staticmethod
-    def _handle_collectors(collectors_dict, individuals_dict):
+    def _handle_collectors(collectors_dict, individuals_dict) -> None:
         collectors_to_bulk_create = []
         for hash_key, collectors_list in collectors_dict.items():
             for collector in collectors_list:
