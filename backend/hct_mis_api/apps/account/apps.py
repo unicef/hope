@@ -1,4 +1,5 @@
 from typing import Any
+
 from django.apps import AppConfig
 from django.contrib.admin.options import get_content_type_for_model
 

@@ -1,7 +1,7 @@
 import itertools
 import logging
 import pickle
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType

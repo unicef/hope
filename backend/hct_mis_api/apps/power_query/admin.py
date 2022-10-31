@@ -7,7 +7,6 @@ from django.contrib import messages
 from django.contrib.admin import register
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django import forms
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render

@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, List, Tuple
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import Count, DecimalField, F, Q, Sum, QuerySet
+from django.db.models import Count, DecimalField, F, Q, QuerySet, Sum
 from django.template.loader import render_to_string
 from django.urls import reverse
 

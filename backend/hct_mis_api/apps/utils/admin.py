@@ -1,4 +1,5 @@
-from typing import Any, List, Tuple
+from typing import Any, Tuple
+
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
