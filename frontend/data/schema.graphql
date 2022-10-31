@@ -853,6 +853,7 @@ type HouseholdNode implements Node {
   removedDate: DateTime
   lastSyncAt: DateTime
   version: BigInt!
+  unicefId: String
   withdrawn: Boolean!
   withdrawnDate: DateTime
   consentSign: String!
@@ -902,7 +903,6 @@ type HouseholdNode implements Node {
   headOfHousehold: IndividualNode!
   fchildHoh: Boolean
   childHoh: Boolean
-  unicefId: String!
   businessArea: UserBusinessAreaNode!
   start: DateTime
   deviceid: String!
@@ -919,6 +919,7 @@ type HouseholdNode implements Node {
   rowId: Int
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
+  familyId: String
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -1599,6 +1600,7 @@ type IndividualNode implements Node {
   removedDate: DateTime
   lastSyncAt: DateTime
   version: BigInt!
+  unicefId: String
   duplicate: Boolean!
   duplicateDate: DateTime
   withdrawn: Boolean!
@@ -1626,7 +1628,6 @@ type IndividualNode implements Node {
   userFields: JSONString!
   enrolledInNutritionProgramme: Boolean
   administrationOfRutf: Boolean
-  unicefId: String!
   deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus!
   deduplicationBatchStatus: IndividualDeduplicationBatchStatus!
   deduplicationGoldenRecordResults: [DeduplicationResultNode]
