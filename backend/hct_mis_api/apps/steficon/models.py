@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List, Tuple
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -81,7 +81,7 @@ class Rule(models.Model):
         self.enabled = False
         self.save()
 
-    def get_changes(self):
+    def get_changes(self) -> Tuple[Dict, List]:
         prev = self.latest_commit
         if prev:
             data1 = prev.after
@@ -232,7 +232,8 @@ class RuleCommit(models.Model):
 
     @cached_property
     def interpreter(self):
-        return mapping[self.language](self.definition)
+        func: Callable = mapping[self.language]
+        return func(self.definition)
 
     def execute(self, context) -> Any:
         return self.interpreter.execute(context)

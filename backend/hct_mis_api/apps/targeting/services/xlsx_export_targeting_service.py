@@ -57,7 +57,7 @@ class XlsxExportTargetingService:
         self._adjust_column_width_from_col(self.ws_individuals, 1, 1, self.current_header_column_index)
         return self.workbook
 
-    def _add_version(self):
+    def _add_version(self) -> None:
         self.ws_meta[
             XlsxExportTargetingService.VERSION_CELL_NAME_COORDINATES
         ] = XlsxExportTargetingService.VERSION_CELL_NAME
@@ -71,12 +71,12 @@ class XlsxExportTargetingService:
         self.ws_meta = workbook.create_sheet(XlsxExportTargetingService.META_SHEET)
         return workbook
 
-    def _add_standard_columns_headers(self):
+    def _add_standard_columns_headers(self) -> None:
         standard_columns_names = list(self.COLUMNS_MAPPING_DICT.keys())
         self.ws_individuals.append(standard_columns_names)
         self.current_header_column_index += len(standard_columns_names)
 
-    def _add_individual_row(self, individual: Individual):
+    def _add_individual_row(self, individual: Individual) -> None:
         individual_row = {}
         for index, field in enumerate(self.COLUMNS_MAPPING_DICT.values()):
             if callable(field):

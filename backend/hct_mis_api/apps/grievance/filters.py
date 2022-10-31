@@ -210,7 +210,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
     order_by = OrderingFilter(fields=("id",))
 
-    def prepare_ticket_filters(self, lookup, obj):
+    def prepare_ticket_filters(self, lookup, obj) -> Q:
         types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
 
         q_obj = Q()

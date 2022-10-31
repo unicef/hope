@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, List
 
 from django.core.exceptions import ValidationError
 
@@ -275,7 +276,7 @@ class KoboTemplateValidator:
         return errors
 
     @classmethod
-    def validate_kobo_template(cls, survey_sheet, choices_sheet):
+    def validate_kobo_template(cls, survey_sheet, choices_sheet) -> List[Dict[str, str]]:
         choices_mapping = prepare_choices_for_validation(choices_sheet)
 
         first_row = survey_sheet.row(0)

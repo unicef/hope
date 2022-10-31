@@ -585,9 +585,8 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def _get_payment_records_for_report(self, report):
-        filter_vars = self._format_filters_for_payment_records(report)
-        return PaymentRecord.objects.filter(**filter_vars)
+    def _get_payment_records_for_report(self, report) -> PaymentRecord:
+        return PaymentRecord.objects.filter(**self._format_filters_for_payment_records(report))
 
     @classmethod
     def _get_business_areas_or_programs(cls, report, valid_payment_records) -> Tuple[Any, str]:
@@ -1005,7 +1004,7 @@ class GenerateDashboardReportService:
             ws.column_dimensions[col_name].width = value
 
     @staticmethod
-    def _add_font_style_to_sheet(ws, totals_row=None):
+    def _add_font_style_to_sheet(ws, totals_row=None) -> None:
         bold_font = Font(bold=True)
         for cell in ws["1:1"]:
             cell.font = bold_font

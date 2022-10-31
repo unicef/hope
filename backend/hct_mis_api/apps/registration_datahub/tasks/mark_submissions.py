@@ -1,3 +1,4 @@
+from typing import Dict
 from django.db import transaction
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -12,7 +13,7 @@ class MarkSubmissions:
     def __init__(self, business_area: BusinessArea):
         self.business_area = business_area
 
-    def execute(self):
+    def execute(self) -> Dict:
         # Filter rdi with status done and following business area slug
         datahub_ids = self._get_datahub_ids()
 
