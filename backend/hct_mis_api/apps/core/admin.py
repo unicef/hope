@@ -100,7 +100,7 @@ class BusinessofficeFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         return [(1, "Is a Business Office"), (2, "Is a Business Area")]
 
-    def value(self):
+    def value(self) -> str:
         return self.used_parameters.get(self.parameter_name)
 
     def queryset(self, request, queryset):

@@ -1,5 +1,6 @@
 import csv
 import logging
+from typing import List
 
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, RelatedFieldListFilter
@@ -40,7 +41,7 @@ class ActiveRecordFilter(ListFilter):
     def value(self):
         return self.used_parameters.get(self.parameter_name, "")
 
-    def expected_parameters(self):
+    def expected_parameters(self) -> List:
         return [self.parameter_name]
 
     def choices(self, changelist):

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Callable, Dict
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -100,7 +100,7 @@ class Rule(models.Model):
             super().save(force_insert, force_update, using, update_fields)
             self.commit()
 
-    def commit(self, is_release=False, force=False):
+    def commit(self, is_release=False, force=False) -> "RuleCommit":
         stored, changes = self.get_changes()
         release = None
         values = {
@@ -159,7 +159,8 @@ class Rule(models.Model):
 
     @cached_property
     def interpreter(self):
-        return mapping[self.language](self.definition)
+        func: Callable = mapping[self.language]
+        return func(self.definition)
 
     def execute(self, context=None, only_release=True, only_enabled=True) -> Result:
         if self.pk:

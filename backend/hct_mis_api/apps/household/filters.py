@@ -2,7 +2,7 @@ import json
 import re
 from typing import Any, Dict, List
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 
 from constance import config
@@ -119,7 +119,7 @@ class HouseholdFilter(FilterSet):
         )
     )
 
-    def _search_es(self, qs, value):
+    def _search_es(self, qs, value) -> QuerySet:
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_households(value, business_area)
         es_response = (
@@ -143,7 +143,7 @@ class HouseholdFilter(FilterSet):
             return self._search_es(qs, value)
         return self._search_db(qs, value)
 
-    def _search_db(self, qs, value):
+    def _search_db(self, qs, value) -> QuerySet:
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
         else:

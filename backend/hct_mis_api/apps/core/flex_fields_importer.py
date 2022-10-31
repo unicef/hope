@@ -401,7 +401,7 @@ class FlexibleAttributeImporter:
     can_add_flag = True
 
     @transaction.atomic
-    def import_xls(self, xls_file):
+    def import_xls(self, xls_file) -> None:
         self.current_group_tree = [None]
         if isinstance(xls_file, str) and isfile(xls_file):
             wb = xlrd.open_workbook(filename=xls_file)

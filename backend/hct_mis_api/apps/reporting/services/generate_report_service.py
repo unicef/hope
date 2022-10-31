@@ -695,7 +695,7 @@ class GenerateReportService:
         self.ws_filters = wb.create_sheet(GenerateReportService.FILTERS_SHEET)
         return wb
 
-    def _add_filters_info(self):
+    def _add_filters_info(self) -> None:
         filter_rows = [
             ("Report type", str(self._report_type_to_str())),
             ("Business area", self.business_area.name),
@@ -716,7 +716,7 @@ class GenerateReportService:
         for filter_row in filter_rows:
             self.ws_filters.append(filter_row)
 
-    def _add_headers(self):
+    def _add_headers(self) -> None:
         headers_row = GenerateReportService.HEADERS[self.report_type]
         self.ws_report.append(headers_row)
 
@@ -771,7 +771,7 @@ class GenerateReportService:
         if self.report.file:
             self._send_email()
 
-    def _send_email(self):
+    def _send_email(self) -> None:
         context = {
             "report_type": self._report_type_to_str(),
             "created_at": GenerateReportContentHelpers._format_date(self.report.created_at),
@@ -788,7 +788,7 @@ class GenerateReportService:
         msg.attach_alternative(html_body, "text/html")
         msg.send()
 
-    def _add_missing_headers(self, ws, column_to_start, column_to_finish, label):
+    def _add_missing_headers(self, ws, column_to_start, column_to_finish, label) -> None:
         for x in range(column_to_start, column_to_finish + 1):
             col_letter = get_column_letter(x)
             ws[f"{col_letter}1"] = label
