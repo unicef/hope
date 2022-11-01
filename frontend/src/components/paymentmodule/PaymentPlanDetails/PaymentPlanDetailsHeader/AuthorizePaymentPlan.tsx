@@ -100,7 +100,7 @@ export const AuthorizePaymentPlan = ({
                     <Box p={5}>
                       <GreyText>
                         {t(
-                          'Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Review stage.',
+                          'Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Release stage.',
                         )}
                       </GreyText>
                     </Box>

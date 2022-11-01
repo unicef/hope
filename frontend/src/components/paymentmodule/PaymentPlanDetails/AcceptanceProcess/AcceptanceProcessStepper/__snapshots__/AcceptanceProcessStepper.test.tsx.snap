@@ -127,7 +127,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
           <span
             class="MuiTypography-root MuiStepLabel-label MuiTypography-body2 MuiTypography-displayBlock"
           >
-            Finance Review (0/1)
+            Finance Release (0/1)
           </span>
         </span>
       </span>
@@ -263,7 +263,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
           <span
             class="MuiTypography-root MuiStepLabel-label MuiTypography-body2 MuiTypography-displayBlock"
           >
-            Finance Review (0/1)
+            Finance Release (0/1)
           </span>
         </span>
       </span>
@@ -399,7 +399,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
           <span
             class="MuiTypography-root MuiStepLabel-label MuiTypography-body2 MuiTypography-displayBlock"
           >
-            Finance Review (0/1)
+            Finance Release (0/1)
           </span>
         </span>
       </span>
@@ -408,7 +408,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
 </div>
 `;
 
-exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessStepper should render step Sent for Finance Review Date 1`] = `
+exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessStepper should render step Sent for Finance Release Date 1`] = `
 <div>
   <div
     class="MuiPaper-root MuiStepper-root MuiStepper-horizontal MuiPaper-elevation0"
@@ -535,7 +535,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
           <span
             class="MuiTypography-root MuiStepLabel-label MuiTypography-body2 MuiTypography-displayBlock"
           >
-            Finance Review (0/1)
+            Finance Release (0/1)
           </span>
         </span>
       </span>
