@@ -42,7 +42,7 @@ export const AcceptanceProcessStepper = ({
       isCompleted: actions.authorization.length === authorizationNumberRequired,
     },
     {
-      name: `${t('Finance Review')} (${
+      name: `${t('Finance Release')} (${
         actions.financeReview.length
       }/${financeReviewNumberRequired})`,
       hasError: rejectedOn === 'IN_REVIEW',
