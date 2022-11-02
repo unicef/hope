@@ -1,6 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
-from random import randint
+from random import randint, choice
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
@@ -499,94 +499,6 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     registration_ca_id = factory.Faker("uuid4")
 
 
-def generate_real_cash_plans():
-    if ServiceProvider.objects.count() < 3:
-        ServiceProviderFactory.create_batch(3)
-    program = RealProgramFactory(status=Program.ACTIVE)
-    cash_plans = RealCashPlanFactory.create_batch(3, program=program)
-    for cash_plan in cash_plans:
-        targeting_criteria = TargetingCriteriaFactory()
-
-        rule = TargetingCriteriaRule.objects.create(targeting_criteria=targeting_criteria)
-        TargetingCriteriaRuleFilter.objects.create(
-            targeting_criteria_rule=rule, comparison_method="EQUALS", field_name="residence_status", arguments=[REFUGEE]
-        )
-        target_population = TargetPopulationFactory(
-            program=program,
-            status=TargetPopulation.STATUS_OPEN,
-            targeting_criteria=targeting_criteria,
-        )
-        target_population.full_rebuild()
-        target_population.status = TargetPopulation.STATUS_READY_FOR_CASH_ASSIST
-        target_population.save()
-        RealPaymentRecordFactory.create_batch(
-            5,
-            target_population=target_population,
-            parent=cash_plan,
-        )
-    program.households.set(
-        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
-        .filter(parent__in=cash_plans)
-        .values_list("household__id", flat=True)
-    )
-
-
-def generate_real_cash_plans_for_households(households):
-    if ServiceProvider.objects.count() < 3:
-        ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
-    program = RealProgramFactory(business_area=households[0].business_area)
-    cash_plans = RealCashPlanFactory.create_batch(3, program=program, business_area=households[0].business_area)
-    for cash_plan in cash_plans:
-        for hh in households:
-            RealPaymentRecordFactory(
-                parent=cash_plan,
-                household=hh,
-                business_area=hh.business_area,
-            )
-    program.households.set(
-        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
-        .filter(parent__in=cash_plans)
-        .values_list("household__id", flat=True)
-    )
-
-
-def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
-    cash_plan_payment_verification = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
-    cash_plan_payment_verification.status = status
-    cash_plan_payment_verification.save(update_fields=("status",))
-    registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
-    for _ in range(5):
-        household, _ = create_household(
-            {
-                "registration_data_import": registration_data_import,
-                "admin_area": Area.objects.order_by("?").first(),
-            },
-            {"registration_data_import": registration_data_import},
-        )
-
-        household.programs.add(program)
-
-        if isinstance(cash_plan, CashPlan):
-            payment_record = PaymentRecordFactory(
-                parent=cash_plan,
-                household=household,
-                target_population=target_population,
-            )
-        else:
-            payment_record = PaymentFactory(
-                parent=cash_plan,
-                household=household,
-            )
-
-        PaymentVerificationFactory(
-            payment_verification_plan=cash_plan_payment_verification,
-            generic_fk_obj=payment_record,
-            status=PaymentVerification.STATUS_PENDING,
-        )
-        EntitlementCardFactory(household=household)
-    return cash_plan_payment_verification
-
-
 class PaymentPlanFactory(factory.DjangoModelFactory):
     class Meta:
         model = PaymentPlan
@@ -707,6 +619,107 @@ class DeliveryMechanismPerPaymentPlanFactory(factory.DjangoModelFactory):
         getter=lambda c: c[0],
     )
     delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
+
+
+def create_payment_verification_plan_with_status(cash_plan, user, business_area, program, target_population, status):
+    payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
+    payment_verification_plan.status = status
+    payment_verification_plan.save(update_fields=("status",))
+    registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
+    for _ in range(5):
+        household, _ = create_household(
+            {
+                "registration_data_import": registration_data_import,
+                "admin_area": Area.objects.order_by("?").first(),
+            },
+            {"registration_data_import": registration_data_import},
+        )
+
+        household.programs.add(program)
+
+        if isinstance(cash_plan, CashPlan):
+            payment_record = PaymentRecordFactory(
+                parent=cash_plan,
+                household=household,
+                target_population=target_population,
+            )
+        else:
+            payment_record = PaymentFactory(
+                parent=cash_plan,
+                household=household,
+            )
+
+        pv = PaymentVerificationFactory(
+            payment_verification_plan=payment_verification_plan,
+            generic_fk_obj=payment_record,
+            status=PaymentVerification.STATUS_PENDING,
+        )
+        EntitlementCardFactory(household=household)
+    return payment_verification_plan
+
+
+def generate_real_cash_plans():
+    if ServiceProvider.objects.count() < 3:
+        ServiceProviderFactory.create_batch(3)
+    program = RealProgramFactory(status=Program.ACTIVE)
+    cash_plans = RealCashPlanFactory.create_batch(3, program=program)
+    for cash_plan in cash_plans:
+        generate_payment_verification_plan_with_status = choice([True, False, False])
+        targeting_criteria = TargetingCriteriaFactory()
+
+        rule = TargetingCriteriaRule.objects.create(targeting_criteria=targeting_criteria)
+        TargetingCriteriaRuleFilter.objects.create(
+            targeting_criteria_rule=rule, comparison_method="EQUALS", field_name="residence_status", arguments=[REFUGEE]
+        )
+        target_population = TargetPopulationFactory(
+            program=program,
+            status=TargetPopulation.STATUS_OPEN,
+            targeting_criteria=targeting_criteria,
+        )
+        target_population.full_rebuild()
+        target_population.status = TargetPopulation.STATUS_READY_FOR_CASH_ASSIST
+        target_population.save()
+        RealPaymentRecordFactory.create_batch(
+            5,
+            target_population=target_population,
+            parent=cash_plan,
+        )
+
+        if generate_payment_verification_plan_with_status:
+            root = User.objects.get(username="root")
+            create_payment_verification_plan_with_status(
+                cash_plan,
+                root,
+                cash_plan.business_area,
+                target_population.program,
+                target_population,
+                PaymentVerificationPlan.STATUS_ACTIVE
+            )
+
+    program.households.set(
+        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
+        .filter(parent__in=cash_plans)
+        .values_list("household__id", flat=True)
+    )
+
+
+def generate_real_cash_plans_for_households(households):
+    if ServiceProvider.objects.count() < 3:
+        ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
+    program = RealProgramFactory(business_area=households[0].business_area)
+    cash_plans = RealCashPlanFactory.create_batch(3, program=program, business_area=households[0].business_area)
+    for cash_plan in cash_plans:
+        for hh in households:
+            RealPaymentRecordFactory(
+                parent=cash_plan,
+                household=hh,
+                business_area=hh.business_area,
+            )
+    program.households.set(
+        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
+        .filter(parent__in=cash_plans)
+        .values_list("household__id", flat=True)
+    )
 
 
 def generate_reconciled_payment_plan():
