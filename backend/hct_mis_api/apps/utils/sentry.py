@@ -10,7 +10,7 @@ def sentry_tags(func: Callable) -> Callable:
     """
 
     @wraps(func)
-    def wrapper(*args: List, **kwargs: Dict) -> Any:
+    def wrapper(*args: List, **kwargs: Any) -> Any:
         with configure_scope() as scope:
             scope.set_tag("celery", True)
             scope.set_tag("celery_task", func.__name__)

@@ -6,7 +6,7 @@ from django.conf import settings
 
 def do_nothing_decorator(func: Callable) -> Callable:
     @wraps(func)
-    def wrapped(*args: List, **kwargs: Dict) -> Any:
+    def wrapped(*args: List, **kwargs: Any) -> Any:
         return func(*args, **kwargs)
 
     return wrapped

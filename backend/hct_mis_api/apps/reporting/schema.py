@@ -8,9 +8,9 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from hct_mis_api.apps.account.permissions import BasePermission
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
+    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,

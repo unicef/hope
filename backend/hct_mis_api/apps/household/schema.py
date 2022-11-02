@@ -1,14 +1,15 @@
 from typing import Tuple, Type
+
 from django.db.models import Case, Prefetch, Sum, Value, When
 
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from hct_mis_api.apps.account.permissions import BasePermission
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
+    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopeOneOfPermissionClass,

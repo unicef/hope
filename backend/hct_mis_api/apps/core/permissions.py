@@ -12,7 +12,7 @@ def is_authenticated(func: Callable) -> Any:
     to check if user is authenticated.
     """
 
-    def wrapper(cls: Any, root: Any, info: Any, *args: List, **kwargs: Dict) -> Any:
+    def wrapper(cls: Any, root: Any, info: Any, *args: List, **kwargs: Any) -> Any:
         if not info.context.user.is_authenticated:
             logger.error(f"Permission Denied for user={info.context.user.email}, User is not authenticated.")
             raise PermissionDenied("Permission Denied: User is not authenticated.")
