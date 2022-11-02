@@ -135,6 +135,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         fsp {
           id
           name
+          communicationChannel
         }
       }
       volumeByDeliveryMechanism {
