@@ -8,9 +8,11 @@
     "pretty": "prettier --write \"cypress/**/*.{ts,js,jsx,json}\"",
     "cy:run": "cypress run --config video=false",
     "cy:open": "cypress open",
-    "initdb": "docker-compose run --rm backend sh -c './manage.py initcypress --skip-drop'",
+    "backend": "docker-compose run --rm backend",
+    "initdb": "yarn backend ./manage.py initcypress --skip-drop",
     "generate-xlsx-files": "./generate_xlsx_files.sh",
-    "clean": "rm -rf cypress/fixtures/*.xlsx ; rm -rf cypress/downloads/*.{xlsx,zip} ; docker-compose run --rm backend ./manage.py clean_generated"
+    "clean": "rm -rf cypress/fixtures/*.xlsx ; rm -rf cypress/downloads/*.{xlsx,zip} ; yarn backend ./manage.py clean_generated",
+    "init-scenario": "yarn backend ./manage.py init-e2e-scenario"
   },
   "devDependencies": {
     "@types/cypress-cucumber-preprocessor": "^1.14.1",
