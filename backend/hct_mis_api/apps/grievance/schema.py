@@ -8,8 +8,8 @@ from django.db.models import Q
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
-from backend.hct_mis_api.apps.account.permissions import BasePermission
 
+from hct_mis_api.apps.account.permissions import BasePermission
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,

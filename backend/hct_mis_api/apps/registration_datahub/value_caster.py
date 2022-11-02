@@ -1,6 +1,6 @@
 import abc
 from datetime import date, datetime
-from typing import Any
+from typing import Any, Optional
 
 from dateutil.parser import parse
 
@@ -16,7 +16,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 
 
 class BaseValueCaster(abc.ABC):
-    def __init__(self, next_caster: "BaseValueCaster" = None):
+    def __init__(self, next_caster: Optional["BaseValueCaster"] = None):
         self._next_caster = next_caster
 
     @abc.abstractmethod

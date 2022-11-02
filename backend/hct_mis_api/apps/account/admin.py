@@ -166,7 +166,7 @@ class DjAdminManager:
         self.admin_url_kc = f"{kc_host}{self.admin_path}"
         self.login_url_kc = f"{self.admin_url_kc}login/"
         self._logged = False
-        self._last_error = None
+        self._last_error: Optional[bool] = None
         self._last_response = False
         self._username = None
         self._password = None

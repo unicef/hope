@@ -32,11 +32,9 @@ def targeting_criteria_object_type_to_query(
     targeting_criteria_object_type, program: Union[str, Program], excluded_ids=""
 ):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
-    given_program: str
-    if not isinstance(program, Program):
-        given_program = decode_and_get_object(program, Program, True)
-    else:
-        given_program = program
+    given_program: Program = (
+        decode_and_get_object(program, Program, True) if not isinstance(program, Program) else program
+    )
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingBase(
         [], excluded_household_ids=map_unicef_ids_to_households_unicef_ids(excluded_ids)
     )

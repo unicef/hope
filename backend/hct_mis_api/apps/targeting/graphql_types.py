@@ -3,8 +3,8 @@ from typing import List, Tuple, Type
 import graphene
 from graphene import relay
 from graphene_django import DjangoConnectionField, DjangoObjectType
-from backend.hct_mis_api.apps.account.permissions import BasePermission
 
+from hct_mis_api.apps.account.permissions import BasePermission
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,

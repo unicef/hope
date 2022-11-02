@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple, Type
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -159,7 +159,7 @@ class Rule(models.Model):
 
     @cached_property
     def interpreter(self):
-        func: Interpreter = mapping[self.language]
+        func: Type[Interpreter] = mapping[self.language]
         return func(self.definition)
 
     def execute(self, context=None, only_release=True, only_enabled=True) -> Result:
