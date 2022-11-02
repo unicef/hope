@@ -29,6 +29,7 @@ import {
   useCreateReportMutation,
   useReportChoiceDataQuery,
 } from '../../__generated__/graphql';
+import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { FieldLabel } from '../core/FieldLabel';
 import { LoadingButton } from '../core/LoadingButton';
 import { LoadingComponent } from '../core/LoadingComponent';
@@ -57,13 +58,17 @@ export const NewReportForm = (): React.ReactElement => {
       .required(t('Date To is required')),
   });
 
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsQuery({
-      variables: { businessArea, status: ['ACTIVE'] },
-      fetchPolicy: 'cache-and-network',
-    });
-  const { data: choicesData, loading: choicesLoading } =
-    useReportChoiceDataQuery();
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
+  });
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useReportChoiceDataQuery();
   const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;
@@ -256,6 +261,7 @@ export const NewReportForm = (): React.ReactElement => {
         >
           {({ submitForm, values }) => (
             <>
+              {dialogOpen && <AutoSubmitFormOnEnter />}
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title' disableTypography>
                   <Typography variant='h6'>

@@ -1,10 +1,8 @@
 import { When, Then, Given } from 'cypress-cucumber-preprocessor/steps';
 import {
-  getIndividualsFromRdiDetails,
   uniqueSeed,
 } from '../../procedures/procedures';
 let householdId;
-let individualId;
 let individualIds = [];
 
 Given('I am authenticated', () => {
@@ -60,7 +58,7 @@ When('I select the xlsx file', () => {
 
   const fileName = `rdi_import_1_hh_1_ind_seed_${uniqueSeed}.xlsx`;
   cy.fixture(fileName, 'base64').then((fileContent) => {
-    cy.get('[data-cy="rdi-file-input"]').upload({
+    cy.get('[data-cy="file-input"]').upload({
       fileContent,
       fileName,
       mimeType:
@@ -72,13 +70,13 @@ When('I select the xlsx file', () => {
 
 Then('I see it was chosen', () => {
   cy.get('[data-cy="number-of-households"]').contains(
-    '1 Household available to Import',
+    '1 Household available to import',
     {
       timeout: 10000,
     },
   );
   cy.get('[data-cy="number-of-individuals"]').contains(
-    '1 Individual available to Import',
+    '1 Individual available to import',
   );
   cy.get('div').contains('Errors').should('not.exist');
 });
@@ -120,7 +118,15 @@ Then('I see that the status is merged', () => {
     });
   cy.get('button > span').contains('Individuals').click({ force: true });
 
-  getIndividualsFromRdiDetails(cy, 1, individualIds);
+  for (let i = 0; i < 1; i++) {
+    cy.get('[data-cy="imported-individuals-table"]')
+      .find(`tbody > tr:nth-child(${i + 1}) > td:nth-child(1)`)
+      .then(($td) => {
+        const individualId = $td.text().split(' (')[0];
+        cy.log(`Saved individualId: ${individualId}`);
+        individualIds.push(individualId);
+      });
+  }
 });
 
 When('I visit the Households dashboard', () => {
@@ -130,12 +136,14 @@ When('I visit the Households dashboard', () => {
 
 Then('I see a newly imported household', () => {
   cy.log(`looking for householdId: ${householdId}`);
-  cy.get('[data-cy="hh-filters-search"]').find('input').type(householdId, { force: true });
+  cy.get('[data-cy="hh-filters-search"]')
+    .find('input')
+    .type(householdId, { force: true });
   cy.get('td').should('contain', householdId);
 });
 
 When('I visit the Individuals dashboard', () => {
-  cy.get('span').contains('Individuals').click();
+  cy.get('span').contains('Individuals').click({ force: true });
 });
 
 Then('I see the newly imported individuals', () => {

@@ -3,8 +3,7 @@ Feature: Targeting
 
     Background:
         Given I am authenticated
-        Given There are individuals and households imported
-        Given I have an active program
+        Given I initialize the data
 
     Scenario: Visit Targeting page and create Target Population
         When I visit the main dashboard

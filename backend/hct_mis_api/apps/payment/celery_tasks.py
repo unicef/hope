@@ -241,6 +241,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(payment_plan_id, user_id,
                     service.import_payment_list()
                     payment_plan.remove_export_file()
                     payment_plan.background_action_status_none()
+                    payment_plan.update_money_fields()
 
                     if payment_plan.is_reconciled:
                         payment_plan.status_reconciled()

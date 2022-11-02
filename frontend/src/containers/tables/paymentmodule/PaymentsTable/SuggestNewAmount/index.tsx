@@ -1,1 +1,0 @@
-export { SuggestNewAmount } from './SuggestNewAmount';

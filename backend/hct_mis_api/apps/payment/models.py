@@ -631,6 +631,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel)
 
     @property
     def is_reconciled(self):
+        # TODO what in case of partial reconciliation or active grievance tickets?
         return (
             self.not_excluded_payments.filter(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS).count()
             == self.not_excluded_payments.count()
