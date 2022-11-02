@@ -7,8 +7,8 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 import * as Yup from 'yup';
-import { Field, Form, Formik, useFormikContext } from 'formik';
-import React, { useState, useEffect } from 'react';
+import { Field, Form, Formik } from 'formik';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
